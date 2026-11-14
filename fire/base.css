@@ -2,8 +2,32 @@
    Fire — base: reset, type roles, focus, icons, primitives
    ========================================================================== */
 
+/* ---------- Tokens ---------- */
+:root {
+  /* scrollbar */
+  --fd-base-scrollbar: 10px;          /* WebKit scrollbar width / height */
+  --fd-base-scrollbar-gap: 3px;       /* transparent border that insets the thumb */
+  /* links */
+  --fd-base-link-offset: 3px;         /* underline distance from the baseline */
+  /* icons */
+  --fd-base-icon-2xl: 32px;           /* the largest data-size step (empty states) */
+  /* keyboard hint */
+  --fd-kbd-size: 20px;                /* minimum width and height */
+  --fd-kbd-px: 5px;
+  /* inline code */
+  --fd-base-code-py: 1px;
+  --fd-base-code-px: 5px;
+  /* layout */
+  --fd-base-grid-min: 260px;          /* default minimum column of .fd-grid */
+  /* utilities and motion */
+  --fd-base-sr-size: 1px;             /* the visually hidden box */
+  --fd-base-rise: 8px;                /* how far .fd-rise travels */
+  --fd-base-spin: 0.8s;               /* .fd-spin (the button spinner uses --fd-loop-spin) */
+  --fd-base-motion-off: 0.01ms;       /* animation length when the user asks for reduced motion */
+}
+
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; tab-size: 2; scroll-padding-top: calc(var(--fd-topbar-h) + 16px); }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; tab-size: 2; scroll-padding-top: calc(var(--fd-topbar-h) + var(--fd-space-4)); }
 body {
   margin: 0;
   background: var(--fd-bg);
@@ -38,8 +62,8 @@ hr { border: 0; border-top: var(--fd-hairline) solid var(--fd-line-faint); margi
 
 /* Scrollbars: thin, ink-tinted, invisible until needed. */
 * { scrollbar-width: thin; scrollbar-color: var(--fd-a16) transparent; }
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: var(--fd-a16); border-radius: var(--fd-radius-full); border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar { width: var(--fd-base-scrollbar); height: var(--fd-base-scrollbar); }
+::-webkit-scrollbar-thumb { background: var(--fd-a16); border-radius: var(--fd-radius-full); border: var(--fd-base-scrollbar-gap) solid transparent; background-clip: content-box; }
 ::-webkit-scrollbar-thumb:hover { background-color: var(--fd-a32); }
 ::-webkit-scrollbar-track { background: transparent; }
 
@@ -81,15 +105,15 @@ hr { border: 0; border-top: var(--fd-hairline) solid var(--fd-line-faint); margi
 .fd-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .fd-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .fd-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.fd-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.fd-sr-only { position: absolute; width: var(--fd-base-sr-size); height: var(--fd-base-sr-size); padding: 0; margin: calc(var(--fd-base-sr-size) * -1); overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ---------- Links ---------- */
 .fd-link {
   color: var(--fd-accent-text);
   text-decoration: underline;
   text-decoration-color: var(--fd-accent-40);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-decoration-thickness: var(--fd-hairline);
+  text-underline-offset: var(--fd-base-link-offset);
   transition: text-decoration-color var(--fd-dur-2) var(--fd-ease-out);
   border-radius: var(--fd-radius-xs);
 }
@@ -106,26 +130,26 @@ hr { border: 0; border-top: var(--fd-hairline) solid var(--fd-line-faint); margi
   fill: none; stroke: currentColor; stroke-width: var(--fd-icon-stroke);
   stroke-linecap: round; stroke-linejoin: round;
 }
-.fd-icon[data-size="12"] { width: 12px; height: 12px; stroke-width: 1.75; }
-.fd-icon[data-size="14"] { width: 14px; height: 14px; stroke-width: 1.6; }
-.fd-icon[data-size="20"] { width: 20px; height: 20px; }
-.fd-icon[data-size="24"] { width: 24px; height: 24px; }
-.fd-icon[data-size="32"] { width: 32px; height: 32px; stroke-width: 1.25; }
+.fd-icon[data-size="12"] { width: var(--fd-icon-xs); height: var(--fd-icon-xs); stroke-width: 1.75; }
+.fd-icon[data-size="14"] { width: var(--fd-icon-sm); height: var(--fd-icon-sm); stroke-width: 1.6; }
+.fd-icon[data-size="20"] { width: var(--fd-icon-lg); height: var(--fd-icon-lg); }
+.fd-icon[data-size="24"] { width: var(--fd-icon-xl); height: var(--fd-icon-xl); }
+.fd-icon[data-size="32"] { width: var(--fd-base-icon-2xl); height: var(--fd-base-icon-2xl); stroke-width: 1.25; }
 i[data-icon] { display: inline-block; width: var(--fd-icon); height: var(--fd-icon); flex: none; }
 
 /* ---------- Keyboard hint ---------- */
 .fd-kbd {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 20px; height: 20px; padding: 0 5px;
+  min-width: var(--fd-kbd-size); height: var(--fd-kbd-size); padding: 0 var(--fd-kbd-px);
   font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-text-3);
   background: var(--fd-surface); border-radius: var(--fd-radius-sm);
-  box-shadow: 0 0 0 var(--fd-hairline) var(--fd-line), 0 1px 0 1px var(--fd-line);
+  box-shadow: 0 0 0 var(--fd-hairline) var(--fd-line), 0 var(--fd-hairline) 0 var(--fd-hairline) var(--fd-line);
 }
 
 /* ---------- Inline code ---------- */
 .fd-code {
   font-family: var(--fd-font-mono); font-size: 0.92em;
-  padding: 1px 5px; border-radius: var(--fd-radius-sm);
+  padding: var(--fd-base-code-py) var(--fd-base-code-px); border-radius: var(--fd-radius-sm);
   background: var(--fd-fill); color: var(--fd-text);
 }
 .fd-code[data-tone="accent"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
@@ -142,13 +166,13 @@ i[data-icon] { display: inline-block; width: var(--fd-icon); height: var(--fd-ic
 .fd-row[data-align="start"] { align-items: flex-start; }
 .fd-row[data-align="baseline"] { align-items: baseline; }
 .fd-grow { flex: 1 1 0; min-width: 0; }
-.fd-grid { display: grid; gap: var(--fd-gap, var(--fd-space-4)); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--fd-min, 260px)), 1fr)); }
-.fd-divider { height: 1px; background: var(--fd-line-faint); border: 0; flex: none; }
-.fd-divider[data-vertical] { width: 1px; height: auto; align-self: stretch; }
+.fd-grid { display: grid; gap: var(--fd-gap, var(--fd-space-4)); grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--fd-min, var(--fd-base-grid-min))), 1fr)); }
+.fd-divider { height: var(--fd-hairline); background: var(--fd-line-faint); border: 0; flex: none; }
+.fd-divider[data-vertical] { width: var(--fd-hairline); height: auto; align-self: stretch; }
 
 /* ---------- Motion primitives ---------- */
 @keyframes fd-fade-in { from { opacity: 0; } }
-@keyframes fd-rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes fd-rise { from { opacity: 0; transform: translateY(var(--fd-base-rise)); } }
 @keyframes fd-pop { from { opacity: 0; transform: scale(0.96); } }
 @keyframes fd-spin { to { transform: rotate(360deg); } }
 @keyframes fd-pulse { 50% { opacity: 0.45; } }
@@ -159,12 +183,12 @@ i[data-icon] { display: inline-block; width: var(--fd-icon); height: var(--fd-ic
 @keyframes fd-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
 
 /* Entrance: add .fd-rise to a container and set --fd-i on children for a stagger. */
-.fd-rise { animation: fd-rise var(--fd-dur-5) var(--fd-ease-emphasized) both; animation-delay: calc(var(--fd-i, 0) * 40ms); }
+.fd-rise { animation: fd-rise var(--fd-dur-5) var(--fd-ease-emphasized) both; animation-delay: calc(var(--fd-i, 0) * var(--fd-stagger)); }
 .fd-fade { animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out) both; }
-.fd-spin { animation: fd-spin 0.8s linear infinite; }
+.fd-spin { animation: fd-spin var(--fd-base-spin) linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: var(--fd-base-motion-off) !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
 
 /* Container-query contexts used by responsive components. */

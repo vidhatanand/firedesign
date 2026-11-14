@@ -21,6 +21,38 @@
    Contrast stays under ~1.6:1 against the surface: neutral ink is a24 in light, a16 in dark.
    ========================================================================== */
 
+/* ---------- Tokens ---------- */
+:root {
+  /* character field + glyph */
+  --fd-ascii-inline-h: 160px;     /* height of an inline field or dot grid */
+  --fd-ascii-font: 10px;          /* character size of a field (fixed px: it is a pixel grid) */
+  --fd-glyph-font: 10px;
+  --fd-glyph-font-sm: 9px;        /* the 40px glyph */
+  --fd-glyph-40: 40px;
+  --fd-glyph-48: 48px;
+  --fd-glyph-56: 56px;            /* default */
+  --fd-glyph-64: 64px;
+  /* dot grid */
+  --fd-dotgrid-gap: 16px;         /* lattice pitch: default */
+  --fd-dotgrid-gap-sm: 12px;
+  --fd-dotgrid-gap-lg: 24px;
+  --fd-dotgrid-r: 0.75px;         /* dot radius: default */
+  --fd-dotgrid-r-lg: 0.9px;
+  --fd-dotgrid-soft: 0.6px;       /* soft edge added to the dot radius */
+  /* crosshair + corners */
+  --fd-crosshair-size: 9px;       /* length of each registration arm */
+  --fd-crosshair-half: 4px;       /* half of it, rounded down: the centre offset */
+  --fd-corners-gap: 8px;          /* [data-gap] pushes the marks out by this much */
+  /* grain */
+  --fd-noise-tile: 180px;
+  /* shimmer text + announcement */
+  --fd-shimmer-loop: 2.2s;
+  --fd-announce-min-h: 280px;
+  --fd-announce-measure: 34rem;   /* widest line of the announcement body */
+  --fd-announce-ring-gap: 2px;    /* focus ring on the accent: gap, then ring */
+  --fd-announce-ring-w: 4px;
+}
+
 /* ---------- Layering: decorative layers sit above the host's background, below its content ---------- */
 :where(:has(> .fd-ascii:not([data-inline]), > .fd-dotgrid:not([data-inline]), > .fd-noise)) { isolation: isolate; }
 
@@ -28,7 +60,7 @@
 .fd-ascii {
   --_tx-ink: light-dark(var(--fd-a24), var(--fd-a16));
   --_tx-opacity: 1;
-  --_tx-font-size: 10px;
+  --_tx-font-size: var(--fd-ascii-font);
   position: absolute; inset: 0; z-index: -1;
   display: block; overflow: hidden;
   pointer-events: none; user-select: none; -webkit-user-select: none;
@@ -41,7 +73,7 @@
 }
 .fd-ascii[data-inline] {
   position: relative; inset: auto; z-index: auto;
-  width: 100%; height: 160px;
+  width: 100%; height: var(--fd-ascii-inline-h);
   contain: layout paint;
 }
 .fd-ascii-canvas {
@@ -67,8 +99,8 @@
 .fd-glyph {
   --_tx-ink: var(--fd-accent-text);
   --_tx-opacity: 0.78;
-  --_tx-size: 56px;
-  --_tx-font-size: 10px;
+  --_tx-size: var(--fd-glyph-56);
+  --_tx-font-size: var(--fd-glyph-font);
   position: relative;
   display: inline-block; flex: none;
   width: var(--_tx-size); height: var(--_tx-size);
@@ -77,39 +109,39 @@
   font-family: var(--fd-font-mono); font-size: var(--_tx-font-size);
   vertical-align: middle;
 }
-.fd-glyph[data-size="40"] { --_tx-size: 40px; --_tx-font-size: 9px; }
-.fd-glyph[data-size="48"] { --_tx-size: 48px; }
-.fd-glyph[data-size="64"] { --_tx-size: 64px; }
+.fd-glyph[data-size="40"] { --_tx-size: var(--fd-glyph-40); --_tx-font-size: var(--fd-glyph-font-sm); }
+.fd-glyph[data-size="48"] { --_tx-size: var(--fd-glyph-48); }
+.fd-glyph[data-size="64"] { --_tx-size: var(--fd-glyph-64); }
 .fd-glyph[data-tone="neutral"] { --_tx-ink: var(--fd-a48); --_tx-opacity: 1; }
 
 /* ---------- Dot grid ---------- */
 .fd-dotgrid {
-  --_tx-gap: 16px;
+  --_tx-gap: var(--fd-dotgrid-gap);
   --_tx-dot: var(--fd-a12);
-  --_tx-r: 0.75px;
+  --_tx-r: var(--fd-dotgrid-r);
   position: absolute; inset: 0; z-index: -1;
   display: block; pointer-events: none;
-  background-image: radial-gradient(circle at center, var(--_tx-dot) var(--_tx-r), transparent calc(var(--_tx-r) + 0.6px));
+  background-image: radial-gradient(circle at center, var(--_tx-dot) var(--_tx-r), transparent calc(var(--_tx-r) + var(--fd-dotgrid-soft)));
   background-size: var(--_tx-gap) var(--_tx-gap);
   background-position: center;
   -webkit-mask-image: var(--_tx-mask, none);
   mask-image: var(--_tx-mask, none);
 }
-.fd-dotgrid[data-inline] { position: relative; inset: auto; z-index: auto; width: 100%; height: 160px; }
-.fd-dotgrid[data-size="sm"] { --_tx-gap: 12px; }
-.fd-dotgrid[data-size="lg"] { --_tx-gap: 24px; --_tx-r: 0.9px; }
+.fd-dotgrid[data-inline] { position: relative; inset: auto; z-index: auto; width: 100%; height: var(--fd-ascii-inline-h); }
+.fd-dotgrid[data-size="sm"] { --_tx-gap: var(--fd-dotgrid-gap-sm); }
+.fd-dotgrid[data-size="lg"] { --_tx-gap: var(--fd-dotgrid-gap-lg); --_tx-r: var(--fd-dotgrid-r-lg); }
 .fd-dotgrid[data-tone="accent"] { --_tx-dot: var(--fd-accent-24); }
 
-/* ---------- Crosshair: one 9px registration mark ---------- */
+/* ---------- Crosshair: one registration mark (9px) ---------- */
 .fd-crosshair {
   --_tx-c: var(--fd-line-strong);
-  --_tx-o: -4px;
+  --_tx-o: calc(var(--fd-crosshair-half) * -1);
   display: inline-block; flex: none;
-  width: 9px; height: 9px;
+  width: var(--fd-crosshair-size); height: var(--fd-crosshair-size);
   pointer-events: none;
   background:
-    linear-gradient(var(--_tx-c), var(--_tx-c)) center / 9px 1px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) center / 1px 9px no-repeat;
+    linear-gradient(var(--_tx-c), var(--_tx-c)) center / var(--fd-crosshair-size) var(--fd-hairline) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) center / var(--fd-hairline) var(--fd-crosshair-size) no-repeat;
 }
 /* Placed: the mark's centre lands on the corner pixel of the positioned parent's padding box. */
 .fd-crosshair[data-corner] { position: absolute; z-index: 1; }
@@ -127,19 +159,19 @@
 }
 .fd-corners::before {
   content: "";
-  position: absolute; inset: calc(-4px - var(--_tx-gap)); z-index: 1;
+  position: absolute; inset: calc(var(--fd-crosshair-half) * -1 - var(--_tx-gap)); z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(var(--_tx-c), var(--_tx-c)) left 0 top 4px / 9px 1px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) left 4px top 0 / 1px 9px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) right 0 top 4px / 9px 1px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) right 4px top 0 / 1px 9px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) left 0 bottom 4px / 9px 1px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) left 4px bottom 0 / 1px 9px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) right 0 bottom 4px / 9px 1px no-repeat,
-    linear-gradient(var(--_tx-c), var(--_tx-c)) right 4px bottom 0 / 1px 9px no-repeat;
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left 0 top var(--fd-crosshair-half) / var(--fd-crosshair-size) var(--fd-hairline) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left var(--fd-crosshair-half) top 0 / var(--fd-hairline) var(--fd-crosshair-size) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right 0 top var(--fd-crosshair-half) / var(--fd-crosshair-size) var(--fd-hairline) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right var(--fd-crosshair-half) top 0 / var(--fd-hairline) var(--fd-crosshair-size) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left 0 bottom var(--fd-crosshair-half) / var(--fd-crosshair-size) var(--fd-hairline) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left var(--fd-crosshair-half) bottom 0 / var(--fd-hairline) var(--fd-crosshair-size) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right 0 bottom var(--fd-crosshair-half) / var(--fd-crosshair-size) var(--fd-hairline) no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right var(--fd-crosshair-half) bottom 0 / var(--fd-hairline) var(--fd-crosshair-size) no-repeat;
 }
-.fd-corners[data-gap] { --_tx-gap: 8px; }
+.fd-corners[data-gap] { --_tx-gap: var(--fd-corners-gap); }
 .fd-corners[data-tone="accent"] { --_tx-c: var(--fd-accent); }
 
 /* ---------- Grain: very subtle film noise for large accent areas ---------- */
@@ -149,7 +181,7 @@
   pointer-events: none;
   opacity: var(--_tx-opacity);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
+  background-size: var(--fd-noise-tile) var(--fd-noise-tile);
 }
 
 /* ---------- Shimmer text: a highlight sweeping a live status ---------- */
@@ -163,7 +195,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: fd-shimmer-text 2.2s var(--fd-ease-in-out) infinite;
+  animation: fd-shimmer-text var(--fd-shimmer-loop) var(--fd-ease-in-out) infinite;
 }
 .fd-shimmer[data-tone="accent"] { --_tx-base: color-mix(in srgb, var(--fd-accent-text) 56%, transparent); --_tx-hi: var(--fd-accent-text); }
 @keyframes fd-shimmer-text { from { background-position: 100% 0; } to { background-position: 0 0; } }
@@ -173,7 +205,7 @@
   position: relative; isolation: isolate; overflow: hidden;
   container: fd-announce / inline-size;
   display: grid; place-items: center;
-  min-height: 280px;
+  min-height: var(--fd-announce-min-h);
   padding: var(--fd-space-12) var(--fd-space-6);
   border-radius: var(--fd-radius-xl);
   background: var(--fd-accent);
@@ -187,7 +219,7 @@
 }
 .fd-announce-art[data-side="start"] { inset-inline-start: 0; }
 .fd-announce-art[data-side="end"] { inset-inline-end: 0; }
-.fd-announce-body { display: grid; justify-items: center; gap: var(--fd-space-3); max-width: 34rem; }
+.fd-announce-body { display: grid; justify-items: center; gap: var(--fd-space-3); max-width: var(--fd-announce-measure); }
 .fd-announce-body > :is(h1, h2, h3, .fd-h1, .fd-h2, .fd-h3) { text-wrap: balance; }
 .fd-announce-body > p { color: color-mix(in srgb, var(--fd-accent-contrast) 84%, transparent); }
 .fd-announce-tag {
@@ -198,17 +230,17 @@
   box-shadow: inset 0 0 0 var(--fd-hairline) color-mix(in srgb, var(--fd-accent-contrast) 28%, transparent);
   font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label);
 }
-.fd-announce-tag > .fd-icon { width: 14px; height: 14px; }
+.fd-announce-tag > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); }
 .fd-announce-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--fd-space-2); margin-top: var(--fd-space-3); }
 /* On the accent, a ghost button becomes a contrast outline. */
 .fd-announce .fd-btn[data-variant="ghost"] {
   --_b-fg: var(--fd-accent-contrast);
   --_b-bg-hover: color-mix(in srgb, var(--fd-accent-contrast) 12%, transparent);
   --_b-bg-active: color-mix(in srgb, var(--fd-accent-contrast) 18%, transparent);
-  --_b-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-accent-contrast) 40%, transparent);
+  --_b-shadow: inset 0 0 0 var(--fd-hairline) color-mix(in srgb, var(--fd-accent-contrast) 40%, transparent);
 }
 .fd-announce .fd-btn[data-variant="ghost"]:hover { --_b-fg: var(--fd-accent-contrast); }
-.fd-announce .fd-btn:focus-visible { box-shadow: var(--_b-shadow), 0 0 0 2px var(--fd-accent), 0 0 0 4px var(--fd-accent-contrast); }
+.fd-announce .fd-btn:focus-visible { box-shadow: var(--_b-shadow), 0 0 0 var(--fd-announce-ring-gap) var(--fd-accent), 0 0 0 var(--fd-announce-ring-w) var(--fd-accent-contrast); }
 
 @container fd-announce (max-width: 640px) {
   .fd-announce-art[data-side="end"] { display: none; }

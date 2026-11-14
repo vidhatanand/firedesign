@@ -21,21 +21,87 @@
    Stagger: set --fd-i on a skeleton (presets do it per row/card).
    ========================================================================== */
 
+/* ---------- Tokens ---------- */
+:root {
+  /* spinner */
+  --fd-spinner-w: 1.5px;            /* ring thickness (spinner and the pending spinner) */
+  --fd-spinner-32: 32px;            /* the larger box; 12 / 16 / 20 / 24 are the icon sizes */
+  /* three dots */
+  --fd-dots-dot: 4px;
+  --fd-dots-dot-sm: 3px;
+  --fd-dots-gap: 3px;
+  --fd-dots-loop: 1.1s;
+  --fd-dots-delay: 0.16s;           /* stagger between dots */
+  /* equaliser bars */
+  --fd-eq-h: 12px;
+  --fd-eq-w: 2px;
+  --fd-eq-radius: calc(1px * var(--fd-radius-scale));
+  --fd-eq-loop: 0.9s;
+  --fd-eq-offset: 0.3s;           /* negative phase offset between bars */
+  /* page bar */
+  --fd-pagebar-h: 2px;
+  --fd-pagebar-glow: 8px;
+  --fd-pagebar-glow-sm: 2px;
+  /* skeleton blocks */
+  --fd-skeleton-h: 12px;            /* default bare block height */
+  --fd-skeleton-h-xs: 7px;          /* axis ticks, table head cells */
+  --fd-skeleton-h-sm: 8px;          /* table cells, form control text */
+  --fd-skeleton-stagger: 90ms;      /* delay per --fd-i step */
+  --fd-skeleton-pulse: 2.4s;        /* chart area and line */
+  /* bar thickness inside a text line, named by the line role it stands in for */
+  --fd-skeleton-bar-2xs: 7px;
+  --fd-skeleton-bar-xs: 8px;
+  --fd-skeleton-bar-sm: 9px;
+  --fd-skeleton-bar-md: 10px;
+  --fd-skeleton-bar-lg: 11px;
+  --fd-skeleton-bar-title: 12px;
+  --fd-skeleton-bar-h3: 15px;
+  --fd-skeleton-bar-h2: 18px;
+  --fd-skeleton-bar-stat: 20px;
+  --fd-skeleton-bar-h1: 22px;
+  --fd-skeleton-bar-display: 28px;
+  /* avatar and tile boxes */
+  --fd-skeleton-size-16: 16px;
+  --fd-skeleton-size-20: 20px;
+  --fd-skeleton-size-24: 24px;
+  --fd-skeleton-size-32: 32px;      /* avatar default */
+  --fd-skeleton-size-40: 40px;      /* tile default */
+  --fd-skeleton-size-48: 48px;
+  /* button widths */
+  --fd-skeleton-button-w: 96px;
+  --fd-skeleton-button-w-sm: 72px;
+  --fd-skeleton-button-w-lg: 120px;
+  /* screens */
+  --fd-skeleton-grid-min: 260px;    /* card grid minimum track */
+  --fd-skeleton-stat-min: 168px;    /* stat strip minimum tile */
+  --fd-skeleton-plot-h: 200px;
+  --fd-skeleton-axis-w: 28px;       /* y-axis label column */
+  --fd-skeleton-tick-y: 20px;
+  --fd-skeleton-tick-y-alt: 26px;
+  --fd-skeleton-tick-x: 32px;
+  --fd-skeleton-thread-w: 26rem;    /* widest user bubble and tool row */
+  --fd-skeleton-title-min: 16px;    /* shortest title bar inside a tool row */
+  --fd-skeleton-page-h: 560px;
+  --fd-skeleton-sep-w: 20px;
+  --fd-skeleton-search-w: 280px;
+  --fd-skeleton-search-min: 120px;
+}
+
 /* ---------- Spinner ---------- */
 .fd-spinner {
-  --_sk-s: 16px;
+  --_sk-s: var(--fd-icon);
   display: inline-block; flex: none;
   width: var(--_sk-s); height: var(--_sk-s);
   border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, currentColor 20%, transparent);
+  border: var(--fd-spinner-w) solid color-mix(in srgb, currentColor 20%, transparent);
   border-top-color: currentColor;
   vertical-align: middle;
-  animation: fd-spin 0.7s linear infinite;
+  animation: fd-spin var(--fd-loop-spin) linear infinite;
 }
-.fd-spinner[data-size="12"] { --_sk-s: 12px; }
-.fd-spinner[data-size="20"] { --_sk-s: 20px; }
-.fd-spinner[data-size="24"] { --_sk-s: 24px; }
-.fd-spinner[data-size="32"] { --_sk-s: 32px; }
+.fd-spinner[data-size="12"] { --_sk-s: var(--fd-icon-xs); }
+.fd-spinner[data-size="20"] { --_sk-s: var(--fd-icon-lg); }
+.fd-spinner[data-size="24"] { --_sk-s: var(--fd-icon-xl); }
+.fd-spinner[data-size="32"] { --_sk-s: var(--fd-spinner-32); }
 .fd-spinner[data-tone="accent"] { color: var(--fd-accent); }
 .fd-spinner[data-tone="muted"] { color: var(--fd-text-3); }
 
@@ -55,33 +121,33 @@
 
 /* ---------- Three dots ---------- */
 .fd-dots {
-  display: inline-flex; align-items: center; gap: 3px;
+  display: inline-flex; align-items: center; gap: var(--fd-dots-gap);
   height: 1lh; vertical-align: middle;
 }
 .fd-dots > * {
-  width: 4px; height: 4px; border-radius: 50%;
+  width: var(--fd-dots-dot); height: var(--fd-dots-dot); border-radius: 50%;
   background: currentColor; opacity: 0.24;
-  animation: fd-dots 1.1s var(--fd-ease-in-out) infinite;
+  animation: fd-dots var(--fd-dots-loop) var(--fd-ease-in-out) infinite;
 }
-.fd-dots > :nth-child(2) { animation-delay: 0.16s; }
-.fd-dots > :nth-child(3) { animation-delay: 0.32s; }
+.fd-dots > :nth-child(2) { animation-delay: var(--fd-dots-delay); }
+.fd-dots > :nth-child(3) { animation-delay: calc(var(--fd-dots-delay) * 2); }
 .fd-dots[data-size="sm"] { gap: var(--fd-space-0-5); }
-.fd-dots[data-size="sm"] > * { width: 3px; height: 3px; }
+.fd-dots[data-size="sm"] > * { width: var(--fd-dots-dot-sm); height: var(--fd-dots-dot-sm); }
 @keyframes fd-dots { 0%, 70%, 100% { opacity: 0.24; } 35% { opacity: 1; } }
 
 /* ---------- Equaliser bars ---------- */
 .fd-bars-loader {
   display: inline-flex; align-items: flex-end; gap: var(--fd-space-0-5);
-  height: 12px; vertical-align: middle;
+  height: var(--fd-eq-h); vertical-align: middle;
 }
 .fd-bars-loader > * {
-  width: 2px; height: 100%; border-radius: 1px;
+  width: var(--fd-eq-w); height: 100%; border-radius: var(--fd-eq-radius);
   background: currentColor;
   transform-origin: 50% 100%;
-  animation: fd-eq 0.9s var(--fd-ease-in-out) infinite;
+  animation: fd-eq var(--fd-eq-loop) var(--fd-ease-in-out) infinite;
 }
-.fd-bars-loader > :nth-child(1) { animation-delay: -0.6s; }
-.fd-bars-loader > :nth-child(2) { animation-delay: -0.3s; }
+.fd-bars-loader > :nth-child(1) { animation-delay: calc(var(--fd-eq-offset) * -2); }
+.fd-bars-loader > :nth-child(2) { animation-delay: calc(var(--fd-eq-offset) * -1); }
 .fd-bars-loader[data-tone="accent"] { color: var(--fd-accent); }
 @keyframes fd-eq { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
 
@@ -93,10 +159,10 @@
 .fd-pending > * { opacity: 0.5; transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
 .fd-pending::after {
   content: "";
-  flex: none; width: 12px; height: 12px; border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--fd-text-3) 24%, transparent);
+  flex: none; width: var(--fd-icon-xs); height: var(--fd-icon-xs); border-radius: 50%;
+  border: var(--fd-spinner-w) solid color-mix(in srgb, var(--fd-text-3) 24%, transparent);
   border-top-color: var(--fd-text-3);
-  animation: fd-spin 0.7s linear infinite;
+  animation: fd-spin var(--fd-loop-spin) linear infinite;
 }
 .fd-pending[data-block] { display: flex; }
 .fd-pending[data-block]::after { margin-inline-start: auto; }
@@ -104,7 +170,7 @@
 /* ---------- Page bar ---------- */
 .fd-pagebar {
   position: fixed; inset: 0 0 auto 0; z-index: var(--fd-z-toast);
-  height: 2px;
+  height: var(--fd-pagebar-h);
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--fd-dur-4) var(--fd-ease-out);
@@ -117,7 +183,7 @@
   width: calc(var(--_sk-p, 0) * 100%);
   border-start-end-radius: var(--fd-radius-full); border-end-end-radius: var(--fd-radius-full);
   background: var(--fd-accent);
-  box-shadow: 0 0 8px var(--fd-accent-40), 0 0 2px var(--fd-accent-24);
+  box-shadow: 0 0 var(--fd-pagebar-glow) var(--fd-accent-40), 0 0 var(--fd-pagebar-glow-sm) var(--fd-accent-24);
   transition: width var(--fd-dur-4) var(--fd-ease-out);
 }
 .fd-pagebar[data-state="idle"] .fd-pagebar-fill { transition: none; }
@@ -134,7 +200,7 @@
   --_sk-b: 0px;
   display: block; flex: none;
   width: var(--_sk-w, 100%); max-width: 100%;
-  height: var(--_sk-h, 12px);
+  height: var(--_sk-h, var(--fd-skeleton-h));
   border: 0 solid transparent;
   border-block-width: var(--_sk-b);
   border-radius: var(--_sk-r) / calc(var(--_sk-r) + var(--_sk-b));
@@ -144,14 +210,14 @@
   background-repeat: no-repeat;
   background-clip: padding-box;
   background-origin: padding-box;
-  animation: fd-shimmer 1.6s var(--fd-ease-in-out) calc(var(--fd-i, 0) * 90ms) infinite both;
+  animation: fd-shimmer var(--fd-loop-shimmer) var(--fd-ease-in-out) calc(var(--fd-i, 0) * var(--fd-skeleton-stagger)) infinite both;
 }
 .fd-skeleton { --_sk-r: var(--fd-radius-sm); }
 
 /* ---------- Text lines ---------- */
 .fd-skeleton-text {
   --_sk-lh: var(--fd-lh-md);
-  --_sk-bar: 10px;
+  --_sk-bar: var(--fd-skeleton-bar-md);
   display: flex; flex-direction: column;
   width: 100%; min-width: 0;
 }
@@ -163,49 +229,49 @@
 .fd-skeleton-text > :nth-child(6n + 6) { --_sk-w: 86%; }
 .fd-skeleton-text > :last-child:not(:only-child) { --_sk-w: 60%; }
 .fd-skeleton-text > :only-child { --_sk-w: 72%; }
-.fd-skeleton-text[data-size="lg"] { --_sk-lh: var(--fd-lh-lg); --_sk-bar: 11px; }
-.fd-skeleton-text[data-size="sm"] { --_sk-lh: var(--fd-lh-sm); --_sk-bar: 9px; }
-.fd-skeleton-text[data-size="xs"] { --_sk-lh: var(--fd-lh-xs); --_sk-bar: 8px; }
+.fd-skeleton-text[data-size="lg"] { --_sk-lh: var(--fd-lh-lg); --_sk-bar: var(--fd-skeleton-bar-lg); }
+.fd-skeleton-text[data-size="sm"] { --_sk-lh: var(--fd-lh-sm); --_sk-bar: var(--fd-skeleton-bar-sm); }
+.fd-skeleton-text[data-size="xs"] { --_sk-lh: var(--fd-lh-xs); --_sk-bar: var(--fd-skeleton-bar-xs); }
 
 /* ---------- Single line at a type role's height ---------- */
 .fd-skeleton-title {
   --_sk-lh: var(--fd-lh-title);
-  --_sk-bar: 12px;
+  --_sk-bar: var(--fd-skeleton-bar-title);
   --_sk-b: calc((var(--_sk-lh) - var(--_sk-bar)) / 2);
   width: var(--_sk-w, 40%);
   height: var(--_sk-lh);
 }
-.fd-skeleton-title[data-size="label"] { --_sk-lh: var(--fd-lh-md); --_sk-bar: 10px; }
-.fd-skeleton-title[data-size="mono"] { --_sk-lh: var(--fd-lh-sm); --_sk-bar: 9px; }
-.fd-skeleton-title[data-size="caption"] { --_sk-lh: var(--fd-lh-xs); --_sk-bar: 8px; }
-.fd-skeleton-title[data-size="eyebrow"] { --_sk-lh: var(--fd-lh-2xs); --_sk-bar: 7px; }
-.fd-skeleton-title[data-size="lead"] { --_sk-lh: var(--fd-lh-lg); --_sk-bar: 12px; }
-.fd-skeleton-title[data-size="h3"] { --_sk-lh: var(--fd-lh-h3); --_sk-bar: 15px; }
-.fd-skeleton-title[data-size="h2"] { --_sk-lh: var(--fd-lh-h2); --_sk-bar: 18px; --_sk-r: var(--fd-radius-sm); }
-.fd-skeleton-title[data-size="stat"] { --_sk-lh: var(--fd-lh-stat); --_sk-bar: 20px; --_sk-r: var(--fd-radius-sm); }
-.fd-skeleton-title[data-size="h1"] { --_sk-lh: var(--fd-lh-h1); --_sk-bar: 22px; --_sk-r: var(--fd-radius-sm); }
-.fd-skeleton-title[data-size="display"] { --_sk-lh: var(--fd-lh-display); --_sk-bar: 28px; --_sk-r: var(--fd-radius-md); }
+.fd-skeleton-title[data-size="label"] { --_sk-lh: var(--fd-lh-md); --_sk-bar: var(--fd-skeleton-bar-md); }
+.fd-skeleton-title[data-size="mono"] { --_sk-lh: var(--fd-lh-sm); --_sk-bar: var(--fd-skeleton-bar-sm); }
+.fd-skeleton-title[data-size="caption"] { --_sk-lh: var(--fd-lh-xs); --_sk-bar: var(--fd-skeleton-bar-xs); }
+.fd-skeleton-title[data-size="eyebrow"] { --_sk-lh: var(--fd-lh-2xs); --_sk-bar: var(--fd-skeleton-bar-2xs); }
+.fd-skeleton-title[data-size="lead"] { --_sk-lh: var(--fd-lh-lg); --_sk-bar: var(--fd-skeleton-bar-title); }
+.fd-skeleton-title[data-size="h3"] { --_sk-lh: var(--fd-lh-h3); --_sk-bar: var(--fd-skeleton-bar-h3); }
+.fd-skeleton-title[data-size="h2"] { --_sk-lh: var(--fd-lh-h2); --_sk-bar: var(--fd-skeleton-bar-h2); --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-title[data-size="stat"] { --_sk-lh: var(--fd-lh-stat); --_sk-bar: var(--fd-skeleton-bar-stat); --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-title[data-size="h1"] { --_sk-lh: var(--fd-lh-h1); --_sk-bar: var(--fd-skeleton-bar-h1); --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-title[data-size="display"] { --_sk-lh: var(--fd-lh-display); --_sk-bar: var(--fd-skeleton-bar-display); --_sk-r: var(--fd-radius-md); }
 
 /* ---------- Avatar, button, tile ---------- */
-.fd-skeleton-avatar { --_sk-s: 32px; --_sk-r: 50%; width: var(--_sk-s); height: var(--_sk-s); }
-.fd-skeleton-avatar[data-size="16"] { --_sk-s: 16px; }
-.fd-skeleton-avatar[data-size="20"] { --_sk-s: 20px; }
-.fd-skeleton-avatar[data-size="24"] { --_sk-s: 24px; }
-.fd-skeleton-avatar[data-size="40"] { --_sk-s: 40px; }
-.fd-skeleton-avatar[data-size="48"] { --_sk-s: 48px; }
+.fd-skeleton-avatar { --_sk-s: var(--fd-skeleton-size-32); --_sk-r: 50%; width: var(--_sk-s); height: var(--_sk-s); }
+.fd-skeleton-avatar[data-size="16"] { --_sk-s: var(--fd-skeleton-size-16); }
+.fd-skeleton-avatar[data-size="20"] { --_sk-s: var(--fd-skeleton-size-20); }
+.fd-skeleton-avatar[data-size="24"] { --_sk-s: var(--fd-skeleton-size-24); }
+.fd-skeleton-avatar[data-size="40"] { --_sk-s: var(--fd-skeleton-size-40); }
+.fd-skeleton-avatar[data-size="48"] { --_sk-s: var(--fd-skeleton-size-48); }
 
-.fd-skeleton-button { --_sk-r: var(--fd-radius-lg); width: var(--_sk-w, 96px); height: var(--fd-control-md); }
-.fd-skeleton-button[data-size="sm"] { --_sk-r: var(--fd-radius-md); width: var(--_sk-w, 72px); height: var(--fd-control-sm); }
-.fd-skeleton-button[data-size="lg"] { width: var(--_sk-w, 120px); height: var(--fd-control-lg); }
+.fd-skeleton-button { --_sk-r: var(--fd-radius-lg); width: var(--_sk-w, var(--fd-skeleton-button-w)); height: var(--fd-control-md); }
+.fd-skeleton-button[data-size="sm"] { --_sk-r: var(--fd-radius-md); width: var(--_sk-w, var(--fd-skeleton-button-w-sm)); height: var(--fd-control-sm); }
+.fd-skeleton-button[data-size="lg"] { width: var(--_sk-w, var(--fd-skeleton-button-w-lg)); height: var(--fd-control-lg); }
 .fd-skeleton-button[data-square] { width: var(--fd-control-md); }
 .fd-skeleton-button[data-size="sm"][data-square] { width: var(--fd-control-sm); }
 
-.fd-skeleton-tile { --_sk-s: 40px; --_sk-r: var(--fd-radius-lg); width: var(--_sk-s); height: var(--_sk-s); }
-.fd-skeleton-tile[data-size="16"] { --_sk-s: 16px; --_sk-r: var(--fd-radius-xs); }
-.fd-skeleton-tile[data-size="20"] { --_sk-s: 20px; --_sk-r: var(--fd-radius-sm); }
-.fd-skeleton-tile[data-size="24"] { --_sk-s: 24px; --_sk-r: var(--fd-radius-sm); }
-.fd-skeleton-tile[data-size="32"] { --_sk-s: 32px; --_sk-r: var(--fd-radius-md); }
-.fd-skeleton-tile[data-size="48"] { --_sk-s: 48px; --_sk-r: var(--fd-radius-xl); }
+.fd-skeleton-tile { --_sk-s: var(--fd-skeleton-size-40); --_sk-r: var(--fd-radius-lg); width: var(--_sk-s); height: var(--_sk-s); }
+.fd-skeleton-tile[data-size="16"] { --_sk-s: var(--fd-skeleton-size-16); --_sk-r: var(--fd-radius-xs); }
+.fd-skeleton-tile[data-size="20"] { --_sk-s: var(--fd-skeleton-size-20); --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-tile[data-size="24"] { --_sk-s: var(--fd-skeleton-size-24); --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-tile[data-size="32"] { --_sk-s: var(--fd-skeleton-size-32); --_sk-r: var(--fd-radius-md); }
+.fd-skeleton-tile[data-size="48"] { --_sk-s: var(--fd-skeleton-size-48); --_sk-r: var(--fd-radius-xl); }
 
 /* ==========================================================================
    Skeleton screens. Box styles are zero-specificity so a real component class on the
@@ -232,7 +298,7 @@
 /* ---------- Card grid (same tracks as .fd-grid) ---------- */
 .fd-skeleton-grid {
   display: grid; gap: var(--fd-gap, var(--fd-space-4));
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--fd-min, 260px)), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--fd-min, var(--fd-skeleton-grid-min))), 1fr));
 }
 
 /* ---------- Table ---------- */
@@ -247,16 +313,16 @@
 .fd-skeleton-table-cell { display: flex; flex: 1 1 0; min-width: 0; }
 .fd-skeleton-table-cell:first-child { flex-grow: 1.6; }
 .fd-skeleton-table-cell:last-child:not(:first-child) { justify-content: flex-end; }
-.fd-skeleton-table-head .fd-skeleton { --_sk-h: 7px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
-.fd-skeleton-table-row .fd-skeleton { --_sk-h: 8px; --_sk-r: var(--fd-radius-xs); }
+.fd-skeleton-table-head .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-table-row .fd-skeleton { --_sk-h: var(--fd-skeleton-h-sm); --_sk-r: var(--fd-radius-xs); }
 @container (max-width: 480px) {
   .fd-skeleton-table-cell:nth-child(n + 4) { display: none; }
 }
 
 /* ---------- Stat strip ---------- */
 .fd-skeleton-stat {
-  display: grid; gap: 1px; overflow: hidden;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  display: grid; gap: var(--fd-hairline); overflow: hidden;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--fd-skeleton-stat-min)), 1fr));
   background: var(--fd-line-faint);
 }
 .fd-skeleton-stat-tile {
@@ -267,23 +333,23 @@
 
 /* ---------- Chart ---------- */
 :where(.fd-skeleton-chart) { padding: var(--fd-space-5); }
-.fd-skeleton-chart { --_sk-plot: 200px; display: flex; flex-direction: column; gap: var(--fd-space-5); min-width: 0; }
+.fd-skeleton-chart { --_sk-plot: var(--fd-skeleton-plot-h); display: flex; flex-direction: column; gap: var(--fd-space-5); min-width: 0; }
 .fd-skeleton-chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--fd-space-4); }
 .fd-skeleton-chart-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .fd-skeleton-chart-body {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-columns: var(--fd-skeleton-axis-w) minmax(0, 1fr);
   grid-template-rows: var(--_sk-plot) auto;
   column-gap: var(--fd-space-3); row-gap: var(--fd-space-2);
 }
 .fd-skeleton-chart-y { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; margin-block: calc(var(--fd-space-1) * -1); }
-.fd-skeleton-chart-y > .fd-skeleton { --_sk-h: 7px; --_sk-w: 20px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
-.fd-skeleton-chart-y > .fd-skeleton:nth-child(odd) { --_sk-w: 26px; }
+.fd-skeleton-chart-y > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-w: var(--fd-skeleton-tick-y); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-chart-y > .fd-skeleton:nth-child(odd) { --_sk-w: var(--fd-skeleton-tick-y-alt); }
 .fd-skeleton-chart-x { grid-column: 2; display: flex; justify-content: space-between; }
-.fd-skeleton-chart-x > .fd-skeleton { --_sk-h: 7px; --_sk-w: 32px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-chart-x > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-w: var(--fd-skeleton-tick-x); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
 .fd-skeleton-chart-plot {
   position: relative; overflow: hidden;
-  background: linear-gradient(var(--fd-chart-grid) 0 1px, transparent 1px) 0 0 / 100% 25%;
+  background: linear-gradient(var(--fd-chart-grid) 0 var(--fd-hairline), transparent var(--fd-hairline)) 0 0 / 100% 25%;
   border-bottom: var(--fd-hairline) solid var(--fd-line);
 }
 .fd-skeleton-chart-area,
@@ -291,7 +357,7 @@
   position: absolute; inset: 12% 0 0;
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  animation: fd-pulse 2.4s var(--fd-ease-in-out) infinite;
+  animation: fd-pulse var(--fd-skeleton-pulse) var(--fd-ease-in-out) infinite;
 }
 .fd-skeleton-chart-area {
   background: linear-gradient(var(--fd-a6), transparent);
@@ -324,7 +390,7 @@
 .fd-skeleton-thread { display: flex; flex-direction: column; gap: var(--fd-space-6); width: 100%; min-width: 0; }
 .fd-skeleton-thread-user {
   align-self: flex-end;
-  width: min(72%, 26rem);
+  width: min(72%, var(--fd-skeleton-thread-w));
   padding: var(--fd-space-2-5) var(--fd-space-3-5);
   border-radius: var(--fd-radius-2xl);
   background: var(--fd-fill);
@@ -333,13 +399,13 @@
 .fd-skeleton-thread-reply { display: flex; flex-direction: column; gap: var(--fd-space-3); min-width: 0; }
 .fd-skeleton-thread-tool {
   display: flex; align-items: center; gap: var(--fd-space-2);
-  width: min(100%, 26rem); height: var(--fd-control-md);
+  width: min(100%, var(--fd-skeleton-thread-w)); height: var(--fd-control-md);
   padding-inline: var(--fd-space-3);
   border: var(--fd-hairline) solid var(--fd-line-faint);
   border-radius: var(--fd-radius-lg);
   background: var(--fd-surface);
 }
-.fd-skeleton-thread-tool > .fd-skeleton-title { flex: 0 1 auto; min-width: 16px; }
+.fd-skeleton-thread-tool > .fd-skeleton-title { flex: 0 1 auto; min-width: var(--fd-skeleton-title-min); }
 
 /* ---------- Form ---------- */
 .fd-skeleton-form { display: flex; flex-direction: column; gap: var(--fd-space-5); width: 100%; min-width: 0; }
@@ -351,7 +417,7 @@
   background: var(--fd-surface);
   box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line);
 }
-.fd-skeleton-form-control > .fd-skeleton { --_sk-h: 8px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-form-control > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-sm); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
 .fd-skeleton-form-actions { display: flex; justify-content: flex-end; gap: var(--fd-space-2); padding-top: var(--fd-space-1); }
 
 /* ---------- Page hero ---------- */
@@ -364,7 +430,7 @@
 /* ---------- Whole screen ---------- */
 .fd-skeleton-page {
   container: fd-skeleton-page / inline-size;
-  display: flex; min-height: 560px; min-width: 0;
+  display: flex; min-height: var(--fd-skeleton-page-h); min-width: 0;
   border: var(--fd-hairline) solid var(--fd-line-faint);
   border-radius: var(--fd-radius-xl);
   background: var(--fd-bg);
@@ -377,7 +443,7 @@
   border-inline-end: var(--fd-hairline) solid var(--fd-line-faint);
 }
 .fd-skeleton-page-icons { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--fd-space-4); }
-.fd-skeleton-page-sep { width: 20px; height: 1px; flex: none; background: var(--fd-line-faint); }
+.fd-skeleton-page-sep { width: var(--fd-skeleton-sep-w); height: var(--fd-hairline); flex: none; background: var(--fd-line-faint); }
 .fd-skeleton-page-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .fd-skeleton-page-top {
   flex: none; height: var(--fd-topbar-h);
@@ -387,7 +453,7 @@
 }
 .fd-skeleton-page-body { display: flex; flex-direction: column; padding: 0 var(--fd-gutter) var(--fd-gutter); min-width: 0; }
 .fd-skeleton-page-toolbar { display: flex; align-items: center; gap: var(--fd-space-2); margin-bottom: var(--fd-space-4); min-width: 0; }
-.fd-skeleton-page-toolbar > [data-search] { flex: 0 1 280px; min-width: 120px; }
+.fd-skeleton-page-toolbar > [data-search] { flex: 0 1 var(--fd-skeleton-search-w); min-width: var(--fd-skeleton-search-min); }
 @container fd-skeleton-page (max-width: 640px) {
   .fd-skeleton-page-rail { display: none; }
   .fd-skeleton-page-top > .fd-skeleton-button[data-square],

@@ -15,6 +15,21 @@
    aria-pressed / aria-expanded="true"  held state (toggles, open menus)
    ========================================================================== */
 
+/* ---------- Tokens ---------- */
+:root {
+  /* button */
+  --fd-btn-nudge: 2px;              /* a trailing arrow's travel on hover */
+  --fd-btn-nudge-diag: 1px;         /* the same, for the up-right arrow (per axis) */
+  --fd-btn-spinner: 14px;           /* loading spinner box */
+  --fd-btn-spinner-stroke: 1.5px;   /* its ring */
+  --fd-btn-lift-y: 1px;             /* danger drop shadow: offset */
+  --fd-btn-lift-blur: 2px;          /*   and blur */
+  --fd-btn-swap-shift: 5px;         /* label swap: how far a label slides as it fades */
+  /* floating action */
+  --fd-fab-size: 48px;
+  --fd-fab-icon: 22px;
+}
+
 .fd-btn {
   --_b-h: var(--fd-control-md);
   --_b-px: var(--fd-control-px);
@@ -46,15 +61,15 @@
 .fd-btn > .fd-icon { color: color-mix(in srgb, currentColor 72%, transparent); transition: color var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-3) var(--fd-ease-out); }
 .fd-btn:hover > .fd-icon { color: currentColor; }
 /* A trailing arrow nudges on hover. Mark it with data-nudge. */
-.fd-btn:hover > .fd-icon[data-nudge] { translate: 2px 0; }
-.fd-btn:hover > .fd-icon[data-nudge="up-right"] { translate: 1px -1px; }
+.fd-btn:hover > .fd-icon[data-nudge] { translate: var(--fd-btn-nudge) 0; }
+.fd-btn:hover > .fd-icon[data-nudge="up-right"] { translate: var(--fd-btn-nudge-diag) calc(var(--fd-btn-nudge-diag) * -1); }
 
 /* ---------- Sizes ---------- */
-.fd-btn[data-size="xs"] { --_b-h: var(--fd-control-xs); --_b-px: 8px; --_b-radius: var(--fd-radius-sm); font-size: var(--fd-text-xs); gap: var(--fd-space-1); }
-.fd-btn[data-size="sm"] { --_b-h: var(--fd-control-sm); --_b-px: 10px; --_b-radius: var(--fd-radius-md); font-size: var(--fd-text-sm); gap: var(--fd-space-1); }
-.fd-btn[data-size="lg"] { --_b-h: var(--fd-control-lg); --_b-px: 16px; }
-.fd-btn[data-size="xl"] { --_b-h: var(--fd-control-xl); --_b-px: 20px; --_b-radius: var(--fd-radius-xl); font-size: var(--fd-text-lg); }
-.fd-btn[data-size="xs"] > .fd-icon, .fd-btn[data-size="sm"] > .fd-icon { width: 14px; height: 14px; }
+.fd-btn[data-size="xs"] { --_b-h: var(--fd-control-xs); --_b-px: var(--fd-space-2); --_b-radius: var(--fd-radius-sm); font-size: var(--fd-text-xs); gap: var(--fd-space-1); }
+.fd-btn[data-size="sm"] { --_b-h: var(--fd-control-sm); --_b-px: var(--fd-space-2-5); --_b-radius: var(--fd-radius-md); font-size: var(--fd-text-sm); gap: var(--fd-space-1); }
+.fd-btn[data-size="lg"] { --_b-h: var(--fd-control-lg); --_b-px: var(--fd-space-4); }
+.fd-btn[data-size="xl"] { --_b-h: var(--fd-control-xl); --_b-px: var(--fd-space-5); --_b-radius: var(--fd-radius-xl); font-size: var(--fd-text-lg); }
+.fd-btn[data-size="xs"] > .fd-icon, .fd-btn[data-size="sm"] > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); }
 .fd-btn[data-icon-only] { padding: 0; width: var(--_b-h); }
 .fd-btn[data-block] { display: flex; width: 100%; }
 
@@ -74,9 +89,9 @@
 
 .fd-btn[data-variant="outline"] {
   --_b-bg: var(--fd-surface); --_b-bg-hover: var(--fd-surface); --_b-bg-active: var(--fd-bg);
-  --_b-shadow: inset 0 0 0 1px var(--fd-line), var(--fd-shadow-xs);
+  --_b-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line), var(--fd-shadow-xs);
 }
-.fd-btn[data-variant="outline"]:hover { --_b-shadow: inset 0 0 0 1px var(--fd-line-strong), var(--fd-shadow-xs); }
+.fd-btn[data-variant="outline"]:hover { --_b-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong), var(--fd-shadow-xs); }
 
 .fd-btn[data-variant="ghost"] { --_b-bg: transparent; --_b-bg-hover: var(--fd-fill); --_b-bg-active: var(--fd-fill-hover); --_b-fg: var(--fd-text-2); }
 .fd-btn[data-variant="ghost"]:hover { --_b-fg: var(--fd-text); }
@@ -85,7 +100,7 @@
   --_b-bg: var(--fd-surface-inverse); --_b-fg: var(--fd-text-inverse);
   --_b-bg-hover: color-mix(in srgb, var(--fd-surface-inverse) 88%, var(--fd-ink-inverse));
   --_b-bg-active: color-mix(in srgb, var(--fd-surface-inverse) 80%, var(--fd-ink-inverse));
-  --_b-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.12), var(--fd-shadow-sm);
+  --_b-shadow: inset 0 var(--fd-hairline) 0 0 rgb(255 255 255 / 0.12), var(--fd-shadow-sm);
 }
 .fd-btn[data-variant="inverse"] > .fd-icon { color: currentColor; }
 
@@ -95,7 +110,7 @@
 .fd-btn[data-variant="danger"] {
   --_b-bg: var(--fd-danger-solid); --_b-fg: #fff;
   --_b-bg-hover: color-mix(in srgb, var(--fd-danger-solid) 90%, #000); --_b-bg-active: color-mix(in srgb, var(--fd-danger-solid) 84%, #000);
-  --_b-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.16), 0 1px 2px 0 color-mix(in srgb, var(--fd-danger-solid) 30%, transparent);
+  --_b-shadow: inset 0 var(--fd-hairline) 0 0 rgb(255 255 255 / 0.16), 0 var(--fd-btn-lift-y) var(--fd-btn-lift-blur) 0 color-mix(in srgb, var(--fd-danger-solid) 30%, transparent);
 }
 .fd-btn[data-variant="danger"] > .fd-icon { color: currentColor; }
 .fd-btn[data-variant="danger-soft"] { --_b-bg: var(--fd-danger-bg); --_b-fg: var(--fd-danger-text); --_b-bg-hover: color-mix(in srgb, var(--fd-danger-solid) 14%, transparent); --_b-bg-active: color-mix(in srgb, var(--fd-danger-solid) 20%, transparent); }
@@ -114,9 +129,9 @@
 .fd-btn[aria-busy="true"] { pointer-events: none; }
 .fd-btn[aria-busy="true"] > * { opacity: 0; }
 .fd-btn[aria-busy="true"]::after {
-  content: ""; position: absolute; width: 14px; height: 14px; border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, currentColor 28%, transparent); border-top-color: currentColor;
-  animation: fd-spin 0.7s linear infinite;
+  content: ""; position: absolute; width: var(--fd-btn-spinner); height: var(--fd-btn-spinner); border-radius: 50%;
+  border: var(--fd-btn-spinner-stroke) solid color-mix(in srgb, currentColor 28%, transparent); border-top-color: currentColor;
+  animation: fd-spin var(--fd-loop-spin) linear infinite;
 }
 
 /* ---------- Button group: joined controls ---------- */
@@ -124,18 +139,18 @@
 .fd-btn-group > .fd-btn { border-radius: 0; }
 .fd-btn-group > .fd-btn:first-child { border-start-start-radius: var(--fd-radius-lg); border-end-start-radius: var(--fd-radius-lg); }
 .fd-btn-group > .fd-btn:last-child { border-start-end-radius: var(--fd-radius-lg); border-end-end-radius: var(--fd-radius-lg); }
-.fd-btn-group > .fd-btn + .fd-btn { margin-inline-start: 1px; }
-.fd-btn-group > .fd-btn[data-variant="outline"] + .fd-btn[data-variant="outline"] { margin-inline-start: -1px; }
+.fd-btn-group > .fd-btn + .fd-btn { margin-inline-start: var(--fd-hairline); }
+.fd-btn-group > .fd-btn[data-variant="outline"] + .fd-btn[data-variant="outline"] { margin-inline-start: calc(var(--fd-hairline) * -1); }
 .fd-btn-group > .fd-btn:hover, .fd-btn-group > .fd-btn:focus-visible { z-index: 1; }
-.fd-btn-group > .fd-btn[data-variant="primary"] + .fd-btn[data-variant="primary"] { box-shadow: var(--fd-shadow-accent), inset 1px 0 0 0 rgb(255 255 255 / 0.24); margin-inline-start: 0; }
+.fd-btn-group > .fd-btn[data-variant="primary"] + .fd-btn[data-variant="primary"] { box-shadow: var(--fd-shadow-accent), inset var(--fd-hairline) 0 0 0 rgb(255 255 255 / 0.24); margin-inline-start: 0; }
 
 /* ---------- Label swap: "Copy" becomes "Copied" in place, so the button never changes width ----------
    <button class="fd-btn" data-fd-copy="npx ember init"><span class="fd-btn-swap"><span>Copy</span><span>Copied</span></span></button>
    fire.js sets data-state="done" for 1.4s after a successful copy; set it yourself for other confirmations. */
 .fd-btn-swap { display: inline-grid; justify-items: center; align-items: center; }
 .fd-btn-swap > * { grid-area: 1 / 1; transition: opacity var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-3) var(--fd-ease-out); }
-.fd-btn-swap > :last-child { opacity: 0; translate: 0 5px; }
-[data-state="done"] > .fd-btn-swap > :first-child, [data-state="done"] .fd-btn-swap > :first-child { opacity: 0; translate: 0 -5px; }
+.fd-btn-swap > :last-child { opacity: 0; translate: 0 var(--fd-btn-swap-shift); }
+[data-state="done"] > .fd-btn-swap > :first-child, [data-state="done"] .fd-btn-swap > :first-child { opacity: 0; translate: 0 calc(var(--fd-btn-swap-shift) * -1); }
 [data-state="done"] > .fd-btn-swap > :last-child, [data-state="done"] .fd-btn-swap > :last-child { opacity: 1; translate: 0 0; }
 
 /* ---------- Text button: an action that reads as text ---------- */
@@ -147,17 +162,17 @@
 }
 .fd-btn-text:hover { color: var(--fd-text); }
 .fd-btn-text[data-tone="accent"] { color: var(--fd-accent-text); }
-.fd-btn-text > .fd-icon { width: 14px; height: 14px; transition: translate var(--fd-dur-3) var(--fd-ease-out); }
-.fd-btn-text:hover > .fd-icon[data-nudge] { translate: 2px 0; }
+.fd-btn-text > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); transition: translate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-btn-text:hover > .fd-icon[data-nudge] { translate: var(--fd-btn-nudge) 0; }
 
 /* ---------- Floating action (support bubble, scroll-to-bottom) ---------- */
 .fd-fab {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 48px; height: 48px; border-radius: 50%;
+  width: var(--fd-fab-size); height: var(--fd-fab-size); border-radius: 50%;
   background: var(--fd-accent); color: var(--fd-accent-contrast);
   box-shadow: var(--fd-shadow-accent), var(--fd-shadow-md);
   transition: scale var(--fd-dur-3) var(--fd-ease-spring), background-color var(--fd-dur-2) var(--fd-ease-out);
 }
 .fd-fab:hover { scale: 1.06; background: var(--fd-accent-hover); }
 .fd-fab:active { scale: 0.96; }
-.fd-fab > .fd-icon { width: 22px; height: 22px; }
+.fd-fab > .fd-icon { width: var(--fd-fab-icon); height: var(--fd-fab-icon); }

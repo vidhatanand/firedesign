@@ -27,6 +27,38 @@
    and fade the clipped edge.
    ========================================================================== */
 
+/* ---------- Tokens ---------- */
+:root {
+  /* shared */
+  --fd-nav-fade: 40px;               /* width of the fade where a scroller is clipped */
+  --fd-nav-strip-h: 40px;            /* tabs and chip nav height */
+  --fd-nav-strip-h-sm: 36px;         /* small tabs */
+  --fd-nav-strip-px: 1px;            /* inline padding of a tab or chip */
+  --fd-nav-item-h: 40px;             /* subnav item height */
+  --fd-nav-nudge: 2px;               /* how far the back arrow travels on hover */
+  /* tabs */
+  --fd-nav-indicator: 2px;           /* underline thickness */
+  --fd-nav-indicator-radius: calc(2px * var(--fd-radius-scale));
+  --fd-nav-count: 18px;              /* tab count pill: min width and height */
+  --fd-nav-count-px: 5px;
+  /* segmented */
+  --fd-nav-seg-gap: 9px;             /* grouped: space between groups */
+  --fd-nav-seg-label-room: 22px;     /* grouped: room reserved above the track for the labels */
+  --fd-nav-seg-sep-h: 14px;          /* grouped: divider between groups */
+  --fd-nav-seg-sep-inset: 5px;       /*   and how far it sits outside the group */
+  /* steps */
+  --fd-nav-step-marker: 22px;
+  --fd-nav-step-ring: 3px;           /* current step halo */
+  --fd-nav-step-link: 16px;          /* connector: preferred length */
+  --fd-nav-step-link-min: 12px;      /*   and minimum */
+  --fd-nav-step-nudge: 1px;          /* vertical: aligns the text with the marker */
+  /* on this page */
+  --fd-nav-toc-bar: 2px;             /* active marker thickness */
+  --fd-nav-toc-bar-inset: 4px;       /*   and its inset top and bottom */
+  --fd-nav-toc-radius: calc(1px * var(--fd-radius-scale));
+  --fd-nav-toc-py: 5px;              /* item block padding */
+}
+
 /* ---------- Shared: horizontal scrollers with edge fades ---------- */
 .fd-tabs,
 .fd-chip-nav {
@@ -39,33 +71,33 @@
 .fd-chip-nav::-webkit-scrollbar,
 .fd-subnav::-webkit-scrollbar { display: none; }
 :is(.fd-tabs, .fd-chip-nav, .fd-subnav)[data-overflow="end"] {
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
-  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--fd-nav-fade)), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--fd-nav-fade)), transparent);
 }
 :is(.fd-tabs, .fd-chip-nav, .fd-subnav)[data-overflow="start"] {
-  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent);
-  mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - var(--fd-nav-fade)), transparent);
+  mask-image: linear-gradient(to left, #000 calc(100% - var(--fd-nav-fade)), transparent);
 }
 :is(.fd-tabs, .fd-chip-nav, .fd-subnav)[data-overflow="both"] {
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
-  mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fd-nav-fade), #000 calc(100% - var(--fd-nav-fade)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--fd-nav-fade), #000 calc(100% - var(--fd-nav-fade)), transparent);
 }
 
 /* ---------- Tabs ---------- */
 .fd-tabs {
-  --_n-h: 40px;
+  --_n-h: var(--fd-nav-strip-h);
   --_n-gap: var(--fd-space-6);
   position: relative;
   display: flex; align-items: stretch; gap: var(--_n-gap);
   min-width: 0;
-  box-shadow: inset 0 -1px 0 var(--fd-line-faint);
+  box-shadow: inset 0 calc(var(--fd-hairline) * -1) 0 var(--fd-line-faint);
 }
-.fd-tabs[data-size="sm"] { --_n-h: 36px; --_n-gap: var(--fd-space-5); }
+.fd-tabs[data-size="sm"] { --_n-h: var(--fd-nav-strip-h-sm); --_n-gap: var(--fd-space-5); }
 
 .fd-tab {
   position: relative; flex: none;
   display: inline-flex; align-items: center; gap: var(--fd-space-1-5);
-  height: var(--_n-h); padding-inline: 1px;
+  height: var(--_n-h); padding-inline: var(--fd-nav-strip-px);
   color: var(--fd-text-3);
   font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label);
   white-space: nowrap; user-select: none;
@@ -83,14 +115,14 @@
 
 /* Underline without JS; replaced by the sliding indicator once nav.js runs. */
 .fd-tab[aria-selected="true"]::after, .fd-tab[aria-current="page"]::after {
-  content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px;
-  border-radius: 2px 2px 0 0; background: var(--fd-accent);
+  content: ""; position: absolute; inset-inline: 0; bottom: 0; height: var(--fd-nav-indicator);
+  border-radius: var(--fd-nav-indicator-radius) var(--fd-nav-indicator-radius) 0 0; background: var(--fd-accent);
 }
 .fd-tabs[data-indicator] .fd-tab::after { display: none; }
 .fd-tabs-indicator {
   position: absolute; left: 0; bottom: 0; z-index: 1;
-  width: var(--_n-w, 0px); height: 2px;
-  border-radius: 2px 2px 0 0;
+  width: var(--_n-w, 0px); height: var(--fd-nav-indicator);
+  border-radius: var(--fd-nav-indicator-radius) var(--fd-nav-indicator-radius) 0 0;
   background: var(--fd-accent);
   translate: var(--_n-x, 0px) 0;
   pointer-events: none;
@@ -102,7 +134,7 @@
 
 .fd-tab-count {
   display: inline-grid; place-items: center;
-  min-width: 18px; height: 18px; padding-inline: 5px;
+  min-width: var(--fd-nav-count); height: var(--fd-nav-count); padding-inline: var(--fd-nav-count-px);
   border-radius: var(--fd-radius-full);
   background: var(--fd-fill);
   color: var(--fd-text-3);
@@ -116,8 +148,8 @@
 
 /* ---------- Segmented ---------- */
 .fd-segmented {
-  --_n-pad: 2px;
-  --_n-h: calc(var(--fd-control-md) - 2px);
+  --_n-pad: var(--fd-space-0-5);
+  --_n-h: calc(var(--fd-control-md) - var(--fd-space-0-5));
   --_n-px: var(--fd-space-3);
   --_n-radius: var(--fd-radius-lg);
   --_n-thumb-radius: var(--fd-radius-md);
@@ -132,8 +164,8 @@
 /* Never wider than its container: it scrolls instead. The grouped variant keeps its labels outside the track, so it is left alone. */
 .fd-segmented:not([data-variant="grouped"]) { overflow-x: auto; scrollbar-width: none; }
 .fd-segmented[data-size="sm"] {
-  --_n-pad: 2px;
-  --_n-h: calc(var(--fd-control-md) - 8px);
+  --_n-pad: var(--fd-space-0-5);
+  --_n-h: calc(var(--fd-control-md) - var(--fd-space-2));
   --_n-px: var(--fd-space-2-5);
   --_n-radius: var(--fd-radius-md);
   --_n-thumb-radius: var(--fd-radius-sm);
@@ -154,7 +186,7 @@
 }
 .fd-segmented[data-size="sm"] .fd-segmented-item { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); gap: var(--fd-space-1); }
 .fd-segmented-item > .fd-icon { color: var(--fd-text-4); transition: color var(--fd-dur-2) var(--fd-ease-out); }
-.fd-segmented[data-size="sm"] .fd-segmented-item > .fd-icon { width: 14px; height: 14px; }
+.fd-segmented[data-size="sm"] .fd-segmented-item > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); }
 .fd-segmented-item:hover { color: var(--fd-text-2); }
 .fd-segmented-item:hover > .fd-icon { color: var(--fd-text-3); }
 .fd-segmented-item:active { scale: var(--fd-press-scale); }
@@ -189,16 +221,16 @@
 .fd-segmented[data-icon-only] .fd-segmented-item { width: var(--_n-h); padding: 0; }
 
 /* Grouped: small mono labels above runs of items, hairlines between groups. */
-.fd-segmented[data-variant="grouped"] { gap: 9px; margin-top: 22px; }
+.fd-segmented[data-variant="grouped"] { gap: var(--fd-nav-seg-gap); margin-top: var(--fd-nav-seg-label-room); }
 .fd-segmented-group { position: relative; display: flex; align-items: center; }
 .fd-segmented-group + .fd-segmented-group::before {
-  content: ""; position: absolute; inset-inline-start: -5px; top: 50%;
-  width: 1px; height: 14px; margin-top: -7px;
+  content: ""; position: absolute; inset-inline-start: calc(var(--fd-nav-seg-sep-inset) * -1); top: 50%;
+  width: var(--fd-hairline); height: var(--fd-nav-seg-sep-h); margin-top: calc(var(--fd-nav-seg-sep-h) / -2);
   background: var(--fd-line-strong);
 }
 .fd-segmented-label {
   position: absolute; inset-inline-start: var(--_n-px);
-  bottom: calc(100% + var(--_n-pad) + 6px);
+  bottom: calc(100% + var(--_n-pad) + var(--fd-space-1-5));
   font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
   letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase;
   color: var(--fd-text-4);
@@ -209,19 +241,19 @@
 .fd-chip-nav {
   display: flex; align-items: stretch; gap: var(--fd-space-5);
   min-width: 0;
-  box-shadow: inset 0 -1px 0 var(--fd-line-faint);
+  box-shadow: inset 0 calc(var(--fd-hairline) * -1) 0 var(--fd-line-faint);
 }
 .fd-chip {
   flex: none;
   display: inline-flex; align-items: center; gap: var(--fd-space-1-5);
-  height: 40px; padding-inline: 1px;
+  height: var(--fd-nav-strip-h); padding-inline: var(--fd-nav-strip-px);
   color: var(--fd-text-3);
   font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-regular);
   white-space: nowrap; user-select: none;
   border-radius: var(--fd-radius-sm);
   transition: color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
 }
-.fd-chip > .fd-icon { width: 14px; height: 14px; color: currentColor; transition: color var(--fd-dur-2) var(--fd-ease-out); }
+.fd-chip > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); color: currentColor; transition: color var(--fd-dur-2) var(--fd-ease-out); }
 .fd-chip:hover { color: var(--fd-text); }
 .fd-chip:active { scale: var(--fd-press-scale); }
 .fd-chip:focus-visible { box-shadow: var(--fd-ring-inset); }
@@ -240,7 +272,7 @@
 .fd-subnav { display: flex; flex-direction: column; gap: var(--fd-space-1-5); min-width: 0; }
 .fd-subnav-item {
   display: flex; align-items: center; gap: var(--fd-space-3);
-  height: 40px; min-width: 0;
+  height: var(--fd-nav-item-h); min-width: 0;
   padding-inline: var(--fd-space-3);
   border-radius: var(--fd-radius-lg);
   color: var(--fd-text-2);
@@ -262,7 +294,7 @@
   font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); color: var(--fd-text-4);
   font-variant-numeric: tabular-nums;
 }
-.fd-subnav-sep { height: 1px; margin: var(--fd-space-1-5) var(--fd-space-3); background: var(--fd-line-faint); border: 0; }
+.fd-subnav-sep { height: var(--fd-hairline); margin: var(--fd-space-1-5) var(--fd-space-3); background: var(--fd-line-faint); border: 0; }
 
 /* When it is not beside the content, the subnav becomes a scrollable chip row. */
 @container (max-width: 760px) {
@@ -278,7 +310,7 @@
     box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint);
   }
   .fd-subnav-item:is([aria-current="page"], [aria-current="true"], [aria-selected="true"]) { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-accent-16); }
-  .fd-subnav-item > .fd-icon { width: 14px; height: 14px; }
+  .fd-subnav-item > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); }
   .fd-subnav-meta, .fd-subnav-sep { display: none; }
 }
 
@@ -299,7 +331,7 @@
   transition: color var(--fd-dur-2) var(--fd-ease-out);
 }
 .fd-breadcrumb a:hover { color: var(--fd-text); }
-.fd-breadcrumb a > .fd-icon { width: 14px; height: 14px; }
+.fd-breadcrumb a > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); }
 .fd-breadcrumb [aria-current="page"] {
   max-width: 32ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   color: var(--fd-text); font-weight: var(--fd-weight-label);
@@ -314,11 +346,11 @@
   border-radius: var(--fd-radius-xs);
   transition: color var(--fd-dur-2) var(--fd-ease-out);
 }
-.fd-back > .fd-icon { width: 14px; height: 14px; transition: translate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-back > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); transition: translate var(--fd-dur-3) var(--fd-ease-out); }
 .fd-back:hover { color: var(--fd-text); }
-.fd-back:hover > .fd-icon { translate: -2px 0; }
+.fd-back:hover > .fd-icon { translate: calc(var(--fd-nav-nudge) * -1) 0; }
 .fd-back:dir(rtl) > .fd-icon { scale: -1 1; }
-.fd-back:dir(rtl):hover > .fd-icon { translate: 2px 0; }
+.fd-back:dir(rtl):hover > .fd-icon { translate: var(--fd-nav-nudge) 0; }
 
 /* ---------- Pagination ---------- */
 .fd-pagination {
@@ -366,14 +398,14 @@
 .fd-step:last-child { flex: 0 1 auto; }
 /* Connector to the next step. */
 .fd-steps:not([data-orientation="vertical"]) > .fd-step:not(:last-child)::after {
-  content: ""; flex: 1 1 16px; min-width: 12px; height: 1px;
+  content: ""; flex: 1 1 var(--fd-nav-step-link); min-width: var(--fd-nav-step-link-min); height: var(--fd-hairline);
   background: var(--fd-line);
   transition: background-color var(--fd-dur-3) var(--fd-ease-out);
 }
 .fd-step-marker {
   position: relative; flex: none;
   display: grid; place-items: center;
-  width: 22px; height: 22px; border-radius: 50%;
+  width: var(--fd-nav-step-marker); height: var(--fd-nav-step-marker); border-radius: 50%;
   box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong);
   color: var(--fd-text-3);
   font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1;
@@ -397,13 +429,13 @@
 .fd-step:is([aria-current="step"], [data-state="current"]) { color: var(--fd-text); }
 .fd-step:is([aria-current="step"], [data-state="current"]) .fd-step-marker {
   background: var(--fd-accent-8); color: var(--fd-accent-text);
-  box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-accent), 0 0 0 3px var(--fd-accent-12);
+  box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-accent), 0 0 0 var(--fd-nav-step-ring) var(--fd-accent-12);
 }
 .fd-step[data-state="done"] { color: var(--fd-text-2); }
 .fd-step[data-state="done"] .fd-step-marker { background: var(--fd-fill-active); box-shadow: none; color: transparent; }
 .fd-step[data-state="done"] .fd-step-marker::after {
   content: ""; position: absolute; inset: 0; margin: auto;
-  width: 12px; height: 12px;
+  width: var(--fd-icon-xs); height: var(--fd-icon-xs);
   background: var(--fd-text);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -417,11 +449,11 @@
 .fd-steps[data-orientation="vertical"] > .fd-step { flex: none; align-items: flex-start; padding-bottom: var(--fd-space-5); }
 .fd-steps[data-orientation="vertical"] > .fd-step:last-child { padding-bottom: 0; }
 .fd-steps[data-orientation="vertical"] > .fd-step:not(:last-child)::before {
-  content: ""; position: absolute; inset-inline-start: 10.5px; top: 28px; bottom: 6px;
-  width: 1px; background: var(--fd-line);
+  content: ""; position: absolute; inset-inline-start: calc(var(--fd-nav-step-marker) / 2 - var(--fd-hairline) / 2); top: calc(var(--fd-nav-step-marker) + var(--fd-space-1-5)); bottom: var(--fd-space-1-5);
+  width: var(--fd-hairline); background: var(--fd-line);
 }
 .fd-steps[data-orientation="vertical"] > .fd-step[data-state="done"]:not(:last-child)::before { background: var(--fd-line-strong); }
-.fd-steps[data-orientation="vertical"] .fd-step-body { padding-top: 1px; }
+.fd-steps[data-orientation="vertical"] .fd-step-body { padding-top: var(--fd-nav-step-nudge); }
 .fd-steps[data-orientation="vertical"] :is(.fd-step-title, .fd-step-desc) { white-space: normal; }
 
 @container (max-width: 560px) {
@@ -437,27 +469,27 @@
 }
 .fd-toc-list { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .fd-toc-list::before {
-  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 1px;
+  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: var(--fd-hairline);
   background: var(--fd-line-faint);
 }
 .fd-toc-item {
   position: relative; display: block;
-  padding-block: 5px; padding-inline: var(--fd-space-3-5) 0;
+  padding-block: var(--fd-nav-toc-py); padding-inline: var(--fd-space-3-5) 0;
   color: var(--fd-text-3);
   font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm);
   border-radius: var(--fd-radius-xs);
   transition: color var(--fd-dur-2) var(--fd-ease-out);
 }
-.fd-toc-item[data-level="2"] { padding-inline-start: calc(var(--fd-space-3-5) + var(--fd-space-3)); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); padding-block: 5px; }
+.fd-toc-item[data-level="2"] { padding-inline-start: calc(var(--fd-space-3-5) + var(--fd-space-3)); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); padding-block: var(--fd-nav-toc-py); }
 .fd-toc-item:hover { color: var(--fd-text); }
 .fd-toc-item:focus-visible { box-shadow: var(--fd-ring-inset); }
 .fd-toc-item:is([aria-current="true"], [aria-current="location"]) { color: var(--fd-text); }
 .fd-toc:not([data-marker]) .fd-toc-item:is([aria-current="true"], [aria-current="location"])::before {
-  content: ""; position: absolute; inset-block: 4px; inset-inline-start: 0; width: 2px; border-radius: 1px; background: var(--fd-accent);
+  content: ""; position: absolute; inset-block: var(--fd-nav-toc-bar-inset); inset-inline-start: 0; width: var(--fd-nav-toc-bar); border-radius: var(--fd-nav-toc-radius); background: var(--fd-accent);
 }
 .fd-toc-marker {
   position: absolute; left: 0; top: 0; z-index: 1;
-  width: 2px; height: var(--_n-h, 0px); border-radius: 1px;
+  width: var(--fd-nav-toc-bar); height: var(--_n-h, 0px); border-radius: var(--fd-nav-toc-radius);
   background: var(--fd-accent);
   translate: 0 var(--_n-y, 0px);
   pointer-events: none;

@@ -291,6 +291,7 @@ export function renderOverlays({ prefix = 'ember' } = {}) {
         <a class="fd-command-item" href="${PLAYGROUND}crawl" data-keywords="site website links">${i('workflow')}<span class="fd-command-item-label">Start a crawl</span><span class="fd-command-item-hint fd-mono">/crawl</span></a>
         <a class="fd-command-item" href="api-keys.html#create" data-keywords="token new secret">${i('plus')}<span class="fd-command-item-label">Create API key</span></a>
         <a class="fd-command-item" href="settings.html#team" data-keywords="member team people invite">${i('user-plus')}<span class="fd-command-item-label">Invite a teammate</span></a>
+        <div class="fd-command-item" data-value="chat" data-keywords="help support question contact person talk ai">${i('message-circle')}<span class="fd-command-item-label">Chat with support</span><span class="fd-command-item-hint">Ember AI and the support team</span></div>
         <div class="fd-command-item" data-value="theme" data-keywords="dark light mode appearance">${i('moon')}<span class="fd-command-item-label">Switch theme</span><span class="fd-command-item-hint">Light, dark or system</span></div>
       </div>
       <div class="fd-command-group">
@@ -323,7 +324,8 @@ ${renderTopbar({ prefix, mobileOpen })}
 ${content}
 </div>
 ${renderMobileNav({ active, prefix, open: mobileOpen })}
-<button class="fd-fab fd-app-fab" type="button" data-fd-tooltip="Chat with support" data-placement="left" aria-label="Chat with support">${i('message-circle')}</button>
+<button class="fd-fab fd-app-fab fd-chat-launcher" type="button" data-fd-chat-toggle="${prefix}-chat" data-fd-tooltip="Chat with support" data-placement="left" aria-label="Chat with support"><span class="fd-chat-launcher-icon" data-role="open">${i('message-circle')}</span><span class="fd-chat-launcher-icon" data-role="close">${i('chevron-down')}</span><span class="fd-chat-launcher-badge" hidden></span></button>
+<section class="fd-chat" id="${prefix}-chat" data-mode="panel" data-state="closed" data-fd-chat-demo aria-label="Ember support"${contained ? ' data-contained' : ''}></section>
 ${renderOverlays({ prefix })}
 </div>`;
 }
@@ -356,6 +358,9 @@ function bindBehaviour(fire, prefix) {
       setTimeout(() => command.open(`${prefix}-command`), 60);
     } else if (item.closest(`#${prefix}-command`) && value === 'theme') {
       fire.shell.cycleTheme();
+    } else if (item.closest(`#${prefix}-command`) && value === 'chat') {
+      // Open the support chat once the palette has closed, so focus lands in the composer.
+      setTimeout(() => fire.chat.get(`${prefix}-chat`)?.open(), 60);
     }
   });
   // The search control only earns its width on large screens.
@@ -380,6 +385,9 @@ export function mountShell({ active, title } = {}) {
   if (typeof matchMedia === 'function' && !matchMedia('(min-width: 1100px)').matches) app.querySelectorAll('[data-fd-search-trigger]').forEach((el) => { el.hidden = true; });
   if (main.isConnected) main.before(app); else body.prepend(app);
   app.querySelector('.fd-main').append(main);
+  // The support chat is a fixed panel: it lives at the end of <body>, outside the shell's layout.
+  const chat = app.querySelector(':scope > .fd-chat');
+  if (chat) body.append(chat);
   const heading = title ?? body.dataset.title;
   if (heading) document.title = `${heading} · Ember`;
   body.setAttribute('data-shell', 'mounted');
@@ -387,7 +395,7 @@ export function mountShell({ active, title } = {}) {
   // needs it; every Fire init is idempotent, so a page that also calls init() cannot double-bind.
   const fireReady = document.documentElement.hasAttribute('data-fd-ready');
   import('../fire/fire.js')
-    .then((fire) => { if (fireReady) fire.init(app); bindBehaviour(fire, 'ember'); })
+    .then((fire) => { if (fireReady) { fire.init(app); if (chat) fire.init(chat); } bindBehaviour(fire, 'ember'); })
     .catch((error) => console.error('[ember] shell init failed', error));
   return app;
 }

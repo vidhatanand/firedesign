@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chat · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="chat">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Chat</h1>
+    <p class="doc-lede">One conversation for the AI and for people. Ember AI answers first in plain prose beside a spark; when it needs a person it hands over in the same thread, and a person speaks from a white bubble beside their face. Messages carry real components, not only text.</p>
+  </header>
+
+  <!-- ===================================================== Anatomy -->
+  <section class="doc-section" id="anatomy">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Anatomy</h2>
+      <p>A head that says who you are talking to, an optional incident strip, a body with one view at a time, and the composer pinned to the bottom. This is the whole chat written by hand; an empty <code class="fd-code">.fd-chat</code> is filled with the same default parts by <code class="fd-code">chat.js</code>.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-surface="sunken" data-code>
+      <section class="fd-chat" id="anatomy-chat" data-mode="inline" data-view="conversation" style="max-width:440px; --fd-chat-h:640px" aria-label="Ember support">
+        <header class="fd-chat-head">
+          <div class="fd-chat-who">
+            <span class="fd-chat-mark" data-size="28" aria-hidden="true"><i data-icon="sparkle"></i></span>
+            <div class="fd-chat-who-text"><h2 class="fd-chat-title">Ember support</h2><p class="fd-chat-status" aria-live="polite">Ember AI · answers instantly</p></div>
+          </div>
+          <div class="fd-chat-actions">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-chat-view="history" aria-pressed="false" aria-label="Conversation history"><i data-icon="history"></i></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="anatomy-menu" data-placement="bottom-end" aria-label="Conversation options"><i data-icon="ellipsis"></i></button>
+            <div class="fd-menu" id="anatomy-menu" popover role="menu" aria-label="Conversation">
+              <button class="fd-menu-item" data-value="transcript"><i data-icon="mail"></i><span class="fd-menu-item-label">Email transcript</span></button>
+              <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="false" data-close data-value="mute"><i data-icon="bell-off"></i><span class="fd-menu-item-label">Mute notifications</span></button>
+              <hr class="fd-menu-sep">
+              <button class="fd-menu-item" data-tone="danger" data-value="end"><i data-icon="circle-x"></i><span class="fd-menu-item-label">End conversation</span></button>
+            </div>
+          </div>
+        </header>
+        <div class="fd-chat-banner" data-tone="warning" role="status"><i data-icon="triangle-alert"></i><span class="fd-chat-banner-text">Degraded crawl performance in <strong>eu-west</strong></span><a class="fd-btn-text" href="https://status.ember.dev" target="_blank" rel="noopener"><span>Status</span><i data-icon="arrow-up-right" data-nudge></i></a></div>
+        <div class="fd-chat-body">
+          <div class="fd-chat-view" data-view="conversation">
+            <div class="fd-chat-log" role="log" aria-live="polite" aria-label="Conversation">
+              <div class="fd-chat-msg" data-author="system"><span class="fd-chat-system-text"><span>Today</span></span></div>
+              <article class="fd-chat-msg" data-author="user" data-time="2026-11-14T14:18:00">
+                <div class="fd-chat-msg-main">
+                  <div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">Why did my request fail? It was req_8f3a21.</div></div>
+                  <div class="fd-chat-msg-meta"><span class="fd-chat-receipt" data-state="read"><i data-icon="check-check"></i>Read</span></div>
+                </div>
+              </article>
+              <article class="fd-chat-msg" data-author="ai" data-time="2026-11-14T14:18:20">
+                <div class="fd-chat-msg-avatar"><span class="fd-chat-mark" aria-hidden="true"><i data-icon="sparkle"></i></span></div>
+                <div class="fd-chat-msg-main">
+                  <header class="fd-chat-msg-head"><span class="fd-chat-msg-name">Ember AI</span><span class="fd-chat-badge">AI</span><time class="fd-chat-msg-time">2:18 PM</time></header>
+                  <div class="fd-chat-msg-body">
+                    <div class="fd-chat-block" data-type="tool"><div class="fd-toolcall" data-state="done"><div class="fd-toolcall-head"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">Looked up</span><span class="fd-toolcall-args">req_8f3a21</span><span class="fd-toolcall-meta">0.4s</span></div></div></div>
+                    <div class="fd-chat-block" data-type="text"><p>The scrape of <code>northwind.io/pricing</code> hit the <strong>30-second timeout</strong>. Raise <code>timeout</code> and wait for the pricing table with <code>waitFor</code>.</p></div>
+                  </div>
+                </div>
+              </article>
+              <div class="fd-chat-msg" data-author="system"><span class="fd-chat-system-text"><i data-icon="users"></i><span>Ember AI handed this conversation to support</span></span></div>
+              <article class="fd-chat-msg" data-author="human" data-name="Maya" data-time="2026-11-14T14:27:00">
+                <div class="fd-chat-msg-avatar"><span class="fd-avatar" data-size="28" data-tone="accent" data-status="online" aria-hidden="true">MO</span></div>
+                <div class="fd-chat-msg-main">
+                  <header class="fd-chat-msg-head"><span class="fd-chat-msg-name">Maya</span><span class="fd-chat-msg-role">Support engineer</span><time class="fd-chat-msg-time">2:27 PM</time></header>
+                  <div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text"><p>Hi, I’m Maya from support. I’ve approved the refund; it’ll be on your Visa in 5–10 business days.</p></div></div>
+                </div>
+              </article>
+            </div>
+          </div>
+          <button type="button" class="fd-chat-jump" aria-label="Jump to new messages"><i data-icon="arrow-down"></i><span>New messages</span><span class="fd-chat-jump-count" hidden></span></button>
+        </div>
+        <footer class="fd-chat-foot">
+          <p class="fd-chat-closed"><i data-icon="circle-check"></i><span class="fd-chat-closed-text">This conversation is closed.</span><button type="button" class="fd-btn-text" data-tone="accent" data-fd-chat-new>Start a new one</button></p>
+          <form class="fd-composer">
+            <textarea class="fd-composer-input" rows="1" placeholder="Ask a question…" aria-label="Message"></textarea>
+            <div class="fd-composer-tools">
+              <button type="button" class="fd-composer-tool" data-fd-chat-attach aria-label="Attach a file"><i data-icon="paperclip"></i></button>
+              <input type="file" class="fd-sr-only" multiple data-fd-chat-files tabindex="-1" aria-hidden="true">
+              <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+            </div>
+          </form>
+          <p class="fd-chat-disclaimer">Ember AI can make mistakes. Check important details.</p>
+        </footer>
+        <div class="fd-chat-drop" aria-hidden="true"><i data-icon="cloud-upload"></i><span>Drop files to attach</span><small>Up to 10 MB each</small></div>
+      </section>
+    </div>
+    <ul class="doc-notes">
+      <li><b>Head</b> (<code class="fd-code">fd-chat-head</code>, 52px): the mark or avatar of who is answering, the title, a status line that changes with them, and icon actions. Under it, an optional <code class="fd-code">fd-chat-banner</code> for incidents.</li>
+      <li><b>Body</b> (<code class="fd-code">fd-chat-body</code>): views <code class="fd-code">home</code>, <code class="fd-code">conversation</code>, <code class="fd-code">history</code> and <code class="fd-code">offline</code>; one is visible and they slide 16px and fade as they change. The thread is <code class="fd-code">fd-chat-log</code> (<code class="fd-code">role="log"</code>, polite).</li>
+      <li><b>Foot</b> (<code class="fd-code">fd-chat-foot</code>): the agent composer at chat density, a reply strip when quoting, the closed line when the conversation ends, and a 12px disclaimer that shows only while you talk to the AI.</li>
+      <li>Drag a file onto the chat to see the drop overlay. Press ↑ in the empty composer to edit your last message.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Modes -->
+  <section class="doc-section" id="modes">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Four modes</h2>
+      <p>The same chat docks to the edge, floats above its launcher, fills a page or sits beside it. Each specimen below lives inside its box with <code class="fd-code">data-contained</code>; without it, panel and popup position against the viewport, and under 640px every floating mode becomes a full-screen sheet.</p>
+    </div>
+
+    <h3 class="doc-sub">Panel</h3>
+    <p class="fd-muted">The default: 420px, full height, docked to the right with a soft shadow. It slides in from the edge and covers the page, so the page keeps its layout. Use it for help from anywhere in the console.</p>
+    <div class="doc-specimen" data-layout="bleed" data-height style="--h:620px" data-code>
+      <div class="fd-app" data-contained>
+        <div class="fd-main">
+          <section class="fd-band"><p class="fd-eyebrow">Account</p><h3 class="fd-h2">Activity logs</h3><p class="fd-muted">Every request your team sent in the last 30 days.</p></section>
+          <section class="fd-band"><div class="fd-empty" data-size="sm"><span class="fd-empty-icon"><i data-icon="clock"></i></span><h3 class="fd-empty-title">No activity logs found</h3><p class="fd-empty-text">Your API requests will appear here.</p></div></section>
+        </div>
+        <button class="fd-fab fd-chat-launcher" data-float data-contained data-fd-chat-toggle="mode-panel" aria-label="Chat with support"><span class="fd-chat-launcher-icon" data-role="open"><i data-icon="message-circle"></i></span><span class="fd-chat-launcher-icon" data-role="close"><i data-icon="chevron-down"></i></span><span class="fd-chat-launcher-badge" hidden></span></button>
+        <section class="fd-chat" id="mode-panel" data-mode="panel" data-state="open" data-contained data-fd-chat-demo aria-label="Ember support"></section>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Popup</h3>
+    <p class="fd-muted">A 400px card, radius 20, that grows out of the launcher’s corner (scale from 96%, a 12px rise and a fade) and closes faster than it opens. The launcher turns into a chevron while it is open. Use it on marketing pages and docs, where a panel would feel heavy.</p>
+    <div class="doc-specimen" data-layout="bleed" data-height style="--h:720px" data-code>
+      <div class="fd-app" data-contained>
+        <div class="fd-main">
+          <section class="fd-band"><p class="fd-eyebrow">docs.ember.dev</p><h3 class="fd-h2">Crawl a website</h3><p class="fd-muted">Start at a URL and follow links. Each page costs one credit.</p></section>
+        </div>
+        <button class="fd-fab fd-chat-launcher" data-float data-contained data-fd-chat-toggle="mode-popup" aria-label="Chat with support"><span class="fd-chat-launcher-icon" data-role="open"><i data-icon="message-circle"></i></span><span class="fd-chat-launcher-icon" data-role="close"><i data-icon="chevron-down"></i></span><span class="fd-chat-launcher-badge" hidden></span></button>
+        <section class="fd-chat" id="mode-popup" data-mode="popup" data-state="open" data-contained data-fd-chat-demo aria-label="Ember support"></section>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Inline</h3>
+    <p class="fd-muted">Fills its container and is always open: an embedded help page, or a full-page inbox like the <a class="fd-link" href="../templates/support.html">support template</a>. Set the height with <code class="fd-code">--fd-chat-h</code>; above 720px the thread keeps a reading width.</p>
+    <div class="doc-specimen" data-layout="center" data-code>
+      <section class="fd-chat" id="mode-inline" data-mode="inline" data-fd-chat-demo style="max-width:520px; --fd-chat-h:600px" aria-label="Ember support"></section>
+    </div>
+
+    <h3 class="doc-sub">Side</h3>
+    <p class="fd-muted">A persistent 400px column that pushes the page instead of covering it, for long sessions where the person works and asks at the same time (the playground, a run in progress).</p>
+    <div class="doc-specimen" data-layout="bleed" data-height style="--h:600px" data-code>
+      <div class="fd-app" data-contained>
+        <div class="fd-main">
+          <section class="fd-band"><div class="fd-row" data-justify="between" data-wrap><div><p class="fd-eyebrow">Playground</p><h3 class="fd-h2">Scrape a page</h3></div><button class="fd-btn" type="button" data-fd-chat-toggle="mode-side"><i data-icon="message-circle"></i><span>Toggle chat</span></button></div></section>
+          <section class="fd-band"><p class="fd-muted">The page reflows as the column opens and closes; nothing sits on top of it.</p></section>
+        </div>
+        <section class="fd-chat" id="mode-side" data-mode="side" data-state="open" data-contained data-fd-chat-demo aria-label="Ember support"></section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Expand (<code class="fd-code">data-expanded</code>) widens a panel to 760px and makes a popup taller and wider. It is hidden on phones, where the chat is already full screen.</li>
+      <li>On phones the chat is modal: focus stays inside, the page behind stops scrolling, and the composer keeps clear of the home indicator (<code class="fd-code">env(safe-area-inset-bottom)</code>).</li>
+      <li>Open state, mode and size are remembered for the browser session. Contained chats opt in with <code class="fd-code">data-persist</code>; any chat opts out with <code class="fd-code">data-persist="false"</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Launcher -->
+  <section class="doc-section" id="launcher">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Launcher, badge and teaser</h2>
+      <p>The launcher is the floating action button. Its chat icon turns and fades into a chevron while the chat is open; an unread count pops in with the spring ease. A teaser offers help once, after a delay, and remembers a dismissal for the session.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-code>
+      <button class="fd-fab fd-chat-launcher" type="button" aria-label="Chat with support"><span class="fd-chat-launcher-icon" data-role="open"><i data-icon="message-circle"></i></span><span class="fd-chat-launcher-icon" data-role="close"><i data-icon="chevron-down"></i></span></button>
+      <button class="fd-fab fd-chat-launcher" type="button" aria-label="Chat with support, 2 unread"><span class="fd-chat-launcher-icon" data-role="open"><i data-icon="message-circle"></i></span><span class="fd-chat-launcher-icon" data-role="close"><i data-icon="chevron-down"></i></span><span class="fd-chat-launcher-badge">2</span></button>
+      <button class="fd-fab fd-chat-launcher" type="button" aria-expanded="true" aria-label="Close support chat"><span class="fd-chat-launcher-icon" data-role="open"><i data-icon="message-circle"></i></span><span class="fd-chat-launcher-icon" data-role="close"><i data-icon="chevron-down"></i></span></button>
+      <div class="fd-chat-teaser" data-state="open" data-static><span class="fd-chat-mark" aria-hidden="true"><i data-icon="sparkle"></i></span><span class="fd-chat-teaser-text"><strong>Need help with your crawl?</strong>Ember AI can read your last run.</span><button type="button" class="fd-btn" data-variant="ghost" data-size="xs" data-icon-only aria-label="Dismiss"><i data-icon="x"></i></button></div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-fd-chat-toggle="&lt;id&gt;"</code> on any button makes it a launcher: <code class="fd-code">aria-expanded</code> and <code class="fd-code">aria-controls</code> stay in sync, and closing the chat returns focus to it. Add <code class="fd-code">data-float</code> to pin it to the bottom-right corner.</li>
+      <li>The teaser (<code class="fd-code">.fd-chat-teaser[data-for][data-delay]</code>) rises in after the delay unless the chat is open. Say one useful thing; never two teasers on one page.</li>
+      <li><code class="fd-code">setUnread(n)</code> updates every launcher for that chat and its accessible name (“Chat with support, 2 unread”). Opening the chat clears it.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Header -->
+  <section class="doc-section" id="header">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Header states</h2>
+      <p>The status line always says who will answer and how soon. It changes in place with <code class="fd-code">setAgent()</code> and is announced politely; the mark pops when the speaker changes.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="sunken" data-code>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto" data-agent="ai">
+        <header class="fd-chat-head"><div class="fd-chat-who"><span class="fd-chat-mark" data-size="28" aria-hidden="true"><i data-icon="sparkle"></i></span><div class="fd-chat-who-text"><h2 class="fd-chat-title">Ember support</h2><p class="fd-chat-status">Ember AI · answers instantly</p></div></div><div class="fd-chat-actions"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Conversation history"><i data-icon="history"></i></button></div></header>
+      </div>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto" data-agent="human">
+        <header class="fd-chat-head"><div class="fd-chat-who"><span class="fd-avatar" data-size="28" data-tone="accent" data-status="online" aria-hidden="true">MO</span><div class="fd-chat-who-text"><h2 class="fd-chat-title">Ember support</h2><p class="fd-chat-status" data-tone="success">Maya from Ember · online</p></div></div><div class="fd-chat-actions"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Conversation history"><i data-icon="history"></i></button></div></header>
+      </div>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto" data-agent="away">
+        <header class="fd-chat-head"><div class="fd-chat-who"><span class="fd-chat-mark" data-size="28" data-tone="neutral" aria-hidden="true"><i data-icon="moon"></i></span><div class="fd-chat-who-text"><h2 class="fd-chat-title">Ember support</h2><p class="fd-chat-status" data-tone="warning">Support is away · back at 9:00 CET</p></div></div><div class="fd-chat-actions"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Conversation history"><i data-icon="history"></i></button></div></header>
+      </div>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto" data-agent="queue">
+        <header class="fd-chat-head"><div class="fd-chat-who"><span class="fd-avatar-stack"><span class="fd-avatar" data-size="24" data-tone="accent" aria-hidden="true">MO</span><span class="fd-avatar" data-size="24" aria-hidden="true">JL</span><span class="fd-avatar" data-size="24" aria-hidden="true">PA</span></span><div class="fd-chat-who-text"><h2 class="fd-chat-title">Ember support</h2><p class="fd-chat-status" data-tone="accent">Waiting for an agent · <b>2</b> ahead of you</p></div></div><div class="fd-chat-actions"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Conversation history"><i data-icon="history"></i></button></div></header>
+        <div class="fd-chat-banner" data-tone="warning" role="status"><i data-icon="triangle-alert"></i><span class="fd-chat-banner-text">Degraded crawl performance in <strong>eu-west</strong></span><a class="fd-btn-text" href="https://status.ember.dev" target="_blank" rel="noopener"><span>Status</span><i data-icon="arrow-up-right" data-nudge></i></a></div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Actions, left to right: history, expand, options (Email transcript, Mute notifications, End conversation), minimize, close. Inline chats hide expand, minimize and close.</li>
+      <li>The banner takes <code class="fd-code">data-tone</code> warning, danger or info and one link to the status page. Use it for incidents only, never for marketing.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Views -->
+  <section class="doc-section" id="views">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Home, history and offline</h2>
+      <p>Home is where a new conversation starts: a greeting with one accent word, a muted line on what the assistant can do, and up to four questions as right-aligned outlined pills that send themselves. History lists past conversations with their state; offline takes a message when nobody is in.</p>
+    </div>
+    <div class="doc-specimen" data-layout="grid" data-surface="sunken" data-code>
+      <section class="fd-chat" id="view-home" data-mode="inline" data-view="home" data-fd-chat-demo style="--fd-chat-h:600px" aria-label="Home view"></section>
+      <section class="fd-chat" id="view-history" data-mode="inline" data-view="history" style="--fd-chat-h:600px" aria-label="History view"></section>
+      <section class="fd-chat" id="view-offline" data-mode="inline" data-view="offline" data-agent="away" style="--fd-chat-h:600px" aria-label="Offline view"></section>
+    </div>
+    <ul class="doc-notes">
+      <li>The “Continue conversation” row appears on Home while a conversation is open, with the last line, its time and an unread dot.</li>
+      <li>History search filters as you type and shows an empty state that says what to try. Badges: Open (info), Waiting (warning), Resolved (neutral); a dot marks unread replies.</li>
+      <li>The offline form is a <a class="fd-link" href="#block-form">form block</a>: it validates, then folds into a short summary with an Edit link.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Messages -->
+  <section class="doc-section" id="messages">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Authors and grouping</h2>
+      <p>Who said something is visible at a glance: your words in a grey bubble on the right; the AI in unboxed prose beside a spark, with an “AI” mark on the first message of a run; a person in a white bubble with a hairline edge, beside their face, with their name and role.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-chat-log" aria-label="Conversation">
+        <div class="fd-chat-msg" data-author="system"><span class="fd-chat-system-text"><span>Today</span></span></div>
+        <article class="fd-chat-msg" data-author="user" data-time="2026-11-14T14:20:00">
+          <div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">My crawl of docs.quarry.dev keeps stopping at 412 pages.</div></div></div>
+        </article>
+        <article class="fd-chat-msg" data-author="user" data-time="2026-11-14T14:20:30">
+          <div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">The site has about 1,200.</div></div></div>
+        </article>
+        <article class="fd-chat-msg" data-author="ai" data-time="2026-11-14T14:20:40">
+          <div class="fd-chat-msg-avatar"><span class="fd-chat-mark" aria-hidden="true"><i data-icon="sparkle"></i></span></div>
+          <div class="fd-chat-msg-main">
+            <header class="fd-chat-msg-head"><span class="fd-chat-msg-name">Ember AI</span><span class="fd-chat-badge">AI</span><time class="fd-chat-msg-time">2:20 PM</time></header>
+            <div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text"><p>Your crawl has <code>maxDepth: 2</code>, so it stops two links from the start page. Raise it to 3, or remove it and set a <code>limit</code> instead.</p></div></div>
+          </div>
+        </article>
+        <div class="fd-chat-msg" data-author="system"><span class="fd-chat-system-text"><i data-icon="users"></i><span>Ember AI handed this conversation to support</span></span></div>
+        <div class="fd-chat-msg" data-author="system"><span class="fd-chat-system-text"><i data-icon="user-plus"></i><span><b>Maya</b> joined the conversation</span></span></div>
+        <article class="fd-chat-msg" data-author="human" data-name="Maya" data-time="2026-11-14T14:24:00">
+          <div class="fd-chat-msg-avatar"><span class="fd-avatar" data-size="28" data-tone="accent" data-status="online" aria-hidden="true">MO</span></div>
+          <div class="fd-chat-msg-main">
+            <header class="fd-chat-msg-head"><span class="fd-chat-msg-name">Maya</span><span class="fd-chat-msg-role">Support engineer</span><time class="fd-chat-msg-time">2:24 PM</time></header>
+            <div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text"><p>Hi! I checked the run: depth was the limit, not credits.</p></div></div>
+          </div>
+        </article>
+        <article class="fd-chat-msg" data-author="human" data-name="Maya" data-time="2026-11-14T14:24:20">
+          <div class="fd-chat-msg-avatar"><span class="fd-avatar" data-size="28" data-tone="accent" data-status="online" aria-hidden="true">MO</span></div>
+          <div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text"><p>I’ve started it again with <code>maxDepth: 3</code> so you don’t have to.</p></div></div></div>
+        </article>
+        <div class="fd-chat-msg" data-author="system" data-tone="accent"><span class="fd-chat-system-text"><span>New messages</span></span></div>
+        <article class="fd-chat-msg" data-author="human" data-name="Maya" data-time="2026-11-14T14:31:00">
+          <div class="fd-chat-msg-avatar"><span class="fd-avatar" data-size="28" data-tone="accent" data-status="online" aria-hidden="true">MO</span></div>
+          <div class="fd-chat-msg-main">
+            <header class="fd-chat-msg-head"><span class="fd-chat-msg-name">Maya</span><span class="fd-chat-msg-role">Support engineer</span><time class="fd-chat-msg-time">2:31 PM</time></header>
+            <div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text"><p>Done: 1,204 pages in 3m 12s.</p></div></div>
+          </div>
+        </article>
+        <div class="fd-chat-msg" data-author="system" data-tone="success"><span class="fd-chat-system-text"><i data-icon="circle-check"></i><span>Conversation resolved</span></span></div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Messages from the same author within two minutes form a run: the avatar and name show once, the gap drops to 4px, and the bubble corner on the speaker’s side tightens from 16 to 6. <code class="fd-code">chat.js</code> sets <code class="fd-code">data-continued</code> from <code class="fd-code">data-time</code>.</li>
+      <li>Times show once per run in the head; on any other message they appear on hover or focus. Hover or focus a message for its actions: copy, react, reply, and for the AI, good and bad answer. Five reactions render as chips under the message.</li>
+      <li>System lines are small, centred and muted between hairlines: dates, joins, handovers, resolution. The unread divider is the one in accent.</li>
+      <li>New messages rise 8px and fade in. When you have scrolled up, a “New messages” pill appears instead of moving the thread under you.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Delivery -->
+  <section class="doc-section" id="delivery">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Delivery states</h2>
+      <p>Only your latest message carries its state, in a quiet line under the bubble: sending with a spinner, sent, delivered, read with a double check in accent, or failed with a retry. Set it with <code class="fd-code">update(id, { state })</code>.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+        <div class="fd-chat-log" aria-label="Delivery states">
+          <article class="fd-chat-msg" data-author="user"><div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">Can you check req_8f3a21?</div></div><div class="fd-chat-msg-meta"><span class="fd-chat-receipt" data-state="sending"><span class="fd-spinner" data-size="12" aria-hidden="true"></span>Sending…</span></div></div></article>
+          <article class="fd-chat-msg" data-author="user"><div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">It was a /scrape call.</div></div><div class="fd-chat-msg-meta"><span class="fd-chat-receipt" data-state="sent"><i data-icon="check"></i>Sent</span></div></div></article>
+          <article class="fd-chat-msg" data-author="user"><div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">From the eu-west region.</div></div><div class="fd-chat-msg-meta"><span class="fd-chat-receipt" data-state="delivered"><i data-icon="check-check"></i>Delivered</span></div></div></article>
+          <article class="fd-chat-msg" data-author="user"><div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">Around 2:18 PM.</div></div><div class="fd-chat-msg-meta"><span class="fd-chat-receipt" data-state="read"><i data-icon="check-check"></i>Read</span></div></div></article>
+          <article class="fd-chat-msg" data-author="user"><div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text">Here is the response body.</div></div><div class="fd-chat-msg-meta"><span class="fd-chat-receipt" data-state="failed"><i data-icon="circle-alert"></i>Not sent<button type="button" class="fd-btn-text" data-chat-retry>Retry</button></span></div></div></article>
+        </div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="surface">
+        <div class="fd-row" data-justify="between"><span class="fd-eyebrow">Live</span><button class="fd-btn" type="button" data-size="sm" id="delivery-play"><i data-icon="play"></i><span>Send a message</span></button></div>
+        <div class="fd-chat-log" id="delivery-log" aria-label="Delivery demo"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Typing -->
+  <section class="doc-section" id="typing">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Typing and streaming</h2>
+      <p>A person types: their face and three dots that pulse in turn in a small bubble. The AI works: a shimmering line that says what it is doing, and compact tool activity. Its answer then streams word by word with the accent caret.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+        <div class="fd-chat-log" aria-label="Typing states">
+          <div class="fd-chat-msg" data-author="ai" data-typing>
+            <div class="fd-chat-msg-avatar"><span class="fd-chat-mark" aria-hidden="true"><i data-icon="sparkle"></i></span></div>
+            <div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-message-thinking" role="status"><span class="fd-message-status">Looking up your request…</span></div></div></div>
+          </div>
+          <div class="fd-chat-msg" data-author="human" data-name="Maya" data-typing>
+            <div class="fd-chat-msg-avatar"><span class="fd-avatar" data-size="28" data-tone="accent" data-status="online" aria-hidden="true">MO</span></div>
+            <div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><span class="fd-chat-typing" aria-hidden="true"><span class="fd-message-dots"><i></i><i></i><i></i></span></span><span class="fd-chat-typing-label" role="status">Maya is typing</span></div></div>
+          </div>
+          <article class="fd-chat-msg" data-author="ai">
+            <div class="fd-chat-msg-avatar"><span class="fd-chat-mark" aria-hidden="true"><i data-icon="sparkle"></i></span></div>
+            <div class="fd-chat-msg-main"><div class="fd-chat-msg-body"><div class="fd-chat-block" data-type="text" aria-busy="true"><p>Failed requests are free, so req_8f3a21 used no credits<span class="fd-cursor" aria-hidden="true"></span></p></div></div></div>
+          </article>
+        </div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="surface">
+        <div class="fd-row" data-justify="between"><span class="fd-eyebrow">Live</span><button class="fd-btn" type="button" data-size="sm" id="stream-play"><i data-icon="play"></i><span>Play</span></button></div>
+        <div class="fd-chat-log" id="stream-log" aria-label="Streaming demo"></div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">setTyping('human' | 'ai' | false, { name, label })</code> shows one indicator at the end of the thread. <code class="fd-code">stream(id, text)</code> uses the agent family’s <code class="fd-code">stream()</code>: citations, tables and cards appear whole.</li>
+      <li>While the AI answers, the send button is a stop square; pressing it (or Enter) stops the answer and says so in the thread.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Blocks -->
+  <section class="doc-section" id="blocks">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Rich blocks</h2>
+      <p>A message body is a stack of blocks, <code class="fd-code">&lt;div class="fd-chat-block" data-type="…"&gt;</code>, each built from an existing Fire component. Every specimen below is rendered by <code class="fd-code">chat.render()</code> from the JSON beside it, and every one works: click, choose, submit.</p>
+    </div>
+
+    <h3 class="doc-sub" id="block-text">1 · Text</h3>
+    <p class="fd-muted">Prose at chat density, 14/22. Supports paragraphs, lists, <code class="fd-code">`code`</code>, <code class="fd-code">**bold**</code>, links and <code class="fd-code">[1]</code> citations, or pass <code class="fd-code">html</code>.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-text" aria-label="Text block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-text">{
+  "author": "ai",
+  "time": "2026-11-14T14:20:00",
+  "blocks": [{
+    "type": "text",
+    "text": "Crawls charge **one credit per page**, so a `limit` is also a budget.\n\n- Start at the docs root\n- Add `includePaths` to stay in one section\n- See [crawl options](https://docs.ember.dev/crawl-options)"
+  }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-quick-replies">2 · Quick replies</h3>
+    <p class="fd-muted">Offer the next likely answer. Choosing one sends it as your message and the row folds away so it can’t be used twice; <code class="fd-code">multi</code> collects several with a Confirm. Never more than three.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-replies" aria-label="Quick replies block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-replies">[{
+  "author": "ai",
+  "text": "Did raising the timeout fix it?",
+  "blocks": [{ "type": "quick-replies",
+    "options": ["That fixed it", "Still failing", "Talk to a person"] }]
+}, {
+  "author": "ai",
+  "text": "Which endpoints does your team call most?",
+  "blocks": [{ "type": "quick-replies", "multi": true, "confirm": "Confirm",
+    "options": ["/scrape", "/crawl", "/agent"] }]
+}]</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-actions">3 · Actions</h3>
+    <p class="fd-muted">One to three buttons for what to do next: one primary, a secondary, or a link whose arrow nudges on hover. Each fires <code class="fd-code">fd:action</code> with its value.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-actions" aria-label="Actions block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-actions">{
+  "author": "ai",
+  "text": "Hobby allows 5 concurrent requests; your batch started 12.",
+  "blocks": [{ "type": "actions", "items": [
+    { "label": "Compare plans", "variant": "primary", "value": "plans" },
+    { "label": "Copy request ID", "icon": "copy", "value": "copy-id" },
+    { "label": "Read about rate limits", "variant": "link",
+      "href": "https://docs.ember.dev/rate-limits" }
+  ] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-card">4 · Card and carousel</h3>
+    <p class="fd-muted">A card is an object worth opening: a docs article (the whole card is a link) or a plan with fields and an action. A carousel shows up to five of them in a row that snaps, fades at the edges and gets prev and next buttons on hover.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-card" aria-label="Card and carousel blocks"></div></div>
+      <div class="fd-codeblock" data-collapse="420"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-card">[{
+  "author": "ai",
+  "text": "This guide covers it:",
+  "blocks": [{ "type": "card", "media": { "icon": "book-open" },
+    "title": "Crawl options", "meta": "docs.ember.dev · 4 min read",
+    "text": "Cap a crawl with limit, maxDepth and includePaths.",
+    "href": "https://docs.ember.dev/crawl-options" }]
+}, {
+  "author": "ai",
+  "text": "Plans with more concurrency:",
+  "blocks": [{ "type": "carousel", "label": "Plans", "cards": [
+    { "title": "Standard", "meta": "100,000 credits", "icon": "zap", "tone": "accent",
+      "price": "$83", "per": "/ month",
+      "fields": [{ "key": "Concurrency", "value": "50" }, { "key": "Support", "value": "Priority" }],
+      "actions": [{ "label": "Choose Standard", "variant": "primary", "value": "standard" }] },
+    { "title": "Growth", "meta": "500,000 credits", "icon": "rocket",
+      "price": "$333", "per": "/ month",
+      "fields": [{ "key": "Concurrency", "value": "100" }, { "key": "Support", "value": "Slack" }],
+      "actions": [{ "label": "Choose Growth", "value": "growth" }] },
+    { "title": "Top-up", "meta": "Never expires", "icon": "plus",
+      "price": "$19", "per": "/ 5,000 credits",
+      "fields": [{ "key": "Concurrency", "value": "Unchanged" }, { "key": "Expires", "value": "Never" }],
+      "actions": [{ "label": "Buy top-up", "value": "topup" }] }
+  ] }]
+}]</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-list">5 · Selectable list</h3>
+    <p class="fd-muted">When the answer depends on which one: radio rows (or checkboxes with <code class="fd-code">multi</code>) with meta on the right. After Continue the list locks, the other rows fold away and the choice stays.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-list" aria-label="List block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-list">{
+  "author": "ai",
+  "blocks": [{ "type": "list", "title": "Which invoice?", "icon": "receipt",
+    "name": "invoice", "confirm": "Get invoice",
+    "options": [
+      { "value": "INV-2026-011", "title": "INV-2026-011",
+        "desc": "Nov 1 · Hobby plan", "meta": "$16.00" },
+      { "value": "INV-2026-010", "title": "INV-2026-010",
+        "desc": "Oct 12 · 5,000-credit top-up", "meta": "$19.00" },
+      { "value": "INV-2026-009", "title": "INV-2026-009",
+        "desc": "Oct 1 · Hobby plan", "meta": "$16.00" }
+    ] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-form">6 · Inline form</h3>
+    <p class="fd-muted">Collect a few details without leaving the thread. Fields come from the forms family and validate on blur and submit; a sent form folds into a compact summary with an Edit link.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-form" aria-label="Form block"></div></div>
+      <div class="fd-codeblock" data-collapse="420"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-form">{
+  "author": "ai",
+  "text": "I’ll open a ticket for the webhooks team. A few details first:",
+  "blocks": [{ "type": "form", "title": "Webhook issue", "icon": "webhook",
+    "submit": "Open ticket", "done": "Ticket opened · #4127",
+    "fields": [
+      { "type": "email", "name": "email", "label": "Reply to",
+        "value": "maya@quarry.dev", "required": true },
+      { "type": "select", "name": "endpoint", "label": "Endpoint",
+        "options": ["/crawl", "/scrape", "/extract"] },
+      { "type": "choice", "name": "urgency", "label": "How urgent is it?",
+        "options": [
+          { "value": "blocking", "title": "Blocking production", "desc": "We reply within 1 hour" },
+          { "value": "soon", "title": "This week", "desc": "We reply within 1 business day" }
+        ] },
+      { "type": "textarea", "name": "details", "label": "What happened?",
+        "placeholder": "Delivery ID, time and the response you saw",
+        "required": true, "minlength": 10 }
+    ] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-details">7 · Details</h3>
+    <p class="fd-muted">Facts about one object, as key-values: a request, an invoice, an API key. Identifiers are mono with a copy button; states use the status dot.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-details" aria-label="Details block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-details">{
+  "author": "ai",
+  "blocks": [{ "type": "details", "title": "req_8f3a21",
+    "meta": "Nov 14, 2:18 PM", "icon": "file-text",
+    "items": [
+      { "key": "Request ID", "value": "req_8f3a21", "copy": true },
+      { "key": "Endpoint", "value": "POST /v2/scrape", "mono": true },
+      { "key": "Status", "value": "Failed · 408 timeout", "status": "danger" },
+      { "key": "Credits", "value": "0 (failed requests are free)" },
+      { "key": "Duration", "value": "30.0 s", "mono": true }
+    ] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-table">8 · Table</h3>
+    <p class="fd-muted">Three to five rows that answer “which ones?”. It scrolls sideways inside the message, never the chat.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-table" aria-label="Table block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-table">{
+  "author": "ai",
+  "blocks": [{ "type": "table", "title": "Latest 429 responses",
+    "columns": [{ "label": "Time", "mono": true }, { "label": "Endpoint", "mono": true },
+      { "label": "Status" }, { "label": "Retry after", "num": true }],
+    "rows": [
+      ["2:14 PM", "/scrape", { "status": "danger", "label": "429" }, "2s"],
+      ["2:13 PM", "/crawl", { "status": "danger", "label": "429" }, "5s"],
+      ["1:58 PM", "/scrape", { "status": "danger", "label": "429" }, "1s"]
+    ],
+    "foot": "logs · last 24 hours" }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-code">9 · Code and JSON</h3>
+    <p class="fd-muted">A fix the person can paste, in their language (the tab choice is shared with every code block on the page), or a response as a collapsible JSON tree.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-code" aria-label="Code block"></div></div>
+      <div class="fd-codeblock" data-collapse="420"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-code">{
+  "author": "ai",
+  "blocks": [
+    { "type": "code", "tabs": [
+      { "label": "Node", "value": "node", "lang": "javascript",
+        "code": "await ember.scrape(url, {\n  timeout: 60_000,\n  waitFor: \".pricing-table\",\n});" },
+      { "label": "Python", "value": "python", "lang": "python",
+        "code": "app.scrape(url, timeout=60_000, wait_for=\".pricing-table\")" }
+    ] },
+    { "type": "code", "title": "req_8f3a21.json", "depth": 1,
+      "json": { "status": 408, "error": "TIMEOUT",
+        "url": "https://northwind.io/pricing", "waitedMs": 30000, "credits": 0 } }
+  ]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-attachment">10 · Attachments</h3>
+    <p class="fd-muted">Images open in a lightbox; four or more become a 2×2 grid with a “+3”. Files show their type, size and a download, or their upload progress and a retry when it failed. A link preview shows a letter tile, the title and the domain.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-attach" aria-label="Attachment block"></div></div>
+      <div class="fd-codeblock" data-collapse="420"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-attach">[{
+  "author": "user",
+  "blocks": [
+    { "type": "attachment", "images": [{ "name": "crawl-error.png", "art": "error" }] },
+    { "type": "text", "text": "This is what the dashboard shows." }
+  ]
+}, {
+  "author": "human", "name": "Maya", "role": "Support engineer",
+  "avatar": { "initials": "MO", "tone": "accent", "status": "online" },
+  "blocks": [
+    { "type": "attachment",
+      "images": [
+        { "name": "run-overview.png", "art": "chart" },
+        { "name": "scrape-config.png", "art": "code" },
+        { "name": "logs.png" },
+        { "name": "error-detail.png", "art": "error" },
+        { "name": "retry.png" }, { "name": "settings.png" }, { "name": "billing.png" }
+      ],
+      "files": [
+        { "name": "INV-2026-010.pdf", "size": 48210 },
+        { "name": "crawl_41ab9c.json", "state": "uploading", "progress": 64 },
+        { "name": "har-export.zip", "state": "failed", "error": "Upload failed · 14.2 MB is over 10 MB" }
+      ],
+      "link": { "url": "https://docs.ember.dev/scrape#wait-for",
+        "title": "Wait for content before scraping", "domain": "docs.ember.dev" } }
+  ]
+}]</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-sources">11 · Sources</h3>
+    <p class="fd-muted">Every claim from a page carries a numbered chip; hover or focus it for the source. The sources follow in a scrolling row, in the same order. Write <code class="fd-code">[1]</code> in text and pass the block’s <code class="fd-code">sources</code>.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-sources" aria-label="Sources block"></div></div>
+      <div class="fd-codeblock" data-collapse="420"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-sources">{
+  "author": "ai",
+  "blocks": [
+    { "type": "text",
+      "text": "Each page costs one credit [1]. Keep a crawl inside one section with `includePaths` [2].",
+      "sources": [
+        { "title": "Credits and billing", "domain": "docs.ember.dev/credits",
+          "snippet": "One credit per page. Failed requests are free." },
+        { "title": "Crawl options", "domain": "docs.ember.dev/crawl-options",
+          "snippet": "includePaths keeps a crawl inside one section." }
+      ] },
+    { "type": "sources", "items": [
+      { "title": "Credits and billing · How each endpoint is counted", "domain": "docs.ember.dev/credits" },
+      { "title": "Crawl options · limit, maxDepth and includePaths", "domain": "docs.ember.dev/crawl-options" }
+    ] }
+  ]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-tool">12 · Tool activity</h3>
+    <p class="fd-muted">What the AI looked up, as a compact tool call: what, on what, how long. Collapsed by default; open it for the input and the result.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-tool" aria-label="Tool block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-tool">{
+  "author": "ai",
+  "blocks": [
+    { "type": "tool", "name": "Looked up", "args": "req_8f3a21", "meta": "0.4s",
+      "input": { "id": "req_8f3a21" },
+      "output": { "status": 408, "error": "TIMEOUT", "credits": 0 } },
+    { "type": "tool", "name": "Searching", "args": "logs · status 429", "state": "running" },
+    { "type": "tool", "name": "Read", "args": "invoice INV-2026-010", "state": "failed", "meta": "2.0s" }
+  ]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-steps">13 · Steps</h3>
+    <p class="fd-muted">Progress of something that takes longer than the conversation: a refund, a key rotation, an export. The live step pulses; <code class="fd-code">setStep(block, i, state)</code> moves it.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-steps" aria-label="Steps block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-steps">{
+  "author": "ai",
+  "blocks": [{ "type": "steps", "title": "Refund · $19.00", "meta": "rf_20c4e1", "icon": "receipt",
+    "items": [
+      { "label": "Refund requested", "state": "done", "time": "2:24 PM" },
+      { "label": "Approved by support", "detail": "Approved by Maya", "state": "done", "time": "2:27 PM" },
+      { "label": "Sent to Visa •••• 4242", "detail": "Usually 5–10 business days", "state": "active" }
+    ] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-confirm">14 · Confirm</h3>
+    <p class="fd-muted">Anything that moves money, deletes or changes access asks first, with the amount and the destination in the title. It resolves in place to a success or cancelled line.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-confirm" aria-label="Confirm block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-confirm">{
+  "author": "ai",
+  "blocks": [{ "type": "confirm", "icon": "credit-card",
+    "title": "Refund $19.00 to Visa •••• 4242?",
+    "text": "The 5,000 unused credits are removed from Quarry Labs.",
+    "confirm": "Refund $19.00", "cancel": "Keep it",
+    "done": "Refund of $19.00 requested",
+    "cancelled": "Kept the top-up. Nothing was refunded." }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-handoff">15 · Handoff</h3>
+    <p class="fd-muted">“Talk to a person”: who is on support, the expected wait, and your place in line counting down, with a way out. When someone joins, the block says so and a system line follows.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface">
+        <div class="fd-chat-log" id="handoff-log" data-fd-chat-render="#j-handoff" aria-label="Handoff block"></div>
+        <div class="fd-row"><button class="fd-btn" type="button" data-size="sm" id="handoff-step"><i data-icon="play"></i><span>Count down</span></button></div>
+      </div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-handoff">{
+  "author": "ai",
+  "text": "I’m passing this to the support team with everything so far.",
+  "blocks": [{ "type": "handoff", "position": 2, "wait": "about 2 min",
+    "agents": [
+      { "name": "Maya Okafor", "initials": "MO", "tone": "accent" },
+      { "name": "Jonas Lind", "initials": "JL" },
+      { "name": "Priya Anand", "initials": "PA" }
+    ] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-rating">16 · Rating</h3>
+    <p class="fd-muted">Ask once, at the end. Faces or stars preview as you hover; after a rating an optional comment slides open, then a thank-you. For a single answer, the lighter “Was this helpful?”.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-rating" aria-label="Rating block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-rating">[
+  { "author": "ai", "blocks": [
+    { "type": "rating", "variant": "faces", "label": "How did we do?" } ] },
+  { "author": "ai", "blocks": [
+    { "type": "rating", "variant": "stars", "label": "Rate this answer", "comment": false } ] },
+  { "author": "ai", "text": "Raise `timeout` to 60 seconds.", "blocks": [
+    { "type": "rating", "variant": "helpful" } ] }
+]</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-schedule">17 · Schedule</h3>
+    <p class="fd-muted">Book a call without leaving the chat: a day, then a time, in the person’s time zone. Booked shows the date as a calendar tile with Add to calendar.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-schedule" aria-label="Schedule block"></div></div>
+      <div class="fd-codeblock" data-collapse="420"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-schedule">{
+  "author": "human", "name": "Maya", "role": "Support engineer",
+  "avatar": { "initials": "MO", "tone": "accent", "status": "online" },
+  "text": "Want me to walk you through `waitFor` on a short call?",
+  "blocks": [{ "type": "schedule", "title": "Call with Maya", "duration": "20 min",
+    "timezone": "CET (UTC+1)",
+    "with": "Maya Okafor · the invite goes to maya@quarry.dev",
+    "days": [
+      { "value": "2026-11-16", "label": "Mon", "date": "16", "month": "Nov" },
+      { "value": "2026-11-17", "label": "Tue", "date": "17", "month": "Nov" },
+      { "value": "2026-11-18", "label": "Wed", "date": "18", "month": "Nov" },
+      { "value": "2026-11-19", "label": "Thu", "date": "19", "month": "Nov", "disabled": true }
+    ],
+    "slots": {
+      "2026-11-16": ["09:30", "10:00", "11:30", { "time": "14:00", "disabled": true }],
+      "2026-11-17": ["09:00", "10:30", "13:00", "16:00"],
+      "2026-11-18": ["11:00", "14:30"]
+    } }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-metric">18 · Metric</h3>
+    <p class="fd-muted">“How much have I used?” answered with the number, a meter against the limit and the last two weeks as a sparkline.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-metric" aria-label="Metric block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-metric">{
+  "author": "ai",
+  "blocks": [{ "type": "metric", "title": "Hobby plan", "meta": "Resets Nov 23",
+    "icon": "gauge", "figure": 1520, "caption": "credits left this cycle",
+    "value": 1520, "max": 3000, "unit": "credits", "label": "Remaining",
+    "foot": "About 9 days at your current pace",
+    "series": [62, 88, 41, 120, 96, 140, 77, 158, 132, 104, 170, 91, 143, 58] }]
+}</code></pre></div>
+    </div>
+
+    <h3 class="doc-sub" id="block-notice">19 · Notice</h3>
+    <p class="fd-muted">A short callout inside the thread when something needs attention: an incident, a limit reached, a key about to expire.</p>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface"><div class="fd-chat-log" data-fd-chat-render="#j-notice" aria-label="Notice block"></div></div>
+      <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">JSON</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json" id="j-notice">{
+  "author": "ai",
+  "blocks": [
+    { "type": "notice", "tone": "info", "title": "Crawls in eu-west are slower today",
+      "text": "Jobs finish, but take about twice as long." },
+    { "type": "notice", "tone": "warning", "title": "41 requests were rate limited",
+      "text": "Hobby allows 5 concurrent requests." },
+    { "type": "notice", "tone": "danger", "title": "Key em_sk_…5fUz expires tomorrow",
+      "text": "Rotate it to keep your crawler running.",
+      "actions": [{ "label": "Rotate key", "value": "rotate" }] }
+  ]
+}</code></pre></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Audio and video blocks are out of scope.</li>
+      <li>Hand-written block markup works the same as rendered markup; <code class="fd-code">chat.js</code> wires behaviour through delegated listeners, so blocks inserted later need no setup.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Composer -->
+  <section class="doc-section" id="composer">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Composer</h2>
+      <p>The agent composer at chat density: radius 16, a 1px 12% edge, “+” and attach on the left, a round send on the right that is grey when there is nothing to send, accent when there is, and a stop square while the AI answers. Enter sends, Shift+Enter adds a line, ↑ edits your last message, Escape closes a floating chat.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="sunken" data-code>
+      <p class="fd-eyebrow">Ready, with a reply strip</p>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto">
+        <footer class="fd-chat-foot">
+          <form class="fd-composer">
+            <div class="fd-chat-quote"><span class="fd-chat-quote-text"><b>Replying to Maya</b><span>I’ve started it again with maxDepth: 3 so you don’t have to.</span></span><button type="button" class="fd-composer-attachment-remove" data-chat-unquote aria-label="Cancel"><i data-icon="x"></i></button></div>
+            <textarea class="fd-composer-input" rows="1" aria-label="Message">Thanks! Can you do the same for the /blog crawl?</textarea>
+            <div class="fd-composer-tools">
+              <button type="button" class="fd-composer-tool" data-fd-menu="composer-plus" data-placement="top-start" aria-label="Add to message"><i data-icon="plus"></i></button>
+              <div class="fd-menu" id="composer-plus" popover role="menu" aria-label="Add to message">
+                <button class="fd-menu-item" data-value="attach"><i data-icon="paperclip"></i><span class="fd-menu-item-label">Attach file</span></button>
+                <button class="fd-menu-item" data-value="request"><i data-icon="hash"></i><span class="fd-menu-item-label">Share a request ID</span></button>
+                <button class="fd-menu-item" data-value="screenshot"><i data-icon="camera"></i><span class="fd-menu-item-label">Share a screenshot</span></button>
+                <hr class="fd-menu-sep">
+                <button class="fd-menu-item" data-value="person"><i data-icon="users"></i><span class="fd-menu-item-label">Talk to a person</span></button>
+              </div>
+              <button type="button" class="fd-composer-tool" data-fd-chat-attach aria-label="Attach a file"><i data-icon="paperclip"></i></button>
+              <input type="file" class="fd-sr-only" multiple data-fd-chat-files tabindex="-1" aria-hidden="true">
+              <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+            </div>
+          </form>
+          <p class="fd-chat-disclaimer">Ember AI can make mistakes. Check important details.</p>
+        </footer>
+      </div>
+      <p class="fd-eyebrow">Attachments uploading and failed</p>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto">
+        <footer class="fd-chat-foot">
+          <form class="fd-composer">
+            <div class="fd-composer-attachments">
+              <span class="fd-composer-attachment"><span class="fd-composer-attachment-tile"><i data-icon="image"></i></span><span class="fd-composer-attachment-name">crawl-error.png</span><span class="fd-composer-attachment-meta">243 KB</span><button type="button" class="fd-composer-attachment-remove" aria-label="Remove crawl-error.png"><i data-icon="x"></i></button></span>
+              <span class="fd-composer-attachment" data-upload="uploading" style="--_cht-p:58%"><span class="fd-composer-attachment-tile"><i data-icon="file-json"></i></span><span class="fd-composer-attachment-name">crawl_41ab9c.json</span><span class="fd-composer-attachment-meta">58%</span><button type="button" class="fd-composer-attachment-remove" aria-label="Remove crawl_41ab9c.json"><i data-icon="x"></i></button></span>
+              <span class="fd-composer-attachment" data-upload="failed"><span class="fd-composer-attachment-tile"><i data-icon="archive"></i></span><span class="fd-composer-attachment-name">har-export.zip</span><span class="fd-composer-attachment-meta">Over 10 MB</span><button type="button" class="fd-composer-attachment-remove" aria-label="Remove har-export.zip"><i data-icon="x"></i></button></span>
+            </div>
+            <textarea class="fd-composer-input" rows="1" placeholder="Ask a question…" aria-label="Message"></textarea>
+            <div class="fd-composer-tools">
+              <button type="button" class="fd-composer-tool" data-fd-chat-attach aria-label="Attach a file"><i data-icon="paperclip"></i></button>
+              <input type="file" class="fd-sr-only" multiple data-fd-chat-files tabindex="-1" aria-hidden="true">
+              <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+            </div>
+          </form>
+        </footer>
+      </div>
+      <p class="fd-eyebrow">While the AI answers</p>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto">
+        <footer class="fd-chat-foot">
+          <form class="fd-composer" data-state="running">
+            <textarea class="fd-composer-input" rows="1" placeholder="Ask a follow-up…" aria-label="Message"></textarea>
+            <div class="fd-composer-tools">
+              <button type="button" class="fd-composer-tool" data-fd-chat-attach aria-label="Attach a file"><i data-icon="paperclip"></i></button>
+              <button class="fd-composer-send" type="submit" aria-label="Stop"><i data-icon="arrow-up"></i></button>
+            </div>
+          </form>
+          <p class="fd-chat-disclaimer">Ember AI can make mistakes. Check important details.</p>
+        </footer>
+      </div>
+      <p class="fd-eyebrow">Closed</p>
+      <div class="fd-chat" data-mode="inline" style="--fd-chat-h:auto" data-disabled>
+        <footer class="fd-chat-foot">
+          <p class="fd-chat-closed"><i data-icon="circle-check"></i><span class="fd-chat-closed-text">This conversation is resolved.</span><button type="button" class="fd-btn-text" data-tone="accent" data-fd-chat-new>Start a new one</button></p>
+          <form class="fd-composer" aria-disabled="true">
+            <textarea class="fd-composer-input" rows="1" placeholder="Ask a question…" aria-label="Message" disabled></textarea>
+            <div class="fd-composer-tools">
+              <button type="button" class="fd-composer-tool" disabled aria-label="Attach a file"><i data-icon="paperclip"></i></button>
+              <button class="fd-composer-send" type="submit" aria-label="Send" disabled><i data-icon="arrow-up"></i></button>
+            </div>
+          </form>
+        </footer>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="center" data-surface="sunken" data-code>
+        <div class="fd-chat" data-mode="inline" data-dragging style="--fd-chat-h:220px">
+          <div class="fd-chat-body"></div>
+          <div class="fd-chat-drop" aria-hidden="true"><i data-icon="cloud-upload"></i><span>Drop files to attach</span><small>Up to 10 MB each</small></div>
+        </div>
+      </div>
+      <ul class="doc-notes">
+        <li>Paste or drop files anywhere on the chat: they become chips above the input with upload progress, a size check (10 MB) and a remove button.</li>
+        <li>The “+” menu offers Attach file, Share a request ID (types <span class="fd-mono">Request ID: req_</span>), Share a screenshot and Talk to a person.</li>
+        <li><code class="fd-code">setDisabled(reason)</code> shows the reason above a disabled composer with “Start a new one”. The disclaimer shows only while the AI is answering for Ember.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================================================== Demos -->
+  <section class="doc-section" id="demos">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Scripted conversations</h2>
+      <p>Two scripts play when they scroll into view. The AI-only answer looks a run up, explains it with facts and sources, and asks if it helped. The support story goes from a failed request to a code fix, a refund approval, a handoff to Maya, a booked call and a rating.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="sunken">
+        <div class="fd-row" data-justify="between"><span class="fd-eyebrow">Ember AI only</span><button class="fd-btn" type="button" data-size="sm" data-fd-chat-replay="#demo-ai" data-demo="ai"><i data-icon="rotate-ccw"></i><span>Replay</span></button></div>
+        <section class="fd-chat" id="demo-ai" data-mode="inline" data-fd-chat-demo data-fd-chat-play="ai" style="--fd-chat-h:680px" aria-label="AI demo"></section>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="sunken">
+        <div class="fd-row" data-justify="between"><span class="fd-eyebrow">AI, then a person</span><button class="fd-btn" type="button" data-size="sm" data-fd-chat-replay="#demo-support" data-demo="support"><i data-icon="rotate-ccw"></i><span>Replay</span></button></div>
+        <section class="fd-chat" id="demo-support" data-mode="inline" data-fd-chat-demo data-fd-chat-play="support" style="--fd-chat-h:680px" aria-label="Support demo"></section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">chat.demo(el, 'ai' | 'support' | 'handoff')</code> plays a script; <code class="fd-code">handoff</code> renders the first part at once and plays from the refund. With reduced motion the final state renders immediately.</li>
+      <li>Chats with <code class="fd-code">data-fd-chat-demo</code> also answer free questions from a small script: failed requests, credits, invoices, rate limits, refunds and “talk to a person”.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== API -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">JavaScript</h2>
+      <p><code class="fd-code">fire/js/chat.js</code> wires every chat on load and exports the controller. It reuses the agent family for the composer, streaming and tool calls, and code, data, forms, charts and overlays for what blocks contain.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Export / method</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>chat.get(el | id)</td><td>The controller for a chat (or a bare <code class="fd-code">.fd-chat-log</code>). Accepts the element, anything inside it, or its id.</td></tr>
+        <tr><td>open({ trigger }) · close() · toggle()</td><td>Floating modes only. Opening animates from the launcher, clears unread and focuses the composer; closing returns focus to the launcher.</td></tr>
+        <tr><td>setMode(mode) · expand(on)</td><td><code class="fd-code">panel</code>, <code class="fd-code">popup</code>, <code class="fd-code">inline</code> or <code class="fd-code">side</code>; <code class="fd-code">expand</code> toggles <code class="fd-code">data-expanded</code>.</td></tr>
+        <tr><td>show(view)</td><td><code class="fd-code">home</code>, <code class="fd-code">conversation</code>, <code class="fd-code">history</code> or <code class="fd-code">offline</code>, sliding forward or back.</td></tr>
+        <tr><td>send(text, { attachments, quote })</td><td>Sends as the person: fires <code class="fd-code">fd:submit</code> (cancel it to keep the text) and adds the message with <code class="fd-code">state: 'sending'</code>, then <code class="fd-code">'sent'</code>.</td></tr>
+        <tr><td>add(message) · update(id, patch) · remove(id)</td><td>Add a message object (see below) or element; patch <code class="fd-code">state</code>, <code class="fd-code">text</code>, <code class="fd-code">html</code>, <code class="fd-code">blocks</code>, <code class="fd-code">time</code> or <code class="fd-code">edited</code>; remove with a fade.</td></tr>
+        <tr><td>setTyping(author | false, opts)</td><td>One typing indicator: <code class="fd-code">'human'</code> (face and dots) or <code class="fd-code">'ai'</code> (shimmering <code class="fd-code">opts.label</code>).</td></tr>
+        <tr><td>stream(id, text, { speed })</td><td>Streams text or HTML into a new text block of that message with the caret. Returns a promise.</td></tr>
+        <tr><td>setAgent({ kind, name, role, avatar, status, ahead })</td><td><code class="fd-code">kind</code>: <code class="fd-code">ai</code>, <code class="fd-code">human</code>, <code class="fd-code">away</code> or <code class="fd-code">queue</code>. Updates the head and the disclaimer.</td></tr>
+        <tr><td>setUnread(n) · setDisabled(reason | false)</td><td>Launcher badges and accessible names; the closed state of the composer.</td></tr>
+        <tr><td>addFiles(files) · newConversation()</td><td>Attach files as chips with upload progress; clear the thread and return to Home.</td></tr>
+        <tr><td>chat.render(message)</td><td>Builds a message element from data.</td></tr>
+        <tr><td>chat.demo(el, name) · chat.stopDemo(el)</td><td>Plays or stops a scripted conversation.</td></tr>
+        <tr><td>chat.setStep · setQueue · resolveConfirm · cite</td><td>Drive a steps block, count a handoff queue down, resolve an approval card yourself, write a citation chip.</td></tr>
+      </tbody>
+    </table>
+    <table class="doc-table">
+      <thead><tr><th>Event</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>fd:open · fd:close</td><td><code class="fd-code">{ mode }</code>, from the chat.</td></tr>
+        <tr><td>fd:submit</td><td><code class="fd-code">{ value, attachments }</code>. Cancelable: the text stays in the composer and nothing is added.</td></tr>
+        <tr><td>fd:action</td><td><code class="fd-code">{ type, value, block, message }</code>. Types: quick-reply, suggestion, action, list, form, confirm, handoff, rating, rating-comment, helpful, schedule, calendar, feedback, reaction, copy, reply, edit, retry, menu, history, new. Cancel a confirm or a list to resolve it yourself.</td></tr>
+        <tr><td>fd:change</td><td><code class="fd-code">{ value, kind }</code> with kind <code class="fd-code">view</code>, <code class="fd-code">mode</code>, <code class="fd-code">size</code>, <code class="fd-code">agent</code> or <code class="fd-code">attachments</code>.</td></tr>
+      </tbody>
+    </table>
+    <table class="doc-table">
+      <thead><tr><th>Attribute</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>[data-fd-chat-toggle="id"]</td><td>A launcher; keeps <code class="fd-code">aria-expanded</code> in sync.</td></tr>
+        <tr><td>[data-fd-chat-open="id"]</td><td>Opens the chat; <code class="fd-code">data-prompt</code> also sends a message.</td></tr>
+        <tr><td>[data-fd-chat-view="…"]</td><td>Shows a view (<code class="fd-code">back</code> returns to the previous one).</td></tr>
+        <tr><td>.fd-chat-log[data-fd-chat-render]</td><td>Renders messages from JSON in a child <code class="fd-code">script</code> or the element the selector names.</td></tr>
+        <tr><td>[data-fd-chat-play] · [data-fd-chat-replay]</td><td>Plays a demo when in view; replays one.</td></tr>
+      </tbody>
+    </table>
+    <div class="fd-codeblock">
+      <div class="fd-codeblock-head"><span class="fd-codeblock-lang">Message</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div>
+      <pre class="fd-codeblock-body"><code data-lang="javascript">chat.get('support').add({
+  id: 'm_42',                         // optional; generated when missing
+  author: 'human',                    // 'user' | 'ai' | 'human' | 'system'
+  name: 'Maya', role: 'Support engineer',
+  avatar: { initials: 'MO', tone: 'accent', status: 'online' },
+  time: '2026-11-14T14:27:00',        // groups runs and shows the time
+  state: 'read',                      // user only: sending | sent | delivered | read | failed
+  quote: { name: 'You', text: 'Can I get a refund?' },
+  text: 'I’ve approved the refund.',  // shorthand for a first text block
+  blocks: [{ type: 'steps', items: [/* … */] }],
+});</code></pre>
+    </div>
+  </section>
+
+  <!-- ===================================================== Rules -->
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head"><h2 class="fd-h3">Rules</h2></div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Keep the AI and people visibly different: the AI is prose beside a spark with an “AI” mark; a person has a face, a name, a role and a bubble. Say in the thread when the speaker changes.</p></div>
+      <div data-dont><strong>Don't</strong><p>Give the AI a human name or face, or let a person’s message look like the AI’s. Never hide that a handoff happened.</p></div>
+      <div data-do><strong>Do</strong><p>Offer at most three quick replies, phrased as the person would say them (“Was I charged for it?”), and let them fold away once used.</p></div>
+      <div data-dont><strong>Don't</strong><p>Use quick replies as a menu of everything the assistant can do, or ask the same question twice.</p></div>
+      <div data-do><strong>Do</strong><p>Ask before anything that moves money or changes access, with the amount and destination in the title, and resolve the card in place.</p></div>
+      <div data-dont><strong>Don't</strong><p>Put more than one primary button in a message, or show a rating before the conversation is over.</p></div>
+      <div data-do><strong>Do</strong><p>Show what the AI looked up as a compact tool call, and cite pages with numbered chips and a sources row.</p></div>
+      <div data-dont><strong>Don't</strong><p>Use emoji as icons or reactions, or move the thread while someone is reading further up.</p></div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { chat } from '../fire/fire.js';
+  const pause = (ms) => new Promise((r) => setTimeout(r, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : ms));
+
+  // Delivery: a message walks through its states.
+  const deliveryLog = document.getElementById('delivery-log');
+  let deliveryCount = 0;
+  document.getElementById('delivery-play')?.addEventListener('click', async () => {
+    const c = chat.get(deliveryLog);
+    const texts = ['Can you check req_8f3a21?', 'It was a /scrape call from eu-west.', 'Around 2:18 PM.'];
+    const el = c.add({ author: 'user', text: texts[deliveryCount++ % texts.length], state: 'sending' });
+    for (const state of ['sent', 'delivered', 'read']) { await pause(700); c.update(el, { state }); }
+  });
+
+  // Typing and streaming: the AI looks something up, then Maya types.
+  const streamLog = document.getElementById('stream-log');
+  document.getElementById('stream-play')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const c = chat.get(streamLog);
+    button.disabled = true;
+    c.clear();
+    c.add({ author: 'user', text: 'Was I charged for req_8f3a21?', time: new Date() });
+    await pause(400);
+    c.setTyping('ai', { label: 'Checking your billing…' });
+    await pause(1400);
+    c.setTyping(false);
+    const msg = c.add({ author: 'ai', time: new Date(), blocks: [] });
+    await c.stream(msg, 'No. Failed requests are free, so **req_8f3a21 used no credits**. I did find an unused top-up of $19.00 from Nov 12.');
+    await pause(500);
+    c.setTyping('human', { name: 'Maya', avatar: { initials: 'MO', tone: 'accent', status: 'online' } });
+    await pause(1600);
+    c.setTyping(false);
+    c.add({ author: 'human', name: 'Maya', role: 'Support engineer', avatar: { initials: 'MO', tone: 'accent', status: 'online' }, time: new Date(), text: 'I can refund that top-up for you. Want me to?' });
+    button.disabled = false;
+  });
+
+  // Handoff: count the queue down, then mark the person as joined.
+  document.getElementById('handoff-step')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const block = document.querySelector('#handoff-log .fd-chat-block[data-type="handoff"]');
+    if (!block || block.dataset.state) return;
+    button.disabled = true;
+    chat.setQueue(block, 1);
+    await pause(1500);
+    chat.setQueue(block, 0, { name: 'Maya' });
+    chat.get(block).add({ author: 'system', html: '<b>Maya</b> joined the conversation', icon: 'user-plus' });
+  });
+</script>
+</body>
+</html>

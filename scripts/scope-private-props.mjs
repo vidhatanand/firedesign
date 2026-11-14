@@ -5,7 +5,7 @@
 // Usage: node scripts/scope-private-props.mjs [--write]
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 const WRITE = process.argv.includes('--write');
-const PFX = { button: 'b', shell: 's', nav: 'n', forms: 'f', overlays: 'o', data: 'd', content: 'c', code: 'k', agent: 'a', charts: 'ch', texture: 'tx', skeleton: 'sk' };
+const PFX = { button: 'b', shell: 's', nav: 'n', forms: 'f', overlays: 'o', data: 'd', content: 'c', code: 'k', agent: 'a', charts: 'ch', texture: 'tx', skeleton: 'sk', chat: 'cht', docsite: 'doc' };
 const dir = new URL('../fire/components/', import.meta.url);
 const files = readdirSync(dir).filter((f) => f.endsWith('.css'));
 const src = Object.fromEntries(files.map((f) => [f.replace('.css', ''), readFileSync(new URL(f, dir), 'utf8')]));

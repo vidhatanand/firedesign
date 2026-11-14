@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrape · Ember API reference</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./docs-shell.js"></script>
+</head>
+<body data-docs-shell data-section="api" data-active="api-scrape" data-toc="false" data-updated="2026-11-10">
+<main>
+  <article class="fd-doc-article" data-width="wide">
+    <div class="fd-doc-api">
+
+      <div class="fd-doc-api-head">
+        <header class="fd-doc-head">
+          <a class="fd-doc-eyebrow" href="#scrape-endpoints">Scrape endpoints</a>
+          <h1 class="fd-doc-title">Scrape</h1>
+          <p class="fd-doc-lead">Scrape one URL and get its content as Markdown, HTML, links, a screenshot or structured JSON.</p>
+        </header>
+        <div class="fd-doc-endpoint">
+          <button class="fd-doc-endpoint-path" type="button" data-fd-copy="https://api.ember.dev/v2/scrape" aria-label="Copy endpoint URL, POST https://api.ember.dev/v2/scrape">
+            <span class="fd-doc-method" data-method="post" data-size="lg">POST</span>
+            <span class="fd-doc-endpoint-url"><span class="fd-doc-endpoint-base">/v2</span>/scrape</span>
+            <span class="fd-btn-swap fd-doc-endpoint-copy" aria-hidden="true"><i data-icon="copy"></i><i data-icon="check"></i></span>
+          </button>
+          <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-open="try-scrape" aria-label="Try it"><span>Try it</span><i data-icon="play"></i></button>
+        </div>
+      </div>
+
+      <div class="fd-doc-api-side">
+        <figure class="fd-codeblock fd-doc-panel" data-variant="framed" data-kind="request" id="scrape-request" data-lang="curl" data-example="basic">
+          <div class="fd-codeblock-head">
+            <button class="fd-doc-picker" type="button" data-fd-menu="scrape-req-lang" aria-label="Request language"><span data-fd-menu-value>cURL</span><i data-icon="chevron-down"></i></button>
+            <div class="fd-codeblock-actions">
+              <button class="fd-doc-picker" type="button" data-fd-menu="scrape-req-example" data-placement="bottom-end" aria-label="Example"><span data-fd-menu-value>scrapeUrl</span><i data-icon="chevron-down"></i></button>
+              <button class="fd-codeblock-copy" type="button" aria-label="Copy request"><i data-icon="copy"></i></button>
+            </div>
+          </div>
+          <pre class="fd-codeblock-body" data-value="curl" data-example="basic"><code data-lang="bash">curl --request POST \
+  --url https://api.ember.dev/v2/scrape \
+  --header 'Authorization: Bearer &lt;token&gt;' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://ember.dev/pricing",
+  "formats": ["markdown", "links"],
+  "onlyMainContent": true
+}'</code></pre>
+          <pre class="fd-codeblock-body" data-value="python" data-example="basic" hidden><code data-lang="python">from ember import Ember
+
+ember = Ember(api_key="em-YOUR-API-KEY")
+
+page = ember.scrape(
+    "https://ember.dev/pricing",
+    formats=["markdown", "links"],
+    only_main_content=True,
+)
+print(page.metadata.title)</code></pre>
+          <pre class="fd-codeblock-body" data-value="node" data-example="basic" hidden><code data-lang="javascript">import Ember from "@ember/sdk";
+
+const ember = new Ember({ apiKey: "em-YOUR-API-KEY" });
+
+const page = await ember.scrape("https://ember.dev/pricing", {
+  formats: ["markdown", "links"],
+  onlyMainContent: true,
+});
+console.log(page.metadata.title);</code></pre>
+          <pre class="fd-codeblock-body" data-value="cli" data-example="basic" hidden><code data-lang="bash">ember scrape https://ember.dev/pricing \
+  --format markdown,links \
+  --only-main-content</code></pre>
+          <pre class="fd-codeblock-body" data-value="curl" data-example="json" hidden><code data-lang="bash">curl --request POST \
+  --url https://api.ember.dev/v2/scrape \
+  --header 'Authorization: Bearer &lt;token&gt;' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://ember.dev/pricing",
+  "formats": [{
+    "type": "json",
+    "prompt": "Every plan with its monthly price and credit limit",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "plans": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  }]
+}'</code></pre>
+          <pre class="fd-codeblock-body" data-value="python" data-example="json" hidden><code data-lang="python">from pydantic import BaseModel
+from ember import Ember
+
+class Plan(BaseModel):
+    name: str
+    monthly_price: float
+    credits: int
+
+ember = Ember(api_key="em-YOUR-API-KEY")
+page = ember.scrape(
+    "https://ember.dev/pricing",
+    formats=[{"type": "json", "schema": list[Plan]}],
+)
+print(page.json)</code></pre>
+          <pre class="fd-codeblock-body" data-value="node" data-example="json" hidden><code data-lang="javascript">import Ember from "@ember/sdk";
+import { z } from "zod";
+
+const Plan = z.object({ name: z.string(), monthlyPrice: z.number(), credits: z.number() });
+
+const ember = new Ember({ apiKey: "em-YOUR-API-KEY" });
+const page = await ember.scrape("https://ember.dev/pricing", {
+  formats: [{ type: "json", schema: z.array(Plan) }],
+});
+console.log(page.json);</code></pre>
+        </figure>
+        <div class="fd-menu" id="scrape-req-lang" popover role="menu" aria-label="Request language" data-fd-doc-picker="lang" data-for="scrape-request">
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-value="curl"><i data-icon="square-terminal"></i><span class="fd-menu-item-label">cURL</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="python"><i data-icon="code"></i><span class="fd-menu-item-label">Python</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="node"><i data-icon="code"></i><span class="fd-menu-item-label">Node</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="cli"><i data-icon="terminal"></i><span class="fd-menu-item-label">CLI</span></button>
+        </div>
+        <div class="fd-menu" id="scrape-req-example" popover role="menu" aria-label="Example" data-fd-doc-picker="example" data-for="scrape-request">
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-value="basic"><span class="fd-menu-item-label">scrapeUrl<span class="fd-menu-item-desc">Markdown and links from one page</span></span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="json"><span class="fd-menu-item-label">extractJson<span class="fd-menu-item-desc">Typed JSON with a schema</span></span></button>
+        </div>
+
+        <figure class="fd-codeblock fd-doc-panel" data-variant="framed" data-kind="response" data-sync="none" id="scrape-response">
+          <div class="fd-codeblock-head">
+            <div class="fd-codeblock-tabs" aria-label="Response status">
+              <button class="fd-codeblock-tab" data-value="200">200</button>
+              <button class="fd-codeblock-tab" data-value="400" data-tone="warning">400</button>
+              <button class="fd-codeblock-tab" data-value="402" data-tone="warning">402</button>
+              <button class="fd-codeblock-tab" data-value="403" data-tone="warning">403</button>
+              <button class="fd-codeblock-tab" data-value="404" data-tone="warning">404</button>
+              <button class="fd-codeblock-tab" data-value="409" data-tone="warning">409</button>
+              <button class="fd-codeblock-tab" data-value="429" data-tone="warning">429</button>
+              <button class="fd-codeblock-tab" data-value="500" data-tone="danger">500</button>
+              <button class="fd-codeblock-tab" data-value="503" data-tone="danger">503</button>
+            </div>
+            <div class="fd-codeblock-actions">
+              <button class="fd-codeblock-copy" type="button" aria-label="Copy response"><i data-icon="copy"></i></button>
+            </div>
+          </div>
+          <pre class="fd-codeblock-body" data-value="200"><code data-lang="json">{
+  "success": true,
+  "data": {
+    "markdown": "# Pricing\n\nStart free with 500 credits. Pay as you go after that...",
+    "links": [
+      "https://ember.dev/",
+      "https://ember.dev/docs",
+      "https://ember.dev/signup"
+    ],
+    "metadata": {
+      "title": "Pricing · Ember",
+      "description": "Simple, credit-based pricing for the web-data API.",
+      "language": "en",
+      "sourceURL": "https://ember.dev/pricing",
+      "url": "https://ember.dev/pricing",
+      "statusCode": 200,
+      "contentType": "text/html; charset=utf-8",
+      "creditsUsed": 1,
+      "cacheState": "miss",
+      "scrapeId": "scr_01JD8Q7Z4M2K9F3T"
+    }
+  }
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="400" hidden><code data-lang="json">{
+  "success": false,
+  "code": "BAD_REQUEST",
+  "error": "url must be a full URL starting with http:// or https://.",
+  "details": [{ "path": ["url"], "message": "Invalid url" }]
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="402" hidden><code data-lang="json">{
+  "success": false,
+  "code": "PAYMENT_REQUIRED",
+  "error": "This team has 0 credits left. Credits reset on Nov 23, or upgrade at ember.dev/pricing."
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="403" hidden><code data-lang="json">{
+  "success": false,
+  "code": "FORBIDDEN",
+  "error": "This API key cannot call /v2/scrape. Ask a team owner to add the scrape scope."
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="404" hidden><code data-lang="json">{
+  "success": false,
+  "code": "SITE_NOT_FOUND",
+  "error": "ember.dve could not be resolved. Check the domain for typos."
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="409" hidden><code data-lang="json">{
+  "success": false,
+  "code": "IDEMPOTENCY_CONFLICT",
+  "error": "Idempotency-Key 7f3c… was used with a different request body in the last 24 hours."
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="429" hidden><code data-lang="json">{
+  "success": false,
+  "code": "RATE_LIMITED",
+  "error": "100 requests per minute reached for /v2/scrape on the Hobby plan.",
+  "retryAfter": 12
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="500" hidden><code data-lang="json">{
+  "success": false,
+  "code": "INTERNAL_ERROR",
+  "error": "Something went wrong on our side. The request was not billed.",
+  "requestId": "req_8f2a91c4b70e"
+}</code></pre>
+          <pre class="fd-codeblock-body" data-value="503" hidden><code data-lang="json">{
+  "success": false,
+  "code": "UNAVAILABLE",
+  "error": "Scrape workers are at capacity. Retry with backoff; see status.ember.dev.",
+  "retryAfter": 30
+}</code></pre>
+        </figure>
+      </div>
+
+      <div class="fd-doc-api-body" id="scrape-reference">
+        <div class="fd-prose">
+          <h2 id="capabilities">Capabilities</h2>
+          <p><a href="#capabilities-matrix">Capabilities</a> is the single page that lists what a scrape can do to a page, which of those run in a self-hosted deployment, and which endpoints accept a request with no API key.</p>
+          <h2 id="interactions">Interactions</h2>
+          <p>For browser interactions such as clicking, typing and navigating, use the <a href="#api-interact">Interact endpoint</a>. Scrape a page first, then call <code>POST /v2/scrape/{scrapeId}/interact</code> with a plain-language prompt or code to act on the page.</p>
+          <p>For a few fixed steps you can also pass <code>actions</code> here, though it is not meant for long or branching flows.</p>
+          <div class="fd-callout" data-tone="neutral" role="note">
+            <i class="fd-callout-icon" data-icon="history"></i>
+            <div class="fd-callout-content">
+              <p class="fd-callout-title">Cached by default</p>
+              <p class="fd-callout-body">A page scraped in the last two days is served from cache and costs the same. Set <code>maxAge</code> to <code>0</code> to always fetch it fresh.</p>
+            </div>
+          </div>
+        </div>
+
+        <section class="fd-doc-params" data-in="header" aria-labelledby="authorizations">
+          <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="authorizations">Authorizations</h2></header>
+          <div class="fd-schema">
+            <div class="fd-schema-item fd-doc-param" id="header-authorization">
+              <div class="fd-schema-head"><code class="fd-schema-name">Authorization</code><span class="fd-schema-type">string</span><span class="fd-doc-param-in">header</span><span class="fd-schema-req">required</span></div>
+              <p class="fd-schema-desc">Bearer authentication header of the form <code>Bearer &lt;token&gt;</code>, where <code>&lt;token&gt;</code> is your API key. Keys start with <code>em-</code>.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="fd-doc-params" data-in="headers" aria-labelledby="headers">
+          <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="headers">Headers</h2></header>
+          <div class="fd-schema">
+            <div class="fd-schema-item fd-doc-param" id="header-idempotency-key">
+              <div class="fd-schema-head"><code class="fd-schema-name">Idempotency-Key</code><span class="fd-schema-type">string</span><span class="fd-schema-opt">optional</span></div>
+              <p class="fd-schema-desc">A unique value, such as a UUID. Retrying with the same key within 24 hours returns the first response instead of scraping again.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param" id="header-ember-team">
+              <div class="fd-schema-head"><code class="fd-schema-name">Ember-Team</code><span class="fd-schema-type">string</span><span class="fd-schema-opt">optional</span></div>
+              <p class="fd-schema-desc">The team to bill, for keys that belong to more than one team. Defaults to the key’s own team.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="fd-doc-params" data-in="path" aria-labelledby="path-parameters">
+          <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="path-parameters">Path parameters</h2></header>
+          <p class="fd-schema-desc fd-doc-params-empty">None. Endpoints that act on a job, like <a class="fd-link" data-tone="neutral" href="#api-batch-status">Get batch scrape status</a>, take its id here.</p>
+        </section>
+
+        <section class="fd-doc-params" data-in="query" aria-labelledby="query-parameters">
+          <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="query-parameters">Query parameters</h2></header>
+          <div class="fd-schema">
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">dryRun</code><span class="fd-schema-type">boolean</span><span class="fd-schema-default">Default <code>false</code></span></div>
+              <p class="fd-schema-desc">Validate the request and return its credit cost without scraping.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="fd-doc-params" data-in="body" aria-labelledby="body">
+          <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="body">Body</h2><span class="fd-doc-params-type">application/json</span></header>
+          <div class="fd-schema">
+            <div class="fd-schema-item fd-doc-param" data-example="https://ember.dev/pricing">
+              <div class="fd-schema-head"><code class="fd-schema-name">url</code><span class="fd-schema-type">string&lt;uri&gt;</span><span class="fd-schema-req">required</span></div>
+              <p class="fd-schema-desc">The URL to scrape.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">formats</code><span class="fd-schema-type">(string | object)[]</span><span class="fd-schema-default">Default <code>["markdown"]</code></span></div>
+              <p class="fd-schema-desc">Output formats to include in the response. Pass names as strings, or objects for formats that take options, such as <code>{ "type": "json", "schema": {…} }</code>.</p>
+              <div class="fd-schema-enum"><span class="fd-doc-param-enum-label">One of</span><code class="fd-schema-value">markdown</code><code class="fd-schema-value">summary</code><code class="fd-schema-value">html</code><code class="fd-schema-value">rawHtml</code><code class="fd-schema-value">links</code><code class="fd-schema-value">images</code><code class="fd-schema-value">screenshot</code><code class="fd-schema-value">json</code><code class="fd-schema-value">changeTracking</code></div>
+              <button class="fd-schema-toggle" type="button" aria-expanded="false"><i data-icon="chevron-right"></i><span>Show json format attributes</span></button>
+              <div class="fd-schema-children" hidden>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">type</code><span class="fd-schema-type">string</span><span class="fd-schema-req">required</span></div>
+                  <p class="fd-schema-desc">Always <code>json</code> for this format.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">schema</code><span class="fd-schema-type">object</span></div>
+                  <p class="fd-schema-desc">A JSON Schema for the result. Without one, Ember infers a shape from the prompt.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">prompt</code><span class="fd-schema-type">string</span></div>
+                  <p class="fd-schema-desc">What to extract, in plain language. Up to 2,000 characters.</p>
+                </div>
+              </div>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">onlyMainContent</code><span class="fd-schema-type">boolean</span><span class="fd-schema-default">Default <code>true</code></span></div>
+              <p class="fd-schema-desc">Return only the main content, without headers, navigation, footers and cookie banners.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param" data-try="false">
+              <div class="fd-schema-head"><code class="fd-schema-name">includeTags</code><span class="fd-schema-type">string[]</span></div>
+              <p class="fd-schema-desc">CSS selectors to keep, such as <code>article</code> or <code>.pricing-table</code>. Everything else is dropped.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param" data-try="false">
+              <div class="fd-schema-head"><code class="fd-schema-name">excludeTags</code><span class="fd-schema-type">string[]</span></div>
+              <p class="fd-schema-desc">CSS selectors to remove before converting, such as <code>#comments</code>.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">waitFor</code><span class="fd-schema-type">integer</span><span class="fd-schema-default">Default <code>0</code></span></div>
+              <p class="fd-schema-desc">Milliseconds to wait after the page loads before reading it. Prefer a <code>wait</code> action with a selector when you know what to wait for.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">timeout</code><span class="fd-schema-type">integer</span><span class="fd-schema-default">Default <code>30000</code></span></div>
+              <p class="fd-schema-desc">Milliseconds before the request is abandoned. Between <code>1000</code> and <code>300000</code>.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param" data-try="false">
+              <div class="fd-schema-head"><code class="fd-schema-name">actions</code><span class="fd-schema-type">object[]</span></div>
+              <p class="fd-schema-desc">Steps to run on the page before it is read, in order. Up to 50 actions per request.</p>
+              <button class="fd-schema-toggle" type="button" aria-expanded="false"><i data-icon="chevron-right"></i><span>Show 4 child attributes</span></button>
+              <div class="fd-schema-children" hidden>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">type</code><span class="fd-schema-type">string</span><span class="fd-schema-req">required</span></div>
+                  <div class="fd-schema-enum"><code class="fd-schema-value">wait</code><code class="fd-schema-value">click</code><code class="fd-schema-value">write</code><code class="fd-schema-value">press</code><code class="fd-schema-value">scroll</code><code class="fd-schema-value">screenshot</code></div>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">selector</code><span class="fd-schema-type">string</span></div>
+                  <p class="fd-schema-desc">CSS selector of the element to act on, for <code>click</code>, <code>write</code> and <code>wait</code>.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">text</code><span class="fd-schema-type">string</span></div>
+                  <p class="fd-schema-desc">Text to type, for <code>write</code>.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">milliseconds</code><span class="fd-schema-type">integer</span></div>
+                  <p class="fd-schema-desc">How long to wait, for <code>wait</code> without a selector.</p>
+                </div>
+              </div>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">proxy</code><span class="fd-schema-type">string</span><span class="fd-schema-default">Default <code>"auto"</code></span></div>
+              <p class="fd-schema-desc">Which proxies to use. <code>auto</code> starts with basic and retries with stealth when a site blocks the request; stealth costs 5 credits.</p>
+              <div class="fd-schema-enum"><span class="fd-doc-param-enum-label">One of</span><code class="fd-schema-value">auto</code><code class="fd-schema-value">basic</code><code class="fd-schema-value">stealth</code></div>
+            </div>
+            <div class="fd-schema-item fd-doc-param" data-try="false">
+              <div class="fd-schema-head"><code class="fd-schema-name">maxAge</code><span class="fd-schema-type">integer</span><span class="fd-schema-default">Default <code>172800000</code></span></div>
+              <p class="fd-schema-desc">Serve a cached copy if it is younger than this many milliseconds. <code>0</code> always fetches fresh.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="fd-doc-params fd-doc-response" data-in="response" aria-labelledby="response">
+          <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="response">Response</h2><span class="fd-doc-response-status"><span class="fd-status" data-tone="success" data-size="sm">200</span><span class="fd-doc-params-type">application/json</span></span></header>
+          <div class="fd-schema">
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">success</code><span class="fd-schema-type">boolean</span></div>
+              <p class="fd-schema-desc"><code>true</code> when the page was scraped. Check <code>data.metadata.statusCode</code> for what the site itself returned.</p>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">data</code><span class="fd-schema-type">object</span></div>
+              <p class="fd-schema-desc">The formats you asked for, plus metadata.</p>
+              <button class="fd-schema-toggle" type="button" aria-expanded="false"><i data-icon="chevron-right"></i><span>Show 5 child attributes</span></button>
+              <div class="fd-schema-children" hidden>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">markdown</code><span class="fd-schema-type">string</span></div>
+                  <p class="fd-schema-desc">The page as Markdown, when <code>markdown</code> is in <code>formats</code>.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">links</code><span class="fd-schema-type">string[]</span></div>
+                  <p class="fd-schema-desc">Absolute URLs found on the page.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">screenshot</code><span class="fd-schema-type">string&lt;uri&gt;</span></div>
+                  <p class="fd-schema-desc">A signed URL to a PNG, valid for 24 hours.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">json</code><span class="fd-schema-type">object</span></div>
+                  <p class="fd-schema-desc">Extracted data that matches your schema.</p>
+                </div>
+                <div class="fd-schema-item">
+                  <div class="fd-schema-head"><code class="fd-schema-name">metadata</code><span class="fd-schema-type">object</span></div>
+                  <p class="fd-schema-desc">Title, description, language, <code>sourceURL</code>, final <code>url</code>, <code>statusCode</code>, <code>creditsUsed</code> and <code>cacheState</code>.</p>
+                </div>
+              </div>
+            </div>
+            <div class="fd-schema-item fd-doc-param">
+              <div class="fd-schema-head"><code class="fd-schema-name">warning</code><span class="fd-schema-type">string</span></div>
+              <p class="fd-schema-desc">Set when the scrape worked but something was off, such as a page that took longer than <code>timeout</code> to finish loading.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </article>
+
+  <dialog class="fd-sheet fd-doc-try" id="try-scrape" data-size="lg" data-params="#scrape-reference" aria-labelledby="try-scrape-title">
+    <div class="fd-sheet-head">
+      <div class="fd-sheet-bar">
+        <span class="fd-doc-method" data-method="post">POST</span>
+        <h2 class="fd-sheet-title fd-mono" id="try-scrape-title">/v2/scrape</h2>
+        <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <p class="fd-sheet-desc">Runs against the sandbox. Responses here are scripted and cost no credits.</p>
+    </div>
+    <form class="fd-sheet-body fd-doc-try-form" id="try-scrape-form" data-fd-doc-try-form>
+      <div class="fd-sheet-section">
+        <p class="fd-eyebrow">Authorization</p>
+        <div class="fd-field">
+          <div class="fd-field-head"><label class="fd-field-label" for="try-scrape-key">API key</label></div>
+          <input class="fd-input" id="try-scrape-key" type="password" data-mono data-fd-doc-try-key value="em-demo-5f2a91c4e7b04d38" autocomplete="off" spellcheck="false" aria-describedby="try-scrape-key-hint">
+          <p class="fd-field-hint" id="try-scrape-key-hint">Sent as <code class="fd-code">Authorization: Bearer …</code>. Clear it to see a 401.</p>
+        </div>
+      </div>
+      <div class="fd-sheet-section">
+        <p class="fd-eyebrow">Parameters</p>
+        <div class="fd-doc-try-fields" data-fd-doc-try-fields></div>
+      </div>
+      <div class="fd-doc-try-result" hidden aria-live="polite">
+        <div class="fd-doc-try-meta"></div>
+        <div class="fd-json" data-toolbar data-label="Response"></div>
+      </div>
+    </form>
+    <div class="fd-sheet-foot">
+      <span class="fd-small fd-muted" data-start>Sandbox · no credits used</span>
+      <button class="fd-btn" type="button" data-fd-dialog-close>Close</button>
+      <button class="fd-btn" type="submit" form="try-scrape-form" data-variant="primary"><span>Send request</span><i data-icon="play"></i></button>
+    </div>
+    <script type="application/json" data-fd-doc-try-response>
+    {
+      "success": true,
+      "data": {
+        "markdown": "# Pricing\n\nStart free with 500 credits. Pay as you go after that, or pick a plan.\n\n| Plan | Monthly | Credits |\n| --- | --- | --- |\n| Hobby | $16 | 3,000 |\n| Standard | $83 | 100,000 |\n| Growth | $333 | 500,000 |",
+        "links": ["https://ember.dev/", "https://ember.dev/docs", "https://ember.dev/signup", "https://ember.dev/enterprise"],
+        "metadata": {
+          "title": "Pricing · Ember",
+          "description": "Simple, credit-based pricing for the web-data API.",
+          "language": "en",
+          "sourceURL": "https://ember.dev/pricing",
+          "url": "https://ember.dev/pricing",
+          "statusCode": 200,
+          "creditsUsed": 1,
+          "cacheState": "miss",
+          "scrapeId": "scr_01JD8Q7Z4M2K9F3T"
+        }
+      }
+    }
+    </script>
+  </dialog>
+</main>
+</body>
+</html>

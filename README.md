@@ -14,11 +14,11 @@ Then open http://127.0.0.1:4747/docs/index.html. The docs are live: every specim
 |---|---|
 | `fire/tokens.css` | Every value: the ink ladder, surfaces, accent, status tones, type, space, radius, shadows, motion, layout. Light and dark through `light-dark()`. |
 | `fire/base.css` | Reset, type roles, links, focus, icons, layout and motion primitives. |
-| `fire/components/*.css` | One file per family: button, shell, nav, forms, overlays, data, content, charts, code, agent, texture, skeleton. |
+| `fire/components/*.css` | One file per family: button, shell, nav, forms, overlays, data, content, charts, code, agent, chat, docsite, texture, skeleton. |
 | `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers) and `icons.js` (a Lucide subset). |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site. Start at `docs/index.html`. |
-| `templates/` | Sixteen full screens for a fictional product, Ember, built only from Fire components. Start at `templates/index.html`. |
+| `templates/` | Twenty-one full screens for a fictional product, Ember (the app, a support page and a docs site), built only from Fire components. Start at `templates/index.html`. |
 | `DESIGN.md` | The contract: the eight rules, tokens, naming, interaction rules, JS conventions, the quality bar. Read it before adding anything. |
 | `scripts/` | `serve.py` (dev server), `audit.mjs` (checks icons, tokens, class names, ids, links), `build-icons.mjs` (regenerates the icon set). |
 
@@ -42,7 +42,7 @@ Serve the folder over HTTP; ES modules do not load from `file://`.
 
 ## Families
 
-Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Cards and feedback · Charts · Code and logs · Agent and AI · Texture and frame · Skeletons and loading. Each has a page in `docs/` showing every variant, size and state.
+Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Cards and feedback · Charts · Code and logs · Agent and AI · Chat · Documentation · Texture and frame · Skeletons and loading. Each has a page in `docs/` showing every variant, size and state.
 
 ## Checks
 

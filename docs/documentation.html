@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="documentation">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Documentation</h1>
+    <p class="doc-lede">The docs site in the app’s own language. A two-row top bar, a neutral nav, a reading column with an “On this page” rail, and reference pages with live request and response panels, so reading the docs feels like using the product.</p>
+  </header>
+
+  <!-- ===================================================== Shell -->
+  <section class="doc-section" id="shell">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">The docs shell</h2>
+      <p>Use it for every guide and reference page. The page provides only its article; <code class="fd-code">templates/docs-shell.js</code> mounts the top bar, the section’s nav, the contents column, the article footer and the search palette. Scroll inside the box: the contents marker follows the heading you are reading.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-height style="--h: 780px" data-code>
+      <template data-source>
+<!-- <body data-docs-shell data-section="docs" data-active="introduction" data-updated="2026-11-12"> -->
+  <main>
+    <article class="fd-doc-article">
+      <header class="fd-doc-head">
+        <a class="fd-doc-eyebrow" href="#get-started">Get started</a>
+        <h1 class="fd-doc-title">Introduction</h1>
+        <p class="fd-doc-lead">The context API for AI agents…</p>
+      </header>
+      <div class="fd-prose">…</div>
+    </article>
+  </main>
+  <!-- <script type="module" src="../fire/fire.js"></script> -->
+  <!-- <script type="module" src="../templates/docs-shell.js"></script> -->
+
+<!-- docs-shell.js renders: -->
+<div class="fd-doc" [data-contained]>
+  <header class="fd-doc-top">
+    <div class="fd-doc-top-row" data-row="tools">brand · v2 · English · .fd-doc-search · repo · Status · Support · Sign up · theme</div>
+    <div class="fd-doc-top-row" data-row="sections"><nav class="fd-tabs fd-doc-sections">…</nav></div>
+    <div class="fd-doc-top-row" data-row="crumbs"><button class="fd-doc-crumbs" data-fd-doc-nav-open>…</button></div>
+  </header>
+  <div class="fd-doc-body">
+    <nav class="fd-doc-nav"><div class="fd-doc-nav-scroll">…</div></nav>
+    <main class="fd-doc-main">
+      <div class="fd-doc-content">
+        <article class="fd-doc-article">…head · .fd-doc-otp · .fd-prose · .fd-doc-foot…</article>
+        <aside class="fd-doc-aside"><nav class="fd-toc fd-doc-toc" data-fd-scrollspy>…</nav><div class="fd-card fd-doc-cta" data-variant="accent">…</div></aside>
+      </div>
+      <footer class="fd-doc-footer">…</footer>
+    </main>
+  </div>
+</div>
+      </template>
+      <div data-doc-demo data-section="docs" data-active="introduction" data-prefix="dm1">
+        <article class="fd-doc-article">
+          <header class="fd-doc-head">
+            <a class="fd-doc-eyebrow" href="#dm1-get-started">Get started</a>
+            <h2 class="fd-doc-title">Introduction</h2>
+            <p class="fd-doc-lead">The context API for AI agents. Search the web, scrape any page, and interact with it through one API.</p>
+          </header>
+          <div class="fd-prose">
+            <p>Ember turns the live web into clean Markdown or structured JSON your agent can use, including pages that need JavaScript or a few clicks first.</p>
+            <h2 id="dm1-get-started">Get started</h2>
+            <p>Scrape your first page now. No account or API key is needed for this request.</p>
+            <figure class="fd-codeblock" data-variant="framed">
+              <div class="fd-codeblock-head">
+                <div class="fd-codeblock-tabs" aria-label="Language">
+                  <button class="fd-codeblock-tab" data-value="python">Python</button>
+                  <button class="fd-codeblock-tab" data-value="node">Node</button>
+                  <button class="fd-codeblock-tab" data-value="curl">cURL</button>
+                </div>
+                <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div>
+              </div>
+              <pre class="fd-codeblock-body" data-value="python"><code data-lang="python">from ember import Ember
+
+page = Ember().scrape("https://ember.dev/pricing", formats=["markdown"])
+print(page.markdown[:400])</code></pre>
+              <pre class="fd-codeblock-body" data-value="node" hidden><code data-lang="javascript">import Ember from "@ember/sdk";
+
+const page = await new Ember().scrape("https://ember.dev/pricing", { formats: ["markdown"] });
+console.log(page.markdown.slice(0, 400));</code></pre>
+              <pre class="fd-codeblock-body" data-value="curl" hidden><code data-lang="bash">curl -s -X POST "https://api.ember.dev/v2/scrape" \
+  -H "Content-Type: application/json" \
+  -d '{ "url": "https://ember.dev/pricing", "formats": ["markdown"] }'</code></pre>
+            </figure>
+            <h3 id="dm1-add-a-key">Add a key for higher limits</h3>
+            <p>Keyless requests share 10 scrapes per hour per IP address. Create a key in <a href="../templates/api-keys.html">API keys</a> and send it as a bearer token; nothing else in your code changes.</p>
+            <div class="fd-callout" data-tone="info" role="note">
+              <i class="fd-callout-icon" data-icon="info"></i>
+              <div class="fd-callout-content"><p class="fd-callout-title">Keys stay on the server</p><p class="fd-callout-body">Never ship a key in browser code. Call Ember from your backend or an edge function.</p></div>
+            </div>
+            <h2 id="dm1-what-can-ember-do">What can Ember do?</h2>
+            <div class="fd-doc-cards" data-cols="3">
+              <a class="fd-card" data-interactive href="#dm1-what-can-ember-do"><i class="fd-doc-card-icon" data-icon="search"></i><span class="fd-doc-card-head"><span class="fd-doc-card-title">Search</span><span class="fd-doc-card-text">Search the web and get the full content of every result.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+              <a class="fd-card" data-interactive href="#dm1-what-can-ember-do"><i class="fd-doc-card-icon" data-icon="file-text"></i><span class="fd-doc-card-head"><span class="fd-doc-card-title">Scrape</span><span class="fd-doc-card-text">Any URL as Markdown, HTML, a screenshot or JSON.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+              <a class="fd-card" data-interactive href="#dm1-what-can-ember-do"><i class="fd-doc-card-icon" data-icon="mouse-pointer-click"></i><span class="fd-doc-card-head"><span class="fd-doc-card-title">Interact</span><span class="fd-doc-card-text">Click, fill forms and load more on a scraped page.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+            </div>
+            <h3 id="dm1-why-ember">Why Ember?</h3>
+            <ul>
+              <li><strong>LLM-ready output.</strong> Clean Markdown and typed JSON, without navigation and cookie banners.</li>
+              <li><strong>Handles the hard parts.</strong> JavaScript rendering, proxies and rate limits are handled for you.</li>
+              <li><strong>Agent-native.</strong> An MCP server, a skill for coding agents, and these docs as <code>llms.txt</code>.</li>
+            </ul>
+            <h2 id="dm1-next-steps">Next steps</h2>
+            <p>Read the <a href="../templates/docs-api.html">Scrape reference</a> for every parameter, or open the <a href="../templates/playground.html">Playground</a> and try a page of your own.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Declare the page with <code class="fd-code">&lt;body data-docs-shell data-section="docs|sdks|api|ai" data-active="introduction"&gt;</code>. Add <code class="fd-code">data-toc="false"</code> for reference pages, <code class="fd-code">data-foot="false"</code> for landing pages.</li>
+      <li><code class="fd-code">data-contained</code> makes the shell a box that scrolls inside itself (docs, previews). Its height comes from <code class="fd-code">--h</code>.</li>
+      <li>The contents column is built from the article’s <code class="fd-code">h2</code> and <code class="fd-code">h3</code>. It needs a main column of 892px (a 1200px window with the nav); narrower, as in this box, it becomes the “On this page” disclosure at the top of the article. The next specimen drops the nav to show it.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="reading">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Reading column and contents</h2>
+      <p>The reading column stays at 720px or less; beside it, “On this page” follows the heading you are reading with a 1px ink marker on a faint rail, and a quiet accent card closes the column. Scroll inside the box.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-height style="--h: 640px">
+      <div data-doc-demo data-section="docs" data-active="webhooks" data-nav="false" data-prefix="dm3">
+        <article class="fd-doc-article">
+          <header class="fd-doc-head">
+            <a class="fd-doc-eyebrow" href="#dm3-receive-events">Webhooks</a>
+            <h2 class="fd-doc-title">Webhooks</h2>
+            <p class="fd-doc-lead">Receive crawl, batch and monitor events at your own endpoint, as they happen.</p>
+          </header>
+          <div class="fd-prose">
+            <p>Instead of polling a job, give Ember a URL. It sends a signed <code>POST</code> for each event and retries with backoff for 24 hours if your endpoint is down.</p>
+            <h2 id="dm3-receive-events">Receive events</h2>
+            <p>Add a <code>webhook</code> object to any crawl, batch scrape or monitor. Each request carries one event with a <code>type</code>, a <code>data</code> payload and a delivery id.</p>
+            <h3 id="dm3-event-types">Event types</h3>
+            <ul>
+              <li><code>crawl.started</code>, <code>crawl.page</code>, <code>crawl.completed</code> and <code>crawl.failed</code></li>
+              <li><code>batch_scrape.completed</code></li>
+              <li><code>monitor.changed</code>, with a unified diff</li>
+            </ul>
+            <h3 id="dm3-delivery">Delivery</h3>
+            <p>Respond with any <code>2xx</code> within 10 seconds. Anything else counts as a failure and is retried after 30 seconds, then 2, 10 and 60 minutes, then hourly.</p>
+            <h2 id="dm3-verify-signatures">Verify signatures</h2>
+            <p>Every request has an <code>Ember-Signature</code> header: an HMAC of the raw body with your signing secret. Compute it yourself and compare in constant time before you trust the payload.</p>
+            <h3 id="dm3-rotate-secrets">Rotate secrets</h3>
+            <p>Create a second secret, deploy it, then delete the first. Both are valid while both exist, so no event is rejected during the switch.</p>
+            <h2 id="dm3-test-locally">Test locally</h2>
+            <p>Run <code>ember webhooks listen --forward http://localhost:3000/api/ember</code> to tunnel events to your machine while you build.</p>
+            <h2 id="dm3-limits">Limits</h2>
+            <p>One webhook URL per job, payloads up to 10 MB, and at most 50 concurrent deliveries per team. Larger pages are sent as a signed download URL instead of inline Markdown.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="phone">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Phones and tablets</h2>
+      <p>Under 900px the top bar keeps only the brand, search and a menu, and a breadcrumb bar opens the nav as a left sheet. Tap the breadcrumb to try it; the sheet borrows the same nav, so its open groups and current item stay in sync.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-surface="sunken" data-height style="--h: 720px">
+      <div data-doc-demo data-section="docs" data-active="scrape-formats" data-prefix="dm2" style="width: 375px">
+        <article class="fd-doc-article">
+          <header class="fd-doc-head">
+            <a class="fd-doc-eyebrow" href="#dm2-formats">Core endpoints</a>
+            <h2 class="fd-doc-title">Scrape formats</h2>
+            <p class="fd-doc-lead">Ask for exactly the shape your model needs: Markdown, HTML, links, a screenshot or JSON.</p>
+          </header>
+          <div class="fd-prose">
+            <p>Pass one or more names in <code>formats</code>. Each format adds a field to <code>data</code>; credits do not change with the number of formats.</p>
+            <h2 id="dm2-formats">Formats</h2>
+            <table>
+              <thead><tr><th>Format</th><th>Field</th></tr></thead>
+              <tbody>
+                <tr><td><code>markdown</code></td><td>The main content as Markdown</td></tr>
+                <tr><td><code>links</code></td><td>Absolute URLs on the page</td></tr>
+                <tr><td><code>screenshot</code></td><td>A signed PNG URL, valid for 24 hours</td></tr>
+              </tbody>
+            </table>
+            <h2 id="dm2-json">JSON with a schema</h2>
+            <p>Use an object with <code>type: "json"</code> and a schema or a prompt to get typed data back.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Top bar -->
+  <section class="doc-section" id="top-bar">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Top bar</h2>
+      <p>Two rows on a blurred page colour: tools (56px) and section tabs (40px) sitting on the bottom hairline. Search sits in the middle as a soft pill and opens the command palette; the section tabs are ink, never accent.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <div class="fd-doc" data-contained>
+        <header class="fd-doc-top">
+          <div class="fd-doc-top-row" data-row="tools">
+            <div class="fd-doc-top-start">
+              <a class="fd-brand" href="../templates/docs-home.html" aria-label="Ember docs home"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span><span class="fd-doc-brand-tag">docs</span></a>
+              <button class="fd-btn fd-doc-switch" type="button" data-variant="ghost" data-size="sm" data-mono data-doc-hide="sm" data-fd-menu="tb-version" aria-label="Version"><span data-fd-menu-value>v2</span><i data-icon="chevron-down"></i></button>
+              <button class="fd-btn fd-doc-switch" type="button" data-variant="ghost" data-size="sm" data-doc-hide="md sm" aria-label="Language"><span>English</span><i data-icon="chevron-down"></i></button>
+            </div>
+            <button class="fd-doc-search" type="button" data-fd-command-open="dm1-command" aria-label="Search the docs"><i data-icon="search"></i><span>Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
+            <div class="fd-doc-top-end">
+              <a class="fd-doc-repo" href="https://code.ember.dev/ember/ember" data-doc-hide="md sm" aria-label="Ember repository, 48,213 stars"><i data-icon="git-branch"></i><span class="fd-doc-repo-name">ember/ember</span><span class="fd-doc-repo-stars"><i data-icon="star"></i>48,213</span></a>
+              <a class="fd-btn" href="https://status.ember.dev" data-doc-hide="lg md sm">Status</a>
+              <a class="fd-btn" href="mailto:support@ember.dev" data-doc-hide="lg md sm">Support</a>
+              <a class="fd-btn" data-variant="primary" href="../templates/auth.html" data-doc-hide="sm">Sign up</a>
+              <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-hide="sm" data-fd-theme-toggle aria-label="Theme"><i data-icon="monitor"></i></button>
+              <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-show="sm" data-fd-command-open="dm1-command" aria-label="Search the docs"><i data-icon="search"></i></button>
+            </div>
+          </div>
+          <div class="fd-doc-top-row" data-row="sections">
+            <nav class="fd-tabs fd-doc-sections" aria-label="Sections">
+              <a class="fd-tab" href="../templates/docs-home.html" aria-current="page">Documentation</a>
+              <a class="fd-tab" href="#top-bar">SDKs</a>
+              <a class="fd-tab" href="../templates/docs-api.html">API reference</a>
+              <a class="fd-tab" href="#top-bar">Build with AI</a>
+            </nav>
+          </div>
+        </header>
+      </div>
+      <div class="fd-menu" id="tb-version" popover role="menu" aria-label="Version">
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-value="v2"><span class="fd-menu-item-label">v2<span class="fd-menu-item-desc">Current</span></span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="v1"><span class="fd-menu-item-label">v1<span class="fd-menu-item-desc">Supported until Jun 30, 2027</span></span></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Mark controls with <code class="fd-code">data-doc-hide="lg md sm"</code> to drop them below 1200, 1100 and 900px; <code class="fd-code">data-doc-show="sm"</code> shows the phone-only search and menu buttons.</li>
+      <li>The repository count is mono with tabular figures. One primary per bar: “Sign up”.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Nav -->
+  <section class="doc-section" id="nav">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Navigation</h2>
+      <p>Docs navigation is neutral: the current page is an 8% ink pill in ink weight 500, hover is a 4% wash. Groups are separated by hairlines; expandable items hang their children from a hairline guide and remember being open.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="center" data-code>
+        <nav class="fd-doc-nav" aria-label="Documentation" style="width: 308px">
+          <div class="fd-doc-nav-scroll">
+            <div class="fd-doc-nav-links">
+              <a class="fd-doc-nav-item" href="../templates/playground.html"><i data-icon="play"></i><span class="fd-doc-nav-text">Playground</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><i data-icon="newspaper"></i><span class="fd-doc-nav-text">Blog</span></a>
+              <a class="fd-doc-nav-item" href="../templates/docs-changelog.html"><i data-icon="scroll-text"></i><span class="fd-doc-nav-text">Changelog</span></a>
+            </div>
+            <div class="fd-doc-nav-group">
+              <p class="fd-doc-nav-label">Get started</p>
+              <a class="fd-doc-nav-item" href="../templates/docs-guide.html" aria-current="page"><span class="fd-doc-nav-text">Introduction</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-nav-text">Quickstart</span></a>
+              <button class="fd-doc-nav-item" type="button" aria-expanded="true" aria-controls="nv-mcp" data-key="specimen/mcp"><span class="fd-doc-nav-text">MCP server</span><i data-icon="chevron-right" class="fd-doc-nav-chevron"></i></button>
+              <div class="fd-doc-nav-sub" id="nv-mcp">
+                <a class="fd-doc-nav-item" href="#nav"><span class="fd-tile" data-size="20" data-tone="neutral">C</span><span class="fd-doc-nav-text">Claude Code</span></a>
+                <a class="fd-doc-nav-item" href="#nav"><span class="fd-tile" data-size="20" data-tone="neutral">X</span><span class="fd-doc-nav-text">Codex</span></a>
+                <a class="fd-doc-nav-item" href="#nav"><span class="fd-tile" data-size="20" data-tone="neutral">R</span><span class="fd-doc-nav-text">Cursor</span></a>
+              </div>
+              <button class="fd-doc-nav-item" type="button" aria-expanded="false" aria-controls="nv-billing" data-key="specimen/billing"><span class="fd-doc-nav-text">Plans and billing</span><i data-icon="chevron-right" class="fd-doc-nav-chevron"></i></button>
+              <div class="fd-doc-nav-sub" id="nv-billing" hidden>
+                <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-nav-text">Credits</span></a>
+                <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-nav-text">Rate limits</span></a>
+              </div>
+            </div>
+            <div class="fd-doc-nav-group">
+              <p class="fd-doc-nav-label">Core endpoints</p>
+              <a class="fd-doc-nav-item" href="#nav"><i data-icon="search"></i><span class="fd-doc-nav-text">Search</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><i data-icon="file-text"></i><span class="fd-doc-nav-text">Scrape</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><i data-icon="wand-sparkles"></i><span class="fd-doc-nav-text">Agent</span><span class="fd-doc-nav-tag">Beta</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><i data-icon="radar"></i><span class="fd-doc-nav-text">Monitor</span><span class="fd-doc-nav-tag" data-tone="accent">New</span></a>
+            </div>
+          </div>
+        </nav>
+      </div>
+      <div class="doc-specimen" data-layout="center" data-code>
+        <nav class="fd-doc-nav" aria-label="API reference" style="width: 308px">
+          <div class="fd-doc-nav-scroll">
+            <div class="fd-doc-nav-group">
+              <p class="fd-doc-nav-label">Scrape endpoints</p>
+              <a class="fd-doc-nav-item" href="../templates/docs-api.html" aria-current="page"><span class="fd-doc-method" data-method="post">POST</span><span class="fd-doc-nav-text">Scrape</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="post">POST</span><span class="fd-doc-nav-text">Batch scrape</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="get">GET</span><span class="fd-doc-nav-text">Get batch scrape status</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="delete">DEL</span><span class="fd-doc-nav-text">Cancel batch scrape</span></a>
+            </div>
+            <div class="fd-doc-nav-group">
+              <p class="fd-doc-nav-label">Monitors</p>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="post">POST</span><span class="fd-doc-nav-text">Create monitor</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="patch">PATCH</span><span class="fd-doc-nav-text">Update monitor</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="put">PUT</span><span class="fd-doc-nav-text">Replace rules</span></a>
+              <a class="fd-doc-nav-item" href="#nav"><span class="fd-doc-method" data-method="delete">DEL</span><span class="fd-doc-nav-text">Delete monitor</span></a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-code>
+      <span class="fd-doc-method" data-method="get">GET</span>
+      <span class="fd-doc-method" data-method="post">POST</span>
+      <span class="fd-doc-method" data-method="put">PUT</span>
+      <span class="fd-doc-method" data-method="patch">PATCH</span>
+      <span class="fd-doc-method" data-method="delete">DEL</span>
+      <span class="fd-doc-method" data-method="post" data-size="lg">POST</span>
+      <span class="fd-doc-method" data-method="get" data-size="lg">GET</span>
+      <span class="fd-doc-nav-tag" data-tone="accent">New</span>
+      <span class="fd-doc-nav-tag">Beta</span>
+    </div>
+    <ul class="doc-notes">
+      <li>Method badges use the same tones as <code class="fd-code">fd-endpoint</code>: GET info, POST success, PUT and PATCH warning, DELETE danger (labelled <code class="fd-code">DEL</code> to keep the column narrow).</li>
+      <li>Leading glyphs are 20px tiles for products and plain 16px icons for endpoints; never logos. Children carry no icons.</li>
+      <li>The current item is scrolled into the middle third of the nav on load. Open groups are stored under <code class="fd-code">fd-doc-nav-open</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Head -->
+  <section class="doc-section" id="head">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Article header</h2>
+      <p>Every page opens with its group as an eyebrow link, a 36/40 title and an 18/28 lead. “Copy page” turns the article into Markdown for an LLM; its menu also opens the Markdown, copies a prompt or the MCP URL.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <article class="fd-doc-article" id="hd-article">
+      <header class="fd-doc-head">
+        <a class="fd-doc-eyebrow" href="#head">Core endpoints</a>
+        <h2 class="fd-doc-title">Crawl a website</h2>
+        <div class="fd-btn-group fd-doc-copy" role="group" aria-label="Copy page">
+          <button class="fd-btn" type="button" data-variant="outline" data-fd-doc-copy-page><i data-icon="copy"></i><span class="fd-btn-swap"><span>Copy page</span><span>Copied</span></span></button>
+          <button class="fd-btn" type="button" data-variant="outline" data-icon-only data-fd-menu="hd-copy" data-placement="bottom-end" aria-label="More ways to use this page"><i data-icon="chevron-down"></i></button>
+        </div>
+        <p class="fd-doc-lead">Follow links across a site and scrape every page you allow, as one job you can watch, pause and page through.</p>
+      </header>
+      </article>
+      <div class="fd-menu" id="hd-copy" popover role="menu" aria-label="Use this page" data-fd-doc-copy-menu data-for="hd-article">
+        <button class="fd-menu-item" data-value="copy-md"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy page as Markdown<span class="fd-menu-item-desc">For pasting into an LLM</span></span></button>
+        <button class="fd-menu-item" data-value="view-md"><i data-icon="file-text"></i><span class="fd-menu-item-label">View as Markdown<span class="fd-menu-item-desc">Opens the plain text in a new tab</span></span></button>
+        <button class="fd-menu-item" data-value="open-ai"><i data-icon="sparkles"></i><span class="fd-menu-item-label">Open in an AI assistant<span class="fd-menu-item-desc">Copies a prompt with this page</span></span></button>
+        <button class="fd-menu-item" data-value="mcp"><i data-icon="plug"></i><span class="fd-menu-item-label">Connect via MCP<span class="fd-menu-item-desc">Copies the MCP server URL</span></span></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The eyebrow is the nav group, not a breadcrumb trail. Titles are sentence case; leads are one or two sentences that say what the page lets you do.</li>
+      <li>Under 640px the copy button moves under the lead.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Prose -->
+  <section class="doc-section" id="prose">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Prose</h2>
+      <p>Put rendered Markdown inside <code class="fd-code">.fd-prose</code> and plain elements are styled without classes: 16/28 body, 24/32 and 20/28 headings, ink links with a quiet underline, 12px inline code on a 6% wash. Hover a heading for its link.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-prose">
+        <p>Crawl starts at one URL and follows the links it is allowed to, scraping each page into the formats you ask for. A crawl of <strong>500 pages</strong> usually finishes in <em>under two minutes</em>; see <a href="#prose">rate limits</a> for what your plan allows, or read the <a class="fd-link" href="#prose">crawl announcement</a>.</p>
+        <h2 id="pr-limit-the-crawl">Limit the crawl</h2>
+        <p>Set <code>limit</code> to cap the number of pages and <code>maxDepth</code> to stop following links after a number of hops. Press <kbd>⌘</kbd> <kbd>K</kbd> and type <code>/crawl</code> to jump to the reference.</p>
+        <h3 id="pr-include-and-exclude-paths">Include and exclude paths</h3>
+        <p>Paths are regular expressions matched against the URL path, not the full URL.</p>
+        <ul>
+          <li><code>includePaths</code> keeps only matching pages.
+            <ul><li>An empty list keeps everything.</li><li>Patterns are case-sensitive.</li></ul>
+          </li>
+          <li><code>excludePaths</code> drops matching pages, and wins over includes.</li>
+          <li>Query strings are ignored unless <code>ignoreQueryParameters</code> is <code>false</code>.</li>
+        </ul>
+        <h4 id="pr-ordering">Ordering</h4>
+        <ol>
+          <li>The start URL is scraped first.</li>
+          <li>Links are queued breadth-first.</li>
+          <li>Sitemaps are merged in after the first 50 pages.</li>
+        </ol>
+        <p>Before you start a large crawl:</p>
+        <ul class="contains-task-list">
+          <li><input type="checkbox" checked disabled> Check the site’s <code>robots.txt</code></li>
+          <li><input type="checkbox" checked disabled> Run a crawl with <code>limit: 10</code></li>
+          <li><input type="checkbox" disabled> Add a webhook for <code>crawl.page</code> events</li>
+        </ul>
+        <blockquote><p>Crawl slowly and identify yourself. Ember sends a clear user agent and honours <code>Crawl-delay</code> by default.</p></blockquote>
+        <pre><code>ember crawl https://docs.northwind.dev --limit 500 --max-depth 3</code></pre>
+        <table>
+          <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>limit</code></td><td>integer</td><td><code>10000</code></td><td>Most pages to scrape</td></tr>
+            <tr><td><code>maxDepth</code></td><td>integer</td><td><code>10</code></td><td>Most link hops from the start URL</td></tr>
+            <tr><td><code>allowSubdomains</code></td><td>boolean</td><td><code>false</code></td><td>Follow links to <code>*.northwind.dev</code></td></tr>
+            <tr><td><code>delay</code></td><td>integer</td><td><code>0</code></td><td>Milliseconds between pages on the same host</td></tr>
+          </tbody>
+        </table>
+        <figure class="fd-doc-frame" data-zoom>
+          <div class="fd-doc-frame-media">
+            <div class="fd-doc-frame-placeholder" role="img" aria-label="A crawl job with 412 of 500 pages scraped">
+              <div class="fd-ascii" data-fd-ascii="orbit" data-fade="radial" aria-hidden="true"></div>
+              <span class="fd-doc-frame-play"><i data-icon="play"></i></span>
+              <span>Watch a crawl, 0:48</span>
+            </div>
+          </div>
+          <figcaption class="fd-doc-frame-caption">A 500-page crawl from start to webhook. Click to enlarge.</figcaption>
+        </figure>
+        <dl>
+          <dt><code>completed</code></dt><dd>Every allowed page was scraped or skipped.</dd>
+          <dt><code>cancelled</code></dt><dd>You stopped the job; pages scraped so far are kept and billed.</dd>
+          <dt><code>failed</code></dt><dd>The start URL could not be reached. Nothing is billed.</dd>
+        </dl>
+        <hr>
+        <p>Crawled pages are kept for 24 hours.<sup><a href="#pr-fn-1" id="pr-fnref-1">1</a></sup> Download them before then, or send them to a webhook as they arrive.</p>
+        <section data-footnotes>
+          <ol>
+            <li id="pr-fn-1">On Growth plans and above you can extend retention to 30 days in team settings. <a href="#pr-fnref-1" aria-label="Back to the text">↩</a></li>
+          </ol>
+        </section>
+      </div>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-prose" data-size="sm">
+        <h2 id="pr-sm-dense-text">Dense reference text</h2>
+        <p><code>data-size="sm"</code> sets 14/22 for parameter notes, FAQ answers and changelog entries, where you scan rather than read. Everything else keeps the same rhythm.</p>
+        <ul><li>Headings step down one size.</li><li>Code and tables stay the same.</li></ul>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Only direct children get the reading rhythm, so components placed inside prose keep their own type. Links inside callouts and tables follow the same style.</li>
+      <li>One link style: ink with an underline that darkens. Use <code class="fd-code">.fd-link</code> for the rare accent link, such as an announcement.</li>
+      <li>Tables are wrapped in <code class="fd-code">.fd-doc-table</code> on load so wide ones scroll on their own; the page never scrolls sideways.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Code -->
+  <section class="doc-section" id="code">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Framed code</h2>
+      <p>In docs, <code class="fd-code">.fd-codeblock[data-variant="framed"]</code> sits in a soft 4% frame: tabs on the wash, code on an inner surface. Language tabs stay in sync across the page and across pages.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <figure class="fd-codeblock" data-variant="framed">
+        <div class="fd-codeblock-head">
+          <div class="fd-codeblock-tabs" aria-label="Language">
+            <button class="fd-codeblock-tab" data-value="python">Python</button>
+            <button class="fd-codeblock-tab" data-value="node">Node</button>
+            <button class="fd-codeblock-tab" data-value="curl">cURL</button>
+            <button class="fd-codeblock-tab" data-value="cli">CLI</button>
+          </div>
+          <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div>
+        </div>
+        <pre class="fd-codeblock-body" data-value="python"><code data-lang="python">job = ember.crawl("https://docs.northwind.dev", limit=500, max_depth=3)
+
+for page in job.pages:
+    print(page.metadata.source_url, len(page.markdown))  # every page with its length in characters</code></pre>
+        <pre class="fd-codeblock-body" data-value="node" hidden><code data-lang="javascript">const job = await ember.crawl("https://docs.northwind.dev", { limit: 500, maxDepth: 3 });
+
+for (const page of job.pages) console.log(page.metadata.sourceURL, page.markdown.length);</code></pre>
+        <pre class="fd-codeblock-body" data-value="curl" hidden><code data-lang="bash">curl -X POST https://api.ember.dev/v2/crawl \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -d '{ "url": "https://docs.northwind.dev", "limit": 500, "maxDepth": 3 }'</code></pre>
+        <pre class="fd-codeblock-body" data-value="cli" hidden><code data-lang="bash">ember crawl https://docs.northwind.dev --limit 500 --max-depth 3</code></pre>
+      </figure>
+      <figure class="fd-codeblock" data-variant="framed">
+        <pre class="fd-codeblock-body"><code data-lang="bash">npx -y ember-cli@latest init --all --browser</code></pre>
+        <button class="fd-codeblock-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button>
+      </figure>
+      <figure class="fd-codeblock" data-variant="framed" data-lines data-highlight="4-6" data-collapse="200">
+        <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="file-code"></i>webhook.ts</span><div class="fd-codeblock-actions"><button class="fd-codeblock-btn" data-action="wrap" type="button" aria-pressed="false" aria-label="Wrap lines"><i data-icon="wrap-text"></i></button><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div>
+        <pre class="fd-codeblock-body"><code data-lang="typescript">import { verifySignature } from "@ember/sdk/webhooks";
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const signature = request.headers.get("Ember-Signature") ?? "";
+  if (!verifySignature(body, signature, process.env.EMBER_WEBHOOK_SECRET!)) {
+    return new Response("Invalid signature", { status: 401 });
+  }
+  const event = JSON.parse(body);
+  if (event.type === "crawl.page") await savePage(event.data);
+  if (event.type === "crawl.completed") await notifyTeam(event.data.id);
+  return new Response(null, { status: 204 });
+}</code></pre>
+      </figure>
+    </div>
+    <ul class="doc-notes">
+      <li>Every code sample is copyable. Use <code class="fd-code">python</code>, <code class="fd-code">node</code>, <code class="fd-code">curl</code> and <code class="fd-code">cli</code> as tab values so groups (and the API request panel) sync.</li>
+      <li>All code-block options still apply: line numbers, highlights, collapse, wrap.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Blocks -->
+  <section class="doc-section" id="cards">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Cards</h2>
+      <p>Use link cards to fan out from an overview: an icon, a title and one line. They are <code class="fd-code">fd-card[data-interactive]</code>, flush with the page until hovered.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-doc-cards" data-cols="3">
+        <a class="fd-card" data-interactive href="#cards"><i class="fd-doc-card-icon" data-icon="search"></i><span class="fd-doc-card-head"><span class="fd-doc-card-title">Search</span><span class="fd-doc-card-text">Search the web and get the full content of every result.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+        <a class="fd-card" data-interactive href="#cards"><i class="fd-doc-card-icon" data-icon="file-text"></i><span class="fd-doc-card-head"><span class="fd-doc-card-title">Scrape</span><span class="fd-doc-card-text">Any URL as Markdown, HTML, a screenshot or JSON.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+        <a class="fd-card" data-interactive href="#cards"><i class="fd-doc-card-icon" data-icon="mouse-pointer-click"></i><span class="fd-doc-card-head"><span class="fd-doc-card-title">Interact</span><span class="fd-doc-card-text">Click, fill forms and load more on a scraped page.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+      </div>
+      <div class="fd-doc-cards" data-cols="2">
+        <a class="fd-card" data-interactive href="#cards"><span class="fd-tile" data-size="40" data-tone="neutral"><i data-icon="code"></i></span><span class="fd-doc-card-head"><span class="fd-doc-card-title">Python SDK</span><span class="fd-doc-card-text">Sync and async clients with typed responses.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+        <a class="fd-card" data-interactive href="#cards"><span class="fd-tile" data-size="40" data-tone="neutral"><i data-icon="code"></i></span><span class="fd-doc-card-head"><span class="fd-doc-card-title">Node SDK</span><span class="fd-doc-card-text">Node 18+, Bun and edge runtimes.</span></span><i class="fd-card-arrow" data-icon="arrow-up-right"></i></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="steps">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Steps</h2>
+      <p>Use numbered steps for a setup that must happen in order. Each step holds prose and code; the rail ties them together.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <ol class="fd-doc-steps">
+        <li class="fd-doc-step" data-state="done">
+          <h3 class="fd-doc-step-title">Create a signing secret</h3>
+          <div class="fd-doc-step-body fd-prose"><p>In <a href="../templates/settings.html">Settings → Webhooks</a>, create a secret and store it as <code>EMBER_WEBHOOK_SECRET</code>.</p></div>
+        </li>
+        <li class="fd-doc-step">
+          <h3 class="fd-doc-step-title">Verify every request</h3>
+          <div class="fd-doc-step-body fd-prose">
+            <p>Reject any payload whose <code>Ember-Signature</code> header doesn’t match.</p>
+            <figure class="fd-codeblock" data-variant="framed"><pre class="fd-codeblock-body"><code data-lang="javascript">if (!verifySignature(body, signature, secret)) return new Response(null, { status: 401 });</code></pre><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></figure>
+          </div>
+        </li>
+        <li class="fd-doc-step">
+          <h3 class="fd-doc-step-title">Answer within 10 seconds</h3>
+          <div class="fd-doc-step-body fd-prose"><p>Return <code>204</code> quickly and do the work in a queue. Slow endpoints are retried with backoff for 24 hours.</p></div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="doc-section" id="tabs">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Content tabs</h2>
+      <p>Use tabs when the same instructions differ by platform or framework, and the reader needs only one. The indicator is ink.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-doc-tabs">
+        <div class="fd-tabs" role="tablist" aria-label="Framework">
+          <button class="fd-tab" role="tab" aria-selected="true" aria-controls="tb-next" id="tb-next-tab">Next.js</button>
+          <button class="fd-tab" role="tab" aria-selected="false" aria-controls="tb-express" id="tb-express-tab">Express</button>
+          <button class="fd-tab" role="tab" aria-selected="false" aria-controls="tb-fastapi" id="tb-fastapi-tab">FastAPI</button>
+        </div>
+        <div class="fd-tab-panel fd-prose" role="tabpanel" id="tb-next" aria-labelledby="tb-next-tab"><p>Add a route handler at <code>app/api/ember/route.ts</code> and read the raw body with <code>request.text()</code> before parsing it.</p></div>
+        <div class="fd-tab-panel fd-prose" role="tabpanel" id="tb-express" aria-labelledby="tb-express-tab" hidden><p>Mount <code>express.raw({ type: "application/json" })</code> on the webhook route so the signature is checked against the exact bytes.</p></div>
+        <div class="fd-tab-panel fd-prose" role="tabpanel" id="tb-fastapi" aria-labelledby="tb-fastapi-tab" hidden><p>Read <code>await request.body()</code> in the endpoint and verify it before calling <code>json.loads</code>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="setup">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Setup card</h2>
+      <p>Use it once, near the top of an introduction, to get someone connected in their own tool. The chosen tile carries an accent top rule and a 4% accent wash; arrow keys move between tiles.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <section class="fd-doc-setup" aria-labelledby="su-title">
+        <header class="fd-doc-setup-head">
+          <div><h3 class="fd-doc-setup-title" id="su-title">Set up Ember MCP</h3><p class="fd-doc-setup-desc">Sign in through your browser. No key to paste.</p></div>
+          <a class="fd-btn-text" href="#setup"><span>See all setup options</span><i data-icon="arrow-right" data-nudge></i></a>
+        </header>
+        <div class="fd-doc-setup-tiles" aria-label="Agent">
+          <button class="fd-doc-setup-tile" type="button" data-value="claude-code" aria-selected="true"><span class="fd-tile" data-size="28" data-tone="accent">C</span><span class="fd-doc-setup-name">Claude Code</span><span class="fd-doc-setup-action">Install plugin</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="codex"><span class="fd-tile" data-size="28" data-tone="inverse">X</span><span class="fd-doc-setup-name">Codex</span><span class="fd-doc-setup-action">Run in terminal</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="cursor"><span class="fd-tile" data-size="28" data-tone="neutral">R</span><span class="fd-doc-setup-name">Cursor</span><span class="fd-doc-setup-action">One click</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="mcp-client"><span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="plug"></i></span><span class="fd-doc-setup-name">Any MCP client</span><span class="fd-doc-setup-action">Copy URL</span></button>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="claude-code">
+          <p>Install the Ember plugin, or add the MCP server directly with the command below.</p>
+          <a class="fd-btn" href="#setup"><span>Add to Claude Code</span><i data-icon="arrow-right" data-nudge></i></a>
+          <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">claude mcp add ember --transport http https://mcp.ember.dev/v2/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+          <p class="fd-doc-setup-hint">Then run <code>/mcp</code> and check that <b>ember</b> shows as connected.</p>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="codex" hidden>
+          <p>Register the server once; every Codex session on this machine can use it.</p>
+          <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">codex mcp add ember --url https://mcp.ember.dev/v2/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="cursor" hidden>
+          <p>Cursor asks to install the server, then signs you in through the browser.</p>
+          <a class="fd-btn" href="#setup"><span>Add to Cursor</span><i data-icon="arrow-right" data-nudge></i></a>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="mcp-client" hidden>
+          <p>Add Ember as a remote server in any client that supports streamable HTTP.</p>
+          <div class="fd-snippet"><code class="fd-snippet-text">https://mcp.ember.dev/v2/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy server URL"><i data-icon="copy"></i></button></div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="doc-section" id="callouts">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Callouts, accordions and the assistant tip</h2>
+      <p>Docs reuse <code class="fd-code">fd-callout</code> with five meanings: Note (neutral), Tip (success), Info, Warning and Danger. Use at most one per screen; if everything is a callout, nothing is. FAQs and long optional detail go in an accordion.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-callout" role="note"><i class="fd-callout-icon" data-icon="pencil"></i><div class="fd-callout-content"><p class="fd-callout-title">Note</p><p class="fd-callout-body">Crawl results are kept for 24 hours. Download them or use a webhook.</p></div></div>
+      <div class="fd-callout" data-tone="success" role="note"><i class="fd-callout-icon" data-icon="lightbulb"></i><div class="fd-callout-content"><p class="fd-callout-title">Tip</p><p class="fd-callout-body">Run a crawl with <code class="fd-code">limit: 10</code> first to check your include paths.</p></div></div>
+      <div class="fd-callout" data-tone="info" role="note"><i class="fd-callout-icon" data-icon="info"></i><div class="fd-callout-content"><p class="fd-callout-title">Info</p><p class="fd-callout-body">Sitemaps are merged in after the first 50 pages.</p></div></div>
+      <div class="fd-callout" data-tone="warning" role="note"><i class="fd-callout-icon" data-icon="triangle-alert"></i><div class="fd-callout-content"><p class="fd-callout-title">Warning</p><p class="fd-callout-body">Stealth proxies cost 5 credits per page. Set <code class="fd-code">proxy: "basic"</code> to cap spend.</p></div></div>
+      <div class="fd-callout" data-tone="danger" role="alert"><i class="fd-callout-icon" data-icon="octagon-alert"></i><div class="fd-callout-content"><p class="fd-callout-title">Danger</p><p class="fd-callout-body">Deleting a monitor also deletes its change history. This cannot be undone.</p></div></div>
+      <div class="fd-accordion" data-single>
+        <details class="fd-accordion-item">
+          <summary class="fd-accordion-trigger"><span>Does Ember respect robots.txt?</span><i data-icon="chevron-down"></i></summary>
+          <div class="fd-accordion-panel"><div class="fd-accordion-inner">Yes, by default. Teams on Enterprise can turn it off for domains they own.</div></div>
+        </details>
+        <details class="fd-accordion-item">
+          <summary class="fd-accordion-trigger"><span>Are failed requests billed?</span><i data-icon="chevron-down"></i></summary>
+          <div class="fd-accordion-panel"><div class="fd-accordion-inner">No. A request that returns a 4xx or 5xx status from Ember costs nothing.</div></div>
+        </details>
+      </div>
+      <div class="fd-doc-ask">
+        <i data-icon="sparkles"></i>
+        <p class="fd-doc-ask-text"><b>Tip: ask the assistant.</b> It has read every page here and answers with code for your language.</p>
+        <button class="fd-btn" type="button" data-size="sm" data-fd-command-open="dm1-command"><span>Ask about this page</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Params -->
+  <section class="doc-section" id="params">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Parameters and response fields</h2>
+      <p>Reference rows build on <code class="fd-code">fd-schema</code>: mono name, mono type chip, where it goes, <code class="fd-code">required</code>, the default, a description, enum values as mono badges, and children that expand on an indent rail. Each row has a link.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <section class="fd-doc-params" data-in="body" aria-labelledby="pm-body">
+        <header class="fd-doc-params-head"><h3 class="fd-doc-params-title" id="pm-body">Body</h3><span class="fd-doc-params-type">application/json</span></header>
+        <div class="fd-schema">
+          <div class="fd-schema-item fd-doc-param" id="pm-url">
+            <div class="fd-schema-head"><code class="fd-schema-name">url</code><span class="fd-schema-type">string&lt;uri&gt;</span><span class="fd-schema-req">required</span></div>
+            <p class="fd-schema-desc">The page to start crawling from.</p>
+          </div>
+          <div class="fd-schema-item fd-doc-param" id="pm-sitemap">
+            <div class="fd-schema-head"><code class="fd-schema-name">sitemap</code><span class="fd-schema-type">string</span><span class="fd-schema-default">Default <code>"include"</code></span></div>
+            <p class="fd-schema-desc">How to use the site’s sitemap.</p>
+            <div class="fd-schema-enum"><span class="fd-doc-param-enum-label">One of</span><code class="fd-schema-value">include</code><code class="fd-schema-value">skip</code><code class="fd-schema-value">only</code></div>
+          </div>
+          <div class="fd-schema-item fd-doc-param" id="pm-webhook">
+            <div class="fd-schema-head"><code class="fd-schema-name">webhook</code><span class="fd-schema-type">object</span></div>
+            <p class="fd-schema-desc">Where to send <code>crawl.page</code> and <code>crawl.completed</code> events.</p>
+            <button class="fd-schema-toggle" type="button" aria-expanded="true"><i data-icon="chevron-right"></i><span>Hide 2 child attributes</span></button>
+            <div class="fd-schema-children">
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">url</code><span class="fd-schema-type">string&lt;uri&gt;</span><span class="fd-schema-req">required</span></div>
+                <p class="fd-schema-desc">An HTTPS endpoint you control.</p>
+              </div>
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">events</code><span class="fd-schema-type">string[]</span><span class="fd-schema-default">Default <code>["completed"]</code></span></div>
+                <div class="fd-schema-enum"><code class="fd-schema-value">started</code><code class="fd-schema-value">page</code><code class="fd-schema-value">completed</code><code class="fd-schema-value">failed</code></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="fd-doc-params fd-doc-response" data-in="response" aria-labelledby="pm-response">
+        <header class="fd-doc-params-head"><h3 class="fd-doc-params-title" id="pm-response">Response</h3><span class="fd-doc-response-status"><span class="fd-status" data-tone="success" data-size="sm">200</span><span class="fd-doc-params-type">application/json</span></span></header>
+        <div class="fd-schema">
+          <div class="fd-schema-item fd-doc-param" id="pm-res-id">
+            <div class="fd-schema-head"><code class="fd-schema-name">id</code><span class="fd-schema-type">string</span></div>
+            <p class="fd-schema-desc">The crawl job. Poll <code>GET /v2/crawl/{id}</code> or wait for the webhook.</p>
+          </div>
+          <div class="fd-schema-item fd-doc-param" id="pm-res-url">
+            <div class="fd-schema-head"><code class="fd-schema-name">url</code><span class="fd-schema-type">string&lt;uri&gt;</span></div>
+            <p class="fd-schema-desc">A status URL you can open in the browser.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ===================================================== API layout -->
+  <section class="doc-section" id="api-layout">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">API reference layout</h2>
+      <p>Reference pages put the endpoint first, prose and parameters on the left, and a sticky request and response on the right. Under 1100px the panels flow under the endpoint bar. “Try it” opens a playground sheet generated from the parameters.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-doc-api-demo">
+        <div class="fd-doc-api">
+          <div class="fd-doc-api-head">
+            <header class="fd-doc-head">
+              <a class="fd-doc-eyebrow" href="#api-layout">Crawl and map</a>
+              <h2 class="fd-doc-title">Get crawl status</h2>
+              <p class="fd-doc-lead">Progress and pages of a crawl job, newest first.</p>
+            </header>
+            <div class="fd-doc-endpoint">
+              <button class="fd-doc-endpoint-path" type="button" data-fd-copy="https://api.ember.dev/v2/crawl/{id}" aria-label="Copy endpoint URL, GET https://api.ember.dev/v2/crawl/{id}">
+                <span class="fd-doc-method" data-method="get" data-size="lg">GET</span>
+                <span class="fd-doc-endpoint-url">/v2/crawl/{id}</span>
+                <span class="fd-btn-swap fd-doc-endpoint-copy" aria-hidden="true"><i data-icon="copy"></i><i data-icon="check"></i></span>
+              </button>
+              <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-open="ap-try" aria-label="Try it"><span>Try it</span><i data-icon="play"></i></button>
+            </div>
+          </div>
+          <div class="fd-doc-api-side">
+            <figure class="fd-codeblock fd-doc-panel" data-variant="framed" data-kind="request" id="ap-request" data-lang="curl">
+              <div class="fd-codeblock-head">
+                <button class="fd-doc-picker" type="button" data-fd-menu="ap-lang" aria-label="Request language"><span data-fd-menu-value>cURL</span><i data-icon="chevron-down"></i></button>
+                <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy request"><i data-icon="copy"></i></button></div>
+              </div>
+              <pre class="fd-codeblock-body" data-value="curl"><code data-lang="bash">curl --request GET \
+  --url https://api.ember.dev/v2/crawl/crl_01JD9A2B7K \
+  --header 'Authorization: Bearer &lt;token&gt;'</code></pre>
+              <pre class="fd-codeblock-body" data-value="python" hidden><code data-lang="python">status = ember.get_crawl_status("crl_01JD9A2B7K")
+print(status.completed, "/", status.total)</code></pre>
+              <pre class="fd-codeblock-body" data-value="node" hidden><code data-lang="javascript">const status = await ember.getCrawlStatus("crl_01JD9A2B7K");
+console.log(`${status.completed} / ${status.total}`);</code></pre>
+            </figure>
+            <div class="fd-menu" id="ap-lang" popover role="menu" aria-label="Request language" data-fd-doc-picker="lang" data-for="ap-request">
+              <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-value="curl"><span class="fd-menu-item-label">cURL</span></button>
+              <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="python"><span class="fd-menu-item-label">Python</span></button>
+              <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="node"><span class="fd-menu-item-label">Node</span></button>
+            </div>
+            <figure class="fd-codeblock fd-doc-panel" data-variant="framed" data-kind="response" data-sync="none">
+              <div class="fd-codeblock-head">
+                <div class="fd-codeblock-tabs" aria-label="Response status">
+                  <button class="fd-codeblock-tab" data-value="200">200</button>
+                  <button class="fd-codeblock-tab" data-value="404" data-tone="warning">404</button>
+                  <button class="fd-codeblock-tab" data-value="429" data-tone="warning">429</button>
+                  <button class="fd-codeblock-tab" data-value="500" data-tone="danger">500</button>
+                </div>
+                <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy response"><i data-icon="copy"></i></button></div>
+              </div>
+              <pre class="fd-codeblock-body" data-value="200"><code data-lang="json">{
+  "status": "scraping",
+  "total": 500,
+  "completed": 412,
+  "creditsUsed": 412,
+  "expiresAt": "2026-11-15T16:29:00Z",
+  "next": "https://api.ember.dev/v2/crawl/crl_01JD9A2B7K?skip=100",
+  "data": [
+    {
+      "markdown": "# Northwind docs\n\nWelcome to the Northwind API...",
+      "metadata": {
+        "title": "Introduction · Northwind",
+        "sourceURL": "https://docs.northwind.dev/",
+        "statusCode": 200
+      }
+    },
+    {
+      "markdown": "# Authentication\n\nEvery request needs a key...",
+      "metadata": {
+        "title": "Authentication · Northwind",
+        "sourceURL": "https://docs.northwind.dev/auth",
+        "statusCode": 200
+      }
+    }
+  ]
+}</code></pre>
+              <pre class="fd-codeblock-body" data-value="404" hidden><code data-lang="json">{
+  "success": false,
+  "code": "NOT_FOUND",
+  "error": "No crawl with id crl_01JD9A2B7K. Crawl results expire after 24 hours."
+}</code></pre>
+              <pre class="fd-codeblock-body" data-value="429" hidden><code data-lang="json">{
+  "success": false,
+  "code": "RATE_LIMITED",
+  "error": "Polling more than once a second. Use a webhook instead.",
+  "retryAfter": 1
+}</code></pre>
+              <pre class="fd-codeblock-body" data-value="500" hidden><code data-lang="json">{
+  "success": false,
+  "code": "INTERNAL_ERROR",
+  "error": "Something went wrong on our side. The request was not billed.",
+  "requestId": "req_77c1e0b2a9d4"
+}</code></pre>
+            </figure>
+          </div>
+          <div class="fd-doc-api-body" id="ap-reference">
+            <div class="fd-prose">
+              <p>Results arrive in pages of up to 100. Follow <code>next</code> until it is missing, or set a webhook on the crawl and skip polling entirely.</p>
+            </div>
+            <section class="fd-doc-params" data-in="path" aria-labelledby="ap-path">
+              <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="ap-path">Path parameters</h2></header>
+              <div class="fd-schema">
+                <div class="fd-schema-item fd-doc-param" id="ap-path-id" data-example="crl_01JD9A2B7K">
+                  <div class="fd-schema-head"><code class="fd-schema-name">id</code><span class="fd-schema-type">string</span><span class="fd-doc-param-in">path</span><span class="fd-schema-req">required</span></div>
+                  <p class="fd-schema-desc">The crawl id returned when you started the crawl.</p>
+                </div>
+              </div>
+            </section>
+            <section class="fd-doc-params" data-in="query" aria-labelledby="ap-query">
+              <header class="fd-doc-params-head"><h2 class="fd-doc-params-title" id="ap-query">Query parameters</h2></header>
+              <div class="fd-schema">
+                <div class="fd-schema-item fd-doc-param" id="ap-query-skip">
+                  <div class="fd-schema-head"><code class="fd-schema-name">skip</code><span class="fd-schema-type">integer</span><span class="fd-schema-default">Default <code>0</code></span></div>
+                  <p class="fd-schema-desc">Pages to skip, for paging through results.</p>
+                </div>
+                <div class="fd-schema-item fd-doc-param" id="ap-query-status">
+                  <div class="fd-schema-head"><code class="fd-schema-name">status</code><span class="fd-schema-type">string</span><span class="fd-schema-default">Default <code>"all"</code></span></div>
+                  <p class="fd-schema-desc">Only pages with this outcome.</p>
+                  <div class="fd-schema-enum"><span class="fd-doc-param-enum-label">One of</span><code class="fd-schema-value">all</code><code class="fd-schema-value">scraped</code><code class="fd-schema-value">failed</code></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+      <dialog class="fd-sheet fd-doc-try" id="ap-try" data-size="lg" data-params="#ap-reference" aria-labelledby="ap-try-title">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <span class="fd-doc-method" data-method="get">GET</span>
+            <h2 class="fd-sheet-title fd-mono" id="ap-try-title">/v2/crawl/{id}</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc">Runs against the sandbox. Responses here are scripted and cost no credits.</p>
+        </div>
+        <form class="fd-sheet-body fd-doc-try-form" id="ap-try-form" data-fd-doc-try-form>
+          <div class="fd-sheet-section">
+            <p class="fd-eyebrow">Authorization</p>
+            <div class="fd-field">
+              <div class="fd-field-head"><label class="fd-field-label" for="ap-try-key">API key</label></div>
+              <input class="fd-input" id="ap-try-key" type="password" data-mono data-fd-doc-try-key value="em-demo-5f2a91c4e7b04d38" autocomplete="off" spellcheck="false">
+            </div>
+          </div>
+          <div class="fd-sheet-section"><p class="fd-eyebrow">Parameters</p><div class="fd-doc-try-fields" data-fd-doc-try-fields></div></div>
+          <div class="fd-doc-try-result" hidden aria-live="polite"><div class="fd-doc-try-meta"></div><div class="fd-json" data-toolbar data-label="Response"></div></div>
+        </form>
+        <div class="fd-sheet-foot">
+          <span class="fd-small fd-muted" data-start>Sandbox · no credits used</span>
+          <button class="fd-btn" type="button" data-fd-dialog-close>Close</button>
+          <button class="fd-btn" type="submit" form="ap-try-form" data-variant="primary"><span>Send request</span><i data-icon="play"></i></button>
+        </div>
+        <script type="application/json" data-fd-doc-try-response>{"status":"scraping","total":500,"completed":412,"creditsUsed":412,"next":"https://api.ember.dev/v2/crawl/crl_01JD9A2B7K?skip=100","data":[{"markdown":"# Northwind docs\n\nWelcome to the Northwind API.","metadata":{"title":"Introduction · Northwind","sourceURL":"https://docs.northwind.dev/","statusCode":200}}]}</script>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>The request panel’s language follows the page’s code groups both ways. Its example picker (<code class="fd-code">data-fd-doc-picker="example"</code>) swaps panes marked <code class="fd-code">data-example</code>.</li>
+      <li>Status tabs carry a tone dot on errors: 4xx warning, 5xx danger. The response scrolls inside and fades at the bottom until you reach the end.</li>
+      <li>Clicking the path copies the full URL. <code class="fd-code">{params}</code> are emphasised in ink, not accent.</li>
+      <li>Try it validates required fields, shows a busy Send button, then the scripted response with its status, time and a JSON tree. Clear the key to see a 401.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Footer -->
+  <section class="doc-section" id="footer">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Article footer, pager and site footer</h2>
+      <p>Every page ends the same way: was it helpful, how to fix it, when it changed, and where to go next. Choosing “No” asks what was missing.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <footer class="fd-doc-foot">
+        <div class="fd-doc-foot-row">
+          <div class="fd-doc-helpful">
+            <p class="fd-doc-helpful-q">Was this page helpful?</p>
+            <div class="fd-doc-helpful-actions">
+              <button class="fd-btn" type="button" data-size="sm" data-fd-doc-vote="yes"><i data-icon="thumbs-up"></i><span>Yes</span></button>
+              <button class="fd-btn" type="button" data-size="sm" data-fd-doc-vote="no"><i data-icon="thumbs-down"></i><span>No</span></button>
+            </div>
+            <p class="fd-doc-helpful-thanks" hidden><i data-icon="circle-check"></i><span data-fd-doc-thanks-text>Thanks for letting us know.</span></p>
+            <form class="fd-doc-helpful-form" hidden>
+              <label class="fd-sr-only" for="ft-feedback">What was missing or wrong?</label>
+              <textarea class="fd-textarea" id="ft-feedback" rows="3" placeholder="What were you looking for? A link or a code sample helps."></textarea>
+              <div class="fd-row"><button class="fd-btn" type="submit" data-size="sm">Send feedback</button></div>
+            </form>
+          </div>
+          <div class="fd-doc-foot-links">
+            <a class="fd-btn-text" href="#footer"><i data-icon="square-pen"></i><span>Suggest edits</span></a>
+            <a class="fd-btn-text" href="#footer"><i data-icon="bug"></i><span>Raise an issue</span></a>
+          </div>
+        </div>
+        <p class="fd-doc-updated">Last updated <time datetime="2026-11-12">Nov 12, 2026</time></p>
+        <nav class="fd-doc-pager" aria-label="Previous and next page">
+          <a class="fd-doc-pager-link" data-dir="prev" href="#footer"><span class="fd-doc-pager-eyebrow">Previous</span><span class="fd-doc-pager-title"><i data-icon="arrow-left"></i><span>Map</span></span></a>
+          <a class="fd-doc-pager-link" data-dir="next" href="#footer"><span class="fd-doc-pager-eyebrow">Next</span><span class="fd-doc-pager-title"><span>Extract</span><i data-icon="arrow-right"></i></span></a>
+        </nav>
+      </footer>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <footer class="fd-doc-footer">
+        <div class="fd-doc-footer-inner">
+          <div class="fd-doc-footer-brand">
+            <a class="fd-brand" href="../templates/docs-home.html"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a>
+            <p class="fd-doc-footer-note">The web-data and agent API. Search, scrape and interact with any page from one key.</p>
+          </div>
+          <div class="fd-doc-footer-col"><p>Product</p><a href="../templates/playground.html">Playground</a><a href="../templates/usage.html">Pricing</a><a href="../templates/docs-changelog.html">Changelog</a></div>
+          <div class="fd-doc-footer-col"><p>Developers</p><a href="../templates/docs-api.html">API reference</a><a href="#footer">Python SDK</a><a href="#footer">Node SDK</a></div>
+          <div class="fd-doc-footer-col"><p>Company</p><a href="#footer">About</a><a href="#footer">Blog</a><a href="mailto:hello@ember.dev">Contact</a></div>
+        </div>
+        <div class="fd-doc-footer-bar">
+          <span>© 2026 Ember Labs, Inc.</span>
+          <div class="fd-row">
+            <a class="fd-status" data-tone="success" data-size="sm" href="https://status.ember.dev">All systems normal</a>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-theme-toggle aria-label="Theme"><i data-icon="monitor"></i></button>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ===================================================== Search -->
+  <section class="doc-section" id="search">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Search</h2>
+      <p>The top-bar pill and <kbd class="fd-kbd">⌘K</kbd> open the command palette with three groups: Pages, API endpoints and Guides. When the match is in a page’s text rather than its title, the hint shows the matched sentence.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-surface="sunken" data-code>
+      <div class="fd-command" data-static-demo aria-label="Search the docs (example)">
+        <div class="fd-command-search"><i data-icon="search"></i><input class="fd-command-input" type="text" value="webhook" aria-label="Search the docs" readonly><kbd class="fd-kbd">esc</kbd></div>
+        <div class="fd-command-list">
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Pages</p>
+            <div class="fd-command-item" data-active><i data-icon="radar"></i><span class="fd-command-item-label">Monitor</span><span class="fd-command-item-hint">…pages for changes and get a <mark class="fd-doc-hit">webhook</mark> with the diff.</span></div>
+            <div class="fd-command-item"><i data-icon="network"></i><span class="fd-command-item-label">Crawl</span><span class="fd-command-item-hint">…send pages to a <mark class="fd-doc-hit">webhook</mark> as they arrive.</span></div>
+          </div>
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Guides</p>
+            <div class="fd-command-item"><i data-icon="book-open"></i><span class="fd-command-item-label">Verify signatures</span><span class="fd-command-item-hint">Check the Ember-Signature header with your signing secret</span></div>
+          </div>
+        </div>
+      </div>
+      <button class="fd-btn" type="button" data-fd-command-open="dm1-command"><i data-icon="search"></i><span>Open the live palette</span></button>
+    </div>
+  </section>
+
+  <!-- ===================================================== Changelog -->
+  <section class="doc-section" id="changelog">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Changelog</h2>
+      <p>Dated releases on a rail, newest first. The date column sticks while its entry scrolls; filter chips narrow by kind or area.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-doc-changelog">
+        <nav class="fd-chip-nav fd-doc-changelog-filters" aria-label="Filter releases">
+          <button class="fd-chip" type="button" aria-pressed="true" data-value="all"><span>All</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="new"><span>New</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="improved"><span>Improved</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="fixed"><span>Fixed</span></button>
+        </nav>
+        <ol class="fd-doc-releases">
+          <li class="fd-doc-release" id="cl-v2-14-0" data-tags="new" data-latest>
+            <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-11-12">Nov 12, 2026</time><span class="fd-badge" data-variant="mono">v2.14.0</span></div>
+            <div class="fd-doc-release-body">
+              <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="accent">New</span><span class="fd-badge">API</span></div>
+              <h3 class="fd-doc-release-title">Monitors are generally available</h3>
+              <div class="fd-prose" data-size="sm"><p>Point a monitor at any URL and get a webhook with the diff when it changes. One credit per check.</p></div>
+            </div>
+          </li>
+          <li class="fd-doc-release" id="cl-v2-13-2" data-tags="improved">
+            <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-11-05">Nov 5, 2026</time><span class="fd-badge" data-variant="mono">v2.13.2</span></div>
+            <div class="fd-doc-release-body">
+              <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="info">Improved</span><span class="fd-badge">SDKs</span></div>
+              <h3 class="fd-doc-release-title">Typed JSON in the Python and Node SDKs</h3>
+              <div class="fd-prose" data-size="sm"><p>Pass a Pydantic model or a Zod schema straight to <code>formats</code>.</p></div>
+            </div>
+          </li>
+          <li class="fd-doc-release" id="cl-v2-13-1" data-tags="fixed">
+            <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-10-29">Oct 29, 2026</time><span class="fd-badge" data-variant="mono">v2.13.1</span></div>
+            <div class="fd-doc-release-body">
+              <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="success">Fixed</span><span class="fd-badge">API</span></div>
+              <h3 class="fd-doc-release-title">Crawls no longer stall on sitemap index files</h3>
+              <div class="fd-prose" data-size="sm"><p>Affected crawls from the last 30 days were refunded automatically.</p></div>
+            </div>
+          </li>
+        </ol>
+        <p class="fd-doc-releases-empty" hidden>No releases match this filter yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Home -->
+  <section class="doc-section" id="home">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Docs home</h2>
+      <p>The landing page answers “where do I start?”: a big search, three ways in, every endpoint, the SDKs and what others are reading.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <section class="fd-doc-hero" aria-labelledby="hm-title">
+        <div class="fd-ascii" data-fd-ascii="terrain" data-fade="bottom" aria-hidden="true"></div>
+        <p class="fd-eyebrow">Ember documentation</p>
+        <h2 class="fd-doc-hero-title" id="hm-title">Give your agents the live web</h2>
+        <p class="fd-doc-lead">Guides, references and recipes for searching, scraping and interacting with any page through one API.</p>
+        <button class="fd-doc-hero-search" type="button" data-fd-command-open="dm1-command" aria-label="Search the docs"><i data-icon="search"></i><span>Search pages, endpoints and guides…</span><kbd class="fd-kbd">⌘K</kbd></button>
+      </section>
+      <div class="fd-doc-sdks">
+        <div class="fd-doc-sdk">
+          <div class="fd-doc-sdk-head"><span class="fd-tile" data-size="28" data-tone="info">Py</span><span class="fd-doc-sdk-name">Python</span><span class="fd-doc-sdk-meta">v2.6.1</span></div>
+          <div class="fd-snippet" data-size="sm"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">pip install ember-py</code><button class="fd-snippet-copy" type="button" aria-label="Copy install command"><i data-icon="copy"></i></button></div>
+        </div>
+        <div class="fd-doc-sdk">
+          <div class="fd-doc-sdk-head"><span class="fd-tile" data-size="28" data-tone="success">JS</span><span class="fd-doc-sdk-name">Node</span><span class="fd-doc-sdk-meta">v2.8.0</span></div>
+          <div class="fd-snippet" data-size="sm"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">npm install @ember/sdk</code><button class="fd-snippet-copy" type="button" aria-label="Copy install command"><i data-icon="copy"></i></button></div>
+        </div>
+      </div>
+      <ul class="fd-doc-guides">
+        <li><a class="fd-doc-guide" href="#home"><span><span class="fd-doc-guide-title">LLM-ready Markdown</span><span class="fd-doc-guide-desc">Strip boilerplate and size pages for a context window.</span></span><span class="fd-doc-guide-time">6 min</span><i data-icon="arrow-right"></i></a></li>
+        <li><a class="fd-doc-guide" href="#home"><span><span class="fd-doc-guide-title">Structured data with schemas</span><span class="fd-doc-guide-desc">Schemas that extract reliably across layouts.</span></span><span class="fd-doc-guide-time">9 min</span><i data-icon="arrow-right"></i></a></li>
+      </ul>
+    </div>
+    <ul class="doc-notes">
+      <li>See the full pages: <a class="fd-link" href="../templates/docs-home.html">docs home</a>, <a class="fd-link" href="../templates/docs-guide.html">guide</a>, <a class="fd-link" href="../templates/docs-api.html">API reference</a> and <a class="fd-link" href="../templates/docs-changelog.html">changelog</a>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== API -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Classes and attributes</h2>
+      <p>Everything is styled in <code class="fd-code">fire/components/docsite.css</code>. Private properties use <code class="fd-code">--_doc-</code>; the framed code look sets the code family’s <code class="fd-code">--_k-</code> properties.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Class / attribute</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>.fd-doc [data-contained]</td><td>The shell. A size container named <code class="fd-code">fd-doc</code>; contained, it scrolls inside a box of height <code class="fd-code">--h</code>.</td></tr>
+        <tr><td>.fd-doc-top · -top-row[data-row]</td><td>Sticky two-row bar: <code class="fd-code">tools</code>, <code class="fd-code">sections</code>, and <code class="fd-code">crumbs</code> under 900px.</td></tr>
+        <tr><td>.fd-doc-search · -repo · -switch</td><td>Search pill, repository link with stars, soft select-like version and language buttons.</td></tr>
+        <tr><td>[data-doc-hide="lg md sm"] · [data-doc-show="sm"]</td><td>Drop top-bar controls below 1200, 1100 and 900px, or show them only below 900px.</td></tr>
+        <tr><td>.fd-doc-nav · -nav-item · -nav-label · -nav-sub · -nav-tag</td><td>Neutral docs nav. Items take <code class="fd-code">aria-current="page"</code> or <code class="fd-code">aria-expanded</code> + <code class="fd-code">aria-controls</code>.</td></tr>
+        <tr><td>.fd-doc-method[data-method][data-size="lg"]</td><td>GET, POST, PUT, PATCH, DEL tags in the endpoint tones.</td></tr>
+        <tr><td>.fd-doc-main · -content · -article[data-width="wide"] · -aside</td><td>Reading column (720 max) and the 264px contents column.</td></tr>
+        <tr><td>.fd-doc-toc · .fd-doc-otp</td><td>Contents list on <code class="fd-code">fd-toc</code> with an ink marker; the small-screen disclosure.</td></tr>
+        <tr><td>.fd-doc-head · -eyebrow · -title · -lead · -copy</td><td>Article header and the Copy page split button.</td></tr>
+        <tr><td>.fd-prose [data-size="sm"]</td><td>Rendered Markdown typography.</td></tr>
+        <tr><td>.fd-doc-frame[data-zoom] · -frame-media · -frame-caption · -frame-placeholder · -shot</td><td>Media frame, zoomable through a dialog; placeholders for demo images and video.</td></tr>
+        <tr><td>.fd-codeblock[data-variant="framed"]</td><td>Docs code look.</td></tr>
+        <tr><td>.fd-doc-cards[data-cols] · -steps · -tabs · -setup · -ask</td><td>Docs blocks.</td></tr>
+        <tr><td>.fd-doc-params[data-in] · .fd-doc-param · -param-in · .fd-doc-response</td><td>Reference rows on <code class="fd-code">fd-schema</code>.</td></tr>
+        <tr><td>.fd-doc-api · -api-head · -api-side · -api-body · -endpoint · -panel[data-kind] · -picker · -try</td><td>API reference layout, endpoint bar, request and response panels, Try it sheet.</td></tr>
+        <tr><td>.fd-doc-foot · -helpful · -pager · -footer</td><td>Article footer, previous / next, site footer.</td></tr>
+        <tr><td>.fd-doc-changelog · -releases · -release[data-tags]</td><td>Changelog on a rail with filters.</td></tr>
+        <tr><td>.fd-doc-hero · -section · -sdks · -guides</td><td>Docs home.</td></tr>
+      </tbody>
+    </table>
+    <table class="doc-table">
+      <thead><tr><th>fire/js/docsite.js</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>init(root)</td><td>Anchors headings and parameters, wraps tables, fills contents lists, restores nav groups, wires setup cards, panels, zoom and Try it. Idempotent.</td></tr>
+        <tr><td>buildToc(root)</td><td>Fills empty <code class="fd-code">[data-fd-doc-toc]</code> lists and <code class="fd-code">.fd-doc-otp-list</code> from the article’s h2 and h3.</td></tr>
+        <tr><td>toMarkdown(article)</td><td>The article as Markdown, used by Copy page.</td></tr>
+        <tr><td>setNavGroup(button, open)</td><td>Opens or closes a nav group with a height animation; fires <code class="fd-code">fd:open</code> / <code class="fd-code">fd:close</code>.</td></tr>
+        <tr><td>openNavSheet(trigger)</td><td>Opens the nav of the nearest shell in a left sheet.</td></tr>
+        <tr><td>selectSetup(tile)</td><td>Selects a setup tile; fires <code class="fd-code">fd:change</code>.</td></tr>
+        <tr><td>setPanelLang(panel, lang) · setPanelExample(panel, name)</td><td>Switches a request panel; the language also moves every synced code group.</td></tr>
+        <tr><td>Events</td><td><code class="fd-code">fd:change</code> (setup, pickers, helpful vote, Try it status), <code class="fd-code">fd:copy</code> (Copy page, heading links), <code class="fd-code">fd:open</code> / <code class="fd-code">fd:close</code> (nav groups).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head"><h2 class="fd-h3">Rules</h2></div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Keep docs navigation neutral. In a reading context the accent is for the primary button, method badges and the rare announcement link.</p></div>
+      <div data-dont><strong>Don't</strong><p>Use accent pills for the current page, or accent underlines for ordinary links. One link style: ink with a quiet underline.</p></div>
+      <div data-do><strong>Do</strong><p>Give every page a lead that says what it lets you do, and end it with a next step: the pager, a card or a link.</p></div>
+      <div data-dont><strong>Don't</strong><p>Ship a code sample without a copy button, or a request without its response. Every endpoint shows both.</p></div>
+      <div data-do><strong>Do</strong><p>Use the same tab values (<code class="fd-code">python</code>, <code class="fd-code">node</code>, <code class="fd-code">curl</code>, <code class="fd-code">cli</code>) everywhere so a reader’s language follows them.</p></div>
+      <div data-dont><strong>Don't</strong><p>Stack callouts or put a table inside a callout. If it matters that much, it belongs in the prose.</p></div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { mountDemo } from '../templates/docs-shell.js';
+  document.querySelectorAll('[data-doc-demo]').forEach((host) => mountDemo(host, {
+    section: host.dataset.section, active: host.dataset.active, toc: host.dataset.toc !== 'false', nav: host.dataset.nav !== 'false', prefix: host.dataset.prefix, base: '../templates/',
+  }));
+</script>
+</body>
+</html>

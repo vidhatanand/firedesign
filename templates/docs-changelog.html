@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog · Ember docs</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./docs-shell.js"></script>
+</head>
+<body data-docs-shell data-section="docs" data-active="changelog" data-toc="false" data-copy="false" data-updated="2026-11-12">
+<main>
+  <article class="fd-doc-article" data-width="wide">
+    <header class="fd-doc-head">
+      <a class="fd-doc-eyebrow" href="docs-home.html">Ember</a>
+      <h1 class="fd-doc-title">Changelog</h1>
+      <p class="fd-doc-lead">New endpoints, SDK releases and fixes, newest first. Subscribe with the <a class="fd-link" data-tone="neutral" href="#rss">RSS feed</a> or the <code class="fd-code">changelog.updated</code> webhook.</p>
+    </header>
+
+    <div class="fd-doc-changelog">
+      <nav class="fd-chip-nav fd-doc-changelog-filters" aria-label="Filter releases">
+        <button class="fd-chip" type="button" aria-pressed="true" data-value="all"><span>All</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false" data-value="new"><span>New</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false" data-value="improved"><span>Improved</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false" data-value="fixed"><span>Fixed</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false" data-value="api"><span>API</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false" data-value="sdk"><span>SDKs</span></button>
+      </nav>
+
+      <ol class="fd-doc-releases">
+        <li class="fd-doc-release" id="v2-14-0" data-tags="new api" data-latest>
+          <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-11-12">Nov 12, 2026</time><span class="fd-badge" data-variant="mono">v2.14.0</span></div>
+          <div class="fd-doc-release-body">
+            <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="accent">New</span><span class="fd-badge">API</span></div>
+            <h2 class="fd-doc-release-title">Monitors are generally available</h2>
+            <div class="fd-prose">
+              <p>Point a monitor at any URL, choose what counts as a change, and Ember sends a webhook with the diff. Monitors run every 5 minutes to every 7 days and cost one credit per check.</p>
+              <ul>
+                <li>New endpoints: <code>POST /v2/monitors</code>, <code>PATCH /v2/monitors/{id}</code> and <code>DELETE /v2/monitors/{id}</code>.</li>
+                <li>The <code>monitor.changed</code> webhook carries a unified diff and the two Markdown versions.</li>
+                <li>Ignore rules let you skip timestamps, prices or any CSS selector.</li>
+              </ul>
+            </div>
+            <figure class="fd-doc-frame" data-zoom>
+              <div class="fd-doc-frame-media">
+                <div class="fd-doc-frame-placeholder" data-ratio="wide" role="img" aria-label="Monitors overview with three watched pages and their last change">
+                  <div class="fd-ascii" data-fd-ascii="waves" data-fade="radial" aria-hidden="true"></div>
+                  <i data-icon="radar"></i>
+                  <span>Monitors overview</span>
+                </div>
+              </div>
+              <figcaption class="fd-doc-frame-caption">Every monitor shows its last change and the next check.</figcaption>
+            </figure>
+          </div>
+        </li>
+
+        <li class="fd-doc-release" id="v2-13-2" data-tags="improved sdk">
+          <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-11-05">Nov 5, 2026</time><span class="fd-badge" data-variant="mono">v2.13.2</span></div>
+          <div class="fd-doc-release-body">
+            <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="info">Improved</span><span class="fd-badge">SDKs</span></div>
+            <h2 class="fd-doc-release-title">Typed JSON in the Python and Node SDKs</h2>
+            <div class="fd-prose">
+              <p>Pass a Pydantic model or a Zod schema straight to <code>formats</code>. The SDKs convert it to JSON Schema and return a typed object, so you no longer validate the response yourself.</p>
+              <figure class="fd-codeblock" data-variant="framed">
+                <div class="fd-codeblock-head">
+                  <div class="fd-codeblock-tabs" aria-label="Language">
+                    <button class="fd-codeblock-tab" data-value="python">Python</button>
+                    <button class="fd-codeblock-tab" data-value="node">Node</button>
+                  </div>
+                  <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div>
+                </div>
+                <pre class="fd-codeblock-body" data-value="python"><code data-lang="python">page = ember.scrape(url, formats=[{"type": "json", "schema": list[Plan]}])
+plans: list[Plan] = page.json</code></pre>
+                <pre class="fd-codeblock-body" data-value="node" hidden><code data-lang="javascript">const page = await ember.scrape(url, { formats: [{ type: "json", schema: z.array(Plan) }] });
+const plans = page.json; // Plan[]</code></pre>
+              </figure>
+            </div>
+          </div>
+        </li>
+
+        <li class="fd-doc-release" id="v2-13-1" data-tags="fixed api">
+          <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-10-29">Oct 29, 2026</time><span class="fd-badge" data-variant="mono">v2.13.1</span></div>
+          <div class="fd-doc-release-body">
+            <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="success">Fixed</span><span class="fd-badge">API</span></div>
+            <h2 class="fd-doc-release-title">Crawls no longer stall on sitemap index files</h2>
+            <div class="fd-prose">
+              <p>Sites that split their sitemap across nested index files could leave a crawl waiting at 0 pages. Crawls now follow up to three levels of index files and report skipped ones in <code>warnings</code>.</p>
+              <p>Affected crawls from the last 30 days were refunded automatically.</p>
+            </div>
+          </div>
+        </li>
+
+        <li class="fd-doc-release" id="v2-13-0" data-tags="new improved api">
+          <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-10-21">Oct 21, 2026</time><span class="fd-badge" data-variant="mono">v2.13.0</span></div>
+          <div class="fd-doc-release-body">
+            <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="accent">New</span><span class="fd-badge" data-tone="info">Improved</span><span class="fd-badge">API</span></div>
+            <h2 class="fd-doc-release-title">Interact sessions and faster stealth proxies</h2>
+            <div class="fd-prose">
+              <p>After a scrape, keep the browser open with <code>POST /v2/scrape/{scrapeId}/interact</code> and drive it with a prompt or code. Sessions bill 2 credits per minute and close after 10 idle minutes.</p>
+              <p>Stealth proxies now pick a region near the site, which cut the median time to first byte from 2.1 s to 1.3 s.</p>
+            </div>
+          </div>
+        </li>
+
+        <li class="fd-doc-release" id="v2-12-0" data-tags="improved sdk">
+          <div class="fd-doc-release-date"><time class="fd-doc-release-time" datetime="2026-10-08">Oct 8, 2026</time><span class="fd-badge" data-variant="mono">v2.12.0</span></div>
+          <div class="fd-doc-release-body">
+            <div class="fd-doc-release-tags"><span class="fd-badge" data-tone="info">Improved</span><span class="fd-badge">SDKs</span></div>
+            <h2 class="fd-doc-release-title">The CLI signs in from the browser</h2>
+            <div class="fd-prose">
+              <p><code>ember login</code> now opens the browser and stores the key in the system keychain. Pass <code>--key</code> for CI, where there is no browser.</p>
+            </div>
+          </div>
+        </li>
+      </ol>
+      <p class="fd-doc-releases-empty" hidden>No releases match this filter yet.</p>
+    </div>
+  </article>
+</main>
+</body>
+</html>

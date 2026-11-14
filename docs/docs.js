@@ -20,6 +20,8 @@ const PAGES = [
     ['charts', 'Charts', 'chart-column'],
     ['code', 'Code & logs', 'braces'],
     ['agent', 'Agent & AI', 'wand-sparkles'],
+    ['documentation', 'Documentation', 'book-open'],
+    ['chat', 'Chat', 'message-circle'],
     ['skeletons', 'Skeletons & loading', 'loader'],
   ]],
   ['Templates', [

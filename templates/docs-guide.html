@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introduction · Ember docs</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./docs-shell.js"></script>
+</head>
+<body data-docs-shell data-section="docs" data-active="introduction" data-updated="2026-11-12">
+<main>
+  <article class="fd-doc-article">
+    <header class="fd-doc-head">
+      <a class="fd-doc-eyebrow" href="#get-started">Get started</a>
+      <h1 class="fd-doc-title">Introduction</h1>
+      <p class="fd-doc-lead">The context API for AI agents. Search the web, scrape any page, and interact with it through one API.</p>
+    </header>
+
+    <div class="fd-prose">
+      <p>Ember turns the live web into clean Markdown or structured JSON your agent can use. Search, scrape and interact with any page, including the ones that need JavaScript, a login wall or a few clicks before the content appears.</p>
+
+      <h2 id="get-started">Get started</h2>
+
+      <section class="fd-doc-setup" aria-labelledby="setup-title">
+        <header class="fd-doc-setup-head">
+          <div>
+            <h3 class="fd-doc-setup-title" id="setup-title">Set up Ember MCP</h3>
+            <p class="fd-doc-setup-desc">Sign in through your browser. No key to paste.</p>
+          </div>
+          <a class="fd-btn-text" href="#mcp"><span>See all setup options</span><i data-icon="arrow-right" data-nudge></i></a>
+        </header>
+        <div class="fd-doc-setup-tiles" aria-label="Agent">
+          <button class="fd-doc-setup-tile" type="button" data-value="claude-code" aria-selected="true"><span class="fd-tile" data-size="28" data-tone="accent">C</span><span class="fd-doc-setup-name">Claude Code</span><span class="fd-doc-setup-action">Install plugin</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="codex"><span class="fd-tile" data-size="28" data-tone="inverse">X</span><span class="fd-doc-setup-name">Codex</span><span class="fd-doc-setup-action">Run in terminal</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="cursor"><span class="fd-tile" data-size="28" data-tone="neutral">R</span><span class="fd-doc-setup-name">Cursor</span><span class="fd-doc-setup-action">One click</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="mcp-client"><span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="plug"></i></span><span class="fd-doc-setup-name">Any MCP client</span><span class="fd-doc-setup-action">Copy URL</span></button>
+          <button class="fd-doc-setup-tile" type="button" data-value="terminal"><span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="square-terminal"></i></span><span class="fd-doc-setup-name">Terminal agents</span><span class="fd-doc-setup-action">Run once</span></button>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="claude-code">
+          <p>Install the Ember plugin, or add the MCP server directly with the command below.</p>
+          <a class="fd-btn" href="#mcp-claude-code"><span>Add to Claude Code</span><i data-icon="arrow-right" data-nudge></i></a>
+          <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">claude mcp add ember --transport http https://mcp.ember.dev/v2/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+          <p class="fd-doc-setup-hint">Then run <code>/mcp</code> in Claude Code and check that <b>ember</b> shows as connected.</p>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="codex" hidden>
+          <p>Register the server once; every Codex session on this machine can use it.</p>
+          <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">codex mcp add ember --url https://mcp.ember.dev/v2/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+          <p class="fd-doc-setup-hint">Codex opens your browser to sign in. Run <code>codex mcp list</code> to confirm.</p>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="cursor" hidden>
+          <p>Cursor asks to install the server, then signs you in through the browser.</p>
+          <a class="fd-btn" href="#mcp-cursor"><span>Add to Cursor</span><i data-icon="arrow-right" data-nudge></i></a>
+          <p class="fd-doc-setup-hint">Prefer a config file? Add the URL below to <code>.cursor/mcp.json</code>.</p>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="mcp-client" hidden>
+          <p>Add Ember as a remote server in any client that supports streamable HTTP.</p>
+          <div class="fd-snippet"><code class="fd-snippet-text">https://mcp.ember.dev/v2/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy server URL"><i data-icon="copy"></i></button></div>
+          <p class="fd-doc-setup-hint">Clients without remote support can run <code>npx -y ember-mcp</code> with <code>EMBER_API_KEY</code> set.</p>
+        </div>
+        <div class="fd-doc-setup-panel" data-value="terminal" hidden>
+          <p>One command finds every coding agent on this machine and adds the Ember skill and server to each.</p>
+          <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">npx -y ember-cli@latest init --all --browser</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+          <p class="fd-doc-setup-hint">Takes about 20 seconds. Re-run it after installing a new agent.</p>
+        </div>
+      </section>
+
+      <h3 id="build-directly-with-the-api">Build directly with the API</h3>
+      <p>Scrape your first page now. No account or API key is needed for this request.</p>
+
+      <figure class="fd-codeblock" data-variant="framed">
+        <div class="fd-codeblock-head">
+          <div class="fd-codeblock-tabs" aria-label="Language">
+            <button class="fd-codeblock-tab" data-value="python">Python</button>
+            <button class="fd-codeblock-tab" data-value="node">Node</button>
+            <button class="fd-codeblock-tab" data-value="curl">cURL</button>
+            <button class="fd-codeblock-tab" data-value="cli">CLI</button>
+          </div>
+          <div class="fd-codeblock-actions">
+            <button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <pre class="fd-codeblock-body" data-value="python"><code data-lang="python"># pip install ember-py
+from ember import Ember
+
+ember = Ember()  # no key to start; set EMBER_API_KEY for higher limits
+
+page = ember.scrape("https://ember.dev/pricing", formats=["markdown", "links"])
+print(page.markdown[:400])</code></pre>
+        <pre class="fd-codeblock-body" data-value="node" hidden><code data-lang="javascript">// npm install @ember/sdk
+import Ember from "@ember/sdk";
+
+const ember = new Ember(); // reads EMBER_API_KEY when it is set
+
+const page = await ember.scrape("https://ember.dev/pricing", {
+  formats: ["markdown", "links"],
+});
+console.log(page.markdown.slice(0, 400));</code></pre>
+        <pre class="fd-codeblock-body" data-value="curl" hidden><code data-lang="bash"># No key needed to start. Add -H "Authorization: Bearer $EMBER_API_KEY" for higher limits.
+curl -s -X POST "https://api.ember.dev/v2/scrape" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://ember.dev/pricing",
+    "formats": ["markdown", "links"]
+  }'</code></pre>
+        <pre class="fd-codeblock-body" data-value="cli" hidden><code data-lang="bash">npx -y ember-cli@latest scrape https://ember.dev/pricing --format markdown,links</code></pre>
+      </figure>
+
+      <p>Add an <a href="api-keys.html">API key</a> when you need higher limits. See the <a href="#sdk-python">Python SDK</a>, <a href="#sdk-node">Node SDK</a> or <a href="docs-api.html">API reference</a> to build it into your application.</p>
+
+      <div class="fd-callout" data-tone="info" role="note">
+        <i class="fd-callout-icon" data-icon="info"></i>
+        <div class="fd-callout-content">
+          <p class="fd-callout-title">Requests without a key</p>
+          <p class="fd-callout-body">Keyless requests share a limit of 10 scrapes per hour per IP address and skip stealth proxies. Responses are identical otherwise, so code you write now keeps working once you add a key.</p>
+        </div>
+      </div>
+
+      <h2 id="other-ways-to-get-started">Other ways to get started</h2>
+
+      <h3 id="install-the-ember-cli">Install the Ember CLI</h3>
+      <p>One command installs the CLI, signs you in through the browser, and adds the Ember skill to every coding agent it finds.</p>
+      <figure class="fd-codeblock" data-variant="framed">
+        <pre class="fd-codeblock-body"><code data-lang="bash">npx -y ember-cli@latest init --all --browser</code></pre>
+        <button class="fd-codeblock-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button>
+      </figure>
+
+      <h3 id="set-up-with-an-agent">Set up with an agent</h3>
+      <p>If you work inside a coding agent, let it do the setup. Three steps, about a minute.</p>
+      <ol class="fd-doc-steps">
+        <li class="fd-doc-step">
+          <h4 class="fd-doc-step-title">Install the skill</h4>
+          <div class="fd-doc-step-body fd-prose">
+            <p>The skill teaches your agent when to search, when to scrape, and how to keep pages small enough for its context window.</p>
+            <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">npx -y ember-cli@latest init --agent claude-code</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+          </div>
+        </li>
+        <li class="fd-doc-step">
+          <h4 class="fd-doc-step-title">Sign in from the browser</h4>
+          <div class="fd-doc-step-body fd-prose">
+            <p>The installer opens <code>ember.dev/cli-auth</code>. Approve the request and the key is stored in your system keychain, never in a dotfile.</p>
+          </div>
+        </li>
+        <li class="fd-doc-step">
+          <h4 class="fd-doc-step-title">Ask for something on the web</h4>
+          <div class="fd-doc-step-body fd-prose">
+            <p>Try a task that needs fresh data. The agent picks the endpoint; you see each call in <a href="logs.html">Activity logs</a>.</p>
+            <figure class="fd-codeblock" data-variant="framed">
+              <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="message-square"></i>Prompt</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy prompt"><i data-icon="copy"></i></button></div></div>
+              <pre class="fd-codeblock-body"><code data-lang="text">Use Ember to read the pricing pages of northwind.dev and quarry.dev,
+then give me a table of plan names, monthly prices and request limits.</code></pre>
+            </figure>
+          </div>
+        </li>
+      </ol>
+
+      <h3 id="build-and-test-directly">Build and test directly</h3>
+      <p>The <a href="playground.html">Playground</a> runs every endpoint in the browser and shows the exact request, so you can copy it into your code once the output looks right. Press <kbd>⌘</kbd> <kbd>K</kbd> anywhere in these docs to jump to an endpoint.</p>
+      <div class="fd-doc-ask">
+        <i data-icon="sparkles"></i>
+        <p class="fd-doc-ask-text"><b>Tip: ask the assistant.</b> It has read every page here and answers with code for your language.</p>
+        <button class="fd-btn" type="button" data-size="sm" data-fd-command-open="docs-command"><span>Ask about this page</span></button>
+      </div>
+
+      <h2 id="what-can-ember-do">What can Ember do?</h2>
+      <div class="fd-doc-cards" data-cols="3">
+        <a class="fd-card" data-interactive href="#search">
+          <i class="fd-doc-card-icon" data-icon="search"></i>
+          <span class="fd-doc-card-head"><span class="fd-doc-card-title">Search</span><span class="fd-doc-card-text">Search the web and get the full content of every result.</span></span>
+          <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        </a>
+        <a class="fd-card" data-interactive href="docs-api.html">
+          <i class="fd-doc-card-icon" data-icon="file-text"></i>
+          <span class="fd-doc-card-head"><span class="fd-doc-card-title">Scrape</span><span class="fd-doc-card-text">Turn any URL into Markdown, HTML, a screenshot or structured JSON.</span></span>
+          <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        </a>
+        <a class="fd-card" data-interactive href="#interact">
+          <i class="fd-doc-card-icon" data-icon="mouse-pointer-click"></i>
+          <span class="fd-doc-card-head"><span class="fd-doc-card-title">Interact</span><span class="fd-doc-card-text">Keep working with a scraped page: click, fill forms, load more.</span></span>
+          <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        </a>
+        <a class="fd-card" data-interactive href="#crawl">
+          <i class="fd-doc-card-icon" data-icon="network"></i>
+          <span class="fd-doc-card-head"><span class="fd-doc-card-title">Crawl</span><span class="fd-doc-card-text">Follow links across a site and scrape every page you allow.</span></span>
+          <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        </a>
+        <a class="fd-card" data-interactive href="#extract">
+          <i class="fd-doc-card-icon" data-icon="braces"></i>
+          <span class="fd-doc-card-head"><span class="fd-doc-card-title">Extract</span><span class="fd-doc-card-text">Typed JSON from one page or many, with a schema or a prompt.</span></span>
+          <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        </a>
+        <a class="fd-card" data-interactive href="#agent">
+          <i class="fd-doc-card-icon" data-icon="wand-sparkles"></i>
+          <span class="fd-doc-card-head"><span class="fd-doc-card-title">Agent</span><span class="fd-doc-card-text">Describe the data you need; get it back with sources.</span></span>
+          <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        </a>
+      </div>
+
+      <h3 id="why-ember">Why Ember?</h3>
+      <ul>
+        <li><strong>LLM-ready output.</strong> Clean Markdown, typed JSON, screenshots and links, without navigation and cookie banners.</li>
+        <li><strong>Handles the hard parts.</strong> JavaScript rendering, proxies, rate limits and dynamic content are handled for you.</li>
+        <li><strong>Reliable.</strong> 99.95% uptime over the last 90 days, with automatic retries on flaky pages.</li>
+        <li><strong>Fast.</strong> A median scrape returns in 1.4 seconds; cached pages in under 200 ms.</li>
+        <li><strong>Agent-native.</strong> An <a href="#mcp">MCP server</a>, a skill for coding agents, and these docs as <a href="#ai-llms-txt">llms.txt</a>.</li>
+      </ul>
+
+      <figure class="fd-doc-frame" data-zoom>
+        <div class="fd-doc-frame-media">
+          <div class="fd-doc-shot" role="img" aria-label="The Playground with a scrape request on the left and its Markdown result on the right">
+            <div class="fd-ascii" data-fd-ascii="grid" data-fade="radial" aria-hidden="true"></div>
+            <div class="fd-doc-shot-pane">
+              <span class="fd-doc-shot-bar" data-tone="strong" style="--w: 70%"></span>
+              <span class="fd-doc-shot-bar" style="--w: 90%"></span>
+              <span class="fd-doc-shot-bar" style="--w: 55%"></span>
+              <span class="fd-doc-shot-bar" data-tone="accent" style="--w: 80%"></span>
+              <span class="fd-doc-shot-bar" style="--w: 64%"></span>
+            </div>
+            <div class="fd-doc-shot-pane">
+              <span class="fd-doc-shot-bar" data-tone="strong" style="--w: 40%"></span>
+              <div class="fd-doc-shot-code">
+                <span class="fd-doc-shot-bar" style="--w: 82%"></span>
+                <span class="fd-doc-shot-bar" style="--w: 66%"></span>
+                <span class="fd-doc-shot-bar" data-tone="accent" style="--w: 48%"></span>
+                <span class="fd-doc-shot-bar" style="--w: 74%"></span>
+                <span class="fd-doc-shot-bar" style="--w: 58%"></span>
+              </div>
+              <span class="fd-doc-shot-bar" style="--w: 92%"></span>
+              <span class="fd-doc-shot-bar" style="--w: 76%"></span>
+            </div>
+          </div>
+        </div>
+        <figcaption class="fd-doc-frame-caption">The Playground runs a scrape and shows the request beside its Markdown.</figcaption>
+      </figure>
+
+      <h2 id="endpoints-at-a-glance">Endpoints at a glance</h2>
+      <p>Every endpoint takes JSON and returns JSON. Credits are counted per page or result; failed requests are free.<sup><a href="#fn-1" id="fnref-1">1</a></sup></p>
+      <table>
+        <thead><tr><th>Endpoint</th><th>Returns</th><th>Credits</th></tr></thead>
+        <tbody>
+          <tr><td><code>/search</code></td><td>Results with the full content of each page</td><td>1 per result</td></tr>
+          <tr><td><code>/scrape</code></td><td>Markdown, HTML, links, screenshot or JSON</td><td>1 per page</td></tr>
+          <tr><td><code>/interact</code></td><td>A live browser session on a scraped page</td><td>2 per minute</td></tr>
+          <tr><td><code>/parse</code></td><td>Markdown from PDF, DOCX and XLSX files</td><td>1 per page</td></tr>
+          <tr><td><code>/crawl</code></td><td>Every page of a site, as a job</td><td>1 per page</td></tr>
+          <tr><td><code>/map</code></td><td>The URLs of a site</td><td>1 per call</td></tr>
+          <tr><td><code>/extract</code></td><td>Typed JSON from one or many pages</td><td>5 per page</td></tr>
+          <tr><td><code>/agent</code></td><td>Sourced answers and data</td><td>Shown before the run</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="resources">Resources</h2>
+      <ul>
+        <li><a href="#quickstart">Quickstart</a>: your first scrape in every language.</li>
+        <li><a href="docs-api.html">API reference</a>: every endpoint, parameter and response code.</li>
+        <li><a href="docs-changelog.html">Changelog</a>: what shipped this week.</li>
+        <li><a href="#community">Community</a>: ask questions and share what you built.</li>
+      </ul>
+
+      <section data-footnotes>
+        <h2 class="fd-sr-only" id="footnotes">Footnotes</h2>
+        <ol>
+          <li id="fn-1">A request fails when Ember returns a 4xx or 5xx status. A page that loads but returns 404 from the site still counts as one credit. <a href="#fnref-1" aria-label="Back to the text">↩</a></li>
+        </ol>
+      </section>
+    </div>
+  </article>
+</main>
+</body>
+</html>

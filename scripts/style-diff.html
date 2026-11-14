@@ -1,0 +1,77 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fire style diff</title>
+<!-- Compares computed styles of two builds of the same pages, element by element.
+     Open /scripts/style-diff.html?base=/.baseline&pages=templates/logs.html,docs/forms.html
+     `base` is a frozen copy of the build served from the same origin (git archive HEAD | tar -x -C .baseline).
+     The result is rendered below and left on window.__diff for scripts. -->
+<style>
+  body { font: 13px/1.5 ui-monospace, Menlo, monospace; margin: 16px; color: #222; }
+  iframe { position: fixed; left: 0; top: 0; width: 1440px; height: 900px; border: 0; opacity: 0; pointer-events: none; }
+  h2 { font-size: 14px; margin: 16px 0 4px; } .ok { color: #1a7a3a; } .bad { color: #c2271c; } pre { margin: 0; white-space: pre-wrap; }
+</style>
+<div id="out">Running…</div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const base = q.get('base') || '/.baseline';
+const pages = (q.get('pages') || 'templates/logs.html').split(',');
+const wait = Number(q.get('wait') || 3200);
+const width = Number(q.get('width') || 1440);
+const PROPS = ['display', 'position', 'font-family', 'font-size', 'line-height', 'font-weight', 'letter-spacing', 'text-transform', 'color', 'background-color',
+  'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+  'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width', 'border-top-color',
+  'border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius',
+  'row-gap', 'column-gap', 'box-shadow', 'opacity', 'z-index', 'transition-duration', 'animation-duration', 'stroke-width'];
+const FREEZE = '*,*::before,*::after{animation-play-state:paused!important;animation-delay:-999s!important;transition:none!important;caret-color:transparent!important}';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function load(url) {
+  const f = document.createElement('iframe');
+  f.style.width = width + 'px';
+  f.src = url; document.body.append(f);
+  await new Promise((r) => { f.onload = r; });
+  await sleep(wait);
+  const s = f.contentDocument.createElement('style'); s.textContent = FREEZE; f.contentDocument.head.append(s);
+  await sleep(150);
+  return f;
+}
+// Colours can serialise differently (rgba(), color(srgb …)) for the same value: normalise before comparing.
+const canon = (r, g, b, a = 1) => `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${Math.round(a * 1000) / 1000})`;
+const norm = (value) => String(value)
+  .replace(/color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: \/ ([\d.e-]+))?\)/g, (m, r, g, b, a) => canon(r * 255, g * 255, b * 255, a === undefined ? 1 : Number(a)))
+  .replace(/rgba?\(([\d.]+),? ([\d.]+),? ([\d.]+)(?:,? ?\/? ?([\d.]+))?\)/g, (m, r, g, b, a) => canon(r, g, b, a === undefined ? 1 : Number(a)))
+  .replace(/(\d+\.\d{3})\d+/g, '$1');
+const describe = (el) => `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}.${String(el.getAttribute('class') || '').split(/\s+/).slice(0, 3).join('.')}`;
+function snapshot(f) {
+  const win = f.contentWindow;
+  return [...f.contentDocument.body.querySelectorAll('*')].filter((el) => !['SCRIPT', 'STYLE', 'TEMPLATE', 'symbol', 'path', 'line', 'circle', 'rect', 'polyline', 'polygon', 'use', 'g', 'defs'].includes(el.tagName)).map((el) => {
+    const cs = win.getComputedStyle(el); const r = el.getBoundingClientRect();
+    const v = {}; for (const p of PROPS) v[p] = norm(cs.getPropertyValue(p));
+    v.box = `${Math.round(r.width)}x${Math.round(r.height)}`;
+    return { d: describe(el), v };
+  });
+}
+const result = {};
+for (const page of pages) {
+  const [a, b] = await Promise.all([load(`${base}/${page}`), load(`/${page}`)]);
+  const A = snapshot(a), B = snapshot(b);
+  const diffs = [];
+  const n = Math.min(A.length, B.length);
+  for (let i = 0; i < n; i++) {
+    if (A[i].d !== B[i].d) { diffs.push({ el: `${A[i].d} → ${B[i].d}`, note: 'structure differs from here' }); break; }
+    const changed = Object.keys(A[i].v).filter((p) => A[i].v[p] !== B[i].v[p]);
+    if (changed.length) diffs.push({ el: A[i].d, changed: Object.fromEntries(changed.map((p) => [p, `${A[i].v[p]} → ${B[i].v[p]}`])) });
+  }
+  result[page] = { elements: [A.length, B.length], different: diffs.length, diffs };
+  a.remove(); b.remove();
+}
+window.__diff = result;
+// Group identical changes so one cause shows as one line.
+const groups = {};
+for (const [page, r] of Object.entries(result)) for (const d of r.diffs) {
+  const key = d.note ? `${d.note}: ${d.el}` : `${d.el.replace(/#[\w-]+/, '')} | ${Object.entries(d.changed).map(([p, c]) => `${p}: ${c}`).join('; ')}`;
+  (groups[key] ||= { n: 0, pages: new Set() }); groups[key].n++; groups[key].pages.add(page);
+}
+window.__groups = Object.entries(groups).sort((x, y) => y[1].n - x[1].n).map(([k, g]) => `${g.n}× [${[...g.pages].map((p) => p.split('/').pop()).join(',')}] ${k}`);
+document.getElementById('out').innerHTML = Object.entries(result).map(([p, r]) => `<h2 class="${r.different ? 'bad' : 'ok'}">${p}: ${r.different} of ${r.elements[1]} elements differ</h2>`).join('') + `<pre>${window.__groups.slice(0, 200).join('\n').replace(/</g, '&lt;')}</pre>`;
+window.__done = true;
+</script>

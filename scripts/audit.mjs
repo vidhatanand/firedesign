@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const AS_JSON = process.argv.includes('--json');
-const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'sizes'];
+const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'literals', 'sizes'];
 const LEVELS = { icons: 'ERROR', colors: 'WARN', classes: 'WARN', ids: 'ERROR', links: 'ERROR', tokens: 'ERROR', sizes: 'INFO' };
 const findings = []; // { check, level, file, line, message }
 
@@ -236,6 +236,51 @@ function checkTokens() {
   }
 }
 
+// ---------- literals ----------
+// Every length, time and type metric in a component must be a token, so the system can be retuned from
+// variables alone. Token blocks (`:root { … }`) and at-rule conditions are the only places a raw value may live.
+// Allowed anywhere: 0, percentages, unitless numbers, and relative units (em, ch, fr, dvh, vw, deg, turn).
+function checkLiterals() {
+  const files = [...fs.readdirSync(path.join(ROOT, 'fire/components')).filter(f => f.endsWith('.css')).map(f => `fire/components/${f}`), 'fire/base.css'];
+  for (const f of files) {
+    const raw = read(f);
+    const text = stripCss(raw);
+    const line = lineFinder(text);
+    let i = 0, segStart = 0;
+    const stack = [];
+    const scan = (from, to, inTokens) => {
+      if (inTokens) return;
+      const body = text.slice(from, to);
+      for (const d of body.matchAll(/([\w-]+)\s*:\s*([^;{}]+)/g)) {
+        const prop = d[1]; const value = d[2];
+        const at = from + d.index;
+        const found = [];
+        for (const m of value.matchAll(/(?<![\w.#-])(\d*\.?\d+)(px|rem|ms|s)(?![\w-])/g)) if (Number(m[1]) !== 0) found.push(m[0]);
+        if (prop === 'letter-spacing') for (const m of value.matchAll(/(?<![\w.(-])-?(\d*\.?\d+)em\b/g)) if (Number(m[1]) !== 0) found.push(m[0]);
+        if (prop === 'line-height' && /^\s*\d*\.\d+\s*$/.test(value)) found.push(value.trim());
+        if (found.length) add('literals', 'WARN', f, line(at), `${prop}: ${value.trim().slice(0, 70)}  ← ${[...new Set(found)].join(', ')}`);
+      }
+    };
+    while (i < text.length) {
+      const ch = text[i];
+      if (ch === '{') {
+        const prelude = text.slice(segStart, i).trim();
+        const top = stack[stack.length - 1];
+        const isGroup = /^@(media|container|supports|layer|scope|starting-style)/.test(prelude);
+        const tokens = /^:root(\s*,|\s*$|\[)/.test(prelude) || /^@(property|font-face)/.test(prelude) || (top && top.tokens && !isGroup);
+        stack.push({ tokens, group: isGroup });
+        i++; segStart = i; continue;
+      }
+      if (ch === '}') {
+        const top = stack.pop() || {};
+        if (!top.group) scan(segStart, i, top.tokens);
+        i++; segStart = i; continue;
+      }
+      i++;
+    }
+  }
+}
+
 // ---------- 7. sizes ----------
 const countLines = t => (t.length === 0 ? 0 : t.split('\n').length - (t.endsWith('\n') ? 1 : 0));
 
@@ -265,6 +310,7 @@ async function main() {
   checkIds();
   checkLinks();
   checkTokens();
+  checkLiterals();
   reportSizes();
 
   const byPlace = (a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0);

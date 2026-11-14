@@ -15,8 +15,12 @@
  *                  <button class="fd-btn-text fd-tweaks-reset" data-tweaks-action="reset">Reset</button>
  *                  <button class="fd-btn" data-icon-only data-tweaks-action="close" aria-label="Close tweaks">
  *                <div class="fd-tweaks-body"> sections of .fd-tweaks-row; every control carries data-tweak="<key>":
- *                  .fd-segmented[data-tweak]           theme, density, lines, display, textSize, motion (nav.js drives them)
- *                  .fd-tweaks-palettes[role=radiogroup] > .fd-tweaks-swatch[role=radio][data-palette][data-value]
+ *                  .fd-segmented[data-tweak]           theme, density, lines, textSize, motion (nav.js drives them)
+ *                  .fd-tweaks-palettes[role=radiogroup][data-tweak=palette] > .fd-tweaks-swatch[role=radio][data-palette][data-value]
+ *                  .fd-tweaks-faces[role=radiogroup][data-tweak=type]       > .fd-tweaks-face[role=radio][data-value]
+ *                      .fd-tweaks-face-sample[data-type]  "Ag" set in that type set (the tokens resolve on the sample itself)
+ *                      .fd-tweaks-face-name               the label, in the panel's own font
+ *                  .fd-tweaks-readout                  the selected type set's faces, e.g. "Fraunces · Instrument Sans"
  *                  .fd-slider[data-tweak] > input[type=range]   tone.hue, tone.vivid, tone.light, tone.warmth, corners, texture
  *                  .fd-tweaks-value[data-tweak-reset]  the value readout; click (or double-click the slider) to reset
  *                  .fd-switch > input[data-tweak="contrast"]
@@ -25,12 +29,12 @@
  *
  * State (only non-default keys are stored, as JSON in localStorage['fd-tweaks']; theme and density persist through core)
  *  palette   ember · volt · iris · …         data-palette on <html> (removed for ember)
+ *  type      geist · editorial · book · …   data-type on <html> (removed for geist); the list is typefaces.js, the styles typefaces.css
  *  tone      { hue, vivid, light, warmth }  the toned palette written as inline light-dark() custom properties on <html>
  *  theme     system · light · dark          setTheme()
  *  density   compact · comfortable · spacious  setDensity()
  *  corners   0…2 (step .125)                --fd-radius-scale
  *  lines     1 · 1.5 · 2                    --fd-hairline
- *  display   sans · mono · serif            --fd-font-display
  *  textSize  sm · md · lg                   data-text-size
  *  contrast  default · high                 data-contrast="high"
  *  motion    off · default · slow           --fd-motion 0 · 1 · 1.75
@@ -47,6 +51,7 @@ import {
   PALETTES, PALETTE_TOKENS, DEFAULT_PALETTE, TONE_DEFAULT, TONE_RANGE, isDefaultTone,
   getPalette, paletteTokens, toneTokens, cssValue, oklch,
 } from './palettes.js';
+import { TYPEFACES, DEFAULT_TYPEFACE, getTypeface } from './typefaces.js';
 
 /* ==========================================================================
    State
@@ -55,25 +60,22 @@ import {
 const KEY = 'fd-tweaks';
 const POS_KEY = 'fd-tweaks-pos';
 const BOOT_KEY = 'fd-tweaks-boot';
-const SERIF = 'ui-serif, "New York", "Iowan Old Style", "Palatino Linotype", Georgia, serif';
-const DISPLAY = { mono: 'var(--fd-font-mono)', serif: SERIF };
 const MOTION = { off: 0, default: 1, slow: 1.75 };
 const CHOICES = {
   theme: ['light', 'dark', 'system'],
   density: ['compact', 'comfortable', 'spacious'],
   lines: [1, 1.5, 2],
-  display: ['sans', 'mono', 'serif'],
   textSize: ['sm', 'md', 'lg'],
   contrast: ['default', 'high'],
   motion: ['off', 'default', 'slow'],
 };
 const RANGES = { corners: [0, 2, 0.125], texture: [0, 1.5, 0.05] };
 const DEFAULTS = Object.freeze({
-  palette: DEFAULT_PALETTE, tone: TONE_DEFAULT, theme: 'system', density: 'comfortable', corners: 1, lines: 1,
-  display: 'sans', textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
+  palette: DEFAULT_PALETTE, type: DEFAULT_TYPEFACE, tone: TONE_DEFAULT, theme: 'system', density: 'comfortable', corners: 1, lines: 1,
+  textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
 });
 /* Every inline custom property this module may write on <html>. */
-const OWNED = [...PALETTE_TOKENS, '--fd-radius-scale', '--fd-hairline', '--fd-font-display', '--fd-motion', '--fd-texture'];
+const OWNED = [...PALETTE_TOKENS, '--fd-radius-scale', '--fd-hairline', '--fd-motion', '--fd-texture'];
 
 const root = document.documentElement;
 /* Storage can throw (private mode, sandboxed frames): every access stays inside the try. */
@@ -87,13 +89,14 @@ const fresh = () => ({ ...DEFAULTS, tone: { ...TONE_DEFAULT } });
 function sanitize(input = {}) {
   const s = fresh();
   if (PALETTES.some((p) => p.name === input.palette)) s.palette = input.palette;
+  if (TYPEFACES.some((t) => t.name === input.type)) s.type = input.type;
   if (input.tone && typeof input.tone === 'object') {
     for (const k of Object.keys(TONE_DEFAULT)) {
       const v = Number(input.tone[k]);
       if (Number.isFinite(v)) s.tone[k] = clamp(Math.round(v), ...TONE_RANGE[k]);
     }
   }
-  for (const k of ['theme', 'density', 'display', 'textSize', 'contrast', 'motion']) if (CHOICES[k].includes(input[k])) s[k] = input[k];
+  for (const k of ['theme', 'density', 'textSize', 'contrast', 'motion']) if (CHOICES[k].includes(input[k])) s[k] = input[k];
   if (CHOICES.lines.includes(Number(input.lines))) s.lines = Number(input.lines);
   for (const k of Object.keys(RANGES)) {
     const v = Number(input[k]);
@@ -121,7 +124,6 @@ function inlineProps(s) {
   }
   if (s.corners !== 1) out['--fd-radius-scale'] = String(s.corners);
   if (s.lines !== 1) out['--fd-hairline'] = `${s.lines}px`;
-  if (s.display !== 'sans') out['--fd-font-display'] = DISPLAY[s.display];
   if (s.motion !== 'default') out['--fd-motion'] = String(MOTION[s.motion]);
   if (s.texture !== 1) out['--fd-texture'] = String(s.texture);
   return out;
@@ -131,6 +133,7 @@ const attr = (name, value) => (value == null ? root.removeAttribute(name) : root
 
 function apply(s) {
   attr('data-palette', s.palette === DEFAULT_PALETTE ? null : s.palette);
+  attr('data-type', s.type === DEFAULT_TYPEFACE ? null : s.type);
   attr('data-text-size', s.textSize === 'md' ? null : s.textSize);
   attr('data-contrast', s.contrast === 'high' ? 'high' : null);
   if (getTheme() !== s.theme) setTheme(s.theme);
@@ -153,6 +156,7 @@ function flush() {
   // What fire/boot.js puts back on <html> before the first paint of the next page.
   const attrs = {};
   if (state.palette !== DEFAULT_PALETTE) attrs['data-palette'] = state.palette;
+  if (state.type !== DEFAULT_TYPEFACE) attrs['data-type'] = state.type;
   if (state.textSize !== 'md') attrs['data-text-size'] = state.textSize;
   if (state.contrast === 'high') attrs['data-contrast'] = 'high';
   const props = inlineProps(state);
@@ -162,6 +166,17 @@ function persist() {
   clearTimeout(persistTimer);
   persistTimer = setTimeout(flush, 120);
 }
+
+/* An older version kept the heading font as an inline --fd-font-display (also in the boot cache): drop it, or it
+   would sit above the type set's own value. */
+try {
+  const boot = JSON.parse(store.get(BOOT_KEY) || 'null');
+  if (boot?.props && '--fd-font-display' in boot.props) {
+    delete boot.props['--fd-font-display'];
+    store.set(BOOT_KEY, Object.keys(boot.attrs || {}).length || Object.keys(boot.props).length ? JSON.stringify(boot) : null);
+    root.style.removeProperty('--fd-font-display');
+  }
+} catch { /* a damaged boot entry is rewritten on the next change */ }
 
 let state = load();
 apply(state); // before `ready`: no flash of the default look
@@ -201,7 +216,7 @@ const MINUS = '−';
 const fmtX = (v) => `${Number(v.toFixed(3))}×`;
 
 function summary(s = state) {
-  return `${s.palette}${isDefaultTone(s.tone) ? '' : ' (toned)'} · ${s.density} · ${fmtX(s.corners)}`;
+  return `${s.palette}${isDefaultTone(s.tone) ? '' : ' (toned)'} · ${s.type === DEFAULT_TYPEFACE ? '' : `${s.type} · `}${s.density} · ${fmtX(s.corners)}`;
 }
 
 /** A ready-to-paste block: the attributes to set on <html>, then :root with every overridden custom property. */
@@ -209,12 +224,14 @@ export function toCss(s = state) {
   const toned = !isDefaultTone(s.tone);
   const attrs = [];
   if (s.palette !== DEFAULT_PALETTE && !toned) attrs.push(`data-palette="${s.palette}"`);
+  if (s.type !== DEFAULT_TYPEFACE) attrs.push(`data-type="${s.type}"`);
   if (s.theme !== 'system') attrs.push(`data-theme="${s.theme}"`);
   if (s.density !== 'comfortable') attrs.push(`data-density="${s.density}"`);
   if (s.textSize !== 'md') attrs.push(`data-text-size="${s.textSize}"`);
   if (s.contrast === 'high') attrs.push('data-contrast="high"');
   const notes = [`On <html>: ${attrs.length ? attrs.join(' ') : 'nothing (default attributes)'}`];
   if (s.palette !== DEFAULT_PALETTE && !toned) notes.push('data-palette needs fire/palettes.css.');
+  if (s.type !== DEFAULT_TYPEFACE) notes.push('Type sets need fire/typefaces.css (part of fire.css).');
   if (toned) notes.push(`The ${s.palette} palette, toned ${JSON.stringify(s.tone).replace(/"/g, '').replace(/,/g, ', ').replace(/:/g, ': ')}, is written out below.`);
   notes.push('Load this after fire.css.');
   const props = Object.entries(inlineProps(s));
@@ -281,9 +298,19 @@ function sliderRow(key, label, [min, max, step], { tone = false, ends } = {}) {
 }
 
 function swatches() {
-  return `<div class="fd-tweaks-palettes" role="radiogroup" aria-labelledby="fd-tw-palette-head">${PALETTES.map((p) => {
+  return `<div class="fd-tweaks-palettes" role="radiogroup" aria-labelledby="fd-tw-palette-head" data-tweak="palette">${PALETTES.map((p) => {
     const on = p.name === state.palette;
     return `<button class="fd-tweaks-swatch" type="button" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" data-palette="${p.name}" data-value="${p.name}" title="${esc(p.note)}"><span class="fd-tweaks-swatch-tile" aria-hidden="true"><span class="fd-tweaks-swatch-dot"></span><span class="fd-tweaks-swatch-ink"></span></span><span class="fd-tweaks-swatch-name">${esc(p.label)}</span></button>`;
+  }).join('')}</div>`;
+}
+
+/* The type sets: a tile each. The sample carries data-type, so the set's tokens resolve on it by themselves;
+   the name stays outside it and keeps the panel's own font. */
+const typeFaces = (t) => (t.display === t.sans ? t.display : `${t.display} · ${t.sans}`);
+function typefaces() {
+  return `<div class="fd-tweaks-faces" role="radiogroup" aria-label="Typeface" data-tweak="type">${TYPEFACES.map((t) => {
+    const on = t.name === state.type;
+    return `<button class="fd-tweaks-face" type="button" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" data-value="${t.name}" title="${esc(t.note)}"><span class="fd-tweaks-face-sample" data-type="${t.name}" aria-hidden="true">Ag</span><span class="fd-tweaks-face-name">${esc(t.label)}</span></button>`;
   }).join('')}</div>`;
 }
 
@@ -292,7 +319,6 @@ const section = (id, title, body) =>
 
 function markup() {
   const rule = (w) => `<span class="fd-tweaks-rule" style="--_tw-w: ${w}px" aria-hidden="true"></span>`;
-  const face = (f, text) => `<span class="fd-tweaks-face" data-face="${f}">${text}</span>`;
   return `
   <header class="fd-tweaks-head">
     <span class="fd-tweaks-grab" aria-hidden="true"></span>
@@ -315,7 +341,7 @@ function markup() {
       inlineRow('lines', 'Lines', segmented('lines', [[1, `${rule(1)}<span>1</span>`, '1 pixel'], [1.5, `${rule(1.5)}<span>1.5</span>`, '1.5 pixels'], [2, `${rule(2)}<span>2</span>`, '2 pixels']])),
     ].join(''))}
     ${section('type', 'Type', [
-      inlineRow('display', 'Headings', segmented('display', [['sans', face('sans', 'Sans')], ['mono', face('mono', 'Mono')], ['serif', face('serif', 'Serif')]])),
+      `<div class="fd-tweaks-row"><div class="fd-tweaks-row-head"><span class="fd-tweaks-label" id="fd-tw-type-label">Typeface</span><span class="fd-tweaks-readout" data-tweaks-typeface>${esc(typeFaces(getTypeface(state.type)))}</span></div>${typefaces()}</div>`,
       inlineRow('textSize', 'Text size', segmented('textSize', [['sm', 'S', 'Small'], ['md', 'M', 'Medium'], ['lg', 'L', 'Large']])),
       `<label class="fd-switch" data-size="sm" data-label="start"><input type="checkbox" role="switch" data-tweak="contrast"${state.contrast === 'high' ? ' checked' : ''}><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-tweaks-label">High contrast</span></span></label>`,
     ].join(''))}
@@ -338,6 +364,7 @@ function markup() {
 let panel = null;
 let lastTrigger = null;
 const desktop = typeof matchMedia === 'function' ? matchMedia('(min-width: 641px)') : { matches: true };
+const GRIDS = '.fd-tweaks-palettes, .fd-tweaks-faces'; // the radio grids; data-tweak names the state key
 const triggers = () => $$('[data-fd-tweaks-open]');
 const isOpen = () => panel?.dataset.state === 'open';
 
@@ -398,11 +425,15 @@ function sync() {
     const item = $$('.fd-segmented-item', group).find((i) => i.dataset.value === value);
     if (item && item.getAttribute('aria-checked') !== 'true') selectSegment(item, { silent: true });
   }
-  for (const swatch of $$('.fd-tweaks-swatch', panel)) {
-    const on = swatch.dataset.value === state.palette;
-    swatch.setAttribute('aria-checked', String(on));
-    swatch.tabIndex = on ? 0 : -1;
+  for (const grid of $$(GRIDS, panel)) {
+    for (const item of $$('[role="radio"]', grid)) {
+      const on = item.dataset.value === state[grid.dataset.tweak];
+      item.setAttribute('aria-checked', String(on));
+      item.tabIndex = on ? 0 : -1;
+    }
   }
+  const faceReadout = $('[data-tweaks-typeface]', panel);
+  if (faceReadout) faceReadout.textContent = typeFaces(getTypeface(state.type));
   for (const el of $$('.fd-slider[data-tweak]', panel)) {
     const key = el.dataset.tweak;
     const value = readKey(state, key);
@@ -464,8 +495,8 @@ function bindPanel(el) {
       }
       return;
     }
-    const swatch = target.closest('.fd-tweaks-swatch');
-    if (swatch) { set({ palette: swatch.dataset.value }); return; }
+    const choice = target.closest('.fd-tweaks-swatch, .fd-tweaks-face');
+    if (choice) { set({ [choice.closest(GRIDS).dataset.tweak]: choice.dataset.value }); return; }
     const action = target.closest('[data-tweaks-action]')?.dataset.tweaksAction;
     if (action === 'close') close();
     else if (action === 'reset') { reset(); $('.fd-segmented[data-tweak="theme"] [aria-checked="true"]', el)?.focus({ preventScroll: true }); }
@@ -473,17 +504,19 @@ function bindPanel(el) {
   });
   el.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') { event.preventDefault(); close(); return; }
-    if (event.target.matches?.('.fd-tweaks-swatch')) paletteKeys(event);
+    if (event.target.matches?.('.fd-tweaks-swatch, .fd-tweaks-face')) gridKeys(event);
   });
   bindDrag(el);
 }
 
-/* Palette grid: arrows move through the 5 × 3 grid and select (the radio pattern), Home / End jump. */
-function paletteKeys(event) {
-  const items = $$('.fd-tweaks-swatch', panel);
+/* Swatch and tile grids (palette 5 × 3, typeface 4 × 3): arrows move through the grid and select (the radio
+   pattern), Home / End jump. The column count is the grid's own, so the CSS decides it. */
+function gridKeys(event) {
+  const grid = event.target.closest(GRIDS);
+  const items = $$('[role="radio"]', grid);
   const i = items.indexOf(event.target);
   const n = items.length;
-  const cols = 5;
+  const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
   const rtl = getComputedStyle(panel).direction === 'rtl';
   const key = rtl ? ({ ArrowLeft: 'ArrowRight', ArrowRight: 'ArrowLeft' }[event.key] ?? event.key) : event.key;
   let j = null;
@@ -496,7 +529,7 @@ function paletteKeys(event) {
   if (j === null) return;
   event.preventDefault();
   items[j].focus();
-  set({ palette: items[j].dataset.value });
+  set({ [grid.dataset.tweak]: items[j].dataset.value });
 }
 
 async function copyCss(button) {

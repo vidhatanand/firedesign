@@ -2,7 +2,7 @@
 
 A design system for developer, agent and AI products: consoles, playgrounds, catalogs, logs, billing, documentation and chat-style agent screens. Plain CSS and small ES modules, with no framework and no build step.
 
-Every value is a variable, so the whole system can be retuned: fifteen palettes, tone controls, density, corners, type and motion, live from a Tweaks panel.
+Every value is a variable, so the whole system can be retuned: fifteen palettes, tone controls, twelve type sets, density, corners and motion, live from a Tweaks panel.
 
 ## Start
 
@@ -14,7 +14,7 @@ Then open http://127.0.0.1:4747/docs/index.html.
 
 - **Docs** (`/docs/index.html`): every component, live, with a "Markup" view to copy from.
 - **Templates** (`/templates/index.html`): 21 full screens for a fictional product, Ember, built only from Fire components.
-- **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, change density, corners, heading font, contrast, motion and texture. Choices are saved and follow you across pages.
+- **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, switch the typeface, change density, corners, contrast, motion and texture. Choices are saved and follow you across pages.
 
 ## Read next
 
@@ -52,6 +52,7 @@ Serve the folder over HTTP; ES modules do not load from `file://`.
 
 - Theme: `data-theme="light|dark"` on `<html>` or any subtree; omit it to follow the system.
 - Palette: `data-palette="volt"` recolours neutrals and accent together. Fifteen are included; `ember` is the default and needs no attribute. `data-accent` swaps only the accent.
+- Typeface: `data-type="editorial"` changes the heading, interface and mono faces together. Twelve sets are included, all open source; `geist` is the default.
 - Density, contrast, text size: `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
 - Character: `--fd-radius-scale`, `--fd-space-scale`, `--fd-motion`, `--fd-texture`, `--fd-hairline` and `--fd-font-display` each retune the whole system from one value.
 
@@ -79,6 +80,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/` | The system itself; the only folder a product ships. |
 | `fire/tokens.css` | Global values: the ink ladder, surfaces, accent, status tones, type, space, sizes, radius, shadows, motion. Light and dark through `light-dark()`. |
 | `fire/palettes.css` | Fifteen palettes, generated from `fire/js/palettes.js`. |
+| `fire/typefaces.css`, `fire/fonts/` | Twelve type sets and their font files (17 families, SIL Open Font License; licences in `fire/fonts/licenses/`). |
 | `fire/base.css` | Reset, type roles, links, focus, icons, layout and motion primitives. |
 | `fire/components/*.css` | One file per family. Each declares its own `--fd-<component>-*` values at the top; rules contain no raw sizes or timings. |
 | `fire/layout.css` | Layout attributes: `data-gap`, `data-min`, `data-cols`, `data-span`. |
@@ -122,4 +124,4 @@ Fire uses `light-dark()`, `color-mix()`, `@property`, container queries, the Pop
 
 ## Credits
 
-The interface face is Geist and the mono face is Geist Mono, both under the SIL Open Font License (licence in `fire/fonts/`). `fire/fonts/README.md` explains the choice and how to swap in a licensed face. Icons are a subset of Lucide, ISC License (`fire/LICENSE-lucide.txt`). The interaction patterns were studied from well-made developer consoles; no third-party brand assets, names or artwork are included.
+The default interface face is Geist and the mono face is Geist Mono; the other type sets use Space Grotesk, Space Mono, Fraunces, Instrument Sans, Newsreader, Bricolage Grotesque, Big Shoulders Display, Archivo, JetBrains Mono, Pixelify Sans, Doto, Oxanium, Unbounded, Manrope, Syne, DM Sans and DM Mono. All are under the SIL Open Font License 1.1 (licences in `fire/fonts/`). `fire/fonts/README.md` explains the choice and how to swap in a licensed face. Icons are a subset of Lucide, ISC License (`fire/LICENSE-lucide.txt`). The interaction patterns were studied from well-made developer consoles; no third-party brand assets, names or artwork are included.

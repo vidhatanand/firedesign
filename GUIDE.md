@@ -98,8 +98,9 @@ Grids, stacks and rows nest freely. If you are about to write a width, you are m
 
 - `data-theme="light|dark"` on `<html>` or any subtree; omit it to follow the system.
 - `data-palette="volt"` (fifteen palettes; see `docs/tweaks.html`) recolours neutrals and accent together. A brand palette is one CSS block that sets about twenty variables; the page shows how.
+- `data-type="editorial"` (twelve type sets, all open source) changes the heading, interface and mono faces together.
 - `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
-- The Tweaks panel lets you try palettes, tone, density, corners, heading font and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
+- The Tweaks panel lets you try palettes, tone, typefaces, density, corners and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
 
 **Checks before you call a screen done.**
 

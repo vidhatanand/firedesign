@@ -9,6 +9,8 @@
      .fd-tweaks-body > .fd-tweaks-section > .fd-tweaks-eyebrow + .fd-tweaks-row…
      .fd-tweaks-foot  (Copy CSS, .fd-tweaks-summary)
    .fd-tweaks-swatch[data-palette][role=radio]   a palette in miniature: page, ink, accent
+   .fd-tweaks-face[data-value][role=radio]       a type set: "Ag" set in its headings face (.fd-tweaks-face-sample[data-type]) and its name
+   .fd-tweaks-readout                            the selected type set's faces, beside the Typeface label
    .fd-tweaks-launcher                           the floating round button (html[data-fd-tweaks] without a trigger)
    ========================================================================== */
 
@@ -22,8 +24,9 @@
   --fd-tweaks-sheet-max: 72dvh;      /* bottom-sheet height cap */
   --fd-tweaks-grab-w: 36px;          /* bottom-sheet grab bar */
   --fd-tweaks-grab-h: 4px;
-  /* palette swatches */
+  /* palette swatches and typeface tiles */
   --fd-tweaks-swatch-h: 40px;        /* the tile */
+  --fd-tweaks-face-size: 1.25rem;    /* the "Ag" sample in a typeface tile */
   --fd-tweaks-dot: 14px;             /* the accent dot */
   --fd-tweaks-ink-len: 12px;         /* the ink bar beside it */
   --fd-tweaks-ink-w: 2px;
@@ -38,8 +41,6 @@
   --fd-tweaks-rule: 12px;            /* length of the line-weight marks in the Lines control */
   /* launcher */
   --fd-tweaks-launcher: 40px;
-  /* the serif heading option (also written to --fd-font-display by tweaks.js) */
-  --fd-tweaks-serif: ui-serif, "New York", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
 }
 
 /* ---------- Frame ---------- */
@@ -128,12 +129,18 @@
 .fd-tweaks-value[data-changed] { color: var(--fd-accent-text); cursor: pointer; }
 .fd-tweaks-value[data-changed]:hover { background: var(--fd-accent-8); }
 .fd-tweaks-value:not([data-changed]) { cursor: default; }
+.fd-tweaks-row-head > .fd-tweaks-label { flex: none; }
+/* The selected type set's faces: mono, and it gives way (ellipsis) before the label does. */
+.fd-tweaks-readout {
+  flex: 0 1 auto; min-inline-size: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--fd-text-3);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs);
+}
 
 /* Segmented controls fill their cell; the theme one carries icons and labels. */
 .fd-tweaks .fd-segmented { inline-size: 100%; }
 .fd-tweaks .fd-segmented-item { padding-inline: var(--fd-space-1-5); }
-.fd-tweaks-face[data-face="mono"] { font-family: var(--fd-font-mono); }
-.fd-tweaks-face[data-face="serif"] { font-family: var(--fd-tweaks-serif); }
 .fd-tweaks-rule {
   display: inline-block; inline-size: var(--fd-tweaks-rule); block-size: var(--_tw-w, var(--fd-hairline));
   border-radius: var(--fd-radius-full); background: currentColor;
@@ -171,22 +178,30 @@
 }
 .fd-tweaks-tone > input[type="range"]::-moz-range-progress { background: transparent; }
 
-/* ---------- Palette swatches ---------- */
-.fd-tweaks-palettes {
+/* ---------- Palette swatches and typeface tiles ----------
+   Two radio grids built the same way: a button (the radio), a 40px tile that carries the selection ring, a name. */
+.fd-tweaks-palettes,
+.fd-tweaks-faces {
   display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--fd-space-2-5) var(--fd-space-1-5);
 }
-.fd-tweaks-swatch {
+.fd-tweaks-faces { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.fd-tweaks-swatch,
+.fd-tweaks-face {
   display: grid; gap: var(--fd-space-1); min-inline-size: 0;
   border-radius: var(--fd-radius-md);
   color: var(--fd-text-3);
   font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
   transition: color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
 }
-.fd-tweaks-swatch:hover { color: var(--fd-text-2); }
-.fd-tweaks-swatch:active { scale: var(--fd-press-scale); }
-.fd-tweaks-swatch:focus-visible { box-shadow: none; }
-.fd-tweaks-swatch-tile {
+.fd-tweaks-swatch:hover,
+.fd-tweaks-face:hover { color: var(--fd-text-2); }
+.fd-tweaks-swatch:active,
+.fd-tweaks-face:active { scale: var(--fd-press-scale); }
+.fd-tweaks-swatch:focus-visible,
+.fd-tweaks-face:focus-visible { box-shadow: none; }
+.fd-tweaks-swatch-tile,
+.fd-tweaks-face-sample {
   display: flex; align-items: center; justify-content: center; gap: var(--fd-space-1);
   block-size: var(--fd-tweaks-swatch-h);
   border-radius: var(--fd-radius-md);
@@ -194,14 +209,17 @@
   box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line);
   transition: box-shadow var(--fd-dur-2) var(--fd-ease-out);
 }
-.fd-tweaks-swatch:hover > .fd-tweaks-swatch-tile { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong); }
-.fd-tweaks-swatch[aria-checked="true"] > .fd-tweaks-swatch-tile {
+.fd-tweaks-swatch:hover > .fd-tweaks-swatch-tile,
+.fd-tweaks-face:hover > .fd-tweaks-face-sample { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong); }
+.fd-tweaks-swatch[aria-checked="true"] > .fd-tweaks-swatch-tile,
+.fd-tweaks-face[aria-checked="true"] > .fd-tweaks-face-sample {
   box-shadow:
     inset 0 0 0 var(--fd-hairline) var(--fd-line),
     0 0 0 var(--fd-tweaks-ring-gap) var(--_tw-panel),
     0 0 0 calc(var(--fd-tweaks-ring-gap) + var(--fd-tweaks-ring)) var(--fd-accent);
 }
-.fd-tweaks-swatch:focus-visible > .fd-tweaks-swatch-tile {
+.fd-tweaks-swatch:focus-visible > .fd-tweaks-swatch-tile,
+.fd-tweaks-face:focus-visible > .fd-tweaks-face-sample {
   box-shadow:
     inset 0 0 0 var(--fd-hairline) var(--fd-line),
     0 0 0 var(--fd-tweaks-ring-gap) var(--_tw-panel),
@@ -218,9 +236,18 @@
   border-radius: var(--fd-radius-full);
   background: var(--fd-ink);
 }
-.fd-tweaks-swatch-name { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
-.fd-tweaks-swatch[aria-checked="true"] { color: var(--fd-text); }
+.fd-tweaks-swatch-name,
+.fd-tweaks-face-name { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.fd-tweaks-swatch[aria-checked="true"],
+.fd-tweaks-face[aria-checked="true"] { color: var(--fd-text); }
 
+/* The sample carries data-type, so its set's tokens resolve on it: the headings face, weight and tracking. */
+.fd-tweaks-face-sample {
+  overflow: hidden;
+  color: var(--fd-text);
+  font-family: var(--fd-font-display); font-size: var(--fd-tweaks-face-size); line-height: 1;
+  font-weight: var(--fd-weight-display); letter-spacing: var(--fd-ls-display);
+}
 /* ---------- Footer ---------- */
 .fd-tweaks-foot {
   flex: none;

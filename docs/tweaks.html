@@ -8,8 +8,8 @@
 <link rel="stylesheet" href="../fire/fire.css">
 <link rel="stylesheet" href="docs.css">
 <style>
-  /* A palette card paints its own page and text, so a palette or a forced theme on it is self-contained. */
-  .tw-card { display: grid; gap: var(--fd-space-3); align-content: start; min-width: 0; padding: var(--fd-space-5); border-radius: var(--fd-radius-xl); background: var(--fd-bg); color: var(--fd-text); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint); }
+  /* A palette or typeface card paints its own page, text and font, so a palette, type set or forced theme on it is self-contained. */
+  .tw-card { display: grid; gap: var(--fd-space-3); align-content: start; min-width: 0; padding: var(--fd-space-5); border-radius: var(--fd-radius-xl); background: var(--fd-bg); color: var(--fd-text); font-family: var(--fd-font-sans); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint); }
   .tw-card > .fd-nav-item { justify-self: start; }
 </style>
 <script type="module" src="docs.js"></script>
@@ -20,7 +20,7 @@
   <header class="doc-hero">
     <p class="fd-eyebrow">Foundations</p>
     <h1 class="fd-display">Theming and tweaks</h1>
-    <p class="doc-lede">Fire's whole look runs on variables: fifteen palettes recolour every neutral and the accent, tone bends whichever palette you pick, and a handful of scales set density, corners, lines, type and motion. The Tweaks panel turns all of it into live controls.</p>
+    <p class="doc-lede">Fire's whole look runs on variables: fifteen palettes recolour every neutral and the accent, tone bends whichever palette you pick, twelve type sets change the voice of the headings and the interface, and a handful of scales set density, corners, lines, text size and motion. The Tweaks panel turns all of it into live controls.</p>
   </header>
 
   <section class="doc-section" id="panel">
@@ -35,16 +35,16 @@
       <li>Any element with <code class="fd-code">data-fd-tweaks-open</code> toggles the panel and carries its <code class="fd-code">aria-expanded</code> state. The docs top bar has one.</li>
       <li>No trigger of your own? Put <code class="fd-code">data-fd-tweaks</code> on <code class="fd-code">&lt;html&gt;</code> and a round launcher appears bottom-left.</li>
       <li>Choices are saved in <code class="fd-code">localStorage["fd-tweaks"]</code> (only what differs from the default) and applied as soon as the module runs. Load <code class="fd-code">fire/boot.js</code> as a plain (non-module) script in <code class="fd-code">&lt;head&gt;</code>, before the stylesheet, and the saved look is on <code class="fd-code">&lt;html&gt;</code> before the first paint, so a reload never flashes the default. Reset leaves no attribute or inline style behind.</li>
-      <li>Copy CSS gives you a block to paste into your product: the attributes for <code class="fd-code">&lt;html&gt;</code> and a <code class="fd-code">:root</code> rule with every overridden variable, toned palette colours included.</li>
-      <li>Keyboard: Tab moves between controls, arrows move inside a group (the palette grid is 5 × 3), Escape closes the panel and returns focus to its trigger. On desktop the header drags; double-click it to dock again. Under 640px it is a bottom sheet.</li>
+      <li>Copy CSS gives you a block to paste into your product: the attributes for <code class="fd-code">&lt;html&gt;</code> and a <code class="fd-code">:root</code> rule with every overridden variable, toned palette colours included. A type set is just an attribute, so it needs <code class="fd-code">fire/typefaces.css</code> (already part of <code class="fd-code">fire.css</code>).</li>
+      <li>Keyboard: Tab moves between controls, arrows move inside a group (the palette grid is 5 × 3 and the typeface grid 4 × 3), Escape closes the panel and returns focus to its trigger. On desktop the header drags; double-click it to dock again. Under 640px it is a bottom sheet.</li>
     </ul>
     <div class="doc-table-wrap">
       <table class="doc-table">
         <thead><tr><th>JavaScript</th><th>Does</th></tr></thead>
         <tbody>
           <tr><td>open(trigger) · close() · toggle(trigger)</td><td>Show or hide the panel. Focus returns to <code class="fd-code">trigger</code> on close.</td></tr>
-          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, tone, theme, density, corners, lines, display, textSize, contrast, motion, texture }</code>.</td></tr>
-          <tr><td>set(partial)</td><td>Merge and apply, for example <code class="fd-code">set({ palette: "paper", tone: { warmth: 30 } })</code>. Unknown or out-of-range values are ignored or clamped.</td></tr>
+          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, type, tone, theme, density, corners, lines, textSize, contrast, motion, texture }</code>.</td></tr>
+          <tr><td>set(partial)</td><td>Merge and apply, for example <code class="fd-code">set({ palette: "paper", type: "editorial", tone: { warmth: 30 } })</code>. Unknown or out-of-range values are ignored or clamped.</td></tr>
           <tr><td>reset()</td><td>Everything back to the default look.</td></tr>
           <tr><td>toCss()</td><td>The Copy CSS text for the current state.</td></tr>
           <tr><td>fd:change</td><td>Fires on <code class="fd-code">&lt;html&gt;</code> after every change with <code class="fd-code">detail: { name: "tweaks", value: state }</code>.</td></tr>
@@ -287,6 +287,186 @@
     </ul>
   </section>
 
+  <section class="doc-section" id="typefaces">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Typefaces</h2>
+      <p>A type set is one attribute, <code class="fd-code">data-type</code>, on <code class="fd-code">&lt;html&gt;</code> or any subtree. It sets three voices together: <code class="fd-code">--fd-font-display</code> for headings, <code class="fd-code">--fd-font-sans</code> for the interface and <code class="fd-code">--fd-font-mono</code> for code, keys and eyebrows, plus how the headings are tracked and weighted in that face. Pick one to change a product's character without touching a component.</p>
+    </div>
+    <div class="fd-grid" data-min="lg" data-cols="3" data-gap="4">
+      <div class="tw-card" data-type="geist">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Geist</p><code class="fd-mono-sm fd-faint">geist</code></div>
+        <p class="fd-small fd-muted">Neutral and precise. The default.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="grotesk">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Grotesk</p><code class="fd-mono-sm fd-faint">grotesk</code></div>
+        <p class="fd-small fd-muted">Quirky and technical: Space Grotesk with Space Mono.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="editorial">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Editorial</p><code class="fd-mono-sm fd-faint">editorial</code></div>
+        <p class="fd-small fd-muted">A soft, old-style serif for headings over a crisp sans.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="book">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Book</p><code class="fd-mono-sm fd-faint">book</code></div>
+        <p class="fd-small fd-muted">Serif throughout, like a well-set page.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="atelier">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Atelier</p><code class="fd-mono-sm fd-faint">atelier</code></div>
+        <p class="fd-small fd-muted">Bricolage Grotesque: hand-cut, characterful, a little odd.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="poster">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Poster</p><code class="fd-mono-sm fd-faint">poster</code></div>
+        <p class="fd-small fd-muted">Tall, condensed, heavy headings, like a billboard.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="terminal">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Terminal</p><code class="fd-mono-sm fd-faint">terminal</code></div>
+        <p class="fd-small fd-muted">Everything in JetBrains Mono.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="pixel">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Pixel</p><code class="fd-mono-sm fd-faint">pixel</code></div>
+        <p class="fd-small fd-muted">Bitmap headings over a mono interface.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="matrix">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Matrix</p><code class="fd-mono-sm fd-faint">matrix</code></div>
+        <p class="fd-small fd-muted">Dot-matrix headings, like a departure board.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="cyber">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Cyber</p><code class="fd-mono-sm fd-faint">cyber</code></div>
+        <p class="fd-small fd-muted">Squared, sci-fi lettering: Oxanium.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="loud">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Loud</p><code class="fd-mono-sm fd-faint">loud</code></div>
+        <p class="fd-small fd-muted">Wide, rounded, unmissable headings: Unbounded.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+      <div class="tw-card" data-type="gallery">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Gallery</p><code class="fd-mono-sm fd-faint">gallery</code></div>
+        <p class="fd-small fd-muted">Art-house: Syne headings, DM Sans and DM Mono.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start monitoring</button>
+          <button class="fd-btn" data-size="sm" type="button">View docs</button>
+        </div>
+      </div>
+    </div>
+    <h3 class="doc-sub">The twelve sets</h3>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Set</th><th>Headings</th><th>Interface</th><th>Mono</th></tr></thead>
+        <tbody>
+          <tr><td><code class="fd-code">geist</code></td><td>Geist</td><td>Geist</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">grotesk</code></td><td>Space Grotesk</td><td>Space Grotesk</td><td>Space Mono</td></tr>
+          <tr><td><code class="fd-code">editorial</code></td><td>Fraunces</td><td>Instrument Sans</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">book</code></td><td>Newsreader</td><td>Newsreader</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">atelier</code></td><td>Bricolage Grotesque</td><td>Bricolage Grotesque</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">poster</code></td><td>Big Shoulders Display</td><td>Archivo</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">terminal</code></td><td>JetBrains Mono</td><td>JetBrains Mono</td><td>JetBrains Mono</td></tr>
+          <tr><td><code class="fd-code">pixel</code></td><td>Pixelify Sans</td><td>Geist Mono</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">matrix</code></td><td>Doto</td><td>Geist</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">cyber</code></td><td>Oxanium</td><td>Oxanium</td><td>JetBrains Mono</td></tr>
+          <tr><td><code class="fd-code">loud</code></td><td>Unbounded</td><td>Manrope</td><td>Geist Mono</td></tr>
+          <tr><td><code class="fd-code">gallery</code></td><td>Syne</td><td>DM Sans</td><td>DM Mono</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>Geist is the default and needs no attribute. The Tweaks panel removes <code class="fd-code">data-type</code> when you pick it, and saves the choice with the rest.</li>
+      <li>Every face is open source under the SIL Open Font License 1.1. The licences are in <code class="fd-code">fire/fonts/licenses/</code>.</li>
+      <li>A font file downloads only when a set that uses it is on the page, so a product that ships one set pays for one set. The Tweaks panel shows all twelve in its picker, so opening it loads their heading faces.</li>
+      <li>A few sets also change the heading sizes: Loud steps them down because a wide face reads larger, and Matrix steps them up because dots need room to read as letters.</li>
+      <li>To add a set: put the woff2 file in <code class="fd-code">fire/fonts/</code>, add an <code class="fd-code">@font-face</code> and a <code class="fd-code">[data-type="name"]</code> block to <code class="fd-code">fire/typefaces.css</code>, and add an entry to <code class="fd-code">fire/js/typefaces.js</code> so the panel lists it.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="tone">
     <div class="doc-section-head">
       <h2 class="fd-h3">Tone</h2>
@@ -332,7 +512,9 @@
           <tr><td>--fd-motion</td><td>1</td><td>Every duration (<code class="fd-code">--fd-dur-*</code> and timed component tokens). 0 turns motion off; reduced motion sets it for you.</td></tr>
           <tr><td>--fd-texture</td><td>1</td><td>Strength of the generative textures, 0 to 1.5.</td></tr>
           <tr><td>--fd-hairline</td><td>1px</td><td>The width of every rule, edge and ring.</td></tr>
-          <tr><td>--fd-font-display</td><td>var(--fd-font-sans)</td><td>The face of headings and display type. Point it at <code class="fd-code">var(--fd-font-mono)</code> or a serif stack to change the voice.</td></tr>
+          <tr><td>--fd-font-display</td><td>var(--fd-font-sans)</td><td>The face of headings and display type. A type set points it at the set's headings face; set it by hand only for a one-off.</td></tr>
+          <tr><td>--fd-weight-display</td><td>500</td><td>The weight of headings. A type set may ask for a heavier or lighter cut, so a condensed face can run at 800 and a serif at 500.</td></tr>
+          <tr><td>data-type</td><td>(geist)</td><td>A type set, on <code class="fd-code">&lt;html&gt;</code> or any subtree: it sets the headings, interface and mono faces together with the heading tracking and weight. Geist needs no attribute.</td></tr>
           <tr><td>data-density</td><td>comfortable</td><td><code class="fd-code">compact</code> or <code class="fd-code">spacious</code>: control and row heights, control padding, the gutter and the space scale.</td></tr>
           <tr><td>data-contrast</td><td>(none)</td><td><code class="fd-code">high</code> strengthens muted text, lines and control edges.</td></tr>
           <tr><td>data-text-size</td><td>(md)</td><td><code class="fd-code">sm</code> or <code class="fd-code">lg</code> on <code class="fd-code">&lt;html&gt;</code>: the root size, so everything set in rem follows.</td></tr>

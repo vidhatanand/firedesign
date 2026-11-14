@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navigation · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="navigation">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Navigation</h1>
+    <p class="doc-lede">Tabs, segmented controls, category strips and the small wayfinding pieces between them. Selection moves; it never jumps. A thin accent line or a raised white thumb slides to where you clicked.</p>
+  </header>
+
+  <section class="doc-section" id="tabs">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tabs</h2>
+      <p>Use underline tabs to switch between views of the same object, like the output formats of a run. They sit on a hairline; the accent underline slides between tabs with a slight spring.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-tabs" role="tablist" aria-label="Run output">
+        <button class="fd-tab" role="tab" aria-selected="true" aria-controls="tab-markdown" data-value="markdown"><i data-icon="file-text"></i>Markdown</button>
+        <button class="fd-tab" role="tab" aria-selected="false" aria-controls="tab-html" data-value="html"><i data-icon="code"></i>HTML</button>
+        <button class="fd-tab" role="tab" aria-selected="false" aria-controls="tab-json" data-value="json"><i data-icon="braces"></i>JSON</button>
+        <button class="fd-tab" role="tab" aria-selected="false" aria-controls="tab-links" data-value="links"><i data-icon="link"></i>Links <span class="fd-tab-count">128</span></button>
+        <button class="fd-tab" role="tab" aria-selected="false" aria-controls="tab-shot" disabled><i data-icon="image"></i>Screenshot</button>
+      </div>
+      <div class="fd-tab-panel" id="tab-markdown"><p class="fd-muted"># Changelog — 2,481 words of clean markdown from docs.quarry.dev/changelog.</p></div>
+      <div class="fd-tab-panel" id="tab-html" hidden><p class="fd-muted">Cleaned HTML with scripts, styles and navigation removed.</p></div>
+      <div class="fd-tab-panel" id="tab-json" hidden><p class="fd-muted">Structured fields extracted with your schema.</p></div>
+      <div class="fd-tab-panel" id="tab-links" hidden><p class="fd-muted">128 links found on the page, 41 of them on the same domain.</p></div>
+      <div class="fd-tab-panel" id="tab-shot" hidden></div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <p class="doc-specimen-label">data-size="sm" · route tabs</p>
+        <nav class="fd-tabs" data-size="sm" aria-label="Billing">
+          <a class="fd-tab" href="#plan" aria-current="page">Plan</a>
+          <a class="fd-tab" href="#coupons">Coupons</a>
+          <a class="fd-tab" href="#invoices">Invoices <span class="fd-tab-count">4</span></a>
+          <a class="fd-tab" href="#referrals">Referrals</a>
+        </nav>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <p class="doc-specimen-label">overflow</p>
+        <div class="fd-tabs" role="tablist" aria-label="Endpoints" style="width: 100%">
+          <button class="fd-tab" role="tab" aria-selected="false">Overview</button>
+          <button class="fd-tab" role="tab" aria-selected="false">/search</button>
+          <button class="fd-tab" role="tab" aria-selected="false">/scrape</button>
+          <button class="fd-tab" role="tab" aria-selected="true">/crawl</button>
+          <button class="fd-tab" role="tab" aria-selected="false">/map</button>
+          <button class="fd-tab" role="tab" aria-selected="false">/extract</button>
+          <button class="fd-tab" role="tab" aria-selected="false">/agent</button>
+          <button class="fd-tab" role="tab" aria-selected="false">Webhooks</button>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Buttons with <code class="fd-code">role="tab"</code> and <code class="fd-code">aria-controls</code> get the full tabs pattern: arrow keys, Home and End move and select, panels show and hide. Links with <code class="fd-code">aria-current="page"</code> are route tabs.</li>
+      <li>When tabs overflow, the strip scrolls sideways, fades the clipped edge and keeps the selected tab in view.</li>
+      <li>The tablist fires <code class="fd-code">fd:change</code> with <code class="fd-code">{ value }</code>: the tab's <code class="fd-code">data-value</code>, else its panel id.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="segmented">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Segmented control</h2>
+      <p>Use a segmented control for two to five mutually exclusive options that change what you see right here: audience, state filter, theme. One white thumb slides between the options.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <div class="fd-segmented" role="radiogroup" aria-label="Audience">
+        <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="human">Human</button>
+        <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="agent">Agent</button>
+      </div>
+      <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Monitor state">
+        <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="all">All <span class="fd-segmented-count">3</span></button>
+        <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="active">Active <span class="fd-segmented-count">2</span></button>
+        <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="paused">Paused <span class="fd-segmented-count">1</span></button>
+      </div>
+      <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Chart">
+        <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="line"><i data-icon="chart-line"></i>Line</button>
+        <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="bars"><i data-icon="chart-column"></i>Bars</button>
+        <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="table" disabled><i data-icon="table"></i>Table</button>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="center" data-code>
+        <p class="doc-specimen-label">data-icon-only</p>
+        <div class="fd-segmented" data-icon-only data-size="sm" role="radiogroup" aria-label="Theme">
+          <button class="fd-segmented-item" role="radio" aria-checked="false" aria-label="Light" data-value="light"><i data-icon="sun"></i></button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" aria-label="Dark" data-value="dark"><i data-icon="moon"></i></button>
+          <button class="fd-segmented-item" role="radio" aria-checked="true" aria-label="System" data-value="system"><i data-icon="monitor"></i></button>
+        </div>
+        <div class="fd-segmented" data-icon-only role="radiogroup" aria-label="Layout">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" aria-label="Grid" data-value="grid"><i data-icon="layout-grid"></i></button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" aria-label="List" data-value="list"><i data-icon="layout-list"></i></button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-layout="center" data-code>
+        <p class="doc-specimen-label">data-variant="grouped" · data-tone="accent"</p>
+        <div class="fd-segmented" data-variant="grouped" data-tone="accent" role="radiogroup" aria-label="Endpoint">
+          <div class="fd-segmented-group" role="presentation">
+            <span class="fd-segmented-label" aria-hidden="true">Discover</span>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="search"><i data-icon="search"></i>Search</button>
+          </div>
+          <div class="fd-segmented-group" role="presentation">
+            <span class="fd-segmented-label" aria-hidden="true">Extract</span>
+            <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="scrape"><i data-icon="file-text"></i>Scrape</button>
+          </div>
+          <div class="fd-segmented-group" role="presentation">
+            <span class="fd-segmented-label" aria-hidden="true">Crawl</span>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="map"><i data-icon="map"></i>Map</button>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="crawl"><i data-icon="network"></i>Crawl</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code>
+      <p class="doc-specimen-label">data-block</p>
+      <div class="fd-segmented" data-block role="radiogroup" aria-label="Billing period">
+        <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="monthly">Monthly</button>
+        <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="yearly">Yearly · save 20%</button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>It is a radio group: Tab reaches the selected option, arrow keys move the selection, and the group fires <code class="fd-code">fd:change</code> with the item's <code class="fd-code">data-value</code>.</li>
+      <li>Groups of toggle buttons with <code class="fd-code">aria-pressed</code>, or links with <code class="fd-code">aria-current</code>, get the same sliding thumb.</li>
+      <li>More than five options, or options that navigate to another page, belong in tabs.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="chip-nav">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Chip nav</h2>
+      <p>A category strip for browsing a catalog. Lighter than tabs: no underline, just ink. It scrolls sideways on narrow screens and fades at the clipped edge.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <nav class="fd-chip-nav" aria-label="Provider categories">
+        <a class="fd-chip" href="#all" aria-current="page"><i data-icon="layout-grid"></i><span>All</span></a>
+        <a class="fd-chip" href="#company"><i data-icon="building-2"></i><span>Company</span></a>
+        <a class="fd-chip" href="#places"><i data-icon="map-pin"></i><span>Places</span></a>
+        <a class="fd-chip" href="#people"><i data-icon="users"></i><span>People</span></a>
+        <a class="fd-chip" href="#social"><i data-icon="share-2"></i><span>Social</span></a>
+        <a class="fd-chip" href="#jobs"><i data-icon="briefcase"></i><span>Jobs</span></a>
+        <a class="fd-chip" href="#records"><i data-icon="landmark"></i><span>Public records</span></a>
+        <a class="fd-chip" href="#finance"><i data-icon="trending-up"></i><span>Finance</span></a>
+        <a class="fd-chip" href="#marketing"><i data-icon="megaphone"></i><span>Marketing</span></a>
+        <a class="fd-chip" href="#developer"><i data-icon="terminal"></i><span>Developer</span></a>
+      </nav>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-code>
+      <p class="doc-specimen-label">buttons · narrow</p>
+      <div class="fd-chip-nav" role="group" aria-label="Filter runs" style="width: 320px">
+        <button class="fd-chip" type="button" aria-pressed="false"><i data-icon="layers"></i><span>All runs</span> <span class="fd-chip-count">214</span></button>
+        <button class="fd-chip" type="button" aria-pressed="true"><i data-icon="circle-check"></i><span>Completed</span> <span class="fd-chip-count">198</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false"><i data-icon="circle-x"></i><span>Failed</span> <span class="fd-chip-count">9</span></button>
+        <button class="fd-chip" type="button" aria-pressed="false"><i data-icon="clock"></i><span>Queued</span> <span class="fd-chip-count">7</span></button>
+        <button class="fd-chip" type="button" disabled><i data-icon="archive"></i><span>Archived</span></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Links mark the current category with <code class="fd-code">aria-current="page"</code>; button chips are single-select with <code class="fd-code">aria-pressed</code> and fire <code class="fd-code">fd:change</code>.</li>
+      <li>The selected chip turns weight 450. Its label width is reserved up front, so neighbours never shift.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="subnav">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Subnav</h2>
+      <p>The side navigation inside settings: a 280px column of 40px rows. When it cannot sit beside the content it turns into a row of pills that scrolls sideways.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="center" data-code>
+        <nav class="fd-subnav" aria-label="Settings" style="width: 280px">
+          <a class="fd-subnav-item" href="#account"><i data-icon="user"></i><span>Account</span></a>
+          <a class="fd-subnav-item" href="#team" aria-current="page"><i data-icon="users"></i><span>Team</span><span class="fd-subnav-meta">4</span></a>
+          <a class="fd-subnav-item" href="#billing"><i data-icon="credit-card"></i><span>Billing</span></a>
+          <a class="fd-subnav-item" href="#sources"><i data-icon="database"></i><span>Data sources</span></a>
+          <a class="fd-subnav-item" href="#apps"><i data-icon="plug"></i><span>Connected apps</span></a>
+          <a class="fd-subnav-item" href="#notifications"><i data-icon="bell"></i><span>Notifications</span></a>
+          <hr class="fd-subnav-sep">
+          <a class="fd-subnav-item" href="#advanced"><i data-icon="settings-2"></i><span>Advanced</span></a>
+          <button class="fd-subnav-item" type="button" disabled><i data-icon="shield-check"></i><span>SSO</span><span class="fd-subnav-meta">Scale</span></button>
+        </nav>
+      </div>
+      <div class="doc-specimen" data-layout="center" data-code>
+        <p class="doc-specimen-label">in a container under 760px</p>
+        <div class="fd-cq" style="width: 340px">
+          <nav class="fd-subnav" aria-label="Settings, compact">
+            <a class="fd-subnav-item" href="#account"><i data-icon="user"></i><span>Account</span></a>
+            <a class="fd-subnav-item" href="#team" aria-current="page"><i data-icon="users"></i><span>Team</span></a>
+            <a class="fd-subnav-item" href="#billing"><i data-icon="credit-card"></i><span>Billing</span></a>
+            <a class="fd-subnav-item" href="#sources"><i data-icon="database"></i><span>Data sources</span></a>
+            <a class="fd-subnav-item" href="#apps"><i data-icon="plug"></i><span>Connected apps</span></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="wayfinding">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Breadcrumb and back</h2>
+      <p>Use a breadcrumb when a screen is several levels deep (a run inside a monitor); use a back link when there is one obvious place to return to.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <nav class="fd-breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="#monitors"><i data-icon="radar"></i>Monitors</a></li>
+          <li><a href="#monitor"><span class="fd-mono">pricing-pages</span></a></li>
+          <li><span aria-current="page">Run 2,481</span></li>
+        </ol>
+      </nav>
+      <nav class="fd-breadcrumb" aria-label="Breadcrumb, settings">
+        <ol>
+          <li><a href="#settings">Settings</a></li>
+          <li><a href="#apps">Connected apps</a></li>
+          <li><span aria-current="page">Slack workspace for quarry-eng and the release channel</span></li>
+        </ol>
+      </nav>
+      <div class="fd-row" style="--fd-gap: 24px">
+        <a class="fd-back" href="#overview"><i data-icon="arrow-left"></i><span>Back to dashboard</span></a>
+        <a class="fd-back" href="#monitors"><i data-icon="arrow-left"></i><span>Back to monitors</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="pagination">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pagination</h2>
+      <p>Logs and tables page with a count on the left and joined previous and next buttons on the right. Use the numbered variant only when people jump to a page they remember.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <nav class="fd-pagination" aria-label="Pagination">
+        <p class="fd-pagination-info">Page <b>1</b> of 12</p>
+        <div class="fd-btn-group">
+          <button class="fd-btn" type="button" data-icon-only aria-label="Previous page" disabled><i data-icon="chevron-left"></i></button>
+          <button class="fd-btn" type="button" data-icon-only aria-label="Next page"><i data-icon="chevron-right"></i></button>
+        </div>
+      </nav>
+      <nav class="fd-pagination" aria-label="Pagination, results">
+        <p class="fd-pagination-info">Showing <b>51–100</b> of 2,481 requests</p>
+        <div class="fd-btn-group">
+          <button class="fd-btn" type="button" data-size="sm" data-icon-only aria-label="Previous page"><i data-icon="chevron-left"></i></button>
+          <button class="fd-btn" type="button" data-size="sm" data-icon-only aria-label="Next page"><i data-icon="chevron-right"></i></button>
+        </div>
+      </nav>
+      <nav class="fd-pagination" aria-label="Pagination, empty">
+        <p class="fd-pagination-info">0 monitors</p>
+        <div class="fd-btn-group">
+          <button class="fd-btn" type="button" data-icon-only aria-label="Previous page" disabled><i data-icon="chevron-left"></i></button>
+          <button class="fd-btn" type="button" data-icon-only aria-label="Next page" disabled><i data-icon="chevron-right"></i></button>
+        </div>
+      </nav>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-code>
+      <p class="doc-specimen-label">data-variant="numbered"</p>
+      <nav class="fd-pagination" data-variant="numbered" aria-label="Pagination, numbered">
+        <a class="fd-btn" data-variant="ghost" data-size="sm" href="#p3"><i data-icon="chevron-left"></i><span>Previous</span></a>
+        <div class="fd-pagination-pages">
+          <a class="fd-pagination-page" href="#p1">1</a>
+          <span class="fd-pagination-gap" aria-hidden="true">…</span>
+          <a class="fd-pagination-page" href="#p3">3</a>
+          <a class="fd-pagination-page" href="#p4" aria-current="page">4</a>
+          <a class="fd-pagination-page" href="#p5">5</a>
+          <span class="fd-pagination-gap" aria-hidden="true">…</span>
+          <a class="fd-pagination-page" href="#p12">12</a>
+        </div>
+        <a class="fd-btn" data-variant="ghost" data-size="sm" href="#p5"><span>Next</span><i data-icon="chevron-right" data-nudge></i></a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="doc-section" id="steps">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Steps</h2>
+      <p>For setup flows with a fixed order, like creating a monitor. Finished steps show a check, the current one wears the accent, and the rest wait in outline.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <ol class="fd-steps" id="new-monitor-steps" aria-label="New monitor" data-current="1">
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Choose pages</span><span class="fd-step-desc">3 URLs</span></span></li>
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Set a schedule</span><span class="fd-step-desc">Every 6 hours</span></span></li>
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Notify</span><span class="fd-step-desc">Webhook or email</span></span></li>
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Review</span></span></li>
+      </ol>
+      <div class="fd-row" style="--fd-gap: 8px">
+        <button class="fd-btn" type="button" data-size="sm" data-fd-step="prev" aria-controls="new-monitor-steps"><i data-icon="arrow-left"></i><span>Back</span></button>
+        <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-step="next" aria-controls="new-monitor-steps"><span>Continue</span><i data-icon="arrow-right" data-nudge></i></button>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code>
+        <p class="doc-specimen-label">data-orientation="vertical"</p>
+        <ol class="fd-steps" data-orientation="vertical" aria-label="Connect a data source">
+          <li class="fd-step" data-state="done"><span class="fd-step-marker">1</span><span class="fd-step-body"><span class="fd-step-title">Create an API key</span><span class="fd-step-desc">ember_live_…4f2a, created Nov 12</span></span></li>
+          <li class="fd-step" data-state="done"><span class="fd-step-marker">2</span><span class="fd-step-body"><span class="fd-step-title">Install the SDK</span><span class="fd-step-desc">npm i @ember/sdk</span></span></li>
+          <li class="fd-step" aria-current="step"><span class="fd-step-marker">3</span><span class="fd-step-body"><span class="fd-step-title">Make your first request</span><span class="fd-step-desc">Scrape any page to see the response shape.</span></span></li>
+          <li class="fd-step"><span class="fd-step-marker">4</span><span class="fd-step-body"><span class="fd-step-title">Add a webhook</span></span></li>
+        </ol>
+      </div>
+      <div class="doc-specimen" data-code>
+        <p class="doc-specimen-label">error</p>
+        <ol class="fd-steps" data-orientation="vertical" aria-label="Import">
+          <li class="fd-step" data-state="done"><span class="fd-step-marker">1</span><span class="fd-step-body"><span class="fd-step-title">Upload sitemap</span><span class="fd-step-desc">quarry.dev/sitemap.xml</span></span></li>
+          <li class="fd-step" data-state="error" aria-current="step"><span class="fd-step-marker">!</span><span class="fd-step-body"><span class="fd-step-title">Validate URLs</span><span class="fd-step-desc">14 URLs return 404. Remove them or replace them to continue.</span></span></li>
+          <li class="fd-step"><span class="fd-step-marker">3</span><span class="fd-step-body"><span class="fd-step-title">Start crawl</span></span></li>
+        </ol>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Set <code class="fd-code">data-current</code> (0-based) on the list, or call <code class="fd-code">setStep(steps, index)</code>; it marks earlier steps done and fires <code class="fd-code">fd:change</code>. Buttons with <code class="fd-code">data-fd-step="next|prev"</code> and <code class="fd-code">aria-controls</code> drive it without code.</li>
+      <li>Leave <code class="fd-code">.fd-step-marker</code> empty to number steps automatically. Under 560px only the current step keeps its label.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="toc">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">On this page</h2>
+      <p>Long reference pages list their sections beside the content. With <code class="fd-code">data-fd-scrollspy</code> the marker follows your scroll; this one tracks the sections of this page.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <nav class="fd-toc" aria-label="On this page" data-fd-scrollspy style="width: 240px">
+        <p class="fd-toc-title">On this page</p>
+        <div class="fd-toc-list">
+          <a class="fd-toc-item" href="#tabs">Tabs</a>
+          <a class="fd-toc-item" href="#segmented">Segmented control</a>
+          <a class="fd-toc-item" href="#chip-nav">Chip nav</a>
+          <a class="fd-toc-item" href="#subnav">Subnav</a>
+          <a class="fd-toc-item" href="#wayfinding">Breadcrumb and back</a>
+          <a class="fd-toc-item" href="#pagination" data-level="2">Pagination</a>
+          <a class="fd-toc-item" href="#steps" data-level="2">Steps</a>
+          <a class="fd-toc-item" href="#toc">On this page</a>
+          <a class="fd-toc-item" href="#api">Reference</a>
+        </div>
+      </nav>
+    </div>
+  </section>
+
+  <section class="doc-section" id="api">
+    <div class="doc-section-head"><h2 class="fd-h3">Reference</h2></div>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>.fd-tabs</td><td><code class="fd-code">role="tablist"</code> of <code class="fd-code">.fd-tab</code> buttons, or a <code class="fd-code">nav</code> of links. <code class="fd-code">data-size="sm"</code>. Parts: <code class="fd-code">.fd-tab-count</code>, <code class="fd-code">.fd-tab-panel</code>, <code class="fd-code">.fd-tabs-indicator</code> (added).</td></tr>
+        <tr><td>.fd-segmented</td><td><code class="fd-code">role="radiogroup"</code> of <code class="fd-code">.fd-segmented-item[role="radio"]</code>. <code class="fd-code">data-size="sm"</code>, <code class="fd-code">data-icon-only</code>, <code class="fd-code">data-block</code>, <code class="fd-code">data-tone="accent"</code>, <code class="fd-code">data-variant="grouped"</code> with <code class="fd-code">.fd-segmented-group</code> and <code class="fd-code">.fd-segmented-label</code>. <code class="fd-code">.fd-segmented-count</code>.</td></tr>
+        <tr><td>.fd-chip-nav</td><td><code class="fd-code">.fd-chip</code> links (<code class="fd-code">aria-current</code>) or buttons (<code class="fd-code">aria-pressed</code>), <code class="fd-code">.fd-chip-count</code>.</td></tr>
+        <tr><td>.fd-subnav</td><td><code class="fd-code">.fd-subnav-item</code>, <code class="fd-code">.fd-subnav-meta</code>, <code class="fd-code">.fd-subnav-sep</code>. Becomes a pill row in containers under 760px.</td></tr>
+        <tr><td>.fd-breadcrumb, .fd-back</td><td>Breadcrumb wraps an <code class="fd-code">ol</code>; the last item carries <code class="fd-code">aria-current="page"</code>. Back is a link with a leading arrow.</td></tr>
+        <tr><td>.fd-pagination</td><td><code class="fd-code">.fd-pagination-info</code> + <code class="fd-code">.fd-btn-group</code>, or <code class="fd-code">data-variant="numbered"</code> with <code class="fd-code">.fd-pagination-pages</code>, <code class="fd-code">-page</code>, <code class="fd-code">-gap</code>.</td></tr>
+        <tr><td>.fd-steps</td><td><code class="fd-code">.fd-step</code> with <code class="fd-code">data-state="done|current|error"</code> or <code class="fd-code">aria-current="step"</code>; parts <code class="fd-code">-marker</code>, <code class="fd-code">-body</code>, <code class="fd-code">-title</code>, <code class="fd-code">-desc</code>. <code class="fd-code">data-orientation="vertical"</code>, <code class="fd-code">data-current</code>.</td></tr>
+        <tr><td>.fd-toc</td><td><code class="fd-code">.fd-toc-title</code>, <code class="fd-code">.fd-toc-list</code>, <code class="fd-code">.fd-toc-item</code> (<code class="fd-code">data-level="2"</code>), <code class="fd-code">data-fd-scrollspy</code>, <code class="fd-code">data-offset</code> (px from the top, default 96).</td></tr>
+        <tr><td>nav.js</td><td><code class="fd-code">selectTab(tab)</code>, <code class="fd-code">selectSegment(item)</code>, <code class="fd-code">setStep(steps, index)</code>, <code class="fd-code">refresh(el)</code> after changing content. Every control fires a bubbling <code class="fd-code">fd:change</code> with <code class="fd-code">{ value, item }</code>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head"><h2 class="fd-h3">Rules</h2></div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Pick by what changes: tabs switch views of one thing, a segmented control filters or toggles a mode, a chip nav browses categories, a subnav moves between settings pages.</p></div>
+      <div data-dont><strong>Don't</strong><p>Fill tabs or segments with accent colour. Selection is shown by ink, a 2px line or a white thumb; the accent line is the only colour.</p></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

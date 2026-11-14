@@ -1,0 +1,429 @@
+/* ==========================================================================
+   Loading — spinners, text loaders, skeletons and pre-built skeleton screens.
+   Loading keeps layout: a skeleton has the geometry of the thing it stands in for.
+
+   <span class="fd-spinner" data-size="16" role="status" aria-label="Loading"></span>
+   <span class="fd-braille" role="status">Loading sessions…</span>
+   <span class="fd-dots" role="status" aria-label="Loading"><span></span><span></span><span></span></span>
+   <span class="fd-bars-loader" role="status" aria-label="Loading"><span></span><span></span><span></span></span>
+   <span class="fd-pending"><span>Rotating key</span></span>
+
+   <span class="fd-skeleton" style="width:120px;height:12px"></span>      a bare block
+   <div class="fd-skeleton-text" data-lines="3"></div>                  text lines (JS fills them)
+   .fd-skeleton-title[data-size] .fd-skeleton-avatar .fd-skeleton-button .fd-skeleton-tile
+
+   Screens (an empty element is filled by fire/js/texture.js):
+   .fd-skeleton-card .fd-skeleton-grid[data-count] .fd-skeleton-table[data-rows][data-cols]
+   .fd-skeleton-stat[data-count] .fd-skeleton-chart[data-variant="bars"] .fd-skeleton-list[data-rows]
+   .fd-skeleton-thread .fd-skeleton-form[data-count] .fd-skeleton-hero .fd-skeleton-page
+
+   Content swap: <div data-fd-loading="true"> skeleton first, real content second </div>
+   Stagger: set --fd-i on a skeleton (presets do it per row/card).
+   ========================================================================== */
+
+/* ---------- Spinner ---------- */
+.fd-spinner {
+  --_sk-s: 16px;
+  display: inline-block; flex: none;
+  width: var(--_sk-s); height: var(--_sk-s);
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-top-color: currentColor;
+  vertical-align: middle;
+  animation: fd-spin 0.7s linear infinite;
+}
+.fd-spinner[data-size="12"] { --_sk-s: 12px; }
+.fd-spinner[data-size="20"] { --_sk-s: 20px; }
+.fd-spinner[data-size="24"] { --_sk-s: 24px; }
+.fd-spinner[data-size="32"] { --_sk-s: 32px; }
+.fd-spinner[data-tone="accent"] { color: var(--fd-accent); }
+.fd-spinner[data-tone="muted"] { color: var(--fd-text-3); }
+
+/* ---------- Braille text spinner ---------- */
+.fd-braille {
+  display: inline-flex; align-items: baseline; gap: var(--fd-space-1-5);
+  color: var(--fd-text-3);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm);
+}
+.fd-braille-frame {
+  display: inline-block; flex: none;
+  width: 1em; text-align: center;
+  font-family: var(--fd-font-mono);
+  color: var(--fd-text-3);
+}
+.fd-braille[data-tone="accent"] > .fd-braille-frame { color: var(--fd-accent-text); }
+
+/* ---------- Three dots ---------- */
+.fd-dots {
+  display: inline-flex; align-items: center; gap: 3px;
+  height: 1lh; vertical-align: middle;
+}
+.fd-dots > * {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: currentColor; opacity: 0.24;
+  animation: fd-dots 1.1s var(--fd-ease-in-out) infinite;
+}
+.fd-dots > :nth-child(2) { animation-delay: 0.16s; }
+.fd-dots > :nth-child(3) { animation-delay: 0.32s; }
+.fd-dots[data-size="sm"] { gap: 2px; }
+.fd-dots[data-size="sm"] > * { width: 3px; height: 3px; }
+@keyframes fd-dots { 0%, 70%, 100% { opacity: 0.24; } 35% { opacity: 1; } }
+
+/* ---------- Equaliser bars ---------- */
+.fd-bars-loader {
+  display: inline-flex; align-items: flex-end; gap: 2px;
+  height: 12px; vertical-align: middle;
+}
+.fd-bars-loader > * {
+  width: 2px; height: 100%; border-radius: 1px;
+  background: currentColor;
+  transform-origin: 50% 100%;
+  animation: fd-eq 0.9s var(--fd-ease-in-out) infinite;
+}
+.fd-bars-loader > :nth-child(1) { animation-delay: -0.6s; }
+.fd-bars-loader > :nth-child(2) { animation-delay: -0.3s; }
+.fd-bars-loader[data-tone="accent"] { color: var(--fd-accent); }
+@keyframes fd-eq { 0%, 100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+
+/* ---------- Pending: optimistic content at half strength with a tiny spinner ---------- */
+.fd-pending {
+  display: inline-flex; align-items: center; gap: var(--fd-space-2);
+  min-width: 0;
+}
+.fd-pending > * { opacity: 0.5; transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+.fd-pending::after {
+  content: "";
+  flex: none; width: 12px; height: 12px; border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--fd-text-3) 24%, transparent);
+  border-top-color: var(--fd-text-3);
+  animation: fd-spin 0.7s linear infinite;
+}
+.fd-pending[data-block] { display: flex; }
+.fd-pending[data-block]::after { margin-inline-start: auto; }
+
+/* ---------- Page bar ---------- */
+.fd-pagebar {
+  position: fixed; inset: 0 0 auto 0; z-index: var(--fd-z-toast);
+  height: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--fd-dur-4) var(--fd-ease-out);
+}
+.fd-pagebar[data-scoped] { position: absolute; z-index: var(--fd-z-sticky); }
+.fd-pagebar[data-state="running"] { opacity: 1; transition-duration: var(--fd-dur-1); }
+.fd-pagebar[data-state="done"] { opacity: 0; transition-delay: var(--fd-dur-3); }
+.fd-pagebar-fill {
+  display: block; height: 100%;
+  width: calc(var(--_sk-p, 0) * 100%);
+  border-start-end-radius: var(--fd-radius-full); border-end-end-radius: var(--fd-radius-full);
+  background: var(--fd-accent);
+  box-shadow: 0 0 8px var(--fd-accent-40), 0 0 2px var(--fd-accent-24);
+  transition: width var(--fd-dur-4) var(--fd-ease-out);
+}
+.fd-pagebar[data-state="idle"] .fd-pagebar-fill { transition: none; }
+
+/* ==========================================================================
+   Skeleton blocks
+   ========================================================================== */
+
+/* Every part is a block. Line parts (title, text lines) keep the full line height of the text
+   they replace and draw a thinner bar inside it with transparent block borders, so content
+   swaps in without moving. Radii use "h / v" so the visible bar keeps round ends. */
+:where(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-text > *, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile) {
+  --_sk-r: var(--fd-radius-xs);
+  --_sk-b: 0px;
+  display: block; flex: none;
+  width: var(--_sk-w, 100%); max-width: 100%;
+  height: var(--_sk-h, 12px);
+  border: 0 solid transparent;
+  border-block-width: var(--_sk-b);
+  border-radius: var(--_sk-r) / calc(var(--_sk-r) + var(--_sk-b));
+  background-color: var(--fd-a6);
+  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a4) 50%, transparent 70%);
+  background-size: 150% 100%;
+  background-repeat: no-repeat;
+  background-clip: padding-box;
+  background-origin: padding-box;
+  animation: fd-shimmer 1.6s var(--fd-ease-in-out) calc(var(--fd-i, 0) * 90ms) infinite both;
+}
+.fd-skeleton { --_sk-r: var(--fd-radius-sm); }
+
+/* ---------- Text lines ---------- */
+.fd-skeleton-text {
+  --_sk-lh: var(--fd-lh-md);
+  --_sk-bar: 10px;
+  display: flex; flex-direction: column;
+  width: 100%; min-width: 0;
+}
+.fd-skeleton-text > * { --_sk-b: calc((var(--_sk-lh) - var(--_sk-bar)) / 2); height: var(--_sk-lh); }
+.fd-skeleton-text > :nth-child(6n + 2) { --_sk-w: 94%; }
+.fd-skeleton-text > :nth-child(6n + 3) { --_sk-w: 97%; }
+.fd-skeleton-text > :nth-child(6n + 4) { --_sk-w: 89%; }
+.fd-skeleton-text > :nth-child(6n + 5) { --_sk-w: 93%; }
+.fd-skeleton-text > :nth-child(6n + 6) { --_sk-w: 86%; }
+.fd-skeleton-text > :last-child:not(:only-child) { --_sk-w: 60%; }
+.fd-skeleton-text > :only-child { --_sk-w: 72%; }
+.fd-skeleton-text[data-size="lg"] { --_sk-lh: var(--fd-lh-lg); --_sk-bar: 11px; }
+.fd-skeleton-text[data-size="sm"] { --_sk-lh: var(--fd-lh-sm); --_sk-bar: 9px; }
+.fd-skeleton-text[data-size="xs"] { --_sk-lh: var(--fd-lh-xs); --_sk-bar: 8px; }
+
+/* ---------- Single line at a type role's height ---------- */
+.fd-skeleton-title {
+  --_sk-lh: var(--fd-lh-title);
+  --_sk-bar: 12px;
+  --_sk-b: calc((var(--_sk-lh) - var(--_sk-bar)) / 2);
+  width: var(--_sk-w, 40%);
+  height: var(--_sk-lh);
+}
+.fd-skeleton-title[data-size="label"] { --_sk-lh: var(--fd-lh-md); --_sk-bar: 10px; }
+.fd-skeleton-title[data-size="mono"] { --_sk-lh: var(--fd-lh-sm); --_sk-bar: 9px; }
+.fd-skeleton-title[data-size="caption"] { --_sk-lh: var(--fd-lh-xs); --_sk-bar: 8px; }
+.fd-skeleton-title[data-size="eyebrow"] { --_sk-lh: var(--fd-lh-2xs); --_sk-bar: 7px; }
+.fd-skeleton-title[data-size="lead"] { --_sk-lh: var(--fd-lh-lg); --_sk-bar: 12px; }
+.fd-skeleton-title[data-size="h3"] { --_sk-lh: var(--fd-lh-h3); --_sk-bar: 15px; }
+.fd-skeleton-title[data-size="h2"] { --_sk-lh: var(--fd-lh-h2); --_sk-bar: 18px; --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-title[data-size="stat"] { --_sk-lh: var(--fd-lh-stat); --_sk-bar: 20px; --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-title[data-size="h1"] { --_sk-lh: var(--fd-lh-h1); --_sk-bar: 22px; --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-title[data-size="display"] { --_sk-lh: var(--fd-lh-display); --_sk-bar: 28px; --_sk-r: var(--fd-radius-md); }
+
+/* ---------- Avatar, button, tile ---------- */
+.fd-skeleton-avatar { --_sk-s: 32px; --_sk-r: 50%; width: var(--_sk-s); height: var(--_sk-s); }
+.fd-skeleton-avatar[data-size="16"] { --_sk-s: 16px; }
+.fd-skeleton-avatar[data-size="20"] { --_sk-s: 20px; }
+.fd-skeleton-avatar[data-size="24"] { --_sk-s: 24px; }
+.fd-skeleton-avatar[data-size="40"] { --_sk-s: 40px; }
+.fd-skeleton-avatar[data-size="48"] { --_sk-s: 48px; }
+
+.fd-skeleton-button { --_sk-r: var(--fd-radius-lg); width: var(--_sk-w, 96px); height: var(--fd-control-md); }
+.fd-skeleton-button[data-size="sm"] { --_sk-r: var(--fd-radius-md); width: var(--_sk-w, 72px); height: var(--fd-control-sm); }
+.fd-skeleton-button[data-size="lg"] { width: var(--_sk-w, 120px); height: var(--fd-control-lg); }
+.fd-skeleton-button[data-square] { width: var(--fd-control-md); }
+.fd-skeleton-button[data-size="sm"][data-square] { width: var(--fd-control-sm); }
+
+.fd-skeleton-tile { --_sk-s: 40px; --_sk-r: var(--fd-radius-lg); width: var(--_sk-s); height: var(--_sk-s); }
+.fd-skeleton-tile[data-size="16"] { --_sk-s: 16px; --_sk-r: var(--fd-radius-xs); }
+.fd-skeleton-tile[data-size="20"] { --_sk-s: 20px; --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-tile[data-size="24"] { --_sk-s: 24px; --_sk-r: var(--fd-radius-sm); }
+.fd-skeleton-tile[data-size="32"] { --_sk-s: 32px; --_sk-r: var(--fd-radius-md); }
+.fd-skeleton-tile[data-size="48"] { --_sk-s: 48px; --_sk-r: var(--fd-radius-xl); }
+
+/* ==========================================================================
+   Skeleton screens. Box styles are zero-specificity so a real component class on the
+   same element (class="fd-card fd-skeleton-card") supplies the frame instead.
+   ========================================================================== */
+
+:where(.fd-skeleton-card, .fd-skeleton-table, .fd-skeleton-stat, .fd-skeleton-chart, .fd-skeleton-list) {
+  border: 1px solid var(--fd-line-faint);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-surface);
+}
+
+/* ---------- Catalog card ---------- */
+:where(.fd-skeleton-card) { padding: var(--fd-space-5); }
+.fd-skeleton-card { display: flex; flex-direction: column; gap: var(--fd-space-4); min-width: 0; }
+.fd-skeleton-card-head { display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; }
+.fd-skeleton-card-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fd-skeleton-card-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-3);
+  margin-top: auto; padding-top: var(--fd-space-3);
+  border-top: 1px solid var(--fd-line-faint);
+}
+
+/* ---------- Card grid (same tracks as .fd-grid) ---------- */
+.fd-skeleton-grid {
+  display: grid; gap: var(--fd-gap, var(--fd-space-4));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--fd-min, 260px)), 1fr));
+}
+
+/* ---------- Table ---------- */
+.fd-skeleton-table { display: block; overflow: hidden; container-type: inline-size; min-width: 0; }
+.fd-skeleton-table-head,
+.fd-skeleton-table-row {
+  display: flex; align-items: center; gap: var(--fd-space-4);
+  padding-inline: var(--fd-row-px);
+}
+.fd-skeleton-table-head { height: var(--fd-control-lg); }
+.fd-skeleton-table-row { height: var(--fd-row); border-top: 1px solid var(--fd-line-faint); }
+.fd-skeleton-table-cell { display: flex; flex: 1 1 0; min-width: 0; }
+.fd-skeleton-table-cell:first-child { flex-grow: 1.6; }
+.fd-skeleton-table-cell:last-child:not(:first-child) { justify-content: flex-end; }
+.fd-skeleton-table-head .fd-skeleton { --_sk-h: 7px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-table-row .fd-skeleton { --_sk-h: 8px; --_sk-r: var(--fd-radius-xs); }
+@container (max-width: 480px) {
+  .fd-skeleton-table-cell:nth-child(n + 4) { display: none; }
+}
+
+/* ---------- Stat strip ---------- */
+.fd-skeleton-stat {
+  display: grid; gap: 1px; overflow: hidden;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  background: var(--fd-line-faint);
+}
+.fd-skeleton-stat-tile {
+  display: flex; flex-direction: column; gap: var(--fd-space-2);
+  padding: var(--fd-space-5);
+  background: var(--fd-surface);
+}
+
+/* ---------- Chart ---------- */
+:where(.fd-skeleton-chart) { padding: var(--fd-space-5); }
+.fd-skeleton-chart { --_sk-plot: 200px; display: flex; flex-direction: column; gap: var(--fd-space-5); min-width: 0; }
+.fd-skeleton-chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--fd-space-4); }
+.fd-skeleton-chart-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fd-skeleton-chart-body {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: var(--_sk-plot) auto;
+  column-gap: var(--fd-space-3); row-gap: var(--fd-space-2);
+}
+.fd-skeleton-chart-y { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; margin-block: -4px; }
+.fd-skeleton-chart-y > .fd-skeleton { --_sk-h: 7px; --_sk-w: 20px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-chart-y > .fd-skeleton:nth-child(odd) { --_sk-w: 26px; }
+.fd-skeleton-chart-x { grid-column: 2; display: flex; justify-content: space-between; }
+.fd-skeleton-chart-x > .fd-skeleton { --_sk-h: 7px; --_sk-w: 32px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-chart-plot {
+  position: relative; overflow: hidden;
+  background: linear-gradient(var(--fd-chart-grid) 0 1px, transparent 1px) 0 0 / 100% 25%;
+  border-bottom: 1px solid var(--fd-line);
+}
+.fd-skeleton-chart-area,
+.fd-skeleton-chart-line {
+  position: absolute; inset: 12% 0 0;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  animation: fd-pulse 2.4s var(--fd-ease-in-out) infinite;
+}
+.fd-skeleton-chart-area {
+  background: linear-gradient(var(--fd-a6), transparent);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13 L120 40 L0 40 Z'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13 L120 40 L0 40 Z'/></svg>");
+}
+.fd-skeleton-chart-line {
+  background: var(--fd-a16);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13' fill='none' stroke='black' stroke-width='1.5' vector-effect='non-scaling-stroke'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13' fill='none' stroke='black' stroke-width='1.5' vector-effect='non-scaling-stroke'/></svg>");
+}
+.fd-skeleton-chart[data-variant="bars"] .fd-skeleton-chart-line { display: none; }
+.fd-skeleton-chart[data-variant="bars"] .fd-skeleton-chart-area {
+  inset: 8% 0 0;
+  background: var(--fd-a6);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><rect x='2' y='22' width='6' height='18' rx='1'/><rect x='12' y='16' width='6' height='24' rx='1'/><rect x='22' y='26' width='6' height='14' rx='1'/><rect x='32' y='12' width='6' height='28' rx='1'/><rect x='42' y='18' width='6' height='22' rx='1'/><rect x='52' y='8' width='6' height='32' rx='1'/><rect x='62' y='20' width='6' height='20' rx='1'/><rect x='72' y='14' width='6' height='26' rx='1'/><rect x='82' y='24' width='6' height='16' rx='1'/><rect x='92' y='6' width='6' height='34' rx='1'/><rect x='102' y='15' width='6' height='25' rx='1'/><rect x='112' y='10' width='6' height='30' rx='1'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><rect x='2' y='22' width='6' height='18' rx='1'/><rect x='12' y='16' width='6' height='24' rx='1'/><rect x='22' y='26' width='6' height='14' rx='1'/><rect x='32' y='12' width='6' height='28' rx='1'/><rect x='42' y='18' width='6' height='22' rx='1'/><rect x='52' y='8' width='6' height='32' rx='1'/><rect x='62' y='20' width='6' height='20' rx='1'/><rect x='72' y='14' width='6' height='26' rx='1'/><rect x='82' y='24' width='6' height='16' rx='1'/><rect x='92' y='6' width='6' height='34' rx='1'/><rect x='102' y='15' width='6' height='25' rx='1'/><rect x='112' y='10' width='6' height='30' rx='1'/></svg>");
+}
+
+/* ---------- List ---------- */
+.fd-skeleton-list { display: block; overflow: hidden; min-width: 0; }
+.fd-skeleton-list-row {
+  display: flex; align-items: center; gap: var(--fd-space-3);
+  padding: var(--fd-space-3) var(--fd-row-px);
+}
+.fd-skeleton-list-row + .fd-skeleton-list-row { border-top: 1px solid var(--fd-line-faint); }
+.fd-skeleton-list-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ---------- Agent thread ---------- */
+.fd-skeleton-thread { display: flex; flex-direction: column; gap: var(--fd-space-6); width: 100%; min-width: 0; }
+.fd-skeleton-thread-user {
+  align-self: flex-end;
+  width: min(72%, 26rem);
+  padding: var(--fd-space-2-5) var(--fd-space-3-5);
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-fill);
+}
+.fd-skeleton-thread-user .fd-skeleton-text > * { background-color: var(--fd-a8); }
+.fd-skeleton-thread-reply { display: flex; flex-direction: column; gap: var(--fd-space-3); min-width: 0; }
+.fd-skeleton-thread-tool {
+  display: flex; align-items: center; gap: var(--fd-space-2);
+  width: min(100%, 26rem); height: var(--fd-control-md);
+  padding-inline: var(--fd-space-3);
+  border: 1px solid var(--fd-line-faint);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-surface);
+}
+.fd-skeleton-thread-tool > .fd-skeleton-title { flex: 0 1 auto; min-width: 16px; }
+
+/* ---------- Form ---------- */
+.fd-skeleton-form { display: flex; flex-direction: column; gap: var(--fd-space-5); width: 100%; min-width: 0; }
+.fd-skeleton-form-field { display: flex; flex-direction: column; gap: var(--fd-space-1-5); }
+.fd-skeleton-form-control {
+  display: flex; align-items: center;
+  height: var(--fd-control-md); padding-inline: var(--fd-control-px);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-line);
+}
+.fd-skeleton-form-control > .fd-skeleton { --_sk-h: 8px; --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-form-actions { display: flex; justify-content: flex-end; gap: var(--fd-space-2); padding-top: var(--fd-space-1); }
+
+/* ---------- Page hero ---------- */
+.fd-skeleton-hero {
+  display: flex; flex-direction: column; gap: var(--fd-space-1);
+  padding-block: var(--fd-space-12) var(--fd-space-10);
+  min-width: 0;
+}
+
+/* ---------- Whole screen ---------- */
+.fd-skeleton-page {
+  container: fd-skeleton-page / inline-size;
+  display: flex; min-height: 560px; min-width: 0;
+  border: 1px solid var(--fd-line-faint);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-bg);
+  overflow: hidden;
+}
+.fd-skeleton-page-rail {
+  flex: none; width: var(--fd-rail-w);
+  display: flex; flex-direction: column; align-items: center; gap: var(--fd-space-5);
+  padding-block: var(--fd-space-5);
+  border-inline-end: 1px solid var(--fd-line-faint);
+}
+.fd-skeleton-page-icons { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--fd-space-4); }
+.fd-skeleton-page-sep { width: 20px; height: 1px; flex: none; background: var(--fd-line-faint); }
+.fd-skeleton-page-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fd-skeleton-page-top {
+  flex: none; height: var(--fd-topbar-h);
+  display: flex; align-items: center; gap: var(--fd-space-2);
+  padding-inline: var(--fd-gutter);
+  border-bottom: 1px solid var(--fd-line-faint);
+}
+.fd-skeleton-page-body { display: flex; flex-direction: column; padding: 0 var(--fd-gutter) var(--fd-gutter); min-width: 0; }
+.fd-skeleton-page-toolbar { display: flex; align-items: center; gap: var(--fd-space-2); margin-bottom: var(--fd-space-4); min-width: 0; }
+.fd-skeleton-page-toolbar > [data-search] { flex: 0 1 280px; min-width: 120px; }
+@container fd-skeleton-page (max-width: 640px) {
+  .fd-skeleton-page-rail { display: none; }
+  .fd-skeleton-page-top > .fd-skeleton-button[data-square],
+  .fd-skeleton-page-toolbar > .fd-skeleton-button { display: none; }
+  .fd-skeleton-page-toolbar > [data-search] { flex: 1 1 auto; }
+}
+
+/* ==========================================================================
+   Content swap: [data-fd-loading] holds a skeleton and the real content.
+   The one in flow sets the height; the other is laid over it, so nothing jumps.
+   ========================================================================== */
+[data-fd-loading] { position: relative; }
+[data-fd-loading="true"] > :not([class*="fd-skeleton"]),
+[data-fd-loading="false"] > [class*="fd-skeleton"] {
+  position: absolute; inset: 0 0 auto 0;
+  visibility: hidden; opacity: 0;
+  pointer-events: none;
+}
+[data-fd-loading="false"] > [class*="fd-skeleton"] {
+  transition: opacity var(--fd-dur-3) var(--fd-ease-out), visibility 0s linear var(--fd-dur-3);
+}
+[data-fd-loading="false"] > :not([class*="fd-skeleton"]) {
+  animation: fd-rise var(--fd-dur-5) var(--fd-ease-emphasized) both;
+}
+
+/* ---------- Reduced motion: loaders hold still ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :where(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-text > *, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile),
+  .fd-skeleton-chart-area, .fd-skeleton-chart-line {
+    animation: none;
+    background-image: none;
+  }
+  .fd-skeleton-chart-area { background-image: linear-gradient(var(--fd-a6), transparent); }
+  .fd-skeleton-chart[data-variant="bars"] .fd-skeleton-chart-area { background-image: none; }
+  .fd-dots > * { animation: none; opacity: 0.5; }
+  .fd-bars-loader > * { animation: none; }
+  .fd-bars-loader > :nth-child(1) { transform: scaleY(0.5); }
+  .fd-bars-loader > :nth-child(3) { transform: scaleY(0.7); }
+}

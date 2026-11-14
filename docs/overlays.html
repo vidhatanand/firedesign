@@ -1,0 +1,1199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overlays · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="overlays">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Overlays</h1>
+    <p class="doc-lede">Menus, popovers, tooltips, dialogs, sheets, toasts and the command palette. Everything that floats is a white surface with its own 1px ring, scales in from its anchor and leaves faster than it came. Each one has a live trigger and an inline rendering below it.</p>
+  </header>
+
+  <!-- ===================== MENUS ===================== -->
+  <section class="doc-section" id="menus">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Menus</h2>
+      <p>Use a menu for a short list of actions or a choice that belongs to one trigger: switching teams, acting on a row, choosing columns. Arrow keys move, typing jumps to an item, Escape returns focus to the trigger.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-fd-menu="menu-team"><span class="fd-tile" data-size="20" data-tone="accent" data-bordered data-team-tile>E</span><span data-fd-menu-value>Ember Labs</span><i data-icon="chevrons-up-down"></i></button>
+      <div class="fd-menu" id="menu-team" popover role="menu" data-variant="switcher" aria-label="Teams">
+        <div class="fd-menu-head"><p class="fd-menu-title">Teams</p><button class="fd-menu-close" type="button" aria-label="Close menu"><i data-icon="x"></i></button></div>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-value="ember-labs"><span class="fd-tile" data-size="20" data-tone="accent" data-bordered>E</span><span class="fd-menu-item-label">Ember Labs</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="personal"><span class="fd-tile" data-size="20" data-tone="neutral">P</span><span class="fd-menu-item-label">Personal</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="acme-research"><span class="fd-tile" data-size="20" data-tone="violet">A</span><span class="fd-menu-item-label">Acme Research</span></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item"><i data-icon="plus"></i><span class="fd-menu-item-label">New team</span></button>
+        <button class="fd-menu-item"><i data-icon="settings"></i><span class="fd-menu-item-label">Team settings</span></button>
+        <button class="fd-menu-item"><i data-icon="user-plus"></i><span class="fd-menu-item-label">Invite members</span></button>
+      </div>
+
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-menu="menu-account"><span class="fd-avatar" data-size="24" data-tone="accent">MC</span><span>maya@ember.dev</span></button>
+      <div class="fd-menu" id="menu-account" popover role="menu" aria-label="Account">
+        <div class="fd-menu-head"><p class="fd-menu-title">Account</p><button class="fd-menu-close" type="button" aria-label="Close menu"><i data-icon="x"></i></button></div>
+        <button class="fd-menu-item"><i data-icon="settings"></i><span class="fd-menu-item-label">Settings</span><kbd class="fd-kbd">⌘,</kbd></button>
+        <button class="fd-menu-item"><i data-icon="credit-card"></i><span class="fd-menu-item-label">Billing</span></button>
+        <button class="fd-menu-item"><i data-icon="chart-column"></i><span class="fd-menu-item-label">Usage</span></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" data-fd-submenu="menu-theme"><i data-icon="sun"></i><span class="fd-menu-item-label">Theme</span></button>
+        <div class="fd-menu" id="menu-theme" popover role="menu" aria-label="Theme">
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="light"><i data-icon="sun"></i><span class="fd-menu-item-label">Light</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-value="dark"><i data-icon="moon"></i><span class="fd-menu-item-label">Dark</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-value="system"><i data-icon="monitor"></i><span class="fd-menu-item-label">System</span></button>
+        </div>
+        <a class="fd-menu-item" href="#menus"><i data-icon="book-open"></i><span class="fd-menu-item-label">Documentation</span><i data-icon="arrow-up-right"></i></a>
+        <button class="fd-menu-item"><i data-icon="keyboard"></i><span class="fd-menu-item-label">Keyboard shortcuts</span><kbd class="fd-kbd">?</kbd></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item"><i data-icon="log-out"></i><span class="fd-menu-item-label">Sign out</span></button>
+      </div>
+
+      <button class="fd-btn" type="button" data-variant="outline" data-size="sm" data-icon-only aria-label="Actions for Production crawler" data-fd-menu="menu-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button>
+      <div class="fd-menu" id="menu-row" popover role="menu" aria-label="Key actions">
+        <button class="fd-menu-item"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy key ID</span><kbd class="fd-kbd">⌘C</kbd></button>
+        <button class="fd-menu-item"><i data-icon="pencil"></i><span class="fd-menu-item-label">Rename</span></button>
+        <button class="fd-menu-item"><i data-icon="refresh-cw"></i><span class="fd-menu-item-label">Rotate key<span class="fd-menu-item-desc">The old key keeps working for 24 hours</span></span></button>
+        <button class="fd-menu-item" data-fd-submenu="menu-move"><i data-icon="folder"></i><span class="fd-menu-item-label">Move to</span></button>
+        <div class="fd-menu" id="menu-move" popover role="menu" aria-label="Move to environment">
+          <p class="fd-menu-label">Environment</p>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-menu-item-label">Production</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">Staging</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">Development</span></button>
+        </div>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" disabled><i data-icon="ban"></i><span class="fd-menu-item-label">Disable<span class="fd-menu-item-desc">Owners only</span></span></button>
+        <button class="fd-menu-item" data-tone="danger" data-fd-dialog-open="dlg-revoke"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Revoke key</span></button>
+      </div>
+
+      <button class="fd-btn" type="button" data-fd-menu="menu-view"><i data-icon="sliders-horizontal"></i><span>View</span></button>
+      <div class="fd-menu" id="menu-view" popover role="menu" aria-label="View options">
+        <p class="fd-menu-label">Columns</p>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="true"><span class="fd-menu-item-label">Status</span></button>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="true"><span class="fd-menu-item-label">Endpoint</span></button>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="true"><span class="fd-menu-item-label">Duration</span></button>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="false"><span class="fd-menu-item-label">Credits</span></button>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="false"><span class="fd-menu-item-label">API key</span></button>
+        <hr class="fd-menu-sep">
+        <div class="fd-menu-group" role="group" aria-label="Sort by">
+          <p class="fd-menu-label">Sort by</p>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="true" data-keep-open><span class="fd-menu-item-label">Newest first</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-keep-open><span class="fd-menu-item-label">Oldest first</span></button>
+          <button class="fd-menu-item" role="menuitemradio" aria-checked="false" data-keep-open><span class="fd-menu-item-label">Slowest first</span></button>
+        </div>
+      </div>
+    </div>
+
+    <p class="doc-sub">Inline rendering</p>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="sunken">
+      <div class="fd-menu" data-static-demo data-variant="switcher" role="menu" aria-label="Teams (example)">
+        <div class="fd-menu-head"><p class="fd-menu-title">Teams</p><button class="fd-menu-close" type="button" aria-label="Close menu"><i data-icon="x"></i></button></div>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-tile" data-size="20" data-tone="accent" data-bordered>E</span><span class="fd-menu-item-label">Ember Labs</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-tile" data-size="20" data-tone="neutral">P</span><span class="fd-menu-item-label">Personal</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-tile" data-size="20" data-tone="violet">A</span><span class="fd-menu-item-label">Acme Research</span></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" role="menuitem"><i data-icon="plus"></i><span class="fd-menu-item-label">New team</span></button>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="settings"></i><span class="fd-menu-item-label">Team settings</span></button>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="user-plus"></i><span class="fd-menu-item-label">Invite members</span></button>
+      </div>
+      <div class="fd-menu" data-static-demo role="menu" aria-label="Account (example)">
+        <div class="fd-menu-head"><p class="fd-menu-title">Account</p><button class="fd-menu-close" type="button" aria-label="Close menu"><i data-icon="x"></i></button></div>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="settings"></i><span class="fd-menu-item-label">Settings</span><kbd class="fd-kbd">⌘,</kbd></button>
+        <button class="fd-menu-item" role="menuitem" data-highlighted><i data-icon="credit-card"></i><span class="fd-menu-item-label">Billing</span></button>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="chart-column"></i><span class="fd-menu-item-label">Usage</span></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" role="menuitem" aria-haspopup="menu" aria-expanded="false"><i data-icon="sun"></i><span class="fd-menu-item-label">Theme</span></button>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="book-open"></i><span class="fd-menu-item-label">Documentation</span><i data-icon="arrow-up-right"></i></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" role="menuitem"><i data-icon="log-out"></i><span class="fd-menu-item-label">Sign out</span></button>
+      </div>
+      <div class="fd-menu" data-static-demo role="menu" aria-label="Key actions (example)">
+        <button class="fd-menu-item" role="menuitem"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy key ID</span><kbd class="fd-kbd">⌘C</kbd></button>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="pencil"></i><span class="fd-menu-item-label">Rename</span></button>
+        <button class="fd-menu-item" role="menuitem"><i data-icon="refresh-cw"></i><span class="fd-menu-item-label">Rotate key<span class="fd-menu-item-desc">The old key keeps working for 24 hours</span></span></button>
+        <button class="fd-menu-item" role="menuitem" aria-haspopup="menu" aria-expanded="true"><i data-icon="folder"></i><span class="fd-menu-item-label">Move to</span></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" role="menuitem" disabled><i data-icon="ban"></i><span class="fd-menu-item-label">Disable<span class="fd-menu-item-desc">Owners only</span></span></button>
+        <button class="fd-menu-item" role="menuitem" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Revoke key</span></button>
+      </div>
+      <div class="fd-menu" data-static-demo role="menu" aria-label="View options (example)">
+        <p class="fd-menu-label">Columns</p>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="true"><span class="fd-menu-item-label">Status</span></button>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="mixed"><span class="fd-menu-item-label">Request fields<span class="fd-menu-item-desc">3 of 5 shown</span></span></button>
+        <button class="fd-menu-item" role="menuitemcheckbox" aria-checked="false"><span class="fd-menu-item-label">Credits</span></button>
+        <hr class="fd-menu-sep">
+        <p class="fd-menu-label">Sort by</p>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-menu-item-label">Newest first</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">Oldest first</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">Slowest first</span></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Items are 36px tall with a 16px icon and a 14px label. Highlight follows focus, and the pointer moves focus, so mouse and keyboard never show two highlighted rows.</li>
+      <li>A switcher marks the current item with an accent wash and a dot (<code class="fd-code">data-variant="switcher"</code> or <code class="fd-code">aria-current</code>). A single choice elsewhere gets accent text and a trailing check; multiple choice gets a leading box.</li>
+      <li>Sub-menus (<code class="fd-code">data-fd-submenu</code>) open to the side on hover or <span class="fd-kbd">→</span> and close with <span class="fd-kbd">←</span>. Checkbox items keep the menu open; add <code class="fd-code">data-keep-open</code> to do the same for others.</li>
+      <li>Danger items sit last, below a separator, and open a confirmation rather than acting at once.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== POPOVERS ===================== -->
+  <section class="doc-section" id="popovers">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Popovers</h2>
+      <p>Use a popover when the content is richer than a list: a summary, a small form, a picker. It closes on outside click, Escape, or when focus leaves it. Add <code class="fd-code">data-arrow</code> when the anchor is small and the link between them should be explicit.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="center" data-height style="--h:280px">
+        <button class="fd-btn" type="button" data-fd-popover="pop-credits" data-placement="bottom"><i data-icon="gauge"></i><span>1,520 credits left</span></button>
+        <div class="fd-popover" id="pop-credits" popover data-arrow data-size="sm" aria-label="Credits">
+          <div class="fd-stack">
+            <div>
+              <p class="fd-eyebrow">Standard plan · resets Nov 23</p>
+              <p class="fd-stat">1,520</p>
+              <p class="fd-small fd-muted">credits left of 100,000 this cycle. Crawls pause when you reach zero.</p>
+            </div>
+            <div class="fd-row"><button class="fd-btn" type="button" data-size="sm" data-variant="primary">Buy credits</button><button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-popover-close>View usage</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+        <div class="fd-popover" data-static-demo data-arrow data-side="bottom" data-size="sm" role="dialog" aria-label="Credits (example)">
+          <div class="fd-stack">
+            <div>
+              <p class="fd-eyebrow">Standard plan · resets Nov 23</p>
+              <p class="fd-stat">1,520</p>
+              <p class="fd-small fd-muted">credits left of 100,000 this cycle. Crawls pause when you reach zero.</p>
+            </div>
+            <div class="fd-row"><button class="fd-btn" type="button" data-size="sm" data-variant="primary">Buy credits</button><button class="fd-btn" type="button" data-size="sm" data-variant="ghost">View usage</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Popovers are 16px-radius panels with 16px padding. With head, body or foot parts they become flush and the parts carry their own padding and hairlines.</li>
+      <li>Focus moves into the popover when it opens and back to the trigger when it closes with Escape. Clicking elsewhere leaves focus where you clicked.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== NOTIFICATIONS ===================== -->
+  <section class="doc-section" id="notifications">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Notifications</h2>
+      <p>The bell opens a flush popover: a header with “Mark all read” and settings, an All / Unread switch with a category select, the list, and a link to the full inbox. Unread rows carry an accent dot; the count on the bell follows them.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-height style="--h:180px">
+      <button class="fd-btn" type="button" data-icon-only aria-label="Notifications" data-fd-popover="notif-pop" data-placement="bottom-end"><i data-icon="bell"></i><span class="fd-overlay-count" data-fd-unread-count="notif-pop">2</span></button>
+      <div class="fd-popover" id="notif-pop" popover data-fd-notifications data-size="lg">
+        <div class="fd-popover-head">
+          <p class="fd-popover-title">Notifications</p>
+          <div class="fd-popover-actions">
+            <button class="fd-btn-text" type="button" data-fd-mark-read><i data-icon="check-check"></i><span>Mark all read</span></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Notification settings" data-fd-tooltip="Notification settings"><i data-icon="settings-2"></i></button>
+          </div>
+        </div>
+        <div class="fd-popover-toolbar">
+          <div class="fd-segmented" role="radiogroup" aria-label="Show" data-size="sm">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-fd-show="all">All</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-fd-show="unread">Unread</button>
+          </div>
+          <label class="fd-select" data-size="sm"><span class="fd-sr-only">Category</span>
+            <select data-fd-category><option value="all">All categories</option><option value="jobs">Jobs</option><option value="monitors">Monitors</option><option value="billing">Billing</option></select>
+          </label>
+        </div>
+        <div class="fd-popover-body">
+          <div class="fd-notification-list">
+            <a class="fd-notification" href="#notifications" data-unread data-category="jobs">
+              <span class="fd-tile" data-size="28" data-tone="success"><i data-icon="circle-check"></i></span>
+              <span class="fd-notification-body"><span class="fd-notification-title">Crawl finished</span><span class="fd-notification-text">docs.ember.dev · 1,204 pages in 3m 12s</span></span>
+              <span class="fd-notification-meta">2m</span>
+            </a>
+            <a class="fd-notification" href="#notifications" data-unread data-category="billing">
+              <span class="fd-tile" data-size="28" data-tone="warning"><i data-icon="gauge"></i></span>
+              <span class="fd-notification-body"><span class="fd-notification-title">You’ve used 90% of your credits</span><span class="fd-notification-text">1,520 credits left. They reset on Nov 23.</span></span>
+              <span class="fd-notification-meta">1h</span>
+            </a>
+            <a class="fd-notification" href="#notifications" data-category="monitors">
+              <span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="radar"></i></span>
+              <span class="fd-notification-body"><span class="fd-notification-title">Monitor detected changes</span><span class="fd-notification-text">pricing.ember.dev changed in 3 places since yesterday’s check.</span></span>
+              <span class="fd-notification-meta">Yesterday</span>
+            </a>
+            <a class="fd-notification" href="#notifications" data-category="jobs">
+              <span class="fd-tile" data-size="28" data-tone="danger"><i data-icon="webhook"></i></span>
+              <span class="fd-notification-body"><span class="fd-notification-title">Webhook delivery failed</span><span class="fd-notification-text">hooks.ember.dev returned 502 for run_8f2a91.</span></span>
+              <span class="fd-notification-meta">Nov 12</span>
+            </a>
+          </div>
+          <div class="fd-popover-empty" hidden>
+            <div class="fd-popover-glyph" aria-hidden="true"><span>. : .</span><span>: + * + :</span><span>. * # % # * .</span><span>: * % @ % * :</span><span>. * # % # * .</span><span>: + * + :</span><span>' : '</span></div>
+            <p class="fd-popover-empty-title">You’re all caught up</p>
+            <p class="fd-popover-empty-text">Finished jobs, monitor changes and billing alerts will show up here.</p>
+          </div>
+        </div>
+        <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="#notifications"><span>View all notifications</span><i data-icon="arrow-right" data-nudge></i></a></div>
+      </div>
+    </div>
+
+    <p class="doc-sub">Inline rendering: list and empty state</p>
+    <div class="doc-pair">
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <div class="fd-popover" data-static-demo data-fd-notifications data-size="lg" role="dialog" aria-label="Notifications (example)">
+        <div class="fd-popover-head">
+          <p class="fd-popover-title">Notifications</p>
+          <div class="fd-popover-actions">
+            <button class="fd-btn-text" type="button" data-fd-mark-read><i data-icon="check-check"></i><span>Mark all read</span></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Notification settings"><i data-icon="settings-2"></i></button>
+          </div>
+        </div>
+        <div class="fd-popover-toolbar">
+          <div class="fd-segmented" role="radiogroup" aria-label="Show" data-size="sm">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-fd-show="all">All</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-fd-show="unread">Unread</button>
+          </div>
+          <label class="fd-select" data-size="sm"><span class="fd-sr-only">Category</span>
+            <select data-fd-category><option value="all">All categories</option><option value="jobs">Jobs</option><option value="monitors">Monitors</option><option value="billing">Billing</option></select>
+          </label>
+        </div>
+        <div class="fd-popover-body">
+          <div class="fd-notification-list">
+            <div class="fd-notification" data-unread data-category="jobs">
+              <span class="fd-tile" data-size="28" data-tone="success"><i data-icon="circle-check"></i></span>
+              <span class="fd-notification-body"><span class="fd-notification-title">Crawl finished</span><span class="fd-notification-text">docs.ember.dev · 1,204 pages in 3m 12s</span></span>
+              <span class="fd-notification-meta">2m</span>
+            </div>
+            <div class="fd-notification" data-category="monitors">
+              <span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="radar"></i></span>
+              <span class="fd-notification-body"><span class="fd-notification-title">Monitor detected changes</span><span class="fd-notification-text">pricing.ember.dev changed in 3 places since yesterday’s check.</span></span>
+              <span class="fd-notification-meta">Yesterday</span>
+            </div>
+          </div>
+          <div class="fd-popover-empty" hidden>
+            <p class="fd-popover-empty-title">You’re all caught up</p>
+          </div>
+        </div>
+        <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="#notifications"><span>View all notifications</span><i data-icon="arrow-right" data-nudge></i></a></div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <div class="fd-popover" data-static-demo data-size="lg" role="dialog" aria-label="Notifications, empty (example)">
+        <div class="fd-popover-head">
+          <p class="fd-popover-title">Notifications</p>
+          <div class="fd-popover-actions">
+            <button class="fd-btn-text" type="button" disabled><i data-icon="check-check"></i><span>Mark all read</span></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Notification settings"><i data-icon="settings-2"></i></button>
+          </div>
+        </div>
+        <div class="fd-popover-toolbar">
+          <div class="fd-segmented" role="radiogroup" aria-label="Show" data-size="sm">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true">All</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false">Unread</button>
+          </div>
+          <label class="fd-select" data-size="sm"><span class="fd-sr-only">Category</span>
+            <select><option>All categories</option><option>Jobs</option><option>Monitors</option><option>Billing</option></select>
+          </label>
+        </div>
+        <div class="fd-popover-empty">
+          <div class="fd-popover-glyph" aria-hidden="true"><span>. : .</span><span>: + * + :</span><span>. * # % # * .</span><span>: * % @ % * :</span><span>. * # % # * .</span><span>: + * + :</span><span>' : '</span></div>
+          <p class="fd-popover-empty-title">You’re all caught up</p>
+          <p class="fd-popover-empty-text">Finished jobs, monitor changes and billing alerts will show up here.</p>
+        </div>
+        <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="#notifications"><span>View all notifications</span><i data-icon="arrow-right" data-nudge></i></a></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ===================== DATE RANGE ===================== -->
+  <section class="doc-section" id="date-range">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Date range</h2>
+      <p>Presets cover what people ask for most; the month grid handles the rest. Click a start and an end (the range previews as you hover), then Apply. Today carries an accent dot, future days are disabled for logs.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-height style="--h:180px">
+      <div class="fd-filter">
+        <button class="fd-filter-trigger" type="button" data-fd-popover="pop-range" data-placement="bottom-end"><i data-icon="calendar"></i><span class="fd-filter-value" data-fd-daterange-label>Last 7 days</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+      </div>
+      <div class="fd-popover" id="pop-range" popover data-size="auto" aria-label="Date range">
+        <div class="fd-daterange" data-fd-daterange data-preset="7d" data-max="today">
+          <div class="fd-daterange-presets" role="group" aria-label="Presets">
+            <button class="fd-daterange-preset" type="button" data-preset="24h">Last 24 hours</button>
+            <button class="fd-daterange-preset" type="button" data-preset="7d">Last 7 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="30d">Last 30 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="month">This month</button>
+            <button class="fd-daterange-preset" type="button" data-preset="custom">Custom</button>
+          </div>
+          <div class="fd-daterange-main"><div class="fd-calendar"></div></div>
+          <div class="fd-daterange-foot">
+            <span class="fd-daterange-summary" data-fd-daterange-summary></span>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-daterange-cancel>Cancel</button>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-daterange-apply>Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <div class="fd-popover" data-static-demo data-size="auto" role="dialog" aria-label="Date range (example)">
+        <div class="fd-daterange" data-fd-daterange data-preset="30d" data-max="today">
+          <div class="fd-daterange-presets" role="group" aria-label="Presets">
+            <button class="fd-daterange-preset" type="button" data-preset="24h">Last 24 hours</button>
+            <button class="fd-daterange-preset" type="button" data-preset="7d">Last 7 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="30d">Last 30 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="month">This month</button>
+            <button class="fd-daterange-preset" type="button" data-preset="custom">Custom</button>
+          </div>
+          <div class="fd-daterange-main"><div class="fd-calendar"></div></div>
+          <div class="fd-daterange-foot">
+            <span class="fd-daterange-summary" data-fd-daterange-summary></span>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-daterange-cancel>Cancel</button>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-daterange-apply>Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Weeks start on Monday. Arrow keys move by day and week, <span class="fd-kbd">PgUp</span> <span class="fd-kbd">PgDn</span> by month; while a start is picked, moving the focus previews the range.</li>
+      <li>Apply writes the preset name or the dates into <code class="fd-code">[data-fd-daterange-label]</code> inside the trigger and fires <code class="fd-code">fd:change</code> with ISO dates. Cancel restores the last applied range.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== FILTER ===================== -->
+  <section class="doc-section" id="filter">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Filter</h2>
+      <p>For choosing several values from a long list: a search row, checkable rows with counts, and Clear. The trigger’s label summarises the choice.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="center" data-height style="--h:200px">
+        <div class="fd-filter">
+          <button class="fd-filter-trigger" type="button" data-fd-popover="pop-endpoints"><i data-icon="funnel"></i><span class="fd-filter-value" data-fd-filter-label data-empty="All endpoints">/agent</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+        </div>
+        <div class="fd-popover" id="pop-endpoints" popover data-fd-filter-list data-size="sm" aria-label="Filter by endpoint">
+          <label class="fd-popover-search"><i data-icon="search"></i><input type="search" placeholder="Filter endpoints" aria-label="Filter endpoints" data-fd-filter-search autofocus autocomplete="off"></label>
+          <div class="fd-popover-body">
+            <div class="fd-checklist" aria-label="Endpoints">
+              <div class="fd-checklist-item" data-value="/agent" aria-selected="true"><span class="fd-checklist-label fd-mono">/agent</span><span class="fd-checklist-count">2,481</span></div>
+              <div class="fd-checklist-item" data-value="/scrape"><span class="fd-checklist-label fd-mono">/scrape</span><span class="fd-checklist-count">18,302</span></div>
+              <div class="fd-checklist-item" data-value="/crawl"><span class="fd-checklist-label fd-mono">/crawl</span><span class="fd-checklist-count">1,204</span></div>
+              <div class="fd-checklist-item" data-value="/search"><span class="fd-checklist-label fd-mono">/search</span><span class="fd-checklist-count">7,915</span></div>
+              <div class="fd-checklist-item" data-value="/extract"><span class="fd-checklist-label fd-mono">/extract</span><span class="fd-checklist-count">640</span></div>
+              <div class="fd-checklist-item" data-value="/map"><span class="fd-checklist-label fd-mono">/map</span><span class="fd-checklist-count">96</span></div>
+              <div class="fd-checklist-item" data-value="/batch/scrape"><span class="fd-checklist-label fd-mono">/batch/scrape</span><span class="fd-checklist-count">12</span></div>
+            </div>
+            <p class="fd-checklist-empty" hidden>No endpoints match “<span data-fd-filter-query></span>”</p>
+          </div>
+          <div class="fd-popover-foot"><span data-fd-filter-summary>1 selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+        <div class="fd-popover" data-static-demo data-fd-filter-list data-size="sm" role="dialog" aria-label="Filter by endpoint (example)">
+          <label class="fd-popover-search"><i data-icon="search"></i><input type="search" placeholder="Filter endpoints" aria-label="Filter endpoints" data-fd-filter-search autocomplete="off"></label>
+          <div class="fd-popover-body">
+            <div class="fd-checklist" aria-label="Endpoints">
+              <div class="fd-checklist-item" data-value="/agent" aria-selected="true"><span class="fd-checklist-label fd-mono">/agent</span><span class="fd-checklist-count">2,481</span></div>
+              <div class="fd-checklist-item" data-value="/scrape" aria-selected="true" data-highlighted><span class="fd-checklist-label fd-mono">/scrape</span><span class="fd-checklist-count">18,302</span></div>
+              <div class="fd-checklist-item" data-value="/crawl"><span class="fd-checklist-label fd-mono">/crawl</span><span class="fd-checklist-count">1,204</span></div>
+              <div class="fd-checklist-item" data-value="/search"><span class="fd-checklist-label fd-mono">/search</span><span class="fd-checklist-count">7,915</span></div>
+              <div class="fd-checklist-item" data-value="/extract" aria-disabled="true"><span class="fd-checklist-label fd-mono">/extract</span><span class="fd-checklist-count">0</span></div>
+            </div>
+            <p class="fd-checklist-empty" hidden>No endpoints match “<span data-fd-filter-query></span>”</p>
+          </div>
+          <div class="fd-popover-foot"><span data-fd-filter-summary></span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><span class="fd-kbd">↓</span> moves from the search into the list; <span class="fd-kbd">Space</span> toggles a row; typing returns to the search. Each change fires <code class="fd-code">fd:change</code> with the selected values.</li>
+      <li>For a single choice from a short list, use a menu with radio items instead.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== TOOLTIPS ===================== -->
+  <section class="doc-section" id="tooltips">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tooltips</h2>
+      <p>Tooltips name icon-only controls and reveal shortcuts. They wait 350ms the first time, then follow the pointer from one control to the next with no delay, and disappear the moment you leave, press or scroll. Keyboard focus shows them at once.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <div class="fd-btn-group">
+        <button class="fd-btn" type="button" data-icon-only data-fd-tooltip="Copy API key" data-shortcut="⌘ C"><i data-icon="copy"></i></button>
+        <button class="fd-btn" type="button" data-icon-only data-fd-tooltip="Rotate key"><i data-icon="refresh-cw"></i></button>
+        <button class="fd-btn" type="button" data-icon-only data-fd-tooltip="Open in playground"><i data-icon="square-terminal"></i></button>
+        <button class="fd-btn" type="button" data-icon-only data-fd-tooltip="Revoke key"><i data-icon="trash-2"></i></button>
+      </div>
+      <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-fd-tooltip="Below" data-placement="bottom"><i data-icon="arrow-down"></i></button>
+      <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-fd-tooltip="To the right" data-placement="right"><i data-icon="arrow-right"></i></button>
+      <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-fd-tooltip="To the left" data-placement="left"><i data-icon="arrow-left"></i></button>
+      <span class="fd-small fd-muted" tabindex="0" data-fd-tooltip="Credits reset on the 23rd of each month. Unused credits do not roll over.">Resets Nov 23 <i data-icon="circle-help" data-size="14"></i></span>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <span class="fd-tooltip" data-static-demo role="tooltip">Copy API key <span class="fd-tooltip-keys"><kbd class="fd-kbd">⌘</kbd><kbd class="fd-kbd">C</kbd></span></span>
+      <span class="fd-tooltip" data-static-demo role="tooltip">Rotate key</span>
+      <span class="fd-tooltip" data-static-demo role="tooltip">Credits reset on the 23rd of each month. Unused credits do not roll over.</span>
+    </div>
+    <ul class="doc-notes">
+      <li>Inverse surface, 8px radius, 12px/450 text, 6px by 8px padding. A tooltip never takes the pointer, so it can sit over the next control without getting in the way.</li>
+      <li>One tooltip element serves the whole page and is linked to its trigger with <code class="fd-code">aria-describedby</code> while visible. Icon-only triggers without a name get the tooltip text as their <code class="fd-code">aria-label</code>.</li>
+      <li>Don’t put links or actions in a tooltip. Use a hovercard or a popover.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== HOVERCARDS ===================== -->
+  <section class="doc-section" id="hovercards">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Hovercards</h2>
+      <p>A hovercard previews the thing a link points to, a person or a provider, without leaving the page. It opens after half a second, stays open while the pointer travels into it, and closes a quarter second after leaving.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <p class="fd-body fd-text-2">Last run by <a class="fd-link" data-tone="neutral" href="#hovercards" data-fd-hovercard="hc-maya">Maya Chen</a> using <a class="fd-link" data-tone="neutral" href="#hovercards" data-fd-hovercard="hc-nimbus">Nimbus Data</a> as a source.</p>
+      <div class="fd-hovercard" id="hc-maya" popover="manual">
+        <div class="fd-hovercard-head"><span class="fd-avatar" data-size="40" data-tone="accent" data-status="online">MC</span><div><p class="fd-hovercard-title">Maya Chen</p><p class="fd-hovercard-meta">maya@ember.dev · Admin</p></div></div>
+        <p class="fd-hovercard-text">Owns the docs crawler and the pricing monitors for Ember Labs.</p>
+        <dl class="fd-hovercard-stats"><div><dt>Runs</dt><dd>1,204</dd></div><div><dt>Keys</dt><dd>3</dd></div><div><dt>Joined</dt><dd>Feb 10</dd></div></dl>
+      </div>
+      <div class="fd-hovercard" id="hc-nimbus" popover="manual">
+        <div class="fd-hovercard-head"><span class="fd-tile" data-size="36" data-tone="info">N</span><div><p class="fd-hovercard-title">Nimbus Data</p><p class="fd-hovercard-meta">Company profiles · terms accepted</p></div></div>
+        <p class="fd-hovercard-text">Headcount, funding rounds and tech stack for 40M companies, refreshed weekly.</p>
+        <dl class="fd-hovercard-stats"><div><dt>Calls</dt><dd>8,410</dd></div><div><dt>Latency</dt><dd>420 ms</dd></div><div><dt>Cost</dt><dd>2 cr</dd></div></dl>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <div class="fd-hovercard" data-static-demo>
+        <div class="fd-hovercard-head"><span class="fd-avatar" data-size="40" data-tone="accent" data-status="online">MC</span><div><p class="fd-hovercard-title">Maya Chen</p><p class="fd-hovercard-meta">maya@ember.dev · Admin</p></div></div>
+        <p class="fd-hovercard-text">Owns the docs crawler and the pricing monitors for Ember Labs.</p>
+        <dl class="fd-hovercard-stats"><div><dt>Runs</dt><dd>1,204</dd></div><div><dt>Keys</dt><dd>3</dd></div><div><dt>Joined</dt><dd>Feb 10</dd></div></dl>
+      </div>
+      <div class="fd-hovercard" data-static-demo>
+        <div class="fd-hovercard-head"><span class="fd-tile" data-size="36" data-tone="info">N</span><div><p class="fd-hovercard-title">Nimbus Data</p><p class="fd-hovercard-meta">Company profiles · terms accepted</p></div></div>
+        <p class="fd-hovercard-text">Headcount, funding rounds and tech stack for 40M companies, refreshed weekly.</p>
+        <dl class="fd-hovercard-stats"><div><dt>Calls</dt><dd>8,410</dd></div><div><dt>Latency</dt><dd>420 ms</dd></div><div><dt>Cost</dt><dd>2 cr</dd></div></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DIALOGS ===================== -->
+  <section class="doc-section" id="dialogs">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Dialogs</h2>
+      <p>Use a dialog when the task must finish or be dismissed before the page makes sense again: confirming, creating a key, choosing providers. The page behind is washed out and blurred. Below 640px every dialog becomes a bottom sheet you can drag down.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-fd-dialog-open="dlg-revoke">Revoke key</button>
+      <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-open="dlg-create-key"><i data-icon="plus"></i><span>Create API key</span></button>
+      <button class="fd-btn" type="button" data-variant="accent-soft" data-fd-dialog-open="dlg-whats-new"><i data-icon="sparkles"></i><span>What’s new</span></button>
+      <button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-open="dlg-providers"><i data-icon="database"></i><span>Choose providers</span></button>
+
+      <dialog class="fd-dialog" id="dlg-revoke" data-size="sm">
+        <div class="fd-dialog-head">
+          <h2 class="fd-h3 fd-dialog-title">Revoke Production crawler?</h2>
+          <p class="fd-dialog-desc">Requests signed with <span class="fd-code">em_sk_…5fUz</span> fail at once. Crawls in progress stop at their next page.</p>
+        </div>
+        <div class="fd-dialog-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+          <button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-close value="revoke">Revoke key</button>
+        </div>
+      </dialog>
+
+      <dialog class="fd-dialog" id="dlg-create-key" data-size="md" data-reset>
+        <form method="dialog">
+          <section data-step="form">
+            <div class="fd-dialog-head">
+              <h2 class="fd-h3 fd-dialog-title">Create API key</h2>
+              <p class="fd-dialog-desc">Keys act on behalf of Ember Labs. Limit each one to what it needs.</p>
+              <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+            </div>
+            <div class="fd-dialog-body fd-stack">
+              <div class="fd-field">
+                <label class="fd-field-label" for="ck-name">Name</label>
+                <input class="fd-input" id="ck-name" name="name" required placeholder="Production crawler" autocomplete="off" autofocus>
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="ck-expiry">Expires</label>
+                <label class="fd-select"><select id="ck-expiry" name="expiry"><option value="30">In 30 days</option><option value="90" selected>In 90 days</option><option value="365">In 1 year</option><option value="never">Never</option></select></label>
+              </div>
+              <div class="fd-field" role="group" aria-labelledby="ck-scope-label">
+                <span class="fd-field-label" id="ck-scope-label">Access</span>
+                <div class="fd-choice-group">
+                  <label class="fd-choice"><input type="radio" name="scope" value="full" checked><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Full access</span><span class="fd-choice-desc">Every endpoint, plus runs, monitors and usage.</span></span></label>
+                  <label class="fd-choice"><input type="radio" name="scope" value="restricted"><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Restricted</span><span class="fd-choice-desc">Only /search, /scrape and /crawl. Runs are read-only.</span></span></label>
+                </div>
+              </div>
+            </div>
+            <div class="fd-dialog-foot">
+              <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+              <button class="fd-btn" type="submit" data-variant="primary" data-fd-dialog-step="created" data-fd-dialog-step-delay="700"><span>Create key</span></button>
+            </div>
+          </section>
+          <section data-step="created" hidden>
+            <div class="fd-dialog-head">
+              <h2 class="fd-h3 fd-dialog-title">Your new API key</h2>
+              <p class="fd-dialog-desc" data-ck-summary>Production crawler · full access · expires in 90 days</p>
+              <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+            </div>
+            <div class="fd-dialog-body fd-stack">
+              <div class="fd-callout" data-tone="warning" role="note">
+                <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+                <div class="fd-callout-content"><p class="fd-callout-title">Copy it now</p><p class="fd-callout-body">We show this key once. Store it in your secrets manager before you close this dialog.</p></div>
+              </div>
+              <div class="fd-secret" data-fd-secret data-value="em_sk_7Hq2vN4c9xKp1tR8wB3mLd6Ye0aJ5fUz" data-noun="API key" data-state="revealed" role="group" aria-label="New API key">
+                <code class="fd-secret-value" data-tone="accent"></code>
+                <div class="fd-secret-actions">
+                  <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key" data-fd-toast='{"title":"Key copied","tone":"success"}'><i data-icon="copy"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="fd-dialog-foot">
+              <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close value="done">I’ve copied it</button>
+            </div>
+          </section>
+        </form>
+      </dialog>
+
+      <dialog class="fd-dialog" id="dlg-whats-new" data-size="md">
+        <section data-step="runs">
+          <div class="fd-dialog-head">
+            <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+            <h2 class="fd-h3 fd-dialog-title">Agent runs, rebuilt</h2>
+            <p class="fd-dialog-desc">Same API call. Faster, cheaper runs with sources you can check.</p>
+            <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <div class="fd-dialog-body">
+            <ul class="fd-dialog-features">
+              <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent">12x</span><div><p class="fd-dialog-feature-title">Fewer credits</p><p class="fd-dialog-feature-text">A typical research run now costs 40 credits, down from 480.</p></div></li>
+              <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent">3x</span><div><p class="fd-dialog-feature-title">Faster answers</p><p class="fd-dialog-feature-text">Most runs finish in under a minute, even across dozens of pages.</p></div></li>
+              <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="quote"></i></span><div><p class="fd-dialog-feature-title">Cited sources</p><p class="fd-dialog-feature-text">Every claim links to the page or provider it came from.</p></div></li>
+            </ul>
+          </div>
+          <div class="fd-dialog-foot">
+            <button class="fd-btn" type="button" data-variant="primary" data-block data-fd-dialog-step="next">Next</button>
+            <div class="fd-dialog-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          </div>
+        </section>
+        <section data-step="watch" hidden>
+          <div class="fd-dialog-head">
+            <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+            <h2 class="fd-h3 fd-dialog-title">Watch it work</h2>
+            <p class="fd-dialog-desc">Runs stream their steps as they happen.</p>
+            <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <div class="fd-dialog-body">
+            <ul class="fd-dialog-features">
+              <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="activity"></i></span><div><p class="fd-dialog-feature-title">Live steps</p><p class="fd-dialog-feature-text">See each search, page and tool call the moment it starts.</p></div></li>
+              <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="rotate-ccw"></i></span><div><p class="fd-dialog-feature-title">Replays</p><p class="fd-dialog-feature-text">Re-run any step with new instructions instead of starting over.</p></div></li>
+            </ul>
+          </div>
+          <div class="fd-dialog-foot">
+            <button class="fd-btn" type="button" data-variant="primary" data-block data-fd-dialog-step="next">Next</button>
+            <div class="fd-dialog-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          </div>
+        </section>
+        <section data-step="use" hidden>
+          <div class="fd-dialog-head">
+            <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+            <h2 class="fd-h3 fd-dialog-title">Use it from your agent</h2>
+            <p class="fd-dialog-desc">Point any MCP client at Ember and the new runs are there.</p>
+            <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <div class="fd-dialog-body">
+            <ul class="fd-dialog-features">
+              <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="plug"></i></span><div><p class="fd-dialog-feature-title">One endpoint</p><p class="fd-dialog-feature-text"><span class="fd-code">/agent</span> accepts the same body as before. Nothing to migrate.</p></div></li>
+            </ul>
+          </div>
+          <div class="fd-dialog-foot">
+            <button class="fd-btn" type="button" data-variant="primary" data-block data-fd-dialog-close value="done">Start a run</button>
+            <div class="fd-dialog-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          </div>
+        </section>
+      </dialog>
+
+      <dialog class="fd-dialog" id="dlg-providers" data-size="xl">
+        <div class="fd-dialog-head">
+          <h2 class="fd-h3 fd-dialog-title">Choose data providers</h2>
+          <p class="fd-dialog-desc">Pick the sources your agent may call. Each provider’s terms apply to its data; you can change this later in Settings.</p>
+          <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+        </div>
+        <div class="fd-dialog-body">
+          <div class="fd-search">
+            <i data-icon="search"></i>
+            <input class="fd-search-input" type="search" placeholder="Find a provider" aria-label="Find a provider" autocomplete="off">
+          </div>
+          <div class="fd-dialog-toolbar">
+            <label class="fd-checkbox"><input type="checkbox" data-fd-checkall="#prov-grid input"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Select this page</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" data-fd-checkall="#prov-grid input"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Select all providers (12)</span></span></label>
+            <span data-prov-count>0 selected across all pages</span>
+          </div>
+          <div class="fd-dialog-grid" id="prov-grid">
+            <label class="fd-pick"><input type="checkbox" name="provider" value="nimbus"><span class="fd-pick-check"></span>
+              <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="info">N</span><span><span class="fd-pick-name">Nimbus Data</span><span class="fd-pick-meta">Terms not yet accepted</span></span></span>
+              <span class="fd-pick-text">Company profiles, headcount and funding rounds for 40M businesses.</span>
+              <span class="fd-pick-foot"><span>Effective 2026-08-10</span><span>v1.2.0</span></span></label>
+            <label class="fd-pick"><input type="checkbox" name="provider" value="ledgerline"><span class="fd-pick-check"></span>
+              <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="success">L</span><span><span class="fd-pick-name">Ledgerline</span><span class="fd-pick-meta">Terms not yet accepted</span></span></span>
+              <span class="fd-pick-text">Filings, earnings calls and market data for listed companies.</span>
+              <span class="fd-pick-foot"><span>Effective 2026-09-21</span><span>v2.0.1</span></span></label>
+            <label class="fd-pick"><input type="checkbox" name="provider" value="orbit"><span class="fd-pick-check"></span>
+              <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="violet">O</span><span><span class="fd-pick-name">Orbit Leads</span><span class="fd-pick-meta">Terms not yet accepted</span></span></span>
+              <span class="fd-pick-text">Verified work emails and phone numbers for people search.</span>
+              <span class="fd-pick-foot"><span>Effective 2026-07-02</span><span>v1.0.4</span></span></label>
+            <label class="fd-pick"><input type="checkbox" name="provider" value="parcel" checked><span class="fd-pick-check"></span>
+              <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="warning">P</span><span><span class="fd-pick-name">Parcel Graph</span><span class="fd-pick-meta">Accepted Oct 3</span></span></span>
+              <span class="fd-pick-text">Shipping, tracking and carrier rates across 900 carriers.</span>
+              <span class="fd-pick-foot"><span>Effective 2026-05-14</span><span>v3.1.0</span></span></label>
+            <label class="fd-pick"><input type="checkbox" name="provider" value="quarry"><span class="fd-pick-check"></span>
+              <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="inverse">Q</span><span><span class="fd-pick-name">Quarry</span><span class="fd-pick-meta">Terms not yet accepted</span></span></span>
+              <span class="fd-pick-text">Academic papers and citations with full-text search.</span>
+              <span class="fd-pick-foot"><span>Effective 2026-10-30</span><span>v1.1.0</span></span></label>
+            <label class="fd-pick"><input type="checkbox" name="provider" value="signal-desk"><span class="fd-pick-check"></span>
+              <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="danger">S</span><span><span class="fd-pick-name">Signal Desk</span><span class="fd-pick-meta">Terms not yet accepted</span></span></span>
+              <span class="fd-pick-text">News and press releases from 60,000 outlets, deduplicated.</span>
+              <span class="fd-pick-foot"><span>Effective 2026-11-01</span><span>v1.0.0</span></span></label>
+          </div>
+          <div class="fd-dialog-pager">
+            <span>Page 1 of 2 · 12 providers</span>
+            <div class="fd-row">
+              <button class="fd-btn" type="button" data-size="sm" data-icon-only aria-label="Previous page" disabled><i data-icon="chevron-left"></i></button>
+              <button class="fd-btn" type="button" data-size="sm" data-icon-only aria-label="Next page"><i data-icon="chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="fd-dialog-foot">
+          <button class="fd-btn" type="button" data-start data-fd-dialog-close>Continue browsing</button>
+          <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close value="review" data-prov-submit>Review terms · <span class="fd-num" data-prov-total>1</span></button>
+        </div>
+      </dialog>
+    </div>
+
+    <p class="doc-sub">Inline rendering</p>
+    <div class="doc-pair">
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <dialog class="fd-dialog" data-static-demo open data-size="md" aria-label="What’s new (example)">
+        <div class="fd-dialog-head">
+          <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+          <h2 class="fd-h3 fd-dialog-title">Agent runs, rebuilt</h2>
+          <p class="fd-dialog-desc">Same API call. Faster, cheaper runs with sources you can check.</p>
+          <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close"><i data-icon="x"></i></button>
+        </div>
+        <div class="fd-dialog-body">
+          <ul class="fd-dialog-features">
+            <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent">12x</span><div><p class="fd-dialog-feature-title">Fewer credits</p><p class="fd-dialog-feature-text">A typical research run now costs 40 credits, down from 480.</p></div></li>
+            <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent">3x</span><div><p class="fd-dialog-feature-title">Faster answers</p><p class="fd-dialog-feature-text">Most runs finish in under a minute, even across dozens of pages.</p></div></li>
+            <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="quote"></i></span><div><p class="fd-dialog-feature-title">Cited sources</p><p class="fd-dialog-feature-text">Every claim links to the page or provider it came from.</p></div></li>
+          </ul>
+        </div>
+        <div class="fd-dialog-foot">
+          <button class="fd-btn" type="button" data-variant="primary" data-block>Next</button>
+          <div class="fd-dialog-dots" aria-hidden="true"><span aria-current="step"></span><span></span><span></span></div>
+        </div>
+      </dialog>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="sunken">
+        <dialog class="fd-dialog" data-static-demo open data-size="sm" aria-label="Revoke key (example)">
+          <div class="fd-dialog-head">
+            <h2 class="fd-h3 fd-dialog-title">Revoke Production crawler?</h2>
+            <p class="fd-dialog-desc">Requests signed with <span class="fd-code">em_sk_…5fUz</span> fail at once. Crawls in progress stop at their next page.</p>
+          </div>
+          <div class="fd-dialog-foot">
+            <button class="fd-btn" type="button" data-variant="ghost">Cancel</button>
+            <button class="fd-btn" type="button" data-variant="danger">Revoke key</button>
+          </div>
+        </dialog>
+        <dialog class="fd-dialog" data-static-demo open data-size="sm" aria-label="Key created (example)">
+          <div class="fd-dialog-head">
+            <h2 class="fd-h3 fd-dialog-title">Your new API key</h2>
+            <p class="fd-dialog-desc">Production crawler · full access · expires in 90 days</p>
+          </div>
+          <div class="fd-dialog-body fd-stack">
+            <div class="fd-callout" data-tone="warning" role="note">
+              <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+              <div class="fd-callout-content"><p class="fd-callout-title">Copy it now</p><p class="fd-callout-body">We show this key once. Store it in your secrets manager before you close this dialog.</p></div>
+            </div>
+            <div class="fd-secret" data-fd-secret data-value="em_sk_7Hq2vN4c9xKp1tR8wB3mLd6Ye0aJ5fUz" data-noun="API key" data-state="revealed" role="group" aria-label="New API key (example)">
+              <code class="fd-secret-value" data-tone="accent"></code>
+              <div class="fd-secret-actions">
+                <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key"><i data-icon="copy"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="fd-dialog-foot"><button class="fd-btn" type="button" data-variant="primary">I’ve copied it</button></div>
+        </dialog>
+    </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Sizes: <code class="fd-code">sm</code> 400, <code class="fd-code">md</code> 480 (default), <code class="fd-code">lg</code> 640, <code class="fd-code">xl</code> 800. Long bodies scroll; the head and foot hairlines appear only while there is content above or below.</li>
+      <li>Focus lands on <code class="fd-code">[autofocus]</code> or the first control, never on the close button, and returns to the trigger. In a confirm, the first control is Cancel.</li>
+      <li>Escape, the close button, <code class="fd-code">data-fd-dialog-close</code> and a click on the backdrop close it. Add <code class="fd-code">data-static</code> when a stray click would lose work; the dialog nudges instead.</li>
+      <li>Multi-step flows wrap each step in <code class="fd-code">&lt;section data-step&gt;</code>. A step button that submits validates the form first; <code class="fd-code">data-fd-dialog-step-delay</code> shows the busy state while the work happens.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== CONFIRM ===================== -->
+  <section class="doc-section" id="confirm">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Type to confirm</h2>
+      <p>For actions that destroy something with history in it (a team, a project, all logs), ask for the name. The danger button stays disabled until it matches exactly.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-variant="danger-soft" data-fd-dialog-open="dlg-delete-team"><i data-icon="trash-2"></i><span>Delete team</span></button>
+      <dialog class="fd-dialog fd-confirm" id="dlg-delete-team" data-size="sm" data-confirm="ember-labs">
+        <form method="dialog">
+          <div class="fd-dialog-head">
+            <h2 class="fd-h3 fd-dialog-title">Delete Ember Labs</h2>
+            <p class="fd-dialog-desc">This deletes the team, its 4 API keys, 12 monitors and 30 days of logs. Members lose access at once. You can’t undo this.</p>
+          </div>
+          <div class="fd-dialog-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="dt-confirm">Type <span class="fd-confirm-phrase">ember-labs</span> to confirm</label>
+              <input class="fd-input" id="dt-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false" autofocus>
+            </div>
+          </div>
+          <div class="fd-dialog-foot">
+            <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+            <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Delete team</span></button>
+          </div>
+        </form>
+      </dialog>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <dialog class="fd-dialog fd-confirm" data-static-demo open data-size="sm" data-confirm="ember-labs" aria-label="Delete team (example)">
+        <form method="dialog">
+          <div class="fd-dialog-head">
+            <h2 class="fd-h3 fd-dialog-title">Delete Ember Labs</h2>
+            <p class="fd-dialog-desc">This deletes the team, its 4 API keys, 12 monitors and 30 days of logs. Members lose access at once. You can’t undo this.</p>
+          </div>
+          <div class="fd-dialog-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="dt-confirm-demo">Type <span class="fd-confirm-phrase">ember-labs</span> to confirm</label>
+              <input class="fd-input" id="dt-confirm-demo" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false" value="ember-lab">
+            </div>
+          </div>
+          <div class="fd-dialog-foot">
+            <button class="fd-btn" type="button" data-variant="ghost">Cancel</button>
+            <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Delete team</span></button>
+          </div>
+        </form>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>The phrase is the team’s slug in mono, selectable in one click. Matching is exact after trimming spaces.</li>
+      <li>Submitting fires a cancelable <code class="fd-code">fd:confirm</code>. Cancel it to keep the dialog open while the deletion runs (the button shows <code class="fd-code">aria-busy</code>), then call <code class="fd-code">closeDialog(id, 'confirm')</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== SHEETS ===================== -->
+  <section class="doc-section" id="sheets">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Sheets</h2>
+      <p>A sheet holds the detail of something picked from a list, a log entry or a run, without losing the list. It slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-fd-dialog-open="sheet-log"><i data-icon="panel-right"></i><span>Open log entry</span></button>
+      <button class="fd-btn" type="button" data-fd-dialog-open="sheet-filters"><i data-icon="panel-left"></i><span>Filters</span></button>
+      <button class="fd-btn" type="button" data-fd-dialog-open="sheet-share"><i data-icon="share-2"></i><span>Share run</span></button>
+
+      <dialog class="fd-sheet" id="sheet-log" data-side="right" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <span class="fd-status" data-tone="success" data-variant="pill" data-size="sm">200</span>
+            <h2 class="fd-sheet-title"><span class="fd-mono">req_8f2a91c4</span></h2>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-tooltip="Copy request ID"><i data-icon="copy"></i></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-tooltip="Open in new tab"><i data-icon="external-link"></i></button>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc"><span class="fd-mono">POST /scrape</span> · Nov 14, 2026 4:29 PM · 1.84 s</p>
+          <div class="fd-tabs" role="tablist" aria-label="Request detail" data-size="sm">
+            <button class="fd-tab" type="button" role="tab" aria-selected="true" aria-controls="sl-overview">Overview</button>
+            <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="sl-request">Request</button>
+            <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="sl-response">Response</button>
+          </div>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-tab-panel fd-stack" role="tabpanel" id="sl-overview">
+            <dl class="fd-kv" data-cols="2">
+              <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono">/scrape</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">1.84 s</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">1</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">API key</dt><dd class="fd-kv-value">Production crawler</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Client</dt><dd class="fd-kv-value"><span class="fd-mono">ember-py 2.4.1</span></dd></div>
+            </dl>
+            <div class="fd-sheet-section">
+              <p class="fd-eyebrow">Response</p>
+              <div class="fd-json" data-depth="1" data-max-height="240"><script type="application/json">{"success":true,"data":{"url":"https://docs.ember.dev/pricing","title":"Pricing · Ember","statusCode":200,"markdown":"# Pricing\n\nStart free with 1,000 credits a month.","links":42,"metadata":{"language":"en","contentType":"text/html"}}}</script></div>
+            </div>
+          </div>
+          <div class="fd-tab-panel" role="tabpanel" id="sl-request" hidden>
+            <div class="fd-json" data-depth="2"><script type="application/json">{"url":"https://docs.ember.dev/pricing","formats":["markdown","links"],"onlyMainContent":true,"timeout":30000}</script></div>
+          </div>
+          <div class="fd-tab-panel" role="tabpanel" id="sl-response" hidden>
+            <dl class="fd-kv" data-cols="1">
+              <div class="fd-kv-item"><dt class="fd-kv-key">content-type</dt><dd class="fd-kv-value"><span class="fd-mono">application/json</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">x-ember-request-id</dt><dd class="fd-kv-value"><span class="fd-mono">req_8f2a91c4</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">x-ratelimit-remaining</dt><dd class="fd-kv-value fd-num">48</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="fd-sheet-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-start><i data-icon="code"></i><span>Copy as cURL</span></button>
+          <button class="fd-btn" type="button" data-variant="primary"><i data-icon="play"></i><span>Replay request</span></button>
+        </div>
+      </dialog>
+
+      <dialog class="fd-sheet" id="sheet-filters" data-side="left" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <h2 class="fd-sheet-title">Filters</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-sheet-section" role="group" aria-labelledby="sf-status">
+            <p class="fd-eyebrow" id="sf-status">Status</p>
+            <div class="fd-options">
+              <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Completed</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Failed</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Running</span></span></label>
+            </div>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="sf-key">API key</label>
+            <label class="fd-select"><select id="sf-key"><option>All API keys (3)</option><option>Production crawler</option><option>Staging</option><option>Local dev</option></select></label>
+          </div>
+        </div>
+        <div class="fd-sheet-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-start>Reset</button>
+          <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close>Show 1,204 results</button>
+        </div>
+      </dialog>
+
+      <dialog class="fd-sheet" id="sheet-share" data-side="bottom">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <h2 class="fd-sheet-title">Share run</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc">Anyone with the link can view this run’s steps and output. Keys and headers are never shared.</p>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-copy-field" data-value="https://ember.dev/r/8f2a91c4" data-noun="link">
+            <span class="fd-copy-field-label">Link</span>
+            <div class="fd-copy-field-actions"><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy link" data-fd-toast='{"title":"Link copied","tone":"success"}'><i data-icon="copy"></i></button></div>
+            <code class="fd-copy-field-value"></code>
+          </div>
+        </div>
+      </dialog>
+    </div>
+
+    <p class="doc-sub">Inline rendering</p>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <dialog class="fd-sheet" data-static-demo open data-size="md" style="--h:600px" aria-label="Log entry (example)">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <span class="fd-status" data-tone="success" data-variant="pill" data-size="sm">200</span>
+            <h2 class="fd-sheet-title"><span class="fd-mono">req_8f2a91c4</span></h2>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Copy request ID"><i data-icon="copy"></i></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Open in new tab"><i data-icon="external-link"></i></button>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc"><span class="fd-mono">POST /scrape</span> · Nov 14, 2026 4:29 PM · 1.84 s</p>
+          <div class="fd-tabs" role="tablist" aria-label="Request detail (example)" data-size="sm">
+            <button class="fd-tab" type="button" role="tab" aria-selected="true" aria-controls="sl-overview-demo">Overview</button>
+            <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="sl-request-demo">Request</button>
+          </div>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-tab-panel fd-stack" role="tabpanel" id="sl-overview-demo">
+            <dl class="fd-kv" data-cols="2">
+              <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono">/scrape</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">1.84 s</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">1</dd></div>
+            </dl>
+            <div class="fd-sheet-section">
+              <p class="fd-eyebrow">Response</p>
+              <div class="fd-json" data-depth="1"><script type="application/json">{"success":true,"data":{"url":"https://docs.ember.dev/pricing","title":"Pricing · Ember","statusCode":200,"links":42}}</script></div>
+            </div>
+          </div>
+          <div class="fd-tab-panel" role="tabpanel" id="sl-request-demo" hidden>
+            <div class="fd-json" data-depth="2"><script type="application/json">{"url":"https://docs.ember.dev/pricing","formats":["markdown"]}</script></div>
+          </div>
+        </div>
+        <div class="fd-sheet-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-start><i data-icon="code"></i><span>Copy as cURL</span></button>
+          <button class="fd-btn" type="button" data-variant="primary"><i data-icon="play"></i><span>Replay request</span></button>
+        </div>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>Sheets are modal <code class="fd-code">&lt;dialog&gt;</code>s and open with the same <code class="fd-code">data-fd-dialog-open</code>. They float 8px from the edges with a 16px radius; the bottom sheet is flush with 20px top corners and a drag handle.</li>
+      <li>Head and foot keep their hairlines; only the body scrolls. Put tabs at the bottom of the head so they sit on its hairline.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== TOASTS ===================== -->
+  <section class="doc-section" id="toasts">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Toasts</h2>
+      <p>A toast confirms something that already happened, or reports something that happened elsewhere. It never asks a question. Toasts stack at the bottom right (bottom centre on phones); older ones tuck behind and fan out on hover, which also pauses their timers.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-fd-toast='{"title":"Key copied","tone":"success"}'><i data-icon="copy"></i><span>Copy key</span></button>
+      <button class="fd-btn" type="button" data-fd-toast='{"title":"Crawl finished · 1,204 pages","description":"docs.ember.dev in 3m 12s · 1,204 credits","tone":"success","action":{"label":"View run"}}'><span>Finish crawl</span></button>
+      <button class="fd-btn" type="button" data-fd-toast='{"title":"Rate limit reached","description":"/scrape is paused for 42 seconds. Standard allows 50 concurrent requests.","tone":"warning","action":{"label":"Upgrade"}}'><span>Hit rate limit</span></button>
+      <button class="fd-btn" type="button" data-fd-toast='{"title":"Webhook delivery failed","description":"hooks.ember.dev returned 502 for run_8f2a91.","tone":"danger","action":{"label":"Retry"}}'><span>Fail webhook</span></button>
+      <button class="fd-btn" type="button" data-fd-toast='{"title":"Monitor detected changes","description":"pricing.ember.dev changed in 3 places.","tone":"info"}'><span>Monitor change</span></button>
+      <button class="fd-btn" type="button" data-demo-promise><i data-icon="workflow"></i><span>Start crawl</span></button>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="sunken">
+      <div class="fd-toast" data-static-demo data-tone="success" role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="circle-check"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Key copied</p></div>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="success" data-timed role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="circle-check"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Crawl finished · 1,204 pages</p><p class="fd-toast-desc">docs.ember.dev in 3m 12s · 1,204 credits</p></div>
+        <button class="fd-btn fd-toast-action" type="button" data-size="sm">View run</button>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+        <span class="fd-toast-progress" aria-hidden="true"></span>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="warning" role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="triangle-alert"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Rate limit reached</p><p class="fd-toast-desc">/scrape is paused for 42 seconds. Standard allows 50 concurrent requests.</p></div>
+        <button class="fd-btn fd-toast-action" type="button" data-size="sm">Upgrade</button>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="danger" role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="circle-x"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Webhook delivery failed</p><p class="fd-toast-desc">hooks.ember.dev returned 502 for run_8f2a91.</p></div>
+        <button class="fd-btn fd-toast-action" type="button" data-size="sm">Retry</button>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="info" role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="info"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Monitor detected changes</p><p class="fd-toast-desc">pricing.ember.dev changed in 3 places.</p></div>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="loading" role="status">
+        <span class="fd-toast-icon" aria-hidden="true"></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Crawling docs.ember.dev</p><p class="fd-toast-desc">312 of about 1,200 pages</p></div>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="neutral" role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="info"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Ember Labs deleted</p><p class="fd-toast-desc">You were moved to your Personal team.</p></div>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">toast({ title, description, tone, action: { label, onClick }, duration })</code> returns an id for <code class="fd-code">toast.dismiss(id)</code> and <code class="fd-code">toast.update(id, …)</code>. Tones: neutral, success, danger, warning, info, loading.</li>
+      <li><code class="fd-code">toast.promise(promise, { loading, success, error })</code> shows a spinner until the promise settles, then turns into the result.</li>
+      <li>Toasts last 5 seconds (8 for errors, until settled for loading). The thin line along the bottom is the time left. Swipe a toast sideways to dismiss it.</li>
+      <li>The stack is a polite live region. Up to three toasts show; the oldest leave first. Toasts stay above an open dialog and remain clickable.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== COMMAND ===================== -->
+  <section class="doc-section" id="command-palette">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Command palette</h2>
+      <p>⌘K (Ctrl+K) from anywhere: jump to a page, run an action, open a recent run, search the docs. Matching is fuzzy and the matched letters light up; results stay in their groups.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-variant="outline" data-fd-command-open="command"><i data-icon="search"></i><span class="fd-muted">Search or jump to…</span><kbd class="fd-kbd">⌘K</kbd></button>
+      <dialog class="fd-command" id="command" aria-label="Command palette">
+        <div class="fd-command-search">
+          <i data-icon="search"></i>
+          <input class="fd-command-input" type="text" placeholder="Search pages, actions and runs…" aria-label="Search commands" autocomplete="off" spellcheck="false">
+          <kbd class="fd-kbd">esc</kbd>
+        </div>
+        <div class="fd-command-list">
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Navigation</p>
+            <a class="fd-command-item" href="#command-palette" data-keywords="requests history logs"><i data-icon="list"></i><span class="fd-command-item-label">Activity logs</span><span class="fd-command-item-hint">Requests from the last 30 days</span><kbd class="fd-kbd">G</kbd><kbd class="fd-kbd">L</kbd></a>
+            <a class="fd-command-item" href="#command-palette" data-keywords="credits billing"><i data-icon="chart-column"></i><span class="fd-command-item-label">Usage</span><span class="fd-command-item-hint">Credits and concurrency</span><kbd class="fd-kbd">G</kbd><kbd class="fd-kbd">U</kbd></a>
+            <a class="fd-command-item" href="#command-palette" data-keywords="tokens secrets"><i data-icon="key-round"></i><span class="fd-command-item-label">API keys</span><span class="fd-command-item-hint">3 active</span><kbd class="fd-kbd">G</kbd><kbd class="fd-kbd">K</kbd></a>
+            <a class="fd-command-item" href="#command-palette" data-keywords="watch changes diff"><i data-icon="radar"></i><span class="fd-command-item-label">Monitors</span><span class="fd-command-item-hint">12 pages watched</span></a>
+            <a class="fd-command-item" href="#command-palette" data-keywords="preferences team"><i data-icon="settings"></i><span class="fd-command-item-label">Settings</span><kbd class="fd-kbd">⌘,</kbd></a>
+          </div>
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Actions</p>
+            <div class="fd-command-item" data-value="scrape" data-keywords="page url"><i data-icon="file-text"></i><span class="fd-command-item-label">Scrape a page</span><span class="fd-command-item-hint fd-mono">/scrape</span></div>
+            <div class="fd-command-item" data-value="crawl" data-keywords="site website"><i data-icon="workflow"></i><span class="fd-command-item-label">Start a crawl</span><span class="fd-command-item-hint fd-mono">/crawl</span></div>
+            <div class="fd-command-item" data-value="create-key" data-keywords="token new"><i data-icon="plus"></i><span class="fd-command-item-label">Create API key</span></div>
+            <div class="fd-command-item" data-value="invite" data-keywords="member team people"><i data-icon="user-plus"></i><span class="fd-command-item-label">Invite a teammate</span></div>
+            <div class="fd-command-item" data-value="theme" data-keywords="dark light mode"><i data-icon="moon"></i><span class="fd-command-item-label">Switch theme</span><kbd class="fd-kbd">⇧</kbd><kbd class="fd-kbd">T</kbd></div>
+          </div>
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Recent runs</p>
+            <div class="fd-command-item" data-value="run_8f2a91" data-keywords="run_8f2a91"><i data-icon="workflow"></i><span class="fd-command-item-label">docs.ember.dev</span><span class="fd-command-item-hint fd-mono">run_8f2a91 · 1,204 pages</span><span class="fd-status" data-tone="success" data-size="sm">Done</span></div>
+            <div class="fd-command-item" data-value="run_77c0de" data-keywords="run_77c0de"><i data-icon="radar"></i><span class="fd-command-item-label">pricing.ember.dev</span><span class="fd-command-item-hint fd-mono">run_77c0de · monitor</span><span class="fd-status" data-tone="accent" data-size="sm" data-live>Running</span></div>
+            <div class="fd-command-item" data-value="run_51ab02" data-keywords="run_51ab02"><i data-icon="bot"></i><span class="fd-command-item-label">Compare GPU cloud prices</span><span class="fd-command-item-hint fd-mono">run_51ab02 · agent</span><span class="fd-status" data-tone="danger" data-size="sm">Failed</span></div>
+          </div>
+        </div>
+        <div class="fd-command-empty" hidden>
+          <i data-icon="search"></i>
+          <p class="fd-command-empty-title">No results for “<span data-fd-command-query></span>”</p>
+          <p class="fd-command-empty-text">Try a page name, an endpoint like /crawl, or a run ID.</p>
+        </div>
+        <div class="fd-command-foot">
+          <span><kbd class="fd-kbd">↑</kbd><kbd class="fd-kbd">↓</kbd>navigate</span>
+          <span><kbd class="fd-kbd">↵</kbd>select</span>
+          <span><kbd class="fd-kbd">esc</kbd>close</span>
+        </div>
+      </dialog>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <dialog class="fd-command" data-static-demo open aria-label="Command palette (example)">
+        <div class="fd-command-search">
+          <i data-icon="search"></i>
+          <input class="fd-command-input" type="text" value="crawl" aria-label="Search commands (example)" autocomplete="off" spellcheck="false">
+          <kbd class="fd-kbd">esc</kbd>
+        </div>
+        <div class="fd-command-list">
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Actions</p>
+            <div class="fd-command-item" data-keywords="site website"><i data-icon="workflow"></i><span class="fd-command-item-label">Start a crawl</span><span class="fd-command-item-hint fd-mono">/crawl</span></div>
+            <div class="fd-command-item" data-keywords="page url"><i data-icon="file-text"></i><span class="fd-command-item-label">Scrape a page</span><span class="fd-command-item-hint fd-mono">/scrape</span></div>
+          </div>
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Docs</p>
+            <div class="fd-command-item" data-keywords="limits depth"><i data-icon="book-open"></i><span class="fd-command-item-label">Crawl options</span><span class="fd-command-item-hint">Depth, include paths, limits</span></div>
+            <div class="fd-command-item" data-keywords="concurrency"><i data-icon="book-open"></i><span class="fd-command-item-label">Concurrent crawls</span><span class="fd-command-item-hint">How many run at once on each plan</span></div>
+          </div>
+        </div>
+        <div class="fd-command-empty" hidden>
+          <i data-icon="search"></i>
+          <p class="fd-command-empty-title">No results for “<span data-fd-command-query></span>”</p>
+          <p class="fd-command-empty-text">Try a page name, an endpoint like /crawl, or a run ID.</p>
+        </div>
+        <div class="fd-command-foot">
+          <span><kbd class="fd-kbd">↑</kbd><kbd class="fd-kbd">↓</kbd>navigate</span>
+          <span><kbd class="fd-kbd">↵</kbd>select</span>
+          <span><kbd class="fd-kbd">esc</kbd>close</span>
+        </div>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>Focus stays in the search field; <span class="fd-kbd">↑</span> <span class="fd-kbd">↓</span> move the active row (announced through <code class="fd-code">aria-activedescendant</code>), <span class="fd-kbd">↵</span> selects, <span class="fd-kbd">esc</span> clears the query, then closes.</li>
+      <li>Items come from markup, or from <code class="fd-code">command.register([{ id, label, group, icon, hint, shortcut, keywords, href, perform }])</code>, which returns an unregister function. The Docs group on this page is registered from script.</li>
+      <li>Selecting fires a cancelable <code class="fd-code">fd:select</code> on the item with <code class="fd-code">{ value, item, data }</code>; links navigate after the palette closes.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== API ===================== -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">API</h2>
+      <p>Everything works from markup. <code class="fd-code">fire/js/overlays.js</code> also exports these, for flows that start in code.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>data-fd-menu="id"</td><td>Opens the menu with that id. Sets <code class="fd-code">aria-haspopup</code>, <code class="fd-code">aria-expanded</code> and <code class="fd-code">aria-controls</code>. <span class="fd-kbd">↓</span> <span class="fd-kbd">↑</span> on the trigger open it at the first or last item.</td></tr>
+        <tr><td>data-fd-popover="id"</td><td>Opens a popover anchored to the trigger. <code class="fd-code">data-placement</code> on the trigger or the surface: <code class="fd-code">bottom-start</code> (default), <code class="fd-code">top</code>, <code class="fd-code">right-end</code>…; flips when it doesn’t fit.</td></tr>
+        <tr><td>data-fd-tooltip="text"</td><td>Tooltip on any element, with optional <code class="fd-code">data-placement</code> (default top) and <code class="fd-code">data-shortcut="⌘ K"</code>.</td></tr>
+        <tr><td>data-fd-hovercard="id"</td><td>Hover panel with <code class="fd-code">data-open-delay</code> (500) and <code class="fd-code">data-close-delay</code> (250).</td></tr>
+        <tr><td>data-fd-dialog-open="id"</td><td>Opens a dialog, sheet or command palette. <code class="fd-code">data-fd-dialog-close</code> closes the one it is in, with its <code class="fd-code">value</code> as the return value.</td></tr>
+        <tr><td>data-fd-toast='{…}'</td><td>Shows a toast from JSON options when clicked.</td></tr>
+        <tr><td>data-static-demo</td><td>Renders any surface inline and non-floating, for documentation and reviews.</td></tr>
+        <tr><td>openMenu(id, opts)</td><td><code class="fd-code">{ trigger, at: { x, y }, focus: 'first' | 'last' | 'menu' | 'none', placement }</code>. <code class="fd-code">at</code> opens it at a point, for context menus. <code class="fd-code">closeMenu(id)</code>.</td></tr>
+        <tr><td>openPopover(id, opts)</td><td><code class="fd-code">{ trigger, placement, focus }</code>. <code class="fd-code">closePopover(id)</code>.</td></tr>
+        <tr><td>openDialog(id, opts)</td><td><code class="fd-code">{ trigger }</code> is where focus returns. <code class="fd-code">closeDialog(id, value)</code>; without an id closes the top dialog.</td></tr>
+        <tr><td>toast(opts)</td><td>Returns an id. <code class="fd-code">toast.promise</code>, <code class="fd-code">toast.update</code>, <code class="fd-code">toast.dismiss</code>, and shortcuts <code class="fd-code">toast.success / error / warning / info(title, opts)</code>.</td></tr>
+        <tr><td>command</td><td><code class="fd-code">open()</code>, <code class="fd-code">close()</code>, <code class="fd-code">toggle()</code>, <code class="fd-code">register(items)</code>.</td></tr>
+        <tr><td>Events</td><td><code class="fd-code">fd:open</code> and <code class="fd-code">fd:close</code> on every surface (dialogs pass <code class="fd-code">detail.value</code>), <code class="fd-code">fd:select</code> from menu and command items, <code class="fd-code">fd:change</code> from checkbox and radio items, dialog steps, filters, date ranges and notifications, <code class="fd-code">fd:confirm</code> from type-to-confirm.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== RULES ===================== -->
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head"><h2 class="fd-h3">Rules</h2></div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Pick the lightest overlay that does the job: a tooltip names, a menu acts, a popover shows, a sheet details, a dialog decides.</p></div>
+      <div data-dont><strong>Don't</strong><p>Open a dialog from a dialog, put a form in a toast, or hide the only way to do something behind hover.</p></div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { toast, command, openDialog, closeDialog } from '../fire/js/overlays.js';
+
+  // Team switcher: the trigger's tile follows the chosen team.
+  document.getElementById('menu-team')?.addEventListener('fd:change', (event) => {
+    const tile = event.detail.item.querySelector('.fd-tile');
+    const slot = document.querySelector('[data-team-tile]');
+    if (!tile || !slot) return;
+    slot.textContent = tile.textContent;
+    slot.dataset.tone = tile.dataset.tone;
+    slot.toggleAttribute('data-bordered', tile.hasAttribute('data-bordered'));
+  });
+
+  // Revoke confirm → toast.
+  document.getElementById('dlg-revoke')?.addEventListener('fd:close', (event) => {
+    if (event.detail?.value === 'revoke') toast({ title: 'Key revoked', description: 'Production crawler can no longer sign requests.', tone: 'neutral', action: { label: 'Undo' } });
+  });
+
+  // Create key: the success step names the key that was made.
+  const createKey = document.getElementById('dlg-create-key');
+  createKey?.addEventListener('fd:change', (event) => {
+    if (event.detail?.value !== 'created') return;
+    const form = createKey.querySelector('form');
+    const name = form.elements.name.value.trim() || 'Untitled key';
+    const scope = form.elements.scope.value === 'full' ? 'full access' : 'restricted';
+    const expiry = form.elements.expiry;
+    const when = expiry.value === 'never' ? 'never expires' : `expires ${expiry.selectedOptions[0].textContent.toLowerCase()}`;
+    createKey.querySelector('[data-ck-summary]').textContent = `${name} · ${scope} · ${when}`;
+  });
+
+  // Provider picker: live count on the primary action.
+  const grid = document.getElementById('prov-grid');
+  const countProviders = () => {
+    const n = grid.querySelectorAll('input:checked').length;
+    document.querySelector('[data-prov-count]').textContent = `${n} selected across all pages`;
+    document.querySelector('[data-prov-total]').textContent = String(n);
+    document.querySelector('[data-prov-submit]').disabled = n === 0;
+  };
+  document.getElementById('dlg-providers')?.addEventListener('change', countProviders);
+  document.getElementById('dlg-providers')?.addEventListener('fd:open', countProviders);
+
+  // Type-to-confirm: keep the dialog open while the deletion runs.
+  document.getElementById('dlg-delete-team')?.addEventListener('fd:confirm', (event) => {
+    event.preventDefault();
+    const button = event.detail.submitter;
+    button.setAttribute('aria-busy', 'true');
+    setTimeout(() => {
+      closeDialog('dlg-delete-team', 'confirm');
+      toast({ title: 'Ember Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' });
+    }, 1200);
+  });
+
+  // Promise toast.
+  document.querySelector('[data-demo-promise]')?.addEventListener('click', () => {
+    const crawl = new Promise((resolve, reject) => setTimeout(() => (Math.random() < 0.8 ? resolve(1204) : reject(new Error('timeout'))), 2600));
+    toast.promise(crawl, {
+      loading: { title: 'Crawling docs.ember.dev', description: 'This usually takes a few minutes.' },
+      success: (pages) => ({ title: `Crawl finished · ${pages.toLocaleString('en-US')} pages`, description: 'docs.ember.dev in 3m 12s', action: { label: 'View run' } }),
+      error: { title: 'Crawl failed', description: 'docs.ember.dev stopped responding after 312 pages.', action: { label: 'Retry' } },
+    });
+  });
+
+  // Command palette: a group registered from script, and actions wired to the page.
+  command.register([
+    { id: 'docs-scrape', group: 'Docs', icon: 'book-open', label: 'Scrape a page', hint: 'Formats, actions and timeouts', keywords: 'reference markdown', href: '#command-palette' },
+    { id: 'docs-crawl', group: 'Docs', icon: 'book-open', label: 'Crawl options', hint: 'Depth, include paths, limits', keywords: 'reference', href: '#command-palette' },
+    { id: 'docs-limits', group: 'Docs', icon: 'book-open', label: 'Rate limits', hint: 'Requests per minute on each plan', keywords: 'concurrency 429', href: '#command-palette' },
+  ], { palette: 'command' });
+  document.getElementById('command')?.addEventListener('fd:select', (event) => {
+    const value = event.detail.value;
+    if (value === 'create-key') openDialog('dlg-create-key');
+    else if (value === 'crawl' || value === 'scrape') toast({ title: value === 'crawl' ? 'Crawl queued' : 'Scrape queued', description: 'https://docs.ember.dev', tone: 'info' });
+    else if (value?.startsWith?.('run_')) toast({ title: `Opening ${value}`, tone: 'neutral' });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="agent">
+
+<!-- Session pane. The script moves it between the rail and the content. -->
+<aside class="fd-panel" data-variant="pane" id="ag-pane" aria-label="Sessions" hidden>
+  <div class="fd-panel-head">
+    <h2 class="fd-panel-title">Agent</h2>
+    <div class="fd-row" style="--fd-gap:2px">
+      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Agent settings" data-fd-dialog-open="ag-settings"><i data-icon="settings"></i></button>
+      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Hide sessions" id="ag-hide-pane"><i data-icon="panel-left"></i></button>
+    </div>
+  </div>
+  <div class="fd-panel-body">
+    <nav class="fd-session-list" aria-label="Sessions">
+      <div class="fd-session-list-actions"><button class="fd-session-list-new" type="button" data-new-session><i data-icon="plus"></i>New session</button></div>
+      <div class="fd-session-list-body" data-sessions></div>
+    </nav>
+  </div>
+</aside>
+
+<main class="fd-page">
+  <!-- The agent area fills the space under the top bar (height and single column are set inline; see report). -->
+  <div class="fd-agent" data-fill>
+    <section class="fd-agent-main" aria-label="Agent">
+      <header class="fd-agent-top">
+        <span class="fd-small fd-muted fd-truncate fd-agent-top-hide" id="ag-title" hidden></span>
+        <span class="fd-free-runs" id="ag-free"><b>5</b> free daily runs</span>
+        <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" id="ag-history" aria-controls="ag-pane"><i data-icon="history"></i><span>History</span></button>
+        <button class="fd-btn fd-agent-top-hide" type="button" data-variant="ghost" data-size="sm" data-fd-dialog-open="ag-whatsnew"><i data-icon="sparkles"></i><span>What’s new</span></button>
+        <button class="fd-use-agent" type="button" data-fd-dialog-open="ag-use"><span class="fd-use-agent-stack" aria-hidden="true"><span class="fd-use-agent-tile"><i data-icon="terminal"></i></span><span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span><span class="fd-use-agent-tile" data-tone="neutral">›_</span></span>Use in your agent</button>
+      </header>
+
+      <div class="fd-agent-scroll" id="ag-scroll">
+        <h1 class="fd-sr-only">Agent</h1>
+        <div class="fd-composer-hero" id="ag-hero">
+          <h2 class="fd-h1">Ask for <span class="fd-accent-text">any data</span> on the web</h2>
+          <form class="fd-composer" id="ag-composer">
+            <textarea class="fd-composer-input" rows="1" placeholder="What are you looking for?" aria-label="Ask Ember"></textarea>
+            <div class="fd-composer-tools">
+              <button type="button" class="fd-model-chip" popovertarget="ag-models"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span><span class="fd-model-chip-tag">New</span></button>
+              <div class="fd-model-menu" id="ag-models" popover role="menu" aria-label="Model">
+                <p class="fd-model-menu-label fd-eyebrow">Model</p>
+                <button class="fd-model-menu-item" role="menuitemradio" aria-checked="true" data-value="Spark 2" data-new><i data-icon="sparkles"></i><span class="fd-model-menu-name">Spark 2 <span class="fd-model-chip-tag">New</span></span><i data-icon="check"></i><span class="fd-model-menu-desc">Plans multi-step research and checks its sources</span></button>
+                <button class="fd-model-menu-item" role="menuitemradio" aria-checked="false" data-value="Spark 1"><i data-icon="sparkle"></i><span class="fd-model-menu-name">Spark 1</span><i data-icon="check"></i><span class="fd-model-menu-desc">Fast answers from one or two pages</span></button>
+                <button class="fd-model-menu-item" role="menuitemradio" aria-checked="false" data-value="Spark Mini"><i data-icon="zap"></i><span class="fd-model-menu-name">Spark Mini</span><i data-icon="check"></i><span class="fd-model-menu-desc">Cheapest; good for lookups and lists</span></button>
+              </div>
+              <span class="fd-composer-sep"></span>
+              <button type="button" class="fd-composer-tool" data-fd-popover="ag-sites" data-placement="bottom-start"><i data-icon="plus"></i><span>Sites</span></button>
+              <button type="button" class="fd-composer-tool" data-fd-popover="ag-schema" data-placement="bottom-start"><i data-icon="braces"></i><span>Schema</span></button>
+              <button type="button" class="fd-composer-tool" data-fd-cycle="Low,Medium,High"><i data-icon="gauge"></i><span>Medium</span></button>
+              <button type="button" class="fd-composer-tool" aria-pressed="true"><i data-icon="landmark"></i><span>Catalog</span><i data-icon="chevron-down"></i></button>
+              <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+            </div>
+          </form>
+          <div class="fd-suggestions" data-target="#ag-composer">
+            <button type="button" class="fd-suggestions-item"><span class="fd-suggestions-text">Every pricing tier and monthly price on ember.dev, northwind.io and lumenapi.com</span><i data-icon="arrow-right"></i></button>
+            <button type="button" class="fd-suggestions-item"><span class="fd-suggestions-text">The spring demo-day batch: company, one-liner, founders and website</span><i data-icon="arrow-right"></i></button>
+            <button type="button" class="fd-suggestions-item"><span class="fd-suggestions-text">All open engineering roles at Northwind with location and team</span><i data-icon="arrow-right"></i></button>
+            <button type="button" class="fd-suggestions-item"><span class="fd-suggestions-text">Top five stories on the Ember changelog this month with a one-line summary</span><i data-icon="arrow-right"></i></button>
+          </div>
+        </div>
+        <div class="fd-stack" id="ag-turns" style="--fd-gap:32px" hidden></div>
+      </div>
+
+      <div class="fd-agent-dock" id="ag-dock" hidden>
+        <p class="fd-agent-dock-note">Ember can be wrong. Check the sources before you rely on an answer.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Composer popovers -->
+<div class="fd-popover" id="ag-sites" popover data-size="lg" aria-label="Sites">
+  <div class="fd-stack" style="--fd-gap:12px">
+    <div><p class="fd-title">Limit to these sites</p><p class="fd-small fd-muted">Ember only reads pages from the domains you list. Leave it empty to search the whole web.</p></div>
+    <div class="fd-tag-input" data-fd-tag-input data-mono data-name="sites" data-value="ember.dev,northwind.io"><input class="fd-tag-input-field" id="ag-sites-input" aria-label="Add a domain" placeholder="Add a domain" autocomplete="off" spellcheck="false"></div>
+    <div class="fd-row" data-justify="end"><button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-popover-close>Done</button></div>
+  </div>
+</div>
+<div class="fd-popover" id="ag-schema" popover data-size="lg" aria-label="Output schema">
+  <div class="fd-stack" style="--fd-gap:12px">
+    <div><p class="fd-title">Output schema</p><p class="fd-small fd-muted">Describe the columns you want and Ember returns rows that match.</p></div>
+    <textarea class="fd-textarea" data-mono rows="5" spellcheck="false" aria-label="JSON schema" placeholder='{ "type": "object", "properties": { "plan": { "type": "string" }, "price": { "type": "number" } } }'></textarea>
+    <div class="fd-row" data-justify="end"><button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-popover-close>Done</button></div>
+  </div>
+</div>
+
+<!-- Session menu -->
+<div class="fd-menu" id="ag-session-menu" popover role="menu" aria-label="Session actions">
+  <button class="fd-menu-item" data-act="link"><i data-icon="link"></i><span class="fd-menu-item-label">Copy link</span></button>
+  <button class="fd-menu-item" data-act="open"><i data-icon="square-terminal"></i><span class="fd-menu-item-label">Open in playground</span></button>
+  <hr class="fd-menu-sep">
+  <button class="fd-menu-item" data-tone="danger" data-act="delete"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Delete session</span></button>
+</div>
+
+<!-- Sessions sheet (phones) -->
+<dialog class="fd-sheet" id="ag-sessions-sheet" data-side="left" data-size="md" aria-labelledby="ag-sessions-title">
+  <div class="fd-sheet-head">
+    <div class="fd-sheet-bar">
+      <h2 class="fd-sheet-title" id="ag-sessions-title">Agent sessions</h2>
+      <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+  </div>
+  <div class="fd-sheet-body">
+    <nav class="fd-session-list" aria-label="Sessions">
+      <div class="fd-session-list-actions"><button class="fd-session-list-new" type="button" data-new-session><i data-icon="plus"></i>New session</button></div>
+      <div class="fd-session-list-body" data-sessions></div>
+    </nav>
+  </div>
+</dialog>
+
+<!-- Agent settings -->
+<dialog class="fd-dialog" id="ag-settings" data-size="md" aria-labelledby="ag-settings-title">
+  <div class="fd-dialog-head">
+    <h2 class="fd-h3 fd-dialog-title" id="ag-settings-title">Agent settings</h2>
+    <p class="fd-dialog-desc">Limits apply to every new session on Quarry Labs.</p>
+    <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+  </div>
+  <div class="fd-dialog-body fd-stack">
+    <div class="fd-field">
+      <div class="fd-field-head"><label class="fd-field-label" for="ag-effort">Default effort</label><output class="fd-slider-value" for="ag-effort">Medium</output></div>
+      <div class="fd-slider" data-variant="steps" data-labels="Low,Medium,High"><input type="range" id="ag-effort" min="0" max="2" step="1" value="1"></div>
+      <p class="fd-field-hint">Higher effort reads more sources and costs more credits.</p>
+    </div>
+    <div class="fd-field">
+      <label class="fd-field-label" for="ag-cap">Credit limit per session</label>
+      <label class="fd-select"><select id="ag-cap"><option>25 credits</option><option selected>50 credits</option><option>100 credits</option><option>No limit</option></select></label>
+      <p class="fd-field-hint">A run stops when it reaches the limit and tells you why.</p>
+    </div>
+    <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Ask before paid catalog calls</span><span class="fd-switch-desc">Show an approval step when a source charges credits.</span></span></label>
+  </div>
+  <div class="fd-dialog-foot"><button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button><button class="fd-btn" type="button" data-fd-dialog-close>Save settings</button></div>
+</dialog>
+
+<!-- Use in your agent -->
+<dialog class="fd-dialog" id="ag-use" data-size="lg" aria-labelledby="ag-use-title">
+  <div class="fd-dialog-head">
+    <h2 class="fd-h3 fd-dialog-title" id="ag-use-title">Use Ember in your agent</h2>
+    <p class="fd-dialog-desc">Give any coding agent the same search, scrape and crawl tools you use here.</p>
+    <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+  </div>
+  <div class="fd-dialog-body fd-stack">
+    <div class="fd-stack" style="--fd-gap:6px">
+      <p class="fd-eyebrow">Claude Code</p>
+      <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">claude mcp add ember -- npx -y @ember/mcp</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+    </div>
+    <div class="fd-stack" style="--fd-gap:6px">
+      <p class="fd-eyebrow">Cursor and other MCP clients</p>
+      <div class="fd-snippet"><span class="fd-snippet-prompt" aria-hidden="true">$</span><code class="fd-snippet-text">npx -y @ember/cli init --agent cursor</code><button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+    </div>
+    <div class="fd-stack" style="--fd-gap:6px">
+      <p class="fd-eyebrow">Skill</p>
+      <div class="fd-snippet"><i data-icon="link"></i><code class="fd-snippet-text"><span class="fd-snippet-dim">ember.dev/</span>agent/<span class="fd-snippet-em">SKILL.md</span></code><button class="fd-snippet-copy" type="button" aria-label="Copy skill URL" data-copy="https://ember.dev/agent/SKILL.md"><i data-icon="copy"></i></button></div>
+    </div>
+  </div>
+  <div class="fd-dialog-foot"><a class="fd-btn" data-variant="ghost" href="install.html"><span>Setup guide</span><i data-icon="arrow-right" data-nudge></i></a><button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-close>Done</button></div>
+</dialog>
+
+<!-- What's new -->
+<dialog class="fd-dialog" id="ag-whatsnew" data-size="md" aria-labelledby="ag-whatsnew-title">
+  <section data-step="runs">
+    <div class="fd-dialog-head">
+      <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+      <h2 class="fd-h3 fd-dialog-title" id="ag-whatsnew-title">Meet the new Agent</h2>
+      <p class="fd-dialog-desc">Same request, a new engine underneath.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body">
+      <ul class="fd-dialog-features">
+        <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent">12x</span><div><p class="fd-dialog-feature-title">Cheaper</p><p class="fd-dialog-feature-text">A typical research run now costs 40 credits, down from 480.</p></div></li>
+        <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent">3x</span><div><p class="fd-dialog-feature-title">Faster</p><p class="fd-dialog-feature-text">Most runs finish in under a minute, even across dozens of pages.</p></div></li>
+        <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="landmark"></i></span><div><p class="fd-dialog-feature-title">Catalog</p><p class="fd-dialog-feature-text">Live data from third-party providers, called directly and cited in the answer.</p></div></li>
+      </ul>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="primary" data-block data-fd-dialog-step="next">Next</button>
+      <div class="fd-dialog-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+  <section data-step="watch" hidden>
+    <div class="fd-dialog-head">
+      <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+      <h2 class="fd-h3 fd-dialog-title">Watch it work</h2>
+      <p class="fd-dialog-desc">Runs stream their steps as they happen.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body">
+      <ul class="fd-dialog-features">
+        <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="activity"></i></span><div><p class="fd-dialog-feature-title">Live steps</p><p class="fd-dialog-feature-text">See each search, page and tool call the moment it starts.</p></div></li>
+        <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="shield"></i></span><div><p class="fd-dialog-feature-title">Approvals</p><p class="fd-dialog-feature-text">Paid catalog calls wait for your go-ahead before they run.</p></div></li>
+      </ul>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="primary" data-block data-fd-dialog-step="next">Next</button>
+      <div class="fd-dialog-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+  <section data-step="use" hidden>
+    <div class="fd-dialog-head">
+      <p class="fd-eyebrow" data-tone="accent">What’s new</p>
+      <h2 class="fd-h3 fd-dialog-title">Use it from your agent</h2>
+      <p class="fd-dialog-desc">Point any MCP client at Ember and the new runs are there.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body">
+      <ul class="fd-dialog-features">
+        <li class="fd-dialog-feature"><span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="plug"></i></span><div><p class="fd-dialog-feature-title">One endpoint</p><p class="fd-dialog-feature-text"><span class="fd-code">/agent</span> accepts the same body as before. Nothing to migrate.</p></div></li>
+      </ul>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="primary" data-block data-fd-dialog-close value="done">Start a run</button>
+      <div class="fd-dialog-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+</dialog>
+
+<script type="module">
+import { init, shell, agent, overlays, copyText } from '../fire/fire.js';
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const ico = (n, cls = '') => `<i data-icon="${n}"${cls ? ` class="${cls}"` : ''}></i>`;
+const attr = (o) => esc(JSON.stringify(o));
+const toast = overlays.toast;
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* ---------- shell: sidebar on the rail, session pane beside it ---------- */
+const app = $('.fd-app');
+const pane = $('#ag-pane');
+app.dataset.persist = 'false';
+shell.setSidebar(app, 'collapsed', { persist: false, silent: true });
+$('.fd-sidebar', app).after(pane);
+pane.hidden = false;
+
+/* ---------- elements ---------- */
+const composer = $('#ag-composer');
+const hero = $('#ag-hero');
+const suggestions = $('.fd-suggestions', hero);
+const turns = $('#ag-turns');
+const dock = $('#ag-dock');
+const scroller = $('#ag-scroll');
+const input = $('.fd-composer-input', composer);
+const titleEl = $('#ag-title');
+
+/* ---------- builders for saved threads ---------- */
+const ACTIONS = `<div class="fd-message-actions" role="toolbar" aria-label="Message actions">
+  <button type="button" class="fd-message-action" data-action="copy" aria-label="Copy answer">${ico('copy')}</button>
+  <button type="button" class="fd-message-action" data-action="retry" aria-label="Retry">${ico('rotate-ccw')}</button>
+  <button type="button" class="fd-message-action" data-action="up" aria-label="Good answer" aria-pressed="false">${ico('thumbs-up')}</button>
+  <button type="button" class="fd-message-action" data-action="down" aria-label="Bad answer" aria-pressed="false">${ico('thumbs-down')}</button>
+  <button type="button" class="fd-message-action" data-action="open">${ico('square-terminal')}<span>Open in playground</span></button></div>`;
+const user = (t) => `<article class="fd-message" data-role="user"><div class="fd-message-body">${esc(t)}</div></article>`;
+const asst = (html, state = '') => `<article class="fd-message" data-role="assistant"${state ? ` data-state="${state}"` : ''}><div class="fd-message-avatar" aria-hidden="true">${ico('sparkle')}</div><div class="fd-message-content">${html}</div></article>`;
+const foot = (meta) => `<div class="fd-message-foot">${ACTIONS}<span class="fd-message-meta">${meta}</span></div>`;
+const prose = (html) => `<div class="fd-message-body">${html}</div>`;
+const reasoning = (label, text) => `<div class="fd-reasoning" data-state="done"><button type="button" class="fd-reasoning-toggle" aria-expanded="false">${ico('brain')}<span class="fd-reasoning-label">${label}</span>${ico('chevron-right')}</button><div class="fd-reasoning-panel"><div class="fd-reasoning-body"><div class="fd-reasoning-text"><p>${text}</p></div></div></div></div>`;
+const tcHead = (c, meta) => `<span class="fd-toolcall-status"></span><span class="fd-toolcall-name">${esc(c.name)}</span><span class="fd-toolcall-args">${esc(c.args)}</span><span class="fd-toolcall-meta">${meta}</span>`;
+const tcPanel = (c) => `<div class="fd-toolcall-panel"><div class="fd-toolcall-body"><div class="fd-toolcall-label"><span class="fd-eyebrow">Arguments</span></div><div class="fd-json" data-depth="2" data-max-height="200" data-json="${attr(c.input)}"></div>${c.output ? `<div class="fd-toolcall-label"><span class="fd-eyebrow">Result</span><span>${c.meta}</span></div><div class="fd-json" data-depth="1" data-max-height="200" data-json="${attr(c.output)}"></div>` : ''}</div></div>`;
+const tc = (c) => `<div class="fd-toolcall" data-state="done"><button type="button" class="fd-toolcall-head" aria-expanded="false">${tcHead(c, c.meta)}${ico('chevron-down', 'fd-toolcall-chevron')}</button>${tcPanel(c)}</div>`;
+const tcFailed = (c, message) => `<div class="fd-toolcall" data-state="failed"><button type="button" class="fd-toolcall-head" aria-expanded="false">${tcHead(c, c.meta)}${ico('chevron-down', 'fd-toolcall-chevron')}</button>${tcPanel(c)}<div class="fd-toolcall-foot"><span class="fd-toolcall-foot-text">${message}</span><div class="fd-toolcall-foot-actions"><button type="button" class="fd-btn" data-size="sm" data-retry>${ico('rotate-ccw')}<span>Retry</span></button></div></div></div>`;
+const group = (...items) => `<div class="fd-toolcall-group">${items.join('')}</div>`;
+const SRC_TONES = ['neutral', 'violet', 'info', 'success'];
+const cite = (n, s) => `<a class="fd-citation" href="https://${s.domain}" data-title="${esc(s.title)}" data-domain="${esc(s.domain.split('/')[0])}" data-snippet="${esc(s.snippet)}" aria-label="Source ${n}: ${esc(s.title)}">${n}</a>`;
+const sources = (list) => `<div class="fd-sources" data-layout="row"><div class="fd-sources-head"><span class="fd-eyebrow">Sources</span><span class="fd-sources-count">${list.length}</span></div><div class="fd-sources-list">${list.map((s, i) => `<a class="fd-sources-item" href="https://${s.domain}"><span class="fd-sources-meta"><span class="fd-sources-tile"${i ? ` data-tone="${SRC_TONES[(i - 1) % 4]}"` : ''}>${s.domain[0]}</span><span class="fd-sources-domain">${esc(s.domain.split('/')[0])}</span><span class="fd-sources-num">${i + 1}</span></span><span class="fd-sources-title">${esc(s.title)}</span></a>`).join('')}</div></div>`;
+function result({ title, cols, rows, file, usage }) {
+  const objs = rows.map((r) => Object.fromEntries(cols.map((c, i) => [c.key, r[i]])));
+  return `<section class="fd-result" data-fd-views>
+    <header class="fd-result-head"><div class="fd-result-title"><span>${esc(title)}</span><span class="fd-result-count">${rows.length} rows</span></div>
+      <div class="fd-result-tools"><div class="fd-viewswitch" role="tablist" aria-label="Result view"><button class="fd-viewswitch-item" role="tab" data-value="table" aria-selected="true">Table</button><button class="fd-viewswitch-item" role="tab" data-value="json">JSON</button></div>
+      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-action="copy-result" aria-label="Copy result as JSON">${ico('copy')}</button>
+      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-action="download-result" aria-label="Download CSV">${ico('download')}</button></div></header>
+    <div class="fd-result-body" data-view="table"><table class="fd-result-table"><thead><tr>${cols.map((c) => `<th${c.num ? ' data-num' : ''}>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((v, i) => `<td${cols[i].num ? ' data-num' : ''}>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="fd-result-body" data-view="json" hidden><div class="fd-json" data-variant="bare" data-depth="2" data-json="${attr(objs)}"></div></div>
+    <footer class="fd-result-foot"><span>${esc(file)}</span><span>${esc(usage)}</span></footer></section>`;
+}
+
+const ROLE_COLS = [{ key: 'role', label: 'Role' }, { key: 'team', label: 'Team' }, { key: 'location', label: 'Location' }, { key: 'posted', label: 'Posted', num: true }];
+const ROLE_ROWS = [['Staff Engineer, Crawling', 'Data platform', 'Lisbon', 'Nov 12'], ['Senior Frontend Engineer', 'Console', 'Remote (EU)', 'Nov 10'], ['Engineering Manager', 'Agents', 'Toronto', 'Nov 8'], ['Site Reliability Engineer', 'Infrastructure', 'Lisbon', 'Nov 3'], ['Machine Learning Engineer', 'Extraction', 'Remote (EU)', 'Oct 29'], ['Backend Engineer, Billing', 'Platform', 'Toronto', 'Oct 21']];
+const ROLES_PROMPT = 'All open engineering roles at Northwind with location and team';
+const CAREERS = { name: 'scrape', args: 'northwind.io/careers/engineering · markdown', meta: '2.4s · 1 cr', input: { url: 'https://northwind.io/careers/engineering', formats: ['markdown'], onlyMainContent: true }, output: { pages: 1, status: 200, tokens: 2210, credits: 1 } };
+const SEARCH_CAREERS = { name: 'search', args: '"engineering jobs" site:northwind.io/careers', meta: '0.9s · 1 cr', input: { query: 'engineering jobs', site: 'northwind.io/careers', limit: 10 }, output: { results: [{ url: 'https://northwind.io/careers/engineering', title: 'Engineering' }], credits: 1 } };
+
+const SESSIONS = [
+  { id: 's1', group: 'Today', title: 'Pricing tiers across three web-data APIs', time: '2:14 PM', build: 'demo' },
+  { id: 's2', group: 'Today', title: 'Open engineering roles at Northwind', time: '11:02 AM', build: 'approval' },
+  { id: 's3', group: 'Today', title: 'Changelog highlights this month', time: '9:40 AM', build: 'changelog' },
+  { id: 's4', group: 'Yesterday', title: 'Every SDK release since June with notes', time: '6:18 PM', build: 'sdk' },
+  { id: 's5', group: 'Yesterday', title: 'Docs pages that mention rate limits', time: '3:05 PM', build: 'error' },
+  { id: 's6', group: 'Previous 7 days', title: 'Spring demo-day batch with founders and websites', time: 'Nov 9', build: 'batch' },
+  { id: 's7', group: 'Previous 7 days', title: 'Status pages of our 20 biggest vendors', time: 'Nov 8', build: 'status' },
+];
+
+const BUILDERS = {
+  approval: () => user(ROLES_PROMPT) + asst(
+    reasoning('Thought for 4s', 'Careers pages are the source of truth for the roles. The catalog is only needed to name the hiring manager of each team, and that source charges credits, so it needs approval.')
+    + group(tc(SEARCH_CAREERS), tc(CAREERS), `<div class="fd-toolcall" data-state="approval" id="ag-approval"><div class="fd-toolcall-head"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">catalog.northwind.person_search</span><span class="fd-toolcall-args">Engineering Managers · northwind.io</span><span class="fd-toolcall-meta">5 cr</span></div><div class="fd-toolcall-foot"><span class="fd-toolcall-foot-text">This catalog source charges 5 credits per call. Ember waits for your go-ahead.</span><div class="fd-toolcall-foot-actions"><button type="button" class="fd-btn" data-variant="primary" data-size="sm" data-approve="once">Allow once</button><button type="button" class="fd-btn" data-size="sm" data-approve="always">Always allow</button><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-approve="deny">Deny</button></div></div></div>`),
+  ),
+  changelog: () => {
+    const s = [{ title: 'Changelog · Ember docs', domain: 'docs.ember.dev/changelog', snippet: 'Release notes for the API, SDKs and console, newest first.' }];
+    return user('Top five stories on the Ember changelog this month with a one-line summary') + asst(
+      reasoning('Thought for 2s', 'One page answers this. Scrape the changelog and keep the five newest entries from November.')
+      + group(tc({ name: 'scrape', args: 'docs.ember.dev/changelog · markdown', meta: '1.6s · 1 cr', input: { url: 'https://docs.ember.dev/changelog', formats: ['markdown'], onlyMainContent: true }, output: { pages: 1, status: 200, credits: 1 } }))
+      + prose(`<p>Five things shipped in November${cite(1, s[0])}:</p><ol><li><strong>Spark 2</strong> is the new default agent model and costs about a twelfth of a Spark 1 run.</li><li><strong>Batch scrape</strong> takes up to 1,000 URLs in one request.</li><li><strong>Page actions</strong> can click, scroll and wait before a scrape.</li><li>The <strong>console</strong> adds a session pane to the Agent screen.</li><li><strong>Python SDK 2.4</strong> retries on <code>429</code> with backoff.</li></ol>`)
+      + sources(s) + foot('1 page · 1 credit · 3.4s'),
+    );
+  },
+  sdk: () => user('Every SDK release since June with notes') + asst(
+    reasoning('Thought for 5s', 'Search the changelog and the GitHub releases for each SDK, then merge them into one table sorted by date.')
+    + group(tc({ name: 'search', args: 'ember sdk releases since June 2026', meta: '1.1s · 1 cr', input: { query: 'ember sdk releases', since: '2026-06-01', limit: 10 }, output: { results: 8, credits: 1 } }), tc({ name: 'scrape', args: '3 release pages · markdown', meta: '3.2s · 3 cr', input: { urls: ['https://github.com/ember-dev/ember-py/releases', 'https://github.com/ember-dev/ember-node/releases', 'https://github.com/ember-dev/ember-go/releases'], formats: ['markdown'] }, output: { pages: 3, credits: 3 } }))
+    + prose('<p>There have been five releases across the Python, Node and Go SDKs since June. Python 2.4.1 is the latest.</p>')
+    + result({ title: 'SDK releases', cols: [{ key: 'sdk', label: 'SDK' }, { key: 'version', label: 'Version', num: true }, { key: 'released', label: 'Released', num: true }, { key: 'notes', label: 'Notes' }], rows: [['Python', '2.4.1', 'Nov 6', 'Retry on 429 with backoff'], ['Node', '3.1.0', 'Oct 21', 'Streaming crawl events'], ['Python', '2.4.0', 'Oct 9', 'Batch scrape'], ['Go', '0.8.0', 'Sep 30', 'First public release'], ['Node', '3.0.0', 'Aug 14', 'ESM only']], file: 'sdk_releases.json', usage: '4 pages · 5 credits · 6.8s' })
+    + foot('4 pages · 5 credits · 6.8s'),
+  ),
+  error: () => {
+    const prompt = 'Docs pages that mention rate limits';
+    const failed = { name: 'scrape', args: 'lumenapi.com/docs/limits', meta: '30.0s · 0 cr', input: { url: 'https://lumenapi.com/docs/limits', formats: ['markdown'] }, output: { error: 'TIMEOUT', url: 'https://lumenapi.com/docs/limits', waitedMs: 30000 } };
+    return user(prompt) + asst(
+      group(tc({ name: 'search', args: '"rate limits" docs ember.dev northwind.io lumenapi.com', meta: '1.2s · 1 cr', input: { query: 'rate limits', sites: ['ember.dev', 'northwind.io', 'lumenapi.com'] }, output: { results: 9, credits: 1 } }), tcFailed(failed, 'The page did not finish loading in 30s. Retry with a longer timeout or scrape the cached copy.')),
+    ) + `<article class="fd-message" data-role="assistant" data-state="error"><div class="fd-message-avatar" aria-hidden="true">${ico('sparkle')}</div><div class="fd-message-content"><div class="fd-message-error" role="alert">${ico('circle-alert')}<p class="fd-message-error-text"><span class="fd-message-error-title">The run stopped at 50 credits</span>That is the limit set for this session. Raise it in Agent settings or retry with a narrower question.</p><button type="button" class="fd-btn" data-size="sm" data-retry>${ico('rotate-ccw')}<span>Retry</span></button></div></div></article>`;
+  },
+  batch: () => {
+    const s = [{ title: 'Spring batch · Demo day directory', domain: 'demoday.quarry.dev/spring', snippet: 'Company directory for the spring demo-day batch.' }];
+    return user('The spring demo-day batch: company, one-liner, founders and website') + asst(
+      reasoning('Thought for 3s', 'The directory lists every company on one page; scrape it once and extract the four fields.')
+      + group(tc({ name: 'scrape', args: 'demoday.quarry.dev/spring · json', meta: '2.8s · 5 cr', input: { url: 'https://demoday.quarry.dev/spring', formats: ['json'], jsonOptions: { prompt: 'company, one-liner, founders, website' } }, output: { rows: 4, credits: 5 } }))
+      + prose(`<p>Four companies are listed for the spring batch${cite(1, s[0])}. Two are building agent tooling.</p>`)
+      + result({ title: 'Spring batch', cols: [{ key: 'company', label: 'Company' }, { key: 'oneLiner', label: 'One-liner' }, { key: 'founders', label: 'Founders' }, { key: 'website', label: 'Website' }], rows: [['Tidepool', 'Usage-based billing for APIs', 'Ana Ruiz, Ken Ota', 'tidepool.dev'], ['Fernwood', 'Test data for agents', 'Mia Okafor', 'fernwood.ai'], ['Lattice Labs', 'Schema drift alerts', 'Jon Berg, Priya Nair', 'latticelabs.io'], ['Harbor', 'Secrets for coding agents', 'Leo Marsh', 'harbor.sh']], file: 'spring_batch.json', usage: '1 page · 5 credits · 4.0s' })
+      + sources(s) + foot('1 page · 5 credits · 4.0s'),
+    );
+  },
+  status: () => {
+    const s = [{ title: 'Ember status', domain: 'status.ember.dev', snippet: 'All systems operational.' }, { title: 'Lumen API status', domain: 'status.lumenapi.com', snippet: 'Partial outage: /extract is degraded.' }, { title: 'Northwind status', domain: 'status.northwind.io', snippet: 'All systems operational.' }];
+    return user('Status pages of our 20 biggest vendors') + asst(
+      reasoning('Thought for 6s', 'Fetch each vendor status page and read the headline state. Group by healthy and degraded.')
+      + group(tc({ name: 'scrape', args: '20 status pages · markdown', meta: '9.7s · 20 cr', input: { urls: ['https://status.ember.dev', 'https://status.lumenapi.com', 'https://status.northwind.io', '…17 more'], formats: ['markdown'] }, output: { pages: 20, ok: 19, failed: 1, credits: 20 } }))
+      + prose(`<p>19 of 20 vendors report all systems operational. <strong>Lumen API</strong> has a partial outage affecting <code>/extract</code>${cite(2, s[1])}; Ember${cite(1, s[0])} and Northwind${cite(3, s[2])} are healthy.</p><ul><li>Operational: 19</li><li>Degraded: 1 (Lumen API)</li></ul>`)
+      + sources(s) + foot('20 pages · 20 credits · 11.2s'),
+    );
+  },
+};
+
+/* ---------- state ---------- */
+const sessions = SESSIONS.map((s) => ({ ...s }));
+let current = null;
+let menuFor = null;
+let counter = 0;
+let freeRuns = 5;
+
+function sessionItem(s) {
+  const trail = s.running ? '<span class="fd-session-list-live" role="img" aria-label="Running"></span>' : `<span class="fd-session-list-time">${esc(s.time)}</span>`;
+  return `<div class="fd-session-list-item"><a class="fd-session-list-link" href="#${s.id}" data-session="${s.id}"${s.id === current ? ' aria-current="page"' : ''}>${esc(s.title)}</a>${trail}<button class="fd-session-list-more" type="button" data-more="${s.id}" aria-label="Options for ${esc(s.title)}">${ico('ellipsis')}</button></div>`;
+}
+function renderSessions() {
+  const groups = [...new Set(sessions.map((s) => s.group))];
+  const html = groups.map((g) => `<p class="fd-session-list-label fd-eyebrow">${g}</p>${sessions.filter((s) => s.group === g).map(sessionItem).join('')}`).join('')
+    || '<div class="fd-session-list-empty" role="status">No sessions yet. Ask something to start one.</div>';
+  $$('[data-sessions]').forEach((el) => { el.innerHTML = html; init(el); });
+}
+
+function setView(thread) {
+  hero.hidden = thread;
+  turns.hidden = !thread;
+  dock.hidden = !thread;
+  titleEl.hidden = !thread;
+  if (thread) {
+    dock.prepend(composer);
+    input.placeholder = 'Ask a follow-up';
+  } else {
+    hero.insertBefore(composer, suggestions);
+    input.placeholder = 'What are you looking for?';
+  }
+}
+const stopAll = () => $$('.fd-thread', turns).forEach((t) => agent.stopDemo(t));
+function newTurn() {
+  const thread = document.createElement('div');
+  thread.className = 'fd-thread';
+  turns.append(thread);
+  return thread;
+}
+const scrollEnd = (smooth) => scroller.scrollTo({ top: scroller.scrollHeight, behavior: smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto' });
+
+function newSession() {
+  stopAll();
+  agent.setRunning(composer, false);
+  turns.replaceChildren();
+  current = null;
+  setView(false);
+  scroller.scrollTop = 0;
+  renderSessions();
+  if (!composer.hasAttribute('aria-disabled')) input.focus({ preventScroll: true });
+}
+
+function openSession(id) {
+  const s = sessions.find((x) => x.id === id);
+  if (!s || id === current) return;
+  stopAll();
+  agent.setRunning(composer, false);
+  turns.replaceChildren();
+  current = id;
+  setView(true);
+  titleEl.textContent = s.title;
+  if (s.build === 'demo') {
+    agent.demoRun(newTurn(), { instant: true, composer });
+  } else if (s.build) {
+    const thread = newTurn();
+    thread.innerHTML = BUILDERS[s.build]();
+    init(thread);
+  }
+  if (s.html) { turns.insertAdjacentHTML('beforeend', s.html); init(turns); }
+  scroller.scrollTop = 0;
+  renderSessions();
+}
+
+/* ---------- running ---------- */
+function useFreeRun() {
+  freeRuns = Math.max(0, freeRuns - 1);
+  const el = $('#ag-free');
+  el.innerHTML = freeRuns ? `<b>${freeRuns}</b> free daily runs` : '<b>0</b> free runs left today';
+  if (!freeRuns) el.dataset.state = 'empty';
+}
+function lockComposer() {
+  composer.setAttribute('aria-disabled', 'true');
+  input.disabled = true;
+  input.placeholder = 'You have used today’s 5 free runs. They renew at 00:00 UTC.';
+  $$('.fd-model-chip, .fd-composer-tool, .fd-composer-send', composer).forEach((b) => { b.disabled = true; });
+}
+
+async function startRun(prompt) {
+  if (!prompt) return;
+  let s = sessions.find((x) => x.id === current);
+  const fresh = !s;
+  if (fresh) {
+    s = { id: `n${++counter}`, group: 'Today', title: prompt.length > 64 ? `${prompt.slice(0, 61)}…` : prompt, time: 'Now', running: true, html: '' };
+    sessions.unshift(s);
+    current = s.id;
+    turns.replaceChildren();
+    setView(true);
+    titleEl.textContent = s.title;
+  }
+  s.running = true;
+  renderSessions();
+  useFreeRun();
+  const thread = newTurn();
+  scrollEnd(false);
+  await agent.demoRun(thread, { prompt, composer });
+  s.running = false;
+  s.time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  s.html = (s.html || '') + thread.outerHTML;
+  renderSessions();
+  if (!freeRuns) lockComposer();
+}
+composer.addEventListener('fd:submit', (e) => { const value = e.detail.value; queueMicrotask(() => startRun(value)); });
+
+/* ---------- approvals and retries ---------- */
+document.addEventListener('click', async (e) => {
+  const approve = e.target.closest('[data-approve]');
+  if (approve) {
+    const call = approve.closest('.fd-toolcall');
+    const content = call.closest('.fd-message-content');
+    const choice = approve.dataset.approve;
+    $('.fd-toolcall-foot', call)?.remove();
+    if (choice === 'deny') {
+      agent.setToolcall(call, { state: 'failed', meta: 'denied' });
+      content.insertAdjacentHTML('beforeend', prose('<p>I skipped the catalog lookup, so the hiring managers are not included. The six open roles below come from the careers pages alone.</p>') + result({ title: 'Open engineering roles', cols: ROLE_COLS, rows: ROLE_ROWS, file: 'northwind_roles.json', usage: '2 pages · 2 credits · 4.0s' }) + foot('2 pages · 2 credits · 4.0s'));
+    } else {
+      agent.setToolcall(call, { state: 'running', meta: '' });
+      await wait(1400);
+      agent.setToolcall(call, { state: 'done', meta: '1.1s · 5 cr' });
+      content.insertAdjacentHTML('beforeend', '<div class="fd-message-body" aria-busy="true"></div>');
+      await agent.stream(content.lastElementChild, '<p>Northwind has <strong>6 open engineering roles</strong> today; 2 are remote. The catalog lookup found hiring managers for Agents and Console, which are named in the table below.</p>', { speed: 24 });
+      content.insertAdjacentHTML('beforeend', result({ title: 'Open engineering roles', cols: ROLE_COLS, rows: ROLE_ROWS, file: 'northwind_roles.json', usage: '3 pages · 8 credits · 8.2s' }) + foot('3 pages · 8 credits · 8.2s'));
+      init(content);
+    }
+    init(content);
+    return;
+  }
+  const retry = e.target.closest('[data-retry]');
+  if (retry) {
+    const thread = retry.closest('.fd-thread');
+    const prompt = $('.fd-message[data-role="user"] .fd-message-body', thread)?.textContent || undefined;
+    if (thread) agent.demoRun(thread, { prompt, composer });
+  }
+});
+
+/* ---------- sessions list, new session, history ---------- */
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('[data-session]');
+  if (link) {
+    e.preventDefault();
+    openSession(link.dataset.session);
+    if ($('#ag-sessions-sheet').open) overlays.closeDialog('ag-sessions-sheet');
+    return;
+  }
+  const more = e.target.closest('[data-more]');
+  if (more) { menuFor = more.dataset.more; overlays.openMenu('ag-session-menu', { trigger: more, placement: 'bottom-end' }); return; }
+  if (e.target.closest('[data-new-session]')) {
+    newSession();
+    if ($('#ag-sessions-sheet').open) overlays.closeDialog('ag-sessions-sheet');
+  }
+});
+$('#ag-session-menu').addEventListener('fd:select', async (e) => {
+  const act = e.detail.item?.dataset.act;
+  const s = sessions.find((x) => x.id === menuFor);
+  if (!s) return;
+  if (act === 'delete') {
+    sessions.splice(sessions.indexOf(s), 1);
+    if (current === s.id) newSession(); else renderSessions();
+    toast({ title: 'Session deleted', tone: 'neutral' });
+  } else if (act === 'link') {
+    if (await copyText(`${location.origin}${location.pathname}#${s.id}`)) toast({ title: 'Link copied', tone: 'success' });
+  } else if (act === 'open') {
+    location.href = 'playground.html?endpoint=scrape';
+  }
+});
+
+let hiddenByUser = false;
+function setPane(show) { pane.hidden = !show; hiddenByUser = !show; }
+$('#ag-hide-pane').addEventListener('click', () => setPane(false));
+$('#ag-history').addEventListener('click', (e) => {
+  if (hiddenByUser) { setPane(true); return; }
+  if (getComputedStyle(pane).display === 'none') overlays.openDialog('ag-sessions-sheet', { trigger: e.currentTarget });
+  else setPane(false);
+});
+
+/* ---------- start ---------- */
+renderSessions();
+setView(false);
+</script>
+</body>
+</html>

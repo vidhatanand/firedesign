@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foundations · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<style>
+  .fx-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; width: 100%; }
+  .fx-swatch { display: grid; gap: 8px; min-width: 0; }
+  .fx-chip { height: 56px; border-radius: var(--fd-radius-lg); background: var(--c); box-shadow: inset 0 0 0 1px var(--fd-a8); }
+  .fx-swatch b { font-weight: var(--fd-weight-label); font-size: var(--fd-text-sm); }
+  .fx-swatch code { font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); overflow-wrap: anywhere; }
+  .fx-ladder { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); width: 100%; border-radius: var(--fd-radius-lg); overflow: hidden; box-shadow: inset 0 0 0 1px var(--fd-line-faint); }
+  .fx-ladder > span { height: 64px; background: var(--c); display: grid; align-items: end; justify-items: center; padding-bottom: 6px; font-family: var(--fd-font-mono); font-size: 10px; color: var(--fd-text-3); }
+  .fx-ladder > span:nth-child(n+15) { color: var(--fd-text-inverse); }
+  .fx-type { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 8px 24px; align-items: baseline; width: 100%; }
+  .fx-type > code { font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); }
+  .fx-type > div { min-width: 0; padding-bottom: 14px; border-bottom: 1px solid var(--fd-line-faint); }
+  .fx-space { display: grid; gap: 8px; width: 100%; }
+  .fx-space > div { display: grid; grid-template-columns: 96px 44px minmax(0, 1fr); align-items: center; gap: 12px; font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); }
+  .fx-space i { display: block; height: 12px; width: var(--w); background: var(--fd-accent); border-radius: 2px; }
+  .fx-box { display: grid; place-items: center; gap: 4px; width: 112px; height: 88px; background: var(--fd-surface); font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); text-align: center; }
+  .fx-box[data-line] { box-shadow: inset 0 0 0 1px var(--fd-line); }
+  .fx-motion { display: grid; gap: 14px; width: 100%; }
+  .fx-track { position: relative; height: 28px; border-radius: var(--fd-radius-full); background: var(--fd-fill); }
+  .fx-track > i { position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: var(--fd-accent); transition: left var(--d) var(--e); }
+  .fx-motion[data-run] .fx-track > i { left: calc(100% - 24px); }
+  .fx-mrow { display: grid; grid-template-columns: 220px minmax(0, 1fr); align-items: center; gap: 16px; font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); }
+  .fx-theme { padding: 20px; border-radius: var(--fd-radius-xl); background: var(--fd-bg); color: var(--fd-text); border: 1px solid var(--fd-line-faint); display: grid; gap: 12px; align-content: start; }
+  @media (max-width: 640px) { .fx-type { grid-template-columns: minmax(0, 1fr); } .fx-mrow { grid-template-columns: minmax(0, 1fr); gap: 6px; } .fx-ladder { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
+</style>
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="foundations">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Start</p>
+    <h1 class="fd-display">Foundations</h1>
+    <p class="doc-lede">One ink, one accent, a 4px grid and a short list of durations. Every component is assembled from the values on this page, so changing a token changes the whole product.</p>
+  </header>
+
+  <section class="doc-section" id="ink">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">The ink ladder</h2>
+      <p>Every neutral is the ink at an opacity. A hover is the next step up, a muted label is a step down. Because the steps are transparent they sit correctly on white, on the page, on a tinted card and in dark mode without a second palette.</p>
+    </div>
+    <div class="doc-specimen" data-surface="surface"><div class="fx-ladder" id="ladder"></div></div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Step</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td>a3 · a4 · a6 · a8</td><td>Wells, the resting fill of a soft control, its hover, its pressed state.</td></tr>
+          <tr><td>a8 · a12 · a16</td><td>Chart grid, switch tracks, scrollbar thumbs, skeleton blocks.</td></tr>
+          <tr><td>a24</td><td>The quietest text: sidebar section labels.</td></tr>
+          <tr><td>a40 · a48</td><td>Placeholders, disabled text, faint counts, stat sub-lines.</td></tr>
+          <tr><td>a56</td><td>Muted text: meta, captions, resting labels. 3.7:1 on the page, so never for body copy.</td></tr>
+          <tr><td>a72</td><td>Descriptions under a heading, resting nav labels. 6:1.</td></tr>
+          <tr><td>ink</td><td>Headings, values, anything the eye should land on.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="doc-section" id="surfaces">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Surfaces and lines</h2>
+      <p>The page is off-white; objects on it are white. Depth is two steps, not a staircase: things either sit on the page or float above it.</p>
+    </div>
+    <div class="doc-specimen"><div class="fx-swatches" id="surfaces-grid"></div></div>
+  </section>
+
+  <section class="doc-section" id="accent">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Accent</h2>
+      <p>One hue does all the pointing. It has a solid for fills, a darker text shade that passes AA on neutral surfaces, and washes for tinted backgrounds. Switch the accent in the top bar to see every wash follow.</p>
+    </div>
+    <div class="doc-specimen"><div class="fx-swatches" id="accent-grid"></div></div>
+    <ul class="doc-notes">
+      <li>Accent appears on the primary button, the active nav item, links, focus, switches that are on, the lead chart series and "new / live" marks. If a screen has more than about five accent touches, remove some.</li>
+      <li>Accent text on a neutral surface uses <code class="fd-code">--fd-accent-text</code>. For ember it is the same orange as the fill (3.1:1), so keep it to short labels, links and figures, never sentences.</li>
+      <li>White on the ember solid is 3.1:1. It is used only for 14px/450 button labels and icons, which meets the 3:1 requirement for interface components; never set paragraph text on the accent.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="status">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Status</h2>
+      <p>Five tones, each with a solid for dots and fills, a text shade, a tinted background and a tinted line. Status colour describes an outcome; it is never decoration.</p>
+    </div>
+    <div class="doc-specimen"><div class="fx-swatches" id="status-grid"></div></div>
+  </section>
+
+  <section class="doc-section" id="type">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Type</h2>
+      <p>Geist for the interface, Geist Mono for anything a machine would recognise. 450 is the house weight: slightly firmer than regular, never bold. Display sizes tighten their tracking; small sizes do not.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface">
+      <div class="fx-type">
+        <code>fd-display<br>40 / 44 · 500</code><div class="fd-display">Activity logs</div>
+        <code>fd-h1<br>32 / 36 · 500</code><div class="fd-h1">Ask for any data on the web</div>
+        <code>fd-h2<br>24 / 32 · 500</code><div class="fd-h2">Choose your data providers</div>
+        <code>fd-h3<br>20 / 28 · 450</code><div class="fd-h3">Credits remaining</div>
+        <code>fd-title<br>16 / 24 · 450</code><div class="fd-title">Coding agents</div>
+        <code>fd-label<br>14 / 20 · 450</code><div class="fd-label">Invite team members</div>
+        <code>fd-body-lg<br>16 / 24 · 400</code><div class="fd-body-lg fd-text-2">Give your agents the live web, data providers and specialised indexes through one connection.</div>
+        <code>fd-body<br>14 / 20 · 400</code><div class="fd-body fd-text-2">Invited members receive an email with instructions to join your team.</div>
+        <code>fd-small<br>13 / 20 · 400</code><div class="fd-small fd-muted">Credits from successful jobs · resets Nov 23</div>
+        <code>fd-caption<br>12 / 16 · 400</code><div class="fd-caption fd-muted">Dates use UTC. Weeks start Monday.</div>
+        <code>fd-stat<br>24 / 32 · 500</code><div class="fd-stat">1,520 <span class="fd-small fd-muted" style="letter-spacing:0;font-weight:400">credits</span></div>
+        <code>fd-mono<br>13 / 20 · 500</code><div class="fd-mono">em-227cd••••••••••••••••144b0f16</div>
+        <code>fd-mono-sm<br>12 / 16</code><div class="fd-mono-sm fd-accent-text">0–15 credits</div>
+        <code>fd-eyebrow<br>12 / 16 · mono</code><div class="fd-eyebrow">Alerts (24h)</div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A page has one display title. Sections use <code class="fd-code">fd-h3</code>; cards use <code class="fd-code">fd-title</code>.</li>
+      <li>Mono is for identifiers, keys, paths, endpoints, units, table headers and eyebrows. Never for sentences.</li>
+      <li>Figures use tabular numerals (<code class="fd-code">fd-num</code>, built into <code class="fd-code">fd-stat</code>) so columns and counters do not jitter.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="space">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Space</h2>
+      <p>A 4px grid with four half steps (2, 6, 10, 14) for the inside of small controls. Related things sit 4–8px apart, a group 12–16px, sections 24–40px, page bands 48px and up.</p>
+    </div>
+    <div class="doc-specimen" data-surface="surface"><div class="fx-space" id="space-list"></div></div>
+  </section>
+
+  <section class="doc-section" id="radius">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Radius</h2>
+      <p>Radius grows with the size of the thing. A control is 10, the card that holds it 12, the dialog that holds the card 16. Nested corners always step down.</p>
+    </div>
+    <div class="doc-specimen" id="radius-list"></div>
+  </section>
+
+  <section class="doc-section" id="elevation">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Elevation</h2>
+      <p>Most things have none. Shadows are short and layered, and the floating ones carry their own 1px ring so they never need a border.</p>
+    </div>
+    <div class="doc-specimen" id="shadow-list" style="gap:28px"></div>
+  </section>
+
+  <section class="doc-section" id="motion">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Motion</h2>
+      <p>Five durations and five curves. Colour changes take 160ms; things that move take 220ms; things that arrive take 320ms. The spring is reserved for thumbs and toggles.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface">
+      <div class="fx-motion" id="motion-list"></div>
+      <div><button class="fd-btn" id="motion-run"><i data-icon="play"></i><span>Play</span></button></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Under <code class="fd-code">prefers-reduced-motion</code> every duration token becomes 0 and the press scale becomes 1. Components need no special case.</li>
+      <li>Only things that report live work may loop: spinners, a live status dot, a streaming caret, one ambient texture per view.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="theming">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Theming</h2>
+      <p>Tokens use <code class="fd-code">light-dark()</code>, so a theme is one attribute and it nests: a dark panel inside a light page needs no extra CSS. Accent and density work the same way.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="fx-theme" data-theme="light">
+        <p class="fd-eyebrow">data-theme="light"</p>
+        <p class="fd-title">Usage this month</p>
+        <p class="fd-muted">1,520 of 3,000 credits · resets Nov 23</p>
+        <div class="fd-row"><button class="fd-btn" data-variant="primary">Upgrade</button><button class="fd-btn">View usage</button></div>
+      </div>
+      <div class="fx-theme" data-theme="dark">
+        <p class="fd-eyebrow">data-theme="dark"</p>
+        <p class="fd-title">Usage this month</p>
+        <p class="fd-muted">1,520 of 3,000 credits · resets Nov 23</p>
+        <div class="fd-row"><button class="fd-btn" data-variant="primary">Upgrade</button><button class="fd-btn">View usage</button></div>
+      </div>
+      <div class="fx-theme" data-accent="volt">
+        <p class="fd-eyebrow">data-accent="volt"</p>
+        <p class="fd-title">Usage this month</p>
+        <p class="fd-muted">The same components with a lime accent and dark label.</p>
+        <div class="fd-row"><button class="fd-btn" data-variant="primary">Upgrade</button><button class="fd-btn" data-variant="accent-soft">View usage</button></div>
+      </div>
+      <div class="fx-theme" data-density="compact">
+        <p class="fd-eyebrow">data-density="compact"</p>
+        <p class="fd-title">Usage this month</p>
+        <p class="fd-muted">Controls drop to 32px and rows to 36px for dense tools.</p>
+        <div class="fd-row"><button class="fd-btn" data-variant="primary">Upgrade</button><button class="fd-btn">View usage</button></div>
+      </div>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Attribute</th><th>Values</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td>data-theme</td><td>light · dark (omit to follow the system)</td><td>html or any subtree</td></tr>
+          <tr><td>data-accent</td><td>ember · volt · iris · ocean · forest · ink</td><td>html or any subtree</td></tr>
+          <tr><td>data-density</td><td>comfortable · compact</td><td>html or any subtree</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script type="module">
+  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" style="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted" style="font-weight:400">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
+  const steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 88];
+  document.getElementById('ladder').innerHTML = steps.map((s) => `<span style="--c:var(--fd-a${s})">${s}</span>`).join('');
+  document.getElementById('surfaces-grid').innerHTML = [
+    ['Page', '--fd-bg'], ['Sunken', '--fd-bg-sunken'], ['Surface', '--fd-surface'], ['Raised', '--fd-surface-raised'], ['Inverse', '--fd-surface-inverse'],
+    ['Line, faint', '--fd-line-faint', 'structure'], ['Line', '--fd-line', 'controls'], ['Line, strong', '--fd-line-strong', 'hover'],
+    ['Fill', '--fd-fill'], ['Fill, hover', '--fd-fill-hover'], ['Fill, pressed', '--fd-fill-active'],
+  ].map((a) => sw(...a)).join('');
+  document.getElementById('accent-grid').innerHTML = [
+    ['Accent', '--fd-accent', 'fills'], ['Hover', '--fd-accent-hover'], ['Text', '--fd-accent-text', 'on neutral'], ['Contrast', '--fd-accent-contrast', 'on accent'],
+    ['Wash 4', '--fd-accent-4'], ['Wash 8', '--fd-accent-8', 'active nav'], ['Wash 12', '--fd-accent-12'], ['Wash 16', '--fd-accent-16', 'focus halo'], ['Wash 24', '--fd-accent-24', 'selection'], ['Wash 40', '--fd-accent-40'],
+  ].map((a) => sw(...a)).join('');
+  document.getElementById('status-grid').innerHTML = ['success', 'warning', 'danger', 'info', 'violet'].flatMap((t) => [
+    [`${t[0].toUpperCase() + t.slice(1)}`, `--fd-${t}-solid`], [`${t} text`, `--fd-${t}-text`], [`${t} bg`, `--fd-${t}-bg`],
+  ]).map((a) => sw(...a)).join('');
+  const space = [['0-5', 2], ['1', 4], ['1-5', 6], ['2', 8], ['2-5', 10], ['3', 12], ['3-5', 14], ['4', 16], ['5', 20], ['6', 24], ['8', 32], ['10', 40], ['12', 48], ['16', 64], ['20', 80], ['24', 96]];
+  document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i style="--w:${px}px"></i></div>`).join('');
+  const radius = [['xs', 4, 'checkbox'], ['sm', 6, 'chip, thumb'], ['md', 8, 'menu item'], ['lg', 10, 'control'], ['xl', 12, 'card'], ['2xl', 16, 'dialog'], ['3xl', 20, 'sheet']];
+  document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line style="border-radius:var(--fd-radius-${n})"><span style="color:var(--fd-text)">${n} · ${px}</span><span>${use}</span></div>`).join('');
+  const shadows = [['xs', 'outline button'], ['sm', 'composer'], ['md', 'card hover'], ['thumb', 'segmented, switch'], ['lg', 'menu, popover'], ['xl', 'dialog']];
+  document.getElementById('shadow-list').innerHTML = shadows.map(([n, use]) => `<div class="fx-box" style="border-radius:var(--fd-radius-xl);box-shadow:var(--fd-shadow-${n})"><span style="color:var(--fd-text)">${n}</span><span>${use}</span></div>`).join('');
+  const motion = [['dur-2 · ease-out', '--fd-dur-2', '--fd-ease-out', '160ms hover, focus'], ['dur-3 · ease-out', '--fd-dur-3', '--fd-ease-out', '220ms menus, toggles'], ['dur-3 · ease-spring', '--fd-dur-3', '--fd-ease-spring', '220ms thumbs'], ['dur-4 · ease-emphasized', '--fd-dur-4', '--fd-ease-emphasized', '320ms dialogs, sheets'], ['dur-5 · ease-emphasized', '--fd-dur-5', '--fd-ease-emphasized', '520ms entrances']];
+  const list = document.getElementById('motion-list');
+  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span style="color:var(--fd-text)">${n}</span><br>${use}</span><div class="fx-track" style="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
+  document.getElementById('motion-run').addEventListener('click', () => list.toggleAttribute('data-run'));
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skeletons &amp; loading · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="skeletons">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Skeletons &amp; loading</h1>
+    <p class="doc-lede">Loading keeps the layout. A skeleton has the exact geometry of the thing it stands in for, so the real content swaps in without a single line moving; a spinner is only for work too small or too unpredictable to sketch.</p>
+  </header>
+
+  <section class="doc-section" id="spinners">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Spinners and text loaders</h2>
+      <p>Use a ring inside controls and small panels, a braille frame or dots beside a sentence that says what is happening, and equaliser bars for a stream that is receiving data.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-spinner" data-size="12" role="status" aria-label="Loading"></span>
+      <span class="fd-spinner" role="status" aria-label="Loading"></span>
+      <span class="fd-spinner" data-size="20" role="status" aria-label="Loading"></span>
+      <span class="fd-spinner" data-size="24" role="status" aria-label="Loading"></span>
+      <span class="fd-spinner" data-size="32" role="status" aria-label="Loading"></span>
+      <span class="fd-spinner" data-size="20" data-tone="accent" role="status" aria-label="Loading"></span>
+      <span class="fd-spinner" data-size="20" data-tone="muted" role="status" aria-label="Loading"></span>
+      <button class="fd-btn" data-variant="primary" aria-busy="true"><span>Start crawl</span></button>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <span class="fd-braille" role="status">Loading sessions…</span>
+      <span class="fd-braille" data-tone="accent" role="status">Crawling docs.ember.dev · 48 of 120 pages</span>
+      <span class="fd-row fd-small fd-muted" role="status"><span>Waiting for the first result</span><span class="fd-dots" data-size="sm"><span></span><span></span><span></span></span></span>
+      <span class="fd-row fd-small fd-muted" role="status"><span class="fd-bars-loader" data-tone="accent"><span></span><span></span><span></span></span><span>Streaming response</span></span>
+      <span class="fd-row fd-small" role="status"><span class="fd-dots"><span></span><span></span><span></span></span></span>
+    </div>
+    <ul class="doc-notes">
+      <li>Give a lone spinner <code class="fd-code">role="status"</code> and an <code class="fd-code">aria-label</code>; a loader beside a sentence takes the sentence as its label.</li>
+      <li><code class="fd-code">.fd-braille</code> gets its frame from JavaScript: write only the label. The frame cycles every 80ms and holds still under reduced motion.</li>
+      <li>Buttons do not take a spinner child: set <code class="fd-code">aria-busy="true"</code> on the button.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pending">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pending and the page bar</h2>
+      <p>Show an optimistic change at half strength with a tiny spinner until the server confirms it. Use the page bar for navigation and full reloads, never for work inside a panel.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <span class="fd-pending"><span class="fd-mono">ember_live_7f3a…c91e</span></span>
+      <span class="fd-pending" data-block><span>Renaming “Production” to “Prod EU”</span></span>
+    </div>
+    <div class="doc-specimen" data-code>
+      <button class="fd-btn" data-variant="primary" data-demo-bar="start"><i data-icon="play"></i><span>Start page bar</span></button>
+      <button class="fd-btn" data-demo-bar="done"><i data-icon="check"></i><span>Finish</span></button>
+      <span class="fd-small fd-muted">The bar runs along the top of the window.</span>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">pagebar.start()</code> trickles toward 94%, <code class="fd-code">pagebar.done()</code> completes and fades. <code class="fd-code">createPagebar(host)</code> scopes a bar to a positioned element.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="parts">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Skeleton parts</h2>
+      <p>Line parts keep the full line height of the text they replace and draw a thinner bar inside it, so a title skeleton is exactly as tall as the title.</p>
+    </div>
+    <div class="doc-specimen" data-layout="grid" data-surface="surface" data-code>
+      <div class="fd-skeleton-text" data-lines="1"></div>
+      <div class="fd-skeleton-text" data-lines="3"></div>
+      <div class="fd-skeleton-text" data-lines="4" data-size="sm"></div>
+      <div class="fd-skeleton-text" data-lines="2" data-size="lg"></div>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <span class="fd-skeleton-title" data-size="display" style="width:32%"></span>
+      <span class="fd-skeleton-title" data-size="h2" style="width:40%"></span>
+      <span class="fd-skeleton-title" data-size="h3" style="width:36%"></span>
+      <span class="fd-skeleton-title"></span>
+      <span class="fd-skeleton-title" data-size="label" style="width:28%"></span>
+      <span class="fd-skeleton-title" data-size="eyebrow" style="width:12%"></span>
+    </div>
+    <div class="doc-specimen" data-surface="surface" data-code>
+      <span class="fd-skeleton-avatar" data-size="24"></span>
+      <span class="fd-skeleton-avatar"></span>
+      <span class="fd-skeleton-avatar" data-size="40"></span>
+      <span class="fd-skeleton-tile" data-size="24"></span>
+      <span class="fd-skeleton-tile"></span>
+      <span class="fd-skeleton-tile" data-size="48"></span>
+      <span class="fd-skeleton-button" data-size="sm"></span>
+      <span class="fd-skeleton-button"></span>
+      <span class="fd-skeleton-button" data-square></span>
+      <span class="fd-skeleton" style="width:120px;height:64px"></span>
+    </div>
+    <ul class="doc-notes">
+      <li>Title sizes follow the type roles: <code class="fd-code">display h1 h2 h3</code>, the default card title, <code class="fd-code">lead label mono caption eyebrow stat</code>.</li>
+      <li>Text lines vary their widths and end at 60%. Set <code class="fd-code">--fd-i</code> on a part to stagger its shimmer.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="cards">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Card grid</h2>
+      <p>For catalogs: tile, name and category, two lines of description and a foot. The grid uses the same tracks as <code class="fd-code">.fd-grid</code>.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-skeleton-grid" data-count="4" style="--fd-min:220px"></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Put <code class="fd-code">fd-skeleton-card</code> on an element that is also an <code class="fd-code">fd-card</code> and the card supplies the frame, so padding and border match by construction.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="table">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Table</h2>
+      <p>Header bars are short and lighter, row bars vary by column, and the last column is right-aligned like figures.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-skeleton-table" data-rows="5" data-cols="5"></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Rows are <code class="fd-code">--fd-row</code> tall with a hairline, so compact density tightens them too. Under 480px only the first three columns remain.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="stats">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Stat strip</h2>
+      <p>Eyebrow, figure and caption per tile, separated by hairlines that wrap with the grid.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-skeleton-stat" data-count="4"></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="chart">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Chart</h2>
+      <p>Axis ticks, gridlines and a faint breathing placeholder of the series, as a line or as bars.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <div class="fd-skeleton-chart"></div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <div class="fd-skeleton-chart" data-variant="bars"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="list">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">List</h2>
+      <p>Members, sessions or connected apps: avatar, two lines and a trailing action.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-skeleton-list" data-rows="4"></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="thread">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Agent thread</h2>
+      <p>While a saved session loads: the user's message on the right, then the reply with a tool call between its paragraphs.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-skeleton-thread"></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="form">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Form</h2>
+      <p>Settings pages load their values: label, an empty field frame and the hint, then the actions.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-skeleton-form" data-count="3" style="max-width:480px"></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="page">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Page hero and whole screen</h2>
+      <p>The first paint of a route: rail, top bar, hero, toolbar and a table, built only from skeleton blocks.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-skeleton-hero"></div>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="sunken" data-code>
+      <div class="fd-skeleton-page"></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Every screen is filled from an empty element by <code class="fd-code">texture.js</code>; write the parts by hand when you need a different arrangement and the same classes apply.</li>
+      <li>Below 640px the page drops its rail and secondary toolbar buttons, like the real shell.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="swap">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Content swap</h2>
+      <p>Wrap a skeleton and the real content in one container. While it loads, the skeleton sets the height; when it is ready the skeleton fades out and the content rises 8px into the same place.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-row">
+        <button class="fd-btn" data-variant="primary" data-demo-load="swap-cards"><i data-icon="refresh-cw"></i><span>Load</span></button>
+        <button class="fd-btn" data-demo-reset="swap-cards"><i data-icon="rotate-ccw"></i><span>Reset</span></button>
+      </div>
+      <div id="swap-cards" data-fd-loading="true">
+        <div class="fd-skeleton-grid" style="--fd-min:220px">
+          <div class="fd-card fd-skeleton-card"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i:1"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i:2"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i:3"></div>
+        </div>
+        <div class="fd-grid" style="--fd-min:220px">
+          <article class="fd-card"><div class="fd-stack">
+            <div class="fd-row" style="--fd-gap:12px"><span class="fd-tile">S</span><div class="fd-grow"><p class="fd-title">Search</p><p class="fd-small fd-muted">Web data</p></div></div>
+            <p class="fd-muted fd-clamp-2">Query the live web and get ranked results with full page content.</p>
+            <div class="fd-stack" style="--fd-gap:12px"><hr><div class="fd-row" data-justify="between"><span class="fd-mono fd-accent-text">2 credits</span><span class="fd-small fd-muted">per result</span></div></div>
+          </div></article>
+          <article class="fd-card"><div class="fd-stack">
+            <div class="fd-row" style="--fd-gap:12px"><span class="fd-tile">C</span><div class="fd-grow"><p class="fd-title">Crawl</p><p class="fd-small fd-muted">Sites</p></div></div>
+            <p class="fd-muted fd-clamp-2">Follow every link under a path and return each page as clean markdown.</p>
+            <div class="fd-stack" style="--fd-gap:12px"><hr><div class="fd-row" data-justify="between"><span class="fd-mono fd-accent-text">1 credit</span><span class="fd-small fd-muted">per page</span></div></div>
+          </div></article>
+          <article class="fd-card"><div class="fd-stack">
+            <div class="fd-row" style="--fd-gap:12px"><span class="fd-tile">E</span><div class="fd-grow"><p class="fd-title">Extract</p><p class="fd-small fd-muted">Structured data</p></div></div>
+            <p class="fd-muted fd-clamp-2">Turn any page into typed JSON from a schema or a one-line prompt.</p>
+            <div class="fd-stack" style="--fd-gap:12px"><hr><div class="fd-row" data-justify="between"><span class="fd-mono fd-accent-text">5 credits</span><span class="fd-small fd-muted">per page</span></div></div>
+          </div></article>
+          <article class="fd-card"><div class="fd-stack">
+            <div class="fd-row" style="--fd-gap:12px"><span class="fd-tile">M</span><div class="fd-grow"><p class="fd-title">Monitor</p><p class="fd-small fd-muted">Change tracking</p></div></div>
+            <p class="fd-muted fd-clamp-2">Watch a page on a schedule and get a webhook with the diff when it changes.</p>
+            <div class="fd-stack" style="--fd-gap:12px"><hr><div class="fd-row" data-justify="between"><span class="fd-mono fd-accent-text">1 credit</span><span class="fd-small fd-muted">per check</span></div></div>
+          </div></article>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-row">
+        <button class="fd-btn" data-variant="primary" data-demo-load="swap-table"><i data-icon="refresh-cw"></i><span>Load</span></button>
+        <button class="fd-btn" data-demo-reset="swap-table"><i data-icon="rotate-ccw"></i><span>Reset</span></button>
+      </div>
+      <div id="swap-table" data-fd-loading="true">
+        <div class="fd-skeleton-table" data-rows="5" data-cols="4"></div>
+        <div class="fd-table-wrap">
+          <table class="fd-table">
+            <thead><tr><th>Endpoint</th><th>Status</th><th>Started</th><th>Credits</th></tr></thead>
+            <tbody>
+              <tr><td class="fd-mono">/scrape</td><td><span class="fd-status" data-tone="success">200 OK</span></td><td>Nov 14, 4:29 PM</td><td class="fd-num">1</td></tr>
+              <tr><td class="fd-mono">/crawl</td><td><span class="fd-status" data-tone="success">200 OK</span></td><td>Nov 14, 4:12 PM</td><td class="fd-num">120</td></tr>
+              <tr><td class="fd-mono">/extract</td><td><span class="fd-status" data-tone="warning">429 Rate limited</span></td><td>Nov 14, 3:58 PM</td><td class="fd-num">0</td></tr>
+              <tr><td class="fd-mono">/search</td><td><span class="fd-status" data-tone="success">200 OK</span></td><td>Nov 14, 3:41 PM</td><td class="fd-num">10</td></tr>
+              <tr><td class="fd-mono">/agent</td><td><span class="fd-status" data-tone="success">200 OK</span></td><td>Nov 14, 3:20 PM</td><td class="fd-num">1,240</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Markup: <code class="fd-code">&lt;div data-fd-loading="true"&gt;</code> with the skeleton first and the content second, and no padding on the container.</li>
+      <li>Call <code class="fd-code">setLoading(el, false)</code> from <code class="fd-code">fire/js/texture.js</code> when data arrives. It sets <code class="fd-code">aria-busy</code> and emits <code class="fd-code">fd:change</code> with <code class="fd-code">value: "ready"</code>.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head"><h2 class="fd-h3">Rules</h2></div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Sketch the real layout: the same number of columns, the same row height, a card per card. Show the skeleton only after about 150ms so fast responses never flash.</p></div>
+      <div data-dont><strong>Don't</strong><p>Put a spinner in the middle of an empty page, stack a spinner on a skeleton, or keep a skeleton up after an error. Say what failed instead.</p></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Skeletons are <code class="fd-code">aria-hidden</code>; the container's <code class="fd-code">aria-busy</code> tells assistive technology the region is loading.</li>
+      <li>Under reduced motion the shimmer stops and blocks sit at rest.</li>
+    </ul>
+  </section>
+</main>
+<script type="module">
+  import { setLoading, pagebar } from '../fire/js/texture.js';
+
+  document.addEventListener('click', (event) => {
+    const bar = event.target.closest('[data-demo-bar]');
+    if (bar) { bar.dataset.demoBar === 'start' ? pagebar.start() : pagebar.done(); return; }
+
+    const load = event.target.closest('[data-demo-load]');
+    if (load) {
+      const target = document.getElementById(load.dataset.demoLoad);
+      if (!target || target.dataset.fdLoading === 'false') return;
+      load.setAttribute('aria-busy', 'true');
+      pagebar.start();
+      setTimeout(() => {
+        setLoading(target, false);
+        pagebar.done();
+        load.removeAttribute('aria-busy');
+      }, 1400);
+      return;
+    }
+
+    const reset = event.target.closest('[data-demo-reset]');
+    if (reset) setLoading(document.getElementById(reset.dataset.demoReset), true);
+  });
+</script>
+</body>
+</html>

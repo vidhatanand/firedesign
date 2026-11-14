@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalog · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="catalog">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <!-- Hero -->
+    <section class="fd-band fd-page-hero fd-rise" style="--fd-i:0">
+      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="grid" data-variant="perspective"></div></div>
+      <h1 class="fd-display">Catalog</h1>
+      <p class="fd-page-hero-desc">Data providers and specialised indexes your agents can call through one connection.</p>
+      <div class="fd-page-hero-actions">
+        <button class="fd-btn" type="button" data-fd-dialog-open="dlg-providers"><i data-icon="blocks"></i><span>Manage providers</span></button>
+      </div>
+    </section>
+
+    <!-- What's new, toolbar, categories -->
+    <section class="fd-band fd-rise" data-pad="sm" style="--fd-i:1" aria-label="Browse providers">
+      <div class="fd-stack" style="--fd-gap:16px">
+        <div class="fd-row" data-wrap style="--fd-gap:12px">
+          <div class="fd-avatar-stack" aria-hidden="true">
+            <span class="fd-tile" data-size="20" data-tone="info">N</span>
+            <span class="fd-tile" data-size="20" data-tone="warning">L</span>
+            <span class="fd-tile" data-size="20" data-tone="violet">T</span>
+            <span class="fd-tile" data-size="20" data-tone="accent">H</span>
+            <span class="fd-tile" data-size="20" data-tone="success">P</span>
+          </div>
+          <span class="fd-small"><b class="fd-label">27 new providers</b> <span class="fd-muted">in the last 3 days ·</span>
+            <a class="fd-link" data-tone="neutral" data-quiet href="provider.html">Northwind People</a><span class="fd-muted">,</span>
+            <a class="fd-link" data-tone="neutral" data-quiet href="provider.html">Ledgerline</a> <span class="fd-muted">+25</span></span>
+        </div>
+
+        <div class="fd-toolbar">
+          <div class="fd-segmented" id="view-switch" role="radiogroup" aria-label="View">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="human">Human</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="agent">Agent</button>
+          </div>
+          <div class="fd-search fd-toolbar-search" style="max-width:none">
+            <i data-icon="search"></i>
+            <input class="fd-search-input" id="catalog-q" type="search" placeholder="Search providers" aria-label="Search providers" autocomplete="off" data-fd-search-hotkey>
+            <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+            <kbd class="fd-kbd">/</kbd>
+          </div>
+          <button class="fd-btn" type="button" data-icon-only data-fd-popover="pop-filters" data-placement="bottom-end" aria-label="Filters"><i data-icon="sliders-horizontal"></i></button>
+          <button class="fd-btn" type="button" data-variant="outline" id="suggest"><span>Suggest a provider</span></button>
+          <button class="fd-btn" type="button" id="setup-agent">
+            <span class="fd-use-agent-stack" aria-hidden="true">
+              <span class="fd-use-agent-tile"><i data-icon="terminal"></i></span>
+              <span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span>
+              <span class="fd-use-agent-tile" data-tone="neutral">›_</span>
+            </span>
+            <span>Set up agent</span><i data-icon="copy"></i>
+          </button>
+        </div>
+
+        <div class="fd-chip-nav" id="cats" role="group" aria-label="Categories">
+          <button class="fd-chip" type="button" aria-pressed="true" data-value="all"><i data-icon="layout-grid"></i><span>All</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Company"><i data-icon="building-2"></i><span>Company</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Places"><i data-icon="map-pin"></i><span>Places</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="People"><i data-icon="users"></i><span>People</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Social"><i data-icon="share-2"></i><span>Social</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Jobs"><i data-icon="briefcase"></i><span>Jobs</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Public records"><i data-icon="landmark"></i><span>Public records</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Finance"><i data-icon="trending-up"></i><span>Finance</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Marketing"><i data-icon="megaphone"></i><span>Marketing</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Retail"><i data-icon="shopping-cart"></i><span>Retail</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Sports"><i data-icon="trophy"></i><span>Sports</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Apps"><i data-icon="smartphone"></i><span>Apps</span></button>
+          <button class="fd-chip" type="button" aria-pressed="false" data-value="Developer"><i data-icon="terminal"></i><span>Developer</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommended -->
+    <section class="fd-band fd-rise" id="band-rec" style="--fd-i:2" aria-labelledby="h-rec">
+      <div class="fd-stack">
+        <h2 class="fd-title" id="h-rec">Recommended for you</h2>
+        <div data-fd-loading="true">
+          <div class="fd-skeleton-grid" data-count="4" style="--fd-min:248px"></div>
+          <div class="fd-card-grid" id="rec-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured -->
+    <section class="fd-band" id="band-feat" aria-labelledby="h-feat">
+      <div class="fd-scroller" data-fd-scroller>
+        <div class="fd-scroller-head">
+          <h2 class="fd-title" id="h-feat">Featured</h2>
+          <div class="fd-scroller-nav">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-scroll="prev" aria-label="Previous"><i data-icon="chevron-left"></i></button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-scroll="next" aria-label="Next"><i data-icon="chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="fd-scroller-track" id="feat-track"></div>
+      </div>
+    </section>
+
+    <!-- All providers -->
+    <section class="fd-band" id="band-all" aria-labelledby="h-all">
+      <div class="fd-stack">
+        <div class="fd-row" data-justify="between">
+          <h2 class="fd-title" id="h-all">All providers</h2>
+          <span class="fd-small fd-muted fd-num" id="all-count" aria-live="polite"></span>
+        </div>
+        <div data-fd-loading="true">
+          <div class="fd-skeleton-grid" data-count="12" style="--fd-min:248px"></div>
+          <div class="fd-card-grid" id="all-grid"></div>
+        </div>
+        <div class="fd-row" data-justify="between" id="load-row">
+          <span class="fd-small fd-muted">More providers join the catalog every week.</span>
+          <button class="fd-btn" type="button" data-variant="outline" id="load-more"><span>Load more</span><i data-icon="chevron-down"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Agent view: the same catalog as an agent reads it -->
+    <section class="fd-band" id="band-agent" hidden aria-labelledby="h-agent">
+      <div class="fd-stack">
+        <div class="fd-stack" style="--fd-gap:4px">
+          <p class="fd-eyebrow">Agent view</p>
+          <h2 class="fd-title" id="h-agent">Provider index</h2>
+          <p class="fd-small fd-muted">What an agent sees when it lists providers: stable ids, capability counts and the price per call in credits.</p>
+        </div>
+        <div class="fd-snippet">
+          <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+          <code class="fd-snippet-text">ember providers list --json</code>
+          <button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button>
+        </div>
+        <div class="fd-table-wrap">
+          <div class="fd-table-scroll">
+            <table class="fd-table" data-stack aria-label="Providers as an agent reads them">
+              <thead>
+                <tr><th>id</th><th>category</th><th data-num>capabilities</th><th>credits per call</th><th data-num>free credits</th></tr>
+              </thead>
+              <tbody id="agent-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Empty results -->
+    <section class="fd-band" id="band-empty" data-grow hidden aria-label="No results">
+      <div class="fd-empty">
+        <span class="fd-empty-icon"><i data-icon="search"></i></span>
+        <h2 class="fd-empty-title" id="empty-title">No providers match these filters</h2>
+        <p class="fd-empty-text">Try a broader term, another category, or clear the filters to see the full catalog.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="outline" data-clear-filters><span>Clear filters</span></button></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Filter popover -->
+  <div class="fd-popover" id="pop-filters" popover data-size="sm" aria-label="Filters">
+    <div class="fd-stack" style="--fd-gap:16px">
+      <p class="fd-eyebrow">Filters</p>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="f-verified"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Verified only</span></span></label>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="f-free"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Has free credits</span></span></label>
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="f-price">Max price per call</label><output class="fd-slider-value" for="f-price">300 credits</output></div>
+        <div class="fd-slider" data-suffix=" credits"><input type="range" id="f-price" min="0" max="300" step="5" value="300"></div>
+      </div>
+      <div class="fd-row" data-justify="between">
+        <span class="fd-small fd-muted fd-num" id="filter-summary">All providers</span>
+        <button class="fd-btn-text" type="button" data-clear-filters>Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Choose your data providers -->
+  <dialog class="fd-dialog" id="dlg-providers" data-size="xl">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title">Choose your data providers</h2>
+      <p class="fd-dialog-desc">Choose which providers to enable, then review their terms. You can keep exploring the catalog without accepting.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body">
+      <div class="fd-search">
+        <i data-icon="search"></i>
+        <input class="fd-search-input" id="pick-q" type="search" placeholder="Find a provider" aria-label="Find a provider" autocomplete="off">
+        <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-toolbar">
+        <label class="fd-checkbox"><input type="checkbox" data-fd-checkall="#pick-grid input"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label" id="pick-all-label">Select all providers</span></span></label>
+        <span id="pick-count">0 selected</span>
+      </div>
+      <div class="fd-dialog-grid" id="pick-grid"></div>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-start data-fd-dialog-close>Continue browsing</button>
+      <button class="fd-btn" type="button" data-variant="primary" id="pick-submit" data-fd-dialog-close value="review">Review terms · <span class="fd-num" id="pick-total">0</span></button>
+    </div>
+  </dialog>
+</main>
+
+<script type="module">
+import { init, copyText, reducedMotion, overlays, texture } from '../fire/fire.js';
+
+const { toast } = overlays;
+const { setLoading } = texture;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+/* ---------- Demo data: id, name, initials, tone, category, description, min, max (credits per call), capabilities, verified, free credits ---------- */
+const POOL = [
+  ['northwind-people', 'Northwind People', 'NP', 'info', 'People', 'Person and company enrichment: find people by title and company, verified work emails and firmographics.', 0, 15, 10, 1, 1],
+  ['ledgerline', 'Ledgerline', 'LL', 'warning', 'Finance', 'Real-time financial newswire and analyst coverage for US-listed companies.', 2, 20, 8, 1, 0],
+  ['tessera-finance', 'Tessera Finance', 'TF', 'violet', 'Finance', 'Company fundamentals with the record around them: standardized filings, ratios and segment revenue.', 0, 30, 34, 1, 0],
+  ['halyard-funding', 'Halyard Funding', 'HF', 'accent', 'Finance', 'Recent startup funding rounds, announced from 2026 onward: investors, amounts and stage.', 5, 5, 9, 1, 0],
+  ['parcel-retail', 'Parcel Retail', 'PR', 'success', 'Retail', 'Search products across merchants or within one store: price history, stock and variants.', 2, 300, 10, 1, 0],
+  ['quill-podcasts', 'Quill Podcasts', 'QP', 'violet', 'Social', 'Speaker-labelled transcripts, episode summaries and chapter markers for popular podcasts.', 3, 3, 6, 1, 1],
+  ['docsmith', 'Docsmith', 'DS', 'neutral', 'Developer', 'Search developer documentation, code repositories, issues and changelogs.', 0, 4, 12, 1, 1],
+  ['mapleton-places', 'Mapleton Places', 'MP', 'info', 'Places', 'Business listings, opening hours and reviews for any city, with geocoded results.', 1, 8, 14, 1, 1],
+  ['orbit-leads', 'Orbit Leads', 'OL', 'accent', 'Marketing', 'Lead lists with verified emails and phone numbers, built from intent signals.', 1, 12, 7, 0, 0],
+  ['signal-desk', 'Signal Desk', 'SD', 'danger', 'Social', 'News and press releases from 60,000 outlets, deduplicated and tagged by topic.', 1, 6, 9, 1, 0],
+  ['civic-records', 'Civic Records', 'CR', 'neutral', 'Public records', 'Business registrations, licences and court filings across 40 jurisdictions.', 2, 25, 18, 0, 0],
+  ['fieldhouse-sports', 'Fieldhouse Sports', 'FS', 'success', 'Sports', 'Fixtures, box scores and player stats for 30 leagues, updated every minute.', 1, 10, 13, 1, 0],
+  ['brightbook-companies', 'Brightbook Companies', 'BC', 'info', 'Company', 'Company profiles with headcount, industry, funding and detected technologies for 40M businesses.', 1, 40, 21, 1, 0],
+  ['hirewise', 'Hirewise', 'HW', 'violet', 'Jobs', 'Open roles across 2M employers: title, salary band, seniority and posting history.', 2, 15, 9, 1, 1],
+  ['postmark-social', 'Postmark Social', 'PS', 'danger', 'Social', 'Public posts, profiles and follower graphs from major social networks.', 1, 5, 8, 0, 0],
+  ['cartwheel-retail', 'Cartwheel Retail', 'CW', 'warning', 'Retail', 'Marketplace listings, seller ratings and shipping estimates across 200 stores.', 3, 60, 11, 1, 0],
+  ['appvane', 'Appvane', 'AV', 'accent', 'Apps', 'App store listings, release notes, ratings and download estimates for mobile apps.', 1, 9, 6, 0, 0],
+  ['beacon-ads', 'Beacon Ads', 'BA', 'warning', 'Marketing', 'Ad creatives, spend estimates and landing pages for brands across search and social.', 2, 35, 15, 1, 0],
+  ['slate-weather', 'Slate Weather', 'SW', 'success', 'Apps', 'Hourly forecasts, historical normals and severe weather alerts by coordinates.', 1, 1, 5, 1, 0],
+  ['rook-security', 'Rook Security', 'RK', 'danger', 'Public records', 'Domain, certificate and breach exposure lookups for any hostname.', 4, 40, 11, 1, 0],
+].map(([id, name, ini, tone, cat, desc, min, max, caps, verified, free], index) => ({ id, name, ini, tone, cat, desc, min, max, caps, verified: !!verified, free: !!free, index }));
+const BY_ID = new Map(POOL.map((p) => [p.id, p]));
+
+const price = (p) => (p.min === p.max ? `${p.max} ${p.max === 1 ? 'credit' : 'credits'}` : `${p.min}–${p.max} credits`);
+const verified = '<span class="fd-verified" role="img" aria-label="Verified"></span>';
+
+function cardHTML(p, { note = '', index = null } = {}) {
+  return `<a class="fd-card" data-interactive href="provider.html" data-provider="${p.id}"${index == null ? '' : ` data-index="${index}"`}>
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="${p.tone}">${p.ini}</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>${p.name}</span>${p.verified ? verified : ''}</span>
+          <span class="fd-card-meta">${p.cat}</span>
+        </div>
+      </div>
+      <p class="fd-card-text">${p.desc}</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">${price(p)}</span>
+        <span class="fd-card-count">${p.caps} capabilities</span>${note ? `
+        <span class="fd-card-note">${note}</span>` : ''}
+      </div>
+    </a>`;
+}
+
+const pick = (ids) => ids.map((id) => BY_ID.get(id));
+$('#rec-grid').innerHTML = pick(['northwind-people', 'tessera-finance', 'halyard-funding', 'parcel-retail'])
+  .map((p) => cardHTML(p, { note: p.id === 'northwind-people' ? '1,000 of 1,000 free credits left' : '' })).join('');
+$('#feat-track').innerHTML = pick(['mapleton-places', 'quill-podcasts', 'docsmith', 'ledgerline', 'slate-weather', 'rook-security', 'fieldhouse-sports']).map((p) => cardHTML(p)).join('');
+$('#all-grid').innerHTML = POOL.map((p) => cardHTML(p, { index: p.index })).join('');
+
+/* Provider picker dialog */
+$('#pick-grid').innerHTML = POOL.map((p, i) => {
+  const day = String(10 + i).padStart(2, '0');
+  const month = String((i % 9) + 1).padStart(2, '0');
+  const accepted = p.id === 'northwind-people';
+  return `<label class="fd-pick" data-name="${p.name.toLowerCase()}"><input type="checkbox" name="provider" value="${p.id}"${accepted ? ' checked' : ''}><span class="fd-pick-check"></span>
+        <span class="fd-pick-head"><span class="fd-tile" data-size="28" data-tone="${p.tone}">${p.ini[0]}</span><span><span class="fd-pick-name">${p.name}</span><span class="fd-pick-meta">${accepted ? 'Accepted Nov 3' : 'Terms not yet accepted'}</span></span></span>
+        <span class="fd-pick-text">${p.desc}</span>
+        <span class="fd-pick-foot"><span>Effective 2026-${month}-${day}</span><span>v1.${i % 4}.0</span></span></label>`;
+}).join('');
+$('#pick-all-label').textContent = `Select all providers (${POOL.length})`;
+
+/* ---------- Filtering ---------- */
+const PAGE = 12;
+const STEP = 4;
+const DEFAULTS = { q: '', cat: 'all', verified: false, free: false, maxPrice: 300 };
+const state = { ...DEFAULTS, view: 'human', shown: PAGE };
+
+const isActive = () => state.q !== '' || state.cat !== 'all' || state.verified || state.free || state.maxPrice < 300;
+const matches = (p) => (state.cat === 'all' || p.cat === state.cat)
+  && (!state.q || `${p.name} ${p.cat} ${p.id}`.toLowerCase().includes(state.q))
+  && (!state.verified || p.verified)
+  && (!state.free || p.free)
+  && p.min <= state.maxPrice;
+
+function apply() {
+  const active = isActive();
+  const ok = POOL.filter(matches);
+  const okIds = new Set(ok.map((p) => p.id));
+
+  $$('.fd-card[data-provider]').forEach((card) => {
+    let on = okIds.has(card.dataset.provider);
+    if (card.dataset.index != null && !active) on = on && Number(card.dataset.index) < state.shown;
+    card.hidden = !on;
+  });
+
+  const none = ok.length === 0;
+  const human = state.view === 'human';
+  const anyIn = (sel) => $$(`${sel} .fd-card:not([hidden])`).length > 0;
+  $('#band-rec').hidden = !human || none || !anyIn('#rec-grid');
+  $('#band-feat').hidden = !human || none || !anyIn('#feat-track');
+  $('#band-all').hidden = !human || none;
+  $('#band-agent').hidden = human || none;
+  $('#band-empty').hidden = !none;
+  $('#empty-title').textContent = state.q ? `No providers match “${state.q}”` : 'No providers match these filters';
+
+  const shown = $$('#all-grid .fd-card:not([hidden])').length;
+  $('#all-count').textContent = active ? `${ok.length} ${ok.length === 1 ? 'match' : 'matches'}` : `Showing ${shown} of ${POOL.length}`;
+  $('#load-row').hidden = active || state.shown >= POOL.length;
+  $('#filter-summary').textContent = active ? `${ok.length} of ${POOL.length} providers` : 'All providers';
+
+  $('#agent-rows').innerHTML = ok.map((p) => `<tr data-row="${p.id}">
+    <td data-mono data-stack-title><a class="fd-link" data-tone="neutral" data-quiet href="provider.html">${p.id}</a></td>
+    <td data-mono data-muted>${p.cat.toLowerCase().replace(' ', '_')}</td>
+    <td data-mono data-num>${p.caps}</td>
+    <td data-mono>${p.min === p.max ? p.max : `${p.min}–${p.max}`}</td>
+    <td data-mono data-num data-muted>${p.free ? '1,000' : '—'}</td>
+  </tr>`).join('');
+}
+
+function clearFilters() {
+  Object.assign(state, DEFAULTS);
+  const q = $('#catalog-q');
+  q.value = '';
+  q.dispatchEvent(new Event('input', { bubbles: true }));
+  $$('#cats .fd-chip').forEach((chip) => chip.setAttribute('aria-pressed', String(chip.dataset.value === 'all')));
+  $('#f-verified').checked = false;
+  $('#f-free').checked = false;
+  const slider = $('#f-price');
+  slider.value = '300';
+  slider.dispatchEvent(new Event('input', { bubbles: true }));
+  apply();
+}
+
+$('#catalog-q').addEventListener('input', (e) => { state.q = e.target.value.trim().toLowerCase(); apply(); });
+document.addEventListener('fd:change', (e) => {
+  if (e.target.id === 'cats') { state.cat = e.detail.value; apply(); }
+  if (e.target.id === 'view-switch') { state.view = e.detail.value; apply(); }
+});
+$('#pop-filters').addEventListener('change', () => { state.verified = $('#f-verified').checked; state.free = $('#f-free').checked; apply(); });
+$('#f-price').addEventListener('input', (e) => { state.maxPrice = Number(e.target.value); apply(); });
+document.addEventListener('click', (e) => { if (e.target.closest('[data-clear-filters]')) clearFilters(); });
+
+/* ---------- Load more: reveal the next few with a rise ---------- */
+$('#load-more').addEventListener('click', () => {
+  const next = $$('#all-grid .fd-card').filter((c) => Number(c.dataset.index) >= state.shown && Number(c.dataset.index) < state.shown + STEP);
+  next.forEach((card, n) => {
+    card.style.setProperty('--fd-i', String(n));
+    card.classList.add('fd-rise');
+    card.addEventListener('animationend', () => { card.classList.remove('fd-rise'); card.style.removeProperty('--fd-i'); }, { once: true });
+  });
+  state.shown += STEP;
+  apply();
+});
+
+/* ---------- Toolbar actions ---------- */
+const SETUP_PROMPT = 'Add Ember to this agent. Run `npx -y @ember/cli init --agent claude-code`, then run `ember providers list` and enable the data providers I pick. Use provider ids from the list and call them through the /agent endpoint.';
+$('#setup-agent').addEventListener('click', async () => {
+  await copyText(SETUP_PROMPT);
+  toast({ title: 'Setup prompt copied', description: 'Paste it into your agent to connect Ember and the catalog.', tone: 'success' });
+});
+$('#suggest').addEventListener('click', () => {
+  toast({ title: 'Suggest a provider', description: 'Send the provider name and a docs link to catalog@ember.dev and we will review it.', tone: 'info' });
+});
+
+/* ---------- Provider picker: live count, select all, search ---------- */
+const dialog = $('#dlg-providers');
+const countPicks = () => {
+  const n = $$('#pick-grid input:checked').length;
+  $('#pick-count').textContent = `${n} selected`;
+  $('#pick-total').textContent = String(n);
+  $('#pick-submit').disabled = n === 0;
+  return n;
+};
+dialog.addEventListener('change', countPicks);
+dialog.addEventListener('fd:open', countPicks);
+dialog.addEventListener('fd:close', (e) => {
+  if (e.detail?.value !== 'review') return;
+  const n = countPicks();
+  toast({ title: `Terms ready for ${n} ${n === 1 ? 'provider' : 'providers'}`, description: 'Nothing is enabled until you accept each provider’s terms.', tone: 'info' });
+});
+$('#pick-q').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  $$('#pick-grid .fd-pick').forEach((el) => { el.hidden = !!q && !el.dataset.name.includes(q); });
+});
+countPicks();
+
+/* ---------- First paint: skeleton for ~600ms, then swap ---------- */
+init(document);
+apply();
+const holds = $$('[data-fd-loading="true"]');
+setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 600);
+</script>
+</body>
+</html>

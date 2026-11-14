@@ -1,0 +1,293 @@
+/* ==========================================================================
+   Charts — quiet instruments. SVG, hairline grid, mono axes, one accent series.
+   Behaviour lives in fire/js/charts.js; every colour here is a token.
+
+   <div class="fd-chart" data-fd-chart="line|area|bar|stacked" data-height="240" data-legend>
+     <script type="application/json">{ "labels": [...], "series": [{ "name": "Credits", "values": [...] }] }</script>
+   </div>
+
+   Series colour: the renderer stamps data-s="1…6" (and data-tone from the config) on every
+   series element. Rules below turn that into --_ch-c, so a theme or accent change needs no re-render.
+     1 accent · 2 ink · 3 info · 4 violet · 5 success · 6 warning
+   data-tone  neutral | muted | accent | success | warning | danger | info | violet   (overrides the slot)
+
+   Blocks: fd-chart · fd-legend · fd-sparkline · fd-bars · fd-donut · fd-heatgrid
+           fd-chart-tooltip · fd-chart-card · fd-chart-stat
+   ========================================================================== */
+
+/* ---------- Series colour plumbing ---------- */
+.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat { --_ch-c: var(--fd-chart-1); }
+
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-s="1"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-s="1"] { --_ch-c: var(--fd-chart-1); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-s="2"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-s="2"] { --_ch-c: var(--fd-chart-2); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-s="3"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-s="3"] { --_ch-c: var(--fd-chart-3); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-s="4"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-s="4"] { --_ch-c: var(--fd-chart-4); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-s="5"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-s="5"] { --_ch-c: var(--fd-chart-5); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-s="6"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-s="6"] { --_ch-c: var(--fd-chart-6); }
+
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="accent"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="accent"] { --_ch-c: var(--fd-accent); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="neutral"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="neutral"] { --_ch-c: var(--fd-chart-2); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="muted"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="muted"] { --_ch-c: var(--fd-a40); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="success"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="success"] { --_ch-c: var(--fd-success-solid); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="warning"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="warning"] { --_ch-c: var(--fd-warning-solid); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="danger"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="danger"] { --_ch-c: var(--fd-danger-solid); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="info"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="info"] { --_ch-c: var(--fd-info-solid); }
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat)[data-tone="violet"],
+:is(.fd-chart, .fd-legend, .fd-donut, .fd-sparkline, .fd-heatgrid, .fd-bars, .fd-chart-stat) [data-tone="violet"] { --_ch-c: var(--fd-violet-solid); }
+
+/* ---------- Entrance: lines draw, bars grow ----------
+   The renderer sets data-enter="pending" until the chart scrolls into view, then "run".
+   After that (and on every resize re-render) it is "done" and nothing animates. */
+@keyframes fd-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* ---------- Chart ---------- */
+.fd-chart {
+  --_ch-ring: var(--fd-surface);   /* ring around hover dots; set data-ring="bg" on a page-coloured chart */
+  position: relative; display: block; width: 100%; min-width: 0;
+}
+.fd-chart[data-ring="bg"] { --_ch-ring: var(--fd-bg); }
+.fd-chart > script { display: none; }
+
+.fd-chart-plot {
+  position: relative; display: block; min-width: 0;
+  touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+  border-radius: var(--fd-radius-sm);
+}
+.fd-chart-plot:focus-visible { box-shadow: var(--fd-ring); }
+.fd-chart-svg { display: block; overflow: visible; max-width: none; }
+
+/* Axes and grid: hairlines only. */
+.fd-chart-grid { fill: none; stroke: var(--fd-chart-grid); stroke-width: 1; stroke-dasharray: 2 4; shape-rendering: crispEdges; }
+.fd-chart[data-grid="solid"] .fd-chart-grid { stroke-dasharray: none; }
+.fd-chart[data-grid="none"] .fd-chart-grid { display: none; }
+.fd-chart-baseline { fill: none; stroke: var(--fd-chart-grid); stroke-width: 1; shape-rendering: crispEdges; }
+.fd-chart-tick {
+  fill: var(--fd-chart-axis); font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); font-weight: var(--fd-weight-regular);
+  font-variant-numeric: tabular-nums; font-feature-settings: "zero";
+}
+
+/* Threshold: a dashed line with a small mono label sitting on it. */
+.fd-chart-threshold { fill: none; stroke: var(--fd-a40); stroke-width: 1; stroke-dasharray: 4 4; shape-rendering: crispEdges; }
+.fd-chart-threshold-label {
+  fill: var(--fd-text-3); font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs);
+  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; font-variant-numeric: tabular-nums;
+}
+.fd-chart-threshold[data-tone="danger"] { stroke: var(--fd-danger-solid); }
+.fd-chart-threshold-label[data-tone="danger"] { fill: var(--fd-danger-text); }
+.fd-chart-threshold[data-tone="warning"] { stroke: var(--fd-warning-solid); }
+.fd-chart-threshold-label[data-tone="warning"] { fill: var(--fd-warning-text); }
+
+/* Series */
+.fd-chart-line { fill: none; stroke: var(--_ch-c); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.fd-chart-stop { stop-color: var(--_ch-c); }
+.fd-chart-point { fill: var(--_ch-c); }
+.fd-chart-bar { fill: var(--_ch-c); }
+.fd-chart-col { transform-box: fill-box; transform-origin: 50% 100%; }
+
+/* Crosshair, hover dots, hover band */
+.fd-chart-crosshair { stroke: var(--fd-a24); stroke-width: 1; shape-rendering: crispEdges; }
+.fd-chart-band { fill: var(--fd-a4); }
+.fd-chart-dot { fill: var(--_ch-c); stroke: var(--_ch-ring); stroke-width: 3; paint-order: stroke fill; }
+
+/* Live end-point: a dot with a soft pulsing ring. */
+.fd-chart-live-dot { fill: var(--_ch-c); }
+.fd-chart-live-ring { fill: var(--_ch-c); opacity: 0.32; transform-box: fill-box; transform-origin: center; animation: fd-ping 1.8s var(--fd-ease-out) infinite; }
+
+/* Entrance animation (only while data-enter is pending or run) */
+.fd-chart:is([data-enter="pending"], [data-enter="run"]) .fd-chart-line { stroke-dasharray: 1; animation: fd-draw var(--fd-dur-5) var(--fd-ease-out) both; }
+.fd-chart:is([data-enter="pending"], [data-enter="run"]) .fd-chart-col {
+  animation: fd-grow-y var(--fd-dur-5) var(--fd-ease-emphasized) both;
+  animation-delay: calc(min(var(--_ch-i, 0), 40) * 12ms);
+}
+.fd-chart:is([data-enter="pending"], [data-enter="run"]) :is(.fd-chart-area, .fd-chart-live, .fd-chart-point) {
+  animation: fd-fade-in var(--fd-dur-5) var(--fd-ease-out) both; animation-delay: var(--fd-dur-3);
+}
+.fd-chart[data-enter="pending"] :is(.fd-chart-line, .fd-chart-col, .fd-chart-area, .fd-chart-live, .fd-chart-point) { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .fd-chart-live-ring { animation: none; opacity: 0.24; transform: scale(1.8); }
+}
+
+/* ---------- Tooltip card ---------- */
+.fd-chart-tooltip {
+  position: absolute; left: 0; top: 0; z-index: var(--fd-z-raised);
+  width: max-content; min-width: 148px; max-width: min(300px, calc(100% - 8px));
+  padding: 10px 12px; border-radius: var(--fd-radius-lg);
+  background: var(--fd-surface-raised); color: var(--fd-text); box-shadow: var(--fd-shadow-lg);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: 20px; font-variant-numeric: tabular-nums;
+  pointer-events: none; opacity: 0; scale: 0.97; visibility: hidden;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-2) var(--fd-ease-out), visibility 0s var(--fd-dur-2);
+}
+.fd-chart-tooltip[data-state="open"] { opacity: 1; scale: 1; visibility: visible; transition-delay: 0s; }
+.fd-chart-tooltip[data-snap] { transition: none; }
+.fd-chart-tooltip-title { color: var(--fd-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+.fd-chart-tooltip-row { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.fd-chart-tooltip-swatch { flex: none; width: 10px; height: 2px; border-radius: 1px; background: var(--_ch-c); }
+.fd-chart-tooltip-swatch[data-shape="square"] { width: 8px; height: 8px; border-radius: 2px; }
+.fd-chart-tooltip-value { color: var(--fd-text); }
+.fd-chart-tooltip-name { color: var(--fd-text-3); overflow: hidden; text-overflow: ellipsis; }
+.fd-chart-tooltip-row[data-total] { margin-top: 4px; padding-top: 4px; position: relative; }
+.fd-chart-tooltip-row[data-total]::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--fd-line-faint); }
+
+/* ---------- States ---------- */
+.fd-chart-empty, .fd-chart-loading { position: relative; display: block; }
+.fd-chart-empty { display: grid; place-content: center; justify-items: center; gap: 4px; padding: 24px 16px; text-align: center; font-family: var(--fd-font-sans); }
+.fd-chart-empty-title { font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-chart-empty-text { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); color: var(--fd-text-3); max-width: 38ch; }
+
+.fd-chart-loading { overflow: hidden; }
+.fd-chart-skel-grid { position: absolute; inset: 12px 0 28px; display: flex; flex-direction: column; justify-content: space-between; }
+.fd-chart-skel-grid > i { display: block; height: 1px; background: var(--fd-chart-grid); opacity: 0.6; }
+.fd-chart-skel-bars { position: absolute; inset: 12px 0 28px; display: flex; align-items: flex-end; gap: 8px; padding-inline: 4px; }
+.fd-chart-skel-bar, .fd-chart-skel-area {
+  background: linear-gradient(90deg, var(--fd-a4) 30%, var(--fd-a8) 50%, var(--fd-a4) 70%);
+  background-size: 300% 100%; animation: fd-shimmer 2s linear infinite;
+}
+.fd-chart-skel-bar { flex: 1 1 0; min-width: 2px; height: var(--_ch-h, 40%); border-radius: 3px 3px 0 0; }
+.fd-chart-skel-area { position: absolute; inset: 12px 0 28px; }
+
+/* ---------- Legend ---------- */
+.fd-legend { display: flex; font-family: var(--fd-font-sans); flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 0; padding: 0; list-style: none; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-chart > .fd-legend { margin-top: 12px; }
+.fd-legend-item {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 24px; padding: 0 6px; margin-inline: -6px;
+  border-radius: var(--fd-radius-sm); color: inherit; font: inherit; background: none; border: 0; text-align: start;
+  transition: color var(--fd-dur-2) var(--fd-ease-out);
+}
+button.fd-legend-item { cursor: pointer; }
+button.fd-legend-item:hover { color: var(--fd-text); }
+.fd-legend-item[aria-pressed="false"] { color: var(--fd-text-4); text-decoration: line-through; text-decoration-color: var(--fd-a24); }
+.fd-legend-swatch { flex: none; width: 10px; height: 2px; border-radius: 1px; background: var(--_ch-c); transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+.fd-legend-swatch[data-shape="square"] { height: 10px; border-radius: 2px; }
+.fd-legend-swatch[data-shape="soft"] { height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--_ch-c) 28%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--_ch-c) 48%, transparent); }
+.fd-legend-item[aria-pressed="false"] .fd-legend-swatch { opacity: 0.3; }
+@media (pointer: coarse) { .fd-legend-item { min-height: 40px; } }
+
+/* ---------- Sparkline ---------- */
+.fd-sparkline { display: inline-block; vertical-align: middle; width: var(--_ch-w, 80px); height: var(--_ch-h, 24px); color: var(--_ch-c); flex: none; }
+.fd-sparkline[data-fluid] { width: 100%; }
+.fd-sparkline-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fd-sparkline-line { fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linejoin: round; stroke-linecap: round; }
+.fd-sparkline-dot { fill: currentColor; }
+.fd-sparkline-bar { fill: currentColor; opacity: 0.32; }
+.fd-sparkline-bar[data-last] { opacity: 1; }
+.fd-sparkline-stop { stop-color: currentColor; }
+/* No data-tone: colour follows the trend. */
+.fd-sparkline:not([data-tone])[data-trend="good"] { --_ch-c: var(--fd-success-solid); }
+.fd-sparkline:not([data-tone])[data-trend="bad"] { --_ch-c: var(--fd-danger-solid); }
+.fd-sparkline:not([data-tone])[data-trend="flat"] { --_ch-c: var(--fd-a48); }
+
+/* ---------- Ranked bar list ---------- */
+.fd-bars { --_ch-label: 8rem; --_ch-value: 4.5rem; container-type: inline-size; display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.fd-bars[data-tone="neutral"] { --_ch-c: var(--fd-a48); }
+.fd-bars-row { display: grid; grid-template-columns: var(--_ch-label) minmax(0, 1fr) var(--_ch-value); align-items: center; column-gap: 16px; row-gap: 6px; min-height: 24px; min-width: 0; }
+.fd-bars-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fd-text-2); }
+.fd-bars-track { position: relative; height: 4px; border-radius: var(--fd-radius-full); background: var(--fd-a6); overflow: hidden; }
+.fd-bars-fill {
+  display: block; height: 100%; width: calc(clamp(0, var(--value, 0), 1) * 100%); border-radius: var(--fd-radius-full);
+  background: var(--_ch-c); transform-origin: left center;
+  animation: fd-grow-x var(--fd-dur-5) var(--fd-ease-emphasized) both; animation-delay: calc(var(--_ch-i, 0) * 12ms);
+}
+.fd-bars-value { text-align: end; font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-variant-numeric: tabular-nums; color: var(--fd-text); }
+.fd-bars[data-enter="pending"] .fd-bars-fill { animation-play-state: paused; }
+.fd-bars[data-enter="done"] .fd-bars-fill { animation: none; }
+.fd-bars-row:nth-child(2) { --_ch-i: 1; } .fd-bars-row:nth-child(3) { --_ch-i: 2; } .fd-bars-row:nth-child(4) { --_ch-i: 3; }
+.fd-bars-row:nth-child(5) { --_ch-i: 4; } .fd-bars-row:nth-child(6) { --_ch-i: 5; } .fd-bars-row:nth-child(7) { --_ch-i: 6; }
+.fd-bars-row:nth-child(8) { --_ch-i: 7; } .fd-bars-row:nth-child(9) { --_ch-i: 8; } .fd-bars-row:nth-child(10) { --_ch-i: 9; }
+.fd-bars-row:nth-child(11) { --_ch-i: 10; } .fd-bars-row:nth-child(12) { --_ch-i: 11; }
+@container (max-width: 320px) {
+  .fd-bars-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .fd-bars-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* ---------- Donut ---------- */
+.fd-donut { --_ch-size: 144px; --_ch-t: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; min-width: 0; }
+.fd-donut-ring { position: relative; flex: none; width: var(--_ch-size); height: var(--_ch-size); }
+.fd-donut-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fd-donut-track { fill: none; stroke: var(--fd-a6); stroke-width: var(--_ch-t); }
+.fd-donut-seg { fill: none; stroke: var(--_ch-c); stroke-width: var(--_ch-t); transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+.fd-donut[data-type="progress"] .fd-donut-seg { stroke-linecap: round; }
+.fd-donut[data-active] .fd-donut-seg:not([data-active]) { opacity: 0.3; }
+.fd-donut[data-active] .fd-donut-legend-item:not([data-active]) { opacity: 0.5; }
+.fd-donut-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 2px; padding: calc(var(--_ch-t) + 8px); text-align: center; pointer-events: none; }
+.fd-donut-figure { font-size: var(--fd-text-h3); line-height: var(--fd-lh-h3); letter-spacing: var(--fd-ls-h3); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-donut-caption { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-donut[data-compact] .fd-donut-center { padding: 0; }
+.fd-donut[data-compact] .fd-donut-figure { overflow: visible; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); letter-spacing: 0; font-weight: var(--fd-weight-regular); }
+.fd-donut[data-compact] .fd-donut-caption { display: none; }
+.fd-donut-legend { flex: 1 1 180px; display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; min-width: 0; }
+.fd-donut-legend-item { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; min-height: 28px; padding: 0 6px; margin-inline: -6px; border-radius: var(--fd-radius-sm); transition: background-color var(--fd-dur-2) var(--fd-ease-out), opacity var(--fd-dur-2) var(--fd-ease-out); }
+.fd-donut-legend-item:hover { background: var(--fd-fill); }
+.fd-donut-legend-swatch { width: 8px; height: 8px; border-radius: 2px; background: var(--_ch-c); }
+.fd-donut-legend-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); }
+.fd-donut-legend-value { font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-variant-numeric: tabular-nums; color: var(--fd-text); text-align: end; }
+.fd-donut-legend-share { min-width: 4ch; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-variant-numeric: tabular-nums; color: var(--fd-text-3); text-align: end; }
+.fd-donut:is([data-enter="pending"], [data-enter="run"]) .fd-donut-seg:not([data-static]) { animation: fd-donut-in var(--fd-dur-5) var(--fd-ease-emphasized) both; animation-delay: calc(var(--_ch-i, 0) * 60ms); }
+.fd-donut[data-enter="pending"] .fd-donut-seg { animation-play-state: paused; }
+@keyframes fd-donut-in { from { stroke-dasharray: 0 var(--_ch-circ); } }
+
+/* ---------- Heat grid ---------- */
+.fd-heatgrid { --_ch-cell: 14px; --_ch-gap: 2px; position: relative; display: grid; gap: 12px; min-width: 0; }
+.fd-heatgrid[data-size="sm"] { --_ch-cell: 11px; }
+.fd-heatgrid[data-size="lg"] { --_ch-cell: 18px; }
+.fd-heatgrid-scroll { overflow-x: auto; padding: 2px; margin: -2px; }
+.fd-heatgrid-grid {
+  display: grid; width: fit-content; max-width: 100%; min-width: calc(var(--_ch-weeks) * 8px + 32px); border-radius: var(--fd-radius-sm);
+  grid-template-columns: auto repeat(var(--_ch-weeks), minmax(0, var(--_ch-cell))); column-gap: var(--_ch-gap); row-gap: var(--_ch-gap);
+}
+.fd-heatgrid-grid:focus-visible { box-shadow: var(--fd-ring); }
+.fd-heatgrid-month, .fd-heatgrid-day {
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-chart-axis); white-space: nowrap;
+}
+.fd-heatgrid-month { min-width: 0; grid-row: 1; grid-column: calc(var(--_ch-wk) + 2); padding-bottom: 6px; overflow: visible; }
+.fd-heatgrid-day { grid-column: 1; grid-row: calc(var(--_ch-dy) + 2); align-self: center; padding-inline-end: 8px; }
+.fd-heatgrid-cell {
+  grid-column: calc(var(--_ch-wk) + 2); grid-row: calc(var(--_ch-dy) + 2);
+  aspect-ratio: 1; border-radius: 2px; background: var(--fd-a6);
+}
+.fd-heatgrid-cell[data-l="1"], .fd-heatgrid-swatch[data-l="1"] { background: color-mix(in srgb, var(--_ch-c) 28%, var(--fd-a6)); }
+.fd-heatgrid-cell[data-l="2"], .fd-heatgrid-swatch[data-l="2"] { background: color-mix(in srgb, var(--_ch-c) 52%, var(--fd-a6)); }
+.fd-heatgrid-cell[data-l="3"], .fd-heatgrid-swatch[data-l="3"] { background: color-mix(in srgb, var(--_ch-c) 76%, var(--fd-a6)); }
+.fd-heatgrid-cell[data-l="4"], .fd-heatgrid-swatch[data-l="4"] { background: var(--_ch-c); }
+.fd-heatgrid-cell[data-empty] { background: none; }
+.fd-heatgrid-cell[data-active] { box-shadow: 0 0 0 1.5px var(--fd-text); position: relative; z-index: 1; }
+.fd-heatgrid:is([data-enter="pending"], [data-enter="run"]) .fd-heatgrid-cell { animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out) both; animation-delay: calc(var(--_ch-wk) * 14ms); }
+.fd-heatgrid[data-enter="pending"] .fd-heatgrid-cell { animation-play-state: paused; }
+.fd-heatgrid-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.fd-heatgrid-summary { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-heatgrid-legend { display: inline-flex; align-items: center; gap: 4px; margin-inline-start: auto; font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-text-3); }
+.fd-heatgrid-legend > span:first-child { margin-inline-end: 4px; }
+.fd-heatgrid-legend > span:last-child { margin-inline-start: 4px; }
+.fd-heatgrid-swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--fd-a6); }
+
+/* ---------- Chart card ---------- */
+.fd-chart-card { display: flex; flex-direction: column; gap: 20px; min-width: 0; padding: 20px 24px 24px; background: var(--fd-surface); border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); }
+.fd-chart-card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; }
+.fd-chart-card-text { flex: 1 1 220px; display: grid; gap: 2px; min-width: 0; }
+.fd-chart-card-desc { margin: 0; color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
+.fd-chart-card-aside { flex: none; display: grid; gap: 2px; justify-items: end; text-align: end; }
+.fd-chart-card-caption { font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); }
+.fd-chart-card-body { display: grid; gap: 12px; min-width: 0; }
+.fd-chart-card-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+
+/* ---------- Stat with sparkline ---------- */
+.fd-chart-stat { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; min-width: 0; padding: 16px; background: var(--fd-surface); border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); }
+.fd-chart-stat-main { display: grid; gap: 4px; min-width: 0; }
+.fd-chart-stat-label { margin: 0; color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
+.fd-chart-stat-value { margin: 0; font-size: var(--fd-text-stat); line-height: var(--fd-lh-stat); letter-spacing: var(--fd-ls-stat); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; }
+.fd-chart-stat-delta { margin: 0; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+.fd-chart-stat-delta[data-trend="good"] { color: var(--fd-success-text); }
+.fd-chart-stat-delta[data-trend="bad"] { color: var(--fd-danger-text); }
+.fd-chart-stat > .fd-sparkline { --_ch-w: 96px; --_ch-h: 36px; margin-bottom: 4px; }

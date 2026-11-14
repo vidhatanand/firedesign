@@ -1,0 +1,163 @@
+/* ==========================================================================
+   Button — the reference component. Other components follow this file's shape:
+   one block class, variants and sizes as data attributes, state from native
+   or ARIA attributes, every value a token.
+
+   <button class="fd-btn" data-variant="primary" data-size="md">
+     <i data-icon="plus"></i><span>New monitor</span>
+   </button>
+
+   data-variant  secondary (default) | primary | outline | ghost | danger | danger-soft | inverse | accent-soft
+   data-size     xs | sm | md (default) | lg | xl
+   data-icon-only   square button; requires aria-label
+   data-block       full width
+   aria-busy="true" loading: label stays for width, spinner takes over
+   aria-pressed / aria-expanded="true"  held state (toggles, open menus)
+   ========================================================================== */
+
+.fd-btn {
+  --_b-h: var(--fd-control-md);
+  --_b-px: var(--fd-control-px);
+  --_b-bg: var(--fd-fill);
+  --_b-bg-hover: var(--fd-fill-hover);
+  --_b-bg-active: var(--fd-fill-active);
+  --_b-fg: var(--fd-text);
+  --_b-shadow: none;
+  --_b-radius: var(--fd-radius-lg);
+
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--fd-space-1-5);
+  height: var(--_b-h); min-width: var(--_b-h); padding: 0 var(--_b-px);
+  border-radius: var(--_b-radius);
+  background: var(--_b-bg); color: var(--_b-fg); box-shadow: var(--_b-shadow);
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label);
+  white-space: nowrap; user-select: none; text-decoration: none;
+  transition:
+    background-color var(--fd-dur-2) var(--fd-ease-out),
+    color var(--fd-dur-2) var(--fd-ease-out),
+    box-shadow var(--fd-dur-2) var(--fd-ease-out),
+    scale var(--fd-dur-1) var(--fd-ease-out),
+    opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-btn:hover { background: var(--_b-bg-hover); }
+.fd-btn:active { background: var(--_b-bg-active); scale: var(--fd-press-scale); }
+.fd-btn:focus-visible { box-shadow: var(--_b-shadow), var(--fd-ring); border-radius: var(--_b-radius); }
+.fd-btn[aria-pressed="true"], .fd-btn[aria-expanded="true"] { background: var(--_b-bg-active); }
+.fd-btn > .fd-icon { color: color-mix(in srgb, currentColor 72%, transparent); transition: color var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-btn:hover > .fd-icon { color: currentColor; }
+/* A trailing arrow nudges on hover. Mark it with data-nudge. */
+.fd-btn:hover > .fd-icon[data-nudge] { translate: 2px 0; }
+.fd-btn:hover > .fd-icon[data-nudge="up-right"] { translate: 1px -1px; }
+
+/* ---------- Sizes ---------- */
+.fd-btn[data-size="xs"] { --_b-h: var(--fd-control-xs); --_b-px: 8px; --_b-radius: var(--fd-radius-sm); font-size: var(--fd-text-xs); gap: var(--fd-space-1); }
+.fd-btn[data-size="sm"] { --_b-h: var(--fd-control-sm); --_b-px: 10px; --_b-radius: var(--fd-radius-md); font-size: var(--fd-text-sm); gap: var(--fd-space-1); }
+.fd-btn[data-size="lg"] { --_b-h: var(--fd-control-lg); --_b-px: 16px; }
+.fd-btn[data-size="xl"] { --_b-h: var(--fd-control-xl); --_b-px: 20px; --_b-radius: var(--fd-radius-xl); font-size: var(--fd-text-lg); }
+.fd-btn[data-size="xs"] > .fd-icon, .fd-btn[data-size="sm"] > .fd-icon { width: 14px; height: 14px; }
+.fd-btn[data-icon-only] { padding: 0; width: var(--_b-h); }
+.fd-btn[data-block] { display: flex; width: 100%; }
+
+/* ---------- Variants ---------- */
+.fd-btn[data-variant="primary"] {
+  --_b-bg: var(--fd-accent); --_b-bg-hover: var(--fd-accent-hover); --_b-bg-active: var(--fd-accent-hover);
+  --_b-fg: var(--fd-accent-contrast); --_b-shadow: var(--fd-shadow-accent);
+}
+/* A soft top-light that brightens on hover: the button feels lit, not flat. */
+.fd-btn[data-variant="primary"]::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(rgb(255 255 255 / 0.16), transparent 60%);
+  opacity: 0.5; transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-btn[data-variant="primary"]:hover::before { opacity: 1; }
+.fd-btn[data-variant="primary"] > .fd-icon { color: currentColor; }
+
+.fd-btn[data-variant="outline"] {
+  --_b-bg: var(--fd-surface); --_b-bg-hover: var(--fd-surface); --_b-bg-active: var(--fd-bg);
+  --_b-shadow: inset 0 0 0 1px var(--fd-line), var(--fd-shadow-xs);
+}
+.fd-btn[data-variant="outline"]:hover { --_b-shadow: inset 0 0 0 1px var(--fd-line-strong), var(--fd-shadow-xs); }
+
+.fd-btn[data-variant="ghost"] { --_b-bg: transparent; --_b-bg-hover: var(--fd-fill); --_b-bg-active: var(--fd-fill-hover); --_b-fg: var(--fd-text-2); }
+.fd-btn[data-variant="ghost"]:hover { --_b-fg: var(--fd-text); }
+
+.fd-btn[data-variant="inverse"] {
+  --_b-bg: var(--fd-surface-inverse); --_b-fg: var(--fd-text-inverse);
+  --_b-bg-hover: color-mix(in srgb, var(--fd-surface-inverse) 88%, var(--fd-ink-inverse));
+  --_b-bg-active: color-mix(in srgb, var(--fd-surface-inverse) 80%, var(--fd-ink-inverse));
+  --_b-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.12), var(--fd-shadow-sm);
+}
+.fd-btn[data-variant="inverse"] > .fd-icon { color: currentColor; }
+
+.fd-btn[data-variant="accent-soft"] { --_b-bg: var(--fd-accent-8); --_b-bg-hover: var(--fd-accent-12); --_b-bg-active: var(--fd-accent-16); --_b-fg: var(--fd-accent-text); }
+.fd-btn[data-variant="accent-soft"] > .fd-icon { color: currentColor; }
+
+.fd-btn[data-variant="danger"] {
+  --_b-bg: var(--fd-danger-solid); --_b-fg: #fff;
+  --_b-bg-hover: color-mix(in srgb, var(--fd-danger-solid) 90%, #000); --_b-bg-active: color-mix(in srgb, var(--fd-danger-solid) 84%, #000);
+  --_b-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.16), 0 1px 2px 0 color-mix(in srgb, var(--fd-danger-solid) 30%, transparent);
+}
+.fd-btn[data-variant="danger"] > .fd-icon { color: currentColor; }
+.fd-btn[data-variant="danger-soft"] { --_b-bg: var(--fd-danger-bg); --_b-fg: var(--fd-danger-text); --_b-bg-hover: color-mix(in srgb, var(--fd-danger-solid) 14%, transparent); --_b-bg-active: color-mix(in srgb, var(--fd-danger-solid) 20%, transparent); }
+.fd-btn[data-variant="danger-soft"] > .fd-icon { color: currentColor; }
+
+/* ---------- Disabled & loading ---------- */
+.fd-btn:disabled, .fd-btn[aria-disabled="true"] {
+  --_b-bg: var(--fd-fill-disabled); --_b-bg-hover: var(--fd-fill-disabled); --_b-bg-active: var(--fd-fill-disabled);
+  --_b-fg: var(--fd-text-4); --_b-shadow: none;
+  cursor: not-allowed; scale: 1;
+}
+.fd-btn:disabled::before, .fd-btn[aria-disabled="true"]::before { display: none; }
+/* A disabled primary keeps a hint of its identity so the page still shows where the action is. */
+.fd-btn[data-variant="primary"]:disabled { --_b-bg: var(--fd-accent-24); --_b-bg-hover: var(--fd-accent-24); --_b-fg: var(--fd-accent-contrast); opacity: 0.9; }
+
+.fd-btn[aria-busy="true"] { pointer-events: none; }
+.fd-btn[aria-busy="true"] > * { opacity: 0; }
+.fd-btn[aria-busy="true"]::after {
+  content: ""; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, currentColor 28%, transparent); border-top-color: currentColor;
+  animation: fd-spin 0.7s linear infinite;
+}
+
+/* ---------- Button group: joined controls ---------- */
+.fd-btn-group { display: inline-flex; isolation: isolate; }
+.fd-btn-group > .fd-btn { border-radius: 0; }
+.fd-btn-group > .fd-btn:first-child { border-start-start-radius: var(--fd-radius-lg); border-end-start-radius: var(--fd-radius-lg); }
+.fd-btn-group > .fd-btn:last-child { border-start-end-radius: var(--fd-radius-lg); border-end-end-radius: var(--fd-radius-lg); }
+.fd-btn-group > .fd-btn + .fd-btn { margin-inline-start: 1px; }
+.fd-btn-group > .fd-btn[data-variant="outline"] + .fd-btn[data-variant="outline"] { margin-inline-start: -1px; }
+.fd-btn-group > .fd-btn:hover, .fd-btn-group > .fd-btn:focus-visible { z-index: 1; }
+.fd-btn-group > .fd-btn[data-variant="primary"] + .fd-btn[data-variant="primary"] { box-shadow: var(--fd-shadow-accent), inset 1px 0 0 0 rgb(255 255 255 / 0.24); margin-inline-start: 0; }
+
+/* ---------- Label swap: "Copy" becomes "Copied" in place, so the button never changes width ----------
+   <button class="fd-btn" data-fd-copy="npx ember init"><span class="fd-btn-swap"><span>Copy</span><span>Copied</span></span></button>
+   fire.js sets data-state="done" for 1.4s after a successful copy; set it yourself for other confirmations. */
+.fd-btn-swap { display: inline-grid; justify-items: center; align-items: center; }
+.fd-btn-swap > * { grid-area: 1 / 1; transition: opacity var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-btn-swap > :last-child { opacity: 0; translate: 0 5px; }
+[data-state="done"] > .fd-btn-swap > :first-child, [data-state="done"] .fd-btn-swap > :first-child { opacity: 0; translate: 0 -5px; }
+[data-state="done"] > .fd-btn-swap > :last-child, [data-state="done"] .fd-btn-swap > :last-child { opacity: 1; translate: 0 0; }
+
+/* ---------- Text button: an action that reads as text ---------- */
+.fd-btn-text {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1);
+  color: var(--fd-text-3); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label);
+  border-radius: var(--fd-radius-xs);
+  transition: color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-btn-text:hover { color: var(--fd-text); }
+.fd-btn-text[data-tone="accent"] { color: var(--fd-accent-text); }
+.fd-btn-text > .fd-icon { width: 14px; height: 14px; transition: translate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-btn-text:hover > .fd-icon[data-nudge] { translate: 2px 0; }
+
+/* ---------- Floating action (support bubble, scroll-to-bottom) ---------- */
+.fd-fab {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--fd-accent); color: var(--fd-accent-contrast);
+  box-shadow: var(--fd-shadow-accent), var(--fd-shadow-md);
+  transition: scale var(--fd-dur-3) var(--fd-ease-spring), background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-fab:hover { scale: 1.06; background: var(--fd-accent-hover); }
+.fd-fab:active { scale: 0.96; }
+.fd-fab > .fd-icon { width: 22px; height: 22px; }

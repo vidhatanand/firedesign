@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="monitoring" data-title="Monitoring">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band fd-page-hero fd-rise">
+      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
+      <h1 class="fd-display">Monitoring</h1>
+      <p class="fd-page-hero-desc">Detect when content changes on a page and get notified by webhook or email.</p>
+    </section>
+
+    <section class="fd-band fd-rise" style="--fd-i:1" data-pad="sm" aria-label="Summary">
+      <div id="mon-stats" data-fd-loading="true">
+        <div class="fd-skeleton-stat" data-count="3"></div>
+        <div class="fd-stats">
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label">Monitors</span>
+            <span class="fd-stat" id="st-monitors">12</span>
+            <span class="fd-stat-sub" id="st-active">9 active</span>
+          </div>
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label">Alerts (24h)</span>
+            <span class="fd-stat" id="st-alerts">3</span>
+            <span class="fd-stat-sub" id="st-unread">1 unread</span>
+          </div>
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label">Last activity</span>
+            <span class="fd-stat" id="st-last">2m ago</span>
+            <span class="fd-stat-sub" id="st-last-sub">pricing.northwind.io changed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band fd-rise" style="--fd-i:2" data-pad="sm" aria-label="Toolbar">
+      <div class="fd-stack" style="--fd-gap:12px">
+        <div class="fd-toolbar">
+          <div class="fd-search fd-toolbar-search" data-variant="soft">
+            <i data-icon="search"></i>
+            <input class="fd-search-input" id="mon-search" type="search" placeholder="Search monitors" aria-label="Search monitors" autocomplete="off" data-fd-search-hotkey>
+            <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+            <kbd class="fd-kbd">/</kbd>
+          </div>
+          <div class="fd-toolbar-end">
+            <button class="fd-btn" type="button" data-variant="primary" id="mon-new"><i data-icon="plus"></i><span>New monitor</span></button>
+            <button class="fd-btn" type="button" id="mon-slack"><span class="fd-tile" data-size="20" data-tone="violet" aria-hidden="true"><i data-icon="hash"></i></span><span>Add to Slack</span></button>
+            <button class="fd-btn" type="button" data-fd-dialog-open="dlg-code"><i data-icon="code"></i><span>Get code</span></button>
+          </div>
+        </div>
+        <div class="fd-toolbar">
+          <div class="fd-segmented" data-size="sm" id="mon-filter" role="radiogroup" aria-label="Monitor state">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="all">All <span class="fd-segmented-count" data-count="all">12</span></button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="active">Active <span class="fd-segmented-count" data-count="active">9</span></button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="paused">Paused <span class="fd-segmented-count" data-count="paused">3</span></button>
+          </div>
+          <div class="fd-toolbar-end">
+            <span class="fd-small fd-muted" id="mon-sort-label">Sort</span>
+            <label class="fd-select"><span class="fd-sr-only">Sort monitors</span>
+              <select id="mon-sort" aria-labelledby="mon-sort-label">
+                <option value="recent">Most recent</option>
+                <option value="name">Name</option>
+                <option value="status">Status</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Monitors">
+      <div class="fd-table-wrap" data-variant="plain">
+        <div class="fd-table-scroll">
+          <table class="fd-table" id="mon-table" data-stack aria-label="Monitors" aria-busy="true">
+            <thead>
+              <tr>
+                <th>Monitor</th>
+                <th>Schedule</th>
+                <th>Watches</th>
+                <th>Last check</th>
+                <th>Changes · 14d</th>
+                <th>Status</th>
+                <th data-actions><span class="fd-sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="mon-body" hidden></tbody>
+            <tbody id="mon-skeleton" aria-hidden="true">
+              <tr data-skeleton><td><span class="fd-table-skeleton" style="--w:200px"></span></td><td><span class="fd-table-skeleton" style="--w:90px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:72px"></span></td><td><span class="fd-table-skeleton" style="--w:70px"></span></td><td><span class="fd-table-skeleton" style="--w:64px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" style="--w:170px"></span></td><td><span class="fd-table-skeleton" style="--w:80px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:60px"></span></td><td><span class="fd-table-skeleton" style="--w:60px"></span></td><td><span class="fd-table-skeleton" style="--w:64px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" style="--w:220px"></span></td><td><span class="fd-table-skeleton" style="--w:90px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:72px"></span></td><td><span class="fd-table-skeleton" style="--w:76px"></span></td><td><span class="fd-table-skeleton" style="--w:64px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" style="--w:150px"></span></td><td><span class="fd-table-skeleton" style="--w:80px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:60px"></span></td><td><span class="fd-table-skeleton" style="--w:64px"></span></td><td><span class="fd-table-skeleton" style="--w:64px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" style="--w:190px"></span></td><td><span class="fd-table-skeleton" style="--w:90px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:72px"></span></td><td><span class="fd-table-skeleton" style="--w:70px"></span></td><td><span class="fd-table-skeleton" style="--w:64px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-actions></td></tr>
+            </tbody>
+            <tbody id="mon-state" hidden></tbody>
+          </table>
+        </div>
+        <div class="fd-table-foot">
+          <span class="fd-table-foot-info" id="mon-info" aria-live="polite">Loading monitors</span>
+          <div class="fd-table-foot-actions">
+            <div class="fd-btn-group">
+              <button class="fd-btn" type="button" data-size="sm" data-icon-only disabled aria-label="Previous page"><i data-icon="chevron-left"></i></button>
+              <button class="fd-btn" type="button" data-size="sm" data-icon-only disabled aria-label="Next page"><i data-icon="chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band" data-pad="sm" data-grow aria-label="Demo state">
+      <div class="fd-row" data-wrap data-justify="between">
+        <span class="fd-eyebrow">Demo state</span>
+        <div class="fd-segmented" data-size="sm" id="mon-state-switch" role="radiogroup" aria-label="Table state">
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loaded">Loaded</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="empty">Empty</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Row menu (shared by every row) -->
+  <div class="fd-menu" id="menu-monitor-row" popover role="menu" aria-label="Monitor actions">
+    <button class="fd-menu-item" type="button" data-value="run"><i data-icon="play"></i><span class="fd-menu-item-label">Run now</span></button>
+    <button class="fd-menu-item" type="button" data-value="toggle"><i data-icon="pause"></i><span class="fd-menu-item-label">Pause</span></button>
+    <button class="fd-menu-item" type="button" data-value="edit"><i data-icon="pencil"></i><span class="fd-menu-item-label">Edit</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" type="button" data-value="delete" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Delete</span></button>
+  </div>
+
+  <!-- Monitor detail -->
+  <dialog class="fd-sheet" id="sheet-monitor" data-side="right" data-size="lg">
+    <div class="fd-sheet-head">
+      <div class="fd-sheet-bar">
+        <span class="fd-status" id="sm-status" data-tone="success" data-variant="pill" data-size="sm">Active</span>
+        <h2 class="fd-sheet-title" id="sm-name">Monitor</h2>
+        <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <p class="fd-sheet-desc fd-mono" id="sm-url"></p>
+    </div>
+    <div class="fd-sheet-body">
+      <div class="fd-stack" id="sm-body"></div>
+    </div>
+    <div class="fd-sheet-foot">
+      <button class="fd-btn" type="button" id="sm-toggle" data-variant="ghost" data-start><i data-icon="pause"></i><span>Pause</span></button>
+      <button class="fd-btn" type="button" id="sm-run" data-variant="outline"><i data-icon="play"></i><span>Run now</span></button>
+    </div>
+  </dialog>
+
+  <!-- New monitor -->
+  <dialog class="fd-dialog" id="dlg-monitor" data-size="lg" data-static>
+    <div class="fd-dialog-head">
+      <div class="fd-stack" style="--fd-gap:16px">
+        <div class="fd-stack" style="--fd-gap:4px">
+          <h2 class="fd-h3 fd-dialog-title" id="nm-title">New monitor</h2>
+          <p class="fd-dialog-desc">Watch a page and get notified when its content changes.</p>
+        </div>
+        <ol class="fd-steps" id="nm-steps" aria-label="New monitor" data-current="0">
+          <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Choose pages</span></span></li>
+          <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Set a schedule</span></span></li>
+          <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Notify</span></span></li>
+          <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Review</span></span></li>
+        </ol>
+      </div>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+
+    <section data-step="pages">
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="nm-urls-input">Pages to watch</label>
+          <div class="fd-tag-input" id="nm-urls" data-fd-tag-input data-mono data-name="urls" data-max="10" data-pattern="^https?://[a-z0-9-]+(\.[a-z0-9-]+)+(/\S*)?$">
+            <input class="fd-tag-input-field" id="nm-urls-input" placeholder="https://pricing.northwind.io/plans" autocomplete="off" spellcheck="false" aria-describedby="nm-urls-hint" autofocus>
+          </div>
+          <p class="fd-field-hint" id="nm-urls-hint">Press Enter after each URL. Each page becomes its own monitor.</p>
+          <p class="fd-field-error" id="nm-urls-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Add at least one valid URL that starts with https://.</span></p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="nm-name">Name <span class="fd-field-tag">optional</span></label>
+          <input class="fd-input" id="nm-name" placeholder="Northwind pricing" autocomplete="off">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="nm-watch">Watch for</label>
+          <div class="fd-select" data-variant="outline">
+            <select id="nm-watch"><option value="Any change">Any change to the page</option><option value="Price">Price changes</option><option value="Selector">A part of the page (CSS selector)</option></select>
+          </div>
+        </div>
+        <div class="fd-field" id="nm-selector-field" hidden>
+          <label class="fd-field-label" for="nm-selector">CSS selector</label>
+          <input class="fd-input" id="nm-selector" placeholder=".pricing-table" autocomplete="off" spellcheck="false" data-mono>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-step="next"><span>Continue</span><i data-icon="arrow-right" data-nudge></i></button>
+      </div>
+    </section>
+
+    <section data-step="schedule" hidden>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field" role="radiogroup" aria-labelledby="nm-schedule-label">
+          <span class="fd-field-label" id="nm-schedule-label">How often should Ember check?</span>
+          <div class="fd-choice-group" data-layout="grid">
+            <label class="fd-choice"><input type="radio" name="nm-schedule" value="Every hour"><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Every hour</span><span class="fd-choice-desc">Catch changes within the hour.</span></span><span class="fd-choice-meta">~720 credits/mo</span></label>
+            <label class="fd-choice"><input type="radio" name="nm-schedule" value="Every 6 hours" checked><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Every 6 hours</span><span class="fd-choice-desc">A good default for pricing and docs.</span></span><span class="fd-choice-meta">~120 credits/mo</span></label>
+            <label class="fd-choice"><input type="radio" name="nm-schedule" value="Daily"><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Daily</span><span class="fd-choice-desc">Once a day at 09:00 UTC.</span></span><span class="fd-choice-meta">~30 credits/mo</span></label>
+            <label class="fd-choice"><input type="radio" name="nm-schedule" value="Weekly"><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Weekly</span><span class="fd-choice-desc">Mondays at 09:00 UTC.</span></span><span class="fd-choice-meta">~4 credits/mo</span></label>
+          </div>
+        </div>
+        <p class="fd-small fd-muted">Each check costs 1 credit per page. Cached checks that find no change are free.</p>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-step="prev"><i data-icon="arrow-left"></i><span>Back</span></button>
+        <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-step="next"><span>Continue</span><i data-icon="arrow-right" data-nudge></i></button>
+      </div>
+    </section>
+
+    <section data-step="notify" hidden>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="nm-webhook">Webhook URL <span class="fd-field-tag">optional</span></label>
+          <input class="fd-input" id="nm-webhook" type="url" placeholder="https://api.quarry.dev/hooks/ember" autocomplete="off" spellcheck="false" data-mono aria-describedby="nm-webhook-hint">
+          <p class="fd-field-hint" id="nm-webhook-hint">We POST a JSON payload with the diff each time the page changes.</p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="nm-email">Email <span class="fd-field-tag">optional</span></label>
+          <input class="fd-input" id="nm-email" type="email" value="maya@quarry.dev" autocomplete="off">
+        </div>
+        <label class="fd-checkbox"><input type="checkbox" id="nm-diff" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Include the diff in each notification</span><span class="fd-checkbox-desc">Turn this off to send only the page URL and a timestamp.</span></span></label>
+        <p class="fd-field-error" id="nm-notify-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Add a webhook URL or an email so someone hears about changes.</span></p>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-step="prev"><i data-icon="arrow-left"></i><span>Back</span></button>
+        <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-step="next"><span>Continue</span><i data-icon="arrow-right" data-nudge></i></button>
+      </div>
+    </section>
+
+    <section data-step="review" hidden>
+      <div class="fd-dialog-body fd-stack">
+        <dl class="fd-kv" data-cols="1" data-keys="plain" id="nm-review"></dl>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-step="prev"><i data-icon="arrow-left"></i><span>Back</span></button>
+        <button class="fd-btn" type="button" id="nm-finish" data-variant="primary" data-fd-dialog-step="next" data-fd-dialog-step-delay="800"><span>Create monitor</span></button>
+      </div>
+    </section>
+  </dialog>
+
+  <!-- Get code -->
+  <dialog class="fd-dialog" id="dlg-code" data-size="lg">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title">Create a monitor from code</h2>
+      <p class="fd-dialog-desc">The same monitor, one request. Replace the key with one from API keys.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body">
+      <figure class="fd-codeblock">
+        <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+        <pre class="fd-codeblock-body"><code data-lang="bash">curl -X POST https://api.ember.dev/v1/monitors \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://pricing.northwind.io/plans",
+    "schedule": "every 6 hours",
+    "watch": { "type": "price" },
+    "notify": { "webhook": "https://api.quarry.dev/hooks/ember" }
+  }'</code></pre>
+      </figure>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Close</button>
+    </div>
+  </dialog>
+</main>
+
+<script type="module">
+  import { init, overlays, nav, forms, texture } from '../fire/fire.js';
+
+  const { toast, openDialog, closeDialog } = overlays;
+  const { setLoading } = texture;
+  const { tagValues, setTags } = forms;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  /* ---------- Sample data (today is Nov 14, 2026, 4:35 PM) ---------- */
+  const NOW = new Date('2026-11-14T16:35:00');
+  const EVERY = { 'Every hour': 60, 'Every 6 hours': 360, 'Every 12 hours': 720, Daily: 1440, Weekly: 10080 };
+  const PER_MONTH = { 'Every hour': 720, 'Every 6 hours': 120, 'Every 12 hours': 60, Daily: 30, Weekly: 4 };
+  const WATCH_TONE = { 'Any change': 'neutral', Price: 'info', Selector: 'violet' };
+  const chg = (file, at, pre, del, add, post) => ({ file, at, pre, del, add, post });
+
+  const monitors = [
+    { id: 'm1', name: 'Northwind pricing', url: 'pricing.northwind.io/plans', schedule: 'Every 6 hours', watch: 'Price', lastMin: 2, changedMin: 2, status: 'active', unread: true,
+      spark: [0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 1, 0, 1, 3], webhook: 'https://api.quarry.dev/hooks/ember', email: 'maya@quarry.dev',
+      change: chg('plans.md', 18, ['## Team'], ['**$24** per seat / month'], ['**$29** per seat / month'], ['Billed annually, cancel anytime.']) },
+    { id: 'm2', name: 'Ember changelog', url: 'docs.ember.dev/changelog', schedule: 'Every hour', watch: 'Any change', lastMin: 14, changedMin: 194, status: 'active',
+      spark: [2, 1, 0, 3, 1, 0, 0, 2, 1, 1, 0, 2, 1, 1], webhook: '', email: 'maya@quarry.dev',
+      change: chg('changelog.md', 3, ['## v2.7.0'], [], ['- /parse accepts `onlyMainContent`.'], ['- Fixed a crash on empty sitemaps.']) },
+    { id: 'm3', name: 'Lumen API pricing', url: 'lumenapi.com/pricing', schedule: 'Every 12 hours', watch: 'Price', lastMin: 180, changedMin: 1620, status: 'active',
+      spark: [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], webhook: 'https://api.quarry.dev/hooks/ember', email: '',
+      change: chg('pricing.md', 9, ['### Starter'], ['10,000 requests / month'], ['25,000 requests / month'], ['$9 / month']) },
+    { id: 'm4', name: 'Competitor careers', url: 'jobs.northwind.io', schedule: 'Daily', watch: 'Selector', selector: '.job-listing', lastMin: 360, changedMin: 4300, status: 'active',
+      spark: [1, 0, 0, 2, 0, 1, 0, 0, 1, 0, 0, 0, 2, 0], webhook: '', email: 'maya@quarry.dev',
+      change: chg('.job-listing', 1, ['<li>Senior Backend Engineer</li>'], [], ['<li>Staff Data Engineer</li>'], ['<li>Developer Advocate</li>']) },
+    { id: 'm5', name: 'Status page', url: 'status.quarry.dev', schedule: 'Every hour', watch: 'Selector', selector: '#overall-status', lastMin: 52, changedMin: 9100, status: 'failing',
+      spark: [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], webhook: 'https://api.quarry.dev/hooks/ember', email: '',
+      change: chg('#overall-status', 1, [], ['All systems operational'], ['Degraded performance: API'], []) },
+    { id: 'm6', name: 'Terms of service', url: 'quarry.dev/legal/terms', schedule: 'Weekly', watch: 'Any change', lastMin: 4300, changedMin: 12600, status: 'active',
+      spark: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], webhook: '', email: 'legal@quarry.dev',
+      change: chg('terms.md', 41, ['## 7. Data retention'], ['Logs are kept for 30 days.'], ['Logs are kept for 90 days.'], []) },
+    { id: 'm7', name: 'Hosting plans EU', url: 'hosting.example.eu/plans', schedule: 'Every 6 hours', watch: 'Price', lastMin: 61, changedMin: 421, status: 'active',
+      spark: [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 1], webhook: '', email: 'maya@quarry.dev',
+      change: chg('plans.md', 6, ['### Cloud S'], ['€11.90 / month'], ['€12.90 / month'], ['2 vCPU, 4 GB RAM']) },
+    { id: 'm8', name: 'Release notes', url: 'github.com/ember-dev/ember-js/releases', schedule: 'Every 12 hours', watch: 'Any change', lastMin: 540, changedMin: 3000, status: 'active',
+      spark: [0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0], webhook: '', email: 'maya@quarry.dev',
+      change: chg('releases.md', 1, [], ['## v2.6.0'], ['## v2.6.1'], ['- Retry fetches on connection resets.']) },
+    { id: 'm9', name: 'Docs sitemap', url: 'docs.northwind.io/sitemap.xml', schedule: 'Daily', watch: 'Any change', lastMin: 1080, changedMin: 7800, status: 'active',
+      spark: [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0], webhook: 'https://api.quarry.dev/hooks/ember', email: '',
+      change: chg('sitemap.xml', 212, ['<url><loc>https://docs.northwind.io/api</loc></url>'], [], ['<url><loc>https://docs.northwind.io/api/webhooks</loc></url>'], []) },
+    { id: 'm10', name: 'Old landing page', url: 'quarry.dev/launch-2025', schedule: 'Weekly', watch: 'Any change', lastMin: 17280, changedMin: 40000, status: 'paused',
+      spark: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], webhook: '', email: 'maya@quarry.dev',
+      change: chg('launch-2025.md', 2, ['# Launch week'], ['Join the waitlist'], ['Sign up free'], []) },
+    { id: 'm11', name: 'Beta waitlist count', url: 'lumenapi.com/beta', schedule: 'Daily', watch: 'Selector', selector: '.waitlist-count', lastMin: 7200, changedMin: 9000, status: 'paused',
+      spark: [2, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], webhook: '', email: 'maya@quarry.dev',
+      change: chg('.waitlist-count', 1, [], ['2,481 people waiting'], ['2,517 people waiting'], []) },
+    { id: 'm12', name: 'Pricing archive', url: 'archive.example.org/pricing', schedule: 'Weekly', watch: 'Price', lastMin: 30240, changedMin: 60000, status: 'paused',
+      spark: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], webhook: '', email: 'maya@quarry.dev',
+      change: chg('pricing.md', 4, ['## Pro'], ['$49 / month'], ['$59 / month'], []) },
+  ];
+
+  /* ---------- Formatting helpers ---------- */
+  const ago = (min) => {
+    if (min < 1) return 'just now';
+    if (min < 60) return `${Math.round(min)} min ago`;
+    if (min < 1440) { const h = Math.round(min / 60); return `${h} hour${h === 1 ? '' : 's'} ago`; }
+    const d = Math.round(min / 1440);
+    return `${d} day${d === 1 ? '' : 's'} ago`;
+  };
+  const agoShort = (min) => (min < 1 ? 'now' : min < 60 ? `${Math.round(min)}m ago` : min < 1440 ? `${Math.round(min / 60)}h ago` : `${Math.round(min / 1440)}d ago`);
+  const when = (min) => new Date(NOW - min * 6e4).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const inFuture = (min) => (min < 60 ? `in ${Math.max(1, Math.round(min))} min` : min < 1440 ? `in ${Math.round(min / 60)} hours` : `in ${Math.round(min / 1440)} days`);
+  const STATUS = {
+    active: { tone: 'success', label: 'Active', live: true },
+    paused: { tone: 'neutral', label: 'Paused' },
+    failing: { tone: 'danger', label: 'Failing' },
+  };
+  const statusHTML = (m, size = '') => { const s = STATUS[m.status]; return `<span class="fd-status"${size} data-tone="${s.tone}"${s.live ? ' data-live' : ''}>${s.label}</span>`; };
+
+  /* ---------- State, rendering ---------- */
+  const table = $('#mon-table');
+  const body = $('#mon-body');
+  const skeleton = $('#mon-skeleton');
+  const stateBody = $('#mon-state');
+  const info = $('#mon-info');
+  const search = $('#mon-search');
+  const filterSwitch = $('#mon-filter');
+  const stateSwitch = $('#mon-state-switch');
+  const sortSelect = $('#mon-sort');
+  const statsBox = $('#mon-stats');
+  let state = 'loading';
+  let segment = 'all';
+  let query = '';
+  const fresh = new Set();
+
+  const rowHTML = (m) => `<tr data-value="${m.id}" data-href="#${m.id}" tabindex="0" data-status="${m.status}"${fresh.has(m.id) ? ' class="fd-rise"' : ''}>
+      <td data-stack-title><div class="fd-table-cell"><span class="fd-table-lead"${m.status === 'failing' ? ' data-tone="danger"' : ''}><i data-icon="radar"></i></span><div class="fd-table-two"><span class="fd-table-title">${esc(m.name)}</span><span class="fd-table-sub fd-mono">${esc(m.url)}</span></div></div></td>
+      <td data-label="Schedule" data-muted>${m.schedule}</td>
+      <td data-label="Watches"><span class="fd-badge" data-tone="${WATCH_TONE[m.watch]}">${m.watch}</span></td>
+      <td data-label="Last check" data-muted>${ago(m.lastMin)}</td>
+      <td data-label="Changes · 14d"><span class="fd-sparkline" data-values="${m.spark.join(',')}" data-type="bars" data-tone="${m.status === 'failing' ? 'danger' : 'neutral'}" data-label="Changes per day, last 14 days"></span></td>
+      <td data-label="Status">${statusHTML(m)}</td>
+      <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for ${esc(m.name)}" data-fd-menu="menu-monitor-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+    </tr>`;
+
+  const noteRow = (icon, title, text, button = '', tone = '') => `<tr class="fd-table-state"><td colspan="7"><div class="fd-table-empty"${tone ? ` data-tone="${tone}" role="alert"` : ''}>
+      ${tone ? '' : '<div class="fd-ascii" data-fd-ascii="waves" data-fade="x" aria-hidden="true"></div>'}
+      <span class="fd-table-empty-icon"><i data-icon="${icon}"></i></span>
+      <p class="fd-table-empty-title">${title}</p><p class="fd-table-empty-text">${text}</p>${button}
+    </div></td></tr>`;
+
+  function render() {
+    const base = state === 'empty' ? [] : monitors;
+    const active = base.filter((m) => m.status !== 'paused');
+    const paused = base.filter((m) => m.status === 'paused');
+
+    // Counts and stats
+    const counts = { all: base.length, active: active.length, paused: paused.length };
+    for (const el of $$('[data-count]', filterSwitch)) el.textContent = counts[el.dataset.count];
+    const alerts = base.filter((m) => m.changedMin != null && m.changedMin <= 1440);
+    const latest = base.filter((m) => m.changedMin != null).sort((a, b) => a.changedMin - b.changedMin)[0];
+    $('#st-monitors').textContent = base.length;
+    $('#st-active').textContent = `${active.length} active`;
+    $('#st-alerts').textContent = alerts.length;
+    $('#st-unread').textContent = alerts.length ? `${alerts.filter((m) => m.unread).length} unread` : 'all quiet';
+    $('#st-last').textContent = latest ? agoShort(latest.changedMin) : 'never';
+    $('#st-last-sub').textContent = latest ? `${latest.url.split('/')[0]} changed` : 'no changes yet';
+    setLoading(statsBox, state === 'loading');
+
+    // Rows
+    const q = query.trim().toLowerCase();
+    const order = { failing: 0, active: 1, paused: 2 };
+    const list = base
+      .filter((m) => (segment === 'all' || (segment === 'paused') === (m.status === 'paused')) && (!q || `${m.name} ${m.url}`.toLowerCase().includes(q)))
+      .sort((a, b) => (sortSelect.value === 'name' ? a.name.localeCompare(b.name) : sortSelect.value === 'status' ? order[a.status] - order[b.status] || a.lastMin - b.lastMin : a.lastMin - b.lastMin));
+
+    table.setAttribute('aria-busy', String(state === 'loading'));
+    skeleton.hidden = state !== 'loading';
+    body.hidden = state !== 'loaded' || !list.length;
+    stateBody.hidden = state === 'loading' || (state === 'loaded' && list.length > 0);
+    if (state === 'loaded' && list.length) { body.innerHTML = list.map(rowHTML).join(''); init(body); }
+    if (state === 'empty') stateBody.innerHTML = noteRow('radar', 'No monitors yet', 'Click New monitor to add one.');
+    if (state === 'error') stateBody.innerHTML = noteRow('triangle-alert', 'Couldn’t load monitors', 'The request timed out after 10 seconds. Check your connection, then try again.', '<button class="fd-btn" type="button" data-action="reload"><i data-icon="refresh-cw"></i><span>Retry</span></button>', 'danger');
+    if (state === 'loaded' && !list.length) stateBody.innerHTML = noteRow('search', 'No monitors match', 'Try another name or URL, or switch back to all monitors.', '<button class="fd-btn" type="button" data-action="clear"><span>Clear search</span></button>');
+    if (!stateBody.hidden) init(stateBody);
+    fresh.clear();
+
+    info.textContent = state === 'loading' ? 'Loading monitors' : state === 'error' ? 'Monitors unavailable' : `${list.length} monitor${list.length === 1 ? '' : 's'}`;
+    nav.selectSegment($(`.fd-segmented-item[data-value="${state}"]`, stateSwitch), { silent: true });
+  }
+
+  function setState(next) { state = next; render(); }
+
+  search.addEventListener('input', () => { query = search.value; render(); });
+  sortSelect.addEventListener('change', render);
+
+  document.addEventListener('fd:change', (event) => {
+    if (event.target === filterSwitch) { segment = event.detail.value; render(); }
+    if (event.target === stateSwitch && event.detail.value !== state) setState(event.detail.value);
+  });
+
+  /* ---------- Detail sheet ---------- */
+  const sheet = $('#sheet-monitor');
+  let current = null;
+
+  const diffText = (c) => {
+    const context = c.pre.length + c.post.length;
+    return [`@@ -${c.at},${context + c.del.length} +${c.at},${context + c.add.length} @@`, ...c.pre.map((l) => ` ${l}`), ...c.del.map((l) => `-${l}`), ...c.add.map((l) => `+${l}`), ...c.post.map((l) => ` ${l}`)].join('\n');
+  };
+
+  function timeline(m) {
+    const step = EVERY[m.schedule];
+    const item = (title, time, text, tone, icon) => `<li class="fd-timeline-item"${tone ? ` data-tone="${tone}"` : ''}><span class="fd-timeline-node">${icon ? `<i data-icon="${icon}"></i>` : ''}</span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">${title}</span><time class="fd-timeline-time">${time}</time></div>${text ? `<p class="fd-timeline-body">${text}</p>` : ''}</div></li>`;
+    const items = [];
+    if (m.status === 'paused') items.push(item('Paused', when(m.lastMin), 'Checks resume when you resume the monitor.', 'neutral', 'pause'));
+    for (let i = 0; i < 6; i += 1) {
+      const min = m.lastMin + i * step;
+      if (m.status === 'failing' && i < 3) items.push(item('Check failed', when(min), '403 Forbidden. The page blocked the request; Ember retries on the next run.', 'danger', 'x'));
+      else if (m.changedMin != null && Math.abs(min - m.changedMin) < 1) items.push(item('Change detected', when(min), `${m.change.del.length || 0} removed, ${m.change.add.length} added.`, 'accent', 'diff'));
+      else items.push(item('No change', when(min), ''));
+    }
+    return items.join('');
+  }
+
+  function openMonitor(m, trigger) {
+    current = m;
+    const s = STATUS[m.status];
+    const pill = $('#sm-status');
+    pill.dataset.tone = s.tone;
+    pill.toggleAttribute('data-live', Boolean(s.live));
+    pill.textContent = s.label;
+    $('#sm-name').textContent = m.name;
+    $('#sm-url').textContent = m.url;
+    const notify = [m.webhook && 'Webhook', m.email && m.email].filter(Boolean).join(' · ') || 'None';
+    const diff = m.changedMin == null
+      ? '<div class="fd-callout" role="note"><i class="fd-callout-icon" data-icon="info"></i><div class="fd-callout-content"><p class="fd-callout-title">No changes yet</p><p class="fd-callout-body">The first check sets the baseline. Changes appear here with a diff.</p></div></div>'
+      : `<div class="fd-diff" data-file="${esc(m.change.file)}"><script type="text/plain" class="fd-diff-src">${esc(diffText(m.change))}<\/script></div>`;
+    $('#sm-body').innerHTML = `
+      <dl class="fd-kv" data-cols="2">
+        <div class="fd-kv-item"><dt class="fd-kv-key">Schedule</dt><dd class="fd-kv-value">${m.schedule}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Watches</dt><dd class="fd-kv-value"><span class="fd-badge" data-tone="${WATCH_TONE[m.watch]}">${m.watch}</span>${m.selector ? ` <span class="fd-mono">${esc(m.selector)}</span>` : ''}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Last check</dt><dd class="fd-kv-value">${ago(m.lastMin)}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Next check</dt><dd class="fd-kv-value">${m.status === 'paused' ? 'Paused' : inFuture(Math.max(1, EVERY[m.schedule] - (m.lastMin % EVERY[m.schedule])))}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Notifies</dt><dd class="fd-kv-value">${esc(notify)}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Cost</dt><dd class="fd-kv-value fd-num">~${PER_MONTH[m.schedule]} credits / month</dd></div>
+      </dl>
+      <div class="fd-stack" style="--fd-gap:8px">
+        <p class="fd-eyebrow">Latest change${m.changedMin != null ? ` · ${ago(m.changedMin)}` : ''}</p>
+        ${diff}
+      </div>
+      <div class="fd-stack" style="--fd-gap:8px">
+        <p class="fd-eyebrow">Recent checks</p>
+        <ol class="fd-timeline">${timeline(m)}</ol>
+      </div>`;
+    syncSheetButtons();
+    init(sheet);
+    openDialog(sheet, { trigger });
+  }
+
+  function syncSheetButtons() {
+    const paused = current.status === 'paused';
+    $('#sm-toggle span').textContent = paused ? 'Resume' : 'Pause';
+    $('#sm-toggle use').setAttribute('href', paused ? '#i-play' : '#i-pause');
+  }
+
+  /* ---------- Row actions ---------- */
+  function runNow(m) {
+    const failing = m.status === 'failing';
+    toast.promise(new Promise((resolve, reject) => setTimeout(() => { m.lastMin = 0; render(); failing ? reject(new Error('blocked')) : resolve(); }, 1500)), {
+      loading: { title: `Checking ${m.url.split('/')[0]}`, description: 'Fetching the page and comparing it with the last version.' },
+      success: { title: 'No change detected', description: `${m.name} matches the last check.` },
+      error: { title: 'Check failed', description: `${m.url.split('/')[0]} returned 403 Forbidden.` },
+    });
+  }
+
+  function toggle(m) {
+    m.status = m.status === 'paused' ? 'active' : 'paused';
+    render();
+    toast({ title: m.status === 'paused' ? `${m.name} paused` : `${m.name} resumed`, tone: 'neutral', description: m.status === 'paused' ? 'No checks run until you resume it.' : 'The next check runs on schedule.' });
+  }
+
+  function remove(m) {
+    const index = monitors.indexOf(m);
+    monitors.splice(index, 1);
+    render();
+    toast({ title: `${m.name} deleted`, tone: 'neutral', action: { label: 'Undo', onClick: () => { monitors.splice(index, 0, m); fresh.add(m.id); render(); } } });
+  }
+
+  const byId = (id) => monitors.find((m) => m.id === id);
+
+  document.addEventListener('fd:open', (event) => {
+    if (event.target.id !== 'menu-monitor-row') return;
+    const m = byId(event.detail?.trigger?.closest('tr')?.dataset.value);
+    if (!m) return;
+    const item = $('[data-value="toggle"]', event.target);
+    item.querySelector('.fd-menu-item-label').textContent = m.status === 'paused' ? 'Resume' : 'Pause';
+    item.querySelector('use').setAttribute('href', m.status === 'paused' ? '#i-play' : '#i-pause');
+  });
+
+  document.addEventListener('fd:select', (event) => {
+    const { action, row, item, trigger } = event.detail || {};
+    if (action === 'open' && row?.closest('#mon-table')) { event.preventDefault(); openMonitor(byId(row.dataset.value), row); return; }
+    if (action === 'reload') { setState('loading'); setTimeout(() => setState('loaded'), 900); return; }
+    if (action === 'clear') { search.value = ''; query = ''; segment = 'all'; nav.selectSegment($('[data-value="all"]', filterSwitch), { silent: true }); render(); return; }
+    if (item?.closest('#menu-monitor-row')) {
+      const m = byId(trigger?.closest('tr')?.dataset.value);
+      if (!m) return;
+      const choice = item.dataset.value;
+      if (choice === 'run') runNow(m);
+      if (choice === 'toggle') toggle(m);
+      if (choice === 'edit') requestAnimationFrame(() => openWizard(m, trigger));
+      if (choice === 'delete') remove(m);
+    }
+  });
+
+  $('#sm-run').addEventListener('click', () => { runNow(current); closeDialog(sheet); });
+  $('#sm-toggle').addEventListener('click', () => { toggle(current); closeDialog(sheet); });
+  $('#mon-slack').addEventListener('click', () => toast({ title: 'Connect Slack', description: 'Pick a channel and Ember posts every monitor alert there.', tone: 'info', action: { label: 'Continue' } }));
+
+  /* ---------- New monitor wizard ---------- */
+  const dlg = $('#dlg-monitor');
+  const steps = $('#nm-steps');
+  const URL_RE = /^https?:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i;
+  let editing = null;
+
+  function openWizard(m = null, trigger = $('#mon-new')) {
+    editing = m;
+    $('#nm-title').textContent = m ? 'Edit monitor' : 'New monitor';
+    $('#nm-finish span').textContent = m ? 'Save changes' : 'Create monitor';
+    setTags($('#nm-urls'), m ? [`https://${m.url}`] : []);
+    $('#nm-name').value = m?.name ?? '';
+    $('#nm-watch').value = m?.watch ?? 'Any change';
+    $('#nm-selector').value = m?.selector ?? '';
+    $('#nm-selector-field').hidden = $('#nm-watch').value !== 'Selector';
+    $(`input[name="nm-schedule"][value="${m?.schedule && PER_MONTH[m.schedule] && m.schedule !== 'Every 12 hours' ? m.schedule : 'Every 6 hours'}"]`).checked = true;
+    $('#nm-webhook').value = m?.webhook ?? '';
+    $('#nm-email').value = m ? m.email : 'maya@quarry.dev';
+    for (const err of $$('.fd-field-error', dlg)) err.hidden = true;
+    openDialog(dlg, { trigger });
+  }
+
+  $('#mon-new').addEventListener('click', () => openWizard());
+  $('#nm-watch').addEventListener('change', (event) => { $('#nm-selector-field').hidden = event.target.value !== 'Selector'; });
+
+  dlg.addEventListener('fd:change', (event) => {
+    if (event.target !== dlg) return;
+    nav.setStep(steps, event.detail.index, { silent: true });
+    if (event.detail.value === 'review') fillReview();
+  });
+
+  // Validate before the dialog moves on (this runs before Fire's own handler).
+  dlg.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-fd-dialog-step="next"]');
+    if (!button) return;
+    if (dlg.dataset.step === 'pages') {
+      const urls = tagValues($('#nm-urls'));
+      const ok = urls.length > 0 && urls.every((u) => URL_RE.test(u));
+      $('#nm-urls-error').hidden = ok;
+      if (!ok) { event.stopPropagation(); event.preventDefault(); $('#nm-urls-input').focus(); }
+    }
+    if (dlg.dataset.step === 'notify') {
+      const ok = Boolean($('#nm-webhook').value.trim() || $('#nm-email').value.trim());
+      $('#nm-notify-error').hidden = ok;
+      if (!ok) { event.stopPropagation(); event.preventDefault(); }
+    }
+  }, true);
+
+  const hostOf = (url) => url.replace(/^https?:\/\//, '').split('/')[0];
+
+  function fillReview() {
+    const urls = tagValues($('#nm-urls'));
+    const schedule = $('input[name="nm-schedule"]:checked').value;
+    const watch = $('#nm-watch').value;
+    const kv = (key, value) => `<div class="fd-kv-item"><dt class="fd-kv-key">${key}</dt><dd class="fd-kv-value">${value}</dd></div>`;
+    $('#nm-review').innerHTML = [
+      kv('Name', esc($('#nm-name').value.trim() || hostOf(urls[0] || ''))),
+      kv('Pages', `<span class="fd-mono">${esc(urls[0] || '')}</span>${urls.length > 1 ? ` <span class="fd-badge">+${urls.length - 1} more</span>` : ''}`),
+      kv('Watches', watch === 'Selector' ? `Selector <span class="fd-mono">${esc($('#nm-selector').value || 'body')}</span>` : watch),
+      kv('Schedule', schedule),
+      kv('Notifies', esc([$('#nm-webhook').value.trim() && 'Webhook', $('#nm-email').value.trim()].filter(Boolean).join(' · '))),
+      kv('Estimated cost', `<span class="fd-num">~${(PER_MONTH[schedule] * Math.max(1, urls.length)).toLocaleString('en-US')} credits / month</span>`),
+    ].join('');
+  }
+
+  dlg.addEventListener('fd:close', (event) => {
+    if (event.target !== dlg || event.detail.value !== 'done') return;
+    const urls = tagValues($('#nm-urls'));
+    const name = $('#nm-name').value.trim();
+    const fields = {
+      schedule: $('input[name="nm-schedule"]:checked').value,
+      watch: $('#nm-watch').value,
+      selector: $('#nm-watch').value === 'Selector' ? $('#nm-selector').value.trim() || 'body' : undefined,
+      webhook: $('#nm-webhook').value.trim(),
+      email: $('#nm-email').value.trim(),
+    };
+    if (editing) {
+      Object.assign(editing, fields, { name: name || editing.name });
+      render();
+      toast.success('Monitor updated', { description: `${editing.name} saved.` });
+      return;
+    }
+    const created = urls.map((url, i) => ({
+      id: `m${Date.now()}${i}`, name: name ? (urls.length > 1 ? `${name} ${i + 1}` : name) : hostOf(url), url: url.replace(/^https?:\/\//, ''),
+      lastMin: 0, changedMin: null, status: 'active', spark: new Array(14).fill(0), change: null, ...fields,
+    }));
+    created.forEach((m) => { monitors.unshift(m); fresh.add(m.id); });
+    segment = 'all'; query = ''; search.value = '';
+    nav.selectSegment($('[data-value="all"]', filterSwitch), { silent: true });
+    sortSelect.value = 'recent';
+    setState('loaded');
+    toast.success(created.length > 1 ? `${created.length} monitors created` : 'Monitor created', { description: 'The first check is running now and sets the baseline.' });
+  });
+
+  /* ---------- First paint: skeleton for ~600 ms, then the data ---------- */
+  render();
+  setTimeout(() => state === 'loading' && setState('loaded'), 600);
+</script>
+</body>
+</html>

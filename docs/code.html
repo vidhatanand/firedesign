@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code &amp; logs · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="code">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Code &amp; logs</h1>
+    <p class="doc-lede">Mono on a sunken well, framed by a faint hairline. Colour is reserved for meaning: a few syntax hues, a status tone on a log level or a method, and the accent only on the lines you are pointing at.</p>
+  </header>
+
+  <!-- ===================================================== Code blocks -->
+  <section class="doc-section" id="codeblock">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Code block</h2>
+      <p>Use a code block for anything a developer will read or paste: a request, a config, a response. Name the file in the header when the code lives in one; number the lines and highlight a range when the prose refers to it.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <figure class="fd-codeblock" data-lines data-highlight="6-9">
+        <div class="fd-codeblock-head">
+          <span class="fd-codeblock-file"><i data-icon="file-code"></i>scrape.ts</span>
+          <div class="fd-codeblock-actions">
+            <button class="fd-codeblock-btn" data-action="wrap" aria-label="Wrap lines"><i data-icon="wrap-text"></i></button>
+            <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <pre class="fd-codeblock-body"><code data-lang="typescript">import Ember from "@ember/sdk";
+
+const ember = new Ember({ apiKey: process.env.EMBER_API_KEY });
+
+// Scrape one page and keep only the main content.
+const page = await ember.scrape("https://ember.dev/pricing", {
+  formats: ["markdown", "json"],
+  onlyMainContent: true,
+  waitFor: 1000,
+});
+
+if (page.metadata.statusCode !== 200) {
+  throw new Error(`Scrape failed with status ${page.metadata.statusCode}, check the URL and try again with a longer waitFor value`);
+}
+
+console.log(page.markdown.slice(0, 280));</code></pre>
+      </figure>
+      <figure class="fd-codeblock">
+        <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+        <pre class="fd-codeblock-body"><code data-lang="bash">export EMBER_API_KEY="ek-2f9c…0f16"
+ember crawl https://docs.ember.dev --limit 50 --format markdown</code></pre>
+      </figure>
+    </div>
+    <ul class="doc-notes">
+      <li>The header holds either a filename or language tabs, never both. A block without a header floats its copy button in the corner.</li>
+      <li>Copy takes the raw text, not the rendered spans. The button shows a check and “Copied” for 1.4 seconds.</li>
+      <li>The gutter is sticky: line numbers and the highlight bar stay put while long lines scroll sideways. Wrap is a per-block toggle.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Tabs -->
+  <section class="doc-section" id="tabs">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Language tabs</h2>
+      <p>Offer the same request in each language the reader might use. The choice is remembered and applied to every block on the page, so switching to Python once switches the whole page.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-codeblock">
+        <div class="fd-codeblock-head">
+          <div class="fd-codeblock-tabs" aria-label="Language">
+            <button class="fd-codeblock-tab" data-value="curl">cURL</button>
+            <button class="fd-codeblock-tab" data-value="python">Python</button>
+            <button class="fd-codeblock-tab" data-value="node">Node</button>
+            <button class="fd-codeblock-tab" data-value="cli">CLI</button>
+          </div>
+          <div class="fd-codeblock-actions">
+            <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <pre class="fd-codeblock-body" data-value="curl"><code data-lang="bash">curl -X POST https://api.ember.dev/v2/scrape \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://ember.dev/pricing",
+    "formats": ["markdown"]
+  }'</code></pre>
+        <pre class="fd-codeblock-body" data-value="python"><code data-lang="python">import os
+from ember import Ember
+
+app = Ember(api_key=os.environ["EMBER_API_KEY"])
+
+page = app.scrape("https://ember.dev/pricing", formats=["markdown"])
+print(page.markdown[:280])</code></pre>
+        <pre class="fd-codeblock-body" data-value="node"><code data-lang="javascript">import Ember from "@ember/sdk";
+
+const ember = new Ember({ apiKey: process.env.EMBER_API_KEY });
+const page = await ember.scrape("https://ember.dev/pricing", { formats: ["markdown"] });
+
+console.log(page.markdown.slice(0, 280));</code></pre>
+        <pre class="fd-codeblock-body" data-value="cli"><code data-lang="bash">$ npm install -g @ember/cli
+$ ember login
+$ ember scrape https://ember.dev/pricing --format markdown &gt; pricing.md</code></pre>
+      </div>
+
+      <div class="fd-codeblock">
+        <div class="fd-codeblock-head">
+          <span class="fd-codeblock-lang">Crawl a site</span>
+          <div class="fd-codeblock-tabs" data-variant="segmented" aria-label="Language">
+            <button class="fd-codeblock-tab" data-value="curl">cURL</button>
+            <button class="fd-codeblock-tab" data-value="python">Python</button>
+            <button class="fd-codeblock-tab" data-value="node">Node</button>
+            <button class="fd-codeblock-tab" data-value="cli">CLI</button>
+          </div>
+          <div class="fd-codeblock-actions">
+            <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <pre class="fd-codeblock-body" data-value="curl"><code data-lang="bash">curl -X POST https://api.ember.dev/v2/crawl \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -d '{ "url": "https://docs.ember.dev", "limit": 50 }'</code></pre>
+        <pre class="fd-codeblock-body" data-value="python"><code data-lang="python">job = app.crawl("https://docs.ember.dev", limit=50)
+for page in job.pages:
+    print(page.metadata.source_url, len(page.markdown))</code></pre>
+        <pre class="fd-codeblock-body" data-value="node"><code data-lang="javascript">const job = await ember.crawl("https://docs.ember.dev", { limit: 50 });
+for (const page of job.pages) console.log(page.metadata.sourceURL);</code></pre>
+        <pre class="fd-codeblock-body" data-value="cli"><code data-lang="bash">ember crawl https://docs.ember.dev --limit 50 --out ./docs</code></pre>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Underline tabs are the default. The segmented variant (<code class="fd-code">data-variant="segmented"</code>) suits a header that already carries a label.</li>
+      <li>Tabs follow the ARIA tabs pattern: ← → move and select, Home and End jump. Use <code class="fd-code">data-sync="none"</code> to keep a block out of the shared choice.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Collapsed -->
+  <section class="doc-section" id="collapsed">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Collapsed</h2>
+      <p>Long responses start folded so the page keeps its rhythm. The fade and the line count tell the reader how much is hidden before they open it.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <figure class="fd-codeblock" data-lines data-collapse="240">
+        <div class="fd-codeblock-head">
+          <span class="fd-codeblock-file"><i data-icon="file-json"></i>POST /v2/scrape · 200</span>
+          <div class="fd-codeblock-actions">
+            <button class="fd-codeblock-copy" aria-label="Copy response"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <pre class="fd-codeblock-body"><code data-lang="json">{
+  "success": true,
+  "data": {
+    "markdown": "# Pricing\n\nPlans for web data and agents. Start free, scale when you need to.",
+    "metadata": {
+      "title": "Pricing · Ember",
+      "sourceURL": "https://ember.dev/pricing",
+      "statusCode": 200,
+      "scrapeId": "scr_8Kq2Lm4Yt9",
+      "creditsUsed": 1
+    },
+    "links": [
+      "https://ember.dev/",
+      "https://ember.dev/docs",
+      "https://ember.dev/changelog",
+      "https://ember.dev/enterprise"
+    ],
+    "json": {
+      "plans": [
+        {
+          "name": "Free",
+          "price": 0,
+          "credits": 500,
+          "renews": "daily"
+        },
+        {
+          "name": "Hobby",
+          "price": 16,
+          "credits": 3000,
+          "renews": "monthly"
+        },
+        {
+          "name": "Standard",
+          "price": 83,
+          "credits": 100000,
+          "renews": "monthly"
+        },
+        {
+          "name": "Growth",
+          "price": 333,
+          "credits": 500000,
+          "renews": "monthly"
+        }
+      ]
+    }
+  },
+  "warning": null
+}</code></pre>
+      </figure>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-collapse="240"</code> sets the folded height in pixels. Blocks shorter than that never show the button.</li>
+      <li>“Show less” scrolls the block back into view if its top has left the screen.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Syntax -->
+  <section class="doc-section" id="syntax">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Syntax</h2>
+      <p>A small built-in tokenizer covers the languages Ember docs use: JSON, shell and cURL, JavaScript and TypeScript, Python. It is forgiving: anything it does not recognise stays plain text, and code that is already marked up keeps its spans.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <figure class="fd-codeblock">
+          <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="file-json"></i>monitor.json</span></div>
+          <pre class="fd-codeblock-body"><code data-lang="json">{
+  "name": "Pricing pages",
+  "interval": 3600,
+  "active": true,
+  "webhook": null,
+  "targets": ["ember.dev/pricing"]
+}</code></pre>
+        </figure>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <figure class="fd-codeblock">
+          <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="terminal"></i>deploy.sh</span></div>
+          <pre class="fd-codeblock-body"><code data-lang="bash"># Fail fast and show what runs
+set -euo pipefail
+ember monitors list --json | jq '.[] | .id' &amp;&amp; echo "$COUNT monitors"
+for url in $(cat urls.txt); do ember scrape "$url" --format markdown; done</code></pre>
+        </figure>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <figure class="fd-codeblock">
+          <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="file-code"></i>agent.ts</span></div>
+          <pre class="fd-codeblock-body"><code data-lang="typescript">export async function ask(prompt: string) {
+  const run = await ember.agent.start({ prompt, model: "spark-2", maxCredits: 50 });
+  for await (const event of run.stream()) {
+    if (event.type === "tool_call") log(event.name, event.args);
+  }
+  return run.result; // { rows, sources, usage }
+}</code></pre>
+        </figure>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <figure class="fd-codeblock">
+          <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="file-code"></i>extract.py</span></div>
+          <pre class="fd-codeblock-body"><code data-lang="python">@dataclass
+class Plan:
+    name: str
+    price: float = 0.0
+
+def extract(url: str) -&gt; list[Plan]:
+    """Pull every plan from a pricing page."""
+    rows = app.extract(url, schema=Plan, timeout=30_000)
+    return [r for r in rows if r.price is not None]  # skip "Contact us"</code></pre>
+        </figure>
+      </div>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <figure class="fd-codeblock">
+        <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="terminal"></i>Already marked up</span></div>
+        <pre class="fd-codeblock-body"><code><span class="fd-syntax-comment"># Rotate a key without downtime</span>
+<span class="fd-syntax-fn">ember</span> keys create <span class="fd-syntax-keyword">--name</span> <span class="fd-syntax-string">"production-2"</span>
+<span class="fd-syntax-fn">ember</span> keys revoke <span class="fd-syntax-string">ek-7f2c…91ad</span></code></pre>
+      </figure>
+    </div>
+    <ul class="doc-notes">
+      <li>Tokens: <span class="fd-mono"><span class="fd-syntax-keyword">keyword</span> <span class="fd-syntax-string">string</span> <span class="fd-syntax-number">number</span> <span class="fd-syntax-fn">function</span> <span class="fd-syntax-key">key</span> <span class="fd-syntax-punct">punct</span> <span class="fd-syntax-comment">comment</span></span>, each a <code class="fd-code">--fd-syntax-*</code> token.</li>
+      <li><code class="fd-code">highlight(code, lang)</code> returns the same spans as an HTML string for your own markup.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Snippet -->
+  <section class="doc-section" id="snippet">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Snippet</h2>
+      <p>A snippet is one command or one value the reader copies and leaves with: an install line, a skill URL, a key. When setup takes several commands, number them.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-snippet">
+        <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+        <code class="fd-snippet-text">npx -y @ember/cli init --agent claude-code</code>
+        <button class="fd-snippet-copy" aria-label="Copy command"><i data-icon="copy"></i></button>
+      </div>
+      <div class="fd-snippet">
+        <i data-icon="link"></i>
+        <code class="fd-snippet-text"><span class="fd-snippet-dim">ember.dev/</span>agent-onboarding/<span class="fd-snippet-em">SKILL.md</span></code>
+        <button class="fd-snippet-copy" aria-label="Copy skill URL" data-copy="https://ember.dev/agent-onboarding/SKILL.md"><i data-icon="copy"></i></button>
+      </div>
+      <div class="fd-snippet" data-variant="accent">
+        <code class="fd-snippet-text">ek-2f9c<span class="fd-snippet-dim">••••••••••••••••••••••</span>0f16</code>
+        <button class="fd-snippet-copy" aria-label="Copy API key" data-copy="ek-2f9c8b1e4d7a90c3b5e6f1a20f16"><i data-icon="copy"></i></button>
+      </div>
+      <div class="fd-snippet" data-size="sm" style="max-width:360px">
+        <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+        <code class="fd-snippet-text">pip install ember-py</code>
+        <button class="fd-snippet-copy" aria-label="Copy command"><i data-icon="copy"></i></button>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Steps</h3>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <ol class="fd-snippet-steps">
+        <li class="fd-snippet-step" data-state="done">
+          <p class="fd-snippet-step-title">Install the CLI</p>
+          <div class="fd-snippet">
+            <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+            <code class="fd-snippet-text">npm install -g @ember/cli</code>
+            <button class="fd-snippet-copy" aria-label="Copy command"><i data-icon="copy"></i></button>
+          </div>
+        </li>
+        <li class="fd-snippet-step">
+          <p class="fd-snippet-step-title">Sign in and pick a team</p>
+          <p class="fd-snippet-step-hint">Opens a browser. No API key is stored in your shell history.</p>
+          <div class="fd-snippet">
+            <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+            <code class="fd-snippet-text">ember login</code>
+            <button class="fd-snippet-copy" aria-label="Copy command"><i data-icon="copy"></i></button>
+          </div>
+        </li>
+        <li class="fd-snippet-step">
+          <p class="fd-snippet-step-title">Add Ember skills to your coding agent</p>
+          <div class="fd-snippet">
+            <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+            <code class="fd-snippet-text">ember skills add --all</code>
+            <button class="fd-snippet-copy" aria-label="Copy command"><i data-icon="copy"></i></button>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <ul class="doc-notes">
+      <li>The <code class="fd-code">$</code> prompt is decoration: it is not selectable and never copied.</li>
+      <li><code class="fd-code">fd-snippet-em</code> marks the one segment that matters; <code class="fd-code">fd-snippet-dim</code> quiets the rest. The accent well is for keys and skill links only.</li>
+      <li>A step marked <code class="fd-code">data-state="done"</code> swaps its number for a check.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Endpoint -->
+  <section class="doc-section" id="endpoint">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Endpoint</h2>
+      <p>Method and path together, wherever an API call is named: a docs heading, a log row, a usage table. The method carries a status tone so a destructive call is recognisable at a glance.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-endpoint"><span class="fd-endpoint-method">GET</span><span class="fd-endpoint-path">/v2/crawl/{id}</span></span>
+      <span class="fd-endpoint"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/scrape</span></span>
+      <span class="fd-endpoint"><span class="fd-endpoint-method">PUT</span><span class="fd-endpoint-path">/v2/monitors/{id}</span></span>
+      <span class="fd-endpoint"><span class="fd-endpoint-method">PATCH</span><span class="fd-endpoint-path">/v2/keys/{key_id}</span></span>
+      <span class="fd-endpoint"><span class="fd-endpoint-method">DELETE</span><span class="fd-endpoint-path">/v2/crawl/{id}</span></span>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-endpoint" data-size="sm"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/search</span></span>
+      <span class="fd-endpoint" data-size="sm"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/extract</span></span>
+      <span class="fd-endpoint" data-size="sm"><span class="fd-endpoint-method">GET</span><span class="fd-endpoint-path">/v2/agent/{run_id}/events</span></span>
+      <span class="fd-endpoint" data-variant="plain"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/agent</span></span>
+      <button class="fd-endpoint" data-copyable><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/crawl</span></button>
+    </div>
+    <ul class="doc-notes">
+      <li>Tones: <span class="fd-mono">GET</span> info, <span class="fd-mono">POST</span> success, <span class="fd-mono">PUT</span>/<span class="fd-mono">PATCH</span> warning, <span class="fd-mono">DELETE</span> danger. The tone is read from the tag; set <code class="fd-code">data-method</code> to override.</li>
+      <li>Path parameters in braces are emphasised automatically. Make the pill a <code class="fd-code">&lt;button data-copyable&gt;</code> to copy the path on click.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== JSON -->
+  <section class="doc-section" id="json">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">JSON tree</h2>
+      <p>Use the tree for responses people explore rather than copy whole: it folds, counts what is folded, trims long strings, and copies a single value or its path.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-json" data-toolbar data-label="POST /v2/search · response" data-depth="3" data-truncate="72">
+        <script type="application/json">{
+  "success": true,
+  "id": "srch_3Hd81kQz",
+  "data": {
+    "web": [
+      { "url": "https://ember.dev/blog/agents-need-fresh-data", "title": "Agents need fresh data", "position": 1, "markdown": "# Agents need fresh data\n\nA model's knowledge stops at its training cutoff. Agents that act on the world need the web as it is now, which means search, scrape and crawl as tools rather than as a batch job that runs overnight." },
+      { "url": "https://docs.ember.dev/features/search", "title": "Search · Ember docs", "position": 2, "markdown": null }
+    ],
+    "news": [],
+    "images": []
+  },
+  "creditsUsed": 2,
+  "cached": false
+}</script>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">With a Table | JSON switch</h3>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <section class="fd-result" data-fd-views>
+        <header class="fd-result-head">
+          <div class="fd-result-title"><span>Crawl results</span><span class="fd-result-count">3 pages</span></div>
+          <div class="fd-result-tools">
+            <div class="fd-viewswitch" aria-label="View">
+              <button class="fd-viewswitch-item" data-value="table" aria-selected="true">Table</button>
+              <button class="fd-viewswitch-item" data-value="json">JSON</button>
+            </div>
+            <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-action="copy-result" aria-label="Copy as JSON"><i data-icon="copy"></i></button>
+          </div>
+        </header>
+        <div class="fd-result-body" data-view="table">
+          <table class="fd-result-table">
+            <thead><tr><th>URL</th><th>Title</th><th data-num>Status</th><th data-num>Words</th></tr></thead>
+            <tbody>
+              <tr><td>docs.ember.dev/</td><td>Ember docs</td><td data-num>200</td><td data-num>1,204</td></tr>
+              <tr><td>docs.ember.dev/features/crawl</td><td>Crawl</td><td data-num>200</td><td data-num>2,871</td></tr>
+              <tr><td>docs.ember.dev/api-reference</td><td>API reference</td><td data-num>200</td><td data-num>9,316</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fd-result-body" data-view="json" hidden>
+          <div class="fd-json" data-variant="bare" data-depth="2" data-json='[{"url":"https://docs.ember.dev/","title":"Ember docs","status":200,"words":1204},{"url":"https://docs.ember.dev/features/crawl","title":"Crawl","status":200,"words":2871},{"url":"https://docs.ember.dev/api-reference","title":"API reference","status":200,"words":9316}]'></div>
+        </div>
+      </section>
+    </div>
+
+    <h3 class="doc-sub">Collapsed and bare</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <div class="fd-json" data-depth="1" data-json='{"team":"Personal Team","plan":"Standard","credits":{"used":1480,"limit":100000,"resetsAt":"2026-11-23"},"keys":[{"id":"key_01","name":"Default"},{"id":"key_02","name":"CI"}],"members":["vid@ember.dev","ops@ember.dev","bot@ember.dev"]}'></div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+        <div class="fd-json" data-variant="bare" data-depth="2" data-json='{"error":"RATE_LIMITED","message":"60 requests per minute reached for /v2/extract.","retryAfter":4}'></div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Keyboard: Tab enters the tree, ↑ ↓ move between lines, → opens or steps in, ← closes or steps out, Enter toggles. The focused line shows its Copy and Path actions and Tab reaches them.</li>
+      <li>Clicking a folded line opens it. <code class="fd-code">data-depth</code> sets how many levels start open; <code class="fd-code">data-truncate</code> the characters shown before “+N chars”.</li>
+      <li>The switch (<code class="fd-code">fd-viewswitch</code>) shows the <code class="fd-code">[data-view]</code> panel of the same value inside the nearest <code class="fd-code">[data-fd-views]</code>, or inside <code class="fd-code">data-target</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Log -->
+  <section class="doc-section" id="log">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Log viewer</h2>
+      <p>Logs follow new lines while you watch and stop following the moment you scroll up to read, with a way back to the latest. Search and level chips narrow the view without losing lines.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-log" data-follow data-height="300" data-fd-log-demo="api">
+        <div class="fd-log-bar">
+          <label class="fd-log-search"><i data-icon="search"></i><input type="search" placeholder="Search logs" aria-label="Search logs"></label>
+          <div class="fd-log-filters" role="group" aria-label="Levels">
+            <button class="fd-log-filter" data-level="info" aria-pressed="true">Info <span class="fd-log-filter-count"></span></button>
+            <button class="fd-log-filter" data-level="warn" aria-pressed="true">Warn <span class="fd-log-filter-count"></span></button>
+            <button class="fd-log-filter" data-level="error" aria-pressed="true">Error <span class="fd-log-filter-count"></span></button>
+            <button class="fd-log-filter" data-level="debug" aria-pressed="true">Debug <span class="fd-log-filter-count"></span></button>
+          </div>
+          <button class="fd-log-follow" aria-pressed="true">Follow</button>
+          <button class="fd-log-btn" data-action="wrap" aria-label="Wrap lines"><i data-icon="wrap-text"></i></button>
+          <button class="fd-log-btn" data-action="download" aria-label="Download logs"><i data-icon="download"></i></button>
+        </div>
+        <div class="fd-log-body" aria-label="API logs">
+          <div class="fd-log-row" data-level="info"><time class="fd-log-time">14:02:11.204</time><span class="fd-log-level">INFO</span><span class="fd-log-msg">server listening on :8080 · region iad1 · build 4f16a2c</span></div>
+          <div class="fd-log-row" data-level="debug"><time class="fd-log-time">14:02:11.388</time><span class="fd-log-level">DEBUG</span><span class="fd-log-msg">browser pool warmed size=8</span></div>
+          <div class="fd-log-row" data-level="info"><time class="fd-log-time">14:02:13.019</time><span class="fd-log-level">INFO</span><span class="fd-log-msg">POST /v2/scrape 200 · ember.dev/pricing · 1.18s</span></div>
+          <div class="fd-log-row" data-level="info"><time class="fd-log-time">14:02:14.552</time><span class="fd-log-level">INFO</span><span class="fd-log-msg">POST /v2/crawl 202 · job_8Kq2Lm queued · limit=50 depth=2</span></div>
+          <div class="fd-log-row" data-level="warn"><time class="fd-log-time">14:02:15.930</time><span class="fd-log-level">WARN</span><span class="fd-log-msg">robots.txt disallows /admin on docs.ember.dev, skipped 3 URLs</span></div>
+          <div class="fd-log-row" data-level="info"><time class="fd-log-time">14:02:17.441</time><span class="fd-log-level">INFO</span><span class="fd-log-msg">GET /v2/crawl/job_8Kq2Lm 200 · 18/50 pages</span></div>
+          <div class="fd-log-row" data-level="error"><time class="fd-log-time">14:02:18.006</time><span class="fd-log-level">ERROR</span><span class="fd-log-msg">POST /v2/extract 500 · schema validation failed at $.plans[2].price: expected number, got "Contact us"</span></div>
+          <div class="fd-log-row" data-level="info"><time class="fd-log-time">14:02:19.774</time><span class="fd-log-level">INFO</span><span class="fd-log-msg">webhook delivered → api.yourapp.dev/hooks/ember · <span class="fd-log-tone" data-tone="success">202</span> · 88ms</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Filtered, paused</h3>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-log" data-follow data-paused data-height="168">
+        <div class="fd-log-bar">
+          <label class="fd-log-search"><i data-icon="search"></i><input type="search" placeholder="Search logs" aria-label="Search logs"></label>
+          <div class="fd-log-filters" role="group" aria-label="Levels">
+            <button class="fd-log-filter" data-level="info" aria-pressed="false">Info</button>
+            <button class="fd-log-filter" data-level="warn" aria-pressed="true">Warn</button>
+            <button class="fd-log-filter" data-level="error" aria-pressed="true">Error</button>
+            <button class="fd-log-filter" data-level="debug" aria-pressed="false">Debug</button>
+          </div>
+          <button class="fd-log-follow" aria-pressed="true">Follow</button>
+        </div>
+        <div class="fd-log-body" aria-label="Warnings and errors">
+          <div class="fd-log-row" data-level="warn"><time class="fd-log-time">13:58:40.112</time><span class="fd-log-level">WARN</span><span class="fd-log-msg">ember.dev/blog/launch took 7.4s to settle; raised waitFor to 8000ms</span></div>
+          <div class="fd-log-row" data-level="error"><time class="fd-log-time">13:59:02.640</time><span class="fd-log-level">ERROR</span><span class="fd-log-msg">POST /v2/extract 429 · rate limit of 60/min reached · retrying in 4s</span></div>
+          <div class="fd-log-row" data-level="warn"><time class="fd-log-time">14:00:15.930</time><span class="fd-log-level">WARN</span><span class="fd-log-msg">proxy pool degraded in eu-west, failing over to eu-central</span></div>
+          <div class="fd-log-row" data-level="error"><time class="fd-log-time">14:01:44.287</time><span class="fd-log-level">ERROR</span><span class="fd-log-msg">GET /v2/crawl/job_77xQ 404 · job expired after 24h</span></div>
+          <div class="fd-log-row" data-level="warn"><time class="fd-log-time">14:02:15.930</time><span class="fd-log-level">WARN</span><span class="fd-log-msg">robots.txt disallows /admin on docs.ember.dev, skipped 3 URLs</span></div>
+          <div class="fd-log-row" data-level="error"><time class="fd-log-time">14:02:18.006</time><span class="fd-log-level">ERROR</span><span class="fd-log-msg">POST /v2/extract 500 · schema validation failed at $.plans[2].price</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Terminal</h3>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-log" data-variant="terminal" data-height="236" data-fd-log-demo="cli">
+        <div class="fd-log-title">
+          <span class="fd-log-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="fd-log-title-text">ember — crawl</span>
+          <button class="fd-log-btn" data-action="replay" aria-label="Replay"><i data-icon="rotate-ccw"></i></button>
+        </div>
+        <div class="fd-log-body" aria-label="Terminal output">
+          <div class="fd-log-row"><span class="fd-log-msg"><span class="fd-log-prompt">$ </span><span class="fd-log-cmd">ember crawl https://docs.ember.dev --limit 50</span></span></div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The Follow dot pulses green while new lines scroll in and turns amber when you have scrolled away; “Jump to latest” resumes.</li>
+      <li>The viewer follows the theme on a sunken well. It is never forced dark.</li>
+      <li><code class="fd-code">appendLog(el, { level, message })</code> adds a line; ANSI colour codes in the message become tone spans (<code class="fd-code">fd-log-tone[data-tone]</code>).</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Diff -->
+  <section class="doc-section" id="diff">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Diff</h2>
+      <p>Show what a change does to a config or a prompt before it is saved: a monitor edit, a schema migration, a skill update.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-diff" data-file="monitors/pricing.json" data-lang="json">
+        <script type="text/plain" class="fd-diff-src">@@ -1,10 +1,12 @@
+ {
+   "name": "Pricing pages",
+-  "schedule": "0 */6 * * *",
++  "schedule": "0 * * * *",
+   "targets": [
+     "https://ember.dev/pricing",
+-    "https://northwind.io/plans"
++    "https://northwind.io/plans",
++    "https://lumenapi.com/pricing"
+   ],
+-  "formats": ["markdown"]
++  "formats": ["markdown", "json"],
++  "webhook": "https://api.yourapp.dev/hooks/ember"
+ }
+@@ -24,5 +26,6 @@
+   "notify": {
+     "email": "ops@yourapp.dev",
+-    "onChange": true
++    "onChange": true,
++    "minDiff": 0.02
+   }</script>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Write the unified diff as text inside <code class="fd-code">&lt;script type="text/plain" class="fd-diff-src"&gt;</code>; line numbers come from the hunk headers and each line is highlighted in <code class="fd-code">data-lang</code>.</li>
+      <li>The +/− signs and line numbers are not selectable, so a copied selection pastes as clean code.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Schema -->
+  <section class="doc-section" id="schema">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Schema</h2>
+      <p>Parameter lists for an endpoint. Required comes first, defaults are stated, enum values are listed as they are typed, and nested objects fold so the top level reads in one pass.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+      <div class="fd-schema">
+        <div class="fd-schema-item">
+          <div class="fd-schema-head"><code class="fd-schema-name">url</code><span class="fd-schema-type">string</span><span class="fd-schema-req">required</span></div>
+          <p class="fd-schema-desc">The page to scrape. Must be a full URL including <code>https://</code>.</p>
+        </div>
+        <div class="fd-schema-item">
+          <div class="fd-schema-head"><code class="fd-schema-name">formats</code><span class="fd-schema-type">string[]</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>["markdown"]</code></span></div>
+          <p class="fd-schema-desc">Output formats to return. Each format costs nothing extra except <code>json</code>, which uses an extraction credit.</p>
+          <div class="fd-schema-enum"><code class="fd-schema-value">markdown</code><code class="fd-schema-value">html</code><code class="fd-schema-value">rawHtml</code><code class="fd-schema-value">links</code><code class="fd-schema-value">screenshot</code><code class="fd-schema-value">json</code></div>
+        </div>
+        <div class="fd-schema-item">
+          <div class="fd-schema-head"><code class="fd-schema-name">onlyMainContent</code><span class="fd-schema-type">boolean</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>true</code></span></div>
+          <p class="fd-schema-desc">Drop navigation, footers and cookie banners before converting.</p>
+        </div>
+        <div class="fd-schema-item">
+          <div class="fd-schema-head"><code class="fd-schema-name">actions</code><span class="fd-schema-type">object[]</span><span class="fd-schema-opt">optional</span></div>
+          <p class="fd-schema-desc">Steps to run in the browser before the page is captured, in order.</p>
+          <button class="fd-schema-toggle" aria-expanded="true"><i data-icon="chevron-right"></i><span>Show 3 child attributes</span></button>
+          <div class="fd-schema-children">
+            <div class="fd-schema-item">
+              <div class="fd-schema-head"><code class="fd-schema-name">type</code><span class="fd-schema-type">string</span><span class="fd-schema-req">required</span></div>
+              <div class="fd-schema-enum"><code class="fd-schema-value">wait</code><code class="fd-schema-value">click</code><code class="fd-schema-value">write</code><code class="fd-schema-value">press</code><code class="fd-schema-value">scroll</code></div>
+            </div>
+            <div class="fd-schema-item">
+              <div class="fd-schema-head"><code class="fd-schema-name">selector</code><span class="fd-schema-type">string</span><span class="fd-schema-opt">optional</span></div>
+              <p class="fd-schema-desc">CSS selector for <code>click</code> and <code>write</code>.</p>
+            </div>
+            <div class="fd-schema-item">
+              <div class="fd-schema-head"><code class="fd-schema-name">milliseconds</code><span class="fd-schema-type">number</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>1000</code></span></div>
+              <p class="fd-schema-desc">How long a <code>wait</code> step pauses.</p>
+            </div>
+          </div>
+        </div>
+        <div class="fd-schema-item">
+          <div class="fd-schema-head"><code class="fd-schema-name">location</code><span class="fd-schema-type">object</span><span class="fd-schema-opt">optional</span></div>
+          <p class="fd-schema-desc">Where the request appears to come from. Affects prices, language and consent banners.</p>
+          <button class="fd-schema-toggle" aria-expanded="false"><i data-icon="chevron-right"></i><span>Show 2 child attributes</span></button>
+          <div class="fd-schema-children" hidden>
+            <div class="fd-schema-item">
+              <div class="fd-schema-head"><code class="fd-schema-name">country</code><span class="fd-schema-type">string</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>"US"</code></span></div>
+              <p class="fd-schema-desc">ISO 3166-1 alpha-2 country code.</p>
+            </div>
+            <div class="fd-schema-item">
+              <div class="fd-schema-head"><code class="fd-schema-name">languages</code><span class="fd-schema-type">string[]</span><span class="fd-schema-opt">optional</span></div>
+              <p class="fd-schema-desc">Preferred languages, in order, for the <code>Accept-Language</code> header.</p>
+            </div>
+          </div>
+        </div>
+        <div class="fd-schema-item">
+          <div class="fd-schema-head"><code class="fd-schema-name">timeout</code><span class="fd-schema-type">number</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>30000</code></span></div>
+          <p class="fd-schema-desc">Milliseconds before the request gives up. Maximum <code>300000</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== API -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">JavaScript</h2>
+      <p><code class="fd-code">fire/js/code.js</code> enhances everything above on load. Call <code class="fd-code">init(el)</code> after inserting new markup.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Export</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>highlight(code, lang)</td><td>Returns highlighted HTML (<code class="fd-code">.fd-syntax-*</code> spans) for json, bash/curl, javascript/typescript, python.</td></tr>
+        <tr><td>tokenize(code, lang)</td><td>Returns <code class="fd-code">[{ t, v }]</code> tokens; text is never lost.</td></tr>
+        <tr><td>selectTab(block, value)</td><td>Selects a language tab, stores it and syncs blocks in the same <code class="fd-code">data-sync</code> group. Fires <code class="fd-code">fd:change</code>.</td></tr>
+        <tr><td>renderJSON(el, data, opts)</td><td>Renders a tree into an <code class="fd-code">.fd-json</code>. <code class="fd-code">opts.depth</code>, <code class="fd-code">opts.truncate</code>.</td></tr>
+        <tr><td>setJSONExpanded(el, open)</td><td>Expands or collapses every node (the root stays open).</td></tr>
+        <tr><td>getJSON(el)</td><td>The data a tree was rendered from.</td></tr>
+        <tr><td>appendLog(el, entry)</td><td>Adds a line: a string or <code class="fd-code">{ time, level, message, html }</code>. Respects search, levels and Follow.</td></tr>
+        <tr><td>streamLogDemo(el)</td><td>Streams demo lines while the log is on screen. Returns <code class="fd-code">stop()</code>.</td></tr>
+        <tr><td>playTerminal(el, script)</td><td>Types a command and plays its output in a terminal log.</td></tr>
+        <tr><td>copied(button, opts)</td><td>Shows the check + “Copied” state for 1.4s and announces it to screen readers.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

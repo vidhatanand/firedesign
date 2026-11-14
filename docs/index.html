@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fire · design system</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<style>
+  .ov-hero { position: relative; padding: 72px 0 56px; border-bottom: 1px solid var(--fd-line-faint); display: grid; gap: 14px; overflow: hidden; }
+  .ov-hero > :not(.ov-hero-art) { position: relative; max-width: 620px; }
+  .ov-hero-art { position: absolute; inset: 0 0 0 38%; color: var(--fd-text-4); -webkit-mask-image: linear-gradient(to right, transparent, #000 45%); mask-image: linear-gradient(to right, transparent, #000 45%); pointer-events: none; }
+  .ov-hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1.02; letter-spacing: -0.035em; font-weight: 500; }
+  .ov-rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); border-top: 1px solid var(--fd-line-faint); border-left: 1px solid var(--fd-line-faint); }
+  .ov-rule { padding: 20px; border-right: 1px solid var(--fd-line-faint); border-bottom: 1px solid var(--fd-line-faint); display: grid; gap: 6px; align-content: start; }
+  .ov-rule p { color: var(--fd-text-3); }
+  .ov-stage { border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-2xl); background: var(--fd-bg-sunken); overflow: hidden; }
+  .ov-stage-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--fd-line-faint); background: var(--fd-bg); }
+  .ov-stage-view { display: grid; justify-items: center; padding: 16px; }
+  .ov-stage-view iframe { width: 100%; max-width: var(--w, 100%); height: min(72vh, 760px); border: 0; border-radius: var(--fd-radius-xl); background: var(--fd-bg); box-shadow: var(--fd-shadow-lg); transition: max-width var(--fd-dur-4) var(--fd-ease-emphasized); }
+  .ov-compare { width: 100%; border-collapse: collapse; }
+  .ov-compare th { text-align: left; font-family: var(--fd-font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 400; color: var(--fd-text-3); padding: 10px 16px 10px 0; border-bottom: 1px solid var(--fd-line); }
+  .ov-compare td { padding: 14px 16px 14px 0; border-bottom: 1px solid var(--fd-line-faint); vertical-align: top; color: var(--fd-text-2); }
+  .ov-compare td:first-child { color: var(--fd-text); font-weight: var(--fd-weight-label); white-space: nowrap; }
+  .ov-compare td:nth-child(2) { color: var(--fd-text-3); }
+  @media (max-width: 720px) { .ov-compare thead { display: none; } .ov-compare tr { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--fd-line-faint); } .ov-compare td { border: 0; padding: 0; } .ov-hero { padding: 40px 0 32px; } .ov-hero-art { inset-inline-start: 30%; opacity: 0.5; } }
+</style>
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="index">
+<main class="doc-main">
+  <header class="ov-hero">
+    <div class="ov-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain" data-interactive></div></div>
+    <p class="fd-eyebrow" data-tone="accent">Design system · 0.1</p>
+    <h1>Fire</h1>
+    <p class="doc-lede">A design system for developer, agent and AI products: consoles, playgrounds, catalogs, logs, billing and chat-style agent screens. Plain CSS and small ES modules. One ink, one accent, hairlines instead of boxes.</p>
+    <div class="fd-row" data-wrap style="--fd-gap:8px; margin-top:8px">
+      <a class="fd-btn" data-variant="primary" data-size="lg" href="../templates/index.html"><span>See the screens</span><i data-icon="arrow-right" data-nudge></i></a>
+      <a class="fd-btn" data-size="lg" href="foundations.html"><span>Foundations</span></a>
+      <a class="fd-btn" data-variant="ghost" data-size="lg" href="#start"><i data-icon="terminal"></i><span>Use it</span></a>
+    </div>
+  </header>
+
+  <section class="doc-section" id="live">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">The system, assembled</h2>
+      <p>Every screen below is built only from Fire components, with no page CSS. Switch screens and widths; the theme, accent and density controls in the top bar apply inside the preview too.</p>
+    </div>
+    <div class="ov-stage">
+      <div class="ov-stage-bar">
+        <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Screen" id="ov-screen">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="overview">Overview</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="catalog">Catalog</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="playground">Playground</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="agent">Agent</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="logs">Logs</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="usage">Usage</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="settings">Settings</button>
+        </div>
+        <span class="fd-grow"></span>
+        <div class="fd-segmented" data-size="sm" data-icon-only role="radiogroup" aria-label="Width" id="ov-width">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="100%" aria-label="Desktop"><i data-icon="monitor"></i></button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="820px" aria-label="Tablet"><i data-icon="panel-left"></i></button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="390px" aria-label="Phone"><i data-icon="smartphone"></i></button>
+        </div>
+        <a class="fd-btn" data-size="sm" data-variant="ghost" id="ov-open" href="../templates/overview.html" target="_blank" rel="noopener"><span>Open</span><i data-icon="arrow-up-right" data-nudge="up-right"></i></a>
+      </div>
+      <div class="ov-stage-view"><iframe id="ov-frame" src="../templates/overview.html" title="Live template preview" loading="lazy"></iframe></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Eight rules</h2>
+      <p>The look is the result of a few decisions applied everywhere. If something new follows these, it will look like it belongs.</p>
+    </div>
+    <div class="ov-rules">
+      <div class="ov-rule"><span class="fd-eyebrow">01</span><h3 class="fd-title">One ink</h3><p>Every neutral is the ink at an opacity. Fills, hovers, muted text and edges come from one ladder and invert for dark mode by themselves.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">02</span><h3 class="fd-title">One accent, used sparingly</h3><p>The primary button, the active nav item, links, focus, switches that are on, the lead chart series. Nothing else.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">03</span><h3 class="fd-title">Hairlines, not boxes</h3><p>Pages are a framed column cut by 1px lines with crosshair marks. Cards are for objects; sections are not cards.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">04</span><h3 class="fd-title">White objects on an off-white page</h3><p>Two levels of depth: things sit on the page or float above it with a shadow that carries its own ring.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">05</span><h3 class="fd-title">450 is the house weight</h3><p>Labels, buttons and nav at 450, headings at 500, body at 400. Big titles tighten their tracking. Nothing is bold.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">06</span><h3 class="fd-title">Two voices</h3><p>Sans for people, mono for machines: keys, paths, endpoints, units, table headers and small uppercase eyebrows.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">07</span><h3 class="fd-title">Soft controls</h3><p>A borderless 4% wash, 10px radius, 36px tall. Only the primary button has depth, so the eye always finds it.</p></div>
+      <div class="ov-rule"><span class="fd-eyebrow">08</span><h3 class="fd-title">Everything moves a little</h3><p>160ms colour, a 98% press, thumbs that slide with a slight spring, content that rises 8px. Only live work loops.</p></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="families">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">What is in it</h2>
+      <p>Eleven component families, a texture engine, pre-built skeleton screens and sixteen full screens.</p>
+    </div>
+    <div class="fd-grid" style="--fd-min:260px; --fd-gap:12px" id="ov-families"></div>
+  </section>
+
+  <section class="doc-section" id="from-volt">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Coming from Volt</h2>
+      <p>Volt is structurally sound and visually flat. Fire keeps its discipline (tokens only, one primary action, real states) and changes the decisions that made it read as boring.</p>
+    </div>
+    <table class="ov-compare">
+      <thead><tr><th>Decision</th><th>Volt</th><th>Fire</th></tr></thead>
+      <tbody>
+        <tr><td>Accent</td><td>The accent token is the text colour; lime appears on one button per screen.</td><td>One hue for action, selection, links, focus and live marks, each at a defined strength. Add <code class="fd-code">data-accent="volt"</code> to keep the lime.</td></tr>
+        <tr><td>Type scale</td><td>Page titles 24px, sections 16px. Uppercase and letter-spacing are lint errors.</td><td>40px display titles with tight tracking, 20px sections at weight 450, 13px navigation, mono uppercase eyebrows for labels and table headers.</td></tr>
+        <tr><td>Weight</td><td>400, 500 and 600 with selected items in semibold.</td><td>450 for every label, 500 for headings. Selection is shown by colour, never by weight, so nothing shifts.</td></tr>
+        <tr><td>Neutrals</td><td>A fixed warm-stone palette with separate dark values.</td><td>One ink at 20 opacities. The same step works on any surface and in both themes.</td></tr>
+        <tr><td>Structure</td><td>Bordered lists, underline tabs, 12px cards with a control border on every input.</td><td>A framed column with hairline bands and crosshair marks; borderless soft controls; white inputs on an off-white page.</td></tr>
+        <tr><td>Motion</td><td>One 120ms duration; colour transitions are banned.</td><td>Five durations and five curves, a press scale, sliding thumbs, entrance rises, all removed by reduced-motion at the token level.</td></tr>
+        <tr><td>Character</td><td>None beyond the logo. Empty states are an icon and a sentence.</td><td>Generative character textures in page heroes, banners and empty states, and a mono second voice throughout.</td></tr>
+        <tr><td>Controls</td><td>34px, outlined, neutral.</td><td>36px (40px on touch), soft-filled; the primary button is the only control with depth.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="doc-section" id="start">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Use it</h2>
+      <p>No build step. Link one stylesheet and one module; pick single layers if you want less.</p>
+    </div>
+    <figure class="fd-codeblock">
+      <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="file-code"></i>index.html</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div>
+      <pre class="fd-codeblock-body"><code data-lang="html">&lt;link rel="stylesheet" href="fire/fire.css"&gt;
+&lt;script type="module" src="fire/fire.js"&gt;&lt;/script&gt;
+
+&lt;html data-theme="dark" data-accent="volt" data-density="compact"&gt;
+
+&lt;button class="fd-btn" data-variant="primary"&gt;
+  &lt;i data-icon="plus"&gt;&lt;/i&gt;&lt;span&gt;New monitor&lt;/span&gt;
+&lt;/button&gt;</code></pre>
+    </figure>
+    <ul class="doc-notes">
+      <li>Serve the folder over HTTP (ES modules do not load from <code class="fd-code">file://</code>): <code class="fd-code">npm run dev</code>, then open <code class="fd-code">/docs/index.html</code>.</li>
+      <li><code class="fd-code">DESIGN.md</code> is the contract for adding to the system; <code class="fd-code">npm run audit</code> checks icons, tokens, class names and links.</li>
+      <li>Fonts are Geist and Geist Mono (OFL); icons are a subset of Lucide (ISC). All are vendored.</li>
+    </ul>
+  </section>
+</main>
+<script type="module">
+  import { icon } from '../fire/js/icons.js';
+  const families = [
+    ['buttons', 'Buttons', 'mouse-pointer-click', 'Eight variants, five sizes, groups, text buttons, the floating action.'],
+    ['forms', 'Forms', 'text-cursor-input', 'Inputs, switches, sliders, combobox, choice cards, secrets, drop zones, validation.'],
+    ['navigation', 'Navigation', 'compass', 'Tabs, sliding segmented controls, chip strips, settings side nav, steps.'],
+    ['shell', 'App shell', 'panel-left', 'Sidebar and rail, top bar, the framed page, heroes, toolbars, phone menu.'],
+    ['overlays', 'Overlays', 'layers', 'Menus, popovers, tooltips, dialogs, sheets, toasts and the command palette.'],
+    ['data', 'Tables & data', 'table', 'Sortable tables with every state, lists, key-values, stat strips, meters.'],
+    ['content', 'Cards & feedback', 'layout-grid', 'Cards, tiles, badges, status, callouts, empty states, settings rows, plans.'],
+    ['charts', 'Charts', 'chart-column', 'Line, area, bar, ranked bars, sparklines, rings and heat grids in SVG.'],
+    ['code', 'Code & logs', 'braces', 'Code blocks, snippets, JSON trees, log and terminal viewers, diffs, schemas.'],
+    ['agent', 'Agent & AI', 'wand-sparkles', 'Composers, threads, tool calls, reasoning, citations, run steps, playground.'],
+    ['signature', 'Texture & frame', 'grid-3x3', 'Generative character fields, dot grids, crosshair marks, shimmer text.'],
+    ['skeletons', 'Skeletons & loading', 'loader', 'Spinners, text loaders and pre-built skeleton screens that swap without a jump.'],
+  ];
+  document.getElementById('ov-families').innerHTML = families.map(([slug, name, ic, text]) => `
+    <a class="fd-card" data-interactive href="${slug}.html">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head"><span class="fd-tile" data-size="36">${icon(ic)}</span><div class="fd-card-heading"><span class="fd-card-name">${name}</span></div></div>
+      <p class="fd-card-text">${text}</p>
+    </a>`).join('');
+  const { init } = await import('../fire/fire.js');
+  init(document.getElementById('ov-families'));
+
+  const frame = document.getElementById('ov-frame');
+  const open = document.getElementById('ov-open');
+  document.getElementById('ov-screen').addEventListener('fd:change', (e) => {
+    const url = `../templates/${e.detail.value}.html`;
+    frame.src = url; open.href = url;
+  });
+  document.getElementById('ov-width').addEventListener('fd:change', (e) => frame.style.setProperty('--w', e.detail.value));
+  // The preview shares localStorage with this page, so theme, accent and density carry over on reload.
+  const sync = () => { try { frame.contentWindow.location.reload(); } catch { /* not loaded yet */ } };
+  document.documentElement.addEventListener('fd:theme', sync);
+  document.documentElement.addEventListener('fd:accent', sync);
+</script>
+</body>
+</html>

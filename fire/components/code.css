@@ -1,0 +1,704 @@
+/* ==========================================================================
+   Code & logs — code blocks, snippets, endpoints, JSON trees, logs, diffs,
+   parameter schemas. Everything here is mono on a sunken well, framed by a
+   faint hairline. Colour comes only from the --fd-syntax-* and status tokens.
+
+   <figure class="fd-codeblock" data-lines data-highlight="3,5-7" data-collapse="240">
+     <div class="fd-codeblock-head">
+       <span class="fd-codeblock-file"><i data-icon="file-code"></i>scrape.ts</span>
+       <div class="fd-codeblock-actions">
+         <button class="fd-codeblock-btn" data-action="wrap" aria-pressed="false" aria-label="Wrap lines"><i data-icon="wrap-text"></i></button>
+         <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+       </div>
+     </div>
+     <pre class="fd-codeblock-body"><code data-lang="typescript">…</code></pre>
+   </figure>
+
+   Language tabs: put <div class="fd-codeblock-tabs" role="tablist"> with
+   <button class="fd-codeblock-tab" role="tab" data-value="curl"> in the head,
+   and one <pre class="fd-codeblock-body" data-value="curl"> per tab.
+   data-variant="segmented" on the tab list gives the tiny segmented look.
+
+   Other blocks: fd-snippet, fd-snippet-steps, fd-endpoint, fd-json,
+   fd-viewswitch, fd-log, fd-diff, fd-schema (contracts beside each section).
+   ========================================================================== */
+
+/* ---------- Syntax tokens (shared by every block in this file) ---------- */
+.fd-syntax-plain { color: var(--fd-syntax-plain); }
+.fd-syntax-keyword { color: var(--fd-syntax-keyword); }
+.fd-syntax-string { color: var(--fd-syntax-string); }
+.fd-syntax-number { color: var(--fd-syntax-number); }
+.fd-syntax-comment { color: var(--fd-syntax-comment); }
+.fd-syntax-punct { color: var(--fd-syntax-punct); }
+.fd-syntax-key { color: var(--fd-syntax-key); }
+.fd-syntax-fn { color: var(--fd-syntax-fn); }
+
+/* ---------- Small icon/text buttons used inside code chrome ---------- */
+.fd-codeblock-btn,
+.fd-codeblock-copy,
+.fd-snippet-copy,
+.fd-json-btn,
+.fd-log-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--fd-space-1);
+  height: var(--fd-control-sm); min-width: var(--fd-control-sm); padding: 0 var(--fd-space-1-5);
+  border-radius: var(--fd-radius-md); flex: none;
+  font-family: var(--fd-font-sans); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  color: var(--fd-text-3); white-space: nowrap; user-select: none;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-codeblock-btn > .fd-icon,
+.fd-codeblock-copy > .fd-icon,
+.fd-snippet-copy > .fd-icon,
+.fd-json-btn > .fd-icon,
+.fd-log-btn > .fd-icon { width: 14px; height: 14px; stroke-width: 1.6; }
+.fd-codeblock-btn:hover,
+.fd-codeblock-copy:hover,
+.fd-snippet-copy:hover,
+.fd-json-btn:hover,
+.fd-log-btn:hover { background: var(--fd-fill-hover); color: var(--fd-text); }
+.fd-codeblock-btn:active,
+.fd-codeblock-copy:active,
+.fd-snippet-copy:active,
+.fd-json-btn:active,
+.fd-log-btn:active { scale: var(--fd-press-scale); background: var(--fd-fill-active); }
+.fd-codeblock-btn[aria-pressed="true"],
+.fd-log-btn[aria-pressed="true"] { background: var(--fd-fill-active); color: var(--fd-text); }
+.fd-codeblock-btn:focus-visible,
+.fd-codeblock-copy:focus-visible,
+.fd-snippet-copy:focus-visible,
+.fd-json-btn:focus-visible,
+.fd-log-btn:focus-visible { border-radius: var(--fd-radius-md); }
+/* Copied: check icon + label, held for 1.4s by code.js. */
+[data-state="copied"]:is(.fd-codeblock-copy, .fd-snippet-copy, .fd-json-btn, .fd-log-btn) { color: var(--fd-text); }
+[data-state="copied"]:is(.fd-codeblock-copy, .fd-snippet-copy, .fd-json-btn, .fd-log-btn) > .fd-icon { color: var(--fd-success-text); }
+[data-state="copied"] > .fd-copied-label { animation: fd-fade-in var(--fd-dur-2) var(--fd-ease-out); }
+
+/* ==========================================================================
+   Code block
+   ========================================================================== */
+.fd-codeblock {
+  --_k-lh: 1.6;                         /* 13px / 1.6 */
+  --_k-px: var(--fd-space-4);
+  --_k-gut: var(--_k-px);                 /* left gutter: padding, or line numbers */
+  --_k-max: 280px;                      /* collapsed height (data-collapse="N") */
+  --_k-head-bg: var(--fd-bg);
+
+  position: relative; display: flex; flex-direction: column; min-width: 0;
+  margin: 0;
+  border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl);
+  background: var(--fd-bg-sunken); color: var(--fd-syntax-plain);
+  overflow: hidden; isolation: isolate;
+}
+.fd-codeblock[data-lines] { --_k-gut: calc(var(--_k-digits, 2) * 1ch + 32px); }
+
+.fd-codeblock-head {
+  display: flex; align-items: center; gap: var(--fd-space-2); min-width: 0;
+  height: var(--fd-control-lg); padding-inline: var(--fd-space-3) var(--fd-space-1-5);
+  background: var(--_k-head-bg); border-bottom: 1px solid var(--fd-line-faint);
+  font-family: var(--fd-font-sans);
+}
+.fd-codeblock-file {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1-5); min-width: 0;
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fd-codeblock-file > .fd-icon { width: 14px; height: 14px; color: var(--fd-text-4); }
+.fd-codeblock-lang { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-4); }
+.fd-codeblock-actions { display: flex; align-items: center; gap: var(--fd-space-0-5); margin-inline-start: auto; flex: none; }
+
+/* Language tabs: quiet text with an ink underline. */
+.fd-codeblock-tabs {
+  display: flex; align-self: stretch; gap: var(--fd-space-4); min-width: 0;
+  margin-inline-start: var(--fd-space-1);
+  overflow-x: auto; scrollbar-width: none;
+}
+.fd-codeblock-tabs::-webkit-scrollbar { display: none; }
+.fd-codeblock-tab {
+  position: relative; display: inline-flex; align-items: center; flex: none;
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label);
+  color: var(--fd-text-3); white-space: nowrap;
+  transition: color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-codeblock-tab::after {
+  content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px; border-radius: 2px 2px 0 0;
+  background: var(--fd-text); scale: 0 1;
+  transition: scale var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-codeblock-tab:hover { color: var(--fd-text); }
+.fd-codeblock-tab[aria-selected="true"] { color: var(--fd-text); }
+.fd-codeblock-tab[aria-selected="true"]::after { scale: 1 1; }
+.fd-codeblock-tab:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: var(--fd-radius-sm); }
+
+/* Tiny segmented look. */
+.fd-codeblock-tabs[data-variant="segmented"] {
+  align-self: center; gap: var(--fd-space-0-5); height: var(--fd-control-sm); padding: 2px;
+  border-radius: var(--fd-radius-md); background: var(--fd-fill); margin-inline-start: 0;
+}
+.fd-codeblock-tabs[data-variant="segmented"] .fd-codeblock-tab {
+  height: 100%; padding: 0 var(--fd-space-2); border-radius: var(--fd-radius-sm);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs);
+  transition: color var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out), box-shadow var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-codeblock-tabs[data-variant="segmented"] .fd-codeblock-tab::after { display: none; }
+.fd-codeblock-tabs[data-variant="segmented"] .fd-codeblock-tab[aria-selected="true"] { background: var(--fd-surface-raised); box-shadow: var(--fd-shadow-thumb); }
+.fd-codeblock-tabs[data-variant="segmented"] .fd-codeblock-tab[aria-selected="true"]:focus-visible { box-shadow: var(--fd-shadow-thumb), var(--fd-ring-inset); }
+
+/* Body */
+.fd-codeblock-body {
+  margin: 0; padding-block: var(--fd-space-3-5); min-width: 0;
+  overflow: auto; overscroll-behavior-x: contain;
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--_k-lh);
+  font-feature-settings: "zero" 0, "calt" 0; tab-size: 2;
+  counter-reset: fd-line;
+}
+.fd-codeblock-body:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 0; }
+.fd-codeblock-body > code {
+  display: block; width: max-content; min-width: 100%;
+  font: inherit; color: inherit; background: none; padding: 0; white-space: pre;
+}
+/* Before code.js runs (or without it), raw text still gets the gutter. */
+.fd-codeblock-body > code:not(:has(.fd-codeblock-line)) { padding-inline: var(--_k-px); }
+
+.fd-codeblock-line {
+  display: block; min-height: calc(1em * var(--_k-lh));
+  padding-inline: var(--_k-gut) var(--_k-px);
+  text-indent: calc(-1 * var(--_k-gut));
+  counter-increment: fd-line;
+}
+/* The gutter is a sticky inline box, so numbers and the highlight bar stay put while code scrolls sideways. */
+.fd-codeblock-line::before {
+  content: ""; display: inline-block; box-sizing: border-box; width: var(--_k-gut);
+  position: sticky; inset-inline-start: 0; z-index: 1;
+  text-indent: 0; text-align: end; padding-inline-end: var(--fd-space-4);
+  color: var(--fd-text-4); background-color: var(--fd-bg-sunken); user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.fd-codeblock[data-lines] .fd-codeblock-line::before { content: counter(fd-line); }
+.fd-codeblock-line[data-hl] { background-color: var(--fd-accent-8); box-shadow: inset 2px 0 0 var(--fd-accent); }
+.fd-codeblock-line[data-hl]::before {
+  background-image: linear-gradient(var(--fd-accent-8), var(--fd-accent-8));
+  box-shadow: inset 2px 0 0 var(--fd-accent);
+  color: var(--fd-accent-text);
+}
+
+/* Wrap */
+.fd-codeblock[data-wrap] .fd-codeblock-body > code { width: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fd-codeblock[data-wrap] .fd-codeblock-line::before { position: static; }
+
+/* Head-less block: the copy button floats in the corner. */
+.fd-codeblock > .fd-codeblock-copy {
+  position: absolute; top: var(--fd-space-2); inset-inline-end: var(--fd-space-2); z-index: 2;
+  background: var(--fd-bg-sunken); box-shadow: 0 0 0 1px var(--fd-line-faint);
+}
+.fd-codeblock > .fd-codeblock-copy:hover { background: var(--fd-surface); }
+
+/* Collapsed */
+.fd-codeblock[data-collapse]:not([data-expanded]) .fd-codeblock-body { max-height: var(--_k-max); overflow-y: hidden; }
+.fd-codeblock-more {
+  position: absolute; inset-inline: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: flex-end; justify-content: center;
+  height: 96px; padding-bottom: var(--fd-space-3);
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fd-bg-sunken) 88%, transparent) 55%, var(--fd-bg-sunken));
+  pointer-events: none;
+}
+.fd-codeblock[data-expanded] .fd-codeblock-more {
+  position: static; height: auto; padding: 0 0 var(--fd-space-3); background: none;
+}
+.fd-codeblock-expand {
+  pointer-events: auto;
+  display: inline-flex; align-items: center; gap: var(--fd-space-1-5);
+  height: var(--fd-control-sm); padding: 0 var(--fd-space-3); border-radius: var(--fd-radius-full);
+  background: var(--fd-surface); box-shadow: inset 0 0 0 1px var(--fd-line), var(--fd-shadow-xs);
+  font-family: var(--fd-font-sans); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  color: var(--fd-text-2);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-codeblock-expand:hover { color: var(--fd-text); box-shadow: inset 0 0 0 1px var(--fd-line-strong), var(--fd-shadow-xs); }
+.fd-codeblock-expand:active { scale: var(--fd-press-scale); }
+.fd-codeblock-expand:focus-visible { box-shadow: inset 0 0 0 1px var(--fd-line), var(--fd-ring); border-radius: var(--fd-radius-full); }
+.fd-codeblock-expand > .fd-icon { width: 14px; height: 14px; color: var(--fd-text-3); transition: rotate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-codeblock[data-expanded] .fd-codeblock-expand > .fd-icon { rotate: 180deg; }
+.fd-codeblock-expand .fd-num { font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   Snippet — a one-line command with copy.
+   <div class="fd-snippet">
+     <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+     <code class="fd-snippet-text">npx -y @ember/cli init</code>
+     <button class="fd-snippet-copy" aria-label="Copy command"><i data-icon="copy"></i></button>
+   </div>
+   data-variant="accent"  tinted well with accent text (keys, skill URLs)
+   data-size="sm"         36px
+   Parts: fd-snippet-dim (quiet segment), fd-snippet-em (accent segment)
+   Steps: <ol class="fd-snippet-steps"><li class="fd-snippet-step">
+            <p class="fd-snippet-step-title">…</p><p class="fd-snippet-step-hint">…</p>
+            <div class="fd-snippet">…</div></li></ol>
+   ========================================================================== */
+.fd-snippet {
+  --_k-h: var(--fd-control-lg);
+  display: flex; align-items: center; gap: var(--fd-space-2); min-width: 0;
+  height: var(--_k-h); padding-inline: var(--fd-space-3) calc((var(--_k-h) - var(--fd-control-sm)) / 2);
+  border-radius: var(--fd-radius-lg); background: var(--fd-fill);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text);
+}
+.fd-snippet[data-size="sm"] { --_k-h: var(--fd-control-md); font-size: var(--fd-text-xs); }
+.fd-snippet-prompt { flex: none; color: var(--fd-text-4); user-select: none; }
+.fd-snippet-text {
+  flex: 1 1 auto; min-width: 0;
+  font: inherit; color: inherit; background: none; padding: 0;
+  white-space: nowrap; overflow-x: auto; scrollbar-width: none;
+  mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+}
+.fd-snippet-text::-webkit-scrollbar { display: none; }
+.fd-snippet-dim { color: var(--fd-text-4); }
+.fd-snippet-em { color: var(--fd-accent-text); }
+.fd-snippet-copy:hover { background: var(--fd-fill-hover); }
+.fd-snippet[data-variant="accent"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
+.fd-snippet[data-variant="accent"] .fd-snippet-prompt,
+.fd-snippet[data-variant="accent"] .fd-snippet-dim { color: color-mix(in srgb, var(--fd-accent-text) 56%, transparent); }
+.fd-snippet[data-variant="accent"] .fd-snippet-copy { color: color-mix(in srgb, var(--fd-accent-text) 72%, transparent); }
+.fd-snippet[data-variant="accent"] .fd-snippet-copy:hover { background: var(--fd-accent-12); color: var(--fd-accent-text); }
+.fd-snippet > .fd-icon { flex: none; width: 14px; height: 14px; color: var(--fd-text-4); }
+
+.fd-snippet-steps { display: flex; flex-direction: column; counter-reset: fd-step; min-width: 0; }
+.fd-snippet-step {
+  position: relative; display: flex; flex-direction: column; gap: var(--fd-space-2); min-width: 0;
+  padding-inline-start: 36px; padding-bottom: var(--fd-space-6);
+  counter-increment: fd-step;
+}
+.fd-snippet-step:last-child { padding-bottom: 0; }
+.fd-snippet-step::before {
+  content: counter(fd-step); position: absolute; inset-inline-start: 0; top: 0;
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--fd-surface); box-shadow: inset 0 0 0 1px var(--fd-line);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-text-3);
+}
+.fd-snippet-step::after {
+  content: ""; position: absolute; inset-inline-start: 10.5px; top: 28px; bottom: 6px; width: 1px;
+  background: var(--fd-line-faint);
+}
+.fd-snippet-step:last-child::after { display: none; }
+.fd-snippet-step[data-state="done"]::before { content: "✓"; background: var(--fd-fill); box-shadow: none; color: var(--fd-text-2); }
+.fd-snippet-step-title { font-size: var(--fd-text-md); line-height: 22px; font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-snippet-step-hint { margin-top: calc(-1 * var(--fd-space-1-5)); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+
+/* ==========================================================================
+   Endpoint — method + path.
+   <span class="fd-endpoint" data-method="post"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/crawl/{id}</span></span>
+   data-size="sm"         22px
+   data-variant="plain"   no frame (inside tables and headings)
+   <button class="fd-endpoint" data-copyable>  copies the path on click
+   ========================================================================== */
+.fd-endpoint {
+  --_k-h: var(--fd-control-sm);
+  --_k-tone-bg: var(--fd-fill);
+  --_k-tone-fg: var(--fd-text-2);
+  display: inline-flex; align-items: center; gap: var(--fd-space-2); vertical-align: middle;
+  max-width: 100%; height: var(--_k-h); padding: 3px var(--fd-space-2-5) 3px 3px;
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-surface); box-shadow: inset 0 0 0 1px var(--fd-line);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: 1; color: var(--fd-text-2);
+  white-space: nowrap; text-align: start;
+}
+.fd-endpoint[data-method="get"] { --_k-tone-bg: var(--fd-info-bg); --_k-tone-fg: var(--fd-info-text); }
+.fd-endpoint[data-method="post"] { --_k-tone-bg: var(--fd-success-bg); --_k-tone-fg: var(--fd-success-text); }
+.fd-endpoint:is([data-method="put"], [data-method="patch"]) { --_k-tone-bg: var(--fd-warning-bg); --_k-tone-fg: var(--fd-warning-text); }
+.fd-endpoint[data-method="delete"] { --_k-tone-bg: var(--fd-danger-bg); --_k-tone-fg: var(--fd-danger-text); }
+.fd-endpoint-method {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  align-self: stretch; min-width: calc(6ch + 4px); padding: 0 var(--fd-space-1-5);
+  border-radius: var(--fd-radius-sm);
+  background: var(--_k-tone-bg); color: var(--_k-tone-fg);
+  font-size: var(--fd-text-2xs); letter-spacing: 0.02em; font-weight: var(--fd-weight-medium); text-transform: uppercase;
+}
+.fd-endpoint-path { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fd-text); }
+.fd-endpoint-param { color: var(--fd-accent-text); }
+.fd-endpoint-copy { display: inline-flex; flex: none; margin-inline-start: calc(-1 * var(--fd-space-0-5)); color: var(--fd-text-4); transition: color var(--fd-dur-2) var(--fd-ease-out); }
+.fd-endpoint-copy > .fd-icon { width: 13px; height: 13px; }
+.fd-endpoint[data-size="sm"] { --_k-h: 22px; gap: var(--fd-space-1-5); padding: 2px var(--fd-space-2) 2px 2px; font-size: var(--fd-text-xs); border-radius: var(--fd-radius-sm); }
+.fd-endpoint[data-size="sm"] .fd-endpoint-method { min-width: calc(6ch + 2px); padding: 0 var(--fd-space-1); border-radius: var(--fd-radius-xs); }
+.fd-endpoint[data-variant="plain"] { height: auto; padding: 0; background: none; box-shadow: none; }
+.fd-endpoint[data-variant="plain"] .fd-endpoint-method { align-self: center; height: 20px; }
+button.fd-endpoint, a.fd-endpoint {
+  cursor: pointer;
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+button.fd-endpoint:hover, a.fd-endpoint:hover { box-shadow: inset 0 0 0 1px var(--fd-line-strong); }
+button.fd-endpoint:hover .fd-endpoint-copy, a.fd-endpoint:hover .fd-endpoint-copy { color: var(--fd-text-2); }
+button.fd-endpoint:active, a.fd-endpoint:active { scale: var(--fd-press-scale); }
+button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inset 0 0 0 1px var(--fd-line), var(--fd-ring); border-radius: var(--fd-radius-md); }
+.fd-endpoint[data-state="copied"] .fd-endpoint-copy { color: var(--fd-success-text); }
+
+/* ==========================================================================
+   View switch — the small "Table | JSON" control that swaps panels.
+   <div class="fd-viewswitch" role="tablist" aria-label="View" data-target="#result">
+     <button class="fd-viewswitch-item" role="tab" data-value="table" aria-selected="true">Table</button>
+     <button class="fd-viewswitch-item" role="tab" data-value="json">JSON</button>
+   </div>
+   Panels: elements with data-view="table|json" inside data-target (or the
+   nearest [data-fd-views] ancestor). data-size="md" for a 36px header control.
+   ========================================================================== */
+.fd-viewswitch {
+  --_k-h: var(--fd-control-sm);
+  display: inline-flex; align-items: stretch; flex: none; gap: 2px;
+  height: var(--_k-h); padding: 2px; border-radius: var(--fd-radius-md);
+  background: var(--fd-fill);
+}
+.fd-viewswitch-item {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--fd-space-1);
+  padding: 0 var(--fd-space-2); border-radius: var(--fd-radius-sm);
+  font-family: var(--fd-font-sans); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  color: var(--fd-text-3); white-space: nowrap;
+  transition: color var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out), box-shadow var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-viewswitch-item > .fd-icon { width: 12px; height: 12px; }
+.fd-viewswitch-item:hover { color: var(--fd-text); }
+.fd-viewswitch-item[aria-selected="true"] { background: var(--fd-surface-raised); color: var(--fd-text); box-shadow: var(--fd-shadow-thumb); }
+.fd-viewswitch-item:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: var(--fd-radius-sm); }
+.fd-viewswitch[data-size="md"] { --_k-h: var(--fd-control-md); border-radius: var(--fd-radius-lg); }
+.fd-viewswitch[data-size="md"] .fd-viewswitch-item { padding: 0 var(--fd-space-3); border-radius: var(--fd-radius-md); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
+.fd-viewswitch[data-size="md"] .fd-viewswitch-item > .fd-icon { width: 14px; height: 14px; }
+.fd-viewswitch-item > .fd-icon[data-tone="accent"] { color: var(--fd-accent); fill: var(--fd-accent); }
+
+/* ==========================================================================
+   JSON tree — rendered by code.js.
+   <div class="fd-json" data-toolbar data-label="response.json" data-depth="2" data-truncate="80">
+     <script type="application/json">{ … }</script>
+   </div>
+   (or data-json='{…}').  data-variant="bare" drops the frame.
+   ========================================================================== */
+.fd-json {
+  --_k-max: none;
+  position: relative; display: flex; flex-direction: column; min-width: 0;
+  border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl);
+  background: var(--fd-bg-sunken); overflow: hidden;
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-syntax-plain);
+}
+.fd-json[data-variant="bare"] { border: 0; border-radius: 0; background: none; overflow: visible; }
+.fd-json > script { display: none; }
+.fd-json-bar {
+  display: flex; align-items: center; gap: var(--fd-space-2); min-width: 0;
+  height: var(--fd-control-lg); padding-inline: var(--fd-space-3) var(--fd-space-1-5);
+  background: var(--fd-bg); border-bottom: 1px solid var(--fd-line-faint);
+  font-family: var(--fd-font-sans);
+}
+.fd-json-label { display: inline-flex; align-items: center; gap: var(--fd-space-1-5); min-width: 0; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-json-label > .fd-icon { width: 14px; height: 14px; color: var(--fd-text-4); }
+.fd-json-meta { font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-4); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fd-json-tools { display: flex; align-items: center; gap: var(--fd-space-0-5); margin-inline-start: auto; flex: none; }
+.fd-json-tree { min-width: 0; max-height: var(--_k-max); overflow: auto; padding: var(--fd-space-2-5) var(--fd-space-2) var(--fd-space-2-5) var(--fd-space-1-5); overscroll-behavior-x: contain; }
+.fd-json[data-variant="bare"] .fd-json-tree { padding: 0; }
+.fd-json-root { width: max-content; min-width: 100%; }
+
+.fd-json-line {
+  position: relative; display: block; min-height: var(--fd-lh-sm);
+  padding-inline: 20px var(--fd-space-2); border-radius: var(--fd-radius-sm);
+  white-space: pre; cursor: default;
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-json-line:hover, .fd-json-line:focus-visible { background: var(--fd-fill); }
+.fd-json-line:focus-visible { box-shadow: var(--fd-ring-inset); }
+.fd-json-node[data-container] > .fd-json-line:not(.fd-json-close) { cursor: pointer; }
+.fd-json-toggle {
+  position: absolute; inset-inline-start: 2px; top: 2px; width: 16px; height: 16px;
+  display: grid; place-items: center; border-radius: var(--fd-radius-xs); color: var(--fd-text-4);
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-json-toggle > .fd-icon { width: 12px; height: 12px; stroke-width: 1.75; transition: rotate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-json-toggle:hover { background: var(--fd-fill-hover); color: var(--fd-text); }
+.fd-json-node[aria-expanded="false"] > .fd-json-line > .fd-json-toggle > .fd-icon { rotate: -90deg; }
+.fd-json-children { margin-inline-start: 9px; padding-inline-start: 10px; border-inline-start: 1px solid var(--fd-line-faint); transition: border-color var(--fd-dur-2) var(--fd-ease-out); }
+.fd-json-node:has(> .fd-json-line:hover) > .fd-json-children { border-color: var(--fd-line-strong); }
+.fd-json-node[aria-expanded="false"] > .fd-json-children,
+.fd-json-node[aria-expanded="false"] > .fd-json-close,
+.fd-json-node[aria-expanded="true"] > .fd-json-line > .fd-json-tail { display: none; }
+.fd-json-count {
+  display: inline-block; margin-inline: var(--fd-space-1); padding: 0 5px; border-radius: var(--fd-radius-xs);
+  background: var(--fd-fill); color: var(--fd-text-3); font-size: var(--fd-text-2xs); line-height: 16px; vertical-align: 1px;
+}
+.fd-json-more {
+  margin-inline-start: var(--fd-space-1); padding: 0 5px; border-radius: var(--fd-radius-xs);
+  background: var(--fd-fill); color: var(--fd-text-3); font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 16px; vertical-align: 1px;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-json-more:hover { background: var(--fd-fill-hover); color: var(--fd-text); }
+.fd-json-actions {
+  position: absolute; inset-inline-end: 2px; top: 0; height: 100%;
+  display: flex; align-items: center; gap: 2px; padding-inline-start: var(--fd-space-3);
+  background: linear-gradient(to right, transparent, var(--fd-bg-sunken) var(--fd-space-3));
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-json-line:is(:hover, :focus-visible, :focus-within) > .fd-json-actions { opacity: 1; pointer-events: auto; }
+.fd-json-actions .fd-json-btn {
+  height: 18px; min-width: 0; padding: 0 var(--fd-space-1-5); border-radius: var(--fd-radius-xs);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1;
+  background: var(--fd-surface-raised); box-shadow: 0 0 0 1px var(--fd-line);
+}
+.fd-json-actions .fd-json-btn > .fd-icon { width: 11px; height: 11px; }
+.fd-json-actions .fd-json-btn:hover { background: var(--fd-surface-raised); box-shadow: 0 0 0 1px var(--fd-line-strong); }
+.fd-json-empty { padding: var(--fd-space-2) var(--fd-space-3); color: var(--fd-text-3); font-family: var(--fd-font-sans); }
+
+/* ==========================================================================
+   Log viewer
+   <div class="fd-log" data-follow data-height="320">
+     <div class="fd-log-bar">
+       <label class="fd-log-search"><i data-icon="search"></i><input type="search" placeholder="Search logs" aria-label="Search logs"></label>
+       <div class="fd-log-filters" role="group" aria-label="Levels">
+         <button class="fd-log-filter" data-level="info" aria-pressed="true">Info</button> …
+       </div>
+       <button class="fd-log-follow" aria-pressed="true">Follow</button>
+       <button class="fd-log-btn" data-action="wrap" aria-pressed="false" aria-label="Wrap lines"><i data-icon="wrap-text"></i></button>
+       <button class="fd-log-btn" data-action="download" aria-label="Download logs"><i data-icon="download"></i></button>
+     </div>
+     <div class="fd-log-body" role="log" tabindex="0">
+       <div class="fd-log-row" data-level="info"><time class="fd-log-time">12:04:11.204</time><span class="fd-log-level">INFO</span><span class="fd-log-msg">…</span></div>
+     </div>
+   </div>
+   data-variant="terminal": add <div class="fd-log-title"><span class="fd-log-dots"><i></i><i></i><i></i></span><span class="fd-log-title-text">ember — zsh</span></div>
+   rows hold <span class="fd-log-msg"> only; <span class="fd-log-prompt">$</span>, <span class="fd-log-cursor"></span>.
+   ANSI-ish tones: <span class="fd-log-tone" data-tone="success|warning|danger|info|violet|dim|bold">.
+   ========================================================================== */
+.fd-log {
+  --_k-h: 320px;
+  position: relative; display: flex; flex-direction: column; min-width: 0;
+  border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl);
+  background: var(--fd-bg-sunken); overflow: hidden; isolation: isolate;
+  font-family: var(--fd-font-mono);
+}
+.fd-log-bar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--fd-space-1-5); min-width: 0;
+  padding: var(--fd-space-1-5) var(--fd-space-2); min-height: calc(var(--fd-control-sm) + 2 * var(--fd-space-2));
+  background: var(--fd-bg); border-bottom: 1px solid var(--fd-line-faint);
+  font-family: var(--fd-font-sans);
+}
+.fd-log-search { position: relative; display: flex; align-items: center; flex: 1 1 180px; max-width: 240px; min-width: 120px; }
+.fd-log-search > .fd-icon { position: absolute; inset-inline-start: var(--fd-space-2); width: 14px; height: 14px; color: var(--fd-text-4); pointer-events: none; }
+.fd-log-search > input {
+  width: 100%; height: var(--fd-control-sm); padding: 0 var(--fd-space-2) 0 28px;
+  border: 0; border-radius: var(--fd-radius-md); outline: none;
+  background: var(--fd-surface); box-shadow: inset 0 0 0 1px var(--fd-line);
+  font-size: var(--fd-text-xs); color: var(--fd-text);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-log-search > input:hover { box-shadow: inset 0 0 0 1px var(--fd-line-strong); }
+.fd-log-search > input:focus { box-shadow: inset 0 0 0 1px var(--fd-accent), 0 0 0 3px var(--fd-accent-16); border-radius: var(--fd-radius-md); }
+.fd-log-search > input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.fd-log-filters { display: flex; align-items: center; gap: 2px; }
+.fd-log-filter, .fd-log-follow {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1-5); flex: none;
+  height: var(--fd-control-sm); padding: 0 var(--fd-space-2); border-radius: var(--fd-radius-md);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  color: var(--fd-text-4); white-space: nowrap;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-log-filter:hover, .fd-log-follow:hover { background: var(--fd-fill); color: var(--fd-text-2); }
+.fd-log-filter:active, .fd-log-follow:active { scale: var(--fd-press-scale); }
+.fd-log-filter[aria-pressed="true"], .fd-log-follow[aria-pressed="true"] { background: var(--fd-fill); color: var(--fd-text); }
+.fd-log-filter[aria-pressed="true"]:hover, .fd-log-follow[aria-pressed="true"]:hover { background: var(--fd-fill-hover); }
+.fd-log-filter::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none;
+  background: var(--_k-dot, var(--fd-text-3));
+}
+.fd-log-filter[aria-pressed="false"]::before { background: transparent; box-shadow: inset 0 0 0 1px var(--fd-a24); }
+.fd-log-filter[data-level="warn"] { --_k-dot: var(--fd-warning-solid); }
+.fd-log-filter[data-level="error"] { --_k-dot: var(--fd-danger-solid); }
+.fd-log-filter[data-level="debug"] { --_k-dot: var(--fd-a24); }
+.fd-log-filter-count { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); color: var(--fd-text-4); font-variant-numeric: tabular-nums; }
+.fd-log-follow { margin-inline-start: auto; }
+.fd-log-follow::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none;
+  box-shadow: inset 0 0 0 1px var(--fd-a32);
+}
+.fd-log-follow[aria-pressed="true"]::before { background: var(--fd-success-solid); box-shadow: 0 0 0 3px var(--fd-success-bg); animation: fd-pulse 1.6s var(--fd-ease-in-out) infinite; }
+.fd-log-follow[data-paused]::before { background: var(--fd-warning-solid); box-shadow: 0 0 0 3px var(--fd-warning-bg); animation: none; }
+
+.fd-log-body {
+  position: relative; height: var(--_k-h); min-width: 0;
+  overflow: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: auto auto minmax(max-content, 1fr); align-content: start; column-gap: var(--fd-space-3);
+  padding-block: var(--fd-space-1-5);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-sm); color: var(--fd-text);
+}
+.fd-log-body:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 0; }
+.fd-log[data-wrap] .fd-log-body { grid-template-columns: auto auto minmax(0, 1fr); }
+.fd-log-row {
+  grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; column-gap: var(--fd-space-3);
+  padding-inline: var(--fd-space-3); white-space: pre;
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-log[data-wrap] .fd-log-row { white-space: pre-wrap; overflow-wrap: anywhere; }
+.fd-log-row:hover { background: var(--fd-fill); }
+.fd-log-row[data-new] { animation: fd-fade-in var(--fd-dur-3) var(--fd-ease-out); }
+.fd-log-time { color: var(--fd-text-4); font-variant-numeric: tabular-nums; user-select: none; }
+.fd-log-level { min-width: 5ch; color: var(--fd-text-3); letter-spacing: 0.02em; }
+.fd-log-msg { min-width: 0; }
+.fd-log-row[data-level="warn"] .fd-log-level { color: var(--fd-warning-text); }
+.fd-log-row[data-level="error"] { background: var(--fd-danger-bg); }
+.fd-log-row[data-level="error"]:hover { background: color-mix(in srgb, var(--fd-danger-solid) 12%, transparent); }
+.fd-log-row[data-level="error"] .fd-log-level { color: var(--fd-danger-text); }
+.fd-log-row[data-level="debug"] .fd-log-level,
+.fd-log-row[data-level="debug"] .fd-log-msg { color: var(--fd-text-4); }
+.fd-log-mark { background: var(--fd-accent-24); color: inherit; border-radius: 2px; box-shadow: 0 0 0 1px var(--fd-accent-24); }
+.fd-log-tone[data-tone="success"] { color: var(--fd-success-text); }
+.fd-log-tone[data-tone="warning"] { color: var(--fd-warning-text); }
+.fd-log-tone[data-tone="danger"] { color: var(--fd-danger-text); }
+.fd-log-tone[data-tone="info"] { color: var(--fd-info-text); }
+.fd-log-tone[data-tone="violet"] { color: var(--fd-violet-text); }
+.fd-log-tone[data-tone="accent"] { color: var(--fd-accent-text); }
+.fd-log-tone[data-tone="dim"] { color: var(--fd-text-4); }
+.fd-log-tone[data-tone="bold"] { font-weight: var(--fd-weight-medium); }
+.fd-log-empty { grid-column: 1 / -1; padding: var(--fd-space-6) var(--fd-space-3); text-align: center; font-family: var(--fd-font-sans); font-size: var(--fd-text-sm); color: var(--fd-text-3); white-space: normal; }
+
+.fd-log-jump {
+  position: absolute; bottom: var(--fd-space-3); left: 50%; translate: -50% 0; z-index: 2;
+  display: inline-flex; align-items: center; gap: var(--fd-space-1);
+  height: var(--fd-control-sm); padding: 0 var(--fd-space-2-5) 0 var(--fd-space-3); border-radius: var(--fd-radius-full);
+  background: var(--fd-surface-raised); box-shadow: var(--fd-shadow-lg);
+  font-family: var(--fd-font-sans); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label); color: var(--fd-text);
+  animation: fd-pop var(--fd-dur-3) var(--fd-ease-out);
+  transition: scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-log-jump:active { scale: var(--fd-press-scale); }
+.fd-log-jump:focus-visible { box-shadow: var(--fd-shadow-lg), var(--fd-ring); border-radius: var(--fd-radius-full); }
+.fd-log-jump > .fd-icon { width: 14px; height: 14px; color: var(--fd-text-3); }
+
+/* Terminal */
+.fd-log-title {
+  position: relative; display: flex; align-items: center; height: var(--fd-control-md); padding-inline: var(--fd-space-3);
+  background: var(--fd-bg); border-bottom: 1px solid var(--fd-line-faint);
+}
+.fd-log-dots { display: flex; gap: var(--fd-space-1-5); }
+.fd-log-title > .fd-log-btn { position: relative; margin-inline-start: auto; margin-inline-end: calc(-1 * var(--fd-space-1-5)); }
+.fd-log-dots > * { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--fd-a12); }
+.fd-log-title-text { position: absolute; inset-inline: 72px; text-align: center; font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.fd-log[data-variant="terminal"] .fd-log-body { grid-template-columns: minmax(max-content, 1fr); padding-block: var(--fd-space-3); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); }
+.fd-log[data-variant="terminal"][data-wrap] .fd-log-body { grid-template-columns: minmax(0, 1fr); }
+.fd-log[data-variant="terminal"] .fd-log-row { padding-inline: var(--fd-space-4); }
+.fd-log[data-variant="terminal"] .fd-log-row:hover { background: none; }
+.fd-log[data-variant="terminal"] .fd-log-msg { color: var(--fd-text-2); }
+.fd-log-prompt { color: var(--fd-text-4); user-select: none; }
+.fd-log-cmd { color: var(--fd-text); }
+.fd-log-cursor {
+  display: inline-block; width: 0.6em; height: 1.2em; margin-inline-start: 1px; vertical-align: -0.2em;
+  background: var(--fd-text-2); border-radius: 1px;
+  animation: fd-blink 1.1s steps(1) infinite;
+}
+
+/* ==========================================================================
+   Diff — unified, with old/new line numbers.
+   <div class="fd-diff" data-file="ember.config.json" data-lang="json">
+     <script type="text/plain" class="fd-diff-src">@@ -1,4 +1,5 @@ …</script>
+   </div>
+   code.js renders .fd-diff-head and .fd-diff-body > .fd-diff-line[data-type="add|del|ctx|hunk"].
+   ========================================================================== */
+.fd-diff {
+  display: flex; flex-direction: column; min-width: 0;
+  border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl);
+  background: var(--fd-bg-sunken); overflow: hidden;
+  font-family: var(--fd-font-mono);
+}
+.fd-diff > script { display: none; }
+.fd-diff-head {
+  display: flex; align-items: center; gap: var(--fd-space-2); min-width: 0;
+  height: var(--fd-control-lg); padding-inline: var(--fd-space-3);
+  background: var(--fd-bg); border-bottom: 1px solid var(--fd-line-faint);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs);
+}
+.fd-diff-file { display: inline-flex; align-items: center; gap: var(--fd-space-1-5); min-width: 0; color: var(--fd-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-diff-file > .fd-icon { width: 14px; height: 14px; color: var(--fd-text-4); }
+.fd-diff-stats { display: inline-flex; align-items: center; gap: var(--fd-space-1-5); margin-inline-start: auto; flex: none; font-variant-numeric: tabular-nums; }
+.fd-diff-stat[data-type="add"] { color: var(--fd-success-text); }
+.fd-diff-stat[data-type="del"] { color: var(--fd-danger-text); }
+.fd-diff-bar { display: inline-flex; gap: 2px; margin-inline-start: var(--fd-space-1); }
+.fd-diff-bar > i { width: 7px; height: 7px; border-radius: 1.5px; background: var(--fd-a10); }
+.fd-diff-bar > i[data-type="add"] { background: var(--fd-success-solid); }
+.fd-diff-bar > i[data-type="del"] { background: var(--fd-danger-solid); }
+.fd-diff-body {
+  display: grid; grid-template-columns: auto auto auto minmax(max-content, 1fr); align-content: start;
+  min-width: 0; overflow-x: auto; padding-block: var(--fd-space-1);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-sm); color: var(--fd-text);
+}
+.fd-diff-line { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; white-space: pre; }
+.fd-diff-num {
+  min-width: calc(3ch + 20px); padding-inline: var(--fd-space-2-5); text-align: end;
+  color: var(--fd-text-4); user-select: none; font-variant-numeric: tabular-nums;
+}
+.fd-diff-num + .fd-diff-num { padding-inline-start: 0; }
+.fd-diff-sign { width: calc(1ch + 12px); padding-inline-start: var(--fd-space-1); color: var(--fd-text-4); user-select: none; }
+.fd-diff-code { padding-inline-end: var(--fd-space-4); }
+.fd-diff-line[data-type="add"] { background: var(--fd-success-bg); }
+.fd-diff-line[data-type="add"] :is(.fd-diff-num, .fd-diff-sign) { color: var(--fd-success-text); }
+.fd-diff-line[data-type="add"] .fd-diff-num { background: color-mix(in srgb, var(--fd-success-solid) 8%, transparent); }
+.fd-diff-line[data-type="del"] { background: var(--fd-danger-bg); }
+.fd-diff-line[data-type="del"] :is(.fd-diff-num, .fd-diff-sign) { color: var(--fd-danger-text); }
+.fd-diff-line[data-type="del"] .fd-diff-num { background: color-mix(in srgb, var(--fd-danger-solid) 7%, transparent); }
+.fd-diff-line[data-type="hunk"] { background: var(--fd-fill-subtle); color: var(--fd-text-3); }
+.fd-diff-line[data-type="hunk"] .fd-diff-code { grid-column: 3 / -1; padding-inline-start: var(--fd-space-1); }
+.fd-diff-line[data-type="hunk"] + .fd-diff-line { box-shadow: inset 0 1px 0 var(--fd-line-faint); }
+.fd-diff-line[data-type="meta"] { color: var(--fd-text-4); }
+
+/* ==========================================================================
+   Schema — API parameters.
+   <div class="fd-schema">
+     <div class="fd-schema-item">
+       <div class="fd-schema-head">
+         <code class="fd-schema-name">formats</code><span class="fd-schema-type">string[]</span>
+         <span class="fd-schema-req">required</span>   (or <span class="fd-schema-opt">optional</span>)
+         <span class="fd-schema-default">Default <code>["markdown"]</code></span>
+       </div>
+       <p class="fd-schema-desc">…</p>
+       <div class="fd-schema-enum"><code class="fd-schema-value">markdown</code>…</div>
+       <button class="fd-schema-toggle" aria-expanded="false"><i data-icon="chevron-right"></i><span>Show 3 child attributes</span></button>
+       <div class="fd-schema-children" hidden> …fd-schema-item… </div>
+     </div>
+   </div>
+   ========================================================================== */
+.fd-schema { display: flex; flex-direction: column; min-width: 0; }
+.fd-schema-item { display: flex; flex-direction: column; align-items: flex-start; gap: var(--fd-space-1-5); min-width: 0; padding-block: var(--fd-space-3-5); border-top: 1px solid var(--fd-line-faint); }
+.fd-schema > .fd-schema-item:first-child, .fd-schema-children > .fd-schema-item:first-child { border-top: 0; }
+.fd-schema > .fd-schema-item:first-child { padding-top: 0; }
+.fd-schema-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--fd-space-1) var(--fd-space-2); align-self: stretch; min-width: 0; }
+.fd-schema-name { font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-medium); color: var(--fd-text); overflow-wrap: anywhere; }
+.fd-schema-type { font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); }
+.fd-schema-req, .fd-schema-opt {
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 16px;
+  padding: 0 5px; border-radius: var(--fd-radius-xs); align-self: center;
+}
+.fd-schema-req { color: var(--fd-danger-text); background: var(--fd-danger-bg); }
+.fd-schema-opt { color: var(--fd-text-4); padding-inline: 0; }
+.fd-schema-default { margin-inline-start: auto; font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); white-space: nowrap; }
+.fd-schema-default > code { font-family: var(--fd-font-mono); color: var(--fd-text-2); }
+.fd-schema-desc { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); color: var(--fd-text-2); max-width: var(--fd-measure); }
+.fd-schema-desc code { font-family: var(--fd-font-mono); font-size: 0.92em; padding: 1px 5px; border-radius: var(--fd-radius-sm); background: var(--fd-fill); color: var(--fd-text); }
+.fd-schema-enum { display: flex; flex-wrap: wrap; gap: var(--fd-space-1); }
+.fd-schema-value {
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: 20px;
+  padding: 0 var(--fd-space-1-5); border-radius: var(--fd-radius-sm);
+  background: var(--fd-surface); box-shadow: inset 0 0 0 1px var(--fd-line-faint); color: var(--fd-text-2);
+}
+.fd-schema-toggle {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1); margin-top: var(--fd-space-1);
+  height: var(--fd-control-sm); padding: 0 var(--fd-space-2-5) 0 var(--fd-space-2); border-radius: var(--fd-radius-full);
+  box-shadow: inset 0 0 0 1px var(--fd-line);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label); color: var(--fd-text-2);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-schema-toggle:hover { color: var(--fd-text); box-shadow: inset 0 0 0 1px var(--fd-line-strong); }
+.fd-schema-toggle:active { scale: var(--fd-press-scale); }
+.fd-schema-toggle:focus-visible { box-shadow: inset 0 0 0 1px var(--fd-line), var(--fd-ring); border-radius: var(--fd-radius-full); }
+.fd-schema-toggle > .fd-icon { width: 14px; height: 14px; color: var(--fd-text-3); transition: rotate var(--fd-dur-3) var(--fd-ease-out); }
+.fd-schema-toggle[aria-expanded="true"] > .fd-icon { rotate: 90deg; }
+.fd-schema-children {
+  align-self: stretch; margin-top: var(--fd-space-1); margin-inline-start: 7px; padding-inline-start: var(--fd-space-4);
+  border-inline-start: 1px solid var(--fd-line);
+  animation: fd-fade-in var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-schema-children > .fd-schema-item { padding-block: var(--fd-space-3); }
+.fd-schema-children > .fd-schema-item:last-child { padding-bottom: var(--fd-space-1); }
+
+@media (max-width: 640px) {
+  .fd-schema-default { margin-inline-start: 0; flex-basis: 100%; }
+  .fd-log-search { max-width: none; flex-basis: 100%; }
+  .fd-log-follow { margin-inline-start: 0; }
+}

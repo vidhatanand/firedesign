@@ -1,0 +1,728 @@
+/* ==========================================================================
+   App shell — the frame every Ember screen lives in.
+
+   <div class="fd-app" data-sidebar="expanded|collapsed" [data-contained]>
+     <aside class="fd-sidebar">
+       <div class="fd-sidebar-head">
+         <a class="fd-brand" href="…"><span class="fd-brand-mark">svg</span><span class="fd-brand-name">Ember</span></a>
+         <button class="fd-btn fd-sidebar-toggle" data-variant="ghost" data-size="lg" data-icon-only data-fd-sidebar-toggle aria-label="Collapse sidebar">…</button>
+       </div>
+       <div class="fd-sidebar-body"><nav class="fd-nav">
+         <a class="fd-nav-item" href="…" aria-current="page"><i data-icon="home"></i><span class="fd-nav-text">Overview</span></a>
+         <p class="fd-nav-label">Playground</p>
+         <a class="fd-nav-item" href="…"><i data-icon="file-text"></i><span class="fd-nav-text">Scrape a page</span><span class="fd-nav-hint">/scrape</span></a>
+         <div class="fd-nav-group">
+           <button class="fd-nav-item" aria-expanded="false" aria-controls="id">…<i data-icon="chevron-down" class="fd-nav-chevron"></i></button>
+           <div class="fd-nav-sub" id="id" hidden><a class="fd-nav-item" href="…"><span class="fd-nav-text">Crawl</span></a></div>
+         </div>
+       </nav></div>
+       <div class="fd-sidebar-foot"><div class="fd-usage-card">…</div><a class="fd-account">…</a></div>
+     </aside>
+     <div class="fd-main">
+       <header class="fd-topbar">…</header>
+       <main class="fd-page"><div class="fd-frame"><section class="fd-band">…</section></div></main>
+     </div>
+     <div class="fd-mobile-nav" hidden>…</div>
+   </div>
+
+   data-sidebar       expanded (default) | collapsed (64px icon rail)
+   data-contained     the shell fills its parent box instead of the viewport (docs, previews)
+   data-only          desktop | mobile — hide an element on the other side of the 900px breakpoint
+   Responsive: the shell is a size container named `fd-app`; under 900px the sidebar
+   hides and .fd-mobile-nav takes over. Page parts query the `fd-page` container.
+   ========================================================================== */
+
+/* ---------- Root ---------- */
+.fd-app {
+  --_s-sw: var(--fd-sidebar-w);
+  --_s-brand-size: 1.0625rem; /* 17px wordmark */
+
+  container: fd-app / inline-size;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  min-height: 100dvh;
+  background: var(--fd-bg);
+  color: var(--fd-text);
+}
+.fd-app[data-sidebar="collapsed"] { --_s-sw: var(--fd-rail-w); }
+
+/* Contained: the shell is a box (docs specimens, previews, split views).
+   It fills its parent's height, or --fd-app-h when set. */
+.fd-app[data-contained] {
+  height: var(--fd-app-h, var(--h, 100%));
+  min-height: 0;
+  align-items: stretch;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+html[data-fd-scroll-lock] { overflow: hidden; }
+/* templates/shell.js: keep the bare page out of sight until the shell wraps it (revealed anyway after 1.2s). */
+body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s 1.2s forwards; }
+@keyframes fd-shell-reveal { to { visibility: visible; } }
+/* shell.js restores a saved sidebar state without animating it. */
+.fd-app[data-fd-instant] > :is(.fd-sidebar, .fd-main),
+.fd-app[data-fd-instant] > .fd-sidebar * { transition: none !important; animation: none !important; }
+
+/* ---------- Sidebar ---------- */
+.fd-sidebar {
+  position: sticky; top: 0; z-index: var(--fd-z-sidebar);
+  flex: none;
+  display: flex; flex-direction: column;
+  width: var(--_s-sw); height: 100dvh;
+  background: var(--fd-bg);
+  overflow: hidden;
+  transition: width var(--fd-dur-4) var(--fd-ease-emphasized);
+}
+/* The edge is drawn, not bordered, so the rail keeps its full 64px and icons centre on x=32. */
+.fd-sidebar::after {
+  content: ""; position: absolute; inset-block: 0; inset-inline-end: 0; width: 1px;
+  background: var(--fd-line-faint); pointer-events: none;
+}
+.fd-app[data-contained] .fd-sidebar { position: relative; height: auto; align-self: stretch; }
+
+.fd-sidebar-head {
+  position: relative; flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  height: var(--fd-topbar-h);
+  padding-inline: var(--fd-space-1-5);
+  border-bottom: 1px solid var(--fd-line-faint);
+}
+
+.fd-brand {
+  display: flex; align-items: center; min-width: 0;
+  height: 40px; padding-inline: var(--fd-space-2) var(--fd-space-2-5);
+  border-radius: var(--fd-radius-lg);
+  color: var(--fd-text);
+  font-size: var(--_s-brand-size, 1.0625rem); line-height: 1; font-weight: var(--fd-weight-medium); letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-brand-mark {
+  flex: none; display: grid; place-items: center;
+  width: 36px; height: 36px; color: var(--fd-accent);
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-3) var(--fd-ease-spring);
+}
+.fd-brand-mark > svg { width: 24px; height: 24px; }
+.fd-brand:hover .fd-brand-mark { scale: 1.06; }
+.fd-brand-name { transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+
+.fd-sidebar-toggle { flex: none; margin-inline-end: var(--fd-space-1-5); transition: opacity var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out); }
+
+.fd-sidebar-body {
+  flex: 1 1 auto; min-height: 0;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--fd-space-2) var(--fd-space-1-5) var(--fd-space-4);
+}
+
+.fd-sidebar-foot {
+  position: relative; flex: none;
+  display: flex; flex-direction: column; gap: var(--fd-space-2);
+  padding: var(--fd-space-3) var(--fd-space-1-5) var(--fd-space-2);
+  border-top: 1px solid var(--fd-line-faint);
+}
+
+/* ---------- Nav ---------- */
+.fd-nav { display: flex; flex-direction: column; gap: var(--fd-space-1); }
+
+.fd-nav-item {
+  position: relative;
+  display: flex; align-items: center;
+  width: 100%; min-width: 0;
+  height: var(--fd-control-md);
+  padding-inline: var(--fd-space-2) var(--fd-space-2-5);
+  border-radius: var(--fd-radius-lg);
+  color: var(--fd-text-2);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-regular);
+  text-align: start; white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+  transition:
+    background-color var(--fd-dur-2) var(--fd-ease-out),
+    color var(--fd-dur-2) var(--fd-ease-out),
+    scale var(--fd-dur-1) var(--fd-ease-out);
+}
+/* The icon sits in a 36px box (8px lead + 10px margins): its centre never moves when the sidebar collapses. */
+.fd-nav-item > .fd-icon:first-child {
+  width: 15px; height: 15px; margin-inline: 10.5px;
+  color: var(--fd-text-3);
+  transition: color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-nav-item:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-nav-item:hover > .fd-icon:first-child { color: var(--fd-text-2); }
+.fd-nav-item:active { scale: var(--fd-press-scale); background: var(--fd-fill-hover); }
+.fd-nav-item:focus-visible { box-shadow: var(--fd-ring); border-radius: var(--fd-radius-lg); }
+.fd-nav-item[aria-current="page"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
+.fd-nav-item[aria-current="page"] > .fd-icon:first-child { color: var(--fd-accent-text); }
+.fd-nav-item[aria-current="page"]:hover { background: var(--fd-accent-12); }
+.fd-nav-item:disabled, .fd-nav-item[aria-disabled="true"] { color: var(--fd-text-4); background: none; cursor: not-allowed; scale: 1; }
+.fd-nav-item:disabled > .fd-icon, .fd-nav-item[aria-disabled="true"] > .fd-icon { color: var(--fd-text-4); }
+
+.fd-nav-text {
+  flex: 1 1 auto; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+
+/* Solid "NEW" tag. */
+.fd-nav-badge {
+  flex: none; display: inline-flex; align-items: center;
+  height: 18px; padding-inline: 6px; margin-inline-start: var(--fd-space-2);
+  border-radius: var(--fd-radius-xs);
+  background: var(--fd-accent); color: var(--fd-accent-contrast);
+  font-size: 0.5625rem; line-height: 1; font-weight: var(--fd-weight-medium);
+  letter-spacing: 0.025em; text-transform: uppercase;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+
+/* Mono endpoint hint, revealed on hover or keyboard focus. */
+.fd-nav-hint {
+  /* Takes no room at rest, so a long label is never cut for a hint nobody is looking at. */
+  flex: none; max-width: 0; margin-inline-start: 0; overflow: hidden;
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs);
+  color: var(--fd-text-4);
+  opacity: 0; translate: 4px 0;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-3) var(--fd-ease-out), max-width var(--fd-dur-3) var(--fd-ease-out), margin var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-nav-item:hover > .fd-nav-hint, .fd-nav-item:focus-visible > .fd-nav-hint { opacity: 1; translate: 0 0; max-width: 10ch; margin-inline-start: var(--fd-space-2); }
+.fd-nav-item[aria-current="page"] > .fd-nav-hint { color: color-mix(in srgb, var(--fd-accent-text) 64%, transparent); }
+
+.fd-nav-chevron {
+  flex: none; width: 14px; height: 14px; margin-inline-start: var(--fd-space-2);
+  color: var(--fd-text-4);
+  transition: rotate var(--fd-dur-3) var(--fd-ease-out), opacity var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-nav-item:hover > .fd-nav-chevron { color: var(--fd-text-3); }
+.fd-nav-item[aria-expanded="true"] > .fd-nav-chevron { rotate: -180deg; }
+
+/* Section eyebrow. Its left edge lines up with the icons above and below it. */
+.fd-nav-label {
+  position: relative;
+  display: flex; align-items: flex-end;
+  height: 32px; margin: 0;
+  padding-inline: calc(var(--fd-space-2) + var(--fd-space-2-5));
+  font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); font-weight: var(--fd-weight-medium);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--fd-text-5);
+  white-space: nowrap; overflow: hidden;
+  transition: height var(--fd-dur-4) var(--fd-ease-emphasized), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-nav-label::before {
+  content: ""; position: absolute; top: 50%; inset-inline-start: 16px;
+  width: 20px; height: 1px; background: var(--fd-line);
+  opacity: 0; transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+
+/* Expandable group: indented children on a hairline guide. */
+.fd-nav-group { display: flex; flex-direction: column; }
+.fd-nav-group:has([aria-current="page"]) > .fd-nav-item:not([aria-current]) { color: var(--fd-text); }
+.fd-nav-group:has([aria-current="page"]) > .fd-nav-item:not([aria-current]) > .fd-icon:first-child { color: var(--fd-text-2); }
+.fd-nav-sub {
+  position: relative;
+  display: flex; flex-direction: column; gap: 2px;
+  padding-block: var(--fd-space-1) var(--fd-space-0-5);
+  padding-inline-start: 34px;
+  overflow: hidden;
+}
+.fd-nav-sub::before {
+  content: ""; position: absolute; inset-inline-start: 25px; top: var(--fd-space-1); bottom: var(--fd-space-1);
+  width: 1px; background: var(--fd-line);
+}
+.fd-nav-sub > .fd-nav-item {
+  height: calc(var(--fd-control-md) - 4px);
+  padding-inline: var(--fd-space-2-5);
+  font-size: var(--fd-text-sm);
+  overflow: visible;
+}
+.fd-nav-sub > .fd-nav-item > .fd-icon:first-child { width: 14px; height: 14px; margin-inline: 0 var(--fd-space-2); }
+/* The guide lights up beside the current child. */
+.fd-nav-sub > .fd-nav-item[aria-current="page"]::before {
+  content: ""; position: absolute; inset-inline-start: -9px; top: 6px; bottom: 6px;
+  width: 1px; background: var(--fd-accent);
+}
+
+/* ---------- Rail (collapsed) ---------- */
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar :is(.fd-nav-text, .fd-nav-hint, .fd-nav-badge, .fd-nav-chevron, .fd-brand-name, .fd-account-email, .fd-account > .fd-icon) {
+  opacity: 0; pointer-events: none;
+}
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-label { height: 16px; color: transparent; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-label::before { opacity: 1; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-sub { display: none; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-body { scrollbar-width: none; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-body::-webkit-scrollbar { display: none; }
+/* A group whose child is current reads as current when its children are out of sight. */
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-group:has([aria-current="page"]) > .fd-nav-item { background: var(--fd-accent-8); color: var(--fd-accent-text); }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-group:has([aria-current="page"]) > .fd-nav-item > .fd-icon:first-child { color: var(--fd-accent-text); }
+/* "New" becomes a dot on the icon. */
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-item:has(> .fd-nav-badge)::after {
+  content: ""; position: absolute; top: 7px; inset-inline-start: 33px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--fd-accent); box-shadow: 0 0 0 2px var(--fd-bg);
+  animation: fd-pop var(--fd-dur-3) var(--fd-ease-spring) both;
+}
+/* Head: the toggle sits over the brand mark and appears when the head is hovered or focused. */
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-toggle {
+  position: absolute; top: 50%; inset-inline-start: 12px; margin: -20px 0 0;
+  opacity: 0;
+}
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-head:hover .fd-sidebar-toggle,
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-toggle:focus-visible { opacity: 1; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-head:hover .fd-brand-mark,
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-sidebar-head:has(.fd-sidebar-toggle:focus-visible) .fd-brand-mark { opacity: 0; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-usage-card { display: none; }
+
+/* Rail tooltip. shell.js shows one shared tip in the top layer (never clipped by the scroller). */
+.fd-rail-tip {
+  position: fixed; inset: auto; margin: 0; border: 0;
+  z-index: var(--fd-z-tooltip);
+  padding: 5px var(--fd-space-2);
+  border-radius: var(--fd-radius-sm);
+  background: var(--fd-surface-inverse); color: var(--fd-text-inverse);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  white-space: nowrap; pointer-events: none;
+  box-shadow: var(--fd-shadow-md);
+  transform-origin: left center;
+  /* Replays each time the tip goes from hidden to shown. */
+  animation: fd-pop var(--fd-dur-2) var(--fd-ease-out) both;
+}
+.fd-rail-tip[data-side="left"] { transform-origin: right center; }
+.fd-rail-tip-hint { margin-inline-start: var(--fd-space-1-5); font-family: var(--fd-font-mono); font-weight: var(--fd-weight-regular); opacity: 0.56; }
+
+/* CSS-only fallback when shell.js is not running: the label itself becomes the tip. */
+.fd-app[data-sidebar="collapsed"]:not([data-fd-rail-tips]) > .fd-sidebar,
+.fd-app[data-sidebar="collapsed"]:not([data-fd-rail-tips]) > .fd-sidebar :is(.fd-sidebar-body, .fd-nav-item) { overflow: visible; }
+.fd-app[data-sidebar="collapsed"]:not([data-fd-rail-tips]) > .fd-sidebar .fd-nav-item > .fd-nav-text {
+  position: absolute; top: 50%; inset-inline-start: calc(100% + 10px); translate: 0 -50%;
+  flex: none; overflow: visible;
+  padding: 5px var(--fd-space-2); border-radius: var(--fd-radius-sm);
+  background: var(--fd-surface-inverse); color: var(--fd-text-inverse);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  box-shadow: var(--fd-shadow-md); z-index: var(--fd-z-tooltip);
+}
+.fd-app[data-sidebar="collapsed"]:not([data-fd-rail-tips]) > .fd-sidebar .fd-nav-item:is(:hover, :focus-visible) > .fd-nav-text { opacity: 1; }
+
+/* ---------- Usage card ---------- */
+.fd-usage-card {
+  display: flex; flex-direction: column;
+  min-width: calc(var(--fd-sidebar-w) - 24px);
+  margin-inline: var(--fd-space-1-5);
+  padding: var(--fd-space-3-5);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-fill-subtle);
+  animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out) both;
+}
+.fd-usage-card-head { display: flex; align-items: center; gap: var(--fd-space-2); min-height: 24px; }
+/* An accent ring that empties as credits are spent: --value from 0 to 1. */
+.fd-usage-card-ring {
+  flex: none; width: 16px; height: 16px; border-radius: 50%;
+  background: conic-gradient(var(--fd-accent) calc(var(--value, 1) * 1turn), var(--fd-accent-16) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+}
+.fd-usage-card-title {
+  flex: 1 1 auto; min-width: 0;
+  font-size: var(--fd-text-sm); line-height: 1.1875rem; font-weight: var(--fd-weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fd-usage-card-link {
+  flex: none; display: grid; place-items: center;
+  width: 24px; height: 24px; margin-inline-end: -4px;
+  border-radius: var(--fd-radius-sm);
+  color: var(--fd-text-3);
+  transition: color var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-usage-card-link:hover { color: var(--fd-text); background: var(--fd-a8); }
+.fd-usage-card-link > .fd-icon { width: 14px; height: 14px; }
+.fd-usage-card-meta {
+  margin-top: var(--fd-space-1);
+  font-size: var(--fd-text-xs); line-height: 1.125rem; color: var(--fd-text-3);
+  font-variant-numeric: tabular-nums;
+}
+.fd-usage-card-meter {
+  position: relative; height: 4px; margin-top: var(--fd-space-3);
+  border-radius: var(--fd-radius-full); background: var(--fd-fill-active); overflow: hidden;
+}
+.fd-usage-card-meter::before {
+  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0;
+  width: calc(var(--value, 0) * 100%); border-radius: inherit; background: var(--fd-accent);
+  transition: width var(--fd-dur-5) var(--fd-ease-emphasized);
+}
+.fd-usage-card > .fd-btn { margin-top: var(--fd-space-3); font-size: var(--fd-text-sm); }
+/* The dark upgrade button warms to the accent when you reach for it. */
+.fd-usage-card > .fd-btn[data-variant="inverse"]:hover { --_b-bg-hover: var(--fd-accent); --_b-fg: var(--fd-accent-contrast); }
+
+/* ---------- Account row ---------- */
+.fd-account {
+  display: flex; align-items: center; gap: var(--fd-space-2-5);
+  width: 100%; min-width: 0; height: 40px;
+  padding-inline: var(--fd-space-1-5) var(--fd-space-3);
+  border-radius: var(--fd-radius-xl);
+  color: var(--fd-text); text-align: start; white-space: nowrap;
+  overflow: hidden;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-account:hover, .fd-account[aria-expanded="true"] { background: var(--fd-accent-8); color: var(--fd-text); }
+.fd-account:hover > .fd-account-avatar { background: var(--fd-fill-hover); }
+.fd-account:active { scale: var(--fd-press-scale); }
+.fd-account:focus-visible { box-shadow: var(--fd-ring); border-radius: var(--fd-radius-xl); }
+.fd-account-avatar {
+  flex: none; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: var(--fd-radius-md);
+  background: var(--fd-fill); color: var(--fd-accent-text);
+  box-shadow: inset 0 0 0 1px var(--fd-line-faint);
+  font-size: var(--fd-text-3xs); line-height: 1; font-weight: var(--fd-weight-regular); text-transform: uppercase;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-account-email {
+  flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md);
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-account > .fd-icon { flex: none; width: 14px; height: 14px; color: var(--fd-text-4); transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+
+/* ---------- Main column ---------- */
+.fd-main {
+  position: relative;
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column;
+  min-height: 100dvh;
+}
+.fd-app[data-contained] .fd-main {
+  min-height: 0; height: auto;
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  scroll-padding-top: calc(var(--fd-topbar-h) + 16px);
+}
+
+/* ---------- Top bar ---------- */
+.fd-topbar {
+  position: sticky; top: 0; z-index: var(--fd-z-topbar);
+  flex: none;
+  display: flex; align-items: center; gap: var(--fd-space-2);
+  height: var(--fd-topbar-h); min-width: 0;
+  padding-inline: var(--fd-space-4);
+  border-bottom: 1px solid var(--fd-line-faint);
+  background: color-mix(in srgb, var(--fd-bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+}
+.fd-topbar-actions { display: flex; align-items: center; gap: var(--fd-space-2); margin-inline-start: auto; min-width: 0; }
+.fd-topbar-actions > .fd-divider[data-vertical] { height: 20px; align-self: center; margin-inline: var(--fd-space-1); }
+.fd-topbar-title { min-width: 0; font-size: var(--fd-text-md); font-weight: var(--fd-weight-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Unread dot on an icon button. */
+.fd-topbar-dot {
+  position: absolute; top: 8px; inset-inline-end: 8px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--fd-accent); box-shadow: 0 0 0 2px var(--fd-bg);
+  pointer-events: none;
+}
+
+/* Phone brand tile: the sidebar head, folded into the top bar. */
+.fd-topbar-brand {
+  flex: none; align-self: stretch;
+  display: grid; place-items: center;
+  width: var(--fd-topbar-h);
+  margin-inline-start: calc(var(--fd-space-4) * -1);
+  border-inline-end: 1px solid var(--fd-line-faint);
+  color: var(--fd-accent);
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-topbar-brand:hover { background: var(--fd-fill-subtle); }
+.fd-topbar-brand > svg { width: 24px; height: 24px; }
+.fd-topbar-brand:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 0; }
+
+/* Team switcher: a secondary button with an initial tile, the team and a muted kind. */
+.fd-team-switch { min-width: 0; gap: var(--fd-space-1-5); padding-inline: var(--fd-space-2-5) var(--fd-space-2); }
+.fd-team-switch > span { overflow: hidden; text-overflow: ellipsis; }
+.fd-team-switch-tile {
+  flex: none; display: grid; place-items: center;
+  width: 16px; height: 16px; border-radius: var(--fd-radius-xs);
+  background: var(--fd-accent); color: var(--fd-accent-contrast);
+  font-size: 0.625rem; line-height: 1; font-weight: var(--fd-weight-medium);
+  box-shadow: inset 0 -2px 4px var(--fd-accent-glow);
+}
+.fd-team-switch .fd-team-switch-meta { color: var(--fd-text-3); font-weight: var(--fd-weight-regular); }
+.fd-team-switch > .fd-icon:last-child { width: 14px; height: 14px; color: var(--fd-text-4); margin-inline-start: var(--fd-space-0-5); }
+
+/* Floating support button. */
+.fd-app-fab {
+  position: fixed; inset-inline-end: var(--fd-space-5); inset-block-end: var(--fd-space-5);
+  z-index: var(--fd-z-sticky);
+}
+.fd-app[data-contained] .fd-app-fab { position: absolute; }
+
+/* ---------- Page ---------- */
+.fd-page {
+  container: fd-page / inline-size;
+  position: relative;
+  flex: 1 0 auto;
+  display: flex; flex-direction: column;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+/* ---------- Blueprint frame ----------
+   .fd-frame is the centred column with 1px rails; .fd-band is a horizontal section.
+   Bands after the first draw a hairline that runs past the rails to the edges of the
+   page, and a crosshair mark where it meets each rail.
+   data-pad      none | sm | md (default) | lg
+   data-surface  surface (white band)
+   data-grow     band fills the remaining height
+   data-marks    none hides the crosshairs (on a band, or on the frame for all bands)
+*/
+.fd-frame {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex; flex-direction: column;
+  width: calc(100% - 2 * var(--fd-gutter));
+  max-width: var(--fd-content-max);
+  margin-inline: auto;
+  border-inline: 1px solid var(--fd-line-faint);
+}
+.fd-band {
+  --_s-py: var(--fd-space-6);
+  --_s-px: var(--fd-gutter);
+  position: relative;
+  min-width: 0;
+  padding: var(--_s-py) var(--_s-px);
+}
+.fd-band[data-pad="none"] { --_s-py: 0px; --_s-px: 0px; }
+.fd-band[data-pad="sm"] { --_s-py: var(--fd-space-4); }
+.fd-band[data-pad="md"] { --_s-py: var(--fd-space-6); }
+.fd-band[data-pad="lg"] { --_s-py: var(--fd-space-12); }
+.fd-band[data-surface="surface"] { background: var(--fd-surface); }
+.fd-band[data-surface="sunken"] { background: var(--fd-bg-sunken); }
+.fd-band[data-grow] { flex: 1 0 auto; }
+/* Outside the app shell (sign-in, onboarding, a gallery) the frame can fill the screen itself. */
+.fd-frame[data-fill] { min-height: 100dvh; }
+.fd-band[data-grow]:has(> .fd-split:only-child) { display: flex; flex-direction: column; }
+.fd-band[data-grow] > .fd-split:only-child { flex: 1 0 auto; }
+.fd-band[data-sticky] { position: sticky; top: var(--fd-topbar-h); z-index: var(--fd-z-sticky); background: color-mix(in srgb, var(--fd-bg) 92%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+
+/* Full-bleed hairline (clipped by .fd-page). */
+.fd-band + .fd-band::before {
+  content: ""; position: absolute; top: 0; height: 1px;
+  inset-inline: -100vw;
+  background: var(--fd-line-faint);
+  pointer-events: none;
+}
+/* Crosshair marks, 9px, centred on each rail/hairline intersection. */
+.fd-band + .fd-band::after {
+  content: ""; position: absolute; z-index: 1;
+  top: -4px; inset-inline: -5px; height: 9px;
+  background: var(--fd-line-strong);
+  -webkit-mask: var(--_s-mark) left top / 9px 9px no-repeat, var(--_s-mark) right top / 9px 9px no-repeat;
+  mask: var(--_s-mark) left top / 9px 9px no-repeat, var(--_s-mark) right top / 9px 9px no-repeat;
+  pointer-events: none;
+}
+.fd-band[data-marks="none"]::after,
+.fd-frame[data-marks="none"] > .fd-band::after { display: none; }
+/* Outside an .fd-app the mark shape still needs a source. */
+.fd-frame, .fd-band { --_s-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M4 0h1v2.5Q5 4 6.5 4H9v1H6.5Q5 5 5 6.5V9H4V6.5Q4 5 2.5 5H0V4h2.5Q4 4 4 2.5Z'/%3E%3C/svg%3E"); }
+
+/* ---------- Page hero ---------- */
+.fd-page-hero {
+  --_s-py: var(--fd-space-10);
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
+  gap: var(--fd-space-1);
+  min-height: 240px;
+  padding: var(--_s-py) var(--_s-px, var(--fd-gutter));
+}
+.fd-page-hero > :not(.fd-page-hero-art) { position: relative; z-index: 1; max-width: min(100%, 560px); }
+.fd-page-hero > .fd-eyebrow { margin-bottom: var(--fd-space-2); }
+.fd-page-hero-desc { font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); letter-spacing: var(--fd-ls-lg); color: var(--fd-text-2); text-wrap: pretty; }
+.fd-page-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); margin-top: var(--fd-space-5); }
+.fd-page-hero-art {
+  position: absolute; z-index: 0;
+  inset-block: 0; inset-inline-end: 0;
+  width: 52%;
+  overflow: hidden; pointer-events: none;
+  color: var(--fd-text-4);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 40%);
+  mask-image: linear-gradient(to right, transparent, #000 40%);
+}
+.fd-page-hero-art:dir(rtl) {
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 40%);
+  mask-image: linear-gradient(to left, transparent, #000 40%);
+}
+@container (max-width: 640px) {
+  .fd-page-hero { --_s-py: var(--fd-space-6); min-height: 160px; }
+  .fd-page-hero-desc { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
+  .fd-page-hero-art { width: 62%; opacity: 0.45; -webkit-mask-image: linear-gradient(to left, #000 0%, #000 30%, transparent 92%); mask-image: linear-gradient(to left, #000 0%, #000 30%, transparent 92%); } /* keep the texture clear of the words on a phone */
+}
+
+/* ---------- Page head (compact) ---------- */
+.fd-page-head {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: var(--fd-space-3) var(--fd-space-4);
+  min-width: 0;
+}
+.fd-page-head-text { display: flex; flex-direction: column; flex: 1 1 240px; min-width: 0; }
+.fd-page-head-title { font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); }
+.fd-page-head-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-page-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); }
+
+/* ---------- Toolbar ---------- */
+.fd-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--fd-space-2);
+  min-width: 0;
+}
+.fd-toolbar-search { flex: 1 1 220px; max-width: 280px; min-width: 0; }
+.fd-toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); margin-inline-start: auto; }
+.fd-toolbar-sep { flex: none; width: 1px; height: 20px; background: var(--fd-line); margin-inline: var(--fd-space-1); }
+@container (max-width: 640px) {
+  .fd-toolbar-search { flex-basis: 100%; max-width: none; }
+  .fd-toolbar-sep { display: none; }
+}
+
+/* ---------- Split: content + side panel ---------- */
+.fd-split {
+  --_s-panel-w: var(--fd-panel-w);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--_s-panel-w);
+  min-width: 0;
+}
+.fd-split:has(> .fd-panel > .fd-subnav) { --_s-panel-w: var(--fd-subnav-w); }
+.fd-split[data-side="start"] { grid-template-columns: var(--_s-panel-w) minmax(0, 1fr); }
+.fd-split-main { min-width: 0; padding: var(--fd-space-6) var(--fd-gutter); }
+.fd-split > .fd-panel { border-inline-start: 1px solid var(--fd-line-faint); }
+.fd-split[data-side="start"] > .fd-panel { border-inline-start: 0; border-inline-end: 1px solid var(--fd-line-faint); }
+
+.fd-panel {
+  display: flex; flex-direction: column; gap: var(--fd-space-4);
+  min-width: 0;
+  padding: var(--fd-space-4);
+}
+.fd-panel-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  min-height: 32px;
+}
+.fd-panel-title { font-size: var(--fd-text-title); line-height: var(--fd-lh-title); font-weight: var(--fd-weight-label); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-panel-body { display: flex; flex-direction: column; gap: var(--fd-space-2); min-height: 0; }
+
+@container (max-width: 760px) {
+  .fd-split, .fd-split[data-side="start"] { grid-template-columns: minmax(0, 1fr); }
+  .fd-split > .fd-panel, .fd-split[data-side="start"] > .fd-panel { border-inline: 0; }
+  .fd-split > .fd-panel { border-top: 1px solid var(--fd-line-faint); }
+  .fd-split[data-side="start"] > .fd-panel { border-top: 0; border-bottom: 1px solid var(--fd-line-faint); }
+}
+
+/* Two-pane (agent): a session pane between the rail and the content.
+   <div class="fd-app" data-sidebar="collapsed"><aside class="fd-sidebar">…</aside>
+     <aside class="fd-panel" data-variant="pane">…</aside><div class="fd-main">…</div></div> */
+.fd-app > .fd-panel[data-variant="pane"] {
+  position: sticky; top: 0;
+  flex: none; align-self: flex-start;
+  width: var(--fd-panel-w); height: 100dvh;
+  gap: 0; padding: 0;
+  background: var(--fd-bg);
+  border-inline-end: 1px solid var(--fd-line-faint);
+}
+.fd-app[data-contained] > .fd-panel[data-variant="pane"] { position: relative; height: auto; align-self: stretch; }
+.fd-panel[data-variant="pane"] > .fd-panel-head {
+  flex: none; height: var(--fd-topbar-h);
+  padding-inline: var(--fd-space-4) var(--fd-space-3);
+  border-bottom: 1px solid var(--fd-line-faint);
+}
+.fd-panel[data-variant="pane"] > .fd-panel-body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: var(--fd-space-2) var(--fd-space-1-5) var(--fd-space-4); }
+
+/* ---------- Mobile nav ---------- */
+.fd-mobile-nav {
+  position: fixed; z-index: var(--fd-z-overlay);
+  inset: var(--fd-topbar-h) 0 0 0;
+  display: flex; flex-direction: column;
+  padding: var(--fd-space-3) var(--fd-space-5) calc(var(--fd-space-8) + env(safe-area-inset-bottom, 0px));
+  background: var(--fd-bg);
+  overflow-y: auto; overscroll-behavior: contain;
+  opacity: 0; translate: 0 -8px;
+  transition: opacity var(--fd-dur-3) var(--fd-ease-out), translate var(--fd-dur-4) var(--fd-ease-emphasized);
+}
+.fd-mobile-nav[data-state="open"] { opacity: 1; translate: 0 0; }
+.fd-app[data-contained] .fd-mobile-nav { position: absolute; }
+
+.fd-mobile-nav-scrim {
+  position: fixed; z-index: calc(var(--fd-z-overlay) - 1);
+  inset: var(--fd-topbar-h) 0 0 0;
+  background: var(--fd-scrim);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-mobile-nav-scrim[data-state="open"] { opacity: 1; }
+.fd-app[data-contained] .fd-mobile-nav-scrim { position: absolute; }
+
+.fd-mobile-nav-actions { display: grid; gap: var(--fd-space-2); padding-block: var(--fd-space-2) var(--fd-space-3); }
+
+.fd-mobile-nav-account {
+  display: flex; align-items: center; gap: var(--fd-space-3);
+  min-height: 52px; padding-inline: var(--fd-space-4) var(--fd-space-3);
+  margin-block: var(--fd-space-1) var(--fd-space-3);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-line-faint), var(--fd-shadow-xs);
+  color: var(--fd-text);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-mobile-nav-account:hover { box-shadow: inset 0 0 0 1px var(--fd-line-strong), var(--fd-shadow-xs); }
+.fd-mobile-nav-account:active { scale: var(--fd-press-scale); }
+.fd-mobile-nav-account > span:first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); }
+.fd-mobile-nav-account > .fd-account-avatar { margin-inline-start: auto; }
+
+.fd-mobile-nav-section { display: flex; flex-direction: column; gap: var(--fd-space-0-5); padding-block: var(--fd-space-2); }
+.fd-mobile-nav-section + .fd-mobile-nav-section { border-top: 1px solid var(--fd-line-faint); }
+.fd-mobile-nav-label {
+  padding: var(--fd-space-2) var(--fd-space-3) var(--fd-space-1);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-4);
+}
+.fd-mobile-nav-item {
+  display: flex; align-items: center; gap: var(--fd-space-2);
+  min-height: var(--fd-control-xl); padding-inline: var(--fd-space-3);
+  border-radius: var(--fd-radius-lg);
+  color: var(--fd-text-2);
+  font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg);
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-mobile-nav-item:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-mobile-nav-item:active { scale: var(--fd-press-scale); }
+.fd-mobile-nav-item:focus-visible { box-shadow: var(--fd-ring); border-radius: var(--fd-radius-lg); }
+.fd-mobile-nav-item > .fd-icon:last-child { margin-inline-start: auto; color: var(--fd-text-3); }
+.fd-mobile-nav-item > .fd-nav-badge { margin-inline-start: var(--fd-space-1); }
+.fd-mobile-nav-item[aria-current="page"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
+.fd-mobile-nav-item[aria-current="page"] > .fd-icon:last-child { color: var(--fd-accent-text); }
+.fd-mobile-nav-item[data-level="2"] { padding-inline-start: var(--fd-space-6); font-size: var(--fd-text-md); min-height: var(--fd-control-lg); }
+
+/* ---------- Breakpoint: 900px (the shell's own width) ---------- */
+@container fd-app (min-width: 900px) {
+  .fd-app [data-only="mobile"],
+  .fd-mobile-nav,
+  .fd-mobile-nav-scrim { display: none !important; }
+}
+@container fd-app (max-width: 899.98px) {
+  .fd-sidebar,
+  .fd-app > .fd-panel[data-variant="pane"],
+  .fd-app [data-only="desktop"] { display: none !important; }
+  .fd-topbar { padding-inline-end: var(--fd-space-3); }
+  .fd-topbar .fd-team-switch { flex: 0 1 auto; }
+}
+@container fd-app (min-width: 640px) and (max-width: 899.98px) {
+  /* Tablets: the menu is a right-hand sheet over a scrim. */
+  .fd-mobile-nav {
+    inset-inline-start: auto; width: min(400px, 100%);
+    border-inline-start: 1px solid var(--fd-line-faint);
+    box-shadow: var(--fd-shadow-xl);
+    translate: 16px 0;
+  }
+}
+@container fd-app (max-width: 639.98px) {
+  .fd-topbar .fd-team-switch-meta { display: none; }
+}
+/* Phones: the frame drops its rails; bands keep their full-bleed hairlines. */
+@container fd-page (max-width: 639.98px) {
+  .fd-frame { width: 100%; border-inline: 0; }
+  .fd-band + .fd-band::after { display: none; }
+}

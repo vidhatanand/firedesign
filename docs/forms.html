@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forms · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="forms">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Forms</h1>
+    <p class="doc-lede">White controls on an off-white page, one hairline each, and an accent that only appears when something is focused, selected or on. Every control is native underneath, so keyboards, autofill and validation behave the way people expect.</p>
+  </header>
+
+  <!-- ===================================================================== Input -->
+  <section class="doc-section" id="input">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Text input</h2>
+      <p>White surface, a 1px line drawn inside the box so nothing shifts between states, 10px radius, 36px tall. Hover darkens the line. Focus swaps it for the accent and adds a 3px halo.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-default">Team name</label>
+        <input class="fd-input" id="in-default" placeholder="e.g. Northwind Data" autocomplete="off">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-filled">Team name</label>
+        <input class="fd-input" id="in-filled" value="Northwind Data" autocomplete="off">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-invalid">Team slug</label>
+        <input class="fd-input" id="in-invalid" value="Northwind Data!" aria-invalid="true" aria-describedby="in-invalid-error" autocomplete="off">
+        <p class="fd-field-error" id="in-invalid-error"><i data-icon="circle-alert" data-size="14"></i><span>Use lowercase letters, numbers and dashes only.</span></p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-disabled">Team ID</label>
+        <input class="fd-input" id="in-disabled" value="team_8fK2xQvLm" disabled aria-describedby="in-disabled-hint">
+        <p class="fd-field-hint" id="in-disabled-hint">Set when the team was created.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-readonly">Billing email</label>
+        <input class="fd-input" id="in-readonly" value="billing@northwind.dev" readonly aria-describedby="in-readonly-hint">
+        <p class="fd-field-hint" id="in-readonly-hint">Read-only. Change it under Billing.</p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Focus is not shown here because it needs a real caret: click any field. Invalid uses <code class="fd-code">aria-invalid="true"</code> on the native control; the danger line and its halo on focus follow from that attribute.</li>
+      <li>Disabled fills with the disabled wash and mutes the text. Read-only keeps normal text on the quieter subtle fill, so people can still select and copy it.</li>
+    </ul>
+
+    <h3 class="doc-sub">Sizes and mono</h3>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-sm">Small, 28px</label>
+        <input class="fd-input" data-size="sm" id="in-sm" placeholder="Filter by domain">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-md">Default, 36px</label>
+        <input class="fd-input" id="in-md" placeholder="Filter by domain">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-lg">Large, 40px</label>
+        <input class="fd-input" data-size="lg" id="in-lg" placeholder="Filter by domain">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-mono-url">Webhook URL</label>
+        <input class="fd-input" data-mono type="url" id="in-mono-url" value="https://hooks.northwind.dev/ember/events" spellcheck="false">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="in-mono-key">Environment variable</label>
+        <input class="fd-input" data-mono id="in-mono-key" value="EMBER_API_KEY" spellcheck="false">
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Use <code class="fd-code">data-mono</code> for anything a person will paste or compare character by character: keys, URLs, JSON, paths, regular expressions.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Textarea -->
+  <section class="doc-section" id="textarea">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Textarea</h2>
+      <p>The same skin as the input. Add <code class="fd-code">data-fd-autogrow</code> and it grows with the text up to eight lines by default, then scrolls. A counter in the field footer keeps long answers honest.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <label class="fd-field-label" for="ta-default">Extraction prompt</label>
+        <textarea class="fd-textarea" id="ta-default" rows="3" placeholder="Describe the data you want, e.g. product names with prices."></textarea>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ta-grow">Instructions <span class="fd-field-tag">grows with you</span></label>
+        <textarea class="fd-textarea" id="ta-grow" rows="1" data-fd-autogrow data-max-rows="6" maxlength="280">Collect every plan on the pricing page.
+Return the plan name, monthly price and credit allowance.
+Ignore cookie banners and chat widgets.</textarea>
+        <div class="fd-field-foot">
+          <p class="fd-field-hint">Be specific. Ember follows these on every run.</p>
+          <span class="fd-field-counter"></span>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ta-json">Output schema</label>
+        <textarea class="fd-textarea" id="ta-json" data-mono rows="5" spellcheck="false">{
+  "plan": "string",
+  "price_usd": "number",
+  "credits": "number"
+}</textarea>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ta-invalid">Notes</label>
+        <textarea class="fd-textarea" id="ta-invalid" rows="3" aria-invalid="true" aria-describedby="ta-invalid-error">ok</textarea>
+        <p class="fd-field-error" id="ta-invalid-error"><i data-icon="circle-alert" data-size="14"></i><span>Add at least 20 characters so your teammates have context.</span></p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ta-disabled">Run log note</label>
+        <textarea class="fd-textarea" id="ta-disabled" rows="3" disabled>Locked while the crawl is running.</textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== Field -->
+  <section class="doc-section" id="field">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Field</h2>
+      <p>A field is a label, a control, a hint and room for one error. The hint gives way to the error when it appears, so a field never grows two lines of small print.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <div class="fd-field-head">
+          <label class="fd-field-label" for="fl-slug">Team slug <span class="fd-field-tag">optional</span></label>
+          <button type="button" class="fd-field-info" aria-label="About team slugs" data-fd-tooltip="Used in your team URLs. Leave it blank to use the team ID."><i data-icon="circle-help"></i></button>
+        </div>
+        <input class="fd-input" id="fl-slug" placeholder="e.g. northwind" aria-describedby="fl-slug-hint" autocomplete="off">
+        <p class="fd-field-hint" id="fl-slug-hint" data-mono>ember.dev/app/t/&lt;slug&gt;/usage</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="fl-required" data-required>Work email</label>
+        <input class="fd-input" type="email" id="fl-required" placeholder="maya@northwind.dev" aria-describedby="fl-required-hint" autocomplete="off">
+        <p class="fd-field-hint" id="fl-required-hint">We send run reports here.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="fl-error">Allowed domain</label>
+        <input class="fd-input" id="fl-error" value="northwind" aria-invalid="true" aria-describedby="fl-error-error fl-error-hint" autocomplete="off">
+        <p class="fd-field-error" id="fl-error-error"><i data-icon="circle-alert" data-size="14"></i><span>Enter a full domain, like docs.northwind.dev.</span></p>
+        <p class="fd-field-hint" id="fl-error-hint">Hidden while the error is showing.</p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Labels are 14px at weight 450. The “optional” tag is muted; the info button takes a tooltip with <code class="fd-code">data-fd-tooltip</code>. Mark required fields with <code class="fd-code">data-required</code> on the label rather than a red star.</li>
+      <li>Errors say what happened and what to change, rise 4px into place, and are announced because the control points at them with <code class="fd-code">aria-describedby</code>.</li>
+    </ul>
+
+    <h3 class="doc-sub">Schema fields</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field" data-variant="schema">
+        <label class="fd-field-label" for="sc-titles"><span class="fd-field-name">person_titles</span><span class="fd-field-type">string[]</span></label>
+        <input class="fd-input" id="sc-titles" placeholder="VP of Sales, Head of Growth" aria-describedby="sc-titles-hint" autocomplete="off">
+        <p class="fd-field-hint" id="sc-titles-hint">Job titles to match. Several titles widen the net. Separate values with commas.</p>
+      </div>
+      <div class="fd-field" data-variant="schema">
+        <label class="fd-field-label" for="sc-q"><span class="fd-field-name">q_keywords</span><span class="fd-field-type">string</span></label>
+        <input class="fd-input" id="sc-q" placeholder="<q_keywords>" aria-describedby="sc-q-hint" autocomplete="off">
+        <p class="fd-field-hint" id="sc-q-hint">Free text matched across the person and their company.</p>
+      </div>
+      <div class="fd-field" data-variant="schema">
+        <label class="fd-field-label" for="sc-page"><span class="fd-field-name">page</span><span class="fd-field-type">number</span></label>
+        <input class="fd-input" type="number" id="sc-page" value="1" min="1">
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>For API parameter forms the label becomes a mono name with a quieter mono type. Generate these from the schema; do not write them by hand.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Input group -->
+  <section class="doc-section" id="affixes">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Input group and affixes</h2>
+      <p>The group is the field; a bare input lives inside it. Affixes add an icon, a text prefix, a unit or buttons without breaking the single hairline and focus halo.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-email">Email</label>
+        <div class="fd-input-group">
+          <span class="fd-input-affix"><i data-icon="at-sign"></i></span>
+          <input class="fd-input" type="email" id="ag-email" placeholder="you@company.com" autocomplete="off">
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-url">Page to scrape</label>
+        <div class="fd-input-group">
+          <span class="fd-input-affix" data-kind="tag">https://</span>
+          <input class="fd-input" id="ag-url" placeholder="github.com/ember/ember" autocomplete="off">
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-spend">Monthly spend limit</label>
+        <div class="fd-input-group">
+          <span class="fd-input-affix" data-kind="text">$</span>
+          <input class="fd-input" type="number" id="ag-spend" value="250" min="0">
+          <span class="fd-input-affix" data-kind="unit">USD</span>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-timeout">Request timeout</label>
+        <div class="fd-input-group">
+          <input class="fd-input" type="number" id="ag-timeout" value="30000" min="1000" step="1000">
+          <span class="fd-input-affix" data-kind="unit">ms</span>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-hook">Webhook endpoint</label>
+        <div class="fd-input-group" data-mono>
+          <input class="fd-input" id="ag-hook" value="https://hooks.northwind.dev/ember/events" readonly spellcheck="false">
+          <span class="fd-input-affix" data-kind="action">
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Open endpoint"><i data-icon="external-link"></i></button>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Copy endpoint"><i data-icon="copy"></i></button>
+          </span>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-invalid">Callback URL</label>
+        <div class="fd-input-group">
+          <span class="fd-input-affix" data-kind="tag">https://</span>
+          <input class="fd-input" id="ag-invalid" value="localhost:3000" aria-invalid="true" aria-describedby="ag-invalid-error" autocomplete="off">
+        </div>
+        <p class="fd-field-error" id="ag-invalid-error"><i data-icon="circle-alert" data-size="14"></i><span>Use a public host. Localhost cannot receive webhooks.</span></p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-disabled">Region</label>
+        <div class="fd-input-group">
+          <span class="fd-input-affix"><i data-icon="globe"></i></span>
+          <input class="fd-input" id="ag-disabled" value="us-east-1" disabled>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-sm">Small group</label>
+        <div class="fd-input-group" data-size="sm">
+          <span class="fd-input-affix"><i data-icon="search"></i></span>
+          <input class="fd-input" id="ag-sm" placeholder="Search keys">
+          <span class="fd-input-affix" data-kind="action"><button type="button" class="fd-btn" data-variant="ghost" data-size="xs" data-icon-only aria-label="Clear"><i data-icon="x"></i></button></span>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="ag-lg">Large group</label>
+        <div class="fd-input-group" data-size="lg">
+          <span class="fd-input-affix" data-kind="tag">https://</span>
+          <input class="fd-input" id="ag-lg" placeholder="docs.northwind.dev">
+          <span class="fd-input-affix" data-kind="action"><button type="button" class="fd-btn" data-variant="accent-soft" data-size="sm"><span>Check</span></button></span>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The text prefix chip is for the part of a URL people should not retype. Buttons inside the field are ghost buttons one step smaller than the field: <code class="fd-code">sm</code> in a 36px field, <code class="fd-code">xs</code> in a 28px one.</li>
+    </ul>
+
+    <h3 class="doc-sub">Field and button pair</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-stack" style="max-width:620px">
+        <div class="fd-field">
+          <label class="fd-field-label" for="pr-name">Team name</label>
+          <div class="fd-input-pair">
+            <input class="fd-input" id="pr-name" value="Northwind Data" autocomplete="off">
+            <button type="button" class="fd-btn" disabled>Save</button>
+          </div>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="pr-email">Invite team members</label>
+          <div class="fd-input-pair">
+            <input class="fd-input" type="email" id="pr-email" placeholder="Enter email address" autocomplete="off">
+            <label class="fd-select"><span class="fd-sr-only">Role</span>
+              <select aria-label="Role">
+                <option>Member</option>
+                <option>Admin</option>
+                <option>Billing</option>
+              </select>
+            </label>
+            <button type="button" class="fd-btn" disabled><i data-icon="mail"></i><span>Send invite</span></button>
+          </div>
+          <p class="fd-field-hint">Invited members get an email with instructions to join your team.</p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="pr-joined">Share link</label>
+          <div class="fd-input-pair" data-joined>
+            <input class="fd-input" id="pr-joined" data-mono value="ember.dev/invite/nw-4kf9" readonly>
+            <button type="button" class="fd-btn" data-variant="outline"><i data-icon="copy"></i><span>Copy</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Pairs sit side by side and stack on phones, with the button full width. Add <code class="fd-code">data-joined</code> to fuse the pair when the button belongs to the value (copy, check, apply).</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Search -->
+  <section class="doc-section" id="search">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Search</h2>
+      <p>An input with a leading icon. The clear button appears as soon as there is text, and the key hint steps aside. Press <span class="fd-kbd">/</span> anywhere on this page to focus the first search.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-search">
+        <i data-icon="search"></i>
+        <input class="fd-search-input" type="search" placeholder="Search runs, URLs, job IDs" aria-label="Search runs" data-fd-search-hotkey>
+        <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+        <kbd class="fd-kbd">/</kbd>
+      </div>
+      <div class="fd-search" data-variant="soft">
+        <i data-icon="search"></i>
+        <input class="fd-search-input" type="search" placeholder="Find a provider" aria-label="Find a provider" data-fd-search-hotkey="mod+k">
+        <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+        <kbd class="fd-kbd">⌘K</kbd>
+      </div>
+      <div class="fd-search">
+        <i data-icon="search"></i>
+        <input class="fd-search-input" type="search" value="pricing page" placeholder="Search runs" aria-label="Search runs with text">
+        <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-search" data-size="sm">
+        <i data-icon="search"></i>
+        <input class="fd-search-input" type="search" placeholder="Filter endpoints" aria-label="Filter endpoints">
+        <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-search">
+        <i data-icon="search"></i>
+        <input class="fd-search-input" type="search" placeholder="Search is paused" aria-label="Search (disabled)" disabled>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Mark the page's main search with <code class="fd-code">data-fd-search-hotkey</code> (<span class="fd-kbd">/</span>) or <code class="fd-code">data-fd-search-hotkey="mod+k"</code>. Escape clears the text first, then leaves it.</li>
+      <li>Use the soft variant in toolbars next to filters; use the white one when search is the main job of the page.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Select -->
+  <section class="doc-section" id="select">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Select</h2>
+      <p>A native select wearing Fire's skin, so the picker, typeahead and mobile wheel all keep working. Soft by default, like the secondary button; outline when it sits in a form beside inputs.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <label class="fd-select"><span class="fd-sr-only">Role</span>
+        <select><option>Member</option><option>Admin</option><option>Billing</option></select>
+      </label>
+      <label class="fd-select"><span class="fd-sr-only">Endpoint</span>
+        <select><option>All endpoints</option><option>/search</option><option>/scrape</option><option>/crawl</option><option>/extract</option><option>/agent</option></select>
+      </label>
+      <label class="fd-select" data-size="sm"><span class="fd-sr-only">Range</span>
+        <select><option>Last 7 days</option><option>Last 30 days</option><option>Last 90 days</option></select>
+      </label>
+      <label class="fd-select" data-size="lg"><span class="fd-sr-only">Format</span>
+        <select><option>Markdown</option><option>HTML</option><option>JSON</option></select>
+      </label>
+      <label class="fd-select"><span class="fd-sr-only">Disabled</span>
+        <select disabled><option>Owner</option></select>
+      </label>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <label class="fd-field-label" for="se-format">Default output format</label>
+        <div class="fd-select" data-variant="outline">
+          <select id="se-format"><option>Markdown</option><option>HTML</option><option>Structured JSON</option><option>Screenshot</option></select>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="se-expiry">Key expiry</label>
+        <div class="fd-select" data-variant="outline">
+          <select id="se-expiry"><option>30 days</option><option selected>90 days</option><option>1 year</option><option>Never</option></select>
+        </div>
+        <p class="fd-field-hint">We email you a week before it expires.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="se-invalid">Billing country</label>
+        <div class="fd-select" data-variant="outline">
+          <select id="se-invalid" aria-invalid="true" aria-describedby="se-invalid-error"><option value="">Choose a country</option><option>Germany</option><option>India</option><option>United States</option></select>
+        </div>
+        <p class="fd-field-error" id="se-invalid-error"><i data-icon="circle-alert" data-size="14"></i><span>Choose the country on your invoices.</span></p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="se-disabled">Plan owner</label>
+        <div class="fd-select" data-variant="outline">
+          <select id="se-disabled" disabled><option>maya@northwind.dev</option></select>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The wrapper carries the size and variant; the <code class="fd-code">&lt;select&gt;</code> inside stays untouched. For long or searchable lists use the combobox below instead.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Number -->
+  <section class="doc-section" id="number">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Number</h2>
+      <p>A number input with steppers inside the field. Hold a stepper to repeat; steppers disable at the limits. Arrow keys and typing still work.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <label class="fd-field-label" for="nu-conc">Concurrent crawls</label>
+        <div class="fd-number">
+          <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease concurrent crawls"><i data-icon="minus"></i></button>
+          <input class="fd-number-input" type="number" id="nu-conc" value="5" min="1" max="20" step="1">
+          <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase concurrent crawls"><i data-icon="plus"></i></button>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="nu-pages">Page limit</label>
+        <div class="fd-number" data-size="sm">
+          <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease page limit"><i data-icon="minus"></i></button>
+          <input class="fd-number-input" type="number" id="nu-pages" value="500" min="10" max="10000" step="10">
+          <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase page limit"><i data-icon="plus"></i></button>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="nu-min">At the minimum</label>
+        <div class="fd-number" data-size="lg">
+          <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease retries"><i data-icon="minus"></i></button>
+          <input class="fd-number-input" type="number" id="nu-min" value="0" min="0" max="5">
+          <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase retries"><i data-icon="plus"></i></button>
+        </div>
+        <p class="fd-field-hint">Retries on failed pages.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="nu-disabled">Reserved credits</label>
+        <div class="fd-number">
+          <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease reserved credits" disabled><i data-icon="minus"></i></button>
+          <input class="fd-number-input" type="number" id="nu-disabled" value="1000" disabled>
+          <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase reserved credits" disabled><i data-icon="plus"></i></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== Checkbox and radio -->
+  <section class="doc-section" id="checkbox">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Checkbox</h2>
+      <p>16px, 4px radius, one hairline. Checked fills with the accent and draws a white tick; indeterminate draws a dash. The label is part of the control, so the whole line is the target.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-options">
+        <label class="fd-checkbox"><input type="checkbox"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Unchecked</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Checked</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" data-indeterminate><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Indeterminate</span></span></label>
+      </div>
+      <div class="fd-options">
+        <label class="fd-checkbox"><input type="checkbox" disabled><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Disabled</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" checked disabled><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Disabled and checked</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" aria-invalid="true"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Invalid</span></span></label>
+      </div>
+      <div class="fd-options">
+        <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span>
+          <span class="fd-checkbox-text"><span class="fd-checkbox-label">Respect robots.txt</span><span class="fd-checkbox-desc">Skip pages the site asks crawlers not to visit.</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox"><span class="fd-checkbox-box"></span>
+          <span class="fd-checkbox-text"><span class="fd-checkbox-label">Include subdomains</span><span class="fd-checkbox-desc">Follow links to docs.northwind.dev and blog.northwind.dev.</span></span></label>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Select all</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-options">
+        <label class="fd-checkbox"><input type="checkbox" data-fd-checkall="#ep-list input[type=checkbox]"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">All endpoints</span></span></label>
+        <div class="fd-options" id="ep-list" style="padding-inline-start:26px">
+          <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/search</span></span></label>
+          <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/scrape</span></span></label>
+          <label class="fd-checkbox"><input type="checkbox"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/crawl</span></span></label>
+          <label class="fd-checkbox"><input type="checkbox"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/extract</span></span></label>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Point a parent at its children with <code class="fd-code">data-fd-checkall="selector"</code>; it shows the indeterminate state by itself and selects or clears every child when toggled.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="radio">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Radio</h2>
+      <p>For one choice from a few. The ring is the accent, and the dot scales in with a slight spring. Group with <code class="fd-code">role="radiogroup"</code> and a label; arrow keys move between options natively.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field" role="radiogroup" aria-labelledby="rd-format-label">
+        <span class="fd-field-label" id="rd-format-label">Default format</span>
+        <div class="fd-options">
+          <label class="fd-radio"><input type="radio" name="rd-format" value="markdown" checked><span class="fd-radio-box"></span><span class="fd-radio-text"><span class="fd-radio-label">Markdown</span><span class="fd-radio-desc">Clean text for LLMs and RAG.</span></span></label>
+          <label class="fd-radio"><input type="radio" name="rd-format" value="json"><span class="fd-radio-box"></span><span class="fd-radio-text"><span class="fd-radio-label">Structured JSON</span><span class="fd-radio-desc">Fields from your schema.</span></span></label>
+          <label class="fd-radio"><input type="radio" name="rd-format" value="html"><span class="fd-radio-box"></span><span class="fd-radio-text"><span class="fd-radio-label">Raw HTML</span><span class="fd-radio-desc">The page exactly as served.</span></span></label>
+        </div>
+      </div>
+      <div class="fd-field" role="radiogroup" aria-labelledby="rd-theme-label">
+        <span class="fd-field-label" id="rd-theme-label">Appearance</span>
+        <div class="fd-options" data-orientation="horizontal">
+          <label class="fd-radio"><input type="radio" name="rd-theme" value="light"><span class="fd-radio-box"></span><span class="fd-radio-label">Light</span></label>
+          <label class="fd-radio"><input type="radio" name="rd-theme" value="dark"><span class="fd-radio-box"></span><span class="fd-radio-label">Dark</span></label>
+          <label class="fd-radio"><input type="radio" name="rd-theme" value="system" checked><span class="fd-radio-box"></span><span class="fd-radio-label">System</span></label>
+        </div>
+      </div>
+      <div class="fd-field" role="radiogroup" aria-labelledby="rd-states-label">
+        <span class="fd-field-label" id="rd-states-label">States</span>
+        <div class="fd-options">
+          <label class="fd-radio"><input type="radio" name="rd-states" disabled><span class="fd-radio-box"></span><span class="fd-radio-label">Disabled</span></label>
+          <label class="fd-radio"><input type="radio" name="rd-states-b" checked disabled><span class="fd-radio-box"></span><span class="fd-radio-label">Disabled and selected</span></label>
+          <label class="fd-radio"><input type="radio" name="rd-states-c" aria-invalid="true"><span class="fd-radio-box"></span><span class="fd-radio-label">Invalid</span></label>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Two options that behave like on and off are a switch, not a radio pair. When each option needs a price or a paragraph, use a choice card.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Switch -->
+  <section class="doc-section" id="switch">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Switch</h2>
+      <p>For settings that take effect now. A real checkbox with <code class="fd-code">role="switch"</code>: off is a 12% ink track, on is the accent with a soft inner shadow. The thumb slides with a slight spring and stretches while pressed.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-options">
+        <label class="fd-switch"><input type="checkbox" role="switch"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Off</span></span></label>
+        <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">On</span></span></label>
+        <label class="fd-switch" data-size="sm"><input type="checkbox" role="switch"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Small, off</span></span></label>
+        <label class="fd-switch" data-size="sm"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Small, on</span></span></label>
+      </div>
+      <div class="fd-options">
+        <label class="fd-switch"><input type="checkbox" role="switch" disabled><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Disabled</span></span></label>
+        <label class="fd-switch"><input type="checkbox" role="switch" checked disabled><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Disabled and on</span></span></label>
+        <label class="fd-switch" data-locked><input type="checkbox" role="switch" checked disabled><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Billing alerts</span></span><span class="fd-switch-lock"><i data-icon="lock"></i>Always</span></label>
+      </div>
+      <div class="fd-options">
+        <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span>
+          <span class="fd-switch-text"><span class="fd-switch-label">Privacy mode</span><span class="fd-switch-desc">Blur your email in the sidebar while sharing your screen.</span></span></label>
+        <label class="fd-switch"><input type="checkbox" role="switch"><span class="fd-switch-track"></span>
+          <span class="fd-switch-text"><span class="fd-switch-label">Two-factor authentication</span><span class="fd-switch-desc">Ask for a code from your authenticator app at sign-in.</span></span></label>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A switch has no Save button; if the change needs confirming, use a checkbox in a form. A setting that cannot be turned off is shown locked, with the reason beside it.</li>
+    </ul>
+
+    <h3 class="doc-sub">Notification table</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-matrix" data-cols="2" style="max-width:720px">
+        <div class="fd-matrix-head"><span>Category</span><span class="fd-matrix-cell">In-app</span><span class="fd-matrix-cell">Browser</span></div>
+        <div class="fd-matrix-row">
+          <div class="fd-matrix-text"><span class="fd-matrix-label">Billing &amp; payments</span><span class="fd-matrix-desc">Failed payments, top-ups and plan changes. Always shown in-app.</span></div>
+          <div class="fd-matrix-cell"><span class="fd-switch-lock"><i data-icon="lock"></i>Always</span></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Billing and payments, browser" checked><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-matrix-row">
+          <div class="fd-matrix-text"><span class="fd-matrix-label">Usage &amp; limits</span><span class="fd-matrix-desc">Credit thresholds, rate limits and concurrency limits.</span></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Usage and limits, in-app" checked><span class="fd-switch-track"></span></label></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Usage and limits, browser"><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-matrix-row">
+          <div class="fd-matrix-text"><span class="fd-matrix-label">Monitors</span><span class="fd-matrix-desc">Changes detected on the pages you watch.</span></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Monitors, in-app" checked><span class="fd-switch-track"></span></label></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Monitors, browser" checked><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-matrix-row">
+          <div class="fd-matrix-text"><span class="fd-matrix-label">Runs</span><span class="fd-matrix-desc">Crawls, batch scrapes and agent runs started from the dashboard finishing.</span></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Runs, in-app" checked><span class="fd-switch-track"></span></label></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Runs, browser" checked><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-matrix-row">
+          <div class="fd-matrix-text"><span class="fd-matrix-label">Team &amp; account</span><span class="fd-matrix-desc">Members joining, API keys created and security changes.</span></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Team and account, in-app" checked><span class="fd-switch-track"></span></label></div>
+          <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Team and account, browser"><span class="fd-switch-track"></span></label></div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>For a category by channel grid, use <code class="fd-code">fd-matrix</code>: a mono header row, one row per category and a fixed-width column per channel. Every switch needs an <code class="fd-code">aria-label</code> that names both.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Slider -->
+  <section class="doc-section" id="slider">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Slider</h2>
+      <p>A styled native range input, so touch, arrow keys, Home/End and Page keys work. The accent fills to the thumb; a value bubble shows while dragging or when focused with the keyboard.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="sl-depth">Crawl depth</label><output class="fd-slider-value" for="sl-depth">3</output></div>
+        <div class="fd-slider">
+          <input type="range" id="sl-depth" min="1" max="10" step="1" value="3" aria-describedby="sl-depth-hint">
+        </div>
+        <p class="fd-field-hint" id="sl-depth-hint">How many links deep Ember follows from the start URL.</p>
+      </div>
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="sl-pages">Page limit</label><output class="fd-slider-value" for="sl-pages">250 pages</output></div>
+        <div class="fd-slider" data-suffix=" pages">
+          <input type="range" id="sl-pages" min="10" max="1000" step="10" value="250">
+          <div class="fd-slider-ticks"><span data-value="10">10</span><span data-value="250">250</span><span data-value="500">500</span><span data-value="750">750</span><span data-value="1000">1,000</span></div>
+        </div>
+      </div>
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="sl-disabled">Rate limit</label><output class="fd-slider-value" for="sl-disabled">40 req/min</output></div>
+        <div class="fd-slider" data-suffix=" req/min">
+          <input type="range" id="sl-disabled" min="0" max="100" value="40" disabled>
+        </div>
+        <p class="fd-field-hint">Set by your plan. Upgrade to raise it.</p>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Stepped: effort</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="sl-effort">Agent effort</label><output class="fd-slider-value" for="sl-effort">Medium</output></div>
+        <div class="fd-slider" data-variant="steps" data-labels="Low,Medium,High">
+          <input type="range" id="sl-effort" min="0" max="2" step="1" value="1" aria-describedby="sl-effort-hint">
+        </div>
+        <p class="fd-field-hint" id="sl-effort-hint">Higher effort reads more sources and costs more credits.</p>
+      </div>
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="sl-fresh">Freshness</label><output class="fd-slider-value" for="sl-fresh">Daily</output></div>
+        <div class="fd-slider" data-variant="steps" data-labels="Hourly,Daily,Weekly,Monthly">
+          <input type="range" id="sl-fresh" min="0" max="3" step="1" value="1">
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Give a slider a visible value (the <code class="fd-code">output</code> in the label row) so people are not asked to guess from the thumb. Drop <code class="fd-code">data-labels</code> on the wrapper for a stepped control with named stops; the ticks are clickable.</li>
+      <li>Use a slider for a position on a scale. If the exact number matters, pair it with a number field.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Combobox -->
+  <section class="doc-section" id="combobox">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Combobox</h2>
+      <p>A text field with a listbox. Type to filter, arrow keys to move, Enter to choose, Escape to close. The selected option shows a check; the multiple variant keeps choices as removable tokens in the field.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" data-height style="--h:340px">
+      <div class="fd-field">
+        <label class="fd-field-label" for="cb-model">Model</label>
+        <div class="fd-combobox" data-fd-combobox data-name="model" data-value="ember-pro">
+          <div class="fd-input-group">
+            <input class="fd-input" id="cb-model" role="combobox" placeholder="Choose a model" autocomplete="off">
+            <span class="fd-input-affix" data-kind="chevron" aria-hidden="true"><i data-icon="chevron-down"></i></span>
+          </div>
+          <div class="fd-listbox" popover="manual" aria-label="Models">
+            <div class="fd-option" data-value="ember-fast"><i data-icon="zap"></i><span class="fd-option-main"><span class="fd-option-label">Ember Fast</span><span class="fd-option-desc">Quick answers for simple extraction</span></span><span class="fd-option-meta">1 cr</span></div>
+            <div class="fd-option" data-value="ember-pro"><i data-icon="sparkles"></i><span class="fd-option-main"><span class="fd-option-label">Ember Pro</span><span class="fd-option-desc">Balanced quality for most runs</span></span><span class="fd-option-meta">4 cr</span></div>
+            <div class="fd-option" data-value="ember-deep"><i data-icon="brain"></i><span class="fd-option-main"><span class="fd-option-label">Ember Deep</span><span class="fd-option-desc">Multi-step reasoning across many pages</span></span><span class="fd-option-meta">12 cr</span></div>
+            <div class="fd-option" data-value="ember-legacy" aria-disabled="true"><i data-icon="clock"></i><span class="fd-option-main"><span class="fd-option-label">Ember v1</span><span class="fd-option-desc">Retired on Oct 1</span></span></div>
+          </div>
+        </div>
+        <p class="fd-field-hint">Credits are charged per page.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="cb-region">Region</label>
+        <div class="fd-combobox" data-fd-combobox data-name="region" data-empty="No regions match your search">
+          <div class="fd-input-group">
+            <span class="fd-input-affix"><i data-icon="map-pin"></i></span>
+            <input class="fd-input" id="cb-region" role="combobox" placeholder="Search regions" autocomplete="off">
+            <span class="fd-input-affix" data-kind="chevron" aria-hidden="true"><i data-icon="chevron-down"></i></span>
+          </div>
+          <div class="fd-listbox" popover="manual" aria-label="Regions">
+            <div role="group" aria-labelledby="cb-region-g1">
+              <div class="fd-listbox-label" id="cb-region-g1">Americas</div>
+              <div class="fd-option" data-value="us-east-1"><span class="fd-option-main"><span class="fd-option-label">US East</span></span><span class="fd-option-meta">us-east-1</span></div>
+              <div class="fd-option" data-value="us-west-2"><span class="fd-option-main"><span class="fd-option-label">US West</span></span><span class="fd-option-meta">us-west-2</span></div>
+              <div class="fd-option" data-value="sa-east-1"><span class="fd-option-main"><span class="fd-option-label">São Paulo</span></span><span class="fd-option-meta">sa-east-1</span></div>
+            </div>
+            <div role="group" aria-labelledby="cb-region-g2">
+              <div class="fd-listbox-label" id="cb-region-g2">Europe</div>
+              <div class="fd-option" data-value="eu-west-1"><span class="fd-option-main"><span class="fd-option-label">Ireland</span></span><span class="fd-option-meta">eu-west-1</span></div>
+              <div class="fd-option" data-value="eu-central-1"><span class="fd-option-main"><span class="fd-option-label">Frankfurt</span></span><span class="fd-option-meta">eu-central-1</span></div>
+            </div>
+            <div role="group" aria-labelledby="cb-region-g3">
+              <div class="fd-listbox-label" id="cb-region-g3">Asia Pacific</div>
+              <div class="fd-option" data-value="ap-south-1"><span class="fd-option-main"><span class="fd-option-label">Mumbai</span></span><span class="fd-option-meta">ap-south-1</span></div>
+              <div class="fd-option" data-value="ap-southeast-1"><span class="fd-option-main"><span class="fd-option-label">Singapore</span></span><span class="fd-option-meta">ap-southeast-1</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="cb-endpoints">Endpoints</label>
+        <div class="fd-combobox" data-fd-combobox data-multiple data-name="endpoints" data-value="/search,/scrape">
+          <div class="fd-tag-input" data-mono>
+            <input class="fd-tag-input-field" id="cb-endpoints" role="combobox" placeholder="Add endpoints" autocomplete="off">
+          </div>
+          <div class="fd-listbox" popover="manual" aria-label="Endpoints">
+            <div class="fd-option" data-value="/search"><span class="fd-option-main"><span class="fd-option-label fd-mono">/search</span><span class="fd-option-desc">Ranked web results</span></span></div>
+            <div class="fd-option" data-value="/scrape"><span class="fd-option-main"><span class="fd-option-label fd-mono">/scrape</span><span class="fd-option-desc">One page, any format</span></span></div>
+            <div class="fd-option" data-value="/crawl"><span class="fd-option-main"><span class="fd-option-label fd-mono">/crawl</span><span class="fd-option-desc">A whole site, followed link by link</span></span></div>
+            <div class="fd-option" data-value="/extract"><span class="fd-option-main"><span class="fd-option-label fd-mono">/extract</span><span class="fd-option-desc">Structured data from your schema</span></span></div>
+            <div class="fd-option" data-value="/agent"><span class="fd-option-main"><span class="fd-option-label fd-mono">/agent</span><span class="fd-option-desc">Open-ended research runs</span></span></div>
+          </div>
+        </div>
+        <p class="fd-field-hint">The key can only call these. Backspace removes the last one.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="cb-disabled">Provider</label>
+        <div class="fd-combobox" data-fd-combobox data-value="apollo">
+          <div class="fd-input-group">
+            <input class="fd-input" id="cb-disabled" role="combobox" disabled>
+            <span class="fd-input-affix" data-kind="chevron" aria-hidden="true"><i data-icon="chevron-down"></i></span>
+          </div>
+          <div class="fd-listbox" popover="manual" aria-label="Providers">
+            <div class="fd-option" data-value="apollo"><span class="fd-option-main"><span class="fd-option-label">Apollo</span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Options live in the markup as <code class="fd-code">role="option"</code> rows with an optional icon, description and mono meta. The listbox uses the Popover API, so it layers above everything and closes on outside clicks; where unsupported it falls back to an absolutely positioned panel.</li>
+      <li>Reach for a native select first. Use a combobox when the list is long enough to need typing, or when each option needs an icon or an explanation.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Tag input -->
+  <section class="doc-section" id="tags">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tag input</h2>
+      <p>For free-form lists: domains, IP ranges, keywords. Enter or a comma adds a tag, Backspace on an empty field removes the last one, and pasted lists split on commas and new lines.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <label class="fd-field-label" for="tg-domains">Allowed domains</label>
+        <div class="fd-tag-input" data-fd-tag-input data-mono data-name="domains" data-value="docs.northwind.dev,blog.northwind.dev" data-pattern="^[a-z0-9-]+(\.[a-z0-9-]+)+$">
+          <input class="fd-tag-input-field" id="tg-domains" placeholder="Add a domain" autocomplete="off" spellcheck="false" aria-describedby="tg-domains-hint">
+        </div>
+        <p class="fd-field-hint" id="tg-domains-hint">Anything that is not a valid domain is shown in red. Try “banana”.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="tg-keywords">Keywords <span class="fd-field-tag">optional</span></label>
+        <div class="fd-tag-input" data-fd-tag-input data-name="keywords" data-max="5">
+          <input class="fd-tag-input-field" id="tg-keywords" placeholder="pricing, enterprise, SOC 2" autocomplete="off">
+        </div>
+        <p class="fd-field-hint">Up to 5 keywords.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="tg-ips">IP allowlist</label>
+        <div class="fd-tag-input" data-fd-tag-input data-size="sm" data-mono data-value="10.0.0.0/24">
+          <input class="fd-tag-input-field" id="tg-ips" placeholder="203.0.113.7" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="tg-disabled">Blocked paths</label>
+        <div class="fd-tag-input" data-fd-tag-input data-mono data-value="/admin,/checkout">
+          <input class="fd-tag-input-field" id="tg-disabled" disabled>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== Choice -->
+  <section class="doc-section" id="choice">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Choice card</h2>
+      <p>A selectable card for options that deserve a title, a sentence and sometimes a price. Selected is one accent hairline, a faint accent wash and a check; it stays a real radio or checkbox underneath.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-field" role="radiogroup" aria-labelledby="ch-plan-label" style="max-width:560px">
+        <span class="fd-field-label" id="ch-plan-label">Plan</span>
+        <div class="fd-choice-group">
+          <label class="fd-choice"><input type="radio" name="ch-plan" value="hobby"><span class="fd-choice-mark"></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Hobby</span><span class="fd-choice-desc">1,000 credits a month for side projects.</span></span>
+            <span class="fd-choice-meta">Free</span></label>
+          <label class="fd-choice"><input type="radio" name="ch-plan" value="standard" checked><span class="fd-choice-mark"></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Standard</span><span class="fd-choice-desc">100,000 credits, 50 concurrent crawls and priority support.</span></span>
+            <span class="fd-choice-meta">$83<small>/mo</small></span></label>
+          <label class="fd-choice"><input type="radio" name="ch-plan" value="growth"><span class="fd-choice-mark"></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Growth</span><span class="fd-choice-desc">500,000 credits and a dedicated Slack channel.</span></span>
+            <span class="fd-choice-meta">$333<small>/mo</small></span></label>
+          <label class="fd-choice"><input type="radio" name="ch-plan" value="scale" disabled><span class="fd-choice-mark"></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Scale</span><span class="fd-choice-desc">Talk to us about volume pricing.</span></span>
+            <span class="fd-choice-meta">Custom</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-field" role="group" aria-labelledby="ch-ep-label">
+        <span class="fd-field-label" id="ch-ep-label">Endpoints this key can call</span>
+        <div class="fd-choice-group" data-layout="grid">
+          <label class="fd-choice"><input type="checkbox" name="ch-ep" value="search" checked><span class="fd-choice-mark"></span>
+            <span class="fd-choice-meta"><span class="fd-mono">/search</span></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Search</span><span class="fd-choice-desc">Query the web and get ranked results.</span></span></label>
+          <label class="fd-choice"><input type="checkbox" name="ch-ep" value="scrape" checked><span class="fd-choice-mark"></span>
+            <span class="fd-choice-meta"><span class="fd-mono">/scrape</span></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Scrape</span><span class="fd-choice-desc">Turn one page into clean markdown or JSON.</span></span></label>
+          <label class="fd-choice"><input type="checkbox" name="ch-ep" value="crawl"><span class="fd-choice-mark"></span>
+            <span class="fd-choice-meta"><span class="fd-mono">/crawl</span></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Crawl</span><span class="fd-choice-desc">Follow links across a whole site.</span></span></label>
+          <label class="fd-choice"><input type="checkbox" name="ch-ep" value="agent" disabled><span class="fd-choice-mark"></span>
+            <span class="fd-choice-meta"><span class="fd-mono">/agent</span></span>
+            <span class="fd-choice-body"><span class="fd-choice-title">Agent</span><span class="fd-choice-desc">Not available on your plan.</span></span></label>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Put the whole decision in the card: a title, one sentence, and at most one figure on the right. Use the list layout for a handful of options and the grid layout for scannable sets.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Secret -->
+  <section class="doc-section" id="secret">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Secret and copy field</h2>
+      <p>Keys and signing secrets stay masked until someone asks. Reveal swaps in the real value, copy confirms with a check for a moment, rotate hands the decision back to your app.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-stack" style="max-width:640px">
+        <div class="fd-secret" data-value="em-227cd9a41c3b8e07f52d6a9144b0f16" data-noun="API key" role="group" aria-label="Default API key">
+          <code class="fd-secret-value" data-tone="accent"></code>
+          <div class="fd-secret-actions">
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show API key"><i data-icon="eye"></i></button>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <div class="fd-field">
+          <span class="fd-field-label" id="sec-hook-label">Webhook signing secret</span>
+          <div class="fd-secret" data-value="whsec_9d2e7a41b6c04f58a3e17c92d0b85f64" data-mask="full" data-noun="signing secret" data-demo-rotate role="group" aria-labelledby="sec-hook-label">
+            <code class="fd-secret-value"></code>
+            <div class="fd-secret-actions">
+              <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show signing secret"><i data-icon="eye"></i></button>
+              <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy signing secret"><i data-icon="copy"></i></button>
+              <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="rotate" aria-label="Rotate signing secret"><i data-icon="rotate-ccw"></i></button>
+            </div>
+          </div>
+          <p class="fd-field-hint">Use this secret to verify webhook signatures from Ember. Rotating it invalidates the old one at once.</p>
+        </div>
+        <div class="fd-secret" data-value="em-live-4f2a9c07d1" data-noun="key ID">
+          <code class="fd-secret-value"></code>
+          <div class="fd-secret-actions">
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy key ID"><i data-icon="copy"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A partial mask keeps the first and last eight characters so keys stay recognisable. Use <code class="fd-code">data-mask="full"</code> for secrets that identify nothing. Copying always copies the real value, masked or not, and fires <code class="fd-code">fd:copy</code>.</li>
+    </ul>
+
+    <h3 class="doc-sub">Copy field</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-copy-field" data-value="https://mcp.ember.dev/v2/mcp-oauth" data-noun="URL">
+        <span class="fd-copy-field-label">URL</span>
+        <div class="fd-copy-field-actions"><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy URL"><i data-icon="copy"></i></button></div>
+        <code class="fd-copy-field-value"></code>
+      </div>
+      <div class="fd-copy-field" data-value="em-227cd9a41c3b8e07f52d6a9144b0f16" data-mask="partial" data-noun="API key" data-state="masked">
+        <span class="fd-copy-field-label">EMBER_API_KEY</span>
+        <div class="fd-copy-field-actions">
+          <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show API key"><i data-icon="eye"></i></button>
+          <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key"><i data-icon="copy"></i></button>
+        </div>
+        <code class="fd-copy-field-value"></code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== Dropzone -->
+  <section class="doc-section" id="dropzone">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Dropzone</h2>
+      <p>A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Dragging over it turns the line accent, tints the area and lifts the icon. Files appear as rows with progress.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-stack" style="max-width:640px">
+        <label class="fd-dropzone" data-fd-dropzone data-list="#dz-files" data-max-mb="50">
+          <input type="file" multiple accept=".pdf,.docx,.xlsx,.html,.txt,.md">
+          <span class="fd-dropzone-icon"><i data-icon="cloud-upload"></i></span>
+          <span class="fd-dropzone-text">
+            <span class="fd-dropzone-title">Drop PDFs or documents</span>
+            <span class="fd-dropzone-hint">PDF, DOCX, XLSX, HTML and Markdown, up to 50 MB each</span>
+          </span>
+        </label>
+        <ul class="fd-filelist" id="dz-files"></ul>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Drop or choose a file to see the demo list: it simulates progress, and rejects files that are the wrong type or too large. In a real app, cancel <code class="fd-code">fd:files</code> and report progress with <code class="fd-code">setFileProgress()</code>.</li>
+    </ul>
+
+    <h3 class="doc-sub">File rows and compact layout</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-stack" style="max-width:640px">
+        <label class="fd-dropzone" data-fd-dropzone data-layout="inline" data-list="#dz-inline-files">
+          <input type="file" accept="image/*">
+          <span class="fd-dropzone-icon"><i data-icon="upload"></i></span>
+          <span class="fd-dropzone-text">
+            <span class="fd-dropzone-title">Upload a logo</span>
+            <span class="fd-dropzone-hint">PNG or SVG, at least 256 px square</span>
+          </span>
+        </label>
+        <ul class="fd-filelist" id="dz-inline-files">
+          <li class="fd-file" data-state="uploading" style="--fd-progress:64">
+            <span class="fd-file-icon"><i data-icon="file-text"></i></span>
+            <div class="fd-file-main">
+              <div class="fd-file-name">q3-pricing-report.pdf</div>
+              <div class="fd-file-meta"><span class="fd-file-size">2.4 MB</span><span class="fd-file-status">Uploading 64%</span></div>
+              <div class="fd-file-bar" role="progressbar" aria-label="Uploading q3-pricing-report.pdf" aria-valuemin="0" aria-valuemax="100" aria-valuenow="64"><span></span></div>
+            </div>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Remove q3-pricing-report.pdf" data-fd-file-remove><i data-icon="x"></i></button>
+          </li>
+          <li class="fd-file" data-state="done" style="--fd-progress:100">
+            <span class="fd-file-icon"><i data-icon="table"></i></span>
+            <div class="fd-file-main">
+              <div class="fd-file-name">competitor-prices.xlsx</div>
+              <div class="fd-file-meta"><span class="fd-file-size">318 KB</span><span class="fd-file-status"><i data-icon="circle-check"></i><span>Ready</span></span></div>
+            </div>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Remove competitor-prices.xlsx" data-fd-file-remove><i data-icon="x"></i></button>
+          </li>
+          <li class="fd-file" data-state="error">
+            <span class="fd-file-icon"><i data-icon="file"></i></span>
+            <div class="fd-file-main">
+              <div class="fd-file-name">archive.zip</div>
+              <div class="fd-file-meta"><span class="fd-file-size">84 MB</span><span class="fd-file-status"><i data-icon="circle-alert"></i><span>Larger than 50 MB</span></span></div>
+            </div>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Remove archive.zip" data-fd-file-remove><i data-icon="x"></i></button>
+          </li>
+        </ul>
+        <label class="fd-dropzone" data-fd-dropzone aria-disabled="true" data-layout="inline">
+          <input type="file" disabled>
+          <span class="fd-dropzone-icon"><i data-icon="cloud-upload"></i></span>
+          <span class="fd-dropzone-text">
+            <span class="fd-dropzone-title">Uploads are paused</span>
+            <span class="fd-dropzone-hint">Add a payment method to keep parsing files.</span>
+          </span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== OTP -->
+  <section class="doc-section" id="otp">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">One-time code</h2>
+      <p>Six single-character boxes that behave like one field. Typing advances, Backspace steps back, arrow keys move, and pasting a code fills every box. Autofill from SMS lands in the first.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <span class="fd-field-label" id="otp-label">Verification code</span>
+        <div class="fd-otp" id="otp-demo" data-fd-otp data-length="6" role="group" aria-labelledby="otp-label">
+          <input aria-label="Digit 1 of 6"><input aria-label="Digit 2 of 6"><input aria-label="Digit 3 of 6">
+          <span class="fd-otp-sep" aria-hidden="true"></span>
+          <input aria-label="Digit 4 of 6"><input aria-label="Digit 5 of 6"><input aria-label="Digit 6 of 6">
+        </div>
+        <p class="fd-field-hint" id="otp-hint">Enter the 6-digit code from your authenticator app. For this demo the code is <span class="fd-mono">482913</span>.</p>
+        <p class="fd-field-error" id="otp-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>That code is not right. Check the app and try again.</span></p>
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label" id="otp-invalid-label">Code with an error</span>
+        <div class="fd-otp" data-fd-otp data-length="6" role="group" aria-labelledby="otp-invalid-label">
+          <input value="4" aria-invalid="true"><input value="8" aria-invalid="true"><input value="2" aria-invalid="true"><input value="9" aria-invalid="true"><input value="0" aria-invalid="true"><input value="1" aria-invalid="true">
+        </div>
+        <p class="fd-field-error"><i data-icon="circle-alert" data-size="14"></i><span>This code expired. Request a new one.</span></p>
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label" id="otp-sm-label">Four digits, small</span>
+        <div class="fd-otp" data-fd-otp data-length="4" data-size="sm" role="group" aria-labelledby="otp-sm-label"></div>
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label" id="otp-dis-label">Disabled</span>
+        <div class="fd-otp" data-fd-otp data-length="6" role="group" aria-labelledby="otp-dis-label">
+          <input disabled><input disabled><input disabled><input disabled><input disabled><input disabled>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">fd:change</code> fires on every edit with <code class="fd-code">{ value, complete }</code>. Verify when <code class="fd-code">complete</code> is true; do not make people press a button after the sixth digit. Leave out the inputs and set <code class="fd-code">data-length</code> to have them generated.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Rows and actions -->
+  <section class="doc-section" id="rows">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Form rows and actions</h2>
+      <p>Settings pages are lists of rows: the label and what it does on the left, the control on the right. A row whose control needs width stacks the control under the text. Both stack on phones.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-cq" style="max-width:760px">
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><span class="fd-form-row-label">Team name</span><span class="fd-form-row-desc">Update your team's display name.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-input-pair"><input class="fd-input" aria-label="Team name" value="Northwind Data"><button type="button" class="fd-btn" disabled>Save</button></div>
+          </div>
+        </div>
+        <div class="fd-form-row">
+          <div class="fd-form-row-text"><span class="fd-form-row-label">Appearance</span><span class="fd-form-row-desc">Choose light, dark, or follow your system preference.</span></div>
+          <div class="fd-form-row-control">
+            <label class="fd-select"><span class="fd-sr-only">Appearance</span><select><option>System</option><option>Light</option><option>Dark</option></select></label>
+          </div>
+        </div>
+        <div class="fd-form-row">
+          <div class="fd-form-row-text"><span class="fd-form-row-label">Privacy mode</span><span class="fd-form-row-desc">Hide sensitive account details while screen sharing. Blurs your email in the sidebar; hover to reveal it.</span></div>
+          <div class="fd-form-row-control"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Privacy mode"><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-form-row">
+          <div class="fd-form-row-text"><span class="fd-form-row-label">Change password</span><span class="fd-form-row-desc">You sign in with Google. To also sign in with a password, we'll email you a link to set one.</span></div>
+          <div class="fd-form-row-control"><button type="button" class="fd-btn"><i data-icon="key-round"></i><span>Email me a link</span></button></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Actions and the unsaved changes bar</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-form-actions">
+        <button type="button" class="fd-btn" data-variant="ghost">Cancel</button>
+        <button type="button" class="fd-btn" data-variant="primary">Save changes</button>
+      </div>
+      <hr class="fd-divider">
+      <div class="fd-form-actions" data-align="between">
+        <button type="button" class="fd-btn" data-variant="danger-soft"><i data-icon="trash-2"></i><span>Delete team</span></button>
+        <div class="fd-row">
+          <button type="button" class="fd-btn" data-variant="ghost">Discard</button>
+          <button type="button" class="fd-btn" data-variant="primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <form class="fd-form" id="unsaved-demo" data-fd-dirty style="max-width:560px">
+        <div class="fd-field">
+          <label class="fd-field-label" for="us-name">Display name</label>
+          <input class="fd-input" id="us-name" name="name" value="Maya Okafor" autocomplete="off">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="us-bio">Bio <span class="fd-field-tag">optional</span></label>
+          <textarea class="fd-textarea" id="us-bio" name="bio" rows="2" placeholder="What do you build with Ember?"></textarea>
+          <p class="fd-field-hint">Edit either field: the bar appears when something changes and goes away when it matches the saved values again.</p>
+        </div>
+        <label class="fd-switch"><input type="checkbox" role="switch" name="digest" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Weekly usage digest</span></span></label>
+        <div class="fd-form-actions" data-variant="sticky" hidden>
+          <span class="fd-form-actions-text">You have unsaved changes</span>
+          <button type="reset" class="fd-btn" data-variant="ghost">Discard</button>
+          <button type="submit" class="fd-btn" data-variant="primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li>Actions align right, primary last. A destructive action sits alone on the left so it is never next to the primary. The sticky bar floats at the bottom of the form with the raised surface; add <code class="fd-code">data-fd-dirty</code> to the form and it shows and hides itself.</li>
+      <li>After saving, call <code class="fd-code">markClean(form)</code> to take the current values as the new baseline.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Validation -->
+  <section class="doc-section" id="validation">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Validation</h2>
+      <p>Built on the browser's constraint validation: write <code class="fd-code">required</code>, <code class="fd-code">type</code>, <code class="fd-code">pattern</code> and <code class="fd-code">minlength</code> as usual, add <code class="fd-code">data-fd-validate</code> to the form, and errors appear on blur and on submit. Once a field has been touched it re-checks as you type, so errors clear the moment they are fixed.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <form class="fd-form" id="validation-demo" data-fd-validate style="max-width:520px">
+        <div class="fd-field">
+          <label class="fd-field-label" for="va-name" data-required>Team name</label>
+          <input class="fd-input" id="va-name" name="name" required minlength="3" autocomplete="off" placeholder="e.g. Northwind Data" data-error-required="Enter a team name." data-error-short="Team names need at least 3 characters.">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="va-slug" data-required>Team slug</label>
+          <div class="fd-input-group">
+            <span class="fd-input-affix" data-kind="tag">ember.dev/</span>
+            <input class="fd-input" id="va-slug" name="slug" required pattern="[a-z0-9\-]{3,32}" title="Use 3 to 32 lowercase letters, numbers or dashes." autocomplete="off" placeholder="northwind-data" spellcheck="false" aria-describedby="va-slug-hint" data-error-required="Choose a slug for your team URL.">
+          </div>
+          <p class="fd-field-hint" id="va-slug-hint">3 to 32 lowercase letters, numbers or dashes. “northwind” is taken.</p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="va-email" data-required>Owner email</label>
+          <input class="fd-input" type="email" id="va-email" name="email" required autocomplete="off" placeholder="maya@northwind.dev" data-error-required="Enter the email address of the team owner.">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="va-region" data-required>Data region</label>
+          <div class="fd-select" data-variant="outline">
+            <select id="va-region" name="region" required data-error-required="Choose where your data should live.">
+              <option value="">Choose a region</option>
+              <option value="us">United States</option>
+              <option value="eu">European Union</option>
+              <option value="ap">Asia Pacific</option>
+            </select>
+          </div>
+        </div>
+        <div class="fd-field">
+          <label class="fd-checkbox"><input type="checkbox" name="terms" required data-error-required="Accept the terms to create your team."><span class="fd-checkbox-box"></span>
+            <span class="fd-checkbox-text"><span class="fd-checkbox-label">I agree to the terms of service</span><span class="fd-checkbox-desc">You can read them before you accept.</span></span></label>
+        </div>
+        <div class="fd-form-actions">
+          <button type="reset" class="fd-btn" data-variant="ghost">Reset</button>
+          <button type="submit" class="fd-btn" data-variant="primary" id="va-submit"><span>Create team</span></button>
+        </div>
+        <p class="fd-field-hint" id="va-status" role="status" hidden></p>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li>Messages come from the browser's validity state. Override any of them in the markup with <code class="fd-code">data-error-required</code>, <code class="fd-code">data-error-type</code>, <code class="fd-code">data-error-pattern</code> or <code class="fd-code">data-error-short</code> so they say what to change. For checks only a server can make, call <code class="fd-code">setCustomValidity()</code> and the same error slot shows it.</li>
+      <li>On submit the first invalid control takes focus and <code class="fd-code">fd:invalid</code> fires; a clean form fires <code class="fd-code">fd:valid</code> and is submitted as normal.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Reference -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Behaviour</h2>
+      <p>Everything is wired by data attributes and delegated listeners, so markup you insert later works. Custom controls announce changes with bubbling events; native controls keep their native <code class="fd-code">input</code> and <code class="fd-code">change</code>.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Event</th><th>Detail</th><th>Fired by</th></tr></thead>
+      <tbody>
+        <tr><td>fd:change</td><td>{ value }</td><td>combobox (string or array), tag input (array), number, slider, search, dropzone (files)</td></tr>
+        <tr><td>fd:change</td><td>{ value, complete }</td><td>one-time code</td></tr>
+        <tr><td>fd:select</td><td>{ value, item }</td><td>combobox, when an option is chosen</td></tr>
+        <tr><td>fd:open · fd:close</td><td>none</td><td>combobox listbox</td></tr>
+        <tr><td>fd:copy</td><td>{ value }</td><td>secret, copy field</td></tr>
+        <tr><td>fd:rotate</td><td>none</td><td>secret rotate button; answer with <span class="fd-mono">setSecret(el, value)</span></td></tr>
+        <tr><td>fd:files</td><td>{ files, rows }</td><td>dropzone; cancelable, so you can run the upload yourself</td></tr>
+        <tr><td>fd:invalid · fd:valid</td><td>{ fields }</td><td>form[data-fd-validate] on submit</td></tr>
+        <tr><td>fd:dirty</td><td>{ dirty }</td><td>form[data-fd-dirty]</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================================================================== Composition: settings -->
+  <section class="doc-section" id="settings-form">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Composition: settings form</h2>
+      <p>The pieces together: sections divided by hairlines, rows for single settings, stacked rows for wide controls, a switch table, secrets, and a bar that appears when anything changes. Change a value to see it.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <form class="fd-cq" id="settings-demo" data-fd-dirty data-fd-validate style="max-width:760px; margin-inline:auto; width:100%">
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><label class="fd-form-row-label" for="st-name">Team name</label><span class="fd-form-row-desc">Update your team's display name.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-input-pair"><input class="fd-input" id="st-name" name="name" value="Northwind Data" required autocomplete="off" data-error-required="Enter a team name."><button type="button" class="fd-btn">Save</button></div>
+          </div>
+        </div>
+
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><label class="fd-form-row-label" for="st-slug">Team slug</label><span class="fd-form-row-desc">An optional vanity name for your team's URLs. Leave it blank to use the team ID.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-field">
+              <div class="fd-input-pair">
+                <input class="fd-input" id="st-slug" name="slug" placeholder="e.g. northwind" pattern="[a-z0-9\-]{3,32}" title="Use 3 to 32 lowercase letters, numbers or dashes." autocomplete="off" spellcheck="false" aria-describedby="st-slug-hint">
+                <button type="button" class="fd-btn">Save</button>
+              </div>
+              <p class="fd-field-hint" id="st-slug-hint" data-mono>ember.dev/app/t/team_8fK2xQvLm/usage</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><label class="fd-form-row-label" for="st-invite">Invite team members</label><span class="fd-form-row-desc">Add new members to your team.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-field">
+              <div class="fd-input-pair">
+                <input class="fd-input" type="email" id="st-invite" placeholder="Enter email address" autocomplete="off" aria-describedby="st-invite-hint">
+                <label class="fd-select"><span class="fd-sr-only">Role</span><select><option>Member</option><option>Admin</option><option>Billing</option></select></label>
+                <button type="button" class="fd-btn"><i data-icon="mail"></i><span>Send invite</span></button>
+              </div>
+              <p class="fd-field-hint" id="st-invite-hint">Invited members will receive an email with instructions to join your team.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><span class="fd-form-row-label" id="st-defaults-label">Crawl defaults</span><span class="fd-form-row-desc">Used when a request does not set its own limits.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-form-cols">
+              <div class="fd-field">
+                <div class="fd-field-head"><label class="fd-field-label" for="st-depth">Max depth</label><output class="fd-slider-value" for="st-depth">3</output></div>
+                <div class="fd-slider"><input type="range" id="st-depth" name="depth" min="1" max="10" value="3"></div>
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="st-conc">Concurrent crawls</label>
+                <div class="fd-number">
+                  <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease concurrent crawls"><i data-icon="minus"></i></button>
+                  <input class="fd-number-input" type="number" id="st-conc" name="concurrency" value="5" min="1" max="20">
+                  <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase concurrent crawls"><i data-icon="plus"></i></button>
+                </div>
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="st-format">Default format</label>
+                <div class="fd-select" data-variant="outline"><select id="st-format" name="format"><option>Markdown</option><option>HTML</option><option>Structured JSON</option></select></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><span class="fd-form-row-label">Your notifications</span><span class="fd-form-row-desc">Choose what shows up in Ember and as desktop alerts. These settings are personal, so teammates keep their own.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-matrix" data-cols="2">
+              <div class="fd-matrix-head"><span>Category</span><span class="fd-matrix-cell">In-app</span><span class="fd-matrix-cell">Browser</span></div>
+              <div class="fd-matrix-row">
+                <div class="fd-matrix-text"><span class="fd-matrix-label">Billing &amp; payments</span><span class="fd-matrix-desc">Failed payments and plan changes.</span></div>
+                <div class="fd-matrix-cell"><span class="fd-switch-lock"><i data-icon="lock"></i>Always</span></div>
+                <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" name="n-billing-browser" aria-label="Billing and payments, browser" checked><span class="fd-switch-track"></span></label></div>
+              </div>
+              <div class="fd-matrix-row">
+                <div class="fd-matrix-text"><span class="fd-matrix-label">Usage &amp; limits</span><span class="fd-matrix-desc">Credit thresholds and rate limits.</span></div>
+                <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" name="n-usage-app" aria-label="Usage and limits, in-app" checked><span class="fd-switch-track"></span></label></div>
+                <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" name="n-usage-browser" aria-label="Usage and limits, browser"><span class="fd-switch-track"></span></label></div>
+              </div>
+              <div class="fd-matrix-row">
+                <div class="fd-matrix-text"><span class="fd-matrix-label">Monitors</span><span class="fd-matrix-desc">Changes on the pages you watch.</span></div>
+                <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" name="n-monitors-app" aria-label="Monitors, in-app" checked><span class="fd-switch-track"></span></label></div>
+                <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" name="n-monitors-browser" aria-label="Monitors, browser" checked><span class="fd-switch-track"></span></label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fd-form-row" data-layout="stack">
+          <div class="fd-form-row-text"><span class="fd-form-row-label" id="st-secret-label">Webhook signing secret</span><span class="fd-form-row-desc">Use this secret to verify webhook signatures from Ember.</span></div>
+          <div class="fd-form-row-control">
+            <div class="fd-field">
+              <div class="fd-secret" role="group" aria-labelledby="st-secret-label" data-value="whsec_3b81c0e5a7d24f69b2e8a1d5c7f04e93" data-mask="full" data-noun="signing secret" data-demo-rotate>
+                <code class="fd-secret-value"></code>
+                <div class="fd-secret-actions">
+                  <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show signing secret"><i data-icon="eye"></i></button>
+                  <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy signing secret"><i data-icon="copy"></i></button>
+                  <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="rotate" aria-label="Rotate signing secret"><i data-icon="rotate-ccw"></i></button>
+                </div>
+              </div>
+              <p class="fd-field-hint">Keep this secret safe. Rotating it invalidates the old one immediately.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fd-form-row">
+          <div class="fd-form-row-text"><span class="fd-form-row-label">Delete team</span><span class="fd-form-row-desc">Once you delete a team, there is no going back. Please be certain.</span></div>
+          <div class="fd-form-row-control"><button type="button" class="fd-btn" data-variant="danger">Delete team</button></div>
+        </div>
+
+        <div class="fd-form-actions" data-variant="sticky" hidden>
+          <span class="fd-form-actions-text">You have unsaved changes</span>
+          <button type="reset" class="fd-btn" data-variant="ghost">Discard</button>
+          <button type="submit" class="fd-btn" data-variant="primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================================================================== Composition: create API key -->
+  <section class="doc-section" id="create-key">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Composition: create an API key</h2>
+      <p>A short form with a decision in it. Choice cards for the permission, a combobox for scope, a tag input for network limits; then, once created, the key is shown once with a copy action.</p>
+    </div>
+    <div class="doc-pair">
+      <div>
+        <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+          <form class="fd-form" id="key-demo" data-fd-validate style="max-width:520px; margin-inline:auto; width:100%">
+            <div>
+              <h3 class="fd-title">Create API key</h3>
+              <p class="fd-small fd-muted">Keys authenticate requests to the Ember API for this team.</p>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ck-name" data-required>Key name</label>
+              <input class="fd-input" id="ck-name" name="name" required maxlength="40" placeholder="e.g. Production crawler" autocomplete="off" data-error-required="Name the key so you can find it later.">
+            </div>
+            <div class="fd-field" role="radiogroup" aria-labelledby="ck-perm-label">
+              <span class="fd-field-label" id="ck-perm-label">Permissions</span>
+              <div class="fd-choice-group">
+                <label class="fd-choice"><input type="radio" name="permission" value="full" checked><span class="fd-choice-mark"></span>
+                  <span class="fd-choice-body"><span class="fd-choice-title">Full access</span><span class="fd-choice-desc">Call every endpoint and manage monitors.</span></span></label>
+                <label class="fd-choice"><input type="radio" name="permission" value="read"><span class="fd-choice-mark"></span>
+                  <span class="fd-choice-body"><span class="fd-choice-title">Read only</span><span class="fd-choice-desc">Fetch results and logs. Cannot start runs.</span></span></label>
+                <label class="fd-choice"><input type="radio" name="permission" value="custom"><span class="fd-choice-mark"></span>
+                  <span class="fd-choice-body"><span class="fd-choice-title">Restricted</span><span class="fd-choice-desc">Choose the endpoints this key may call.</span></span></label>
+              </div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ck-endpoints">Endpoints <span class="fd-field-tag">for restricted keys</span></label>
+              <div class="fd-combobox" data-fd-combobox data-multiple data-name="endpoints" data-value="/scrape">
+                <div class="fd-tag-input" data-mono>
+                  <input class="fd-tag-input-field" id="ck-endpoints" role="combobox" placeholder="Add endpoints" autocomplete="off">
+                </div>
+                <div class="fd-listbox" popover="manual" aria-label="Endpoints">
+                  <div class="fd-option" data-value="/search"><span class="fd-option-main"><span class="fd-option-label fd-mono">/search</span><span class="fd-option-desc">Ranked web results</span></span></div>
+                  <div class="fd-option" data-value="/scrape"><span class="fd-option-main"><span class="fd-option-label fd-mono">/scrape</span><span class="fd-option-desc">One page, any format</span></span></div>
+                  <div class="fd-option" data-value="/crawl"><span class="fd-option-main"><span class="fd-option-label fd-mono">/crawl</span><span class="fd-option-desc">A whole site</span></span></div>
+                  <div class="fd-option" data-value="/extract"><span class="fd-option-main"><span class="fd-option-label fd-mono">/extract</span><span class="fd-option-desc">Structured data</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="fd-form-cols">
+              <div class="fd-field">
+                <label class="fd-field-label" for="ck-expiry">Expires</label>
+                <div class="fd-select" data-variant="outline">
+                  <select id="ck-expiry" name="expiry"><option>In 30 days</option><option selected>In 90 days</option><option>In 1 year</option><option>Never</option></select>
+                </div>
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="ck-limit">Monthly credit limit</label>
+                <div class="fd-input-group">
+                  <input class="fd-input" type="number" id="ck-limit" name="limit" value="10000" min="100" step="100">
+                  <span class="fd-input-affix" data-kind="unit">credits</span>
+                </div>
+              </div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ck-ips">IP allowlist <span class="fd-field-tag">optional</span></label>
+              <div class="fd-tag-input" data-fd-tag-input data-mono data-name="ips" data-pattern="^\d{1,3}(\.\d{1,3}){3}(/\d{1,2})?$">
+                <input class="fd-tag-input-field" id="ck-ips" placeholder="203.0.113.0/24" autocomplete="off" spellcheck="false" aria-describedby="ck-ips-hint">
+              </div>
+              <p class="fd-field-hint" id="ck-ips-hint">Requests from other addresses are rejected. Leave empty to allow any.</p>
+            </div>
+            <div class="fd-form-actions">
+              <button type="reset" class="fd-btn" data-variant="ghost">Cancel</button>
+              <button type="submit" class="fd-btn" data-variant="primary"><i data-icon="key-round"></i><span>Create key</span></button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div>
+        <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+          <div class="fd-form" id="key-created" style="max-width:520px; margin-inline:auto; width:100%">
+            <div>
+              <h3 class="fd-title">Key created</h3>
+              <p class="fd-small fd-muted">Copy it now. For your security, you won't be able to see it again.</p>
+            </div>
+            <div class="fd-field">
+              <span class="fd-field-label" id="kc-label">Production crawler</span>
+              <div class="fd-secret" role="group" aria-labelledby="kc-label" data-value="em-8f3a21c7d95e4b60a1c8e72f5d3094b1" data-state="revealed" data-noun="API key">
+                <code class="fd-secret-value" data-tone="accent"></code>
+                <div class="fd-secret-actions">
+                  <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Hide API key"><i data-icon="eye-off"></i></button>
+                  <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key"><i data-icon="copy"></i></button>
+                </div>
+              </div>
+              <p class="fd-field-hint">Created Nov 14, 2026 · Expires Feb 12, 2027 · 10,000 credits a month</p>
+            </div>
+            <div class="fd-copy-field" data-value="curl https://api.ember.dev/v1/scrape -H &quot;Authorization: Bearer $EMBER_API_KEY&quot;" data-noun="command">
+              <span class="fd-copy-field-label">Try it</span>
+              <div class="fd-copy-field-actions"><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy command"><i data-icon="copy"></i></button></div>
+              <code class="fd-copy-field-value"></code>
+            </div>
+            <div class="fd-form-actions">
+              <button type="button" class="fd-btn" data-variant="primary">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Show a secret once, in the same place the form was, with the action that matters (copy) closest to it. Everything else on the page waits until it is dismissed.</li>
+    </ul>
+  </section>
+</main>
+
+<script type="module">
+  // Demo glue only. Everything the components do on their own is in fire/js/forms.js.
+  import { markClean, setSecret, setOtpInvalid, resetOtp } from '../fire/js/forms.js';
+
+  const hex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => b.toString(16).padStart(2, '0')).join('').slice(0, n);
+
+  // Rotate a signing secret.
+  document.addEventListener('fd:rotate', (event) => {
+    const el = event.target.closest('[data-demo-rotate]');
+    if (el) setSecret(el, `whsec_${hex(32)}`);
+  });
+
+  // One-time code: the demo code is 482913.
+  const otp = document.getElementById('otp-demo');
+  const otpError = document.getElementById('otp-error');
+  otp?.addEventListener('fd:change', (event) => {
+    if (!event.detail.complete) { otpError.hidden = true; return; }
+    const ok = event.detail.value === '482913';
+    setOtpInvalid(otp, !ok);
+    otpError.hidden = ok;
+    if (!ok) setTimeout(() => resetOtp(otp), 1400);
+  });
+
+  // Unsaved changes bar and the settings composition.
+  for (const id of ['unsaved-demo', 'settings-demo']) {
+    const form = document.getElementById(id);
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const button = event.submitter;
+      button?.setAttribute('aria-busy', 'true');
+      setTimeout(() => { button?.removeAttribute('aria-busy'); markClean(form); }, 700);
+    });
+  }
+
+  // Validation demo: a server-only check, then a calm success state.
+  const validation = document.getElementById('validation-demo');
+  const slug = document.getElementById('va-slug');
+  slug?.addEventListener('input', () => slug.setCustomValidity(slug.value === 'northwind' ? 'That slug is taken. Try northwind-data.' : ''));
+  validation?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!validation.checkValidity()) return;
+    const status = document.getElementById('va-status');
+    const button = document.getElementById('va-submit');
+    button.setAttribute('aria-busy', 'true');
+    setTimeout(() => {
+      button.removeAttribute('aria-busy');
+      status.hidden = false;
+      status.className = 'fd-field-hint fd-success-text';
+      status.textContent = 'Team created. This is a demo, so nothing was saved.';
+    }, 800);
+  });
+  validation?.addEventListener('reset', () => { document.getElementById('va-status').hidden = true; });
+
+  // Create-key form: no navigation.
+  document.getElementById('key-demo')?.addEventListener('submit', (event) => event.preventDefault());
+</script>
+</body>
+</html>

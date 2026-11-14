@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charts · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="charts">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Charts</h1>
+    <p class="doc-lede">Quiet instruments. A hairline grid, mono axes, one accent series and nothing else to look at. They read fast, resize cleanly and tell you the number the moment you point at it.</p>
+  </header>
+
+  <section class="doc-section" id="line">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Line and area</h2>
+      <p>Use a line for a value that moves continuously and an area when you also want the eye to feel its volume. Series 1 is the accent, series 2 is ink. Lines draw in once, the first time they scroll into view.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" data-fd-chart="area" data-height="240" data-label="Credits used per day, last 30 days">
+        <script type="application/json">
+      {
+        "labels": ["Oct 16", "Oct 17", "Oct 18", "Oct 19", "Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29", "Oct 30", "Oct 31", "Nov 01", "Nov 02", "Nov 03", "Nov 04", "Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+        "titles": ["Oct 16, 2026", "Oct 17, 2026", "Oct 18, 2026", "Oct 19, 2026", "Oct 20, 2026", "Oct 21, 2026", "Oct 22, 2026", "Oct 23, 2026", "Oct 24, 2026", "Oct 25, 2026", "Oct 26, 2026", "Oct 27, 2026", "Oct 28, 2026", "Oct 29, 2026", "Oct 30, 2026", "Oct 31, 2026", "Nov 01, 2026", "Nov 02, 2026", "Nov 03, 2026", "Nov 04, 2026", "Nov 05, 2026", "Nov 06, 2026", "Nov 07, 2026", "Nov 08, 2026", "Nov 09, 2026", "Nov 10, 2026", "Nov 11, 2026", "Nov 12, 2026", "Nov 13, 2026", "Nov 14, 2026"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "Credits used",
+            "values": [4598, 2016, 2099, 5600, 5800, 6055, 5977, 5234, 2418, 2168, 5538, 5806, 7009, 6510, 5586, 2507, 2137, 6297, 6422, 13696, 6604, 6853, 2586, 2215, 6226, 6856, 7703, 7813, 6219, 3182]
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" data-fd-chart="line" data-height="220" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM", "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM"],
+        "yFormat": "ms",
+        "series": [
+          {
+            "name": "p50",
+            "values": [178, 174, 178, 187, 178, 172, 181, 181, 195, 218, 220, 228, 224, 243, 240, 229, 230, 230, 218, 213, 197, 200, 182, 178]
+          },
+          {
+            "name": "p95",
+            "values": [607, 586, 663, 625, 649, 574, 604, 701, 726, 750, 802, 881, 910, 1024, 963, 881, 874, 881, 902, 839, 776, 755, 580, 559]
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Y labels are compact (<code class="fd-code">1.2k</code>, <code class="fd-code">3.4M</code>) and right-aligned; x labels thin themselves so they never collide, and tooltips can carry a longer <code class="fd-code">titles</code> entry than the axis label.</li>
+      <li>The area fill is the series colour at 12% fading to nothing. It is the only gradient in the system.</li>
+      <li>Set <code class="fd-code">yFormat</code> to <code class="fd-code">number</code>, <code class="fd-code">compact</code>, <code class="fd-code">percent</code>, <code class="fd-code">ms</code> or <code class="fd-code">credits</code>.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="threshold">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Thresholds and live data</h2>
+      <p>When a number has a limit, draw the limit on the chart and label it where it sits, in mono capitals. A live series ends in a dot with a soft pulsing ring, the only loop in the family.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" data-fd-chart="line" data-height="260" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["3 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "6 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "9 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "12 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "3 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "6 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "9 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "12 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        "titles": ["Nov 13, 2026, 3:00 PM - 3:10 PM", "Nov 13, 2026, 3:10 PM - 3:20 PM", "Nov 13, 2026, 3:20 PM - 3:30 PM", "Nov 13, 2026, 3:30 PM - 3:40 PM", "Nov 13, 2026, 3:40 PM - 3:50 PM", "Nov 13, 2026, 3:50 PM - 4:00 PM", "Nov 13, 2026, 4:00 PM - 4:10 PM", "Nov 13, 2026, 4:10 PM - 4:20 PM", "Nov 13, 2026, 4:20 PM - 4:30 PM", "Nov 13, 2026, 4:30 PM - 4:40 PM", "Nov 13, 2026, 4:40 PM - 4:50 PM", "Nov 13, 2026, 4:50 PM - 5:00 PM", "Nov 13, 2026, 5:00 PM - 5:10 PM", "Nov 13, 2026, 5:10 PM - 5:20 PM", "Nov 13, 2026, 5:20 PM - 5:30 PM", "Nov 13, 2026, 5:30 PM - 5:40 PM", "Nov 13, 2026, 5:40 PM - 5:50 PM", "Nov 13, 2026, 5:50 PM - 6:00 PM", "Nov 13, 2026, 6:00 PM - 6:10 PM", "Nov 13, 2026, 6:10 PM - 6:20 PM", "Nov 13, 2026, 6:20 PM - 6:30 PM", "Nov 13, 2026, 6:30 PM - 6:40 PM", "Nov 13, 2026, 6:40 PM - 6:50 PM", "Nov 13, 2026, 6:50 PM - 7:00 PM", "Nov 13, 2026, 7:00 PM - 7:10 PM", "Nov 13, 2026, 7:10 PM - 7:20 PM", "Nov 13, 2026, 7:20 PM - 7:30 PM", "Nov 13, 2026, 7:30 PM - 7:40 PM", "Nov 13, 2026, 7:40 PM - 7:50 PM", "Nov 13, 2026, 7:50 PM - 8:00 PM", "Nov 13, 2026, 8:00 PM - 8:10 PM", "Nov 13, 2026, 8:10 PM - 8:20 PM", "Nov 13, 2026, 8:20 PM - 8:30 PM", "Nov 13, 2026, 8:30 PM - 8:40 PM", "Nov 13, 2026, 8:40 PM - 8:50 PM", "Nov 13, 2026, 8:50 PM - 9:00 PM", "Nov 13, 2026, 9:00 PM - 9:10 PM", "Nov 13, 2026, 9:10 PM - 9:20 PM", "Nov 13, 2026, 9:20 PM - 9:30 PM", "Nov 13, 2026, 9:30 PM - 9:40 PM", "Nov 13, 2026, 9:40 PM - 9:50 PM", "Nov 13, 2026, 9:50 PM - 10:00 PM", "Nov 13, 2026, 10:00 PM - 10:10 PM", "Nov 13, 2026, 10:10 PM - 10:20 PM", "Nov 13, 2026, 10:20 PM - 10:30 PM", "Nov 13, 2026, 10:30 PM - 10:40 PM", "Nov 13, 2026, 10:40 PM - 10:50 PM", "Nov 13, 2026, 10:50 PM - 11:00 PM", "Nov 13, 2026, 11:00 PM - 11:10 PM", "Nov 13, 2026, 11:10 PM - 11:20 PM", "Nov 13, 2026, 11:20 PM - 11:30 PM", "Nov 13, 2026, 11:30 PM - 11:40 PM", "Nov 13, 2026, 11:40 PM - 11:50 PM", "Nov 13, 2026, 11:50 PM - 12:00 AM", "Nov 14, 2026, 12:00 AM - 12:10 AM", "Nov 14, 2026, 12:10 AM - 12:20 AM", "Nov 14, 2026, 12:20 AM - 12:30 AM", "Nov 14, 2026, 12:30 AM - 12:40 AM", "Nov 14, 2026, 12:40 AM - 12:50 AM", "Nov 14, 2026, 12:50 AM - 1:00 AM", "Nov 14, 2026, 1:00 AM - 1:10 AM", "Nov 14, 2026, 1:10 AM - 1:20 AM", "Nov 14, 2026, 1:20 AM - 1:30 AM", "Nov 14, 2026, 1:30 AM - 1:40 AM", "Nov 14, 2026, 1:40 AM - 1:50 AM", "Nov 14, 2026, 1:50 AM - 2:00 AM", "Nov 14, 2026, 2:00 AM - 2:10 AM", "Nov 14, 2026, 2:10 AM - 2:20 AM", "Nov 14, 2026, 2:20 AM - 2:30 AM", "Nov 14, 2026, 2:30 AM - 2:40 AM", "Nov 14, 2026, 2:40 AM - 2:50 AM", "Nov 14, 2026, 2:50 AM - 3:00 AM", "Nov 14, 2026, 3:00 AM - 3:10 AM", "Nov 14, 2026, 3:10 AM - 3:20 AM", "Nov 14, 2026, 3:20 AM - 3:30 AM", "Nov 14, 2026, 3:30 AM - 3:40 AM", "Nov 14, 2026, 3:40 AM - 3:50 AM", "Nov 14, 2026, 3:50 AM - 4:00 AM", "Nov 14, 2026, 4:00 AM - 4:10 AM", "Nov 14, 2026, 4:10 AM - 4:20 AM", "Nov 14, 2026, 4:20 AM - 4:30 AM", "Nov 14, 2026, 4:30 AM - 4:40 AM", "Nov 14, 2026, 4:40 AM - 4:50 AM", "Nov 14, 2026, 4:50 AM - 5:00 AM", "Nov 14, 2026, 5:00 AM - 5:10 AM", "Nov 14, 2026, 5:10 AM - 5:20 AM", "Nov 14, 2026, 5:20 AM - 5:30 AM", "Nov 14, 2026, 5:30 AM - 5:40 AM", "Nov 14, 2026, 5:40 AM - 5:50 AM", "Nov 14, 2026, 5:50 AM - 6:00 AM", "Nov 14, 2026, 6:00 AM - 6:10 AM", "Nov 14, 2026, 6:10 AM - 6:20 AM", "Nov 14, 2026, 6:20 AM - 6:30 AM", "Nov 14, 2026, 6:30 AM - 6:40 AM", "Nov 14, 2026, 6:40 AM - 6:50 AM", "Nov 14, 2026, 6:50 AM - 7:00 AM", "Nov 14, 2026, 7:00 AM - 7:10 AM", "Nov 14, 2026, 7:10 AM - 7:20 AM", "Nov 14, 2026, 7:20 AM - 7:30 AM", "Nov 14, 2026, 7:30 AM - 7:40 AM", "Nov 14, 2026, 7:40 AM - 7:50 AM", "Nov 14, 2026, 7:50 AM - 8:00 AM", "Nov 14, 2026, 8:00 AM - 8:10 AM", "Nov 14, 2026, 8:10 AM - 8:20 AM", "Nov 14, 2026, 8:20 AM - 8:30 AM", "Nov 14, 2026, 8:30 AM - 8:40 AM", "Nov 14, 2026, 8:40 AM - 8:50 AM", "Nov 14, 2026, 8:50 AM - 9:00 AM", "Nov 14, 2026, 9:00 AM - 9:10 AM", "Nov 14, 2026, 9:10 AM - 9:20 AM", "Nov 14, 2026, 9:20 AM - 9:30 AM", "Nov 14, 2026, 9:30 AM - 9:40 AM", "Nov 14, 2026, 9:40 AM - 9:50 AM", "Nov 14, 2026, 9:50 AM - 10:00 AM", "Nov 14, 2026, 10:00 AM - 10:10 AM", "Nov 14, 2026, 10:10 AM - 10:20 AM", "Nov 14, 2026, 10:20 AM - 10:30 AM", "Nov 14, 2026, 10:30 AM - 10:40 AM", "Nov 14, 2026, 10:40 AM - 10:50 AM", "Nov 14, 2026, 10:50 AM - 11:00 AM", "Nov 14, 2026, 11:00 AM - 11:10 AM", "Nov 14, 2026, 11:10 AM - 11:20 AM", "Nov 14, 2026, 11:20 AM - 11:30 AM", "Nov 14, 2026, 11:30 AM - 11:40 AM", "Nov 14, 2026, 11:40 AM - 11:50 AM", "Nov 14, 2026, 11:50 AM - 12:00 PM", "Nov 14, 2026, 12:00 PM - 12:10 PM", "Nov 14, 2026, 12:10 PM - 12:20 PM", "Nov 14, 2026, 12:20 PM - 12:30 PM", "Nov 14, 2026, 12:30 PM - 12:40 PM", "Nov 14, 2026, 12:40 PM - 12:50 PM", "Nov 14, 2026, 12:50 PM - 1:00 PM", "Nov 14, 2026, 1:00 PM - 1:10 PM", "Nov 14, 2026, 1:10 PM - 1:20 PM", "Nov 14, 2026, 1:20 PM - 1:30 PM", "Nov 14, 2026, 1:30 PM - 1:40 PM", "Nov 14, 2026, 1:40 PM - 1:50 PM", "Nov 14, 2026, 1:50 PM - 2:00 PM", "Nov 14, 2026, 2:00 PM - 2:10 PM", "Nov 14, 2026, 2:10 PM - 2:20 PM", "Nov 14, 2026, 2:20 PM - 2:30 PM", "Nov 14, 2026, 2:30 PM - 2:40 PM", "Nov 14, 2026, 2:40 PM - 2:50 PM", "Nov 14, 2026, 2:50 PM - 3:00 PM"],
+        "unit": "browsers",
+        "live": true,
+        "threshold": {
+          "value": 2,
+          "label": "Concurrency limit: 2"
+        },
+        "series": [
+          {
+            "name": "average",
+            "values": [1.24, 1.39, 1.08, 1.08, 1.28, 1.25, 1.22, 1.16, 1.26, 1.26, 1.27, 1.15, 1.46, 1.04, 0.99, 1.22, 0.98, 1.17, 1.25, 1.17, 1.02, 1.07, 0.95, 0.83, 0.56, 1.05, 0.63, 0.88, 0.77, 0.75, 0.72, 0.67, 0.37, 0.38, 0.59, 0.51, 0.34, 0.38, 0.49, 0, 0.16, 0.32, 0, 0, 0.13, 0.23, 0, 0, 0, 0.22, 0.15, 0.16, 0.24, 0, 0.21, 0.21, 0.3, 0, 0, 0, 0, 0, 0, 0, 0.14, 0, 0, 0.21, 0, 0, 0, 0.3, 0, 0.12, 0.13, 0.18, 0.27, 0.28, 0, 0, 0, 0.24, 0, 0, 0.24, 0, 0.14, 0.29, 0, 0.2, 0.21, 0, 0, 0, 0, 0, 0.12, 0, 0.25, 0.13, 0, 0.43, 0.16, 0, 0.17, 0.48, 0.52, 0.5, 0.78, 0.82, 0.64, 0.49, 0.5, 0.91, 0.68, 0.87, 1.02, 1.15, 1.04, 1.01, 0.9, 0.99, 1.05, 1.26, 1.27, 0.91, 1.28, 1.4, 1.15, 1.06, 1.28, 1.32, 1.47, 1.38, 1.44, 1.16, 1.44, 1.4, 1.39, 1.4, 1.19, 1.18, 1.13, 1.15]
+          },
+          {
+            "name": "peak",
+            "values": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            "tone": "muted"
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The threshold value is part of the y domain, so the line is never clipped off the top. Add <code class="fd-code">"tone": "danger"</code> to the threshold when crossing it is an error rather than a limit.</li>
+      <li>Hover or press anywhere on the chart: the crosshair snaps to the nearest bucket and the tooltip flips sides before it reaches an edge.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="bars">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Bars and stacked bars</h2>
+      <p>Bars compare discrete periods. Grouped bars put series side by side; stacked bars show a total and its parts, with the rounded top on the top segment only. Bars grow from the baseline, 12ms apart.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" data-fd-chart="bar" data-height="240" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "This week",
+            "values": [18400, 22100, 24800, 23200, 20900, 7400, null]
+          },
+          {
+            "name": "Last week",
+            "values": [16200, 20800, 23100, 21500, 19800, 8100, 4800]
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" data-fd-chart="stacked" data-height="240" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29", "Oct 30", "Oct 31", "Nov 01", "Nov 02", "Nov 03", "Nov 04", "Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+        "titles": ["Oct 25, 2026", "Oct 26, 2026", "Oct 27, 2026", "Oct 28, 2026", "Oct 29, 2026", "Oct 30, 2026", "Oct 31, 2026", "Nov 01, 2026", "Nov 02, 2026", "Nov 03, 2026", "Nov 04, 2026", "Nov 05, 2026", "Nov 06, 2026", "Nov 07, 2026", "Nov 08, 2026", "Nov 09, 2026", "Nov 10, 2026", "Nov 11, 2026", "Nov 12, 2026", "Nov 13, 2026", "Nov 14, 2026"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "Succeeded",
+            "values": [2210, 6506, 6282, 6348, 7016, 5591, 2322, 2424, 6375, 5742, 7662, 7048, 6065, 2803, 2133, 6747, 6085, 7556, 6887, 5919, 2540]
+          },
+          {
+            "name": "Failed",
+            "values": [129, 125, 393, 317, 497, 347, 146, 126, 159, 188, 233, 341, 313, 153, 117, 377, 408, 359, 173, 181, 162],
+            "tone": "danger"
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A <code class="fd-code">null</code> value is a gap, not a zero: Sunday of this week has not happened yet, so it has no bar and the tooltip shows an en dash.</li>
+      <li>Stacked tooltips add a Total row. Use a status tone (<code class="fd-code">danger</code> for failures) for a series that carries meaning; otherwise leave the slot colours alone.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="interaction">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Interaction</h2>
+      <p>Pointer, finger or keyboard, the same thing happens: a crosshair snaps to the nearest x, each series gets a dot, and a tooltip card follows. Focus the chart and use the arrow keys.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" id="chart-interact" data-fd-chart="line" data-height="220">
+        <script type="application/json">
+      {
+        "labels": ["Oct 16", "Oct 17", "Oct 18", "Oct 19", "Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29", "Oct 30", "Oct 31", "Nov 01", "Nov 02", "Nov 03", "Nov 04", "Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+        "titles": ["Oct 16, 2026", "Oct 17, 2026", "Oct 18, 2026", "Oct 19, 2026", "Oct 20, 2026", "Oct 21, 2026", "Oct 22, 2026", "Oct 23, 2026", "Oct 24, 2026", "Oct 25, 2026", "Oct 26, 2026", "Oct 27, 2026", "Oct 28, 2026", "Oct 29, 2026", "Oct 30, 2026", "Oct 31, 2026", "Nov 01, 2026", "Nov 02, 2026", "Nov 03, 2026", "Nov 04, 2026", "Nov 05, 2026", "Nov 06, 2026", "Nov 07, 2026", "Nov 08, 2026", "Nov 09, 2026", "Nov 10, 2026", "Nov 11, 2026", "Nov 12, 2026", "Nov 13, 2026", "Nov 14, 2026"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "Credits used",
+            "values": [4598, 2016, 2099, 5600, 5800, 6055, 5977, 5234, 2418, 2168, 5538, 5806, 7009, 6510, 5586, 2507, 2137, 6297, 6422, 13696, 6604, 6853, 2586, 2215, 6226, 6856, 7703, 7813, 6219, 3182]
+          }
+        ]
+      }
+        </script>
+      </div>
+      <p class="fd-mono fd-muted" id="readout" aria-hidden="true">fd:hover  move over the chart</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Input</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Pointer move</td><td>Crosshair, dots and tooltip follow the nearest point. Leaving the chart hides them.</td></tr>
+          <tr><td>Touch drag</td><td>Scrubs horizontally while vertical swipes still scroll the page. The tooltip lingers for a moment after you lift.</td></tr>
+          <tr><td>← →</td><td>Moves one point. Home and End jump to the first and last. Escape hides the tooltip. Each stop is announced to screen readers.</td></tr>
+          <tr><td>Enter</td><td>Emits <code class="fd-code">fd:select</code> for the active point.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>Every chart is <code class="fd-code">role="img"</code> with an <code class="fd-code">aria-label</code> and carries a visually hidden table of its data.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="legend">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Legends</h2>
+      <p>A legend is a row of small swatches and muted labels. In a chart it is a set of toggles: click a series to hide it, and the scale adjusts. The last visible series cannot be turned off.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" id="chart-endpoints" data-fd-chart="line" data-height="220" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["Nov 01", "Nov 02", "Nov 03", "Nov 04", "Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "/scrape",
+            "values": [1233, 3422, 3741, 3623, 3857, 3293, 1563, 1165, 3455, 4261, 4433, 4432, 3495, 1726]
+          },
+          {
+            "name": "/search",
+            "values": [786, 1846, 2151, 2450, 1956, 2200, 907, 790, 1865, 2040, 2195, 2093, 2187, 863]
+          },
+          {
+            "name": "/crawl",
+            "values": [293, 1034, 1292, 1256, 1036, 838, 351, 291, 962, 778, 1037, 986, 1089, 487]
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" id="chart-ext" data-fd-chart="bar" data-height="200">
+        <script type="application/json">
+      {
+        "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "This week",
+            "values": [18400, 22100, 24800, 23200, 20900, 7400, null]
+          },
+          {
+            "name": "Last week",
+            "values": [16200, 20800, 23100, 21500, 19800, 8100, 4800]
+          }
+        ]
+      }
+        </script>
+      </div>
+      <div class="fd-legend" data-for="#chart-ext">
+        <button class="fd-legend-item" type="button" data-s="1" aria-pressed="true"><span class="fd-legend-swatch" data-shape="square"></span><span>This week</span></button>
+        <button class="fd-legend-item" type="button" data-s="2" aria-pressed="true"><span class="fd-legend-swatch" data-shape="square"></span><span>Last week</span></button>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code>
+      <div class="fd-legend">
+        <span class="fd-legend-item" data-s="1"><span class="fd-legend-swatch"></span><span>10 minute average</span></span>
+        <span class="fd-legend-item" data-s="1"><span class="fd-legend-swatch" data-shape="soft"></span><span>10 minute peak</span></span>
+        <span class="fd-legend-item" data-s="2"><span class="fd-legend-swatch" data-shape="square"></span><span>Succeeded</span></span>
+        <span class="fd-legend-item" data-tone="danger"><span class="fd-legend-swatch" data-shape="square"></span><span>Failed</span></span>
+        <button class="fd-legend-item" type="button" data-s="3" aria-pressed="false"><span class="fd-legend-swatch"></span><span>/crawl (hidden)</span></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A chart renders its own legend with <code class="fd-code">data-legend</code>. To place one elsewhere, point a <code class="fd-code">.fd-legend[data-for="#chart-id"]</code> at it.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="ranked">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Ranked bars</h2>
+      <p>For a ranking (credits by endpoint, requests by key) a list beats a chart: label left, a thin bar, the figure right in mono. It is plain CSS driven by one custom property per row.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <ul class="fd-bars" aria-label="Credits by endpoint">
+        <li class="fd-bars-row" style="--value: 1.000"><span class="fd-bars-label fd-mono">/scrape</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">41,820</span></li>
+        <li class="fd-bars-row" style="--value: 0.529"><span class="fd-bars-label fd-mono">/search</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">22,140</span></li>
+        <li class="fd-bars-row" style="--value: 0.364"><span class="fd-bars-label fd-mono">/crawl</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">15,206</span></li>
+        <li class="fd-bars-row" style="--value: 0.236"><span class="fd-bars-label fd-mono">/extract</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">9,874</span></li>
+        <li class="fd-bars-row" style="--value: 0.103"><span class="fd-bars-label fd-mono">/agent</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">4,312</span></li>
+      </ul>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface">
+      <div style="width: 300px; max-width: 100%">
+        <ul class="fd-bars" data-tone="neutral" aria-label="Credits by endpoint, narrow">
+        <li class="fd-bars-row" style="--value: 1.000"><span class="fd-bars-label fd-mono">/scrape</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">41,820</span></li>
+        <li class="fd-bars-row" style="--value: 0.529"><span class="fd-bars-label fd-mono">/search</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">22,140</span></li>
+        <li class="fd-bars-row" style="--value: 0.364"><span class="fd-bars-label fd-mono">/crawl</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">15,206</span></li>
+        </ul>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">--value</code> is a fraction from 0 to 1 of the longest row. Below 320px the bar drops under its label. <code class="fd-code">data-tone="neutral"</code> turns the fill to ink when the accent is spoken for.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="sparkline">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Sparklines</h2>
+      <p>A sparkline is a shape, not a reading: put it beside a figure to show direction. Without a tone it colours itself by trend; add <code class="fd-code">data-invert</code> where lower is better.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <div class="fd-stack" style="--fd-gap: 12px; width: 100%; max-width: 420px">
+        <div class="fd-row" data-justify="between"><span class="fd-muted">Credits per day</span><span class="fd-row" style="--fd-gap: 12px"><span class="fd-sparkline" data-values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600" data-area data-dot></span><span class="fd-mono">5.6k</span></span></div>
+        <div class="fd-row" data-justify="between"><span class="fd-muted">p95 latency (lower is better)</span><span class="fd-row" style="--fd-gap: 12px"><span class="fd-sparkline" data-values="212,220,208,231,244,238,260,281,270,296" data-invert data-dot></span><span class="fd-mono">296ms</span></span></div>
+        <div class="fd-row" data-justify="between"><span class="fd-muted">Success rate</span><span class="fd-row" style="--fd-gap: 12px"><span class="fd-sparkline" data-values="97,98,97,99,98,99,99,98,99,99" data-dot></span><span class="fd-mono">99%</span></span></div>
+        <div class="fd-row" data-justify="between"><span class="fd-muted">Failed jobs (lower is better)</span><span class="fd-row" style="--fd-gap: 12px"><span class="fd-sparkline" data-values="42,38,51,47,33,29,31,24,26,19" data-invert data-dot></span><span class="fd-mono">19</span></span></div>
+        <div class="fd-row" data-justify="between"><span class="fd-muted">Active monitors</span><span class="fd-row" style="--fd-gap: 12px"><span class="fd-sparkline" data-values="5,5,5,5,5,5"></span><span class="fd-mono">5</span></span></div>
+        <div class="fd-row" data-justify="between"><span class="fd-muted">Accent, bars</span><span class="fd-row" style="--fd-gap: 12px"><span class="fd-sparkline" data-values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600" data-type="bars" data-tone="accent"></span><span class="fd-mono">10 days</span></span></div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <div class="fd-chart-stat" style="width: 100%; max-width: 320px">
+        <div class="fd-chart-stat-main">
+          <p class="fd-chart-stat-label">Requests</p>
+          <p class="fd-chart-stat-value">184,203</p>
+          <p class="fd-chart-stat-delta" data-trend="good">+12.4% vs last week</p>
+        </div>
+        <span class="fd-sparkline" data-values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600" data-tone="accent" data-area data-dot data-label="Requests, last 10 days"></span>
+      </div>
+      <div class="fd-chart-stat" style="width: 100%; max-width: 320px">
+        <div class="fd-chart-stat-main">
+          <p class="fd-chart-stat-label">p95 latency</p>
+          <p class="fd-chart-stat-value">296ms</p>
+          <p class="fd-chart-stat-delta" data-trend="bad">+8.1% vs last week</p>
+        </div>
+        <span class="fd-sparkline" data-values="212,220,208,231,244,238,260,281,270,296" data-invert data-dot data-label="p95 latency, last 10 days"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="donut">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Donut and progress ring</h2>
+      <p>A thin ring for parts of a whole, with two to five segments, the total in the centre and the legend beside it. Hover a segment or a legend row to read it in the centre.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <div class="fd-donut" data-size="160">
+        <script type="application/json">
+      {
+        "caption": "Credits",
+        "format": "compact",
+        "segments": [
+          {
+            "label": "/scrape",
+            "value": 41820
+          },
+          {
+            "label": "/search",
+            "value": 22140
+          },
+          {
+            "label": "/crawl",
+            "value": 15206
+          },
+          {
+            "label": "/extract",
+            "value": 9874
+          },
+          {
+            "label": "/agent",
+            "value": 4312
+          }
+        ]
+      }
+        </script>
+      </div>
+      <div class="fd-donut" data-size="128" style="margin-inline-start: auto">
+        <script type="application/json">
+      {
+        "caption": "Jobs",
+        "segments": [
+          {
+            "label": "Succeeded",
+            "value": 18420
+          },
+          {
+            "label": "Failed",
+            "value": 612,
+            "tone": "danger"
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <div class="fd-donut" data-type="progress" data-value="72" data-label="Success" data-size="96"></div>
+      <div class="fd-donut" data-type="progress" data-value="100" data-label="Indexed" data-size="96" data-tone="success"></div>
+      <div class="fd-donut" data-type="progress" data-value="38" data-label="Crawled" data-size="64"></div>
+      <div class="fd-donut" data-type="progress" data-value="64" data-size="40"></div>
+    </div>
+    <ul class="doc-notes">
+      <li>A progress ring shows one value against a known end: an import, a crawl. A quota or limit is a meter, not a ring: a bar says "how much is left" faster.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="heatgrid">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Heat grid</h2>
+      <p>Activity over weeks, one cell per day. Five steps run from a faint ink wash to the full accent, cut at the quartiles of the busy days so one spike does not flatten the rest.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <div class="fd-heatgrid" style="width: 100%">
+        <script type="application/json">
+      {
+        "start": "2026-06-29",
+        "unit": "requests",
+        "values": [35, 53, 21, 60, 0, 6, 14, 25, 47, 0, 32, 80, 42, 14, 54, 85, 50, 0, 50, 41, 45, 89, 21, 43, 130, 78, 61, 48, 99, 93, 142, 125, 0, 0, 59, 47, 103, 75, 0, 178, 72, 45, 27, 186, 0, 213, 110, 11, 66, 133, 48, 249, 77, 168, 28, 0, 145, 172, 82, 107, 225, 58, 41, 223, 218, 101, 0, 56, 28, 99, 75, 120, 63, 48, 181, 55, 68, 270, 154, 269, 140, 152, 36, 21, 170, 108, 266, 143, 103, 135, 92, 129, 368, 154, 211, 203, 120, 128, 75, 84, 54, 52, 0, 0, 0, 186, 229, 268, 200, 93, 139, 100, 316, 101, 341, 103, 234, 103, 369, 200, 357, 64, 287, 171, 118, 146, 421, 207, 121, 354, 393, 55, 149, 153, 75, 126, 310, 270, 88]
+      }
+        </script>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Pass one number per day from <code class="fd-code">start</code> (any weekday); weeks run Monday to Sunday and a partial week is left empty. Focus the grid and use the arrow keys to walk it: left and right by week, up and down by day.</li>
+      <li><code class="fd-code">data-size="sm|lg"</code> makes the cells 11px or 18px. They shrink to fit narrow containers and the grid scrolls sideways below that.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="states">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">States</h2>
+      <p>Loading keeps the chart's height so nothing jumps. A range with no data says so and suggests what to change. A chart with data that is all zeros is not empty: it draws a flat accent line on the baseline.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <span class="doc-specimen-label">Loading</span>
+        <div class="fd-chart" data-fd-chart="bar" data-height="200" data-state="loading"></div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <span class="doc-specimen-label">Loading, line</span>
+        <div class="fd-chart" data-fd-chart="area" data-height="200" data-state="loading"></div>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <span class="doc-specimen-label">Empty</span>
+        <div class="fd-chart" data-fd-chart="bar" data-height="200">
+          <script type="application/json">
+        {
+          "labels": [],
+          "series": [
+            {
+              "name": "Credits used",
+              "values": []
+            }
+          ]
+        }
+          </script>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <span class="doc-specimen-label">Single data point</span>
+        <div class="fd-chart" data-fd-chart="line" data-height="200">
+          <script type="application/json">
+        {
+          "labels": ["Nov 14"],
+          "yFormat": "compact",
+          "series": [
+            {
+              "name": "Credits used",
+              "values": [1240]
+            }
+          ]
+        }
+          </script>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <span class="doc-specimen-label">All zeros</span>
+      <div class="fd-chart" data-fd-chart="line" data-height="220" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["3 PM", "", "", "6 PM", "", "", "9 PM", "", "", "12 AM", "", "", "3 AM", "", "", "6 AM", "", "", "9 AM", "", "", "12 PM", "", ""],
+        "titles": ["Nov 13, 2026, 3 PM", "Nov 13, 2026, 4 PM", "Nov 13, 2026, 5 PM", "Nov 13, 2026, 6 PM", "Nov 13, 2026, 7 PM", "Nov 13, 2026, 8 PM", "Nov 13, 2026, 9 PM", "Nov 13, 2026, 10 PM", "Nov 13, 2026, 11 PM", "Nov 14, 2026, 12 AM", "Nov 14, 2026, 1 AM", "Nov 14, 2026, 2 AM", "Nov 14, 2026, 3 AM", "Nov 14, 2026, 4 AM", "Nov 14, 2026, 5 AM", "Nov 14, 2026, 6 AM", "Nov 14, 2026, 7 AM", "Nov 14, 2026, 8 AM", "Nov 14, 2026, 9 AM", "Nov 14, 2026, 10 AM", "Nov 14, 2026, 11 AM", "Nov 14, 2026, 12 PM", "Nov 14, 2026, 1 PM", "Nov 14, 2026, 2 PM"],
+        "unit": "browsers",
+        "threshold": {
+          "value": 2,
+          "label": "Concurrency limit: 2"
+        },
+        "series": [
+          {
+            "name": "average",
+            "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          },
+          {
+            "name": "peak",
+            "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "tone": "muted"
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Set <code class="fd-code">data-state="loading"</code> on an element with no data, then call <code class="fd-code">charts.update(el, config)</code> when the data arrives. Empty text can be replaced with <code class="fd-code">"empty": { "title": "…", "description": "…" }</code>.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="cards">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Chart cards</h2>
+      <p>The standard composition: a title and a muted line on the left, a figure or a range switch on the right, the chart, then the legend. Cards separate one chart from the next; inside them nothing else is boxed.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <section class="fd-chart-card" id="card-concurrency">
+        <header class="fd-chart-card-head">
+          <div class="fd-chart-card-text">
+            <h3 class="fd-h3">Browser concurrency</h3>
+            <p class="fd-chart-card-desc">Learn more about <a class="fd-link" href="#cards">concurrent requests</a></p>
+          </div>
+          <div class="fd-segmented" role="radiogroup" aria-label="Range">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="1d">1 day</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="7d">7 days</button>
+          </div>
+        </header>
+        <div class="fd-chart-card-body">
+          <div class="fd-chart" id="chart-card-concurrency" data-fd-chart="line" data-height="260" data-legend>
+            <script type="application/json">
+          {
+            "labels": ["3 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "6 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "9 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "12 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "3 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "6 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "9 AM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "12 PM", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            "titles": ["Nov 13, 2026, 3:00 PM - 3:10 PM", "Nov 13, 2026, 3:10 PM - 3:20 PM", "Nov 13, 2026, 3:20 PM - 3:30 PM", "Nov 13, 2026, 3:30 PM - 3:40 PM", "Nov 13, 2026, 3:40 PM - 3:50 PM", "Nov 13, 2026, 3:50 PM - 4:00 PM", "Nov 13, 2026, 4:00 PM - 4:10 PM", "Nov 13, 2026, 4:10 PM - 4:20 PM", "Nov 13, 2026, 4:20 PM - 4:30 PM", "Nov 13, 2026, 4:30 PM - 4:40 PM", "Nov 13, 2026, 4:40 PM - 4:50 PM", "Nov 13, 2026, 4:50 PM - 5:00 PM", "Nov 13, 2026, 5:00 PM - 5:10 PM", "Nov 13, 2026, 5:10 PM - 5:20 PM", "Nov 13, 2026, 5:20 PM - 5:30 PM", "Nov 13, 2026, 5:30 PM - 5:40 PM", "Nov 13, 2026, 5:40 PM - 5:50 PM", "Nov 13, 2026, 5:50 PM - 6:00 PM", "Nov 13, 2026, 6:00 PM - 6:10 PM", "Nov 13, 2026, 6:10 PM - 6:20 PM", "Nov 13, 2026, 6:20 PM - 6:30 PM", "Nov 13, 2026, 6:30 PM - 6:40 PM", "Nov 13, 2026, 6:40 PM - 6:50 PM", "Nov 13, 2026, 6:50 PM - 7:00 PM", "Nov 13, 2026, 7:00 PM - 7:10 PM", "Nov 13, 2026, 7:10 PM - 7:20 PM", "Nov 13, 2026, 7:20 PM - 7:30 PM", "Nov 13, 2026, 7:30 PM - 7:40 PM", "Nov 13, 2026, 7:40 PM - 7:50 PM", "Nov 13, 2026, 7:50 PM - 8:00 PM", "Nov 13, 2026, 8:00 PM - 8:10 PM", "Nov 13, 2026, 8:10 PM - 8:20 PM", "Nov 13, 2026, 8:20 PM - 8:30 PM", "Nov 13, 2026, 8:30 PM - 8:40 PM", "Nov 13, 2026, 8:40 PM - 8:50 PM", "Nov 13, 2026, 8:50 PM - 9:00 PM", "Nov 13, 2026, 9:00 PM - 9:10 PM", "Nov 13, 2026, 9:10 PM - 9:20 PM", "Nov 13, 2026, 9:20 PM - 9:30 PM", "Nov 13, 2026, 9:30 PM - 9:40 PM", "Nov 13, 2026, 9:40 PM - 9:50 PM", "Nov 13, 2026, 9:50 PM - 10:00 PM", "Nov 13, 2026, 10:00 PM - 10:10 PM", "Nov 13, 2026, 10:10 PM - 10:20 PM", "Nov 13, 2026, 10:20 PM - 10:30 PM", "Nov 13, 2026, 10:30 PM - 10:40 PM", "Nov 13, 2026, 10:40 PM - 10:50 PM", "Nov 13, 2026, 10:50 PM - 11:00 PM", "Nov 13, 2026, 11:00 PM - 11:10 PM", "Nov 13, 2026, 11:10 PM - 11:20 PM", "Nov 13, 2026, 11:20 PM - 11:30 PM", "Nov 13, 2026, 11:30 PM - 11:40 PM", "Nov 13, 2026, 11:40 PM - 11:50 PM", "Nov 13, 2026, 11:50 PM - 12:00 AM", "Nov 14, 2026, 12:00 AM - 12:10 AM", "Nov 14, 2026, 12:10 AM - 12:20 AM", "Nov 14, 2026, 12:20 AM - 12:30 AM", "Nov 14, 2026, 12:30 AM - 12:40 AM", "Nov 14, 2026, 12:40 AM - 12:50 AM", "Nov 14, 2026, 12:50 AM - 1:00 AM", "Nov 14, 2026, 1:00 AM - 1:10 AM", "Nov 14, 2026, 1:10 AM - 1:20 AM", "Nov 14, 2026, 1:20 AM - 1:30 AM", "Nov 14, 2026, 1:30 AM - 1:40 AM", "Nov 14, 2026, 1:40 AM - 1:50 AM", "Nov 14, 2026, 1:50 AM - 2:00 AM", "Nov 14, 2026, 2:00 AM - 2:10 AM", "Nov 14, 2026, 2:10 AM - 2:20 AM", "Nov 14, 2026, 2:20 AM - 2:30 AM", "Nov 14, 2026, 2:30 AM - 2:40 AM", "Nov 14, 2026, 2:40 AM - 2:50 AM", "Nov 14, 2026, 2:50 AM - 3:00 AM", "Nov 14, 2026, 3:00 AM - 3:10 AM", "Nov 14, 2026, 3:10 AM - 3:20 AM", "Nov 14, 2026, 3:20 AM - 3:30 AM", "Nov 14, 2026, 3:30 AM - 3:40 AM", "Nov 14, 2026, 3:40 AM - 3:50 AM", "Nov 14, 2026, 3:50 AM - 4:00 AM", "Nov 14, 2026, 4:00 AM - 4:10 AM", "Nov 14, 2026, 4:10 AM - 4:20 AM", "Nov 14, 2026, 4:20 AM - 4:30 AM", "Nov 14, 2026, 4:30 AM - 4:40 AM", "Nov 14, 2026, 4:40 AM - 4:50 AM", "Nov 14, 2026, 4:50 AM - 5:00 AM", "Nov 14, 2026, 5:00 AM - 5:10 AM", "Nov 14, 2026, 5:10 AM - 5:20 AM", "Nov 14, 2026, 5:20 AM - 5:30 AM", "Nov 14, 2026, 5:30 AM - 5:40 AM", "Nov 14, 2026, 5:40 AM - 5:50 AM", "Nov 14, 2026, 5:50 AM - 6:00 AM", "Nov 14, 2026, 6:00 AM - 6:10 AM", "Nov 14, 2026, 6:10 AM - 6:20 AM", "Nov 14, 2026, 6:20 AM - 6:30 AM", "Nov 14, 2026, 6:30 AM - 6:40 AM", "Nov 14, 2026, 6:40 AM - 6:50 AM", "Nov 14, 2026, 6:50 AM - 7:00 AM", "Nov 14, 2026, 7:00 AM - 7:10 AM", "Nov 14, 2026, 7:10 AM - 7:20 AM", "Nov 14, 2026, 7:20 AM - 7:30 AM", "Nov 14, 2026, 7:30 AM - 7:40 AM", "Nov 14, 2026, 7:40 AM - 7:50 AM", "Nov 14, 2026, 7:50 AM - 8:00 AM", "Nov 14, 2026, 8:00 AM - 8:10 AM", "Nov 14, 2026, 8:10 AM - 8:20 AM", "Nov 14, 2026, 8:20 AM - 8:30 AM", "Nov 14, 2026, 8:30 AM - 8:40 AM", "Nov 14, 2026, 8:40 AM - 8:50 AM", "Nov 14, 2026, 8:50 AM - 9:00 AM", "Nov 14, 2026, 9:00 AM - 9:10 AM", "Nov 14, 2026, 9:10 AM - 9:20 AM", "Nov 14, 2026, 9:20 AM - 9:30 AM", "Nov 14, 2026, 9:30 AM - 9:40 AM", "Nov 14, 2026, 9:40 AM - 9:50 AM", "Nov 14, 2026, 9:50 AM - 10:00 AM", "Nov 14, 2026, 10:00 AM - 10:10 AM", "Nov 14, 2026, 10:10 AM - 10:20 AM", "Nov 14, 2026, 10:20 AM - 10:30 AM", "Nov 14, 2026, 10:30 AM - 10:40 AM", "Nov 14, 2026, 10:40 AM - 10:50 AM", "Nov 14, 2026, 10:50 AM - 11:00 AM", "Nov 14, 2026, 11:00 AM - 11:10 AM", "Nov 14, 2026, 11:10 AM - 11:20 AM", "Nov 14, 2026, 11:20 AM - 11:30 AM", "Nov 14, 2026, 11:30 AM - 11:40 AM", "Nov 14, 2026, 11:40 AM - 11:50 AM", "Nov 14, 2026, 11:50 AM - 12:00 PM", "Nov 14, 2026, 12:00 PM - 12:10 PM", "Nov 14, 2026, 12:10 PM - 12:20 PM", "Nov 14, 2026, 12:20 PM - 12:30 PM", "Nov 14, 2026, 12:30 PM - 12:40 PM", "Nov 14, 2026, 12:40 PM - 12:50 PM", "Nov 14, 2026, 12:50 PM - 1:00 PM", "Nov 14, 2026, 1:00 PM - 1:10 PM", "Nov 14, 2026, 1:10 PM - 1:20 PM", "Nov 14, 2026, 1:20 PM - 1:30 PM", "Nov 14, 2026, 1:30 PM - 1:40 PM", "Nov 14, 2026, 1:40 PM - 1:50 PM", "Nov 14, 2026, 1:50 PM - 2:00 PM", "Nov 14, 2026, 2:00 PM - 2:10 PM", "Nov 14, 2026, 2:10 PM - 2:20 PM", "Nov 14, 2026, 2:20 PM - 2:30 PM", "Nov 14, 2026, 2:30 PM - 2:40 PM", "Nov 14, 2026, 2:40 PM - 2:50 PM", "Nov 14, 2026, 2:50 PM - 3:00 PM"],
+            "unit": "browsers",
+            "live": true,
+            "threshold": {
+              "value": 2,
+              "label": "Concurrency limit: 2"
+            },
+            "series": [
+              {
+                "name": "average",
+                "values": [1.24, 1.39, 1.08, 1.08, 1.28, 1.25, 1.22, 1.16, 1.26, 1.26, 1.27, 1.15, 1.46, 1.04, 0.99, 1.22, 0.98, 1.17, 1.25, 1.17, 1.02, 1.07, 0.95, 0.83, 0.56, 1.05, 0.63, 0.88, 0.77, 0.75, 0.72, 0.67, 0.37, 0.38, 0.59, 0.51, 0.34, 0.38, 0.49, 0, 0.16, 0.32, 0, 0, 0.13, 0.23, 0, 0, 0, 0.22, 0.15, 0.16, 0.24, 0, 0.21, 0.21, 0.3, 0, 0, 0, 0, 0, 0, 0, 0.14, 0, 0, 0.21, 0, 0, 0, 0.3, 0, 0.12, 0.13, 0.18, 0.27, 0.28, 0, 0, 0, 0.24, 0, 0, 0.24, 0, 0.14, 0.29, 0, 0.2, 0.21, 0, 0, 0, 0, 0, 0.12, 0, 0.25, 0.13, 0, 0.43, 0.16, 0, 0.17, 0.48, 0.52, 0.5, 0.78, 0.82, 0.64, 0.49, 0.5, 0.91, 0.68, 0.87, 1.02, 1.15, 1.04, 1.01, 0.9, 0.99, 1.05, 1.26, 1.27, 0.91, 1.28, 1.4, 1.15, 1.06, 1.28, 1.32, 1.47, 1.38, 1.44, 1.16, 1.44, 1.4, 1.39, 1.4, 1.19, 1.18, 1.13, 1.15]
+              },
+              {
+                "name": "peak",
+                "values": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                "tone": "muted"
+              }
+            ]
+          }
+            </script>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <section class="fd-chart-card">
+        <header class="fd-chart-card-head">
+          <div class="fd-chart-card-text">
+            <h3 class="fd-h3">Credits used · Last 7 days</h3>
+            <p class="fd-chart-card-desc">Credits from successful jobs</p>
+          </div>
+          <div class="fd-chart-card-aside">
+            <p class="fd-stat">40,214</p>
+            <p class="fd-chart-card-caption">credits</p>
+          </div>
+        </header>
+        <div class="fd-chart-card-body">
+          <div class="fd-chart" data-fd-chart="area" data-height="200">
+            <script type="application/json">
+          {
+            "labels": ["Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+            "titles": ["Nov 08, 2026", "Nov 09, 2026", "Nov 10, 2026", "Nov 11, 2026", "Nov 12, 2026", "Nov 13, 2026", "Nov 14, 2026"],
+            "yFormat": "compact",
+            "series": [
+              {
+                "name": "Credits used",
+                "values": [2215, 6226, 6856, 7703, 7813, 6219, 3182]
+              }
+            ]
+          }
+            </script>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" style="--fd-min: 240px">
+      <div class="fd-chart-stat">
+        <div class="fd-chart-stat-main">
+          <p class="fd-chart-stat-label">Credits used</p>
+          <p class="fd-chart-stat-value">93,352</p>
+          <p class="fd-chart-stat-delta" data-trend="good">+12.4%</p>
+        </div>
+        <span class="fd-sparkline" data-values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600" data-tone="accent" data-area data-dot data-label="Credits used, last 10 days"></span>
+      </div>
+      <div class="fd-chart-stat">
+        <div class="fd-chart-stat-main">
+          <p class="fd-chart-stat-label">Success rate</p>
+          <p class="fd-chart-stat-value">98.7%</p>
+          <p class="fd-chart-stat-delta" data-trend="good">+0.4 pts</p>
+        </div>
+        <span class="fd-sparkline" data-values="97,98,97,99,98,99,99,98,99,99" data-dot data-label="Success rate, last 10 days"></span>
+      </div>
+      <div class="fd-chart-stat">
+        <div class="fd-chart-stat-main">
+          <p class="fd-chart-stat-label">Failed jobs</p>
+          <p class="fd-chart-stat-value">19</p>
+          <p class="fd-chart-stat-delta" data-trend="good">-54%</p>
+        </div>
+        <span class="fd-sparkline" data-values="42,38,51,47,33,29,31,24,26,19" data-invert data-type="bars" data-label="Failed jobs, last 10 days"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="sizing">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Sizing</h2>
+      <p>Charts are fluid. They redraw when their container changes width (debounced), keep a fixed height, and drop ticks as space runs out. Below 420px the y axis keeps at most four labels.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <span class="doc-specimen-label">320px</span>
+      <div style="width: 320px; max-width: 100%">
+        <div class="fd-chart" data-fd-chart="bar" data-height="200" data-legend>
+          <script type="application/json">
+        {
+          "labels": ["Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29", "Oct 30", "Oct 31", "Nov 01", "Nov 02", "Nov 03", "Nov 04", "Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+          "titles": ["Oct 25, 2026", "Oct 26, 2026", "Oct 27, 2026", "Oct 28, 2026", "Oct 29, 2026", "Oct 30, 2026", "Oct 31, 2026", "Nov 01, 2026", "Nov 02, 2026", "Nov 03, 2026", "Nov 04, 2026", "Nov 05, 2026", "Nov 06, 2026", "Nov 07, 2026", "Nov 08, 2026", "Nov 09, 2026", "Nov 10, 2026", "Nov 11, 2026", "Nov 12, 2026", "Nov 13, 2026", "Nov 14, 2026"],
+          "yFormat": "compact",
+          "series": [
+            {
+              "name": "Succeeded",
+              "values": [2210, 6506, 6282, 6348, 7016, 5591, 2322, 2424, 6375, 5742, 7662, 7048, 6065, 2803, 2133, 6747, 6085, 7556, 6887, 5919, 2540]
+            },
+            {
+              "name": "Failed",
+              "values": [129, 125, 393, 317, 497, 347, 146, 126, 159, 188, 233, 341, 313, 153, 117, 377, 408, 359, 173, 181, 162],
+              "tone": "danger"
+            }
+          ]
+        }
+          </script>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <span class="doc-specimen-label">Full width</span>
+      <div class="fd-chart" data-fd-chart="stacked" data-height="200" data-legend>
+        <script type="application/json">
+      {
+        "labels": ["Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29", "Oct 30", "Oct 31", "Nov 01", "Nov 02", "Nov 03", "Nov 04", "Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14"],
+        "titles": ["Oct 25, 2026", "Oct 26, 2026", "Oct 27, 2026", "Oct 28, 2026", "Oct 29, 2026", "Oct 30, 2026", "Oct 31, 2026", "Nov 01, 2026", "Nov 02, 2026", "Nov 03, 2026", "Nov 04, 2026", "Nov 05, 2026", "Nov 06, 2026", "Nov 07, 2026", "Nov 08, 2026", "Nov 09, 2026", "Nov 10, 2026", "Nov 11, 2026", "Nov 12, 2026", "Nov 13, 2026", "Nov 14, 2026"],
+        "yFormat": "compact",
+        "series": [
+          {
+            "name": "Succeeded",
+            "values": [2210, 6506, 6282, 6348, 7016, 5591, 2322, 2424, 6375, 5742, 7662, 7048, 6065, 2803, 2133, 6747, 6085, 7556, 6887, 5919, 2540]
+          },
+          {
+            "name": "Failed",
+            "values": [129, 125, 393, 317, 497, 347, 146, 126, 159, 188, 233, 341, 313, 153, 117, 377, 408, 359, 173, 181, 162],
+            "tone": "danger"
+          }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">API</h2>
+      <p>Everything is declarative, with the same functions available from script: <code class="fd-code">charts.render(el, config)</code>, <code class="fd-code">charts.update(el, patch)</code> and <code class="fd-code">charts.toggleSeries(el, index)</code>.</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Config key</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>labels</td><td>X tick labels. Use <code class="fd-code">""</code> for points that should not carry a tick.</td></tr>
+          <tr><td>titles</td><td>Optional tooltip headings, one per point.</td></tr>
+          <tr><td>series</td><td>Up to six <code class="fd-code">{ name, values, tone? }</code>. <code class="fd-code">null</code> values are gaps.</td></tr>
+          <tr><td>yFormat</td><td><code class="fd-code">number</code> · <code class="fd-code">compact</code> · <code class="fd-code">percent</code> · <code class="fd-code">ms</code> · <code class="fd-code">credits</code>, or a function when called from script.</td></tr>
+          <tr><td>threshold</td><td><code class="fd-code">{ value, label, tone? }</code>: a dashed line with its label.</td></tr>
+          <tr><td>live</td><td>Pulsing end-point dot on line series.</td></tr>
+          <tr><td>unit</td><td>Noun appended to tooltip values, e.g. <code class="fd-code">browsers</code>.</td></tr>
+          <tr><td>yMin / yMax</td><td>Override the domain. <code class="fd-code">"yMin": "auto"</code> fits the data instead of starting at zero.</td></tr>
+          <tr><td>state, empty</td><td><code class="fd-code">"loading"</code> or <code class="fd-code">"empty"</code>; custom empty copy.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Attribute</th><th>On</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>data-fd-chart</td><td>.fd-chart</td><td><code class="fd-code">line</code> · <code class="fd-code">area</code> · <code class="fd-code">bar</code> · <code class="fd-code">stacked</code></td></tr>
+          <tr><td>data-height</td><td>.fd-chart</td><td>Height in px, 240 by default.</td></tr>
+          <tr><td>data-legend</td><td>.fd-chart</td><td>Render a toggling legend under the chart.</td></tr>
+          <tr><td>data-grid</td><td>.fd-chart</td><td><code class="fd-code">dashed</code> (default) · <code class="fd-code">solid</code> · <code class="fd-code">none</code></td></tr>
+          <tr><td>data-values</td><td>.fd-sparkline</td><td>Comma-separated numbers. Also <code class="fd-code">data-type="bars"</code>, <code class="fd-code">data-area</code>, <code class="fd-code">data-dot</code>, <code class="fd-code">data-tone</code>, <code class="fd-code">data-invert</code>, <code class="fd-code">data-width</code>, <code class="fd-code">data-height</code>.</td></tr>
+          <tr><td>data-size, data-thickness</td><td>.fd-donut</td><td>Diameter and stroke, 144 and 8 by default. <code class="fd-code">data-type="progress"</code> with <code class="fd-code">data-value</code> and <code class="fd-code">data-max</code> for a single ring.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Event</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>fd:hover</td><td><code class="fd-code">{ index, label, values }</code>: the active point changed.</td></tr>
+          <tr><td>fd:select</td><td><code class="fd-code">{ index, label, values }</code>: click, tap or Enter on the active point.</td></tr>
+          <tr><td>fd:change</td><td><code class="fd-code">{ value, index, visible }</code>: a legend toggle.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head"><h2 class="fd-h3">Rules</h2></div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Lead with the accent for the one series that matters and make everything else ink or muted. Keep axes in mono, label thresholds on the line, and show the number on hover.</p></div>
+      <div data-dont><strong>Don't</strong><p>Use more than six series, give every series its own hue, or add gradients, shadows, 3D or rounded-blob bars. If a chart needs a legend of eight colours it needs to be two charts.</p></div>
+    </div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><p>Use a meter (a bar) for a quota or a limit, and a ranked list for a ranking. Both answer "how much" faster than a ring.</p></div>
+      <div data-dont><strong>Don't</strong><p>Use a donut for a quota, or hide the baseline of an empty chart. A flat line on a zero baseline is data; a blank card is a question.</p></div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { charts } from '../fire/fire.js';
+
+  // Live readout under the interaction demo.
+  const readout = document.getElementById('readout');
+  document.addEventListener('fd:hover', (event) => {
+    if (event.target.id !== 'chart-interact' || !readout) return;
+    const { label, values } = event.detail;
+    readout.textContent = 'fd:hover  ' + label + '  ' + values.map((v) => v.value.toLocaleString('en-US')).join(' / ');
+  });
+
+  // Range switch in the concurrency card: 1 day of 10 minute buckets, 7 days of hourly buckets.
+  const card = document.getElementById('card-concurrency');
+  const chart = document.getElementById('chart-card-concurrency');
+  if (card && chart) {
+    let seed = 41;
+    const rand = () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const MONTH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const labels = []; const titles = []; const avg = []; const peak = [];
+    for (let k = 0; k < 168; k++) {
+      const ms = Date.UTC(2026, 10, 8) + k * 3600000;
+      const d = new Date(ms);
+      const hour = d.getUTCHours();
+      const dayName = MONTH[d.getUTCMonth()] + ' ' + String(d.getUTCDate()).padStart(2, '0');
+      const wd = (d.getUTCDay() + 6) % 7;
+      const base = Math.max(0, Math.sin(((hour - 7) / 15) * Math.PI)) * (wd > 4 ? 0.45 : 1);
+      let a = Math.max(0, base * 1.25 + (rand() - 0.45) * 0.4);
+      if (a < 0.1) a = 0;
+      a = Math.round(a * 100) / 100;
+      avg.push(a); peak.push(a === 0 ? 0 : Math.min(2, Math.ceil(a + rand() * 0.5)));
+      labels.push(hour === 0 ? dayName : '');
+      titles.push(dayName + ', 2026, ' + (hour % 12 === 0 ? 12 : hour % 12) + ':00 ' + (hour < 12 ? 'AM' : 'PM'));
+    }
+    const week = { labels, titles, live: false, series: [{ name: 'hourly average', values: avg }, { name: 'hourly peak', values: peak, tone: 'muted' }] };
+    const day = JSON.parse(chart.querySelector('script').textContent);
+    card.addEventListener('click', (event) => {
+      const item = event.target.closest('.fd-segmented-item[data-value]');
+      if (!item) return;
+      card.querySelectorAll('.fd-segmented-item').forEach((b) => b.setAttribute('aria-checked', String(b === item)));
+      charts.update(chart, item.dataset.value === '7d' ? week : day);
+    });
+  }
+</script>
+</body>
+</html>

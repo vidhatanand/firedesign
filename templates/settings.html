@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="settings" data-title="Settings">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band fd-page-hero fd-rise">
+      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
+      <h1 class="fd-display">Settings</h1>
+      <p class="fd-page-hero-desc">Manage your team, billing and account preferences.</p>
+    </section>
+
+    <section class="fd-band fd-rise" style="--fd-i:1" data-pad="none" data-grow aria-label="Settings">
+      <div class="fd-split" data-side="start">
+
+        <aside class="fd-panel" aria-label="Settings sections">
+          <nav class="fd-subnav" aria-label="Settings">
+            <a class="fd-subnav-item" href="?tab=account" data-tab="account"><i data-icon="user"></i><span>Account</span></a>
+            <a class="fd-subnav-item" href="?tab=team" data-tab="team" aria-current="page"><i data-icon="users"></i><span>Team</span><span class="fd-subnav-meta" data-bind="member-count">4</span></a>
+            <a class="fd-subnav-item" href="?tab=billing" data-tab="billing"><i data-icon="credit-card"></i><span>Billing</span></a>
+            <a class="fd-subnav-item" href="?tab=data-sources" data-tab="data-sources"><i data-icon="database"></i><span>Data sources</span></a>
+            <a class="fd-subnav-item" href="?tab=connected-apps" data-tab="connected-apps"><i data-icon="plug"></i><span>Connected apps</span></a>
+            <a class="fd-subnav-item" href="?tab=notifications" data-tab="notifications"><i data-icon="bell"></i><span>Notifications</span></a>
+            <hr class="fd-subnav-sep">
+            <a class="fd-subnav-item" href="?tab=advanced" data-tab="advanced"><i data-icon="settings-2"></i><span>Advanced</span></a>
+          </nav>
+        </aside>
+
+        <div class="fd-split-main">
+
+          <!-- ===================================================== Account -->
+          <section class="fd-stack" style="--fd-gap: 4px" id="panel-account" data-panel="account" aria-labelledby="h-account" hidden>
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-account" tabindex="-1">Account</h2>
+              <p class="fd-muted">Sign-in, appearance and privacy for <span class="fd-mono">maya@quarry.dev</span>.</p>
+            </header>
+            <div>
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Change password</h3><p class="fd-setting-desc">You sign in with Google. To also sign in with a password, we will email you a link to set one.</p></div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-fd-toast='{"title":"Check your inbox","description":"We sent a link to maya@quarry.dev. It expires in 30 minutes.","tone":"success"}'><i data-icon="key-round"></i><span>Email me a link</span></button></div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text">
+                  <h3 class="fd-setting-title">Email preferences</h3>
+                  <div class="fd-stack" style="--fd-gap: 12px">
+                    <p class="fd-setting-desc">Ember emails <span class="fd-mono">maya@quarry.dev</span> about:</p>
+                    <ul class="fd-feature-list" data-size="sm">
+                      <li><i data-icon="check"></i><span>Product updates and new endpoints, about twice a month</span></li>
+                      <li><i data-icon="check"></i><span>Receipts and security notices, always on</span></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-fd-toast='{"title":"Preferences email sent","description":"Open it to change what Ember sends you.","tone":"success"}'><span>Send</span></button></div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Two-factor authentication</h3><p class="fd-setting-desc">Ask for a code from your authenticator app each time you sign in on a new device.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" id="twofa-switch" aria-label="Two-factor authentication"><span class="fd-switch-track"></span></label></div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Appearance</h3><p class="fd-setting-desc">Current: <strong data-bind="theme-label">Light (System)</strong></p></div>
+                <div class="fd-setting-control">
+                  <div class="fd-segmented" data-icon-only role="radiogroup" aria-label="Appearance" id="seg-theme">
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Light" data-value="light"><i data-icon="sun"></i></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Dark" data-value="dark"><i data-icon="moon"></i></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" aria-label="System" data-value="system"><i data-icon="monitor"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Density</h3><p class="fd-setting-desc">Compact tightens rows and controls so more fits on screen.</p></div>
+                <div class="fd-setting-control">
+                  <div class="fd-segmented" role="radiogroup" aria-label="Density" id="seg-density">
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="comfortable">Comfortable</button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="compact">Compact</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Accent</h3><p class="fd-setting-desc">Pick the colour for buttons, links and active states on this device.</p></div>
+                <div class="fd-setting-control">
+                  <div class="fd-segmented" data-icon-only data-size="sm" role="radiogroup" aria-label="Accent colour" id="seg-accent">
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" aria-label="Ember" data-value="ember"><span class="fd-badge" data-variant="solid" data-dot data-accent="ember"></span></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Volt" data-value="volt"><span class="fd-badge" data-variant="solid" data-dot data-accent="volt"></span></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Iris" data-value="iris"><span class="fd-badge" data-variant="solid" data-dot data-accent="iris"></span></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Ocean" data-value="ocean"><span class="fd-badge" data-variant="solid" data-dot data-accent="ocean"></span></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Forest" data-value="forest"><span class="fd-badge" data-variant="solid" data-dot data-accent="forest"></span></button>
+                    <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" aria-label="Ink" data-value="ink"><span class="fd-badge" data-variant="solid" data-dot data-accent="ink"></span></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Privacy mode</h3><p class="fd-setting-desc">Hide sensitive account details while you share your screen. Blurs your email in the sidebar; hover it to reveal.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" id="privacy-switch" aria-label="Privacy mode"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label" data-bind="privacy-label">Off</span></span></label></div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Account owner email</h3><p class="fd-setting-desc"><strong class="fd-mono">maya@quarry.dev</strong> owns this account and receives billing and security emails.</p></div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-open="dlg-email"><i data-icon="pencil"></i><span>Change email</span></button></div>
+              </div>
+
+              <div class="fd-setting" data-tone="danger">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Delete account</h3><p class="fd-setting-desc">Permanently delete your account, API keys and run history. <strong>This cannot be undone.</strong></p></div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-open="dlg-delete-account">Delete account</button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===================================================== Team -->
+          <form class="fd-stack" style="--fd-gap: 4px" id="panel-team" data-panel="team" aria-labelledby="h-team" data-fd-dirty novalidate autocomplete="off">
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-team" tabindex="-1">Team</h2>
+              <p class="fd-muted" data-bind="team-summary">Quarry Labs · 4 members · 2 pending invites</p>
+            </header>
+            <div>
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><label class="fd-form-row-label" for="team-name">Team name</label><span class="fd-form-row-desc">Shown on invoices and to the people you invite.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-field" style="max-width: 560px">
+                    <div class="fd-input-pair">
+                      <input class="fd-input" id="team-name" name="name" value="Quarry Labs" maxlength="40" autocomplete="off" aria-describedby="team-name-error">
+                      <button type="button" class="fd-btn" id="team-name-save" disabled>Save</button>
+                    </div>
+                    <p class="fd-field-error" id="team-name-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Enter a team name.</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><label class="fd-form-row-label" for="team-slug">Team slug</label><span class="fd-form-row-desc">A vanity name for your team URLs. Leave it blank to use the team ID.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-field" style="max-width: 560px">
+                    <div class="fd-input-pair">
+                      <input class="fd-input" id="team-slug" name="slug" value="quarry-labs" placeholder="e.g. quarry-labs" autocomplete="off" spellcheck="false" aria-describedby="team-slug-hint team-slug-error">
+                      <button type="button" class="fd-btn" id="team-slug-save" disabled>Save</button>
+                    </div>
+                    <p class="fd-field-hint" id="team-slug-hint" data-mono>ember.dev/app/t/<span data-bind="slug-preview">quarry-labs</span>/usage</p>
+                    <p class="fd-field-error" id="team-slug-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Use 3 to 32 lowercase letters, numbers or dashes.</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><label class="fd-form-row-label" for="invite-email">Invite team members</label><span class="fd-form-row-desc">Add people to Quarry Labs. Invites expire after 7 days.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-field" style="max-width: 560px">
+                    <div class="fd-input-pair">
+                      <input class="fd-input" type="email" id="invite-email" placeholder="Enter email address" autocomplete="off" aria-describedby="invite-hint">
+                      <label class="fd-select"><span class="fd-sr-only">Role</span>
+                        <select id="invite-role"><option>Member</option><option>Admin</option><option>Billing</option></select>
+                      </label>
+                      <button type="button" class="fd-btn" id="invite-send" disabled><i data-icon="mail"></i><span>Send invite</span></button>
+                    </div>
+                    <p class="fd-field-hint" id="invite-hint">Invited members get an email with instructions to join your team.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text">
+                  <span class="fd-form-row-label" id="members-label">Team members <span class="fd-badge" data-bind="member-badge">4</span></span>
+                  <span class="fd-form-row-desc">Admins manage billing, keys and members. Members can use the API and playground.</span>
+                </div>
+                <div class="fd-form-row-control">
+                  <div id="members-wrap" data-fd-loading="true">
+                    <div class="fd-skeleton-list" data-rows="6"></div>
+                    <ul class="fd-list" data-card aria-labelledby="members-label" id="members-list">
+                      <li class="fd-list-row" data-member="maya@quarry.dev">
+                        <span class="fd-list-lead" data-shape="round" data-tone="accent">MR</span>
+                        <div class="fd-list-body"><span class="fd-list-title">Maya Reyes <span class="fd-badge" data-variant="outline">You</span></span><span class="fd-list-desc">maya@quarry.dev</span></div>
+                        <span class="fd-list-meta"><span class="fd-badge">Owner</span></span>
+                        <span class="fd-list-trail"></span>
+                      </li>
+                      <li class="fd-list-row" data-member="tomasz@quarry.dev">
+                        <span class="fd-list-lead" data-shape="round" data-tone="info">TN</span>
+                        <div class="fd-list-body"><span class="fd-list-title">Tomasz Nowak</span><span class="fd-list-desc">tomasz@quarry.dev</span></div>
+                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Tomasz Nowak</span><select data-role><option>Admin</option><option>Member</option><option>Billing</option></select></label></span>
+                        <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Tomasz Nowak" data-fd-menu="menu-member" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></span>
+                      </li>
+                      <li class="fd-list-row" data-member="amara@quarry.dev">
+                        <span class="fd-list-lead" data-shape="round" data-tone="success">AO</span>
+                        <div class="fd-list-body"><span class="fd-list-title">Amara Okafor</span><span class="fd-list-desc">amara@quarry.dev</span></div>
+                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Amara Okafor</span><select data-role><option>Admin</option><option selected>Member</option><option>Billing</option></select></label></span>
+                        <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Amara Okafor" data-fd-menu="menu-member" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></span>
+                      </li>
+                      <li class="fd-list-row" data-member="lukas@quarry.dev">
+                        <span class="fd-list-lead" data-shape="round" data-tone="violet">LS</span>
+                        <div class="fd-list-body"><span class="fd-list-title">Lukas Schmidt</span><span class="fd-list-desc">lukas@quarry.dev</span></div>
+                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Lukas Schmidt</span><select data-role><option>Admin</option><option>Member</option><option selected>Billing</option></select></label></span>
+                        <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Lukas Schmidt" data-fd-menu="menu-member" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></span>
+                      </li>
+                      <li class="fd-list-row" data-invite="jun@northwind.dev" data-role-name="Member">
+                        <span class="fd-list-lead" data-shape="round" data-tone="warning"><i data-icon="mail"></i></span>
+                        <div class="fd-list-body"><span class="fd-list-title">jun@northwind.dev</span><span class="fd-list-desc">Invited Nov 11 · Member</span></div>
+                        <span class="fd-list-meta"><span class="fd-badge" data-tone="warning">Invite sent</span></span>
+                        <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-resend>Resend</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for jun@northwind.dev" data-fd-menu="menu-invite" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></span>
+                      </li>
+                      <li class="fd-list-row" data-invite="priya@brightline.io" data-role-name="Admin">
+                        <span class="fd-list-lead" data-shape="round" data-tone="warning"><i data-icon="mail"></i></span>
+                        <div class="fd-list-body"><span class="fd-list-title">priya@brightline.io</span><span class="fd-list-desc">Invited Nov 13 · Admin</span></div>
+                        <span class="fd-list-meta"><span class="fd-badge" data-tone="warning">Invite sent</span></span>
+                        <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-resend>Resend</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for priya@brightline.io" data-fd-menu="menu-invite" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="fd-divider">
+
+              <div class="fd-setting" data-size="sm">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Pending invites</h3><p class="fd-setting-desc" data-bind="pending-desc">2 people have been invited and have not joined yet. Invites expire after 7 days.</p></div>
+                <div class="fd-setting-control">
+                  <button class="fd-btn" type="button" data-size="sm" id="resend-all">Resend all</button>
+                  <button class="fd-btn" type="button" data-variant="danger-soft" data-size="sm" id="revoke-all">Revoke all</button>
+                </div>
+              </div>
+
+              <div class="fd-setting" data-size="sm">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Leave team</h3><p class="fd-setting-desc">Leave Quarry Labs and lose access to its keys, runs and monitors. Owners must transfer ownership first.</p></div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="ghost" id="leave-team"><i data-icon="log-out"></i><span>Leave team</span></button></div>
+              </div>
+            </div>
+
+            <div class="fd-form-actions" data-variant="sticky" hidden>
+              <span class="fd-form-actions-text">You have unsaved changes</span>
+              <button type="reset" class="fd-btn" data-variant="ghost">Discard</button>
+              <button type="submit" class="fd-btn" data-variant="primary" id="team-save-all">Save changes</button>
+            </div>
+          </form>
+
+          <!-- ===================================================== Billing -->
+          <section class="fd-stack" style="--fd-gap: 16px" id="panel-billing" data-panel="billing" aria-labelledby="h-billing" hidden>
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-billing" tabindex="-1">Billing</h2>
+              <p class="fd-muted">Your plan, credits and payment method for Quarry Labs.</p>
+            </header>
+
+            <div id="billing-summary" data-fd-loading="true">
+              <div class="fd-skeleton-stat" data-count="4"></div>
+              <div class="fd-stats">
+                <div class="fd-stat-tile">
+                  <span class="fd-stat-label">Plan</span>
+                  <span class="fd-stat">Hobby</span>
+                  <span class="fd-stat-sub">$19 per month</span>
+                </div>
+                <div class="fd-stat-tile">
+                  <span class="fd-stat-label">Renews</span>
+                  <span class="fd-stat">Dec 4</span>
+                  <span class="fd-stat-sub">in 20 days</span>
+                </div>
+                <div class="fd-stat-tile">
+                  <span class="fd-stat-label">Credits remaining</span>
+                  <span class="fd-stat">1,520</span>
+                  <div class="fd-meter" data-size="sm" data-value="1520" data-max="3000" aria-label="Credits remaining this cycle"><div class="fd-meter-track"><div class="fd-meter-fill"></div></div></div>
+                  <span class="fd-stat-sub">of 3,000 · resets Nov 23</span>
+                </div>
+                <div class="fd-stat-tile">
+                  <span class="fd-stat-label">Payment method</span>
+                  <span class="fd-stat">Visa</span>
+                  <span class="fd-stat-sub"><span class="fd-mono">•••• 4242</span> · exp 08/28</span>
+                  <a class="fd-stat-action" href="#update-card" data-update-card>Update card</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="fd-tabs" role="tablist" aria-label="Billing" data-size="sm">
+              <button class="fd-tab" role="tab" id="bt-tab-plan" aria-selected="true" aria-controls="bt-plan" data-value="plan">Plan</button>
+              <button class="fd-tab" role="tab" id="bt-tab-coupons" aria-selected="false" aria-controls="bt-coupons" data-value="coupons">Coupons</button>
+              <button class="fd-tab" role="tab" id="bt-tab-invoices" aria-selected="false" aria-controls="bt-invoices" data-value="invoices">Invoices <span class="fd-tab-count">5</span></button>
+              <button class="fd-tab" role="tab" id="bt-tab-referrals" aria-selected="false" aria-controls="bt-referrals" data-value="referrals">Referrals</button>
+            </div>
+
+            <!-- Plan -->
+            <div class="fd-tab-panel" role="tabpanel" id="bt-plan" aria-labelledby="bt-tab-plan">
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Current plan</h3><p class="fd-setting-desc">Manage your subscription and payment method.</p></div>
+                <div class="fd-plan" data-variant="row" style="width: 100%">
+                  <div class="fd-plan-info"><span class="fd-plan-name">Hobby</span><span class="fd-badge" data-variant="mono">$19/month</span><span class="fd-plan-allowance">3,000 credits/mo</span></div>
+                  <div class="fd-plan-actions">
+                    <button class="fd-btn" type="button" data-variant="primary" data-upgrade>Upgrade</button>
+                    <button class="fd-btn" type="button" data-variant="outline" data-icon-only aria-label="Plan actions" data-fd-menu="menu-plan" data-placement="bottom-end"><i data-icon="ellipsis-vertical"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Smart upgrade</h3><p class="fd-setting-desc">When your credits run out mid-cycle, Ember moves you to Standard so jobs keep running, and bills only the prorated difference. Downgrade at any time and the extra credits stay until they reset.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" data-saved-toast="Smart upgrade" aria-label="Smart upgrade"><span class="fd-switch-track"></span></label></div>
+              </div>
+
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Auto-recharge</h3><p class="fd-setting-desc">Buy a credit pack automatically when your balance drops below a threshold. Charged to Visa <span class="fd-mono">•••• 4242</span>, at most once a day.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" id="recharge-switch" checked aria-label="Auto-recharge"><span class="fd-switch-track"></span></label></div>
+                <div class="fd-form-cols" id="recharge-fields" style="width: 100%; max-width: 520px">
+                  <div class="fd-field">
+                    <label class="fd-field-label" for="recharge-threshold">When credits fall below</label>
+                    <div class="fd-number">
+                      <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease threshold"><i data-icon="minus"></i></button>
+                      <input class="fd-number-input" type="number" id="recharge-threshold" value="500" min="100" max="5000" step="100">
+                      <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase threshold"><i data-icon="plus"></i></button>
+                    </div>
+                  </div>
+                  <div class="fd-field">
+                    <label class="fd-field-label" for="recharge-pack">Add this pack</label>
+                    <div class="fd-select" data-variant="outline">
+                      <select id="recharge-pack"><option>5,000 credits · $25</option><option>20,000 credits · $100</option><option>50,000 credits · $225</option></select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text">
+                  <details class="fd-disclosure" id="compare-plans">
+                    <summary class="fd-disclosure-trigger"><span>Compare plans</span><i data-icon="chevron-down"></i></summary>
+                    <div class="fd-disclosure-panel"><div class="fd-disclosure-inner fd-stack" style="--fd-gap: 20px">
+                      <div class="fd-row">
+                        <div class="fd-segmented" role="radiogroup" aria-label="Billing period" id="seg-period">
+                          <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="monthly">Monthly</button>
+                          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="yearly">Yearly · save 20%</button>
+                        </div>
+                      </div>
+                      <div class="fd-plan-grid" style="max-width: 640px">
+                        <div class="fd-plan">
+                          <div class="fd-plan-head"><h3 class="fd-plan-name">Free</h3></div>
+                          <div class="fd-plan-price"><span class="fd-plan-amount" data-monthly="$0" data-yearly="$0">$0</span><span class="fd-plan-per" data-per>/month</span></div>
+                          <p class="fd-plan-pitch">Try Ember on side projects.</p>
+                          <ul class="fd-feature-list" data-size="sm">
+                            <li><i data-icon="check"></i><span>1,000 credits per month</span></li>
+                            <li><i data-icon="check"></i><span>2 concurrent requests</span></li>
+                            <li><i data-icon="check"></i><span>Community support</span></li>
+                            <li data-excluded><i data-icon="x"></i><span>Webhooks</span></li>
+                            <li data-excluded><i data-icon="x"></i><span>Team seats</span></li>
+                          </ul>
+                          <div class="fd-plan-cta"><button class="fd-btn" type="button" data-block data-downgrade>Downgrade to Free</button></div>
+                        </div>
+                        <div class="fd-plan" data-current>
+                          <div class="fd-plan-head"><h3 class="fd-plan-name">Hobby</h3><span class="fd-status" data-size="sm" data-tone="success">Current</span></div>
+                          <div class="fd-plan-price"><span class="fd-plan-amount" data-monthly="$19" data-yearly="$15">$19</span><span class="fd-plan-per" data-per>/month</span></div>
+                          <p class="fd-plan-pitch">For apps that scrape on a schedule.</p>
+                          <ul class="fd-feature-list" data-size="sm">
+                            <li><i data-icon="check"></i><span>3,000 credits per month</span></li>
+                            <li><i data-icon="check"></i><span>5 concurrent requests</span></li>
+                            <li><i data-icon="check"></i><span>Email support</span></li>
+                            <li><i data-icon="check"></i><span>Webhooks</span></li>
+                            <li data-excluded><i data-icon="x"></i><span>Team seats</span></li>
+                          </ul>
+                          <div class="fd-plan-cta"><button class="fd-btn" type="button" data-block disabled>Current plan</button></div>
+                        </div>
+                        <div class="fd-plan" data-recommended>
+                          <div class="fd-plan-head"><h3 class="fd-plan-name">Standard</h3><span class="fd-badge" data-variant="solid">Recommended</span></div>
+                          <div class="fd-plan-price"><span class="fd-plan-amount" data-monthly="$99" data-yearly="$79">$99</span><span class="fd-plan-per" data-per>/month</span></div>
+                          <p class="fd-plan-pitch">For products with real traffic.</p>
+                          <ul class="fd-feature-list" data-size="sm" data-tone="accent">
+                            <li><i data-icon="check"></i><span>100,000 credits per month</span></li>
+                            <li><i data-icon="check"></i><span>50 concurrent requests</span></li>
+                            <li><i data-icon="check"></i><span>Priority queue</span></li>
+                            <li><i data-icon="check"></i><span>Webhooks and audit log</span></li>
+                            <li><i data-icon="check"></i><span>5 team seats</span></li>
+                          </ul>
+                          <div class="fd-plan-cta"><button class="fd-btn" type="button" data-variant="accent-soft" data-block data-plan="Standard">Upgrade to Standard</button></div>
+                        </div>
+                        <div class="fd-plan">
+                          <div class="fd-plan-head"><h3 class="fd-plan-name">Scale</h3></div>
+                          <div class="fd-plan-price"><span class="fd-plan-amount" data-monthly="$399" data-yearly="$319">$399</span><span class="fd-plan-per" data-per>/month</span></div>
+                          <p class="fd-plan-pitch">For data teams running large crawls.</p>
+                          <ul class="fd-feature-list" data-size="sm">
+                            <li><i data-icon="check"></i><span>500,000 credits per month</span></li>
+                            <li><i data-icon="check"></i><span>150 concurrent requests</span></li>
+                            <li><i data-icon="check"></i><span>Dedicated support channel</span></li>
+                            <li><i data-icon="check"></i><span>SSO and custom retention</span></li>
+                            <li><i data-icon="check"></i><span>Unlimited team seats</span></li>
+                          </ul>
+                          <div class="fd-plan-cta"><button class="fd-btn" type="button" data-variant="outline" data-block data-sales>Talk to sales</button></div>
+                        </div>
+                      </div>
+                    </div></div>
+                  </details>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coupons -->
+            <div class="fd-tab-panel" role="tabpanel" id="bt-coupons" aria-labelledby="bt-tab-coupons" hidden>
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Redeem a coupon</h3><p class="fd-setting-desc">Coupons apply to your next invoice. One coupon can be active at a time.</p></div>
+                <div class="fd-setting-control" style="width: 420px; max-width: 100%">
+                  <div class="fd-field" style="width: 100%">
+                    <label class="fd-field-label fd-sr-only" for="coupon-code">Coupon code</label>
+                    <div class="fd-input-pair" data-joined>
+                      <input class="fd-input" id="coupon-code" data-mono placeholder="Enter coupon code" autocomplete="off" spellcheck="false" aria-describedby="coupon-hint coupon-error">
+                      <button type="button" class="fd-btn" data-variant="outline" id="coupon-apply" disabled>Apply</button>
+                    </div>
+                    <p class="fd-field-hint" id="coupon-hint">For this demo, <span class="fd-mono">QUARRY20</span> is a valid code.</p>
+                    <p class="fd-field-error" id="coupon-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>That code is not valid or has expired. Check the spelling and try again.</span></p>
+                  </div>
+                </div>
+                <div class="fd-callout" data-tone="success" role="status" id="coupon-success" style="width: 100%" hidden>
+                  <i class="fd-callout-icon" data-icon="circle-check"></i>
+                  <div class="fd-callout-content"><p class="fd-callout-title">Coupon applied</p><p class="fd-callout-body">20% off your next 3 invoices. Your Dec 4 invoice will be $15.20.</p></div>
+                </div>
+              </div>
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Applied coupons</h3><p class="fd-setting-desc" id="coupon-empty">No coupons applied yet. Codes you redeem show up here.</p></div>
+                <ul class="fd-list" data-card id="coupon-list" aria-label="Applied coupons" style="width: 100%" hidden>
+                  <li class="fd-list-row">
+                    <span class="fd-list-lead" data-tone="accent"><i data-icon="tag"></i></span>
+                    <div class="fd-list-body"><span class="fd-list-title fd-mono">QUARRY20</span><span class="fd-list-desc">20% off for 3 months · applied Nov 14</span></div>
+                    <span class="fd-list-meta"><span class="fd-badge" data-tone="success" data-dot>Active</span></span>
+                    <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" id="coupon-remove">Remove</button></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Invoices -->
+            <div class="fd-tab-panel" role="tabpanel" id="bt-invoices" aria-labelledby="bt-tab-invoices" hidden>
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Invoices</h3><p class="fd-setting-desc">Receipts for your Hobby subscription and credit packs. Invoices are sent to <span class="fd-mono">maya@quarry.dev</span>.</p></div>
+                <div class="fd-table-wrap" style="width: 100%">
+                  <div class="fd-table-scroll">
+                    <table class="fd-table" data-stack aria-label="Invoices">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Invoice</th>
+                          <th data-num>Amount</th>
+                          <th>Status</th>
+                          <th data-actions><span class="fd-sr-only">Actions</span></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td data-stack-title>Nov 14, 2026</td>
+                          <td data-mono>INV-2026-0121</td>
+                          <td data-num>$25.00</td>
+                          <td><span class="fd-status" data-tone="warning">Open</span></td>
+                          <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-download="INV-2026-0121" aria-label="Download INV-2026-0121"><i data-icon="download"></i></button></td>
+                        </tr>
+                        <tr>
+                          <td data-stack-title>Nov 4, 2026</td>
+                          <td data-mono>INV-2026-0118</td>
+                          <td data-num>$19.00</td>
+                          <td><span class="fd-status" data-tone="success">Paid</span></td>
+                          <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-download="INV-2026-0118" aria-label="Download INV-2026-0118"><i data-icon="download"></i></button></td>
+                        </tr>
+                        <tr>
+                          <td data-stack-title>Oct 21, 2026</td>
+                          <td data-mono>INV-2026-0107</td>
+                          <td data-num>$25.00</td>
+                          <td><span class="fd-status" data-tone="success">Paid</span></td>
+                          <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-download="INV-2026-0107" aria-label="Download INV-2026-0107"><i data-icon="download"></i></button></td>
+                        </tr>
+                        <tr>
+                          <td data-stack-title>Oct 4, 2026</td>
+                          <td data-mono>INV-2026-0096</td>
+                          <td data-num>$19.00</td>
+                          <td><span class="fd-status" data-tone="success">Paid</span></td>
+                          <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-download="INV-2026-0096" aria-label="Download INV-2026-0096"><i data-icon="download"></i></button></td>
+                        </tr>
+                        <tr>
+                          <td data-stack-title>Sep 4, 2026</td>
+                          <td data-mono>INV-2026-0081</td>
+                          <td data-num>$19.00</td>
+                          <td><span class="fd-status" data-tone="neutral">Refunded</span></td>
+                          <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-download="INV-2026-0081" aria-label="Download INV-2026-0081"><i data-icon="download"></i></button></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="fd-table-foot">
+                    <span class="fd-table-foot-info">5 of 5 invoices · last 90 days</span>
+                    <div class="fd-table-foot-actions">
+                      <button class="fd-btn" type="button" data-size="sm" data-download="all invoices"><i data-icon="download"></i><span>Download all</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Referrals -->
+            <div class="fd-tab-panel" role="tabpanel" id="bt-referrals" aria-labelledby="bt-tab-referrals" hidden>
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Your referral link</h3><p class="fd-setting-desc">Share it with a friend. When they run their first request, you both get 500 credits.</p></div>
+                <div class="fd-copy-field" data-value="https://ember.dev/r/quarry-labs-7k2q" data-noun="referral link" style="width: 100%">
+                  <span class="fd-copy-field-label">Referral link</span>
+                  <div class="fd-copy-field-actions"><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy referral link" data-fd-toast='{"title":"Referral link copied","tone":"success"}'><i data-icon="copy"></i></button></div>
+                  <code class="fd-copy-field-value"></code>
+                </div>
+                <div class="fd-stats" style="width: 100%; max-width: 480px">
+                  <div class="fd-stat-tile"><span class="fd-stat-label">Friends joined</span><span class="fd-stat">3</span><span class="fd-stat-sub">1 invite pending</span></div>
+                  <div class="fd-stat-tile"><span class="fd-stat-label">Credits earned</span><span class="fd-stat">1,500</span><span class="fd-stat-sub">500 per friend</span></div>
+                </div>
+              </div>
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text">
+                  <h3 class="fd-setting-title">How it works</h3>
+                  <div class="fd-stack" style="--fd-gap: 12px">
+                    <p class="fd-setting-desc">Three steps, and nobody has to copy a code.</p>
+                    <ul class="fd-feature-list">
+                      <li><i data-icon="share-2"></i><span>Send your link to a developer who needs web data.</span></li>
+                      <li><i data-icon="user-plus"></i><span>They create an Ember account and make their first request.</span></li>
+                      <li><i data-icon="gift"></i><span>You each get 500 credits, added within a minute and valid for 90 days.</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===================================================== Data sources -->
+          <section class="fd-stack" style="--fd-gap: 20px" id="panel-data-sources" data-panel="data-sources" aria-labelledby="h-data-sources" hidden>
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-data-sources" tabindex="-1">Data sources</h2>
+              <p class="fd-muted">Choose which catalog providers your agents can call and cap what each one can spend every month.</p>
+            </header>
+            <div class="fd-stack" style="--fd-gap: 20px">
+              <div class="fd-callout" data-tone="info" role="note">
+                <i class="fd-callout-icon" data-icon="info"></i>
+                <div class="fd-callout-content"><p class="fd-callout-title">Providers set their own terms</p><p class="fd-callout-body">Each provider is a separate data licensor. Accepting its terms lets everyone on Quarry Labs call it, and Ember bills credits at the provider’s rate. When a provider updates its terms you will be asked to review them again.</p></div>
+              </div>
+              <div class="fd-grid" style="--fd-min: 320px; --fd-gap: 16px" id="provider-grid">
+                <article class="fd-card" data-provider="Northwind People" data-terms="Oct 3">
+                  <header class="fd-card-head">
+                    <span class="fd-tile" data-size="36" data-tone="info">NP</span>
+                    <div class="fd-card-heading"><h3 class="fd-title">Northwind People <span class="fd-verified" role="img" aria-label="Verified"></span></h3><p class="fd-card-desc">People and company enrichment</p></div>
+                    <div class="fd-card-action"><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Enable Northwind People"><span class="fd-switch-track"></span></label></div>
+                  </header>
+                  <div class="fd-card-body fd-row" data-wrap data-justify="between" style="--fd-gap: 8px">
+                    <span class="fd-status" data-size="sm" data-tone="success" data-bind="terms-status">Terms accepted Oct 3</span>
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-terms-open>View terms</button>
+                  </div>
+                  <footer class="fd-card-foot">
+                    <label class="fd-field-label" for="cap-northwind">Monthly spend cap</label>
+                    <div class="fd-input-group" style="width: 168px"><input class="fd-input" type="number" id="cap-northwind" value="1000" min="0" step="50"><span class="fd-input-affix" data-kind="unit">credits</span></div>
+                  </footer>
+                </article>
+                <article class="fd-card" data-provider="Tessera Finance" data-terms="Oct 3">
+                  <header class="fd-card-head">
+                    <span class="fd-tile" data-size="36" data-tone="violet">TF</span>
+                    <div class="fd-card-heading"><h3 class="fd-title">Tessera Finance <span class="fd-verified" role="img" aria-label="Verified"></span></h3><p class="fd-card-desc">Filings, ratios and segment revenue</p></div>
+                    <div class="fd-card-action"><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Enable Tessera Finance"><span class="fd-switch-track"></span></label></div>
+                  </header>
+                  <div class="fd-card-body fd-row" data-wrap data-justify="between" style="--fd-gap: 8px">
+                    <span class="fd-status" data-size="sm" data-tone="success" data-bind="terms-status">Terms accepted Oct 3</span>
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-terms-open>View terms</button>
+                  </div>
+                  <footer class="fd-card-foot">
+                    <label class="fd-field-label" for="cap-tessera">Monthly spend cap</label>
+                    <div class="fd-input-group" style="width: 168px"><input class="fd-input" type="number" id="cap-tessera" value="500" min="0" step="50"><span class="fd-input-affix" data-kind="unit">credits</span></div>
+                  </footer>
+                </article>
+                <article class="fd-card" data-provider="Halyard Funding" data-terms="Oct 3">
+                  <header class="fd-card-head">
+                    <span class="fd-tile" data-size="36" data-tone="accent">HF</span>
+                    <div class="fd-card-heading"><h3 class="fd-title">Halyard Funding <span class="fd-verified" role="img" aria-label="Verified"></span></h3><p class="fd-card-desc">Startup funding rounds since 2026</p></div>
+                    <div class="fd-card-action"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Enable Halyard Funding"><span class="fd-switch-track"></span></label></div>
+                  </header>
+                  <div class="fd-card-body fd-row" data-wrap data-justify="between" style="--fd-gap: 8px">
+                    <span class="fd-status" data-size="sm" data-tone="success" data-bind="terms-status">Terms accepted Oct 3</span>
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-terms-open>View terms</button>
+                  </div>
+                  <footer class="fd-card-foot">
+                    <label class="fd-field-label" for="cap-halyard">Monthly spend cap</label>
+                    <div class="fd-input-group" style="width: 168px"><input class="fd-input" type="number" id="cap-halyard" value="200" min="0" step="50" disabled><span class="fd-input-affix" data-kind="unit">credits</span></div>
+                  </footer>
+                </article>
+                <article class="fd-card" data-provider="Parcel Retail" data-terms="">
+                  <header class="fd-card-head">
+                    <span class="fd-tile" data-size="36" data-tone="success">PR</span>
+                    <div class="fd-card-heading"><h3 class="fd-title">Parcel Retail <span class="fd-verified" role="img" aria-label="Verified"></span></h3><p class="fd-card-desc">Prices, stock and variants</p></div>
+                    <div class="fd-card-action"><label class="fd-switch"><input type="checkbox" role="switch" disabled aria-label="Enable Parcel Retail"><span class="fd-switch-track"></span></label></div>
+                  </header>
+                  <div class="fd-card-body fd-row" data-wrap data-justify="between" style="--fd-gap: 8px">
+                    <span class="fd-status" data-size="sm" data-tone="warning" data-bind="terms-status">Terms need review</span>
+                    <button class="fd-btn" type="button" data-variant="outline" data-size="sm" data-terms-open>Review terms</button>
+                  </div>
+                  <footer class="fd-card-foot">
+                    <label class="fd-field-label" for="cap-parcel">Monthly spend cap</label>
+                    <div class="fd-input-group" style="width: 168px"><input class="fd-input" type="number" id="cap-parcel" value="300" min="0" step="50" disabled><span class="fd-input-affix" data-kind="unit">credits</span></div>
+                  </footer>
+                </article>
+                <article class="fd-card" data-provider="Mapleton Places" data-terms="Nov 2">
+                  <header class="fd-card-head">
+                    <span class="fd-tile" data-size="36" data-tone="info">MP</span>
+                    <div class="fd-card-heading"><h3 class="fd-title">Mapleton Places <span class="fd-verified" role="img" aria-label="Verified"></span></h3><p class="fd-card-desc">Listings, hours and reviews</p></div>
+                    <div class="fd-card-action"><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Enable Mapleton Places"><span class="fd-switch-track"></span></label></div>
+                  </header>
+                  <div class="fd-card-body fd-row" data-wrap data-justify="between" style="--fd-gap: 8px">
+                    <span class="fd-status" data-size="sm" data-tone="success" data-bind="terms-status">Terms accepted Nov 2</span>
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-terms-open>View terms</button>
+                  </div>
+                  <footer class="fd-card-foot">
+                    <label class="fd-field-label" for="cap-mapleton">Monthly spend cap</label>
+                    <div class="fd-input-group" style="width: 168px"><input class="fd-input" type="number" id="cap-mapleton" value="250" min="0" step="50"><span class="fd-input-affix" data-kind="unit">credits</span></div>
+                  </footer>
+                </article>
+                <article class="fd-card" data-provider="Docsmith" data-terms="Oct 3">
+                  <header class="fd-card-head">
+                    <span class="fd-tile" data-size="36" data-tone="neutral">DS</span>
+                    <div class="fd-card-heading"><h3 class="fd-title">Docsmith <span class="fd-verified" role="img" aria-label="Verified"></span></h3><p class="fd-card-desc">Developer docs, repos and changelogs</p></div>
+                    <div class="fd-card-action"><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Enable Docsmith"><span class="fd-switch-track"></span></label></div>
+                  </header>
+                  <div class="fd-card-body fd-row" data-wrap data-justify="between" style="--fd-gap: 8px">
+                    <span class="fd-status" data-size="sm" data-tone="success" data-bind="terms-status">Terms accepted Oct 3</span>
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-terms-open>View terms</button>
+                  </div>
+                  <footer class="fd-card-foot">
+                    <label class="fd-field-label" for="cap-docsmith">Monthly spend cap</label>
+                    <div class="fd-input-group" style="width: 168px"><input class="fd-input" type="number" id="cap-docsmith" value="100" min="0" step="50"><span class="fd-input-affix" data-kind="unit">credits</span></div>
+                  </footer>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===================================================== Connected apps -->
+          <section class="fd-stack" style="--fd-gap: 16px" id="panel-connected-apps" data-panel="connected-apps" aria-labelledby="h-connected-apps" hidden>
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-connected-apps" tabindex="-1">Connected apps</h2>
+              <p class="fd-muted">MCP clients and OAuth apps that can use Ember on behalf of Quarry Labs.</p>
+            </header>
+            <div class="fd-stack" style="--fd-gap: 16px">
+              <div class="fd-row" data-justify="between" data-wrap>
+                <p class="fd-small fd-muted" data-bind="apps-count">4 apps connected</p>
+                <a class="fd-btn" data-variant="outline" href="install.html"><i data-icon="plus"></i><span>Connect an app</span></a>
+              </div>
+              <ul class="fd-list" data-card id="apps-list" aria-label="Connected apps">
+                <li class="fd-list-row" data-app="Claude Code">
+                  <span class="fd-list-lead"><i data-icon="terminal"></i></span>
+                  <div class="fd-list-body">
+                    <span class="fd-list-title">Claude Code</span>
+                    <div class="fd-stack" style="--fd-gap: 6px"><span class="fd-list-desc">Connected Nov 2 by maya@quarry.dev</span><span class="fd-row" data-wrap style="--fd-gap: 4px"><span class="fd-badge" data-variant="mono">search</span><span class="fd-badge" data-variant="mono">scrape</span><span class="fd-badge" data-variant="mono">crawl</span><span class="fd-badge" data-variant="mono">agent</span></span></div>
+                  </div>
+                  <span class="fd-list-meta"></span>
+                  <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="danger-soft" data-size="sm" data-disconnect>Disconnect</button></span>
+                </li>
+                <li class="fd-list-row" data-app="Cursor">
+                  <span class="fd-list-lead"><i data-icon="square-terminal"></i></span>
+                  <div class="fd-list-body">
+                    <span class="fd-list-title">Cursor</span>
+                    <div class="fd-stack" style="--fd-gap: 6px"><span class="fd-list-desc">Connected Oct 19 by tomasz@quarry.dev</span><span class="fd-row" data-wrap style="--fd-gap: 4px"><span class="fd-badge" data-variant="mono">search</span><span class="fd-badge" data-variant="mono">scrape</span></span></div>
+                  </div>
+                  <span class="fd-list-meta"></span>
+                  <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="danger-soft" data-size="sm" data-disconnect>Disconnect</button></span>
+                </li>
+                <li class="fd-list-row" data-app="n8n">
+                  <span class="fd-list-lead" data-tone="success"><i data-icon="workflow"></i></span>
+                  <div class="fd-list-body">
+                    <span class="fd-list-title">n8n</span>
+                    <div class="fd-stack" style="--fd-gap: 6px"><span class="fd-list-desc">Connected Sep 27 by maya@quarry.dev</span><span class="fd-row" data-wrap style="--fd-gap: 4px"><span class="fd-badge" data-variant="mono">scrape</span><span class="fd-badge" data-variant="mono">extract</span><span class="fd-badge" data-variant="mono">webhooks:write</span></span></div>
+                  </div>
+                  <span class="fd-list-meta"></span>
+                  <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="danger-soft" data-size="sm" data-disconnect>Disconnect</button></span>
+                </li>
+                <li class="fd-list-row" data-app="Slack">
+                  <span class="fd-list-lead" data-tone="violet"><i data-icon="hash"></i></span>
+                  <div class="fd-list-body">
+                    <span class="fd-list-title">Slack</span>
+                    <div class="fd-stack" style="--fd-gap: 6px"><span class="fd-list-desc">Connected Sep 9 by amara@quarry.dev</span><span class="fd-row" data-wrap style="--fd-gap: 4px"><span class="fd-badge" data-variant="mono">monitors:read</span></span></div>
+                  </div>
+                  <span class="fd-list-meta"></span>
+                  <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="danger-soft" data-size="sm" data-disconnect>Disconnect</button></span>
+                </li>
+              </ul>
+              <div class="fd-empty" data-size="sm" id="apps-empty" hidden>
+                <span class="fd-empty-icon"><i data-icon="plug"></i></span>
+                <h3 class="fd-empty-title">No connected apps</h3>
+                <p class="fd-empty-text">Apps you connect, like Claude Code or Cursor, show up here with the scopes they can use.</p>
+                <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="install.html"><i data-icon="plus"></i><span>Connect an app</span></a></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===================================================== Notifications -->
+          <section class="fd-stack" style="--fd-gap: 4px" id="panel-notifications" data-panel="notifications" aria-labelledby="h-notifications" hidden>
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-notifications" tabindex="-1">Notifications</h2>
+              <p class="fd-muted">Choose what reaches you and where. These settings are personal, so teammates keep their own.</p>
+            </header>
+            <div>
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Email notifications</h3><p class="fd-setting-desc">Usage alerts, run summaries and billing notices sent to <span class="fd-mono">maya@quarry.dev</span>.</p></div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-open="dlg-email-prefs"><i data-icon="mail"></i><span>Manage email notifications</span></button></div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><span class="fd-form-row-label">Your notifications</span><span class="fd-form-row-desc">Choose what shows up in Ember and as desktop alerts.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-matrix" data-cols="2" id="notif-matrix">
+                    <div class="fd-matrix-head"><span>Category</span><span class="fd-matrix-cell">In-app</span><span class="fd-matrix-cell">Browser</span></div>
+                    <div class="fd-matrix-row">
+                      <div class="fd-matrix-text"><span class="fd-matrix-label">Billing &amp; payments</span><span class="fd-matrix-desc">Failed payments, top-ups and plan changes. Always shown in-app.</span></div>
+                      <div class="fd-matrix-cell"><span class="fd-switch-lock"><i data-icon="lock"></i>Always</span></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Billing and payments, browser" checked><span class="fd-switch-track"></span></label></div>
+                    </div>
+                    <div class="fd-matrix-row">
+                      <div class="fd-matrix-text"><span class="fd-matrix-label">Usage &amp; limits</span><span class="fd-matrix-desc">Credit thresholds, rate limits and concurrency limits.</span></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Usage and limits, in-app" checked><span class="fd-switch-track"></span></label></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Usage and limits, browser"><span class="fd-switch-track"></span></label></div>
+                    </div>
+                    <div class="fd-matrix-row">
+                      <div class="fd-matrix-text"><span class="fd-matrix-label">Monitors</span><span class="fd-matrix-desc">Changes detected on the pages you watch.</span></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Monitors, in-app" checked><span class="fd-switch-track"></span></label></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Monitors, browser" checked><span class="fd-switch-track"></span></label></div>
+                    </div>
+                    <div class="fd-matrix-row">
+                      <div class="fd-matrix-text"><span class="fd-matrix-label">Jobs</span><span class="fd-matrix-desc">Crawls, batch scrapes and agent runs finishing or failing.</span></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Jobs, in-app" checked><span class="fd-switch-track"></span></label></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Jobs, browser" checked><span class="fd-switch-track"></span></label></div>
+                    </div>
+                    <div class="fd-matrix-row">
+                      <div class="fd-matrix-text"><span class="fd-matrix-label">Team &amp; account</span><span class="fd-matrix-desc">Members joining, API keys created and security changes.</span></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Team and account, in-app" checked><span class="fd-switch-track"></span></label></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Team and account, browser"><span class="fd-switch-track"></span></label></div>
+                    </div>
+                    <div class="fd-matrix-row">
+                      <div class="fd-matrix-text"><span class="fd-matrix-label">Product updates</span><span class="fd-matrix-desc">New endpoints, providers and changes to the API.</span></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Product updates, in-app" checked><span class="fd-switch-track"></span></label></div>
+                      <div class="fd-matrix-cell"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Product updates, browser"><span class="fd-switch-track"></span></label></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="fd-divider">
+
+              <div class="fd-setting">
+                <div class="fd-setting-text">
+                  <h3 class="fd-setting-title">Browser alerts</h3>
+                  <p class="fd-setting-desc">Permission: <span class="fd-status" data-size="sm" data-tone="warning" id="perm-status" role="status">Not enabled</span></p>
+                  <p class="fd-setting-desc">Ember needs your browser’s permission to show alerts while this tab is in the background.</p>
+                </div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="outline" id="enable-alerts"><i data-icon="bell"></i><span>Enable desktop alerts</span></button></div>
+              </div>
+
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Quiet hours</h3><p class="fd-setting-desc">Pause browser alerts overnight. In-app notifications still collect so you can catch up in the morning.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" id="quiet-switch" checked aria-label="Quiet hours"><span class="fd-switch-track"></span></label></div>
+                <div class="fd-form-cols" id="quiet-fields" style="width: 100%; max-width: 520px">
+                  <div class="fd-field">
+                    <label class="fd-field-label" for="quiet-from">From</label>
+                    <div class="fd-select" data-variant="outline"><select id="quiet-from" data-saved-toast="Quiet hours"><option>9:00 PM</option><option selected>10:00 PM</option><option>11:00 PM</option><option>12:00 AM</option></select></div>
+                  </div>
+                  <div class="fd-field">
+                    <label class="fd-field-label" for="quiet-to">To</label>
+                    <div class="fd-select" data-variant="outline"><select id="quiet-to" data-saved-toast="Quiet hours"><option>6:00 AM</option><option selected>7:00 AM</option><option>8:00 AM</option><option>9:00 AM</option></select></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===================================================== Advanced -->
+          <section class="fd-stack" style="--fd-gap: 4px" id="panel-advanced" data-panel="advanced" aria-labelledby="h-advanced" hidden>
+            <header class="fd-stack" style="--fd-gap: 4px">
+              <h2 class="fd-h2" id="h-advanced" tabindex="-1">Advanced</h2>
+              <p class="fd-muted">Webhooks, network access and data handling for Quarry Labs.</p>
+            </header>
+            <div>
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><span class="fd-form-row-label" id="whsec-label">Webhook signing secret</span><span class="fd-form-row-desc">Verify that webhook requests really come from Ember by checking the signature header with this secret.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-field" style="max-width: 640px">
+                    <div class="fd-secret" id="whsec" role="group" aria-labelledby="whsec-label" data-value="whsec_9d2e7a41b6c04f58a3e17c92d0b85f64" data-mask="full" data-noun="signing secret">
+                      <code class="fd-secret-value"></code>
+                      <div class="fd-secret-actions">
+                        <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show signing secret"><i data-icon="eye"></i></button>
+                        <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy signing secret"><i data-icon="copy"></i></button>
+                        <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="rotate" aria-label="Rotate signing secret"><i data-icon="rotate-ccw"></i></button>
+                      </div>
+                    </div>
+                    <p class="fd-field-hint">Keep it out of client code. Rotating invalidates the old secret at once. <a class="fd-link" href="#docs">Webhook security</a></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><span class="fd-form-row-label" id="endpoints-label">Webhook endpoints</span><span class="fd-form-row-desc">Ember sends signed events to these HTTPS URLs when runs and monitors finish.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-table-wrap">
+                    <div class="fd-table-scroll">
+                      <table class="fd-table" data-stack aria-labelledby="endpoints-label" id="endpoints-table">
+                        <thead>
+                          <tr><th>URL</th><th>Events</th><th>Last delivery</th><th data-actions><span class="fd-sr-only">Actions</span></th></tr>
+                        </thead>
+                        <tbody>
+                          <tr data-endpoint="https://api.quarry.dev/hooks/ember">
+                            <td data-mono data-stack-title><span class="fd-table-trunc" style="--w: 240px">https://api.quarry.dev/hooks/ember</span></td>
+                            <td><span class="fd-row" data-wrap style="--fd-gap: 4px"><span class="fd-badge" data-variant="mono">crawl.completed</span><span class="fd-badge" data-variant="mono">monitor.changed</span></span></td>
+                            <td><span class="fd-status" data-size="sm" data-tone="success">200 · 4 min ago</span></td>
+                            <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for api.quarry.dev endpoint" data-fd-menu="menu-endpoint" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+                          </tr>
+                          <tr data-endpoint="https://n8n.quarry.dev/webhook/ember-runs">
+                            <td data-mono data-stack-title><span class="fd-table-trunc" style="--w: 240px">https://n8n.quarry.dev/webhook/ember-runs</span></td>
+                            <td><span class="fd-row" data-wrap style="--fd-gap: 4px"><span class="fd-badge" data-variant="mono">agent.finished</span></span></td>
+                            <td><span class="fd-status" data-size="sm" data-tone="danger">503 · 2 hr ago</span></td>
+                            <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for n8n.quarry.dev endpoint" data-fd-menu="menu-endpoint" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="fd-table-foot">
+                      <span class="fd-table-foot-info" data-bind="endpoint-count">2 endpoints</span>
+                      <div class="fd-table-foot-actions">
+                        <button class="fd-btn" type="button" data-size="sm" data-fd-dialog-open="dlg-endpoint"><i data-icon="plus"></i><span>Add endpoint</span></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><label class="fd-form-row-label" for="allowlist">IP allowlist</label><span class="fd-form-row-desc">Only requests from these addresses can use your API keys. Leave it empty to allow any address.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-field" style="max-width: 560px">
+                    <div class="fd-tag-input" id="allowlist-tags" data-fd-tag-input data-mono data-value="203.0.113.0/24,198.51.100.7" data-pattern="^((25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(/(3[0-2]|[12]?[0-9]))?$">
+                      <input class="fd-tag-input-field" id="allowlist" placeholder="Add an IP or CIDR, like 203.0.113.0/24" autocomplete="off" spellcheck="false" aria-describedby="allowlist-hint allowlist-error">
+                    </div>
+                    <p class="fd-field-hint" id="allowlist-hint">Changes apply at once. Include your own address so you do not lock yourself out.</p>
+                    <p class="fd-field-error" id="allowlist-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Fix or remove the entries shown in red. Use an IPv4 address or a CIDR range.</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Data retention</h3><p class="fd-setting-desc">How long Ember keeps request logs and run output before deleting them.</p></div>
+                <div class="fd-setting-control"><label class="fd-select"><span class="fd-sr-only">Data retention</span>
+                  <select id="retention" data-saved-toast="Data retention"><option>7 days</option><option selected>30 days</option><option>90 days</option><option>1 year</option></select></label></div>
+              </div>
+
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Zero data retention</h3><p class="fd-setting-desc">Ember stores no page content or request bodies for this team.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" id="zdr-switch" aria-label="Zero data retention"><span class="fd-switch-track"></span></label></div>
+                <div class="fd-callout" data-tone="info" data-size="sm" role="note" style="width: 100%; max-width: 640px">
+                  <i class="fd-callout-icon" data-icon="info"></i>
+                  <div class="fd-callout-content"><p class="fd-callout-body">Logs keep only the URL, status, timing and credits. Runs cannot be replayed and monitors cannot show diffs while this is on.</p></div>
+                </div>
+              </div>
+
+              <div class="fd-setting">
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Export data</h3><p class="fd-setting-desc">Download your runs, logs and usage as a ZIP of CSV files. Large exports are emailed to <span class="fd-mono">maya@quarry.dev</span>.</p></div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="outline" id="export-data"><i data-icon="download"></i><span>Export data</span></button></div>
+              </div>
+
+              <div class="fd-setting" data-tone="danger">
+                <div class="fd-setting-text">
+                  <div class="fd-row" data-align="start" style="--fd-gap: 12px">
+                    <span class="fd-tile" data-size="44" data-tone="accent">QL</span>
+                    <div>
+                      <h3 class="fd-setting-title">Delete team</h3>
+                      <p class="fd-setting-desc"><span class="fd-label">Quarry Labs</span> and its 4 API keys, 12 monitors and 30 days of logs will be permanently deleted. <strong>This cannot be undone.</strong></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-open="dlg-delete-team">Delete</button></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================================================== Menus -->
+  <div class="fd-menu" id="menu-member" popover role="menu" aria-label="Member actions">
+    <button class="fd-menu-item" data-value="copy"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy email</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" data-value="remove" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Remove from team</span></button>
+  </div>
+  <div class="fd-menu" id="menu-invite" popover role="menu" aria-label="Invite actions">
+    <button class="fd-menu-item" data-value="resend"><i data-icon="send"></i><span class="fd-menu-item-label">Resend invite</span></button>
+    <button class="fd-menu-item" data-value="copy"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy email</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" data-value="remove" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Revoke invite</span></button>
+  </div>
+  <div class="fd-menu" id="menu-plan" popover role="menu" aria-label="Plan actions">
+    <button class="fd-menu-item" data-value="compare"><i data-icon="layers"></i><span class="fd-menu-item-label">Compare plans</span></button>
+    <button class="fd-menu-item" data-value="invoices"><i data-icon="receipt"></i><span class="fd-menu-item-label">View invoices</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" data-value="cancel" data-tone="danger"><i data-icon="circle-x"></i><span class="fd-menu-item-label">Cancel subscription</span></button>
+  </div>
+  <div class="fd-menu" id="menu-endpoint" popover role="menu" aria-label="Endpoint actions">
+    <button class="fd-menu-item" data-value="test"><i data-icon="send"></i><span class="fd-menu-item-label">Send test event</span></button>
+    <button class="fd-menu-item" data-value="copy"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy URL</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" data-value="delete" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Delete endpoint</span></button>
+  </div>
+
+  <!-- ===================================================== Dialogs -->
+  <dialog class="fd-dialog" id="dlg-confirm" data-size="sm">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title" data-confirm-title>Are you sure?</h2>
+      <p class="fd-dialog-desc" data-confirm-desc></p>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+      <button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-close value="ok" data-confirm-ok>Confirm</button>
+    </div>
+  </dialog>
+
+  <dialog class="fd-dialog" id="dlg-2fa" data-size="md">
+    <section data-step="scan">
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Set up two-factor authentication</h2>
+        <p class="fd-dialog-desc">Scan the code with an authenticator app, then enter the 6-digit code it shows.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-row" data-wrap data-align="start" style="--fd-gap: 24px">
+          <div class="fd-corners" data-gap role="img" aria-label="QR code placeholder for your authenticator app" style="width: 160px">
+            <div class="fd-ascii" data-inline data-fd-ascii="halftone" aria-hidden="true"></div>
+          </div>
+          <div class="fd-stack" style="--fd-gap: 8px; max-width: 280px">
+            <p class="fd-small fd-muted">Cannot scan it? Enter this key in your app instead.</p>
+            <code class="fd-code">EMBR 7K2Q 9XJM 4TWP</code>
+          </div>
+        </div>
+        <div class="fd-field">
+          <span class="fd-field-label" id="otp-2fa-label">Verification code</span>
+          <div class="fd-otp" id="otp-2fa" data-fd-otp data-length="6" role="group" aria-labelledby="otp-2fa-label"></div>
+          <p class="fd-field-hint" id="otp-2fa-hint">For this demo the code is <span class="fd-mono">482913</span>.</p>
+          <p class="fd-field-error" id="otp-2fa-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>That code is not right. Check your app and try again.</span></p>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="button" data-variant="primary" id="twofa-verify" data-fd-dialog-step="recovery" data-fd-dialog-step-delay="600"><span>Verify and continue</span></button>
+      </div>
+    </section>
+    <section data-step="recovery" hidden>
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Save your recovery codes</h2>
+        <p class="fd-dialog-desc">Each code works once if you lose access to your authenticator app.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-callout" data-tone="warning" role="note">
+          <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+          <div class="fd-callout-content"><p class="fd-callout-title">Store them somewhere safe</p><p class="fd-callout-body">We show these once. A password manager is a good place for them.</p></div>
+        </div>
+        <figure class="fd-codeblock">
+          <button class="fd-codeblock-copy" aria-label="Copy recovery codes"><i data-icon="copy"></i></button>
+          <pre class="fd-codeblock-body"><code data-lang="text">k7f2-9xqm  p4vd-83hn
+t2zc-6wje  m9ra-4ukb
+h5ns-1dyq  x8gp-7ltv
+c3bw-0fok  v6ie-2rnz</code></pre>
+        </figure>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close value="done">I have saved them</button>
+      </div>
+    </section>
+  </dialog>
+
+  <dialog class="fd-dialog" id="dlg-email" data-size="sm" data-reset>
+    <form method="dialog" data-fd-validate>
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Change account email</h2>
+        <p class="fd-dialog-desc">We send a confirmation link to the new address. Your email changes once you open it.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <span class="fd-field-label">Current email</span>
+          <input class="fd-input" value="maya@quarry.dev" readonly aria-label="Current email">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="new-email" data-required>New email</label>
+          <input class="fd-input" type="email" id="new-email" name="email" required autocomplete="off" placeholder="maya@newdomain.dev" data-error-required="Enter the new email address." data-error-type="Enter a valid email address, like maya@newdomain.dev.">
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" value="send" data-variant="primary"><span>Send confirmation</span></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="fd-dialog fd-confirm" id="dlg-delete-account" data-size="sm" data-confirm="maya@quarry.dev">
+    <form method="dialog">
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Delete your account</h2>
+        <p class="fd-dialog-desc">This deletes your account, your API keys and your run history. Teams you own must be deleted or transferred first. You can’t undo this.</p>
+      </div>
+      <div class="fd-dialog-body">
+        <div class="fd-field">
+          <label class="fd-field-label" for="da-confirm">Type <span class="fd-confirm-phrase">maya@quarry.dev</span> to confirm</label>
+          <input class="fd-input" id="da-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Delete account</span></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="fd-dialog" id="dlg-terms" data-size="md">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title" data-terms-title>Provider terms</h2>
+      <p class="fd-dialog-desc" data-terms-desc>Last updated Sep 12, 2026.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body fd-stack">
+      <ul class="fd-feature-list" data-size="sm">
+        <li><i data-icon="check"></i><span>Results can be used inside your product and shown to your own customers.</span></li>
+        <li><i data-icon="check"></i><span>Raw data cannot be resold, redistributed or used to build a competing dataset.</span></li>
+        <li><i data-icon="check"></i><span>Calls are billed in credits at the rate on the provider page, with no minimum.</span></li>
+        <li><i data-icon="check"></i><span>Either side can end access with 30 days’ notice.</span></li>
+      </ul>
+      <label class="fd-checkbox" id="terms-accept-wrap"><input type="checkbox" id="terms-accept"><span class="fd-checkbox-box"></span>
+        <span class="fd-checkbox-text"><span class="fd-checkbox-label">I accept these terms for Quarry Labs</span><span class="fd-checkbox-desc">Everyone on the team can then call this provider.</span></span></label>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Close</button>
+      <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close value="accept" id="terms-accept-btn" disabled>Accept terms</button>
+    </div>
+  </dialog>
+
+  <dialog class="fd-dialog" id="dlg-email-prefs" data-size="md">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title">Email notifications</h2>
+      <p class="fd-dialog-desc">Sent to <span class="fd-mono">maya@quarry.dev</span>.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body fd-options">
+      <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Failed runs</span><span class="fd-switch-desc">One email per failing crawl, batch or monitor, at most once an hour.</span></span></label>
+      <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Usage alerts</span><span class="fd-switch-desc">When you pass 80% and 95% of your monthly credits.</span></span></label>
+      <label class="fd-switch"><input type="checkbox" role="switch"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Weekly usage summary</span><span class="fd-switch-desc">Credits used per endpoint, every Monday.</span></span></label>
+      <label class="fd-switch" data-locked><input type="checkbox" role="switch" checked disabled><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Billing and security</span></span><span class="fd-switch-lock"><i data-icon="lock"></i>Always</span></label>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+      <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close value="save">Save preferences</button>
+    </div>
+  </dialog>
+
+  <dialog class="fd-dialog" id="dlg-endpoint" data-size="md" data-reset>
+    <form method="dialog" data-fd-validate>
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Add webhook endpoint</h2>
+        <p class="fd-dialog-desc">Ember sends a signed POST to this URL. It must answer with a 2xx within 10 seconds.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ep-url" data-required>Endpoint URL</label>
+          <input class="fd-input" data-mono type="url" id="ep-url" name="url" required pattern="https://.+" autocomplete="off" spellcheck="false" placeholder="https://api.quarry.dev/hooks/ember" data-error-required="Enter the URL that should receive events." data-error-type="Enter a full URL starting with https://." data-error-pattern="Endpoints must use https://.">
+        </div>
+        <div class="fd-field" role="group" aria-labelledby="ep-events-label">
+          <span class="fd-field-label" id="ep-events-label">Events</span>
+          <div class="fd-options">
+            <label class="fd-checkbox"><input type="checkbox" name="events" value="crawl.completed" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">crawl.completed</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="events" value="monitor.changed"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">monitor.changed</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="events" value="agent.finished"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">agent.finished</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="events" value="batch.completed"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">batch.completed</span></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" value="add" data-variant="primary"><span>Add endpoint</span></button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="fd-dialog fd-confirm" id="dlg-delete-team" data-size="sm" data-confirm="quarry-labs">
+    <form method="dialog">
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Delete Quarry Labs</h2>
+        <p class="fd-dialog-desc">This deletes the team, its 4 API keys, 12 monitors and 30 days of logs. Members lose access at once. You can’t undo this.</p>
+      </div>
+      <div class="fd-dialog-body">
+        <div class="fd-field">
+          <label class="fd-field-label" for="dt-confirm">Type <span class="fd-confirm-phrase">quarry-labs</span> to confirm</label>
+          <input class="fd-input" id="dt-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Delete team</span></button>
+      </div>
+    </form>
+  </dialog>
+</main>
+
+<script type="module">
+import { init, forms, overlays, nav, texture, setTheme, setAccent, setDensity, getTheme, ready, reducedMotion, $, $$ } from '../fire/fire.js';
+
+const { toast, openDialog, closeDialog } = overlays;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const store = {
+  get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch { /* private mode */ } },
+};
+const bind = (name, text) => $$(`[data-bind="${name}"]`).forEach((el) => { el.textContent = text; });
+const select = (group, value) => {
+  const item = $$('.fd-segmented-item', group).find((el) => el.dataset.value === value);
+  if (item) nav.selectSegment(item, { silent: true });
+};
+const setBusy = (button, on) => (on ? button.setAttribute('aria-busy', 'true') : button.removeAttribute('aria-busy'));
+const isBusy = (button) => button.getAttribute('aria-busy') === 'true';
+const emailOk = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
+
+/** One inline error slot per field: shown in place of the hint. */
+function fieldError(input, message) {
+  const field = input.closest('.fd-field');
+  const slot = field?.querySelector(':scope > .fd-field-error');
+  if (!slot) return;
+  if (message) { slot.querySelector('span').textContent = message; slot.hidden = false; input.setAttribute('aria-invalid', 'true'); }
+  else { slot.hidden = true; input.removeAttribute('aria-invalid'); }
+}
+
+/** Ask before doing something that is hard to undo. Resolves true on confirm. */
+function confirmAction({ title, desc, label = 'Confirm', tone = 'danger' }) {
+  const dialog = $('#dlg-confirm');
+  $('[data-confirm-title]', dialog).textContent = title;
+  $('[data-confirm-desc]', dialog).textContent = desc;
+  const ok = $('[data-confirm-ok]', dialog);
+  ok.textContent = label;
+  ok.dataset.variant = tone;
+  return new Promise((resolve) => {
+    dialog.addEventListener('fd:close', () => resolve(dialog.returnValue === 'ok'), { once: true });
+    openDialog(dialog);
+  });
+}
+
+/* ---------------------------------------------------------------- Tabs in the URL */
+const TABS = ['account', 'team', 'billing', 'data-sources', 'connected-apps', 'notifications', 'advanced'];
+const ALIASES = { sources: 'data-sources', datasources: 'data-sources', apps: 'connected-apps', connected: 'connected-apps' };
+const resolveTab = (value) => { const id = ALIASES[value] ?? value; return TABS.includes(id) ? id : 'team'; };
+const subnav = $('.fd-subnav');
+
+function showTab(id, { animate = false, focus = false, url = false } = {}) {
+  const panel = $(`#panel-${id}`);
+  TABS.forEach((tab) => { $(`#panel-${tab}`).hidden = tab !== id; });
+  $$('[data-tab]', subnav).forEach((link) => {
+    if (link.dataset.tab === id) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+  });
+  const active = $(`[data-tab="${id}"]`, subnav);
+  if (active && subnav.scrollWidth > subnav.clientWidth) {
+    const offset = active.getBoundingClientRect().left - subnav.getBoundingClientRect().left + subnav.scrollLeft;
+    subnav.scrollTo({ left: offset - (subnav.clientWidth - active.offsetWidth) / 2, behavior: reducedMotion() ? 'auto' : 'smooth' });
+  }
+  if (animate && !reducedMotion()) {
+    panel.classList.remove('fd-rise');
+    void panel.offsetWidth;
+    panel.classList.add('fd-rise');
+  }
+  if (url) {
+    const next = new URL(location.href);
+    next.searchParams.set('tab', id);
+    history.replaceState(null, '', next);
+  }
+  if (focus) $('h2', panel).focus();
+  document.title = `${$('h2', panel).textContent} settings · Ember`;
+}
+
+$('.fd-subnav').addEventListener('click', (event) => {
+  const link = event.target.closest('[data-tab]');
+  if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
+  event.preventDefault();
+  showTab(link.dataset.tab, { animate: true, focus: true, url: true });
+});
+
+showTab(resolveTab(new URLSearchParams(location.search).get('tab')));
+
+/* ---------------------------------------------------------------- First paint: skeletons swap to content */
+setTimeout(() => ['members-wrap', 'billing-summary'].forEach((id) => texture.setLoading($(`#${id}`), false)), reducedMotion() ? 0 : 600);
+
+ready(() => {
+/* ---------------------------------------------------------------- Account: appearance, density, accent, privacy */
+const themeGroup = $('#seg-theme');
+const densityGroup = $('#seg-density');
+const accentGroup = $('#seg-accent');
+
+function syncTheme() {
+  const theme = getTheme();
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  bind('theme-label', theme === 'system' ? `${dark ? 'Dark' : 'Light'} (System)` : theme === 'dark' ? 'Dark' : 'Light');
+  select(themeGroup, theme);
+}
+syncTheme();
+select(densityGroup, document.documentElement.dataset.density === 'compact' ? 'compact' : 'comfortable');
+select(accentGroup, document.documentElement.dataset.accent || 'ember');
+themeGroup.addEventListener('fd:change', (event) => { setTheme(event.detail.value); syncTheme(); });
+densityGroup.addEventListener('fd:change', (event) => setDensity(event.detail.value));
+accentGroup.addEventListener('fd:change', (event) => setAccent(event.detail.value));
+document.documentElement.addEventListener('fd:theme', syncTheme);
+document.documentElement.addEventListener('fd:accent', (event) => select(accentGroup, event.detail.accent));
+
+const privacy = $('#privacy-switch');
+function applyPrivacy(on) {
+  privacy.checked = on;
+  bind('privacy-label', on ? 'On' : 'Off');
+  const email = $('.fd-account-email');
+  if (email) email.style.filter = on ? 'blur(5px)' : '';
+  store.set('ember-privacy', on ? '1' : '0');
+}
+applyPrivacy(store.get('ember-privacy') === '1');
+privacy.addEventListener('change', () => applyPrivacy(privacy.checked));
+/* Hovering or focusing the account row reveals the email again. */
+const blurEmail = (row, blurred) => { const email = row && $('.fd-account-email', row); if (email) email.style.filter = blurred ? 'blur(5px)' : ''; };
+const accountRow = (event) => (event.target instanceof Element ? event.target.closest('.fd-account') : null);
+for (const type of ['pointerover', 'focusin']) document.addEventListener(type, (event) => blurEmail(accountRow(event), false));
+for (const type of ['pointerout', 'focusout']) document.addEventListener(type, (event) => {
+  const row = accountRow(event);
+  if (row && !row.contains(event.relatedTarget)) blurEmail(row, privacy.checked);
+});
+
+/* Two-factor authentication */
+const twofa = $('#twofa-switch');
+const twofaDialog = $('#dlg-2fa');
+const otp = $('#otp-2fa');
+const otpError = $('#otp-2fa-error');
+let twofaDone = false;
+const otpValue = () => $$('input', otp).map((input) => input.value).join('');
+twofa.addEventListener('change', () => {
+  if (twofa.checked) { twofaDone = false; openDialog(twofaDialog, { trigger: twofa }); }
+  else toast({ title: 'Two-factor authentication is off', description: 'Sign-ins no longer ask for a code.', tone: 'neutral' });
+});
+twofaDialog.addEventListener('fd:open', () => { forms.setOtpInvalid(otp, false); otpError.hidden = true; $$('input', otp).forEach((input) => { input.value = ''; }); });
+twofaDialog.addEventListener('fd:change', (event) => { if (event.target === twofaDialog && event.detail.value === 'recovery') twofaDone = true; });
+twofaDialog.addEventListener('fd:close', () => {
+  twofa.checked = twofaDone;
+  if (twofaDone) toast({ title: 'Two-factor authentication is on', description: 'You will be asked for a code on new devices.', tone: 'success' });
+});
+otp.addEventListener('fd:change', (event) => {
+  if (!event.detail.complete) { forms.setOtpInvalid(otp, false); otpError.hidden = true; return; }
+  if (event.detail.value === '482913') $('#twofa-verify').click();
+  else { forms.setOtpInvalid(otp, true); otpError.hidden = false; }
+});
+$('#twofa-verify').addEventListener('click', (event) => {
+  if (otpValue() === '482913') return;
+  event.stopPropagation();
+  event.preventDefault();
+  forms.setOtpInvalid(otp, true);
+  otpError.hidden = false;
+});
+
+/* Change email, delete account */
+$('#dlg-email').addEventListener('fd:close', (event) => {
+  if (event.target.returnValue !== 'send') return;
+  toast({ title: 'Confirmation sent', description: `Open the link we sent to ${$('#new-email').value.trim()} to finish the change.`, tone: 'success' });
+});
+$('#dlg-delete-account').addEventListener('fd:close', (event) => {
+  if (event.target.returnValue === 'confirm') toast({ title: 'Account scheduled for deletion', description: 'You have 7 days to change your mind. Sign in to cancel.', tone: 'neutral' });
+});
+
+/* ---------------------------------------------------------------- Team */
+const teamForm = $('#panel-team');
+const nameInput = $('#team-name');
+const slugInput = $('#team-slug');
+const saved = { name: nameInput.value, slug: slugInput.value };
+const SLUG = /^[a-z0-9-]{3,32}$/;
+const TAKEN = ['ember', 'admin', 'api', 'support'];
+
+function slugProblem(value) {
+  if (!value) return '';
+  if (!SLUG.test(value)) return 'Use 3 to 32 lowercase letters, numbers or dashes.';
+  if (TAKEN.includes(value)) return `“${value}” is already taken. Try another slug.`;
+  return '';
+}
+const nameOk = () => nameInput.value.trim().length > 0;
+const slugOk = () => !slugProblem(slugInput.value);
+
+function syncTeamForm() {
+  const slug = slugInput.value;
+  const problem = slugProblem(slug);
+  bind('slug-preview', slug || 'team_8fK2xQvLm');
+  fieldError(slugInput, problem);
+  $('#team-name-save').disabled = nameInput.value.trim() === saved.name || !nameOk();
+  $('#team-slug-save').disabled = slug === saved.slug || Boolean(problem);
+  if (!nameOk() && 'touched' in nameInput.dataset) fieldError(nameInput, 'Enter a team name.'); else fieldError(nameInput, '');
+  if (nameInput.value.trim() === saved.name && slug === saved.slug) forms.markClean(teamForm);
+}
+nameInput.addEventListener('blur', () => { nameInput.dataset.touched = ''; syncTeamForm(); });
+teamForm.addEventListener('input', (event) => { if (event.target === nameInput || event.target === slugInput) syncTeamForm(); });
+teamForm.addEventListener('reset', () => setTimeout(() => {
+  nameInput.value = saved.name; slugInput.value = saved.slug;
+  delete nameInput.dataset.touched;
+  syncTeamForm();
+  forms.markClean(teamForm);
+}, 0));
+
+async function saveField(field) {
+  const button = $(`#team-${field}-save`);
+  if (isBusy(button)) return false;
+  if (field === 'name' ? !nameOk() : !slugOk()) return false;
+  setBusy(button, true);
+  await wait(700);
+  setBusy(button, false);
+  saved[field] = field === 'name' ? nameInput.value.trim() : slugInput.value;
+  if (field === 'name') { nameInput.value = saved.name; bind('team-summary', teamSummary()); }
+  syncTeamForm();
+  return true;
+}
+$('#team-name-save').addEventListener('click', async () => { if (await saveField('name')) toast({ title: 'Team name updated', description: `Your team is now called ${saved.name}.`, tone: 'success' }); });
+$('#team-slug-save').addEventListener('click', async () => { if (await saveField('slug')) toast({ title: 'Team slug updated', description: `ember.dev/app/t/${saved.slug}/usage`, tone: 'success' }); });
+teamForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (event.submitter?.id !== 'team-save-all') return;
+  if (!nameOk() || !slugOk()) { (!nameOk() ? nameInput : slugInput).focus(); return; }
+  const button = event.submitter;
+  setBusy(button, true);
+  await wait(700);
+  setBusy(button, false);
+  saved.name = nameInput.value.trim(); saved.slug = slugInput.value;
+  syncTeamForm();
+  forms.markClean(teamForm);
+  bind('team-summary', teamSummary());
+  toast({ title: 'Team settings saved', tone: 'success' });
+});
+teamForm.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' || !(event.target instanceof HTMLInputElement)) return;
+  const targets = { 'team-name': '#team-name-save', 'team-slug': '#team-slug-save', 'invite-email': '#invite-send' };
+  const button = targets[event.target.id] && $(targets[event.target.id]);
+  if (button) { event.preventDefault(); if (!button.disabled) button.click(); }
+});
+
+/* Members and invites */
+const list = $('#members-list');
+const COLORS = ['info', 'success', 'violet', 'accent', 'warning'];
+const pendingRows = () => $$('[data-invite]', list);
+const activeRows = () => $$('[data-member]', list);
+function teamSummary() {
+  const people = activeRows().length;
+  const pending = pendingRows().length;
+  return `${saved.name} · ${people} member${people === 1 ? '' : 's'} · ${pending} pending invite${pending === 1 ? '' : 's'}`;
+}
+function refreshCounts() {
+  const pending = pendingRows().length;
+  bind('member-count', String(activeRows().length));
+  bind('member-badge', String(activeRows().length + pending));
+  bind('team-summary', teamSummary());
+  bind('pending-desc', pending ? `${pending} ${pending === 1 ? 'person has' : 'people have'} been invited and ${pending === 1 ? 'has' : 'have'} not joined yet. Invites expire after 7 days.` : 'No pending invites. Invite someone above and they will show up here.');
+  $('#resend-all').disabled = !pending;
+  $('#revoke-all').disabled = !pending;
+}
+refreshCounts();
+
+const inviteEmail = $('#invite-email');
+const inviteSend = $('#invite-send');
+inviteEmail.addEventListener('input', () => { inviteSend.disabled = !emailOk(inviteEmail.value); });
+inviteSend.addEventListener('click', async () => {
+  const email = inviteEmail.value.trim().toLowerCase();
+  const role = $('#invite-role').value;
+  if (!emailOk(email) || isBusy(inviteSend)) return;
+  if ($$('[data-member], [data-invite]', list).some((row) => (row.dataset.member || row.dataset.invite) === email)) {
+    toast({ title: 'Already on the team', description: `${email} is a member or has a pending invite.`, tone: 'warning' });
+    return;
+  }
+  setBusy(inviteSend, true);
+  await wait(700);
+  setBusy(inviteSend, false);
+  const row = document.createElement('li');
+  row.className = 'fd-list-row';
+  row.dataset.invite = email;
+  row.dataset.roleName = role;
+  row.innerHTML = `<span class="fd-list-lead" data-shape="round" data-tone="warning"><i data-icon="mail"></i></span>
+    <div class="fd-list-body"><span class="fd-list-title"></span><span class="fd-list-desc">Invited Nov 14 · ${role}</span></div>
+    <span class="fd-list-meta"><span class="fd-badge" data-tone="warning">Invite sent</span></span>
+    <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-resend>Resend</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="menu-invite" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></span>`;
+  $('.fd-list-title', row).textContent = email;
+  $('[data-fd-menu]', row).setAttribute('aria-label', `Actions for ${email}`);
+  list.append(row);
+  init(row);
+  inviteEmail.value = '';
+  inviteSend.disabled = true;
+  refreshCounts();
+  toast({ title: 'Invite sent', description: `${email} will get an email to join as ${role}.`, tone: 'success' });
+});
+
+const rowName = (row) => $('.fd-list-title', row).childNodes[0].textContent.trim();
+async function resend(row, button) {
+  if (button) { if (isBusy(button)) return; setBusy(button, true); await wait(600); setBusy(button, false); }
+  toast({ title: 'Invite resent', description: `A fresh link went to ${row.dataset.invite}.`, tone: 'success' });
+}
+async function removeRow(row, { invite }) {
+  const who = invite ? row.dataset.invite : rowName(row);
+  const ok = await confirmAction(invite
+    ? { title: `Revoke the invite for ${who}?`, desc: 'The link in their email stops working. You can invite them again later.', label: 'Revoke invite' }
+    : { title: `Remove ${who}?`, desc: 'They lose access to this team’s keys, runs and monitors at once. Their own account is not deleted.', label: 'Remove member' });
+  if (!ok) return;
+  row.remove();
+  refreshCounts();
+  toast({ title: invite ? 'Invite revoked' : 'Member removed', description: invite ? `${who} can no longer join with that link.` : `${who} no longer has access to Quarry Labs.`, tone: 'neutral' });
+}
+list.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-resend]');
+  if (button) resend(button.closest('[data-invite]'), button);
+});
+list.addEventListener('change', (event) => {
+  const select = event.target.closest('select[data-role]');
+  if (select) toast({ title: 'Role updated', description: `${rowName(select.closest('.fd-list-row'))} is now ${select.value === 'Admin' ? 'an Admin' : `a ${select.value}`}.`, tone: 'success' });
+});
+$('#menu-member').addEventListener('fd:select', (event) => {
+  const row = event.detail.trigger?.closest('.fd-list-row');
+  if (!row) return;
+  if (event.detail.value === 'copy') { navigator.clipboard?.writeText(row.dataset.member).catch(() => {}); toast({ title: 'Email copied', tone: 'success' }); }
+  else removeRow(row, { invite: false });
+});
+$('#menu-invite').addEventListener('fd:select', (event) => {
+  const row = event.detail.trigger?.closest('.fd-list-row');
+  if (!row) return;
+  if (event.detail.value === 'copy') { navigator.clipboard?.writeText(row.dataset.invite).catch(() => {}); toast({ title: 'Email copied', tone: 'success' }); }
+  else if (event.detail.value === 'resend') resend(row);
+  else removeRow(row, { invite: true });
+});
+$('#resend-all').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  if (isBusy(button)) return;
+  setBusy(button, true);
+  await wait(700);
+  setBusy(button, false);
+  toast({ title: 'Invites resent', description: `${pendingRows().length} people got a fresh link.`, tone: 'success' });
+});
+$('#revoke-all').addEventListener('click', async () => {
+  const count = pendingRows().length;
+  if (!await confirmAction({ title: `Revoke ${count} pending invite${count === 1 ? '' : 's'}?`, desc: 'Their links stop working. You can invite them again later.', label: 'Revoke all' })) return;
+  pendingRows().forEach((row) => row.remove());
+  refreshCounts();
+  toast({ title: 'Invites revoked', tone: 'neutral' });
+});
+$('#leave-team').addEventListener('click', () => toast({ title: 'Transfer ownership first', description: 'You are the only owner of Quarry Labs. Make another member an Owner, then leave.', tone: 'warning' }));
+
+/* ---------------------------------------------------------------- Billing */
+$('[data-update-card]').addEventListener('click', (event) => { event.preventDefault(); toast({ title: 'Opening the secure card form', description: 'Card details go straight to the payment provider, never through Ember.', tone: 'info' }); });
+$('#panel-billing').addEventListener('click', (event) => {
+  const target = event.target.closest('[data-upgrade], [data-plan], [data-downgrade], [data-sales], [data-download]');
+  if (!target) return;
+  if (target.matches('[data-plan]')) toast({ title: `Upgrade to ${target.dataset.plan}`, description: 'Review the prorated charge of $53.33 for the 20 days left in this cycle, then confirm in checkout.', tone: 'info' });
+  else if (target.matches('[data-upgrade]')) { const compare = $('#compare-plans'); if (!compare.open) { compare.open = true; } compare.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); toast({ title: 'Pick a plan to upgrade', description: 'Standard fits teams past 3,000 credits a month.', tone: 'info' }); }
+  else if (target.matches('[data-downgrade]')) toast({ title: 'Downgrade scheduled', description: 'You move to Free on Dec 4 and keep Hobby until then.', tone: 'neutral' });
+  else if (target.matches('[data-sales]')) toast({ title: 'Request sent', description: 'Someone from sales will email maya@quarry.dev today.', tone: 'success' });
+  else toast({ title: `Downloading ${target.dataset.download}`, description: target.dataset.download.startsWith('INV') ? 'PDF · 38 KB' : 'ZIP · 5 PDFs', tone: 'success' });
+});
+$('#menu-plan').addEventListener('fd:select', async (event) => {
+  const value = event.detail.value;
+  if (value === 'compare') { const compare = $('#compare-plans'); compare.open = true; compare.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' }); }
+  else if (value === 'invoices') $('#bt-tab-invoices').click();
+  else if (await confirmAction({ title: 'Cancel your Hobby subscription?', desc: 'You keep 3,000 credits a month until Dec 4, then move to Free with 1,000 credits.', label: 'Cancel subscription' })) toast({ title: 'Subscription canceled', description: 'Hobby ends on Dec 4. You can resubscribe any time.', tone: 'neutral' });
+});
+
+const rechargeSwitch = $('#recharge-switch');
+rechargeSwitch.addEventListener('change', () => {
+  $('#recharge-fields').hidden = !rechargeSwitch.checked;
+  toast({ title: rechargeSwitch.checked ? 'Auto-recharge is on' : 'Auto-recharge is off', tone: rechargeSwitch.checked ? 'success' : 'neutral' });
+});
+$('#recharge-fields').addEventListener('change', () => toast({ title: 'Auto-recharge updated', tone: 'success', id: 'recharge' }));
+
+$('#seg-period').addEventListener('fd:change', (event) => {
+  const yearly = event.detail.value === 'yearly';
+  $$('.fd-plan-amount[data-monthly]').forEach((el) => { el.textContent = yearly ? el.dataset.yearly : el.dataset.monthly; });
+  $$('[data-per]').forEach((el, index) => { el.textContent = yearly && index > 0 ? '/mo, billed yearly' : '/month'; });
+});
+
+const couponInput = $('#coupon-code');
+const couponApply = $('#coupon-apply');
+const couponList = $('#coupon-list');
+const showCoupon = (applied) => {
+  couponList.hidden = !applied;
+  $('#coupon-empty').hidden = applied;
+  $('#coupon-success').hidden = !applied;
+};
+couponInput.addEventListener('input', () => { couponApply.disabled = !couponInput.value.trim(); fieldError(couponInput, ''); });
+async function applyCoupon() {
+  const code = couponInput.value.trim().toUpperCase();
+  if (!code || isBusy(couponApply)) return;
+  setBusy(couponApply, true);
+  await wait(600);
+  setBusy(couponApply, false);
+  if (code === 'QUARRY20') {
+    fieldError(couponInput, '');
+    showCoupon(true);
+    couponInput.value = '';
+    couponApply.disabled = true;
+    toast({ title: 'Coupon applied', description: '20% off your next 3 invoices.', tone: 'success' });
+  } else fieldError(couponInput, 'That code is not valid or has expired. Check the spelling and try again.');
+}
+couponApply.addEventListener('click', applyCoupon);
+couponInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') applyCoupon(); });
+$('#coupon-remove').addEventListener('click', () => { showCoupon(false); toast({ title: 'Coupon removed', tone: 'neutral' }); });
+
+/* ---------------------------------------------------------------- Data sources */
+let termsCard = null;
+const termsDialog = $('#dlg-terms');
+const termsCheck = $('#terms-accept');
+const termsAccept = $('#terms-accept-btn');
+
+function renderProvider(card) {
+  const accepted = card.dataset.terms;
+  const status = $('[data-bind="terms-status"]', card);
+  const button = $('[data-terms-open]', card);
+  const toggle = $('.fd-switch input', card);
+  status.dataset.tone = accepted ? 'success' : 'warning';
+  status.textContent = accepted ? `Terms accepted ${accepted}` : 'Terms need review';
+  button.textContent = accepted ? 'View terms' : 'Review terms';
+  button.dataset.variant = accepted ? 'ghost' : 'outline';
+  toggle.disabled = !accepted;
+  $('.fd-input', card).disabled = !accepted || !toggle.checked;
+}
+$$('[data-provider]').forEach(renderProvider);
+$('#provider-grid').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-terms-open]');
+  if (!button) return;
+  termsCard = button.closest('[data-provider]');
+  const accepted = termsCard.dataset.terms;
+  $('[data-terms-title]', termsDialog).textContent = `${termsCard.dataset.provider} terms`;
+  $('[data-terms-desc]', termsDialog).textContent = accepted ? `You accepted these terms on ${accepted}.` : 'Last updated Sep 12, 2026. Read the summary, then accept for Quarry Labs.';
+  $('#terms-accept-wrap').hidden = Boolean(accepted);
+  termsAccept.hidden = Boolean(accepted);
+  termsCheck.checked = false;
+  termsAccept.disabled = true;
+  openDialog(termsDialog, { trigger: button });
+});
+termsCheck.addEventListener('change', () => { termsAccept.disabled = !termsCheck.checked; });
+termsDialog.addEventListener('fd:close', () => {
+  if (termsDialog.returnValue !== 'accept' || !termsCard) return;
+  termsCard.dataset.terms = 'Nov 14';
+  renderProvider(termsCard);
+  toast({ title: `${termsCard.dataset.provider} terms accepted`, description: 'Turn the provider on to let your agents call it.', tone: 'success' });
+});
+$('#provider-grid').addEventListener('change', (event) => {
+  const card = event.target.closest('[data-provider]');
+  if (!card) return;
+  if (event.target.matches('.fd-switch input')) {
+    renderProvider(card);
+    toast({ title: `${card.dataset.provider} ${event.target.checked ? 'enabled' : 'disabled'}`, tone: event.target.checked ? 'success' : 'neutral', id: 'provider' });
+  } else if (event.target.matches('.fd-input')) toast({ title: 'Spend cap saved', description: `${card.dataset.provider}: ${Number(event.target.value || 0).toLocaleString('en-US')} credits a month.`, tone: 'success', id: 'cap' });
+});
+
+/* ---------------------------------------------------------------- Connected apps */
+const apps = $('#apps-list');
+function refreshApps() {
+  const count = $$('[data-app]', apps).length;
+  apps.hidden = count === 0;
+  $('#apps-empty').hidden = count !== 0;
+  bind('apps-count', count ? `${count} app${count === 1 ? '' : 's'} connected` : 'No apps connected');
+}
+apps.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-disconnect]');
+  if (!button) return;
+  const row = button.closest('[data-app]');
+  const name = row.dataset.app;
+  if (!await confirmAction({ title: `Disconnect ${name}?`, desc: `${name} loses access to Quarry Labs right away. Anything it is running stops at the next request. You can connect it again later.`, label: 'Disconnect' })) return;
+  const next = row.nextElementSibling;
+  row.remove();
+  refreshApps();
+  toast({ title: `${name} disconnected`, tone: 'neutral', action: { label: 'Undo', onClick: () => { apps.insertBefore(row, next); refreshApps(); } } });
+});
+refreshApps();
+
+/* ---------------------------------------------------------------- Notifications */
+let savedTimer;
+const flashSaved = (label = 'Notification preferences') => {
+  clearTimeout(savedTimer);
+  savedTimer = setTimeout(() => toast({ title: `${label} saved`, tone: 'success', duration: 2200, id: 'saved' }), 600);
+};
+$('#notif-matrix').addEventListener('change', () => flashSaved());
+document.addEventListener('change', (event) => {
+  const label = event.target instanceof Element ? event.target.dataset.savedToast : null;
+  if (label) flashSaved(label);
+});
+
+const permStatus = $('#perm-status');
+const enableAlerts = $('#enable-alerts');
+enableAlerts.addEventListener('click', async () => {
+  if (isBusy(enableAlerts)) return;
+  setBusy(enableAlerts, true);
+  await wait(800);
+  setBusy(enableAlerts, false);
+  permStatus.dataset.tone = 'success';
+  permStatus.textContent = 'Allowed';
+  enableAlerts.disabled = true;
+  enableAlerts.querySelector('span').textContent = 'Desktop alerts enabled';
+  toast({ title: 'Desktop alerts enabled', description: 'Ember will notify you here even when the tab is in the background.', tone: 'success' });
+});
+const quiet = $('#quiet-switch');
+quiet.addEventListener('change', () => { $('#quiet-fields').hidden = !quiet.checked; flashSaved('Quiet hours'); });
+
+/* ---------------------------------------------------------------- Advanced */
+const secret = $('#whsec');
+secret.addEventListener('fd:rotate', async () => {
+  if (!await confirmAction({ title: 'Rotate the signing secret?', desc: 'The old secret stops working at once. Update your endpoints with the new one first, or their signature checks will fail.', label: 'Rotate secret' })) return;
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  const next = `whsec_${[...bytes].map((b) => b.toString(16).padStart(2, '0')).join('')}`;
+  const job = wait(900);
+  toast.promise(job, { loading: 'Rotating signing secret…', success: { title: 'Signing secret rotated', description: 'Copy the new secret into your endpoints.', tone: 'success' }, error: 'Could not rotate the secret' });
+  await job;
+  secret.dataset.state = 'masked';
+  forms.setSecret(secret, next);
+});
+
+const allowlist = $('#allowlist-tags');
+allowlist.addEventListener('fd:change', () => {
+  const invalid = $$('.fd-token[data-invalid]', allowlist).length;
+  fieldError($('#allowlist'), invalid ? 'Fix or remove the entries shown in red. Use an IPv4 address or a CIDR range.' : '');
+  if (!invalid) flashSaved('IP allowlist');
+});
+
+const endpoints = $('#endpoints-table tbody');
+const endpointCount = () => bind('endpoint-count', `${endpoints.rows.length} endpoint${endpoints.rows.length === 1 ? '' : 's'}`);
+$('#menu-endpoint').addEventListener('fd:select', async (event) => {
+  const row = event.detail.trigger?.closest('tr');
+  if (!row) return;
+  const url = row.dataset.endpoint;
+  if (event.detail.value === 'copy') { navigator.clipboard?.writeText(url).catch(() => {}); toast({ title: 'URL copied', tone: 'success' }); }
+  else if (event.detail.value === 'test') toast.promise(wait(900), { loading: 'Sending test event…', success: { title: 'Test event delivered', description: `${new URL(url).host} answered 200.`, tone: 'success' }, error: 'Delivery failed' });
+  else if (await confirmAction({ title: 'Delete this endpoint?', desc: `${new URL(url).host} stops receiving events right away.`, label: 'Delete endpoint' })) {
+    row.remove();
+    endpointCount();
+    toast({ title: 'Endpoint deleted', tone: 'neutral' });
+  }
+});
+$('#dlg-endpoint').addEventListener('fd:close', (event) => {
+  const dialog = event.target;
+  if (dialog.returnValue !== 'add') return;
+  const url = $('#ep-url').value.trim();
+  const events = $$('input[name="events"]:checked', dialog).map((input) => input.value);
+  const row = endpoints.insertRow();
+  row.dataset.endpoint = url;
+  row.innerHTML = `<td data-mono data-stack-title><span class="fd-table-trunc" style="--w: 240px"></span></td>
+    <td><span class="fd-row" data-wrap style="--fd-gap: 4px">${events.map((name) => `<span class="fd-badge" data-variant="mono">${name}</span>`).join('') || '<span class="fd-muted">No events</span>'}</span></td>
+    <td><span class="fd-status" data-size="sm" data-tone="neutral">No deliveries yet</span></td>
+    <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="menu-endpoint" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>`;
+  $('.fd-table-trunc', row).textContent = url;
+  $('[data-fd-menu]', row).setAttribute('aria-label', `Actions for ${new URL(url).host} endpoint`);
+  init(row);
+  endpointCount();
+  toast({ title: 'Endpoint added', description: `${new URL(url).host} will get ${events.length} event type${events.length === 1 ? '' : 's'}.`, tone: 'success' });
+});
+
+$('#zdr-switch').addEventListener('change', (event) => toast({ title: event.target.checked ? 'Zero data retention is on' : 'Zero data retention is off', description: event.target.checked ? 'New requests are not stored.' : 'Logs and run output are kept for 30 days again.', tone: event.target.checked ? 'success' : 'neutral' }));
+
+$('#export-data').addEventListener('click', (event) => {
+  if (isBusy(event.currentTarget)) return;
+  const button = event.currentTarget;
+  setBusy(button, true);
+  const job = wait(1800).then(() => setBusy(button, false));
+  toast.promise(job, { loading: 'Preparing your export…', success: { title: 'Export ready', description: 'quarry-labs-export.zip · 4.2 MB', tone: 'success', action: { label: 'Download' } }, error: 'Export failed' });
+});
+
+$('#dlg-delete-team').addEventListener('fd:close', (event) => {
+  if (event.target.returnValue !== 'confirm') return;
+  toast.promise(wait(1200), { loading: 'Deleting Quarry Labs…', success: { title: 'Quarry Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' }, error: 'Could not delete the team' });
+});
+
+syncTeamForm();
+});
+</script>
+</body>
+</html>

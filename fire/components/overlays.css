@@ -1,0 +1,1042 @@
+/* ==========================================================================
+   Overlays — everything that floats above the page.
+   fd-menu · fd-popover · fd-tooltip · fd-hovercard · fd-dialog · fd-confirm
+   fd-sheet · fd-toast · fd-command
+   Behaviour lives in fire/js/overlays.js; its header documents the markup.
+
+   Floating surfaces (menu, popover, tooltip, hovercard) use the native
+   Popover API and share one motion: opacity + scale from 0.96, with the
+   transform origin on the anchor side (data-side / data-align, written by
+   position()). Modal surfaces (dialog, sheet, command) are native <dialog>s
+   with a blurred scrim.
+
+   data-static-demo   renders any surface inline and non-floating (docs)
+   data-state="open"  written by the JS; CSS reads it for every floating surface
+   ========================================================================== */
+
+/* ---------- Shared: floating surfaces ---------- */
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip) {
+  --_o-ox: center;
+  --_o-oy: top;
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  border: 0;
+  color: var(--fd-text);
+  overflow: visible;
+  z-index: var(--fd-z-popover);
+  transform-origin: var(--_o-ox) var(--_o-oy);
+  opacity: 0;
+  scale: 0.96;
+  transition-property: opacity, scale, display, overlay;
+  transition-duration: var(--fd-dur-2);
+  transition-timing-function: var(--fd-ease-out);
+  transition-behavior: allow-discrete;
+}
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-state="open"] {
+  opacity: 1;
+  scale: 1;
+  transition-duration: var(--fd-dur-3);
+}
+@starting-style {
+  :where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-state="open"] { opacity: 0; scale: 0.96; }
+}
+/* The JS measures a surface at full size before it animates in. */
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-measuring] { transition: none; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-measuring="true"] { scale: 1; }
+/* Closed surfaces are not rendered. Written for every surface (not only [popover]) so it
+   also hides them where the Popover API is missing; display is transitioned discretely. */
+:is(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip):not([data-state="open"]):not([data-measuring]):not([data-static-demo]) { display: none; }
+
+/* Transform origin follows the side the surface opened on. */
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-side="bottom"] { --_o-oy: top; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-side="top"] { --_o-oy: bottom; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-side="right"] { --_o-ox: left; --_o-oy: center; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-side="left"] { --_o-ox: right; --_o-oy: center; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip):is([data-side="top"], [data-side="bottom"])[data-align="start"] { --_o-ox: left; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip):is([data-side="top"], [data-side="bottom"])[data-align="end"] { --_o-ox: right; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip):is([data-side="left"], [data-side="right"])[data-align="start"] { --_o-oy: top; }
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip):is([data-side="left"], [data-side="right"])[data-align="end"] { --_o-oy: bottom; }
+
+/* Inline rendering for documentation and design review. */
+:where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-static-demo] {
+  position: relative;
+  z-index: auto;
+  opacity: 1;
+  scale: 1;
+  transition: none;
+}
+
+/* Where discrete transitions are missing, opening still pops in. */
+@supports not (transition-behavior: allow-discrete) {
+  :where(.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip)[data-state="open"]:not([data-static-demo]) {
+    animation: fd-pop var(--fd-dur-3) var(--fd-ease-out);
+  }
+}
+
+/* ==========================================================================
+   Menu
+   <button class="fd-btn" data-fd-menu="team-menu">…</button>
+   <div class="fd-menu" id="team-menu" popover role="menu" data-placement="bottom-start">
+     <div class="fd-menu-head"><p class="fd-menu-title">Teams</p><button class="fd-menu-close" aria-label="Close">…</button></div>
+     <p class="fd-menu-label">Workspace</p>
+     <button class="fd-menu-item"><i data-icon="settings"></i><span class="fd-menu-item-label">Settings</span><kbd class="fd-kbd">⌘,</kbd></button>
+     <hr class="fd-menu-sep">
+   </div>
+   Item roles: menuitem (default) · menuitemcheckbox (leading box) · menuitemradio (trailing check)
+   data-variant="switcher" on the menu, or aria-current on an item: accent wash + dot
+   data-tone="danger" · disabled / aria-disabled · data-fd-submenu="id" (chevron, opens to the side)
+   ========================================================================== */
+.fd-menu {
+  --_o-pad: var(--fd-space-1);
+  min-width: 220px;
+  max-width: min(360px, calc(100vw - 16px));
+  --_o-max-h: 480px;
+  max-height: min(var(--_o-max-h), calc(100dvh - 16px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--_o-pad);
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-surface-raised);
+  box-shadow: var(--fd-shadow-lg);
+  font-size: var(--fd-text-md);
+  line-height: var(--fd-lh-md);
+  scroll-padding-block: var(--_o-pad);
+}
+.fd-menu:focus-visible { box-shadow: var(--fd-shadow-lg); border-radius: var(--fd-radius-2xl); }
+.fd-menu[data-static-demo] { display: block; width: 260px; max-width: 100%; }
+
+/* Header: muted title + small close, then a full-bleed hairline. */
+.fd-menu-head {
+  position: sticky; top: calc(-1 * var(--_o-pad)); z-index: 1;
+  display: flex; align-items: center; gap: var(--fd-space-2);
+  min-height: var(--fd-control-xl);
+  margin: calc(-1 * var(--_o-pad)) calc(-1 * var(--_o-pad)) var(--_o-pad);
+  padding-inline: calc(var(--_o-pad) + var(--fd-space-2-5)) var(--fd-space-2-5);
+  border-bottom: 1px solid var(--fd-line-faint);
+  background: var(--fd-surface-raised);
+  border-start-start-radius: inherit; border-start-end-radius: inherit;
+}
+.fd-menu-title { flex: 1 1 auto; min-width: 0; color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-regular); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-menu-close {
+  flex: none; display: inline-grid; place-items: center;
+  width: var(--fd-control-xs); height: var(--fd-control-xs); border-radius: var(--fd-radius-md);
+  color: var(--fd-text-4);
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-menu-close:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-menu-close > .fd-icon, .fd-menu-close > i[data-icon] { width: 14px; height: 14px; }
+
+.fd-menu-label {
+  padding: var(--fd-space-2) var(--fd-space-2-5) var(--fd-space-1);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-4);
+  user-select: none;
+}
+.fd-menu-sep { height: 1px; margin: var(--_o-pad) calc(-1 * var(--_o-pad)); border: 0; background: var(--fd-line-faint); }
+.fd-menu-group { display: contents; }
+
+/* ---------- Items (shared by menu items and filter options) ---------- */
+.fd-menu-item, .fd-checklist-item {
+  --_o-fg: var(--fd-text);
+  --_o-icon: var(--fd-text-3);
+  --_o-hl: var(--fd-fill);
+  --_o-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  --_o-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round'%3E%3Cpath d='M6 12h12'/%3E%3C/svg%3E");
+  --_o-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+  position: relative;
+  display: flex; align-items: center; gap: var(--fd-space-2-5);
+  width: 100%; min-height: var(--fd-control-md);
+  padding: var(--fd-space-1-5) var(--fd-space-2-5);
+  border-radius: var(--fd-radius-lg);
+  background: transparent;
+  color: var(--_o-fg);
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label);
+  text-align: start; text-decoration: none;
+  cursor: pointer; user-select: none; outline: none;
+  scroll-margin-block: var(--fd-space-1);
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+/* One highlight: focus. The JS moves focus with the pointer, so hover and keyboard never disagree. */
+.fd-menu-item:focus, .fd-menu-item:focus-visible, .fd-menu-item[data-highlighted],
+.fd-checklist-item:focus-visible, .fd-checklist-item[data-highlighted],
+.fd-menu[data-static-demo] .fd-menu-item:hover, .fd-checklist-item:hover {
+  background: var(--_o-hl);
+  box-shadow: none;
+  border-radius: var(--fd-radius-lg);
+}
+.fd-menu-item > .fd-icon, .fd-menu-item > i[data-icon] { color: var(--_o-icon); transition: color var(--fd-dur-2) var(--fd-ease-out); }
+.fd-menu-item:is(:focus, [data-highlighted]) > .fd-icon { color: var(--_o-fg); }
+.fd-menu-item > .fd-kbd, .fd-command-item > .fd-kbd { margin-inline-start: auto; flex: none; }
+.fd-menu-item > .fd-tile, .fd-menu-item > .fd-avatar { margin-inline: -2px; }
+
+.fd-menu-item-label { flex: 1 1 auto; min-width: 0; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-menu-item-desc {
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-regular); color: var(--fd-text-3);
+}
+.fd-menu-item-hint { flex: none; margin-inline-start: auto; font-size: var(--fd-text-sm); font-weight: var(--fd-weight-regular); color: var(--fd-text-4); font-variant-numeric: tabular-nums; }
+.fd-menu-item:has(.fd-menu-item-desc) { align-items: flex-start; padding-block: var(--fd-space-2); }
+.fd-menu-item:has(.fd-menu-item-desc) > :is(.fd-icon, .fd-tile, .fd-avatar, i[data-icon]) { margin-block-start: 2px; }
+
+/* Tones and states */
+.fd-menu-item[data-tone="danger"] { --_o-fg: var(--fd-danger-text); --_o-icon: var(--fd-danger-text); --_o-hl: var(--fd-danger-bg); }
+.fd-menu-item:is(:disabled, [aria-disabled="true"]), .fd-checklist-item[aria-disabled="true"] {
+  --_o-fg: var(--fd-text-4); --_o-icon: var(--fd-text-4); --_o-hl: transparent;
+  cursor: not-allowed;
+}
+.fd-menu-item[aria-expanded="true"] { background: var(--fd-fill); }
+
+/* Single choice: accent text + trailing check. */
+.fd-menu-item[role="menuitemradio"]::after,
+.fd-menu-item[data-fd-submenu]::after,
+.fd-menu-item[aria-haspopup="menu"]::after {
+  content: ""; flex: none; width: 16px; height: 16px; margin-inline-start: auto;
+  background: currentColor;
+  -webkit-mask: var(--_o-check) center / 16px no-repeat;
+  mask: var(--_o-check) center / 16px no-repeat;
+  opacity: 0;
+  transition: opacity var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-menu-item[role="menuitemradio"][aria-checked="true"] { --_o-fg: var(--fd-accent-text); --_o-icon: var(--fd-accent-text); }
+.fd-menu-item[role="menuitemradio"][aria-checked="true"]::after { opacity: 1; }
+.fd-menu-item:is([data-fd-submenu], [aria-haspopup="menu"])::after {
+  background: var(--fd-text-4); opacity: 1;
+  -webkit-mask-image: var(--_o-chevron); mask-image: var(--_o-chevron);
+}
+.fd-menu-item:is([data-fd-submenu], [aria-haspopup="menu"]):is(:focus, [aria-expanded="true"])::after { background: var(--fd-text-2); }
+
+/* Switcher (teams, projects): the current item is an accent wash with a dot. */
+.fd-menu[data-variant="switcher"] .fd-menu-item[aria-checked="true"],
+.fd-menu-item[aria-current]:not([aria-current="false"]) {
+  --_o-fg: var(--fd-accent-text); --_o-icon: var(--fd-accent-text); --_o-hl: var(--fd-accent-12);
+  background: var(--fd-accent-8);
+}
+.fd-menu[data-variant="switcher"] .fd-menu-item[role="menuitemradio"]::after,
+.fd-menu-item[aria-current]:not([aria-current="false"])::after {
+  content: ""; flex: none; width: 6px; height: 6px; margin-inline: auto 5px; border-radius: 50%;
+  background: var(--fd-accent); -webkit-mask: none; mask: none; opacity: 0;
+}
+.fd-menu[data-variant="switcher"] .fd-menu-item[aria-checked="true"]::after,
+.fd-menu-item[aria-current]:not([aria-current="false"])::after { opacity: 1; }
+
+/* Multiple choice: a leading box (menu checkbox items and filter options). */
+.fd-menu-item[role="menuitemcheckbox"]::before, .fd-checklist-item::before {
+  content: ""; flex: none; width: 16px; height: 16px; border-radius: var(--fd-radius-xs);
+  background: var(--fd-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-line-strong);
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out), box-shadow var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-menu-item[role="menuitemcheckbox"]::after, .fd-checklist-item::after {
+  content: ""; position: absolute; inset-inline-start: var(--fd-space-2-5); top: calc(50% - 8px);
+  width: 16px; height: 16px;
+  background: var(--fd-accent-contrast);
+  -webkit-mask: var(--_o-check) center / 12px no-repeat;
+  mask: var(--_o-check) center / 12px no-repeat;
+  opacity: 0; scale: 0.6;
+  transition: opacity var(--fd-dur-1) var(--fd-ease-out), scale var(--fd-dur-2) var(--fd-ease-spring);
+}
+.fd-menu-item[role="menuitemcheckbox"]:is([aria-checked="true"], [aria-checked="mixed"])::before,
+.fd-checklist-item[aria-selected="true"]::before { background: var(--fd-accent); box-shadow: inset 0 0 0 1px var(--fd-accent); }
+.fd-menu-item[role="menuitemcheckbox"]:is([aria-checked="true"], [aria-checked="mixed"])::after,
+.fd-checklist-item[aria-selected="true"]::after { opacity: 1; scale: 1; }
+.fd-menu-item[role="menuitemcheckbox"][aria-checked="mixed"]::after { -webkit-mask-image: var(--_o-dash); mask-image: var(--_o-dash); }
+.fd-menu-item[role="menuitemcheckbox"]:has(.fd-menu-item-desc)::before { margin-block-start: 2px; }
+.fd-menu-item[role="menuitemcheckbox"]:has(.fd-menu-item-desc)::after { top: calc(var(--fd-space-2) + 2px); }
+
+/* ==========================================================================
+   Popover — a generic anchored panel
+   <button class="fd-btn" data-fd-popover="usage-pop">…</button>
+   <div class="fd-popover" id="usage-pop" popover data-arrow data-placement="bottom">…</div>
+   data-size  sm (280) | md (360, default) | lg (420) | auto (fits content)
+   data-arrow  draws a caret toward the anchor
+   Parts (make the popover flush automatically):
+     fd-popover-head (fd-popover-title, fd-popover-actions) · fd-popover-toolbar
+     fd-popover-search · fd-popover-body · fd-popover-empty · fd-popover-foot
+   ========================================================================== */
+.fd-popover, .fd-hovercard {
+  --_o-w: 360px;
+  --_o-pad: var(--fd-space-4);
+  width: max-content;
+  max-width: min(var(--_o-w), calc(100vw - 16px));
+  padding: var(--_o-pad);
+  border-radius: var(--fd-radius-2xl);
+  background: var(--fd-surface-raised);
+  box-shadow: var(--fd-shadow-lg);
+  font-size: var(--fd-text-md);
+  line-height: var(--fd-lh-md);
+}
+.fd-popover:focus-visible, .fd-hovercard:focus-visible { box-shadow: var(--fd-shadow-lg); border-radius: var(--fd-radius-2xl); }
+.fd-popover[data-size="sm"] { --_o-w: 280px; }
+.fd-popover[data-size="lg"] { --_o-w: 420px; }
+.fd-popover[data-size="auto"] { --_o-w: calc(100vw - 16px); }
+.fd-popover:has(> :is(.fd-popover-head, .fd-popover-body, .fd-popover-foot, .fd-popover-search, .fd-daterange)) {
+  --_o-pad: 0px;
+  width: min(var(--_o-w), calc(100vw - 16px));
+}
+.fd-popover[data-size="auto"]:has(> .fd-daterange) { width: max-content; }
+.fd-popover[data-static-demo], .fd-hovercard[data-static-demo] { display: block; width: min(var(--_o-w), 100%); }
+.fd-popover[data-static-demo][data-size="auto"] { width: max-content; max-width: 100%; }
+
+.fd-popover-head { display: flex; align-items: center; gap: var(--fd-space-2); min-height: 52px; padding: var(--fd-space-3) var(--fd-space-3) var(--fd-space-1) var(--fd-space-4); }
+.fd-popover-head:only-child, .fd-popover-head:has(+ .fd-popover-body) { padding-block-end: var(--fd-space-3); border-bottom: 1px solid var(--fd-line-faint); }
+.fd-popover-title { flex: 1 1 auto; min-width: 0; font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); }
+.fd-popover-actions { flex: none; display: flex; align-items: center; gap: var(--fd-space-1); margin-inline-start: auto; }
+.fd-popover-actions > .fd-btn-text { padding-inline: var(--fd-space-1-5); height: var(--fd-control-sm); }
+.fd-popover-actions > .fd-btn-text:disabled { color: var(--fd-text-4); cursor: not-allowed; }
+.fd-popover-toolbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  padding: var(--fd-space-1) var(--fd-space-4) var(--fd-space-3);
+  border-bottom: 1px solid var(--fd-line-faint);
+}
+.fd-popover-toolbar > select { width: auto; min-width: 0; }
+.fd-popover-search {
+  display: flex; align-items: center; gap: var(--fd-space-2-5);
+  height: var(--fd-control-xl); padding-inline: var(--fd-space-4) var(--fd-space-3);
+  border-bottom: 1px solid var(--fd-line-faint);
+  color: var(--fd-text-3);
+}
+.fd-popover-search > input {
+  flex: 1 1 auto; min-width: 0; height: 100%; padding: 0; border: 0; background: none;
+  font-size: var(--fd-text-md); color: var(--fd-text); outline: none;
+}
+.fd-popover-search > input:focus-visible { box-shadow: none; }
+.fd-popover-search > input::-webkit-search-cancel-button { display: none; }
+.fd-popover-body { --_o-max-h: 400px; max-height: min(var(--_o-max-h), 60dvh); overflow-y: auto; overscroll-behavior: contain; padding: var(--fd-space-1); }
+.fd-popover-body:only-child { padding: var(--_o-pad, 0); }
+.fd-popover-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  min-height: var(--fd-control-xl); padding: var(--fd-space-1-5) var(--fd-space-3) var(--fd-space-1-5) var(--fd-space-4);
+  border-top: 1px solid var(--fd-line-faint);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3);
+}
+.fd-popover-foot[data-align="center"] { justify-content: center; padding-inline: var(--fd-space-4); }
+.fd-popover-foot[data-align="end"] { justify-content: flex-end; }
+.fd-popover-foot > .fd-btn-text { color: var(--fd-text-2); }
+.fd-popover-foot > .fd-btn-text:hover { color: var(--fd-text); }
+
+/* Empty state with a small accent glyph */
+.fd-popover-empty { display: grid; justify-items: center; gap: var(--fd-space-1); padding: var(--fd-space-10) var(--fd-space-6) var(--fd-space-8); text-align: center; }
+.fd-popover-glyph {
+  display: grid; justify-items: center;
+  margin: 0 0 var(--fd-space-4);
+  font-family: var(--fd-font-mono); font-size: 10px; line-height: 10px;
+  color: var(--fd-accent); white-space: pre; user-select: none;
+}
+.fd-popover-glyph > span:nth-child(4) { color: var(--fd-accent-text); }
+.fd-popover-empty-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-medium); color: var(--fd-text); }
+.fd-popover-empty-text { max-width: 32ch; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: balance; }
+
+/* Arrow: a rotated square whose two outer edges carry the surface ring. */
+.fd-popover[data-arrow]::before {
+  content: ""; position: absolute; width: 12px; height: 12px;
+  background: var(--fd-surface-raised);
+  rotate: 45deg; pointer-events: none;
+}
+.fd-popover[data-arrow][data-side="bottom"]::before { top: -6px; left: calc(var(--_o-arrow-x, 50%) - 6px); box-shadow: -1px -1px 0 0 var(--fd-a6); border-start-start-radius: 2px; }
+.fd-popover[data-arrow][data-side="top"]::before { bottom: -6px; left: calc(var(--_o-arrow-x, 50%) - 6px); box-shadow: 1px 1px 0 0 var(--fd-a6); border-end-end-radius: 2px; }
+.fd-popover[data-arrow][data-side="right"]::before { left: -6px; top: calc(var(--_o-arrow-y, 50%) - 6px); box-shadow: -1px 1px 0 0 var(--fd-a6); border-end-start-radius: 2px; }
+.fd-popover[data-arrow][data-side="left"]::before { right: -6px; top: calc(var(--_o-arrow-y, 50%) - 6px); box-shadow: 1px -1px 0 0 var(--fd-a6); border-start-end-radius: 2px; }
+.fd-popover[data-arrow]:is([data-side="top"], [data-side="bottom"]) { --_o-ox: var(--_o-arrow-x, center); }
+.fd-popover[data-arrow]:is([data-side="left"], [data-side="right"]) { --_o-oy: var(--_o-arrow-y, center); }
+
+/* ---------- Notification rows ---------- */
+.fd-notification {
+  position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; column-gap: var(--fd-space-3);
+  padding: var(--fd-space-2-5) var(--fd-space-3) var(--fd-space-2-5) var(--fd-space-5);
+  border-radius: var(--fd-radius-lg);
+  color: var(--fd-text); text-decoration: none; text-align: start; width: 100%;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+:is(a, button).fd-notification { cursor: pointer; }
+:is(a, button).fd-notification:hover { background: var(--fd-fill); }
+.fd-notification:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: var(--fd-radius-lg); }
+.fd-notification[data-unread]::before {
+  content: ""; position: absolute; inset-inline-start: 8px; top: 21px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--fd-accent);
+}
+.fd-notification > .fd-tile { margin-block-start: 2px; }
+.fd-notification-body { min-width: 0; display: grid; gap: 2px; }
+.fd-notification-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text-2); }
+.fd-notification[data-unread] .fd-notification-title { color: var(--fd-text); }
+.fd-notification-text {
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3);
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.fd-notification-meta { padding-block-start: 2px; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-4); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Count badge on a trigger (bell). */
+.fd-overlay-count {
+  position: absolute; top: -4px; inset-inline-end: -4px;
+  display: inline-grid; place-items: center; min-width: 16px; height: 16px; padding-inline: 4px;
+  border-radius: var(--fd-radius-full); background: var(--fd-accent); color: var(--fd-accent-contrast);
+  box-shadow: 0 0 0 2px var(--fd-bg);
+  font-family: var(--fd-font-mono); font-size: 10px; line-height: 1; font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* ---------- Option list (filter popover) ---------- */
+.fd-checklist { display: grid; gap: 1px; }
+.fd-checklist-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-checklist-count { flex: none; margin-inline-start: auto; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-4); font-variant-numeric: tabular-nums; }
+.fd-checklist-item[aria-selected="true"] .fd-checklist-count { color: var(--fd-text-3); }
+.fd-checklist-empty { padding: var(--fd-space-6) var(--fd-space-4); text-align: center; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+
+/* ---------- Date range ---------- */
+.fd-daterange {
+  display: grid; grid-template-columns: 168px auto; grid-template-areas: "presets main" "foot foot";
+}
+.fd-daterange-presets {
+  grid-area: presets; display: flex; flex-direction: column; gap: 1px;
+  padding: var(--fd-space-1);
+  border-inline-end: 1px solid var(--fd-line-faint);
+}
+.fd-daterange-preset {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  min-height: var(--fd-control-md); padding-inline: var(--fd-space-2-5);
+  border-radius: var(--fd-radius-lg);
+  color: var(--fd-text-2); font-size: var(--fd-text-md); font-weight: var(--fd-weight-label); text-align: start; white-space: nowrap;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-daterange-preset:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-daterange-preset:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: var(--fd-radius-lg); }
+.fd-daterange-preset[aria-pressed="true"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
+.fd-daterange-main { grid-area: main; padding: var(--fd-space-3) var(--fd-space-4) var(--fd-space-4); }
+.fd-daterange-foot {
+  grid-area: foot; display: flex; align-items: center; gap: var(--fd-space-2);
+  padding: var(--fd-space-2-5) var(--fd-space-3) var(--fd-space-2-5) var(--fd-space-4);
+  border-top: 1px solid var(--fd-line-faint);
+}
+.fd-daterange-summary { flex: 1 1 auto; min-width: 0; margin-inline-end: auto; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-daterange-summary:empty::before { content: "Pick a start date"; color: var(--fd-text-4); }
+
+/* ---------- Calendar (rendered by the JS into .fd-calendar) ---------- */
+.fd-calendar { --_o-cell: 36px; display: grid; gap: var(--fd-space-2); width: max-content; }
+.fd-calendar-head { display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2); }
+.fd-calendar-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; }
+.fd-calendar-grid { display: grid; row-gap: 2px; }
+.fd-calendar-row { display: grid; grid-template-columns: repeat(7, var(--_o-cell)); }
+.fd-calendar-weekday { display: grid; place-items: center; height: 24px; font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-text-4); text-transform: uppercase; letter-spacing: var(--fd-ls-eyebrow); }
+.fd-calendar-cell { position: relative; height: var(--_o-cell); }
+.fd-calendar-cell::before { content: ""; position: absolute; inset: 0; background: transparent; pointer-events: none; }
+.fd-calendar-cell[data-range="middle"]::before { background: var(--fd-accent-8); }
+.fd-calendar-cell[data-range="start"]::before { inset-inline-start: 50%; background: var(--fd-accent-8); }
+.fd-calendar-cell[data-range="end"]::before { inset-inline-end: 50%; background: var(--fd-accent-8); }
+.fd-calendar-cell[data-cap~="start"]::before { border-start-start-radius: var(--fd-radius-md); border-end-start-radius: var(--fd-radius-md); }
+.fd-calendar-cell[data-cap~="end"]::before { border-start-end-radius: var(--fd-radius-md); border-end-end-radius: var(--fd-radius-md); }
+.fd-calendar[data-pending] .fd-calendar-cell[data-range]::before { background: var(--fd-accent-4); }
+.fd-calendar-day {
+  position: relative; display: grid; place-items: center; width: 100%; height: 100%;
+  border-radius: var(--fd-radius-md);
+  color: var(--fd-text); font-size: var(--fd-text-sm); line-height: 1; font-variant-numeric: tabular-nums;
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out), color var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-calendar-day:hover { background: var(--fd-fill); }
+.fd-calendar-day:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: var(--fd-radius-md); }
+.fd-calendar-day:disabled { color: var(--fd-text-4); background: none; cursor: not-allowed; }
+.fd-calendar-cell[data-range="middle"] > .fd-calendar-day { color: var(--fd-accent-text); }
+.fd-calendar-cell[data-range="middle"] > .fd-calendar-day:hover { background: var(--fd-accent-8); }
+.fd-calendar-day[aria-selected="true"] { background: var(--fd-accent); color: var(--fd-accent-contrast); font-weight: var(--fd-weight-label); }
+.fd-calendar-day[data-preview] { box-shadow: inset 0 0 0 1px var(--fd-accent); color: var(--fd-accent-text); background: var(--fd-surface-raised); }
+.fd-calendar-day[data-today]::after {
+  content: ""; position: absolute; bottom: 5px; left: calc(50% - 2px);
+  width: 4px; height: 4px; border-radius: 50%; background: var(--fd-accent);
+}
+.fd-calendar-day[data-today][aria-selected="true"]::after { background: var(--fd-accent-contrast); }
+
+@media (max-width: 640px) {
+  .fd-daterange { grid-template-columns: minmax(0, 1fr); grid-template-areas: "presets" "main" "foot"; }
+  .fd-daterange-presets { flex-direction: row; overflow-x: auto; border-inline-end: 0; border-bottom: 1px solid var(--fd-line-faint); scrollbar-width: none; }
+  .fd-daterange-preset { flex: none; }
+  .fd-daterange-main { display: grid; justify-content: center; }
+  .fd-calendar { --_o-cell: min(40px, calc((100vw - 64px) / 7)); }
+}
+
+/* ==========================================================================
+   Tooltip — data-fd-tooltip="Copy key" (+ data-placement, data-shortcut)
+   One shared element, created by the JS:
+   <div class="fd-tooltip" role="tooltip" popover="manual">Copy key <kbd class="fd-kbd">⌘C</kbd></div>
+   ========================================================================== */
+.fd-tooltip {
+  display: flex; align-items: center; gap: var(--fd-space-1-5);
+  width: max-content; max-width: min(260px, calc(100vw - 16px));
+  padding: var(--fd-space-1-5) var(--fd-space-2);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-surface-inverse);
+  color: var(--fd-text-inverse);
+  box-shadow: var(--fd-shadow-md);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  text-wrap: balance;
+  pointer-events: none;
+  z-index: var(--fd-z-tooltip);
+}
+.fd-tooltip:not([data-state="open"]) { transition-duration: var(--fd-dur-1); }
+.fd-tooltip[data-static-demo] { display: inline-flex; }
+.fd-tooltip-keys { display: inline-flex; gap: 2px; margin-inline-end: -2px; }
+.fd-tooltip .fd-kbd {
+  min-width: 18px; height: 18px; padding: 0 4px;
+  background: color-mix(in srgb, var(--fd-text-inverse) 14%, transparent);
+  color: color-mix(in srgb, var(--fd-text-inverse) 72%, transparent);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Hovercard — a richer hover panel with open/close delays
+   <a href="…" data-fd-hovercard="maya-card">Maya Chen</a>
+   <div class="fd-hovercard" id="maya-card" popover="manual">
+     <div class="fd-hovercard-head">…avatar or tile… <div><p class="fd-hovercard-title">…</p><p class="fd-hovercard-meta">…</p></div></div>
+     <p class="fd-hovercard-text">…</p>
+     <dl class="fd-hovercard-stats"><div><dt>Runs</dt><dd>1,204</dd></div>…</dl>
+   </div>
+   ========================================================================== */
+.fd-hovercard { --_o-w: 320px; width: min(var(--_o-w), calc(100vw - 16px)); }
+.fd-hovercard-head { display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; }
+.fd-hovercard-head > div { min-width: 0; }
+.fd-hovercard-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-hovercard-meta { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-hovercard-text { margin-block-start: var(--fd-space-3); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); text-wrap: pretty; }
+.fd-hovercard-stats {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--fd-space-3);
+  margin: var(--fd-space-4) calc(-1 * var(--_o-pad)) calc(-1 * var(--_o-pad));
+  padding: var(--fd-space-3) var(--_o-pad);
+  border-top: 1px solid var(--fd-line-faint);
+}
+.fd-hovercard-stats > div { display: grid; gap: 2px; min-width: 0; }
+.fd-hovercard-stats dt { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-hovercard-stats dd { margin: 0; font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   Dialog — native <dialog>, opened with showModal()
+   <dialog class="fd-dialog" id="create-key" data-size="md" aria-labelledby="create-key-title">
+     <div class="fd-dialog-head">
+       <p class="fd-eyebrow" data-tone="accent">What's new</p>
+       <h2 class="fd-h3 fd-dialog-title" id="create-key-title">Create API key</h2>
+       <p class="fd-dialog-desc">…</p>
+       <button class="fd-btn fd-dialog-close" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+     </div>
+     <div class="fd-dialog-body">…</div>
+     <div class="fd-dialog-foot"><button class="fd-btn" data-fd-dialog-close>Cancel</button>…</div>
+   </dialog>
+   data-size   sm 400 | md 480 (default) | lg 640 | xl 800
+   data-static backdrop clicks do not close it
+   Steps: wrap head/body/foot in <section data-step="name">; buttons with data-fd-dialog-step="next|prev|name".
+   Below 640px every dialog becomes a bottom sheet with a drag handle.
+   ========================================================================== */
+.fd-dialog, .fd-sheet, .fd-command {
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: var(--fd-surface-raised);
+  color: var(--fd-text);
+  box-shadow: var(--fd-shadow-xl);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  outline: none;
+  transition-property: opacity, scale, translate, display, overlay;
+  transition-duration: var(--fd-dur-2);
+  transition-timing-function: var(--fd-ease-out);
+  transition-behavior: allow-discrete;
+}
+.fd-dialog:focus-visible, .fd-sheet:focus-visible, .fd-command:focus-visible { box-shadow: var(--fd-shadow-xl); }
+:is(.fd-dialog, .fd-sheet, .fd-command):not([open]) { display: none; }
+:is(.fd-dialog, .fd-sheet, .fd-command)[data-dragging] { transition: none; user-select: none; }
+:is(.fd-dialog, .fd-sheet) > form { display: contents; }
+:is(.fd-dialog, .fd-sheet) > [data-step] { display: contents; }
+
+/* Scrim: the page behind is washed out and blurred. */
+:is(.fd-dialog, .fd-sheet, .fd-command)::backdrop {
+  background: var(--fd-scrim, rgb(10 10 10 / 0.4));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition-property: opacity, display, overlay;
+  transition-duration: var(--fd-dur-2);
+  transition-timing-function: var(--fd-ease-out);
+  transition-behavior: allow-discrete;
+}
+:is(.fd-dialog, .fd-sheet, .fd-command)[open]::backdrop { opacity: 1; transition-duration: var(--fd-dur-4); }
+@starting-style {
+  :is(.fd-dialog, .fd-sheet, .fd-command)[open]::backdrop { opacity: 0; }
+}
+
+.fd-dialog {
+  --_o-w: 480px;
+  --_o-pad: var(--fd-space-6);
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(var(--_o-w), calc(100% - 32px));
+  height: fit-content;
+  max-height: min(calc(100dvh - 48px), 880px);
+  border-radius: var(--fd-radius-2xl);
+  flex-direction: column;
+  opacity: 0;
+  scale: 0.96;
+  translate: 0 8px;
+}
+.fd-dialog[open] { display: flex; }
+.fd-dialog[open]:not([data-static-demo]) {
+  opacity: 1;
+  scale: 1;
+  translate: 0 0;
+  transition-duration: var(--fd-dur-4);
+  transition-timing-function: var(--fd-ease-emphasized);
+}
+@starting-style {
+  .fd-dialog[open]:not([data-static-demo]) { opacity: 0; scale: 0.96; translate: 0 8px; }
+}
+.fd-dialog[data-size="sm"] { --_o-w: 400px; }
+.fd-dialog[data-size="lg"] { --_o-w: 640px; }
+.fd-dialog[data-size="xl"] { --_o-w: 800px; --_o-pad: var(--fd-space-6); }
+.fd-dialog[data-bump] { animation: fd-dialog-bump var(--fd-dur-3) var(--fd-ease-out); }
+@keyframes fd-dialog-bump { 40% { transform: scale(1.012); } }
+
+.fd-dialog-head {
+  position: relative; flex: none;
+  display: grid; gap: var(--fd-space-1);
+  padding: var(--_o-pad) var(--_o-pad) var(--fd-space-4);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-dialog-head:has(> .fd-dialog-close) { padding-inline-end: calc(var(--_o-pad) + 36px); }
+.fd-dialog-head > .fd-eyebrow { margin-block-end: var(--fd-space-1); }
+.fd-dialog-title { margin: 0; text-wrap: balance; }
+.fd-dialog-desc { color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); text-wrap: pretty; }
+.fd-dialog-close { position: absolute; top: var(--_o-pad); inset-inline-end: calc(var(--_o-pad) - 6px); }
+.fd-dialog-head:has(> .fd-eyebrow:first-child) > .fd-dialog-close { top: calc(var(--_o-pad) - 6px); }
+.fd-dialog-body {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: var(--fd-space-1) var(--_o-pad) var(--fd-space-2);
+  color: var(--fd-text-2);
+}
+.fd-dialog-body:last-child { padding-block-end: var(--_o-pad); }
+.fd-dialog-head + .fd-dialog-foot { padding-block-start: var(--fd-space-2); }
+.fd-dialog-foot {
+  flex: none;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--fd-space-2);
+  padding: var(--fd-space-4) var(--_o-pad) var(--_o-pad);
+  border-top: 1px solid transparent;
+  transition: border-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-dialog-foot > [data-start], .fd-dialog-foot-start { margin-inline-end: auto; }
+.fd-dialog-foot > .fd-btn[data-block] { flex: 1 1 100%; }
+.fd-dialog-foot-note { margin-inline-end: auto; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+.fd-dialog[data-overflow-top] .fd-dialog-head { border-bottom-color: var(--fd-line-faint); }
+.fd-dialog[data-overflow-bottom] .fd-dialog-foot { border-top-color: var(--fd-line-faint); }
+
+/* What's new: stat or icon tiles beside a title and a muted line. */
+.fd-dialog-features { display: grid; gap: var(--fd-space-4); margin: 0; padding: var(--fd-space-2) 0 0; list-style: none; }
+.fd-dialog-feature { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--fd-space-4); align-items: start; }
+.fd-dialog-feature > .fd-tile[data-shape="wide"] { font-weight: var(--fd-weight-regular); }
+.fd-dialog-feature-title { padding-block-start: 1px; font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-dialog-feature-text { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty; }
+.fd-dialog-dots { display: flex; justify-content: center; gap: 6px; width: 100%; padding-block-start: var(--fd-space-2); }
+.fd-dialog-dots > span {
+  width: 6px; height: 6px; border-radius: var(--fd-radius-full); background: var(--fd-a16);
+  transition: width var(--fd-dur-3) var(--fd-ease-out), background-color var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-dialog-dots > span[aria-current="step"] { width: 18px; background: var(--fd-accent); }
+
+/* Large picker: search, bulk selection row, a grid of objects, pagination. */
+.fd-dialog-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2) var(--fd-space-5); padding-block: var(--fd-space-3) var(--fd-space-1); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); }
+.fd-dialog-toolbar > :last-child:not(:first-child) { color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+.fd-dialog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: var(--fd-space-3); padding-block: var(--fd-space-3); }
+.fd-dialog-pager { display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-3); padding-block: var(--fd-space-2) 0; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+
+/* Pickable object card (provider, template, key). The whole card is the label. */
+.fd-pick {
+  position: relative; display: grid; gap: var(--fd-space-3); align-content: start; min-width: 0;
+  padding: var(--fd-space-4);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-surface);
+  box-shadow: inset 0 0 0 1px var(--fd-line);
+  cursor: pointer;
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-pick:hover { box-shadow: inset 0 0 0 1px var(--fd-line-strong); }
+.fd-pick:has(> input:checked) { background: var(--fd-accent-4); box-shadow: inset 0 0 0 1px var(--fd-accent-40); }
+.fd-pick:has(> input:focus-visible) { box-shadow: inset 0 0 0 1px var(--fd-accent-40), var(--fd-ring); }
+.fd-pick > input {
+  position: absolute; top: var(--fd-space-4); inset-inline-end: var(--fd-space-4); margin: 0;
+  appearance: none; width: 16px; height: 16px; border-radius: var(--fd-radius-xs);
+  background: var(--fd-surface); box-shadow: inset 0 0 0 1px var(--fd-line-strong); cursor: pointer;
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out), box-shadow var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-pick > input:focus-visible { box-shadow: inset 0 0 0 1px var(--fd-line-strong); }
+.fd-pick > input:checked { background: var(--fd-accent); box-shadow: inset 0 0 0 1px var(--fd-accent); }
+.fd-pick > input:checked + .fd-pick-check { opacity: 1; scale: 1; }
+.fd-pick-check {
+  position: absolute; top: var(--fd-space-4); inset-inline-end: var(--fd-space-4); width: 16px; height: 16px;
+  background: var(--fd-accent-contrast); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px no-repeat;
+  opacity: 0; scale: 0.6;
+  transition: opacity var(--fd-dur-1) var(--fd-ease-out), scale var(--fd-dur-2) var(--fd-ease-spring);
+}
+.fd-pick-head { display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; padding-inline-end: var(--fd-space-6); }
+.fd-pick-head > :last-child { display: grid; min-width: 0; }
+.fd-pick-name { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-pick-meta { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-pick-text { padding-block-start: var(--fd-space-3); border-top: 1px solid var(--fd-line-faint); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); text-wrap: pretty; }
+.fd-pick-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1) var(--fd-space-3); font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); }
+
+/* Type-to-confirm */
+.fd-confirm .fd-dialog-head > .fd-tile { margin-block-end: var(--fd-space-3); }
+.fd-confirm-phrase { font-family: var(--fd-font-mono); font-size: 0.92em; padding: 1px 5px; border-radius: var(--fd-radius-sm); background: var(--fd-fill); color: var(--fd-text); user-select: all; }
+.fd-confirm [data-fd-confirm-input] { font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; }
+
+/* Inline dialogs and sheets for documentation. */
+:is(.fd-dialog, .fd-sheet, .fd-command)[data-static-demo] {
+  position: relative; inset: auto; margin: 0; z-index: auto;
+  opacity: 1; scale: 1; translate: none; transition: none;
+  max-width: 100%;
+}
+.fd-dialog[data-static-demo] { width: min(var(--_o-w), 100%); max-height: none; }
+
+/* ---------- Phones: dialogs become bottom sheets ---------- */
+@media (max-width: 640px) {
+  .fd-dialog:not([data-static-demo]) {
+    inset: auto 0 0 0;
+    margin: 0;
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+    border-start-start-radius: var(--fd-radius-3xl);
+    border-start-end-radius: var(--fd-radius-3xl);
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+    scale: 1;
+    translate: 0 100%;
+    --_o-pad: var(--fd-space-5);
+  }
+  .fd-dialog[open]:not([data-static-demo]) { scale: 1; translate: 0 var(--_o-drag, 0px); }
+  @starting-style {
+    .fd-dialog[open]:not([data-static-demo]) { scale: 1; translate: 0 100%; }
+  }
+  .fd-dialog:not([data-static-demo])::before {
+    content: ""; position: absolute; top: 8px; left: calc(50% - 18px); z-index: 2;
+    width: 36px; height: 4px; border-radius: var(--fd-radius-full); background: var(--fd-a16);
+  }
+  .fd-dialog:not([data-static-demo]) .fd-dialog-head { padding-block-start: calc(var(--_o-pad) + 8px); touch-action: none; }
+  .fd-dialog:not([data-static-demo]) .fd-dialog-head > .fd-dialog-close { top: calc(var(--_o-pad) + 8px); }
+  .fd-dialog:not([data-static-demo]) .fd-dialog-head:has(> .fd-eyebrow:first-child) > .fd-dialog-close { top: calc(var(--_o-pad) + 2px); }
+  .fd-dialog-foot > .fd-btn { flex: 1 1 0; }
+  .fd-dialog-foot > [data-start], .fd-dialog-foot-note { flex: 1 1 100%; margin-inline-end: 0; }
+}
+
+/* ==========================================================================
+   Sheet — a drawer for detail views
+   <dialog class="fd-sheet" id="log-detail" data-side="right" data-size="md" aria-labelledby="…">
+     <div class="fd-sheet-head">…title, status, close…</div>
+     <div class="fd-sheet-body">…</div>
+     <div class="fd-sheet-foot">…</div>
+   </dialog>
+   data-side  right (default) | left | bottom        data-size  md 420 (default) | lg 560
+   Opened like a dialog: data-fd-dialog-open="log-detail". Below 640px every sheet is a bottom sheet.
+   ========================================================================== */
+.fd-sheet {
+  --_o-w: 420px;
+  --_o-gap: var(--fd-space-2);
+  position: fixed;
+  inset: var(--_o-gap) var(--_o-gap) var(--_o-gap) auto;
+  margin: 0;
+  width: min(var(--_o-w), calc(100% - 2 * var(--_o-gap)));
+  height: auto;
+  border-radius: var(--fd-radius-2xl);
+  flex-direction: column;
+  translate: calc(100% + 2 * var(--_o-gap)) 0;
+}
+.fd-sheet[open] { display: flex; }
+.fd-sheet[open]:not([data-static-demo]) {
+  translate: 0 var(--_o-drag, 0px);
+  transition-duration: var(--fd-dur-4);
+  transition-timing-function: var(--fd-ease-emphasized);
+}
+@starting-style {
+  .fd-sheet[open]:not([data-static-demo]) { translate: calc(100% + 2 * var(--_o-gap)) 0; }
+  .fd-sheet[data-side="left"][open]:not([data-static-demo]) { translate: calc(-100% - 2 * var(--_o-gap)) 0; }
+  .fd-sheet[data-side="bottom"][open]:not([data-static-demo]) { translate: 0 100%; }
+}
+.fd-sheet:not([open]) { transition-duration: var(--fd-dur-3); transition-timing-function: var(--fd-ease-in-out); }
+.fd-sheet[data-size="lg"] { --_o-w: 560px; }
+.fd-sheet[data-side="left"] { inset: var(--_o-gap) auto var(--_o-gap) var(--_o-gap); translate: calc(-100% - 2 * var(--_o-gap)) 0; }
+.fd-sheet[data-side="bottom"] {
+  inset: auto 0 0 0;
+  width: 100%;
+  max-height: min(92dvh, 760px);
+  border-end-start-radius: 0; border-end-end-radius: 0;
+  border-start-start-radius: var(--fd-radius-3xl); border-start-end-radius: var(--fd-radius-3xl);
+  padding-block-end: env(safe-area-inset-bottom, 0px);
+  translate: 0 100%;
+}
+.fd-sheet[data-side="bottom"]::before {
+  content: ""; position: absolute; top: 8px; left: calc(50% - 18px); z-index: 2;
+  width: 36px; height: 4px; border-radius: var(--fd-radius-full); background: var(--fd-a16);
+}
+.fd-sheet[data-side="bottom"] .fd-sheet-head { padding-block-start: var(--fd-space-6); touch-action: none; }
+.fd-sheet[data-static-demo] { display: flex; width: min(var(--_o-w), 100%); height: var(--h, 560px); max-height: none; }
+
+.fd-sheet-head {
+  flex: none; display: grid; gap: var(--fd-space-3);
+  padding: var(--fd-space-4) var(--fd-space-4) 0 var(--fd-space-5);
+  border-bottom: 1px solid var(--fd-line-faint);
+}
+.fd-sheet-head:not(:has(.fd-tabs)) { padding-block-end: var(--fd-space-4); }
+.fd-sheet-bar { display: flex; align-items: center; gap: var(--fd-space-2); min-width: 0; min-height: var(--fd-control-sm); }
+.fd-sheet-bar > .fd-sheet-title { flex: 1 1 auto; }
+.fd-sheet-title { min-width: 0; font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-sheet-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-sheet-head .fd-tabs { margin-block-end: -1px; }
+.fd-sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--fd-space-5); display: grid; align-content: start; gap: var(--fd-space-5); }
+.fd-sheet-section { display: grid; gap: var(--fd-space-2-5); min-width: 0; }
+.fd-sheet-section > .fd-eyebrow { color: var(--fd-text-3); }
+.fd-sheet-foot {
+  flex: none; display: flex; align-items: center; justify-content: flex-end; gap: var(--fd-space-2);
+  padding: var(--fd-space-3) var(--fd-space-4);
+  border-top: 1px solid var(--fd-line-faint);
+}
+.fd-sheet-foot > [data-start] { margin-inline-end: auto; }
+
+@media (max-width: 640px) {
+  .fd-sheet:not([data-static-demo]) {
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-end-start-radius: 0; border-end-end-radius: 0;
+    border-start-start-radius: var(--fd-radius-3xl); border-start-end-radius: var(--fd-radius-3xl);
+    padding-block-end: env(safe-area-inset-bottom, 0px);
+    translate: 0 100%;
+  }
+  .fd-sheet[open]:not([data-static-demo]) { translate: 0 var(--_o-drag, 0px); }
+  @starting-style {
+    .fd-sheet[open]:not([data-static-demo]), .fd-sheet[data-side][open]:not([data-static-demo]) { translate: 0 100%; }
+  }
+  .fd-sheet:not([data-static-demo])::before {
+    content: ""; position: absolute; top: 8px; left: calc(50% - 18px); z-index: 2;
+    width: 36px; height: 4px; border-radius: var(--fd-radius-full); background: var(--fd-a16);
+  }
+  .fd-sheet:not([data-static-demo]) .fd-sheet-head { padding-block-start: var(--fd-space-6); touch-action: none; }
+}
+
+/* ==========================================================================
+   Toast — created by toast({ title, description, tone, action, duration })
+   <ol class="fd-toaster" aria-live="polite">            (created by the JS)
+     <li class="fd-toast" data-tone="success">
+       <span class="fd-toast-icon">…</span>
+       <div class="fd-toast-content"><p class="fd-toast-title">Key copied</p><p class="fd-toast-desc">…</p></div>
+       <button class="fd-btn fd-toast-action" data-size="sm">Undo</button>
+       <button class="fd-toast-close" aria-label="Dismiss notification">…</button>
+       <span class="fd-toast-progress"></span>
+     </li>
+   </ol>
+   data-tone  neutral | success | danger | warning | info | loading
+   ========================================================================== */
+.fd-toaster {
+  --_o-w: 360px;
+  --_o-peek: 10px;
+  position: fixed;
+  inset: auto var(--fd-space-6) var(--fd-space-6) auto;
+  width: var(--_o-w);
+  height: var(--_o-front-h, 0px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+  list-style: none;
+  pointer-events: none;
+  z-index: var(--fd-z-toast);
+  outline: none;
+}
+.fd-toaster:not([data-state="open"]) { display: none; }
+/* Expanded, the list box spans the whole fan, so the gaps between toasts keep the hover. */
+.fd-toaster[data-expanded] { height: var(--_o-total, 0px); pointer-events: auto; }
+
+.fd-toast {
+  --_o-tone: var(--fd-text-3);
+  --_o-i: 0;
+  --_o-x: 0px;
+  position: relative;
+  display: flex; align-items: flex-start; gap: var(--fd-space-3);
+  width: 100%;
+  padding: var(--fd-space-3-5) var(--fd-space-3) var(--fd-space-3-5) var(--fd-space-4);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-surface-raised);
+  color: var(--fd-text);
+  box-shadow: var(--fd-shadow-lg);
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md);
+  list-style: none;
+}
+.fd-toaster > .fd-toast {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--_o-front-h, auto);
+  overflow: hidden;
+  pointer-events: auto;
+  touch-action: pan-y;
+  transform-origin: 50% 0;
+  translate: var(--_o-x) calc(-1 * var(--_o-i) * var(--_o-peek));
+  scale: calc(1 - var(--_o-i) * 0.05);
+  transition:
+    translate var(--fd-dur-4) var(--fd-ease-emphasized),
+    scale var(--fd-dur-4) var(--fd-ease-emphasized),
+    height var(--fd-dur-3) var(--fd-ease-out),
+    opacity var(--fd-dur-3) var(--fd-ease-out),
+    box-shadow var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-toaster > .fd-toast[data-front] { height: var(--_o-h, auto); }
+/* Tucked toasts show only their top edge; their content fades out. */
+.fd-toaster > .fd-toast > * { transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+.fd-toaster:not([data-expanded]) > .fd-toast:not([data-front]) > * { opacity: 0; }
+.fd-toaster:not([data-expanded]) > .fd-toast:not([data-front]) { box-shadow: var(--fd-shadow-md), 0 0 0 1px var(--fd-a6); }
+.fd-toaster:not([data-expanded]) > .fd-toast[data-hidden] { opacity: 0; pointer-events: none; }
+/* Expanded on hover or focus: the stack fans out to full height. */
+.fd-toaster[data-expanded] > .fd-toast { height: var(--_o-h, auto); translate: var(--_o-x) calc(-1 * var(--_o-offset, 0px)); scale: 1; }
+/* Enter (rise + fade), exit, swipe */
+.fd-toaster > .fd-toast[data-state="entering"] { opacity: 0; translate: 0 16px; scale: 1; }
+.fd-toaster > .fd-toast[data-state="closing"] { opacity: 0; scale: 0.96; pointer-events: none; transition-duration: var(--fd-dur-3); }
+.fd-toaster > .fd-toast[data-swiping] { transition: none; opacity: var(--_o-fade, 1); }
+.fd-toaster > .fd-toast[data-swiped] { opacity: 0; transition-timing-function: var(--fd-ease-out); }
+
+.fd-toast[data-tone="success"] { --_o-tone: var(--fd-success-solid); }
+.fd-toast[data-tone="danger"] { --_o-tone: var(--fd-danger-solid); }
+.fd-toast[data-tone="warning"] { --_o-tone: var(--fd-warning-solid); }
+.fd-toast[data-tone="info"] { --_o-tone: var(--fd-info-solid); }
+.fd-toast[data-tone="accent"] { --_o-tone: var(--fd-accent); }
+.fd-toast-icon { flex: none; display: grid; place-items: center; width: 16px; height: 20px; color: var(--_o-tone); }
+.fd-toast-icon > .fd-icon { width: 16px; height: 16px; }
+.fd-toast[data-tone="loading"] .fd-toast-icon::before {
+  content: ""; width: 14px; height: 14px; border-radius: 50%;
+  border: 1.5px solid var(--fd-a16); border-top-color: var(--fd-text-2);
+  animation: fd-spin 0.7s linear infinite;
+}
+.fd-toast-content { flex: 1 1 auto; min-width: 0; display: grid; gap: 2px; }
+.fd-toast-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.fd-toast-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty; overflow-wrap: anywhere; }
+.fd-toast-action { flex: none; align-self: center; }
+.fd-toast-close {
+  flex: none; display: inline-grid; place-items: center;
+  width: 24px; height: 24px; margin: -2px -2px 0 0; border-radius: var(--fd-radius-md);
+  color: var(--fd-text-4);
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-toast-close:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-toast-close > .fd-icon { width: 14px; height: 14px; }
+.fd-toast-progress {
+  position: absolute; inset-inline: var(--fd-space-4); bottom: 0; height: 2px;
+  border-radius: var(--fd-radius-full); background: var(--fd-a12);
+  transform-origin: left center; pointer-events: none;
+}
+.fd-toast:not([data-timed]) .fd-toast-progress { display: none; }
+.fd-toast[data-static-demo] { width: min(360px, 100%); }
+@media (prefers-reduced-motion: reduce) { .fd-toast-progress { opacity: 0; } }
+
+@media (max-width: 640px) {
+  .fd-toaster { inset: auto var(--fd-space-4) calc(var(--fd-space-4) + env(safe-area-inset-bottom, 0px)) var(--fd-space-4); width: auto; }
+}
+
+/* ==========================================================================
+   Command palette — ⌘K / Ctrl+K
+   <dialog class="fd-command" id="command" aria-label="Command palette">
+     <div class="fd-command-search"><i data-icon="search"></i><input class="fd-command-input" placeholder="Search or jump to…"><kbd class="fd-kbd">esc</kbd></div>
+     <div class="fd-command-list">
+       <div class="fd-command-group"><p class="fd-command-group-label">Navigation</p>
+         <a class="fd-command-item" href="#" data-keywords="requests history"><i data-icon="list"></i>
+           <span class="fd-command-item-label">Activity logs</span><span class="fd-command-item-hint">…</span><kbd class="fd-kbd">G L</kbd></a>
+       </div>
+     </div>
+     <div class="fd-command-empty" hidden>…</div>
+     <div class="fd-command-foot">…key hints…</div>
+   </dialog>
+   ========================================================================== */
+.fd-command {
+  position: fixed;
+  inset: 0;
+  margin: min(14dvh, 120px) auto auto;
+  width: min(640px, calc(100% - 32px));
+  height: fit-content;
+  max-height: min(560px, calc(100dvh - 2 * min(14dvh, 120px)));
+  border-radius: var(--fd-radius-2xl);
+  flex-direction: column;
+  opacity: 0;
+  scale: 0.98;
+  transform-origin: 50% 0;
+}
+.fd-command[open] { display: flex; }
+.fd-command[open]:not([data-static-demo]) { opacity: 1; scale: 1; transition-duration: var(--fd-dur-3); }
+@starting-style {
+  .fd-command[open]:not([data-static-demo]) { opacity: 0; scale: 0.98; }
+}
+.fd-command[data-static-demo] { display: flex; width: min(640px, 100%); max-height: none; }
+
+.fd-command-search {
+  flex: none; display: flex; align-items: center; gap: var(--fd-space-3);
+  height: 56px; padding-inline: var(--fd-space-5) var(--fd-space-4);
+  border-bottom: 1px solid var(--fd-line-faint);
+  color: var(--fd-text-3);
+}
+.fd-command-input {
+  flex: 1 1 auto; min-width: 0; height: 100%; padding: 0; border: 0; background: none;
+  font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); color: var(--fd-text); outline: none;
+}
+.fd-command-input:focus-visible { box-shadow: none; }
+.fd-command-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--fd-space-1-5); scroll-padding-block: var(--fd-space-8) var(--fd-space-1-5); }
+.fd-command-group + .fd-command-group { margin-block-start: var(--fd-space-1-5); }
+.fd-command-group-label {
+  padding: var(--fd-space-2) var(--fd-space-2-5) var(--fd-space-1-5);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-4);
+}
+.fd-command-item {
+  display: flex; align-items: center; gap: var(--fd-space-3);
+  min-height: 40px; padding: var(--fd-space-1-5) var(--fd-space-2-5);
+  border-radius: var(--fd-radius-lg);
+  color: var(--fd-text); text-decoration: none;
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label);
+  cursor: pointer; user-select: none; scroll-margin-block: var(--fd-space-1-5);
+  transition: background-color var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-command-item[data-active] { background: var(--fd-fill); }
+.fd-command-item:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: var(--fd-radius-lg); }
+.fd-command-item > .fd-icon, .fd-command-item > i[data-icon] { color: var(--fd-text-3); }
+.fd-command-item[data-active] > .fd-icon { color: var(--fd-text); }
+.fd-command-item-label { flex: none; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-command-item-label > mark { background: none; color: var(--fd-accent-text); }
+.fd-command-item-hint { flex: 1 1 auto; min-width: 0; font-size: var(--fd-text-sm); font-weight: var(--fd-weight-regular); color: var(--fd-text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-command-item-hint.fd-mono, .fd-command-item-hint > .fd-mono { font-size: var(--fd-text-xs); }
+.fd-command-item > .fd-kbd + .fd-kbd { margin-inline-start: 2px; }
+.fd-command-item > .fd-status, .fd-command-item > .fd-badge { flex: none; margin-inline-start: auto; }
+.fd-command-empty { flex: none; display: grid; justify-items: center; gap: var(--fd-space-1); padding: var(--fd-space-10) var(--fd-space-6); text-align: center; }
+.fd-command-empty > .fd-icon { width: 20px; height: 20px; margin-block-end: var(--fd-space-2); color: var(--fd-text-4); }
+.fd-command-empty-title { font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-command-empty-text { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-command-foot {
+  flex: none; display: flex; align-items: center; gap: var(--fd-space-4);
+  min-height: 40px; padding-inline: var(--fd-space-4);
+  border-top: 1px solid var(--fd-line-faint);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3);
+}
+.fd-command-foot > span { display: inline-flex; align-items: center; gap: var(--fd-space-1-5); white-space: nowrap; }
+.fd-command-foot > span:last-child:not(:first-child) { margin-inline-start: auto; }
+.fd-command-foot .fd-kbd { min-width: 18px; height: 18px; }
+
+@media (max-width: 640px) {
+  .fd-command:not([data-static-demo]) { margin-block-start: var(--fd-space-3); max-height: calc(100dvh - 24px); width: calc(100% - 24px); }
+  .fd-command-foot > span:not(:first-child):not(:last-child) { display: none; }
+  .fd-command-item-hint { display: none; }
+}
+
+/* ---------- Page scroll lock while a modal is open ---------- */
+:root[data-fd-modal-lock] { overflow: hidden; scrollbar-gutter: stable; }
+
+/* ---------- Discrete-transition fallback for modals ---------- */
+@supports not (transition-behavior: allow-discrete) {
+  .fd-dialog[open]:not([data-static-demo]), .fd-command[open]:not([data-static-demo]) { animation: fd-rise var(--fd-dur-4) var(--fd-ease-emphasized); }
+  .fd-sheet[open]:not([data-static-demo]) { animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-emphasized); }
+  :is(.fd-dialog, .fd-sheet, .fd-command)[open]::backdrop { animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out); }
+}

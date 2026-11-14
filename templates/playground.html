@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell>
+<script>
+  /* Pick the active nav item from ?endpoint= before shell.js mounts. */
+  (function () {
+    var m = new URLSearchParams(location.search).get('endpoint');
+    document.body.dataset.active = ['search', 'scrape', 'interact', 'crawl', 'map', 'batch'].indexOf(m) > -1 ? m : 'scrape';
+  })();
+</script>
+<main class="fd-page">
+  <div class="fd-frame">
+    <h1 class="fd-sr-only" id="pg-title">Scrape a page</h1>
+
+    <!-- Endpoint switcher -->
+    <section class="fd-band fd-rise" data-pad="sm" style="--fd-i:0" aria-label="Endpoint">
+      <div class="fd-composer-hero">
+        <div class="fd-segmented" id="pg-modes" data-variant="grouped" data-tone="accent" role="radiogroup" aria-label="Endpoint">
+          <div class="fd-segmented-group" role="presentation">
+            <span class="fd-segmented-label" aria-hidden="true">Discover</span>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="search"><i data-icon="search"></i>Search</button>
+          </div>
+          <div class="fd-segmented-group" role="presentation">
+            <span class="fd-segmented-label" aria-hidden="true">Extract</span>
+            <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="scrape"><i data-icon="file-text"></i>Scrape</button>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="interact"><i data-icon="mouse-pointer-click"></i>Interact</button>
+          </div>
+          <div class="fd-segmented-group" role="presentation">
+            <span class="fd-segmented-label" aria-hidden="true">Crawl</span>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="map"><i data-icon="map"></i>Map</button>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="crawl"><i data-icon="network"></i>Crawl</button>
+            <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="batch"><i data-icon="layers"></i>Batch</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Composer -->
+    <section class="fd-band fd-rise" data-pad="lg" style="--fd-i:1" aria-label="Request">
+      <div class="fd-dotgrid" data-fade="radial" aria-hidden="true"></div>
+      <div class="fd-composer-hero" style="max-width:660px">
+        <form class="fd-composer" id="pg-composer" data-variant="playground" novalidate>
+          <div class="fd-composer-row">
+            <span class="fd-composer-prefix" id="pg-prefix">https://</span>
+            <input class="fd-composer-input" id="pg-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="URL to scrape" placeholder="docs.ember.dev/features/scrape">
+            <button type="button" class="fd-btn" data-variant="ghost" data-icon-only aria-label="Attach a file" data-modes="scrape"><i data-icon="paperclip"></i></button>
+          </div>
+          <div class="fd-composer-row" data-modes="interact" hidden>
+            <input class="fd-composer-input" id="pg-prompt" type="text" autocomplete="off" aria-label="Instructions" placeholder="Open Engineering and list every role with its location">
+          </div>
+          <div class="fd-composer-sources" role="group" aria-label="Sources" data-modes="search" hidden>
+            <button type="button" class="fd-composer-source" aria-pressed="true" data-source="web"><i data-icon="globe"></i><span>Web</span></button>
+            <button type="button" class="fd-composer-source" aria-pressed="false" data-source="news"><i data-icon="newspaper"></i><span>News</span></button>
+            <button type="button" class="fd-composer-source" aria-pressed="false" data-source="images"><i data-icon="images"></i><span>Images</span></button>
+            <span class="fd-composer-sep"></span>
+            <button type="button" class="fd-composer-source" aria-pressed="false" data-source="developer"><i data-icon="code"></i><span>Developer</span></button>
+            <button type="button" class="fd-composer-source" aria-pressed="false" data-source="research"><i data-icon="graduation-cap"></i><span>Research</span><span class="fd-composer-free">Free</span></button>
+          </div>
+          <div class="fd-composer-foot">
+            <button type="button" class="fd-btn" data-variant="outline" data-icon-only aria-label="Options" data-fd-dialog-open="pg-options"><i data-icon="sliders-horizontal"></i></button>
+            <button type="button" class="fd-btn" data-variant="outline" data-icon-only id="pg-layout" aria-pressed="false" aria-label="Extract a table" data-modes="scrape search"><i data-icon="table"></i></button>
+            <button type="button" class="fd-btn" data-variant="outline" data-fd-menu="pg-format" data-modes="scrape batch"><i data-icon="file-text"></i><span><span class="fd-muted">Format:</span> <span data-fd-menu-value>Markdown</span></span><i data-icon="chevron-down"></i></button>
+            <button type="button" class="fd-btn" data-variant="outline" data-fd-menu="pg-limit" data-modes="crawl" hidden><i data-icon="layers"></i><span><span class="fd-muted">Limit:</span> <span data-fd-menu-value>50 pages</span></span><i data-icon="chevron-down"></i></button>
+            <button type="button" class="fd-btn" data-variant="outline" data-fd-menu="pg-depth" data-modes="crawl" hidden><i data-icon="git-branch"></i><span><span class="fd-muted">Depth:</span> <span data-fd-menu-value>2</span></span><i data-icon="chevron-down"></i></button>
+            <button type="button" class="fd-btn" data-variant="outline" data-fd-menu="pg-maplimit" data-modes="map" hidden><i data-icon="link"></i><span><span class="fd-muted">Limit:</span> <span data-fd-menu-value>1,000 links</span></span><i data-icon="chevron-down"></i></button>
+            <div class="fd-composer-foot-end">
+              <button type="button" class="fd-btn" data-variant="outline" id="pg-code-btn" data-fd-dialog-open="pg-code"><i data-icon="code"></i><span>Get code</span></button>
+              <button type="button" class="fd-btn" data-variant="primary" id="pg-run"><span>Start scraping</span></button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="fd-menu" id="pg-format" popover role="menu" aria-label="Output format">
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-menu-item-label">Markdown</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">HTML</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">Links</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">Screenshot</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">JSON</span></button>
+      </div>
+      <div class="fd-menu" id="pg-limit" popover role="menu" aria-label="Page limit">
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">10 pages</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-menu-item-label">50 pages</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">100 pages</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">500 pages</span></button>
+      </div>
+      <div class="fd-menu" id="pg-depth" popover role="menu" aria-label="Crawl depth">
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">1</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-menu-item-label">2</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">3</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">5</span></button>
+      </div>
+      <div class="fd-menu" id="pg-maplimit" popover role="menu" aria-label="Link limit">
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">100 links</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="true"><span class="fd-menu-item-label">1,000 links</span></button>
+        <button class="fd-menu-item" role="menuitemradio" aria-checked="false"><span class="fd-menu-item-label">5,000 links</span></button>
+      </div>
+    </section>
+
+    <!-- Output and recent runs -->
+    <section class="fd-band" data-grow aria-label="Runs">
+      <div class="fd-stack" style="--fd-gap:32px">
+        <div id="pg-out" hidden aria-live="polite"></div>
+        <div class="fd-stack" style="--fd-gap:8px">
+          <div class="fd-row" data-justify="between">
+            <h2 class="fd-eyebrow">Recent runs</h2>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" id="pg-clear"><i data-icon="trash-2"></i><span>Clear</span></button>
+          </div>
+          <div id="pg-recents" data-fd-loading="true" aria-busy="true">
+            <div class="fd-skeleton-list" data-rows="4"></div>
+            <div id="pg-recent-body"></div>
+          </div>
+        </div>
+        <a class="fd-btn-text" href="logs.html"><span>See all in Activity logs</span><i data-icon="arrow-right" data-nudge></i></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Options sheet -->
+<dialog class="fd-sheet" id="pg-options" data-side="right" data-size="md" aria-labelledby="pg-options-title">
+  <div class="fd-sheet-head">
+    <div class="fd-sheet-bar">
+      <h2 class="fd-sheet-title" id="pg-options-title">Scrape options</h2>
+      <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <p class="fd-sheet-desc">Options are added to the request in Get code.</p>
+  </div>
+  <form class="fd-sheet-body fd-stack" id="pg-options-form" style="--fd-gap:24px">
+    <!-- search -->
+    <div class="fd-sheet-section" data-modes="search" hidden>
+      <p class="fd-eyebrow">Results</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-limit">Results per source</label>
+        <div class="fd-number" data-size="sm">
+          <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Fewer results"><i data-icon="minus"></i></button>
+          <input class="fd-number-input" type="number" id="po-limit" value="5" min="1" max="20" step="1">
+          <button type="button" class="fd-number-step" data-fd-step="1" aria-label="More results"><i data-icon="plus"></i></button>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-time">Time range</label>
+        <label class="fd-select"><select id="po-time"><option value="">Any time</option><option value="qdr:d">Past day</option><option value="qdr:w">Past week</option><option value="qdr:m">Past month</option><option value="qdr:y">Past year</option></select></label>
+      </div>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="po-content"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Scrape result pages</span><span class="fd-switch-desc">Return each result as markdown. Adds 1 credit per page.</span></span></label>
+    </div>
+
+    <!-- scrape, batch, crawl -->
+    <div class="fd-sheet-section" data-modes="scrape batch crawl">
+      <p class="fd-eyebrow">Content</p>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="po-main" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Only main content</span><span class="fd-switch-desc">Drop navigation, headers and footers.</span></span></label>
+      <div class="fd-field">
+        <div class="fd-field-head"><label class="fd-field-label" for="po-wait">Wait for</label><output class="fd-slider-value" for="po-wait">1000 ms</output></div>
+        <div class="fd-slider" data-suffix=" ms"><input type="range" id="po-wait" min="0" max="10000" step="500" value="1000" aria-describedby="po-wait-hint"></div>
+        <p class="fd-field-hint" id="po-wait-hint">Extra time for scripts to finish after the page loads.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-include">Include tags <span class="fd-field-tag">optional</span></label>
+        <div class="fd-tag-input" data-fd-tag-input data-mono data-name="includeTags"><input class="fd-tag-input-field" id="po-include" placeholder="article, main" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-exclude">Exclude tags <span class="fd-field-tag">optional</span></label>
+        <div class="fd-tag-input" data-fd-tag-input data-mono data-name="excludeTags" data-value="nav,footer"><input class="fd-tag-input-field" id="po-exclude" placeholder=".cookie-banner" autocomplete="off" spellcheck="false"></div>
+      </div>
+    </div>
+
+    <!-- crawl -->
+    <div class="fd-sheet-section" data-modes="crawl" hidden>
+      <p class="fd-eyebrow">Scope</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-paths">Include paths <span class="fd-field-tag">optional</span></label>
+        <div class="fd-tag-input" data-fd-tag-input data-mono data-name="includePaths" data-value="/docs/*"><input class="fd-tag-input-field" id="po-paths" placeholder="/docs/*" autocomplete="off" spellcheck="false"></div>
+        <p class="fd-field-hint">Only follow links that match one of these paths.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-skip">Exclude paths <span class="fd-field-tag">optional</span></label>
+        <div class="fd-tag-input" data-fd-tag-input data-mono data-name="excludePaths" data-value="/blog/*"><input class="fd-tag-input-field" id="po-skip" placeholder="/blog/*" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="po-external"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Follow external links</span><span class="fd-switch-desc">Leave the starting domain when a page links out.</span></span></label>
+    </div>
+
+    <!-- map -->
+    <div class="fd-sheet-section" data-modes="map" hidden>
+      <p class="fd-eyebrow">Discovery</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-filter">Filter by keyword <span class="fd-field-tag">optional</span></label>
+        <input class="fd-input" id="po-filter" placeholder="pricing" autocomplete="off">
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-sitemap">Sitemap</label>
+        <label class="fd-select"><select id="po-sitemap"><option value="include" selected>Use it and follow links</option><option value="only">Only the sitemap</option><option value="skip">Skip the sitemap</option></select></label>
+      </div>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="po-subdomains"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Include subdomains</span><span class="fd-switch-desc">Also list docs.northwind.io and blog.northwind.io.</span></span></label>
+    </div>
+
+    <!-- interact -->
+    <div class="fd-sheet-section" data-modes="interact" hidden>
+      <p class="fd-eyebrow">Session</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-session">Browser session</label>
+        <label class="fd-select"><select id="po-session"><option value="new" selected>New session</option><option value="reuse">Reuse the last session</option></select></label>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-steps">Maximum steps</label>
+        <div class="fd-number" data-size="sm">
+          <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Fewer steps"><i data-icon="minus"></i></button>
+          <input class="fd-number-input" type="number" id="po-steps" value="10" min="1" max="50" step="1">
+          <button type="button" class="fd-number-step" data-fd-step="1" aria-label="More steps"><i data-icon="plus"></i></button>
+        </div>
+        <p class="fd-field-hint">Each step costs 1 credit.</p>
+      </div>
+    </div>
+
+    <!-- browser: everything that loads a page -->
+    <div class="fd-sheet-section" data-modes="scrape interact crawl batch">
+      <p class="fd-eyebrow">Browser</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-location">Location</label>
+        <label class="fd-select"><select id="po-location"><option value="US" selected>United States</option><option value="DE">Germany</option><option value="JP">Japan</option><option value="BR">Brazil</option></select></label>
+      </div>
+      <label class="fd-switch"><input type="checkbox" role="switch" id="po-mobile"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Mobile viewport</span><span class="fd-switch-desc">Load the page as a phone would.</span></span></label>
+    </div>
+
+    <!-- search location -->
+    <div class="fd-sheet-section" data-modes="search" hidden>
+      <p class="fd-eyebrow">Region</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-country">Location</label>
+        <label class="fd-select"><select id="po-country"><option value="US" selected>United States</option><option value="DE">Germany</option><option value="JP">Japan</option><option value="BR">Brazil</option></select></label>
+      </div>
+    </div>
+
+    <!-- cache and extraction -->
+    <div class="fd-sheet-section" data-modes="scrape batch">
+      <p class="fd-eyebrow">Cache</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-age">Max age</label>
+        <label class="fd-select"><select id="po-age"><option value="0">Always fresh</option><option value="3600000">1 hour</option><option value="86400000">1 day</option><option value="172800000" selected>2 days</option></select></label>
+        <p class="fd-field-hint">Serve a stored copy no older than this. Cached pages load faster.</p>
+      </div>
+    </div>
+    <div class="fd-sheet-section" data-modes="scrape batch">
+      <p class="fd-eyebrow">Extraction</p>
+      <div class="fd-field">
+        <label class="fd-field-label" for="po-schema">JSON schema <span class="fd-field-tag">optional</span></label>
+        <textarea class="fd-textarea" id="po-schema" data-mono rows="5" spellcheck="false" placeholder='{ "type": "object", "properties": { "plans": { "type": "array" } } }'></textarea>
+        <p class="fd-field-hint">Return typed JSON that matches this schema. Adds 4 credits per page.</p>
+      </div>
+    </div>
+  </form>
+  <div class="fd-sheet-foot">
+    <button class="fd-btn" type="button" data-variant="ghost" data-start id="pg-options-reset">Reset</button>
+    <button class="fd-btn" type="button" data-fd-dialog-close>Apply options</button>
+  </div>
+</dialog>
+
+<!-- Get code dialog -->
+<dialog class="fd-dialog" id="pg-code" data-size="xl" aria-labelledby="pg-code-title">
+  <div class="fd-dialog-head">
+    <h2 class="fd-h3 fd-dialog-title" id="pg-code-title">Get code</h2>
+    <p class="fd-dialog-desc" id="pg-code-desc">The request behind this page, ready to paste. It uses your current URL and options.</p>
+    <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+  </div>
+  <div class="fd-dialog-body fd-stack" style="--fd-gap:12px">
+    <div class="fd-row" data-wrap data-justify="between">
+      <button class="fd-endpoint" type="button" data-copyable id="pg-code-endpoint" data-copy="https://api.ember.dev/v2/scrape"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/scrape</span></button>
+      <span class="fd-small fd-muted" id="pg-code-cost">1 credit per page</span>
+    </div>
+    <div id="pg-code-host"></div>
+  </div>
+  <div class="fd-dialog-foot">
+    <a class="fd-btn" data-variant="ghost" href="#docs"><span>API reference</span><i data-icon="arrow-up-right" data-nudge="up-right"></i></a>
+    <button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-close>Done</button>
+  </div>
+</dialog>
+
+<script type="module">
+import { init, nav, shell, texture, forms, code, data, overlays, copyText } from '../fire/fire.js';
+const toast = overlays.toast;
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const ico = (name, attrs = '') => `<i data-icon="${name}"${attrs}></i>`;
+const wait = (ms) => new Promise((r) => setTimeout(r, matchMedia('(prefers-reduced-motion: reduce)').matches ? Math.min(ms, 60) : ms));
+const attr = (o) => esc(JSON.stringify(o));
+
+/* ---------- modes ---------- */
+const MODES = {
+  search: { name: 'Search the web', verb: 'Start searching', path: '/v2/search', icon: 'search', input: 'Latest releases of open-source vector databases', label: 'Search query', cost: '2 credits per 10 results' },
+  scrape: { name: 'Scrape a page', verb: 'Start scraping', path: '/v2/scrape', icon: 'file-text', input: 'docs.ember.dev/features/scrape', label: 'URL to scrape', cost: '1 credit per page' },
+  interact: { name: 'Interact with a page', verb: 'Start interacting', path: '/v2/interact', icon: 'mouse-pointer-click', input: 'northwind.io/careers', label: 'URL to open', cost: '1 credit per step' },
+  crawl: { name: 'Crawl a website', verb: 'Start crawling', path: '/v2/crawl', icon: 'network', input: 'docs.ember.dev', label: 'URL to crawl', cost: '1 credit per page' },
+  map: { name: 'Map a website', verb: 'Start mapping', path: '/v2/map', icon: 'map', input: 'northwind.io', label: 'URL to map', cost: '1 credit per call' },
+  batch: { name: 'Batch scrape', verb: 'Start batch scrape', path: '/v2/batch/scrape', icon: 'layers', input: 'ember.dev/pricing, northwind.io/plans, lumenapi.com/pricing', label: 'URLs to scrape, separated by commas', cost: '1 credit per URL' },
+};
+const URL_MODES = ['scrape', 'interact', 'crawl', 'map'];
+const asked = new URLSearchParams(location.search).get('endpoint');
+let mode = MODES[asked] ? asked : 'scrape';
+
+const composer = $('#pg-composer');
+const input = $('#pg-input');
+const runBtn = $('#pg-run');
+const out = $('#pg-out');
+
+function setNavActive(next) {
+  const links = [...$$('.fd-sidebar .fd-nav-item[href], .fd-mobile-nav .fd-mobile-nav-item[href]')];
+  links.forEach((a) => {
+    const m = /playground\.html\?endpoint=(\w+)/.exec(a.getAttribute('href'));
+    if (!m) return;
+    if (m[1] === next) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  if (['crawl', 'map', 'batch'].includes(next)) {
+    const trigger = $('.fd-sidebar .fd-nav-group > .fd-nav-item[aria-expanded]');
+    if (trigger && trigger.getAttribute('aria-expanded') !== 'true') shell.setNavGroup(trigger, true);
+  }
+}
+
+function setMode(next, { replace = true } = {}) {
+  if (!MODES[next]) return;
+  mode = next;
+  const m = MODES[mode];
+  if (replace) { try { history.replaceState(null, '', `?endpoint=${mode}`); } catch { /* file:// previews */ } }
+  $('#pg-title').textContent = m.name;
+  document.title = `${m.name} · Ember`;
+  setNavActive(mode);
+  const item = $(`#pg-modes [data-value="${mode}"]`);
+  if (item) nav.selectSegment(item, { silent: true });
+
+  $$('[data-modes]').forEach((el) => { el.hidden = !el.dataset.modes.split(' ').includes(mode); });
+  $('#pg-prefix').hidden = !URL_MODES.includes(mode);
+  input.placeholder = m.input;
+  input.setAttribute('aria-label', m.label);
+  $('span', runBtn).textContent = m.verb;
+  $('#pg-options-title').textContent = { search: 'Search options', scrape: 'Scrape options', interact: 'Interact options', crawl: 'Crawl options', map: 'Map options', batch: 'Batch options' }[mode];
+  const layout = $('#pg-layout');
+  const isSearch = mode === 'search';
+  layout.setAttribute('aria-label', isSearch ? 'Include page content' : 'Extract a table');
+  $('.fd-icon, i[data-icon]', layout)?.remove();
+  layout.insertAdjacentHTML('afterbegin', ico(isSearch ? 'file-text' : 'table'));
+  init(layout);
+  out.hidden = true;
+  out.replaceChildren();
+  runId += 1;
+  running = false;
+  runBtn.removeAttribute('aria-busy');
+}
+
+/* ---------- reading the form ---------- */
+const FORMATS = { Markdown: 'markdown', HTML: 'html', Links: 'links', Screenshot: 'screenshot', JSON: 'json' };
+const menuText = (id) => $(`#${id} [aria-checked="true"] .fd-menu-item-label`)?.textContent.trim() || '';
+const num = (s) => parseInt(String(s).replace(/\D/g, ''), 10) || 0;
+const https = (s) => (/^https?:\/\//.test(s) ? s : `https://${s}`);
+
+function target() {
+  const raw = input.value.trim() || input.placeholder;
+  if (mode === 'search') return { query: raw, label: raw };
+  if (mode === 'batch') {
+    const urls = raw.split(',').map((s) => s.trim()).filter(Boolean).map(https);
+    return { urls, label: `${urls.length} URLs` };
+  }
+  const url = https(raw);
+  const prompt = mode === 'interact' ? ($('#pg-prompt').value.trim() || $('#pg-prompt').placeholder) : '';
+  return { url, prompt, label: raw.replace(/^https?:\/\//, '') };
+}
+
+function options() {
+  const tags = (name) => { const el = $(`[data-name="${name}"]`); return el ? forms.tagValues(el) : []; };
+  return {
+    main: $('#po-main').checked,
+    wait: Number($('#po-wait').value),
+    mobile: $('#po-mobile').checked,
+    include: tags('includeTags'),
+    exclude: tags('excludeTags'),
+    country: $('#po-location').value,
+    age: Number($('#po-age').value),
+    schema: $('#po-schema').value.trim(),
+    limit: Number($('#po-limit').value),
+    time: $('#po-time').value,
+    content: $('#po-content').checked,
+    country2: $('#po-country').value,
+    paths: tags('includePaths'),
+    skip: tags('excludePaths'),
+    external: $('#po-external').checked,
+    sitemap: $('#po-sitemap').value,
+    subdomains: $('#po-subdomains').checked,
+    keyword: $('#po-filter').value.trim(),
+    session: $('#po-session').value,
+    steps: Number($('#po-steps').value),
+  };
+}
+
+function request() {
+  const t = target();
+  const o = options();
+  const fmt = FORMATS[menuText('pg-format')] || 'markdown';
+  const table = $('#pg-layout').getAttribute('aria-pressed') === 'true';
+  const m = MODES[mode];
+  let body;
+  let cli;
+  const pageOpts = () => {
+    const b = { onlyMainContent: o.main, waitFor: o.wait };
+    if (o.mobile) b.mobile = true;
+    if (o.include.length) b.includeTags = o.include;
+    if (o.exclude.length) b.excludeTags = o.exclude;
+    if (o.country !== 'US') b.location = { country: o.country };
+    return b;
+  };
+  const flags = (extra = '') => `${o.main ? '' : ' --no-main-content'}${o.wait ? ` --wait-for ${o.wait}` : ''}${o.mobile ? ' --mobile' : ''}${extra}`;
+  if (mode === 'scrape') {
+    const formats = table ? [fmt, { type: 'json', prompt: 'Extract the main table as rows' }] : [fmt];
+    body = { url: t.url, formats, ...pageOpts(), maxAge: o.age };
+    if (o.schema) { try { body.jsonOptions = { schema: JSON.parse(o.schema) }; } catch { body.jsonOptions = { schema: o.schema }; } }
+    cli = `ember scrape ${t.url} --format ${fmt}${flags()}`;
+  } else if (mode === 'search') {
+    const sources = $$('.fd-composer-source[aria-pressed="true"]').map((b) => b.dataset.source);
+    body = { query: t.query, sources: sources.length ? sources : ['web'], limit: o.limit };
+    if (o.time) body.tbs = o.time;
+    if (o.country2 !== 'US') body.location = o.country2;
+    if (o.content || table) body.scrapeOptions = { formats: ['markdown'] };
+    cli = `ember search ${JSON.stringify(t.query)} --sources ${body.sources.join(',')} --limit ${o.limit}`;
+  } else if (mode === 'interact') {
+    body = { url: t.url, prompt: t.prompt, maxSteps: o.steps, ...pageOpts() };
+    delete body.onlyMainContent;
+    cli = `ember interact ${t.url} --prompt ${JSON.stringify(t.prompt)} --max-steps ${o.steps}`;
+  } else if (mode === 'crawl') {
+    const limit = num(menuText('pg-limit'));
+    const depth = num(menuText('pg-depth'));
+    body = { url: t.url, limit, maxDiscoveryDepth: depth };
+    if (o.paths.length) body.includePaths = o.paths;
+    if (o.skip.length) body.excludePaths = o.skip;
+    if (o.external) body.allowExternalLinks = true;
+    body.scrapeOptions = { formats: ['markdown'], ...pageOpts() };
+    cli = `ember crawl ${t.url} --limit ${limit} --depth ${depth} --format markdown${flags()}`;
+  } else if (mode === 'map') {
+    body = { url: t.url, limit: num(menuText('pg-maplimit')), sitemap: o.sitemap };
+    if (o.keyword) body.search = o.keyword;
+    if (o.subdomains) body.includeSubdomains = true;
+    cli = `ember map ${t.url} --limit ${body.limit}${o.keyword ? ` --search ${JSON.stringify(o.keyword)}` : ''}${o.subdomains ? ' --subdomains' : ''}`;
+  } else {
+    body = { urls: t.urls, formats: [fmt], ...pageOpts(), maxAge: o.age };
+    cli = `ember batch scrape ${t.urls.join(' ')} --format ${fmt}${flags()}`;
+  }
+  return { method: 'POST', path: m.path, body, cli };
+}
+
+/* ---------- Get code ---------- */
+const pyLit = (v, depth = 0) => {
+  const pad = '    '.repeat(depth + 1);
+  if (v === null) return 'None';
+  if (v === true) return 'True';
+  if (v === false) return 'False';
+  if (typeof v === 'string' || typeof v === 'number') return JSON.stringify(v);
+  if (Array.isArray(v)) return `[${v.map((x) => pyLit(x, depth)).join(', ')}]`;
+  const entries = Object.entries(v);
+  return `{\n${entries.map(([k, x]) => `${pad}${JSON.stringify(k)}: ${pyLit(x, depth + 1)}`).join(',\n')},\n${'    '.repeat(depth)}}`;
+};
+const indent = (text, n) => text.split('\n').map((l, i) => (i ? ' '.repeat(n) + l : l)).join('\n');
+
+function snippets(r) {
+  const url = `https://api.ember.dev${r.path}`;
+  const json = JSON.stringify(r.body, null, 2);
+  const curl = `curl -X POST ${url} \\\n  -H "Authorization: Bearer $EMBER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '${indent(json, 2).replace(/'/g, "'\\''")}'`;
+  const python = `import os\nimport requests\n\nres = requests.post(\n    "${url}",\n    headers={"Authorization": "Bearer " + os.environ["EMBER_API_KEY"]},\n    json=${indent(pyLit(r.body, 1), 0)},\n)\nprint(res.json())`;
+  const node = `const res = await fetch("${url}", {\n  method: "POST",\n  headers: {\n    Authorization: "Bearer " + process.env.EMBER_API_KEY,\n    "Content-Type": "application/json",\n  },\n  body: JSON.stringify(${indent(json, 2)}),\n});\n\nconsole.log(await res.json());`;
+  const cli = `$ npm install -g @ember/cli\n$ ember login\n$ ${r.cli}`;
+  return { curl, python, node, cli, url };
+}
+
+function renderCode() {
+  const r = request();
+  const s = snippets(r);
+  const ep = $('#pg-code-endpoint');
+  ep.dataset.copy = s.url;
+  ep.innerHTML = `<span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">${esc(r.path)}</span>`;
+  $('#pg-code-cost').textContent = MODES[mode].cost;
+  $('#pg-code-title').textContent = `Get code · ${MODES[mode].name}`;
+  const panes = [['curl', 'bash', s.curl], ['python', 'python', s.python], ['node', 'javascript', s.node], ['cli', 'bash', s.cli]];
+  $('#pg-code-host').innerHTML = `<div class="fd-codeblock" data-sync="lang">
+    <div class="fd-codeblock-head">
+      <div class="fd-codeblock-tabs" aria-label="Language">
+        <button class="fd-codeblock-tab" data-value="curl">cURL</button><button class="fd-codeblock-tab" data-value="python">Python</button><button class="fd-codeblock-tab" data-value="node">Node</button><button class="fd-codeblock-tab" data-value="cli">CLI</button>
+      </div>
+      <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code">${ico('copy')}</button></div>
+    </div>
+    ${panes.map(([v, lang, text]) => `<pre class="fd-codeblock-body" data-value="${v}"><code data-lang="${lang}">${esc(text)}</code></pre>`).join('')}
+  </div>`;
+  init($('#pg-code-host'));
+}
+$('#pg-code-btn').addEventListener('click', renderCode);
+
+/* ---------- Options sheet ---------- */
+$('#pg-options-form').addEventListener('submit', (e) => e.preventDefault());
+$('#pg-options-reset').addEventListener('click', () => {
+  const form = $('#pg-options-form');
+  form.reset();
+  $$('.fd-slider', form).forEach((s) => forms.syncSlider?.(s));
+  $$('.fd-number', form).forEach((n) => forms.syncNumber?.(n));
+  $$('[data-fd-tag-input]', form).forEach((el) => forms.setTags(el, (el.dataset.value || '').split(',').filter(Boolean)));
+  toast({ title: 'Options reset', tone: 'neutral' });
+});
+
+/* ---------- Toggle buttons (outline icon button) ---------- */
+$('#pg-layout').addEventListener('click', (e) => {
+  const b = e.currentTarget;
+  b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'));
+});
+
+/* ---------- Scripted results ---------- */
+const ROLES = [
+  ['Staff Engineer, Crawling', 'Data platform', 'Lisbon'],
+  ['Senior Frontend Engineer', 'Console', 'Remote (EU)'],
+  ['Engineering Manager', 'Agents', 'Toronto'],
+  ['Site Reliability Engineer', 'Infrastructure', 'Lisbon'],
+];
+const LINKS = [
+  ['Quickstart', '/docs/quickstart'], ['Scrape', '/docs/features/scrape'], ['Crawl', '/docs/features/crawl'], ['Map', '/docs/features/map'],
+  ['API reference', '/docs/api-reference'], ['SDKs', '/docs/sdks'], ['Rate limits', '/docs/rate-limits'], ['Pricing', '/pricing'], ['Status', '/status'],
+];
+const CRAWL_PAGES = [
+  ['/', 'Ember docs', 1204], ['/quickstart', 'Quickstart', 1860], ['/features/scrape', 'Scrape', 2310], ['/features/crawl', 'Crawl', 2871],
+  ['/features/map', 'Map', 1422], ['/features/search', 'Search', 1980], ['/api-reference', 'API reference', 9316], ['/sdks/python', 'Python SDK', 2655],
+  ['/sdks/node', 'Node SDK', 2398], ['/guides/webhooks', 'Webhooks', 1730], ['/guides/agents', 'Using Ember in agents', 3104], ['/rate-limits', 'Rate limits', 864],
+  ['/billing/credits', 'Credits and billing', 1221], ['/guides/proxies', 'Proxies and locations', 1087], ['/guides/actions', 'Page actions', 2040], ['/guides/json-mode', 'JSON mode', 1912],
+  ['/guides/caching', 'Caching and max age', 940], ['/changelog', 'Changelog', 4210], ['/guides/errors', 'Errors', 1330], ['/security', 'Security', 780],
+  ['/guides/mcp', 'MCP server', 1618], ['/guides/skills', 'Skills', 1105], ['/guides/batch', 'Batch scrape', 1264], ['/status', 'Status', 312],
+];
+
+const prose = (host) => `<div class="fd-message-body">
+  <h1>Scrape</h1>
+  <p>Scrape turns any URL into clean, LLM-ready data. Ember loads the page in a real browser, waits for it to settle, removes navigation and ads, and returns the main content as markdown, HTML, JSON or a screenshot.</p>
+  <h2>Quickstart</h2>
+  <ol>
+    <li>Send <code>POST /v2/scrape</code> with the <code>url</code> you want.</li>
+    <li>Pick one or more <code>formats</code>. Markdown is the default.</li>
+    <li>Read the content from <code>data.markdown</code> and its details from <code>data.metadata</code>.</li>
+  </ol>
+  <table>
+    <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>onlyMainContent</code></td><td>true</td><td>Drop headers, footers and menus</td></tr>
+      <tr><td><code>waitFor</code></td><td>0</td><td>Milliseconds to wait after load</td></tr>
+      <tr><td><code>maxAge</code></td><td>2 days</td><td>Accept a cached copy no older than this</td></tr>
+    </tbody>
+  </table>
+  <p>Each page costs <strong>1 credit</strong>. Pages that fail are not charged. Content from <code>${esc(host)}</code> is shown here as sample output.</p>
+</div>`;
+
+function resultFor(t, ms) {
+  const secs = (ms / 1000).toFixed(2);
+  const base = (extra) => ({ status: '200 OK', tone: 'success', secs, ...extra });
+  const hostOf = (u) => u.replace(/^https?:\/\//, '').split('/')[0];
+  const listRows = (rows) => `<ul class="fd-list" data-divided aria-label="Results">${rows.join('')}</ul>`;
+  const linkRow = (title, sub, meta) => `<li class="fd-list-row"><div class="fd-list-body"><span class="fd-list-title">${esc(title)}</span><span class="fd-list-desc fd-truncate">${esc(sub)}</span></div><span class="fd-list-meta" data-mono>${esc(meta)}</span></li>`;
+  const shot = (caption) => `<div class="fd-stack" style="--fd-gap:12px"><div class="fd-corners" data-gap style="width:min(100%, 360px)"><div class="fd-ascii" data-inline data-fd-ascii="halftone" data-origin="0.5,0.55" aria-hidden="true"></div></div><p class="fd-mono-sm fd-muted">${caption}</p></div>`;
+  const tbl = (head, rows) => `<div class="fd-table-wrap"><table class="fd-table"><thead><tr>${head.map((h, i) => `<th${i > 1 ? ' data-num' : ''}>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+
+  if (mode === 'scrape') {
+    const host = hostOf(t.url);
+    const o = options();
+    const md = `# Scrape\n\nScrape turns any URL into clean, LLM-ready data.\n\n## Quickstart\n\n1. Send POST /v2/scrape with the url you want.\n2. Pick one or more formats.\n3. Read data.markdown.`;
+    const json = { success: true, data: { markdown: md, metadata: { title: 'Scrape · Ember docs', sourceURL: t.url, statusCode: 200, language: 'en', contentType: 'text/html', cacheState: o.age ? 'hit' : 'miss' }, links: LINKS.map((l) => `https://${host}${l[1]}`) }, creditsUsed: 1 };
+    return base({
+      credits: 1, md, json,
+      tabs: [
+        { id: 'markdown', icon: 'file-text', label: 'Markdown', html: `<div class="fd-card" data-variant="sunken">${prose(host)}</div>` },
+        { id: 'json', icon: 'braces', label: 'JSON', html: `<div class="fd-json" data-toolbar data-label="POST /v2/scrape · response" data-depth="3" data-truncate="72" data-json="${attr(json)}"></div>` },
+        { id: 'links', icon: 'link', label: 'Links', count: LINKS.length, html: listRows(LINKS.map(([title, path]) => linkRow(title, `${host}${path}`, path.startsWith('/docs') ? 'internal' : 'site'))) },
+        { id: 'shot', icon: 'image', label: 'Screenshot', html: shot('1280 × 800 · PNG · 214 KB · full page') },
+      ],
+    });
+  }
+  if (mode === 'search') {
+    const results = [
+      ['Meridian 3.2 release notes: filtered search and quantization', 'meridian-db.dev/blog/3-2', 'Meridian adds scalar quantization and per-collection filters.'],
+      ['Northwind Vectors 1.8 changelog', 'northwind.io/vectors/changelog', 'Hybrid search is now generally available.'],
+      ['Benchmarking nine vector databases on 10M embeddings', 'quarry.dev/blog/vector-benchmarks', 'Latency, recall and cost per million queries.'],
+      ['Lumen Index 0.9 is out', 'lumenapi.com/changelog', 'Disk-backed HNSW and a new Python client.'],
+      ['How we cut approximate-search latency by 40%', 'ember.dev/blog/faster-ann', 'Notes from rebuilding the retrieval layer.'],
+    ];
+    const json = { success: true, id: 'srch_3Hd81kQz', data: { web: results.map(([title, url, description], i) => ({ title, url: `https://${url}`, description, position: i + 1 })) }, creditsUsed: 2 };
+    return base({
+      credits: 2, md: results.map((r) => `- [${r[0]}](https://${r[1]})`).join('\n'), json,
+      tabs: [
+        { id: 'results', icon: 'list', label: 'Results', count: results.length, html: listRows(results.map(([title, url, desc], i) => `<li class="fd-list-row"><span class="fd-list-lead">${i + 1}</span><div class="fd-list-body"><span class="fd-list-title">${esc(title)}</span><span class="fd-list-desc fd-truncate">${esc(url)} · ${esc(desc)}</span></div></li>`)) },
+        { id: 'json', icon: 'braces', label: 'JSON', html: `<div class="fd-json" data-toolbar data-label="POST /v2/search · response" data-depth="3" data-truncate="72" data-json="${attr(json)}"></div>` },
+      ],
+    });
+  }
+  if (mode === 'interact') {
+    const steps = [['Open page', `${hostOf(t.url)}/careers`, '0.9s'], ['Click “Engineering”', 'button[data-team="eng"]', '0.4s'], ['Scroll to load more', '4 roles visible', '0.6s'], ['Extract roles', 'role, team, location', '0.7s']];
+    const md = ROLES.map((r) => `- ${r[0]} · ${r[1]} · ${r[2]}`).join('\n');
+    const json = { success: true, steps: steps.length, data: ROLES.map(([role, team, location]) => ({ role, team, location })), creditsUsed: steps.length };
+    return base({
+      credits: steps.length, md, json,
+      tabs: [
+        { id: 'steps', icon: 'list-checks', label: 'Steps', count: steps.length, html: `<ol class="fd-run-steps">${steps.map(([l, d, tm]) => `<li class="fd-run-steps-item" data-state="done"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">${esc(l)}<span class="fd-run-steps-detail">${esc(d)}</span></span><span class="fd-run-steps-time">${tm}</span></li>`).join('')}</ol>` },
+        { id: 'markdown', icon: 'file-text', label: 'Markdown', html: `<div class="fd-card" data-variant="sunken"><div class="fd-message-body"><h2>Engineering roles</h2><p>${ROLES.length} open roles after clicking Engineering.</p><ul>${ROLES.map((r) => `<li><strong>${esc(r[0])}</strong>, ${esc(r[1])}, ${esc(r[2])}</li>`).join('')}</ul></div></div>` },
+        { id: 'json', icon: 'braces', label: 'JSON', html: `<div class="fd-json" data-toolbar data-label="POST /v2/interact · response" data-depth="3" data-json="${attr(json)}"></div>` },
+        { id: 'shot', icon: 'image', label: 'Screenshot', html: shot('1280 × 800 · PNG · 188 KB · after the last step') },
+      ],
+    });
+  }
+  if (mode === 'crawl') {
+    const host = hostOf(t.url);
+    const limit = num(menuText('pg-limit'));
+    const pages = CRAWL_PAGES.slice(0, Math.min(limit, CRAWL_PAGES.length));
+    const rows = pages.slice(0, 8).map(([path, title, words]) => `<tr><td class="fd-mono">${esc(host + path)}</td><td>${esc(title)}</td><td data-num><span class="fd-status" data-size="sm" data-tone="success">200</span></td><td data-num class="fd-num">${words.toLocaleString()}</td></tr>`);
+    const json = { success: true, status: 'completed', total: pages.length, completed: pages.length, creditsUsed: pages.length, data: pages.slice(0, 3).map(([path, title, words]) => ({ url: `https://${host}${path}`, title, words })) };
+    return base({
+      credits: pages.length, md: pages.map((p) => `- https://${host}${p[0]}`).join('\n'), json, pages: pages.length,
+      tabs: [
+        { id: 'pages', icon: 'file-text', label: 'Pages', count: pages.length, html: `${tbl(['URL', 'Title', 'Status', 'Words'], rows)}<p class="fd-small fd-muted">Showing 8 of ${pages.length} pages. Download the JSON for the full set.</p>` },
+        { id: 'json', icon: 'braces', label: 'JSON', html: `<div class="fd-json" data-toolbar data-label="GET /v2/crawl/job_8Kq2Lm" data-depth="2" data-json="${attr(json)}"></div>` },
+      ],
+    });
+  }
+  if (mode === 'map') {
+    const host = hostOf(t.url);
+    const paths = ['/', '/pricing', '/plans', '/careers', '/careers/engineering', '/careers/remote', '/customers', '/security', '/changelog', '/vectors', '/vectors/changelog', '/blog'];
+    const json = { success: true, links: paths.map((p) => ({ url: `https://${host}${p}` })), total: 428 };
+    return base({
+      credits: 1, md: paths.map((p) => `https://${host}${p}`).join('\n'), json,
+      tabs: [
+        { id: 'links', icon: 'link', label: 'Links', count: 428, html: `${listRows(paths.map((p) => linkRow(p === '/' ? 'Home' : p.slice(1).replace(/\//g, ' / '), host + p, 'page')))}<p class="fd-small fd-muted">Showing 12 of 428 links.</p>` },
+        { id: 'json', icon: 'braces', label: 'JSON', html: `<div class="fd-json" data-toolbar data-label="POST /v2/map · response" data-depth="2" data-truncate="60" data-json="${attr(json)}"></div>` },
+      ],
+    });
+  }
+  const urls = t.urls;
+  const json = { success: true, id: 'batch_5Rk9aD', total: urls.length, completed: urls.length, data: urls.map((u, i) => ({ url: u, statusCode: 200, markdown: '# …', words: [1240, 986, 1512][i % 3] })), creditsUsed: urls.length };
+  return base({
+    credits: urls.length, md: urls.join('\n'), json,
+    tabs: [
+      { id: 'pages', icon: 'file-text', label: 'Pages', count: urls.length, html: tbl(['URL', 'Title', 'Status', 'Words'], urls.map((u, i) => `<tr><td class="fd-mono">${esc(u.replace('https://', ''))}</td><td>${['Pricing', 'Plans and limits', 'Pricing'][i % 3]}</td><td data-num><span class="fd-status" data-size="sm" data-tone="success">200</span></td><td data-num class="fd-num">${[1240, 986, 1512][i % 3].toLocaleString()}</td></tr>`)) },
+      { id: 'json', icon: 'braces', label: 'JSON', html: `<div class="fd-json" data-toolbar data-label="GET /v2/batch/scrape/batch_5Rk9aD" data-depth="2" data-json="${attr(json)}"></div>` },
+    ],
+  });
+}
+
+let uid = 0;
+function resultCard(t, r) {
+  const id = `pgr${++uid}`;
+  const m = MODES[mode];
+  const tabs = r.tabs.map((x, i) => `<button class="fd-tab" type="button" role="tab" aria-selected="${i === 0}" aria-controls="${id}-${x.id}" data-value="${x.id}">${ico(x.icon)}${x.label}${x.count != null ? ` <span class="fd-tab-count">${x.count}</span>` : ''}</button>`).join('');
+  const panels = r.tabs.map((x, i) => `<div class="fd-tab-panel" role="tabpanel" id="${id}-${x.id}"${i ? ' hidden' : ''}>${x.html}</div>`).join('');
+  const el = document.createElement('section');
+  el.className = 'fd-card fd-rise';
+  el.setAttribute('aria-label', 'Result');
+  el.innerHTML = `<header class="fd-card-head">
+    <div class="fd-card-heading">
+      <div class="fd-row" data-wrap style="--fd-gap:12px">
+        <span class="fd-endpoint" data-size="sm"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">${esc(m.path)}</span></span>
+        <span class="fd-status" data-tone="${r.tone}" data-size="sm">${r.status}</span>
+        <span class="fd-mono-sm fd-muted">${r.secs} s · ${r.credits} ${r.credits === 1 ? 'credit' : 'credits'}</span>
+      </div>
+      <p class="fd-card-desc fd-truncate">${esc(t.label)}</p>
+    </div>
+    <div class="fd-card-action">
+      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-act="copy" aria-label="Copy output">${ico('copy')}</button>
+      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-act="download" aria-label="Download output">${ico('download')}</button>
+    </div>
+  </header>
+  <div class="fd-tabs" role="tablist" aria-label="Output">${tabs}</div>
+  ${panels}`;
+  el._payload = r;
+  const payload = () => {
+    const active = $('.fd-tab[aria-selected="true"]', el)?.dataset.value;
+    return active === 'markdown' ? { text: r.md, name: `ember-${mode}.md`, type: 'text/markdown' } : { text: JSON.stringify(r.json, null, 2), name: `ember-${mode}.json`, type: 'application/json' };
+  };
+  $('[data-act="copy"]', el).addEventListener('click', async (e) => { if (await copyText(payload().text)) code.copied(e.currentTarget, { iconOnly: true }); });
+  $('[data-act="download"]', el).addEventListener('click', () => {
+    const p = payload();
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([p.text], { type: p.type })), download: p.name });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  return el;
+}
+
+/* ---------- Running ---------- */
+const STEPS = {
+  scrape: [['Fetch the page', 600], ['Wait for the page to settle', 800], ['Keep the main content', 300], ['Convert to the chosen format', 250]],
+  search: [['Plan the query', 400], ['Search the web', 900], ['Rank and de-duplicate', 350], ['Return results', 200]],
+  interact: [['Open a browser session', 700], ['Open the page', 800], ['Click “Engineering”', 600], ['Extract the roles', 800]],
+  map: [['Read robots.txt and sitemaps', 600], ['Follow links to find more pages', 1100], ['De-duplicate and rank', 400]],
+  batch: [['Queue the URLs', 350], ['Scrape the pages', 1500], ['Merge the results', 350]],
+};
+let running = false;
+let runId = 0;
+
+function recentRow(r) {
+  const m = MODES[r.mode];
+  return `<li class="fd-list-row">
+    <span class="fd-list-lead" data-tone="${r.tone === 'danger' ? 'danger' : 'neutral'}">${ico(m.icon)}</span>
+    <div class="fd-list-body"><span class="fd-list-title">${esc(r.target)}</span><span class="fd-list-desc"><span class="fd-mono">${esc(m.path.replace('/v2', ''))}</span> · ${r.credits} ${r.credits === 1 ? 'credit' : 'credits'}</span></div>
+    <span class="fd-list-meta" data-mono>${esc(r.when)}</span>
+    <span class="fd-list-trail"><span class="fd-status" data-size="sm" data-tone="${r.tone}">${r.status}</span></span>
+  </li>`;
+}
+const recents = [
+  { mode: 'scrape', target: 'ember.dev/pricing', status: 'Completed', tone: 'success', when: '4:29 PM', credits: 1 },
+  { mode: 'search', target: 'vector database benchmarks 2026', status: 'Completed', tone: 'success', when: '4:12 PM', credits: 2 },
+  { mode: 'crawl', target: 'docs.northwind.io', status: 'Completed', tone: 'success', when: '3:58 PM', credits: 120 },
+  { mode: 'scrape', target: 'lumenapi.com/pricing', status: 'Failed', tone: 'danger', when: '3:41 PM', credits: 0 },
+  { mode: 'map', target: 'northwind.io', status: 'Completed', tone: 'success', when: '2:07 PM', credits: 1 },
+];
+function renderRecents() {
+  const body = $('#pg-recent-body');
+  $('#pg-clear').hidden = !recents.length;
+  if (!recents.length) {
+    body.innerHTML = `<div class="fd-empty" data-size="sm">
+      <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="waves" data-fade="x"></div></div>
+      <span class="fd-empty-icon">${ico('history')}</span>
+      <h3 class="fd-empty-title">No runs yet</h3>
+      <p class="fd-empty-text">Runs from this playground show up here with their status and cost. Start one above.</p>
+    </div>`;
+  } else {
+    body.innerHTML = `<ul class="fd-list" data-divided aria-label="Recent runs">${recents.map(recentRow).join('')}</ul>`;
+  }
+  init(body);
+}
+$('#pg-clear').addEventListener('click', () => { recents.length = 0; renderRecents(); });
+
+async function run() {
+  if (running) return;
+  if (!input.value.trim()) input.value = input.placeholder;
+  running = true;
+  const my = ++runId;
+  const t = target();
+  const m = MODES[mode];
+  runBtn.setAttribute('aria-busy', 'true');
+  out.hidden = false;
+  const started = performance.now();
+
+  if (mode === 'crawl') {
+    out.innerHTML = `<section class="fd-card fd-rise" aria-label="Crawl in progress">
+      <header class="fd-card-head"><div class="fd-card-heading"><h2 class="fd-title">Crawling ${esc(t.label)}</h2><p class="fd-card-desc">Following links and scraping each page.</p></div>
+      <div class="fd-card-action"><span class="fd-mono-sm fd-muted">Elapsed <b data-fd-elapsed data-start="${Date.now()}">00:00</b></span></div></header>
+      <div class="fd-progress" data-value="0" data-max="24"><div class="fd-progress-head"><span class="fd-progress-label">Pages scraped</span><span class="fd-progress-value" data-auto></span></div><div class="fd-progress-track" role="progressbar"><div class="fd-progress-bar"></div></div></div>
+      <div class="fd-log" data-follow data-height="220"><div class="fd-log-body" aria-label="Crawl log"></div></div>
+    </section>`;
+    init(out);
+    const bar = $('.fd-progress', out);
+    const log = $('.fd-log', out);
+    const host = t.label.split('/')[0];
+    const limit = num(menuText('pg-limit'));
+    const total = Math.min(limit, CRAWL_PAGES.length);
+    bar.dataset.max = String(total);
+    for (let i = 0; i < total; i += 1) {
+      if (my !== runId) return;
+      await wait(150 + (i % 4) * 40);
+      const [path, , words] = CRAWL_PAGES[i];
+      code.appendLog(log, { level: i === 11 ? 'warn' : 'info', message: i === 11 ? `robots.txt disallows /admin on ${host}, skipped 3 URLs` : `GET ${host}${path} 200 · ${(words / 210).toFixed(1)} KB` });
+      data.setProgress(bar, i + 1);
+    }
+    await wait(300);
+  } else {
+    const steps = STEPS[mode];
+    out.innerHTML = `<section class="fd-card fd-rise" aria-label="Run in progress">
+      <header class="fd-card-head"><div class="fd-card-heading"><h2 class="fd-title">${esc(m.name)}</h2><p class="fd-card-desc fd-truncate">${esc(t.label)}</p></div></header>
+      <ol class="fd-run-steps">${steps.map(([l], i) => `<li class="fd-run-steps-item" data-state="${i ? 'pending' : 'active'}"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">${esc(l)}</span><span class="fd-run-steps-time"></span></li>`).join('')}</ol>
+      <div class="fd-run-steps-foot"><span>Elapsed <b data-fd-elapsed data-start="${Date.now()}">00:00</b></span><span>${esc(m.cost)}</span></div>
+    </section>`;
+    init(out);
+    const items = $$('.fd-run-steps-item', out);
+    for (let i = 0; i < steps.length; i += 1) {
+      if (my !== runId) return;
+      items[i].dataset.state = 'active';
+      await wait(steps[i][1]);
+      if (my !== runId) return;
+      items[i].dataset.state = 'done';
+      $('.fd-run-steps-time', items[i]).textContent = `${(steps[i][1] / 1000).toFixed(1)}s`;
+    }
+  }
+  if (my !== runId) return;
+  const r = resultFor(t, performance.now() - started);
+  const card = resultCard(t, r);
+  out.replaceChildren(card);
+  init(card);
+  card.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  recents.unshift({ mode, target: t.label, status: 'Completed', tone: 'success', when: 'Just now', credits: r.credits, fresh: true });
+  if (recents.length > 8) recents.pop();
+  renderRecents();
+  running = false;
+  runBtn.removeAttribute('aria-busy');
+}
+
+runBtn.addEventListener('click', run);
+composer.addEventListener('fd:submit', (e) => { e.preventDefault(); run(); });
+composer.addEventListener('submit', (e) => e.preventDefault());
+composer.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.isComposing && e.target.matches('input.fd-composer-input')) { e.preventDefault(); run(); }
+});
+
+/* ---------- Wiring ---------- */
+$('#pg-modes').addEventListener('fd:change', (e) => {
+  const value = e.detail?.value;
+  if (value && value !== mode) setMode(value);
+});
+document.addEventListener('click', (e) => {
+  const a = e.target.closest?.('a[href*="playground.html?endpoint="]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  const value = new URL(a.href, location.href).searchParams.get('endpoint');
+  if (!MODES[value]) return;
+  e.preventDefault();
+  setMode(value);
+});
+
+setMode(mode, { replace: false });
+renderRecents();
+setTimeout(() => texture.setLoading($('#pg-recents'), false), 650);
+</script>
+</body>
+</html>

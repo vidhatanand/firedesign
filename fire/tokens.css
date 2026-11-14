@@ -1,0 +1,389 @@
+/* ==========================================================================
+   Fire — design tokens
+   --------------------------------------------------------------------------
+   One ink, one accent, hairlines instead of boxes.
+
+   Theming uses the CSS light-dark() function, so every token is declared
+   once and resolves against the nearest `color-scheme`:
+     <html>                      follows the OS
+     <html data-theme="dark">    forced dark   (also works on any subtree)
+     <html data-theme="light">   forced light
+   Accent:   data-accent="ember | volt | iris | ocean | forest | ink"
+   Density:  data-density="comfortable | compact"
+   ========================================================================== */
+
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./fonts/geist-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./fonts/geist-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./fonts/geist-mono-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("./fonts/geist-mono-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root { color-scheme: light dark; }
+[data-theme="light"] { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+:root {
+  /* ---------- Type ---------- */
+  /* Geist is the closest open-source face to Suisse Int'l, the face this look was drawn for: the same flat
+     terminals and closed apertures, stems within 2% at weight 500, and line widths within 2% once display
+     sizes are tracked at -0.02em (measured against the reference). */
+  --fd-font-sans: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fd-font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* size / line-height / tracking. UI text is 14px; nothing interactive goes below 12px. */
+  --fd-text-display: 2.5rem;   --fd-lh-display: 2.75rem;  --fd-ls-display: -0.02em;  /* 40/44 page hero */
+  --fd-text-h1: 2rem;          --fd-lh-h1: 2.25rem;       --fd-ls-h1: -0.02em;       /* 32/36 */
+  --fd-text-h2: 1.5rem;        --fd-lh-h2: 2rem;          --fd-ls-h2: -0.015em;      /* 24/32 */
+  --fd-text-h3: 1.25rem;       --fd-lh-h3: 1.75rem;       --fd-ls-h3: -0.005em;      /* 20/28 section title, weight 450 */
+  --fd-text-title: 1rem;       --fd-lh-title: 1.5rem;     --fd-ls-title: 0em;        /* 16/24 card title */
+  --fd-text-lg: 1rem;          --fd-lh-lg: 1.5rem;        --fd-ls-lg: -0.006em;      /* 16/24 reading text */
+  --fd-text-md: 0.875rem;      --fd-lh-md: 1.25rem;                                  /* 14/20 default UI */
+  --fd-text-sm: 0.8125rem;     --fd-lh-sm: 1.25rem;                                  /* 13/20 secondary */
+  --fd-text-xs: 0.75rem;       --fd-lh-xs: 1rem;                                     /* 12/16 captions */
+  --fd-text-2xs: 0.6875rem;    --fd-lh-2xs: 1rem;         --fd-ls-eyebrow: 0.06em;   /* 11/16 eyebrows */
+  --fd-text-3xs: 0.625rem;                                                           /* 10px: solid "NEW" tags, tile initials only */
+  --fd-text-stat: 1.5rem;      --fd-lh-stat: 2rem;        --fd-ls-stat: -0.01em;     /* 24/32 figures */
+
+  --fd-weight-regular: 400;
+  --fd-weight-label: 450;   /* the house weight: labels, buttons, nav, card titles */
+  --fd-weight-medium: 500;  /* headings, figures */
+  --fd-weight-semibold: 600; /* rare: emphasis inside prose only */
+
+  /* ---------- Space (4px grid, with 2/6/10/14 half steps) ---------- */
+  --fd-space-0: 0;
+  --fd-space-0-5: 2px;
+  --fd-space-1: 4px;
+  --fd-space-1-5: 6px;
+  --fd-space-2: 8px;
+  --fd-space-2-5: 10px;
+  --fd-space-3: 12px;
+  --fd-space-3-5: 14px;
+  --fd-space-4: 16px;
+  --fd-space-5: 20px;
+  --fd-space-6: 24px;
+  --fd-space-8: 32px;
+  --fd-space-10: 40px;
+  --fd-space-12: 48px;
+  --fd-space-16: 64px;
+  --fd-space-20: 80px;
+  --fd-space-24: 96px;
+
+  /* ---------- Radius ---------- */
+  --fd-radius-xs: 4px;    /* checkboxes, tiny tags */
+  --fd-radius-sm: 6px;    /* chips, segmented thumb, kbd */
+  --fd-radius-md: 8px;    /* menu items, small buttons */
+  --fd-radius-lg: 10px;   /* controls: buttons, inputs, nav items */
+  --fd-radius-xl: 12px;   /* cards, popovers, wells */
+  --fd-radius-2xl: 16px;  /* dialogs, composer, large cards */
+  --fd-radius-3xl: 20px;  /* sheets, hero media */
+  --fd-radius-full: 999px;
+
+  /* ---------- Control metrics ---------- */
+  --fd-control-xs: 24px;
+  --fd-control-sm: 28px;
+  --fd-control-md: 36px;
+  --fd-control-lg: 40px;
+  --fd-control-xl: 44px;
+  --fd-control-px: 12px;      /* horizontal padding of a default control */
+  --fd-icon: 16px;            /* default icon size */
+  --fd-icon-stroke: 1.5;      /* Lucide at 1.5 reads lighter and more precise than the default 2 */
+  --fd-row: 44px;             /* table / list row height */
+  --fd-row-px: 16px;
+
+  /* ---------- Layout ---------- */
+  --fd-sidebar-w: 256px;
+  --fd-rail-w: 64px;
+  --fd-topbar-h: 64px;
+  --fd-panel-w: 320px;
+  --fd-subnav-w: 280px;
+  --fd-gutter: 24px;          /* page gutter; 16px on phones */
+  --fd-content-max: 1140px;   /* the framed column */
+  --fd-measure: 68ch;         /* longest comfortable line of prose */
+
+  /* ---------- Motion ---------- */
+  --fd-dur-1: 100ms;   /* press, tiny colour shifts */
+  --fd-dur-2: 160ms;   /* hover, focus */
+  --fd-dur-3: 220ms;   /* default: menus, toggles, thumbs */
+  --fd-dur-4: 320ms;   /* dialogs, drawers, accordions */
+  --fd-dur-5: 520ms;   /* page entrance, chart grow */
+  --fd-ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --fd-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --fd-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --fd-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);   /* long, soft landing: sheets, dialogs */
+  --fd-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);    /* slight overshoot: thumbs, toggles, pops */
+  --fd-press-scale: 0.98;
+
+  /* ---------- Layers ---------- */
+  --fd-z-base: 0;
+  --fd-z-raised: 1;
+  --fd-z-sticky: 10;
+  --fd-z-topbar: 30;
+  --fd-z-sidebar: 40;
+  --fd-z-overlay: 50;
+  --fd-z-dialog: 60;
+  --fd-z-popover: 70;
+  --fd-z-toast: 80;
+  --fd-z-tooltip: 90;
+
+  /* ======================================================================
+     Colour
+     ====================================================================== */
+
+  /* The ink. Every neutral in the system is this colour at some opacity,
+     so fills, text and hover states stay correct on any surface. */
+  --fd-ink: light-dark(#262626, #f5f5f5);
+  --fd-ink-inverse: light-dark(#ffffff, #0a0a0a);
+
+  /* Low steps are pure black/white (clean washes); high steps are the ink. */
+  --fd-a1: light-dark(rgb(0 0 0 / 0.012), rgb(255 255 255 / 0.016));
+  --fd-a2: light-dark(rgb(0 0 0 / 0.02), rgb(255 255 255 / 0.028));
+  --fd-a3: light-dark(rgb(0 0 0 / 0.03), rgb(255 255 255 / 0.04));
+  --fd-a4: light-dark(rgb(0 0 0 / 0.04), rgb(255 255 255 / 0.055));
+  --fd-a5: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.065));
+  --fd-a6: light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08));
+  --fd-a7: light-dark(rgb(0 0 0 / 0.07), rgb(255 255 255 / 0.09));
+  --fd-a8: light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.1));
+  --fd-a10: light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.12));
+  --fd-a12: light-dark(rgb(0 0 0 / 0.12), rgb(255 255 255 / 0.14));
+  --fd-a16: light-dark(rgb(0 0 0 / 0.16), rgb(255 255 255 / 0.18));
+  --fd-a20: light-dark(rgb(0 0 0 / 0.2), rgb(255 255 255 / 0.22));
+  --fd-a24: light-dark(rgb(0 0 0 / 0.24), rgb(255 255 255 / 0.26));
+  --fd-a32: light-dark(rgb(38 38 38 / 0.32), rgb(255 255 255 / 0.34));
+  --fd-a40: light-dark(rgb(38 38 38 / 0.4), rgb(255 255 255 / 0.42));
+  --fd-a48: light-dark(rgb(38 38 38 / 0.48), rgb(255 255 255 / 0.5));
+  --fd-a56: light-dark(rgb(38 38 38 / 0.56), rgb(255 255 255 / 0.56));
+  --fd-a64: light-dark(rgb(38 38 38 / 0.64), rgb(255 255 255 / 0.62));
+  --fd-a72: light-dark(rgb(38 38 38 / 0.72), rgb(255 255 255 / 0.72));
+  --fd-a88: light-dark(rgb(38 38 38 / 0.88), rgb(255 255 255 / 0.88));
+
+  /* Surfaces: an off-white page, white things on top of it. */
+  --fd-bg: light-dark(#f9f9f9, #0a0a0a);               /* the page */
+  --fd-bg-sunken: light-dark(#f4f4f4, #060606);        /* wells behind content: code, drop zones */
+  --fd-surface: light-dark(#ffffff, #141414);          /* cards, inputs, table bodies */
+  --fd-surface-raised: light-dark(#ffffff, #1c1c1c);   /* menus, dialogs, toasts, thumbs */
+  --fd-surface-inverse: light-dark(#262626, #f5f5f5);  /* tooltips, the inverse button */
+  --fd-scrim: light-dark(rgb(249 249 249 / 0.72), rgb(0 0 0 / 0.64));  /* behind dialogs (pair with blur) */
+
+  --fd-thumb: light-dark(#ffffff, #f5f5f5);            /* switch and slider thumbs */
+
+  /* Text */
+  --fd-text: var(--fd-ink);
+  --fd-text-2: var(--fd-a72);      /* body copy beside a heading */
+  --fd-text-3: var(--fd-a56);      /* muted: meta, captions, resting labels */
+  --fd-text-4: var(--fd-a40);      /* placeholders, disabled, faint counts */
+  --fd-text-5: var(--fd-a24);      /* the quietest text: sidebar section labels */
+  --fd-text-inverse: var(--fd-ink-inverse);
+
+  /* Hairlines */
+  --fd-line-faint: light-dark(#ededed, #1f1f1f);   /* structure: rails, section dividers, card edges */
+  --fd-line: light-dark(#e8e8e8, #2a2a2a);         /* table rules, dividers inside objects */
+  --fd-line-strong: light-dark(#d4d4d4, #3d3d3d);  /* control hover, emphasised edges */
+
+  /* The edge of an input: an inside line that darkens on hover and turns accent on focus. */
+  --fd-control-line: var(--fd-a8);
+  --fd-control-line-hover: var(--fd-a12);
+
+  /* Fills for neutral controls: rest / hover / pressed / selected */
+  --fd-fill: var(--fd-a4);
+  --fd-fill-hover: var(--fd-a6);
+  --fd-fill-active: var(--fd-a8);
+  --fd-fill-subtle: var(--fd-a3);    /* wells, quiet cards */
+  --fd-fill-disabled: var(--fd-a3);
+
+  /* Status. `-solid` for fills and dots, `-text` for words (AA on surfaces),
+     `-bg` for tinted backgrounds, `-line` for tinted edges. */
+  --fd-success-solid: light-dark(#2fb457, #4ccd75);
+  --fd-success-text: light-dark(#1a7a3a, #6fdc91);
+  --fd-success-bg: light-dark(rgb(47 180 87 / 0.1), rgb(76 205 117 / 0.12));
+  --fd-success-line: light-dark(rgb(47 180 87 / 0.28), rgb(76 205 117 / 0.28));
+
+  --fd-warning-solid: light-dark(#e8a917, #f0c550);
+  --fd-warning-text: light-dark(#8a5c00, #f0c550);
+  --fd-warning-bg: light-dark(rgb(232 169 23 / 0.12), rgb(240 197 80 / 0.12));
+  --fd-warning-contrast: #1a1200;  /* text on the solid warning fill */
+  --fd-warning-line: light-dark(rgb(232 169 23 / 0.36), rgb(240 197 80 / 0.28));
+
+  --fd-danger-solid: light-dark(#e5372b, #f05545);
+  --fd-danger-text: light-dark(#c2271c, #ff7a6b);
+  --fd-danger-bg: light-dark(rgb(229 55 43 / 0.08), rgb(240 85 69 / 0.13));
+  --fd-danger-line: light-dark(rgb(229 55 43 / 0.28), rgb(240 85 69 / 0.32));
+
+  --fd-info-solid: light-dark(#2a6dfb, #5a8ffc);
+  --fd-info-text: light-dark(#1d55d6, #84adff);
+  --fd-info-bg: light-dark(rgb(42 109 251 / 0.08), rgb(90 143 252 / 0.14));
+  --fd-info-line: light-dark(rgb(42 109 251 / 0.26), rgb(90 143 252 / 0.32));
+
+  --fd-violet-solid: light-dark(#8a5cf6, #a07aff);
+  --fd-violet-text: light-dark(#6b3fe0, #b79cff);
+  --fd-violet-bg: light-dark(rgb(138 92 246 / 0.08), rgb(160 122 255 / 0.14));
+  --fd-violet-line: light-dark(rgb(138 92 246 / 0.26), rgb(160 122 255 / 0.32));
+
+  /* Categorical series for charts (ordered; the accent always leads). */
+  --fd-chart-1: var(--fd-accent);
+  --fd-chart-2: light-dark(#262626, #f5f5f5);
+  --fd-chart-3: light-dark(#2a6dfb, #5a8ffc);
+  --fd-chart-4: light-dark(#8a5cf6, #a07aff);
+  --fd-chart-5: light-dark(#2fb457, #4ccd75);
+  --fd-chart-6: light-dark(#e8a917, #f0c550);
+  --fd-chart-grid: var(--fd-a8);
+  --fd-chart-axis: var(--fd-text-3);
+
+  /* Syntax (code blocks, JSON viewer). Deliberately few hues. */
+  --fd-syntax-plain: var(--fd-text);
+  --fd-syntax-comment: var(--fd-text-4);
+  --fd-syntax-punct: var(--fd-text-3);
+  --fd-syntax-keyword: var(--fd-accent-text);
+  --fd-syntax-string: light-dark(#1a7a3a, #8fdca8);
+  --fd-syntax-number: light-dark(#1d55d6, #98c5f2);
+  --fd-syntax-key: var(--fd-text);
+  --fd-syntax-fn: light-dark(#6b3fe0, #b79cff);
+
+  /* Elevation. Shadows are layered and short; a 1px ring replaces the border on floating things. */
+  --fd-shadow-xs: 0 1px 2px light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.4));
+  --fd-shadow-sm: 0 1px 2px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0.5)), 0 1px 1px light-dark(rgb(0 0 0 / 0.03), rgb(0 0 0 / 0.3));
+  --fd-shadow-md: 0 4px 12px -2px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.5)), 0 2px 4px -2px light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.4));
+  --fd-shadow-lg: 0 0 0 1px light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08)), 0 12px 32px -8px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.7)), 0 4px 10px -4px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0.5));
+  --fd-shadow-xl: 0 0 0 1px light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08)), 0 32px 64px -16px light-dark(rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.8)), 0 8px 20px -8px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.6));
+  /* The lifted thumb of a segmented control or switch. */
+  --fd-shadow-thumb: 0 0 0 0.5px light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.1)), 0 1px 2px light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.5)), 0 2px 6px -2px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.4));
+  /* The recessed track of a segmented control. */
+  --fd-shadow-inset-control: inset 0 6px 12px light-dark(rgb(0 0 0 / 0.02), rgb(0 0 0 / 0.2)), inset 0 0.75px 0.75px light-dark(rgb(0 0 0 / 0.02), rgb(0 0 0 / 0.2)), inset 0 0.25px 0.25px light-dark(rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.3));
+  /* The composer: a hairline of lift and a long soft drop. */
+  --fd-shadow-composer: 0 1px 2px light-dark(rgb(0 0 0 / 0.03), rgb(0 0 0 / 0.4)), 0 8px 24px -12px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.6));
+  /* Pressed-in wells. */
+  --fd-shadow-inset: inset 0 1px 2px light-dark(rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.5));
+}
+
+/* ---------- Accent ----------------------------------------------------------
+   Declared on :root and on every [data-accent] so derived steps follow overrides.
+   --fd-accent           solid fill (buttons, switches, active dots, chart lead)
+   --fd-accent-hover     solid fill, hovered
+   --fd-accent-contrast  text/icon on the solid fill
+   --fd-accent-text      accent used AS text on neutral surfaces (AA)
+   -------------------------------------------------------------------------- */
+:root,
+[data-accent="ember"] {
+  --fd-accent: light-dark(#fa5d19, #fb6a2a);
+  --fd-accent-hover: light-dark(#ef5210, #ff7c42);
+  --fd-accent-contrast: #ffffff;
+  --fd-accent-text: light-dark(#fa5d19, #fb6a2a);
+  --fd-accent-glow: light-dark(rgb(250 60 25 / 0.28), rgb(250 60 25 / 0.36)); /* warm inner shade of the primary button */
+}
+[data-accent="volt"] {
+  --fd-accent: light-dark(#b8f02c, #c6f63f);
+  --fd-accent-hover: light-dark(#a9e21c, #d3fb62);
+  --fd-accent-contrast: #141412;
+  --fd-accent-text: light-dark(#4d6b00, #c6f63f);
+  --fd-accent-glow: light-dark(rgb(120 170 0 / 0.3), rgb(120 170 0 / 0.3));
+}
+[data-accent="iris"] {
+  --fd-accent: light-dark(#6a5cff, #8478ff);
+  --fd-accent-hover: light-dark(#5a4bf5, #978dff);
+  --fd-accent-contrast: #ffffff;
+  --fd-accent-text: light-dark(#5140e6, #a79eff);
+  --fd-accent-glow: light-dark(rgb(70 40 230 / 0.3), rgb(70 40 230 / 0.4));
+}
+[data-accent="ocean"] {
+  --fd-accent: light-dark(#1f6feb, #4b8ff5);
+  --fd-accent-hover: light-dark(#1a62d4, #68a2f8);
+  --fd-accent-contrast: #ffffff;
+  --fd-accent-text: light-dark(#1a5bc4, #7fb0fa);
+  --fd-accent-glow: light-dark(rgb(10 60 200 / 0.3), rgb(10 60 200 / 0.4));
+}
+[data-accent="forest"] {
+  --fd-accent: light-dark(#1f9d55, #3cc47a);
+  --fd-accent-hover: light-dark(#198a4a, #55d18e);
+  --fd-accent-contrast: #ffffff;
+  --fd-accent-text: light-dark(#167a41, #5fd896);
+  --fd-accent-glow: light-dark(rgb(0 110 50 / 0.3), rgb(0 110 50 / 0.4));
+}
+[data-accent="ink"] {
+  --fd-accent: light-dark(#262626, #f5f5f5);
+  --fd-accent-hover: light-dark(#3a3a3a, #ffffff);
+  --fd-accent-contrast: light-dark(#ffffff, #0a0a0a);
+  --fd-accent-text: light-dark(#262626, #f5f5f5);
+  --fd-accent-glow: light-dark(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.1));
+}
+:root,
+[data-accent] {
+  /* Accent washes: the same ladder idea as the ink, for tints behind accent text. */
+  --fd-accent-4: color-mix(in srgb, var(--fd-accent) 4%, transparent);
+  --fd-accent-8: color-mix(in srgb, var(--fd-accent) 8%, transparent);
+  --fd-accent-12: color-mix(in srgb, var(--fd-accent) 12%, transparent);
+  --fd-accent-16: color-mix(in srgb, var(--fd-accent) 16%, transparent);
+  --fd-accent-24: color-mix(in srgb, var(--fd-accent) 24%, transparent);
+  --fd-accent-40: color-mix(in srgb, var(--fd-accent) 40%, transparent);
+  --fd-focus: var(--fd-accent);
+  /* Focus ring: a gap in the surface colour, then the accent. */
+  --fd-ring: 0 0 0 2px var(--fd-bg), 0 0 0 4px var(--fd-focus);
+  --fd-ring-inset: inset 0 0 0 2px var(--fd-focus);
+  /* The primary button: inner shade + a short stack of tinted contact shadows. */
+  --fd-shadow-accent:
+    inset 0 -6px 12px 0 var(--fd-accent-glow),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.18),
+    0 2px 4px 0 color-mix(in srgb, var(--fd-accent) 14%, transparent),
+    0 1px 1px 0 color-mix(in srgb, var(--fd-accent) 14%, transparent),
+    0 0.5px 0.5px 0 color-mix(in srgb, var(--fd-accent) 20%, transparent);
+}
+
+/* ---------- Density ---------- */
+[data-density="compact"] {
+  --fd-control-sm: 24px;
+  --fd-control-md: 32px;
+  --fd-control-lg: 36px;
+  --fd-control-px: 10px;
+  --fd-row: 36px;
+  --fd-row-px: 12px;
+  --fd-gutter: 20px;
+}
+
+/* Touch: every default control grows to a 40px+ target. */
+@media (pointer: coarse) {
+  :root {
+    --fd-control-sm: 32px;
+    --fd-control-md: 40px;
+    --fd-control-lg: 44px;
+    --fd-row: 48px;
+  }
+}
+@media (max-width: 640px) {
+  :root {
+    --fd-gutter: 16px;
+    --fd-text-display: 2rem;   --fd-lh-display: 2.25rem;
+    --fd-text-h1: 1.75rem;     --fd-lh-h1: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fd-dur-1: 0ms; --fd-dur-2: 0ms; --fd-dur-3: 0ms; --fd-dur-4: 0ms; --fd-dur-5: 0ms;
+    --fd-press-scale: 1;
+  }
+}

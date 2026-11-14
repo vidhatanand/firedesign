@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent &amp; AI · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="agent">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Agent &amp; AI</h1>
+    <p class="doc-lede">The agent speaks in plain prose on the page; only the person's turn sits in a bubble. Work in progress shows as quiet, collapsible steps with their cost beside them, and the accent marks only what is live or what to do next.</p>
+  </header>
+
+  <!-- ===================================================== Hero prompt -->
+  <section class="doc-section" id="hero">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Hero prompt</h2>
+      <p>The empty state of an agent: one question, one composer, and a few example prompts that show the range of what can be asked. Clicking an example fills the composer so it can be edited before sending.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-height style="--h:460px" data-code>
+      <div class="fd-composer-hero">
+        <h2 class="fd-h1">Ask for <span class="fd-accent-text">any data</span> on the web</h2>
+        <form class="fd-composer" id="hero-composer">
+          <textarea class="fd-composer-input" rows="1" placeholder="What are you looking for?" aria-label="Ask Ember"></textarea>
+          <div class="fd-composer-tools">
+            <button type="button" class="fd-model-chip" popovertarget="hero-models"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span><span class="fd-model-chip-tag">New</span></button>
+            <div class="fd-model-menu" id="hero-models" popover role="menu" aria-label="Model">
+              <p class="fd-model-menu-label fd-eyebrow">Model</p>
+              <button class="fd-model-menu-item" role="menuitemradio" aria-checked="true" data-value="Spark 2" data-new><i data-icon="sparkles"></i><span class="fd-model-menu-name">Spark 2 <span class="fd-model-chip-tag">New</span></span><i data-icon="check"></i><span class="fd-model-menu-desc">Plans multi-step research and checks its sources</span></button>
+              <button class="fd-model-menu-item" role="menuitemradio" aria-checked="false" data-value="Spark 1"><i data-icon="sparkle"></i><span class="fd-model-menu-name">Spark 1</span><i data-icon="check"></i><span class="fd-model-menu-desc">Fast answers from one or two pages</span></button>
+              <button class="fd-model-menu-item" role="menuitemradio" aria-checked="false" data-value="Spark Mini"><i data-icon="zap"></i><span class="fd-model-menu-name">Spark Mini</span><i data-icon="check"></i><span class="fd-model-menu-desc">Cheapest; good for lookups and lists</span></button>
+            </div>
+            <span class="fd-composer-sep"></span>
+            <button type="button" class="fd-composer-tool"><i data-icon="plus"></i><span>Sites</span></button>
+            <button type="button" class="fd-composer-tool"><i data-icon="braces"></i><span>Schema</span></button>
+            <button type="button" class="fd-composer-tool" data-fd-cycle="Low,Medium,High"><i data-icon="gauge"></i><span>Medium</span></button>
+            <button type="button" class="fd-composer-tool" aria-pressed="true"><i data-icon="landmark"></i><span>Catalog</span><i data-icon="chevron-down"></i></button>
+            <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+          </div>
+        </form>
+        <div class="fd-suggestions" data-target="#hero-composer">
+          <button class="fd-suggestions-item"><span class="fd-suggestions-text">Every pricing tier and monthly price on ember.dev, northwind.io and lumenapi.com</span><i data-icon="arrow-right"></i></button>
+          <button class="fd-suggestions-item"><span class="fd-suggestions-text">The spring demo-day batch: company, one-liner, founders and website</span><i data-icon="arrow-right"></i></button>
+          <button class="fd-suggestions-item"><span class="fd-suggestions-text">All open engineering roles at Northwind with location and team</span><i data-icon="arrow-right"></i></button>
+          <button class="fd-suggestions-item"><span class="fd-suggestions-text">Top five stories on the Ember changelog this month with a one-line summary</span><i data-icon="arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>One accent phrase in the heading (<code class="fd-code">.fd-accent-text</code>), never two.</li>
+      <li>Suggestions are text rows, not cards: 15px muted text that turns to ink with a small arrow on hover.</li>
+      <li>The model chip opens a menu of models (a native popover); the effort chip cycles Low, Medium and High; Catalog is a source that is switched on, the one accent mark in the row.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Composer states -->
+  <section class="doc-section" id="composer">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Composer states</h2>
+      <p>The send button tells the person what will happen: a quiet grey dot while there is nothing to send, the accent when there is, a stop square while the agent works. Enter sends, Shift+Enter adds a line, and the field grows to 240px before it scrolls.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <p class="fd-eyebrow">Ready</p>
+      <form class="fd-composer">
+        <textarea class="fd-composer-input" rows="1" aria-label="Ask Ember">Find every changelog entry on docs.ember.dev since June and group them by product</textarea>
+        <div class="fd-composer-tools">
+          <button type="button" class="fd-model-chip"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span></button>
+          <span class="fd-composer-sep"></span>
+          <button type="button" class="fd-composer-tool"><i data-icon="plus"></i><span>Sites</span></button>
+          <button type="button" class="fd-composer-tool"><i data-icon="braces"></i><span>Schema</span></button>
+          <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+        </div>
+      </form>
+      <p class="fd-eyebrow">Focused</p>
+      <form class="fd-composer" data-focus>
+        <textarea class="fd-composer-input" rows="1" placeholder="What are you looking for?" aria-label="Ask Ember"></textarea>
+        <div class="fd-composer-tools">
+          <button type="button" class="fd-model-chip"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span></button>
+          <span class="fd-composer-sep"></span>
+          <button type="button" class="fd-composer-tool"><i data-icon="plus"></i><span>Sites</span></button>
+          <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+        </div>
+      </form>
+      <p class="fd-eyebrow">With attachments</p>
+      <form class="fd-composer">
+        <div class="fd-composer-attachments">
+          <span class="fd-composer-attachment"><span class="fd-composer-attachment-tile"><i data-icon="file-text"></i></span><span class="fd-composer-attachment-name">competitor-pricing-2026.csv</span><span class="fd-composer-attachment-meta">48 KB</span><button type="button" class="fd-composer-attachment-remove" aria-label="Remove competitor-pricing-2026.csv"><i data-icon="x"></i></button></span>
+          <span class="fd-composer-attachment"><span class="fd-composer-attachment-tile"><i data-icon="globe"></i></span><span class="fd-composer-attachment-name">northwind.io</span><span class="fd-composer-attachment-meta">site</span><button type="button" class="fd-composer-attachment-remove" aria-label="Remove northwind.io"><i data-icon="x"></i></button></span>
+        </div>
+        <textarea class="fd-composer-input" rows="1" placeholder="Ask about these files and sites" aria-label="Ask Ember"></textarea>
+        <div class="fd-composer-tools">
+          <button type="button" class="fd-model-chip"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span></button>
+          <span class="fd-composer-sep"></span>
+          <button type="button" class="fd-composer-tool"><i data-icon="paperclip"></i><span>Attach</span></button>
+          <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+        </div>
+      </form>
+      <p class="fd-eyebrow">Running</p>
+      <form class="fd-composer" data-state="running">
+        <textarea class="fd-composer-input" rows="1" placeholder="Ask a follow-up while Ember works" aria-label="Ask Ember"></textarea>
+        <div class="fd-composer-tools">
+          <button type="button" class="fd-model-chip"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span></button>
+          <span class="fd-composer-sep"></span>
+          <span class="fd-usage-chip"><i data-icon="zap"></i><b>7</b> credits so far</span>
+          <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+        </div>
+      </form>
+      <p class="fd-eyebrow">Disabled</p>
+      <form class="fd-composer" aria-disabled="true">
+        <textarea class="fd-composer-input" rows="1" placeholder="You have used today's 5 free runs. They renew at 00:00 UTC." aria-label="Ask Ember" disabled></textarea>
+        <div class="fd-composer-tools">
+          <button type="button" class="fd-model-chip" disabled><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span></button>
+          <span class="fd-composer-sep"></span>
+          <button type="button" class="fd-composer-tool" disabled><i data-icon="plus"></i><span>Sites</span></button>
+          <button class="fd-composer-send" type="submit" aria-label="Send" disabled><i data-icon="arrow-up"></i></button>
+        </div>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li>Sending fires <code class="fd-code">fd:submit</code> with <code class="fd-code">detail.value</code>. Cancel the event to keep the text in the field.</li>
+      <li>Focus lifts the edge to <code class="fd-code">--fd-line-strong</code> and adds a soft 4px accent halo; <code class="fd-code">data-focus</code> shows it statically.</li>
+      <li>Below 440px the tool labels hide visually and stay available to screen readers.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Playground composer -->
+  <section class="doc-section" id="playground-composer">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Playground composer</h2>
+      <p>For a single endpoint with options: one card of rows separated by hairlines, the input on top, sources or formats below, and the actions in the footer. “Get code” sits beside the primary because the playground is a way to write a request, not only to run one.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-code>
+      <form class="fd-composer" data-variant="playground" style="max-width:648px">
+        <div class="fd-composer-row">
+          <input class="fd-composer-input" placeholder="Latest releases of open-source vector databases" aria-label="Search query">
+        </div>
+        <div class="fd-composer-sources" role="group" aria-label="Sources">
+          <button type="button" class="fd-composer-source" aria-pressed="true"><i data-icon="globe"></i><span>Web</span></button>
+          <button type="button" class="fd-composer-source" aria-pressed="false"><i data-icon="newspaper"></i><span>News</span></button>
+          <button type="button" class="fd-composer-source" aria-pressed="false"><i data-icon="images"></i><span>Images</span></button>
+          <span class="fd-composer-sep"></span>
+          <button type="button" class="fd-composer-source" aria-pressed="false"><i data-icon="code"></i><span>Developer</span></button>
+          <button type="button" class="fd-composer-source" aria-pressed="false"><i data-icon="graduation-cap"></i><span>Research</span><span class="fd-composer-free">Free</span></button>
+        </div>
+        <div class="fd-composer-foot">
+          <button type="button" class="fd-btn" data-variant="outline" data-icon-only aria-label="Search options"><i data-icon="sliders-horizontal"></i></button>
+          <button type="button" class="fd-btn" data-variant="outline" data-icon-only aria-label="Output format"><i data-icon="file-text"></i></button>
+          <div class="fd-composer-foot-end">
+            <button type="button" class="fd-btn" data-variant="outline"><i data-icon="code"></i><span>Get code</span></button>
+            <button type="submit" class="fd-btn" data-variant="primary"><span>Start searching</span></button>
+          </div>
+        </div>
+      </form>
+      <form class="fd-composer" data-variant="playground" style="max-width:648px">
+        <div class="fd-composer-row">
+          <span class="fd-composer-prefix">https://</span>
+          <input class="fd-composer-input" placeholder="docs.ember.dev/features/scrape" aria-label="URL to scrape">
+          <button type="button" class="fd-btn" data-variant="ghost" data-icon-only aria-label="Attach a file"><i data-icon="paperclip"></i></button>
+        </div>
+        <div class="fd-composer-foot">
+          <button type="button" class="fd-btn" data-variant="outline" data-icon-only aria-label="Scrape options"><i data-icon="sliders-horizontal"></i></button>
+          <button type="button" class="fd-btn" data-variant="outline" data-icon-only aria-label="Extract a table"><i data-icon="table"></i></button>
+          <button type="button" class="fd-btn" data-variant="outline"><i data-icon="file-text"></i><span><span class="fd-muted">Format:</span> Markdown</span><i data-icon="chevron-down"></i></button>
+          <div class="fd-composer-foot-end">
+            <button type="button" class="fd-btn" data-variant="outline"><i data-icon="code"></i><span>Get code</span></button>
+            <button type="submit" class="fd-btn" data-variant="primary"><span>Start scraping</span></button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li>Radius 20 and a medium shadow: the playground composer is the page's main object, a step above the agent composer.</li>
+      <li>Source chips toggle (<code class="fd-code">aria-pressed</code>) with a neutral fill; only “Free” is accent, because it is news.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Thread -->
+  <section class="doc-section" id="thread">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Thread and messages</h2>
+      <p>The person's turn is a bubble on the right; the agent's is prose on the page, at reading size and measure, so long answers read like documentation. Actions appear under an answer on hover or focus, and always under the last one.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-thread">
+        <article class="fd-message" data-role="user"><div class="fd-message-body">How do I crawl only the docs section of a site, and what does it cost?</div></article>
+        <article class="fd-message" data-role="assistant">
+          <div class="fd-message-avatar" aria-hidden="true"><i data-icon="sparkle"></i></div>
+          <div class="fd-message-content">
+            <div class="fd-message-body">
+              <p>Start the crawl at the docs root and limit it to paths under it with <code>includePaths</code>. Each page costs one credit, so a limit is also a budget.</p>
+              <h3>Request</h3>
+              <ol>
+                <li>Send <code>POST /v2/crawl</code> with <code>url</code> set to <code>https://docs.ember.dev</code>.</li>
+                <li>Add <code>"includePaths": ["^/docs/.*"]</code> and a <code>limit</code>.</li>
+                <li>Poll <code>GET /v2/crawl/{id}</code> or pass a <code>webhook</code> to be told when it finishes.</li>
+              </ol>
+              <table>
+                <thead><tr><th>Limit</th><th>Credits</th><th>Typical time</th></tr></thead>
+                <tbody>
+                  <tr><td>50 pages</td><td>50</td><td>30–45s</td></tr>
+                  <tr><td>500 pages</td><td>500</td><td>4–6 min</td></tr>
+                </tbody>
+              </table>
+              <p>Pages that fail are not charged. See <a href="#thread">crawl limits</a> for the per-plan concurrency.</p>
+            </div>
+            <div class="fd-message-foot">
+              <div class="fd-message-actions" role="toolbar" aria-label="Message actions">
+                <button class="fd-message-action" data-action="copy" aria-label="Copy answer"><i data-icon="copy"></i></button>
+                <button class="fd-message-action" data-action="retry" aria-label="Retry"><i data-icon="rotate-ccw"></i></button>
+                <button class="fd-message-action" data-action="up" aria-label="Good answer" aria-pressed="true"><i data-icon="thumbs-up"></i></button>
+                <button class="fd-message-action" data-action="down" aria-label="Bad answer" aria-pressed="false"><i data-icon="thumbs-down"></i></button>
+                <button class="fd-message-action" data-action="open"><i data-icon="square-terminal"></i><span>Open in playground</span></button>
+              </div>
+              <span class="fd-message-meta">2 pages · 3 credits · 4.1s</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The bubble is <code class="fd-code">--fd-fill</code>, radius 16 with a 6px corner toward the edge, at most 70% wide.</li>
+      <li>Prose is 16px at 1.6 within <code class="fd-code">--fd-measure</code>. Headings, lists, inline code, tables and links inside <code class="fd-code">.fd-message-body</code> need no classes.</li>
+      <li>Thumbs up and down are an exclusive pair. Every action fires <code class="fd-code">fd:action</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Streaming -->
+  <section class="doc-section" id="streaming">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Thinking and streaming</h2>
+      <p>Before the first word, say what the agent is doing in a short line that shimmers; when nothing more specific is known, three soft dots. While text streams, an accent caret sits at the end of the last word.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-thread">
+        <article class="fd-message" data-role="assistant">
+          <div class="fd-message-avatar" aria-hidden="true"><i data-icon="sparkle"></i></div>
+          <div class="fd-message-content"><div class="fd-message-thinking" role="status"><span class="fd-message-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="fd-sr-only">Thinking</span></div></div>
+        </article>
+        <article class="fd-message" data-role="assistant">
+          <div class="fd-message-avatar" aria-hidden="true"><i data-icon="sparkle"></i></div>
+          <div class="fd-message-content"><div class="fd-message-thinking" role="status"><span class="fd-message-status">Searching the web…</span></div></div>
+        </article>
+        <article class="fd-message" data-role="assistant">
+          <div class="fd-message-avatar" aria-hidden="true"><i data-icon="sparkle"></i></div>
+          <div class="fd-message-content">
+            <div class="fd-message-body" aria-busy="true"><p>Northwind lists 14 open engineering roles. Most are in Lisbon and Toronto, and four are remote within the EU<span class="fd-cursor" aria-hidden="true"></span></p></div>
+          </div>
+        </article>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">stream(el, html, { speed })</code> types HTML word by word and keeps the caret at the end. Citations, tables and cards appear whole.</li>
+      <li>Under reduced motion the text appears at once, the dots hold still and the shimmer settles to muted text.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Tool calls -->
+  <section class="doc-section" id="toolcalls">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tool calls</h2>
+      <p>Each step the agent takes is one quiet row: what ran, with what, how long and what it cost. Open a row to see the exact arguments and result. Consecutive calls are joined by a rail so a run reads as one sequence.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-toolcall-group">
+        <div class="fd-toolcall" data-state="done">
+          <button class="fd-toolcall-head" aria-expanded="true"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">search</span><span class="fd-toolcall-args">"engineering jobs" site:northwind.io/careers</span><span class="fd-toolcall-meta">0.9s · 1 cr</span><i data-icon="chevron-down" class="fd-toolcall-chevron"></i></button>
+          <div class="fd-toolcall-panel"><div class="fd-toolcall-body">
+            <div class="fd-toolcall-label"><span class="fd-eyebrow">Arguments</span></div>
+            <div class="fd-json" data-depth="2" data-json='{"query":"engineering jobs","site":"northwind.io/careers","limit":10}'></div>
+            <div class="fd-toolcall-label"><span class="fd-eyebrow">Result</span><span>3 results</span></div>
+            <div class="fd-json" data-depth="1" data-json='{"results":[{"url":"https://northwind.io/careers","title":"Careers at Northwind"},{"url":"https://northwind.io/careers/engineering","title":"Engineering"},{"url":"https://northwind.io/careers/remote","title":"Remote roles"}],"credits":1}'></div>
+          </div></div>
+        </div>
+        <div class="fd-toolcall" data-state="done">
+          <button class="fd-toolcall-head" aria-expanded="false"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">scrape</span><span class="fd-toolcall-args">northwind.io/careers/engineering · markdown</span><span class="fd-toolcall-meta">2.4s · 1 cr</span><i data-icon="chevron-down" class="fd-toolcall-chevron"></i></button>
+          <div class="fd-toolcall-panel"><div class="fd-toolcall-body">
+            <div class="fd-toolcall-label"><span class="fd-eyebrow">Arguments</span></div>
+            <div class="fd-json" data-depth="2" data-json='{"url":"https://northwind.io/careers/engineering","formats":["markdown"],"onlyMainContent":true}'></div>
+          </div></div>
+        </div>
+        <div class="fd-toolcall" data-state="running">
+          <button class="fd-toolcall-head" aria-expanded="false"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">catalog.northwind.person_search</span><span class="fd-toolcall-args">titles: "Engineering Manager" · domains: northwind.io</span><span class="fd-toolcall-meta"></span><i data-icon="chevron-down" class="fd-toolcall-chevron"></i></button>
+          <div class="fd-toolcall-panel"><div class="fd-toolcall-body">
+            <div class="fd-toolcall-label"><span class="fd-eyebrow">Arguments</span></div>
+            <div class="fd-json" data-depth="2" data-json='{"person_titles":["Engineering Manager"],"organization_domains":["northwind.io"],"per_page":25}'></div>
+          </div></div>
+        </div>
+        <div class="fd-toolcall" data-state="queued">
+          <div class="fd-toolcall-head"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">extract</span><span class="fd-toolcall-args">schema: role, team, location, remote</span><span class="fd-toolcall-meta">queued</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <div class="fd-toolcall" data-state="failed">
+          <button class="fd-toolcall-head" aria-expanded="false"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">scrape</span><span class="fd-toolcall-args">lumenapi.com/pricing</span><span class="fd-toolcall-meta">30.0s · 0 cr</span><i data-icon="chevron-down" class="fd-toolcall-chevron"></i></button>
+          <div class="fd-toolcall-panel"><div class="fd-toolcall-body">
+            <div class="fd-json" data-depth="2" data-json='{"error":"TIMEOUT","url":"https://lumenapi.com/pricing","waitedMs":30000}'></div>
+          </div></div>
+          <div class="fd-toolcall-foot">
+            <span class="fd-toolcall-foot-text">The page did not finish loading in 30s. Retry with a longer timeout or scrape the cached copy.</span>
+            <div class="fd-toolcall-foot-actions"><button class="fd-btn" data-size="sm"><i data-icon="rotate-ccw"></i><span>Retry</span></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code>
+        <div class="fd-toolcall" data-state="approval">
+          <div class="fd-toolcall-head"><span class="fd-toolcall-status"></span><span class="fd-toolcall-name">catalog.northwind.person_search</span><span class="fd-toolcall-args">25 people · northwind.io</span><span class="fd-toolcall-meta">5 cr</span></div>
+          <div class="fd-toolcall-foot">
+            <span class="fd-toolcall-foot-text">This catalog source charges 5 credits per call.</span>
+            <div class="fd-toolcall-foot-actions">
+              <button class="fd-btn" data-variant="primary" data-size="sm">Allow once</button>
+              <button class="fd-btn" data-size="sm">Always allow</button>
+              <button class="fd-btn" data-variant="ghost" data-size="sm">Deny</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>States: <code class="fd-code">queued</code> (dashed ring), <code class="fd-code">running</code> (spinner, shimmering name and a light that travels the left edge), <code class="fd-code">done</code>, <code class="fd-code">failed</code> (danger edge, message and Retry), <code class="fd-code">approval</code> (accent wash with the three choices).</li>
+      <li>Duration and credits are mono and right-aligned so a column of calls reads as a ledger. Below 440px the argument summary hides.</li>
+      <li><code class="fd-code">setToolcall(el, { state, meta })</code> moves a call between states.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Reasoning -->
+  <section class="doc-section" id="reasoning">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Reasoning</h2>
+      <p>The plan behind an answer, folded by default. It is there for the person who wants to check the approach, and out of the way for everyone else.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-reasoning" data-state="done">
+        <button class="fd-reasoning-toggle" aria-expanded="true"><i data-icon="brain"></i><span class="fd-reasoning-label">Thought for 6s</span><i data-icon="chevron-right"></i></button>
+        <div class="fd-reasoning-panel"><div class="fd-reasoning-body"><div class="fd-reasoning-text">
+          <p>The question asks for roles, so the careers pages are the source of truth; the catalog is only needed for hiring managers.</p>
+          <p>Search the careers section first, scrape the engineering page, then extract role, team and location into one table. Skip the remote page if it repeats the same listings.</p>
+        </div></div></div>
+      </div>
+      <div class="fd-reasoning" data-state="done">
+        <button class="fd-reasoning-toggle" aria-expanded="false"><i data-icon="brain"></i><span class="fd-reasoning-label">Thought for 2s</span><i data-icon="chevron-right"></i></button>
+        <div class="fd-reasoning-panel"><div class="fd-reasoning-body"><div class="fd-reasoning-text"><p>One page answers this; no search needed.</p></div></div></div>
+      </div>
+      <div class="fd-reasoning" data-state="thinking">
+        <button class="fd-reasoning-toggle" aria-expanded="false"><i data-icon="brain"></i><span class="fd-reasoning-label">Thinking…</span><i data-icon="chevron-right"></i></button>
+        <div class="fd-reasoning-panel"><div class="fd-reasoning-body"><div class="fd-reasoning-text"><p>Comparing the three pricing pages…</p></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Sources -->
+  <section class="doc-section" id="sources">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Citations and sources</h2>
+      <p>Every claim that came from a page carries a numbered chip; hovering or focusing it shows where it came from. The sources follow the answer, in the same order.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-message-body">
+        <p>Ember's Free plan renews daily<a class="fd-citation" href="#sources" data-title="Pricing · Ember — plans for web data and agents" data-domain="ember.dev" data-snippet="Free, Hobby, Standard and Growth plans. The Free plan renews 500 credits every day.">1</a>, while Northwind charges $0.002 for each page past the quota<a class="fd-citation" href="#sources" data-title="Plans and limits | Northwind Data" data-domain="northwind.io" data-snippet="Starter and Team plans billed monthly, with overage at $0.002 per page.">2</a>. Lumen discounts yearly billing by 17%<a class="fd-citation" href="#sources" data-title="Lumen API pricing — simple, usage-based" data-domain="lumenapi.com" data-snippet="Developer and Scale tiers. Yearly billing saves 17%.">3</a>.</p>
+      </div>
+      <div class="fd-sources">
+        <div class="fd-sources-head"><span class="fd-eyebrow">Sources</span><span class="fd-sources-count">4</span></div>
+        <div class="fd-sources-list">
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile">E</span><span class="fd-sources-domain">ember.dev</span><span class="fd-sources-num">1</span></span><span class="fd-sources-title">Pricing · Ember — plans for web data and agents</span></a>
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile" data-tone="neutral">N</span><span class="fd-sources-domain">northwind.io</span><span class="fd-sources-num">2</span></span><span class="fd-sources-title">Plans and limits | Northwind Data</span></a>
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile" data-tone="violet">L</span><span class="fd-sources-domain">lumenapi.com</span><span class="fd-sources-num">3</span></span><span class="fd-sources-title">Lumen API pricing — simple, usage-based</span></a>
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile" data-tone="info">D</span><span class="fd-sources-domain">docs.ember.dev</span><span class="fd-sources-num">4</span></span><span class="fd-sources-title">Credits and billing · How credits are counted for each endpoint</span></a>
+        </div>
+      </div>
+      <div class="fd-sources" data-layout="row">
+        <div class="fd-sources-head"><span class="fd-eyebrow">Sources</span><span class="fd-sources-count">3</span></div>
+        <div class="fd-sources-list">
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile">E</span><span class="fd-sources-domain">ember.dev</span><span class="fd-sources-num">1</span></span><span class="fd-sources-title">Pricing · Ember</span></a>
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile" data-tone="neutral">N</span><span class="fd-sources-domain">northwind.io</span><span class="fd-sources-num">2</span></span><span class="fd-sources-title">Plans and limits</span></a>
+          <a class="fd-sources-item" href="#sources"><span class="fd-sources-meta"><span class="fd-sources-tile" data-tone="violet">L</span><span class="fd-sources-domain">lumenapi.com</span><span class="fd-sources-num">3</span></span><span class="fd-sources-title">Lumen API pricing</span></a>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Chips are 18px mono pills. Their card reads <code class="fd-code">data-title</code>, <code class="fd-code">data-domain</code> and <code class="fd-code">data-snippet</code>; give each chip an <code class="fd-code">aria-label</code> such as “Source 1: Pricing · Ember”.</li>
+      <li>Source marks are letter tiles. Never use a site's real logo.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Run steps -->
+  <section class="doc-section" id="run-steps">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Run steps</h2>
+      <p>For runs that take minutes, show the plan up front and tick it off. The current step is in ink, finished steps fall back, and the clock and the credits keep counting at the bottom.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+        <ol class="fd-run-steps">
+          <li class="fd-run-steps-item" data-state="done"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Plan the search</span><span class="fd-run-steps-time">0.8s</span></li>
+          <li class="fd-run-steps-item" data-state="done"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Find careers pages<span class="fd-run-steps-detail">3 of 3 sites</span></span><span class="fd-run-steps-time">2.1s</span></li>
+          <li class="fd-run-steps-item" data-state="active"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Read job listings<span class="fd-run-steps-detail">18 of 41 pages</span></span><span class="fd-run-steps-time">11.4s</span></li>
+          <li class="fd-run-steps-item" data-state="pending"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Extract role, team and location</span></li>
+          <li class="fd-run-steps-item" data-state="pending"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Check for duplicates</span></li>
+        </ol>
+        <div class="fd-run-steps-foot"><span>Elapsed <b data-fd-elapsed>00:14</b></span><span><b>23</b> credits</span></div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="surface" data-code>
+        <ol class="fd-run-steps">
+          <li class="fd-run-steps-item" data-state="done"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Plan the search</span><span class="fd-run-steps-time">0.6s</span></li>
+          <li class="fd-run-steps-item" data-state="done"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Scrape 3 pricing pages</span><span class="fd-run-steps-time">2.9s</span></li>
+          <li class="fd-run-steps-item" data-state="failed"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Extract plans from lumenapi.com<span class="fd-run-steps-detail">Timed out after 30s</span></span><span class="fd-run-steps-time">30.0s</span></li>
+          <li class="fd-run-steps-item" data-state="pending"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Build the table</span></li>
+        </ol>
+        <div class="fd-run-steps-foot"><span>Stopped at <b>00:34</b></span><span><b>4</b> credits</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Result -->
+  <section class="doc-section" id="result">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Result surfaces</h2>
+      <p>When the answer is data, put it in a table under the prose with a JSON view one click away, and say what it cost in a single mono line.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-message-body"><p>Northwind has 6 open engineering roles listed today; 2 are remote.</p></div>
+      <section class="fd-result" data-fd-views>
+        <header class="fd-result-head">
+          <div class="fd-result-title"><span>Open engineering roles</span><span class="fd-result-count">6 rows</span></div>
+          <div class="fd-result-tools">
+            <div class="fd-viewswitch" aria-label="Result view">
+              <button class="fd-viewswitch-item" data-value="table" aria-selected="true">Table</button>
+              <button class="fd-viewswitch-item" data-value="json">JSON</button>
+            </div>
+            <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-action="copy-result" aria-label="Copy result as JSON"><i data-icon="copy"></i></button>
+            <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-action="download-result" aria-label="Download CSV"><i data-icon="download"></i></button>
+          </div>
+        </header>
+        <div class="fd-result-body" data-view="table">
+          <table class="fd-result-table">
+            <thead><tr><th>Role</th><th>Team</th><th>Location</th><th data-num>Posted</th></tr></thead>
+            <tbody>
+              <tr><td>Staff Engineer, Crawling</td><td>Data platform</td><td>Lisbon</td><td data-num>Nov 12</td></tr>
+              <tr><td>Senior Frontend Engineer</td><td>Console</td><td>Remote (EU)</td><td data-num>Nov 10</td></tr>
+              <tr><td>Engineering Manager</td><td>Agents</td><td>Toronto</td><td data-num>Nov 8</td></tr>
+              <tr><td>Site Reliability Engineer</td><td>Infrastructure</td><td>Lisbon</td><td data-num>Nov 3</td></tr>
+              <tr><td>Machine Learning Engineer</td><td>Extraction</td><td>Remote (EU)</td><td data-num>Oct 29</td></tr>
+              <tr><td>Backend Engineer, Billing</td><td>Platform</td><td>Toronto</td><td data-num>Oct 21</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fd-result-body" data-view="json" hidden>
+          <div class="fd-json" data-variant="bare" data-depth="2" data-json='[{"role":"Staff Engineer, Crawling","team":"Data platform","location":"Lisbon","posted":"2026-11-12"},{"role":"Senior Frontend Engineer","team":"Console","location":"Remote (EU)","posted":"2026-11-10"},{"role":"Engineering Manager","team":"Agents","location":"Toronto","posted":"2026-11-08"},{"role":"Site Reliability Engineer","team":"Infrastructure","location":"Lisbon","posted":"2026-11-03"},{"role":"Machine Learning Engineer","team":"Extraction","location":"Remote (EU)","posted":"2026-10-29"},{"role":"Backend Engineer, Billing","team":"Platform","location":"Toronto","posted":"2026-10-21"}]'></div>
+        </div>
+        <footer class="fd-result-foot"><span>northwind_roles.json</span><span>12 pages · 34 credits · 8.2s</span></footer>
+      </section>
+      <div class="fd-row" data-wrap data-justify="between">
+        <span class="fd-usage-chip"><i data-icon="zap"></i><b>34</b> credits<span class="fd-usage-chip-sep"></span><b>18,204</b> tokens</span>
+        <span class="fd-message-meta">12 pages · 34 credits · 8.2s</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== Live demo -->
+  <section class="doc-section" id="demo">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">A run, live</h2>
+      <p>The whole sequence in motion: the question, a plan, two tool calls resolving, a streamed answer with citations, then the table and its sources. It plays once when it scrolls into view; send your own prompt or press Replay to watch it again.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <template data-source>
+<div data-fd-demo-scope>
+  <div class="fd-thread" id="demo-thread" data-fd-demo></div>
+  <form class="fd-composer" data-fd-demo-target="#demo-thread">…</form>
+</div>
+<button class="fd-btn" data-fd-replay="#demo-thread">Replay</button>
+      </template>
+      <div class="fd-row" data-justify="between">
+        <span class="fd-eyebrow">Live demo</span>
+        <button class="fd-btn" data-size="sm" data-fd-replay="#demo-thread"><i data-icon="rotate-ccw"></i><span>Replay</span></button>
+      </div>
+      <div data-fd-demo-scope class="fd-stack" style="--fd-gap:24px">
+        <div class="fd-thread" id="demo-thread" data-fd-demo></div>
+        <div class="fd-agent-dock">
+        <form class="fd-composer" data-fd-demo-target="#demo-thread">
+          <textarea class="fd-composer-input" rows="1" placeholder="Ask a follow-up" aria-label="Ask Ember"></textarea>
+          <div class="fd-composer-tools">
+            <button type="button" class="fd-model-chip"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span></button>
+            <span class="fd-composer-sep"></span>
+            <button type="button" class="fd-composer-tool"><i data-icon="plus"></i><span>Sites</span></button>
+            <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">demoRun(thread, { prompt })</code> plays the script; the composer in the same <code class="fd-code">[data-fd-demo-scope]</code> or <code class="fd-code">.fd-agent</code> switches to its stop state while it runs, and stopping marks unfinished calls as failed.</li>
+      <li>With reduced motion the final state renders at once.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Sessions -->
+  <section class="doc-section" id="sessions">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Session list</h2>
+      <p>Past sessions, newest first, grouped by day. Titles are the question, trimmed to one line; the time is mono and gives way to an options button on hover.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="bleed" data-code>
+        <div style="height:460px">
+          <nav class="fd-session-list" aria-label="Sessions">
+            <div class="fd-session-list-head">
+              <span class="fd-session-list-heading">Agent</span>
+              <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Agent settings"><i data-icon="settings"></i></button>
+              <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Hide sessions"><i data-icon="panel-left"></i></button>
+            </div>
+            <div class="fd-session-list-actions"><button class="fd-session-list-new"><i data-icon="plus"></i>New session<kbd class="fd-kbd">⌘K</kbd></button></div>
+            <div class="fd-session-list-body">
+              <p class="fd-session-list-label fd-eyebrow">Today</p>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions" aria-current="page">Pricing tiers across three web-data APIs</a><time class="fd-session-list-time">2:14 PM</time><button class="fd-session-list-more" aria-label="Options for Pricing tiers across three web-data APIs"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions">Open engineering roles at Northwind</a><span class="fd-session-list-live" role="img" aria-label="Running"></span><button class="fd-session-list-more" aria-label="Options for Open engineering roles at Northwind"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions">Changelog highlights this month</a><time class="fd-session-list-time">9:40 AM</time><button class="fd-session-list-more" aria-label="Options for Changelog highlights this month"><i data-icon="ellipsis"></i></button></div>
+              <p class="fd-session-list-label fd-eyebrow">Yesterday</p>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions">Every SDK release since June with notes</a><time class="fd-session-list-time">6:18 PM</time><button class="fd-session-list-more" aria-label="Options for Every SDK release since June with notes"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions">Docs pages that mention rate limits</a><time class="fd-session-list-time">3:05 PM</time><button class="fd-session-list-more" aria-label="Options for Docs pages that mention rate limits"><i data-icon="ellipsis"></i></button></div>
+              <p class="fd-session-list-label fd-eyebrow">Previous 7 days</p>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions">Spring demo-day batch with founders and websites</a><time class="fd-session-list-time">Nov 9</time><button class="fd-session-list-more" aria-label="Options for Spring demo-day batch"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#sessions">Status pages of our 20 biggest vendors</a><time class="fd-session-list-time">Nov 8</time><button class="fd-session-list-more" aria-label="Options for Status pages of our 20 biggest vendors"><i data-icon="ellipsis"></i></button></div>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="doc-specimen" data-layout="bleed" data-code>
+        <div style="height:460px">
+          <nav class="fd-session-list" aria-label="Sessions" aria-busy="true">
+            <div class="fd-session-list-head">
+              <span class="fd-session-list-heading">Agent</span>
+              <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Agent settings"><i data-icon="settings"></i></button>
+              <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Hide sessions"><i data-icon="panel-left"></i></button>
+            </div>
+            <div class="fd-session-list-actions"><button class="fd-session-list-new"><i data-icon="plus"></i>New session</button></div>
+            <div class="fd-session-list-body">
+              <div class="fd-session-list-loading" role="status"><span class="fd-session-list-spinner" aria-hidden="true">⠏</span>Loading sessions…</div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The active session is an 8% accent wash with accent text, like the active nav item. A running session shows a live dot in place of its time.</li>
+      <li>Loading uses a braille text spinner, which sits on the text baseline and costs nothing to render.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Playground -->
+  <section class="doc-section" id="playground">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Playground</h2>
+      <p>Try one capability of a data source without writing code: the request on the left as a form, the response on the right. The response shows its shape as a skeleton until the first run, so people know what they will get before they spend a credit.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <section class="fd-playground" data-fd-playground>
+        <header class="fd-playground-head">
+          <button class="fd-playground-picker"><i data-icon="search"></i><span>Person search</span><span class="fd-playground-picker-meta">· 10 capabilities</span><i data-icon="chevron-down"></i></button>
+          <div class="fd-playground-head-end">
+            <button class="fd-playground-agent" aria-label="Choose agent"><span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span><i data-icon="chevron-down"></i></button>
+            <div class="fd-viewswitch" data-size="md" aria-label="Mode">
+              <button class="fd-viewswitch-item" data-value="try" aria-selected="true"><i data-icon="play" data-tone="accent"></i>Try it</button>
+              <button class="fd-viewswitch-item" data-value="agent">Agent</button>
+              <button class="fd-viewswitch-item" data-value="docs">Docs</button>
+            </div>
+          </div>
+        </header>
+        <div class="fd-playground-cols">
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">1</span><span class="fd-playground-label">Request</span><button class="fd-btn-text" data-action="reset"><i data-icon="rotate-ccw"></i><span>Reset</span></button></div>
+            <div class="fd-playground-form">
+              <label class="fd-playground-field">
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">person_titles</span><span class="fd-playground-field-type">string[]</span></span>
+                <input type="text" value="Engineering Manager">
+                <span class="fd-playground-field-hint">Job titles to match, for example “VP of Sales”. Separate several with commas.</span>
+              </label>
+              <label class="fd-playground-field">
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">q_keywords</span><span class="fd-playground-field-type">string</span></span>
+                <input type="text" placeholder="&lt;q_keywords&gt;">
+                <span class="fd-playground-field-hint">Free text matched across the person and their company.</span>
+              </label>
+              <label class="fd-playground-field">
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">organization_domains</span><span class="fd-playground-field-type">string[]</span><span class="fd-playground-field-req">required</span></span>
+                <input type="text" value="northwind.io">
+                <span class="fd-playground-field-hint">Company domains to search within, for example ember.dev.</span>
+              </label>
+              <div class="fd-grid" style="--fd-min:160px;--fd-gap:16px">
+                <label class="fd-playground-field">
+                  <span class="fd-playground-field-label"><span class="fd-playground-field-name">page</span><span class="fd-playground-field-type">number</span></span>
+                  <input type="number" value="1" min="1">
+                </label>
+                <label class="fd-playground-field">
+                  <span class="fd-playground-field-label"><span class="fd-playground-field-name">per_page</span><span class="fd-playground-field-type">number</span></span>
+                  <input type="number" value="25" min="1" max="100" data-fd-credits="0.2">
+                </label>
+              </div>
+              <button class="fd-playground-more" aria-expanded="false" aria-controls="pg-more"><i data-icon="chevron-down"></i><span>Show 1 more optional field</span></button>
+              <label class="fd-playground-field" id="pg-more" hidden>
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">seniority</span><span class="fd-playground-field-type">enum</span></span>
+                <select><option selected>Any</option><option>Manager</option><option>Director</option><option>VP</option></select>
+              </label>
+            </div>
+          </div>
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">2</span><span class="fd-playground-label">Response example</span></div>
+            <div class="fd-playground-response" data-fd-views>
+              <div class="fd-playground-note">
+                <p data-done="Live data from Northwind · {rows} rows · {time}">This is a sample shape. Press Run to see live data from Northwind.</p>
+                <div class="fd-viewswitch" aria-label="Response view">
+                  <button class="fd-viewswitch-item" data-value="table" aria-selected="true">Table</button>
+                  <button class="fd-viewswitch-item" data-value="json">JSON</button>
+                </div>
+                <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-action="copy-response" aria-label="Copy response"><i data-icon="copy"></i></button>
+              </div>
+              <div class="fd-playground-output" data-view="table">
+                <table class="fd-result-table">
+                  <thead><tr><th data-key="id">id</th><th data-key="first_name">first_name</th><th data-key="last_name">last_name</th><th data-key="title">title</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:80%"></span></td><td><span class="fd-playground-bar" style="--w:60%"></span></td><td><span class="fd-playground-bar" style="--w:92%"></span></td></tr>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:56%"></span></td><td><span class="fd-playground-bar" style="--w:72%"></span></td><td><span class="fd-playground-bar" style="--w:70%"></span></td></tr>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:68%"></span></td><td><span class="fd-playground-bar" style="--w:84%"></span></td><td><span class="fd-playground-bar" style="--w:80%"></span></td></tr>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:74%"></span></td><td><span class="fd-playground-bar" style="--w:52%"></span></td><td><span class="fd-playground-bar" style="--w:64%"></span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="fd-playground-output" data-view="json" hidden>
+                <div class="fd-json" data-variant="bare" data-depth="2" data-json='[{"id":"string","first_name":"string","last_name":"string","title":"string","organization":{"name":"string","domain":"string"}}]'></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="fd-playground-foot">
+          <span class="fd-playground-credits"><b>≈ 5 credits</b>per run</span>
+          <div class="fd-playground-foot-end">
+            <span class="fd-row" style="--fd-gap:4px"><kbd class="fd-kbd">⌘</kbd><kbd class="fd-kbd">↵</kbd></span>
+            <button class="fd-btn" data-variant="primary" data-action="run"><i data-icon="play"></i><span>Run</span></button>
+          </div>
+        </footer>
+        <template data-result>[
+          {"id": "per_9f2a1c", "first_name": "Maya", "last_name": "Okafor", "title": "Engineering Manager, Agents"},
+          {"id": "per_4b7e90", "first_name": "Tomás", "last_name": "Reyes", "title": "Engineering Manager, Platform"},
+          {"id": "per_c13d55", "first_name": "Ingrid", "last_name": "Halvorsen", "title": "Senior Engineering Manager"},
+          {"id": "per_7a0f2e", "first_name": "Dev", "last_name": "Raman", "title": "Engineering Manager, Data"},
+          {"id": "per_e5512b", "first_name": "Chloé", "last_name": "Martin", "title": "Engineering Manager, Console"}
+        ]</template>
+      </section>
+    </div>
+    <ul class="doc-notes">
+      <li>Press Run (or ⌘↵ inside the form): the skeleton holds its rows, then the data rises in. Reset restores the fields and the sample.</li>
+      <li>The footer is sticky so the cost and Run stay in reach on a long form. Below 720px the columns stack.</li>
+      <li>Change <span class="fd-mono">per_page</span> to see the credit estimate follow it.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================== Small parts -->
+  <section class="doc-section" id="parts">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Small parts</h2>
+      <p>The pieces around a conversation: what is left to spend, where the agent can also run, how full the context is, and what to do when a turn needs permission or fails.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-free-runs"><b>5</b> free daily runs</span>
+      <span class="fd-free-runs" data-state="empty"><b>0</b> free runs left today</span>
+      <button class="fd-btn" data-variant="ghost" data-size="sm"><i data-icon="history"></i><span>History</span></button>
+      <button class="fd-use-agent"><span class="fd-use-agent-stack" aria-hidden="true"><span class="fd-use-agent-tile"><i data-icon="terminal"></i></span><span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span><span class="fd-use-agent-tile" data-tone="neutral">›_</span></span>Use in your agent</button>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-usage-chip"><i data-icon="zap"></i><b>34</b> credits</span>
+      <span class="fd-usage-chip"><b>18,204</b> tokens<span class="fd-usage-chip-sep"></span><b>12</b> pages</span>
+      <span class="fd-context-meter" style="--value:24" role="meter" aria-valuenow="24" aria-valuemin="0" aria-valuemax="100" aria-label="Context used"><span class="fd-context-meter-ring"></span><b>24%</b> context</span>
+      <span class="fd-context-meter" data-tone="warning" style="--value:82" role="meter" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="Context used"><span class="fd-context-meter-ring"></span><b>82%</b> context</span>
+      <span class="fd-context-meter" data-tone="danger" style="--value:97" role="meter" aria-valuenow="97" aria-valuemin="0" aria-valuemax="100" aria-label="Context used"><span class="fd-context-meter-ring"></span><b>97%</b> context</span>
+      <button class="fd-stop-btn">Stop generating</button>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-code>
+      <div class="fd-approval-bar" role="group" aria-label="Approval needed">
+        <i data-icon="shield"></i>
+        <p class="fd-approval-bar-text">Ember wants to crawl <b>412 pages</b> on <code>docs.northwind.io</code>, about <b>412 credits</b>.</p>
+        <div class="fd-approval-bar-actions">
+          <button class="fd-btn" data-variant="primary" data-size="sm">Allow once</button>
+          <button class="fd-btn" data-size="sm">Always allow</button>
+          <button class="fd-btn" data-variant="ghost" data-size="sm">Deny</button>
+        </div>
+      </div>
+      <article class="fd-message" data-role="assistant" data-state="error">
+        <div class="fd-message-avatar" aria-hidden="true"><i data-icon="sparkle"></i></div>
+        <div class="fd-message-content">
+          <div class="fd-message-error" role="alert">
+            <i data-icon="circle-alert"></i>
+            <p class="fd-message-error-text"><span class="fd-message-error-title">The run stopped at 50 credits</span>That is the limit set for this session. Raise it in Agent settings or retry with a narrower question.</p>
+            <button class="fd-btn" data-size="sm"><i data-icon="rotate-ccw"></i><span>Retry</span></button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================================================== Full screen -->
+  <section class="doc-section" id="screen">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Agent screen</h2>
+      <p>Everything together: sessions on the left, the thread in the middle at reading measure, and the composer docked at the bottom with the thread fading under it. Below 760px the session list leaves and the thread takes the width.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <template data-source>
+<div class="fd-agent" style="height:640px">
+  <aside class="fd-agent-side"><nav class="fd-session-list">…</nav></aside>
+  <section class="fd-agent-main">
+    <header class="fd-agent-top">…</header>
+    <div class="fd-agent-scroll"><div class="fd-thread" data-fd-demo></div></div>
+    <div class="fd-agent-dock"><form class="fd-composer">…</form></div>
+  </section>
+</div>
+      </template>
+      <div class="fd-agent" style="height:640px">
+        <aside class="fd-agent-side">
+          <nav class="fd-session-list" aria-label="Sessions">
+            <div class="fd-session-list-head">
+              <span class="fd-session-list-heading">Agent</span>
+              <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Agent settings"><i data-icon="settings"></i></button>
+              <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Hide sessions"><i data-icon="panel-left"></i></button>
+            </div>
+            <div class="fd-session-list-actions"><button class="fd-session-list-new"><i data-icon="plus"></i>New session</button></div>
+            <div class="fd-session-list-body">
+              <p class="fd-session-list-label fd-eyebrow">Today</p>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#screen" aria-current="page">Pricing tiers across three web-data APIs</a><time class="fd-session-list-time">2:14 PM</time><button class="fd-session-list-more" aria-label="Session options"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#screen">Open engineering roles at Northwind</a><time class="fd-session-list-time">11:02 AM</time><button class="fd-session-list-more" aria-label="Session options"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#screen">Changelog highlights this month</a><time class="fd-session-list-time">9:40 AM</time><button class="fd-session-list-more" aria-label="Session options"><i data-icon="ellipsis"></i></button></div>
+              <p class="fd-session-list-label fd-eyebrow">Yesterday</p>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#screen">Every SDK release since June with notes</a><time class="fd-session-list-time">6:18 PM</time><button class="fd-session-list-more" aria-label="Session options"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#screen">Docs pages that mention rate limits</a><time class="fd-session-list-time">3:05 PM</time><button class="fd-session-list-more" aria-label="Session options"><i data-icon="ellipsis"></i></button></div>
+              <div class="fd-session-list-item"><a class="fd-session-list-link" href="#screen">Status pages of our 20 biggest vendors</a><time class="fd-session-list-time">1:47 PM</time><button class="fd-session-list-more" aria-label="Session options"><i data-icon="ellipsis"></i></button></div>
+            </div>
+          </nav>
+        </aside>
+        <section class="fd-agent-main">
+          <header class="fd-agent-top">
+            <span class="fd-small fd-muted fd-truncate fd-agent-top-hide">Pricing tiers across three web-data APIs</span>
+            <span class="fd-free-runs"><b>5</b> free daily runs</span>
+            <button class="fd-btn fd-agent-top-hide" data-variant="ghost" data-size="sm" data-fd-replay="#screen-thread"><i data-icon="rotate-ccw"></i><span>Replay</span></button>
+            <button class="fd-use-agent"><span class="fd-use-agent-stack" aria-hidden="true"><span class="fd-use-agent-tile"><i data-icon="terminal"></i></span><span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span><span class="fd-use-agent-tile" data-tone="neutral">›_</span></span>Use in your agent</button>
+          </header>
+          <div class="fd-agent-scroll">
+            <div class="fd-thread" id="screen-thread" data-fd-demo></div>
+          </div>
+          <div class="fd-agent-dock">
+            <form class="fd-composer" data-fd-demo-target="#screen-thread">
+              <textarea class="fd-composer-input" rows="1" placeholder="Ask a follow-up" aria-label="Ask Ember"></textarea>
+              <div class="fd-composer-tools">
+                <button type="button" class="fd-model-chip"><i data-icon="sparkles"></i><span class="fd-model-chip-label">Spark 2</span><span class="fd-model-chip-tag">New</span></button>
+                <span class="fd-composer-sep"></span>
+                <button type="button" class="fd-composer-tool"><i data-icon="plus"></i><span>Sites</span></button>
+                <button type="button" class="fd-composer-tool"><i data-icon="braces"></i><span>Schema</span></button>
+                <button type="button" class="fd-composer-tool" data-fd-cycle="Low,Medium,High"><i data-icon="gauge"></i><span>Medium</span></button>
+                <button type="button" class="fd-composer-tool" aria-pressed="true"><i data-icon="landmark"></i><span>Catalog</span><i data-icon="chevron-down"></i></button>
+                <button class="fd-composer-send" type="submit" aria-label="Send"><i data-icon="arrow-up"></i></button>
+              </div>
+            </form>
+            <p class="fd-agent-dock-note">Ember can be wrong. Check the sources before you rely on an answer.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== API -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">JavaScript</h2>
+      <p><code class="fd-code">fire/js/agent.js</code> wires everything above on load. It uses <code class="fd-code">code.js</code> for JSON trees, the view switch and copy feedback.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Export / event</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>fd:submit</td><td>Fired on <code class="fd-code">.fd-composer</code> when the person sends. <code class="fd-code">detail.value</code> is the trimmed text. Cancel it to keep the text.</td></tr>
+        <tr><td>fd:stop</td><td>Fired when the stop button is pressed while <code class="fd-code">data-state="running"</code>.</td></tr>
+        <tr><td>fd:action</td><td>Fired by message actions; <code class="fd-code">detail.action</code> is copy, retry, up, down or open.</td></tr>
+        <tr><td>setRunning(composer, on)</td><td>Switches the send button between send and stop.</td></tr>
+        <tr><td>stream(el, html, opts)</td><td>Types HTML into <code class="fd-code">el</code> word by word with a caret. <code class="fd-code">opts.speed</code> (ms per word), <code class="fd-code">opts.keepCursor</code>, <code class="fd-code">opts.signal</code>. Returns a promise.</td></tr>
+        <tr><td>appendMessage(thread, role, html)</td><td>Adds a user or assistant turn with an entrance rise.</td></tr>
+        <tr><td>setToolcall(el, { state, meta })</td><td>Moves a tool call between queued, running, done, failed and approval.</td></tr>
+        <tr><td>demoRun(thread, opts)</td><td>Plays the scripted run. <code class="fd-code">opts.prompt</code>, <code class="fd-code">opts.instant</code>. <code class="fd-code">stopDemo(thread)</code> stops it.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

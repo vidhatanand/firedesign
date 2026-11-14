@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind People · Catalog · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="catalog">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <!-- Back, terms, share -->
+    <section class="fd-band fd-rise" data-pad="sm" style="--fd-i:0">
+      <div class="fd-row" data-justify="between">
+        <a class="fd-back" href="catalog.html"><i data-icon="arrow-left"></i><span>All providers</span></a>
+        <div class="fd-row" style="--fd-gap:12px">
+          <a class="fd-link" data-tone="neutral" data-quiet href="#pricing">Provider terms</a>
+          <button class="fd-btn" type="button" id="share"><i data-icon="link"></i><span>Share</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Header -->
+    <section class="fd-band fd-rise" style="--fd-i:1" aria-label="Northwind People">
+      <div class="fd-row" data-wrap data-align="start" data-justify="between" style="--fd-gap:24px">
+        <div class="fd-stack" style="--fd-gap:12px">
+          <div class="fd-row" style="--fd-gap:12px">
+            <span class="fd-tile" data-size="40" data-tone="info">NP</span>
+            <div class="fd-stack" style="--fd-gap:2px">
+              <span class="fd-eyebrow">Ember catalog</span>
+              <a class="fd-mono-sm fd-accent-text fd-row" style="--fd-gap:2px" href="catalog.html"><span>People</span><i data-icon="arrow-up-right" data-size="12"></i></a>
+            </div>
+          </div>
+          <h1 class="fd-display">Northwind People</h1>
+          <div><a class="fd-tag" href="#skills" id="to-skills"><span>27 ready-made skills use Northwind</span><i data-icon="arrow-down"></i></a></div>
+        </div>
+        <div class="fd-stack" style="--fd-gap:8px;width:420px;max-width:100%">
+          <p class="fd-eyebrow">Try in agent</p>
+          <a class="fd-card" data-interactive data-variant="quiet" data-size="sm" href="agent.html">
+            <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+            <div class="fd-card-head"><div class="fd-card-heading"><p class="fd-body">Find engineering managers at lumenapi.com and show their titles, locations and verified work emails.</p></div></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Playground -->
+    <section class="fd-band fd-rise" data-pad="md" style="--fd-i:2" aria-label="Playground">
+      <section class="fd-playground" id="pg" data-fd-playground>
+        <header class="fd-playground-head">
+          <button class="fd-playground-picker" type="button" data-fd-menu="menu-cap"><i data-icon="search"></i><span id="cap-name">Person search</span><span class="fd-playground-picker-meta">· 10 capabilities</span><i data-icon="chevron-down"></i></button>
+          <div class="fd-playground-head-end">
+            <button class="fd-playground-agent" type="button" id="agent-trigger" data-fd-menu="menu-agent" data-placement="bottom-end" aria-label="Choose agent"><span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span><i data-icon="chevron-down"></i></button>
+            <div class="fd-viewswitch" data-size="md" data-target="#pg" aria-label="Mode">
+              <button class="fd-viewswitch-item" type="button" data-value="try" aria-selected="true"><i data-icon="play" data-tone="accent"></i>Try it</button>
+              <button class="fd-viewswitch-item" type="button" data-value="agent">Agent</button>
+              <button class="fd-viewswitch-item" type="button" data-value="docs">Docs</button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Try it -->
+        <div class="fd-playground-cols" data-view="try">
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">1</span><span class="fd-playground-label">Request</span><button class="fd-btn-text" type="button" data-action="reset"><i data-icon="rotate-ccw"></i><span>Reset</span></button></div>
+            <div class="fd-playground-form">
+              <label class="fd-playground-field">
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">person_titles</span><span class="fd-playground-field-type">string[]</span></span>
+                <input type="text" value="Engineering Manager">
+                <span class="fd-playground-field-hint">Job titles to match, for example “VP of Sales”. Separate several with commas.</span>
+              </label>
+              <label class="fd-playground-field">
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">q_keywords</span><span class="fd-playground-field-type">string</span></span>
+                <input type="text" placeholder="&lt;q_keywords&gt;">
+                <span class="fd-playground-field-hint">Free text matched across the person and their company.</span>
+              </label>
+              <label class="fd-playground-field">
+                <span class="fd-playground-field-label"><span class="fd-playground-field-name">organization_domains</span><span class="fd-playground-field-type">string[]</span><span class="fd-playground-field-req">required</span></span>
+                <input type="text" value="lumenapi.com">
+                <span class="fd-playground-field-hint">Company domains to search within, for example ember.dev. Separate several with commas.</span>
+              </label>
+              <div class="fd-grid" style="--fd-min:160px;--fd-gap:16px">
+                <label class="fd-playground-field">
+                  <span class="fd-playground-field-label"><span class="fd-playground-field-name">page</span><span class="fd-playground-field-type">number</span></span>
+                  <input type="number" value="1" min="1">
+                </label>
+                <label class="fd-playground-field">
+                  <span class="fd-playground-field-label"><span class="fd-playground-field-name">per_page</span><span class="fd-playground-field-type">number</span></span>
+                  <input type="number" value="25" min="1" max="100" data-fd-credits="0.2">
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">2</span><span class="fd-playground-label">Response example</span></div>
+            <div class="fd-playground-response" data-fd-views>
+              <div class="fd-playground-note">
+                <p data-done="Live data from Northwind People · {rows} rows · {time}">This is a sample shape. Press Run to see live data from Northwind People.</p>
+                <div class="fd-viewswitch" aria-label="Response view">
+                  <button class="fd-viewswitch-item" type="button" data-value="table" aria-selected="true">Table</button>
+                  <button class="fd-viewswitch-item" type="button" data-value="json">JSON</button>
+                </div>
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-action="copy-response" aria-label="Copy response"><i data-icon="copy"></i></button>
+              </div>
+              <div class="fd-playground-output" data-view="table">
+                <table class="fd-result-table">
+                  <thead><tr><th data-key="id">id</th><th data-key="first_name">first_name</th><th data-key="last_name">last_name</th><th data-key="title">title</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:80%"></span></td><td><span class="fd-playground-bar" style="--w:60%"></span></td><td><span class="fd-playground-bar" style="--w:92%"></span></td></tr>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:56%"></span></td><td><span class="fd-playground-bar" style="--w:72%"></span></td><td><span class="fd-playground-bar" style="--w:70%"></span></td></tr>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:68%"></span></td><td><span class="fd-playground-bar" style="--w:84%"></span></td><td><span class="fd-playground-bar" style="--w:80%"></span></td></tr>
+                    <tr><td><span class="fd-playground-bar" style="--w:48px"></span></td><td><span class="fd-playground-bar" style="--w:74%"></span></td><td><span class="fd-playground-bar" style="--w:52%"></span></td><td><span class="fd-playground-bar" style="--w:64%"></span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="fd-playground-output" data-view="json" hidden>
+                <div class="fd-json" data-variant="bare" data-depth="2" data-json='[{"id":"string","first_name":"string","last_name":"string","title":"string","organization":{"name":"string","domain":"string"}}]'></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agent -->
+        <div class="fd-playground-cols" data-view="agent" hidden>
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">1</span><span class="fd-playground-label">Connect your agent</span></div>
+            <div class="fd-snippet">
+              <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+              <code class="fd-snippet-text">npx -y @ember/cli init --agent <span data-agent-id>claude-code</span></code>
+              <button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button>
+            </div>
+            <div class="fd-snippet">
+              <span class="fd-snippet-prompt" aria-hidden="true">$</span>
+              <code class="fd-snippet-text">ember providers enable northwind-people</code>
+              <button class="fd-snippet-copy" type="button" aria-label="Copy command"><i data-icon="copy"></i></button>
+            </div>
+            <p class="fd-small fd-muted">Once enabled, your agent picks the right capability on its own. Ask for people at a company and it calls <span class="fd-mono">people/search</span>, then <span class="fd-mono">emails/find</span> if you need addresses.</p>
+          </div>
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">2</span><span class="fd-playground-label">Or call it from code</span></div>
+            <div class="fd-codeblock">
+              <div class="fd-codeblock-head">
+                <div class="fd-codeblock-tabs" aria-label="Language">
+                  <button class="fd-codeblock-tab" type="button" data-value="node">Node</button>
+                  <button class="fd-codeblock-tab" type="button" data-value="python">Python</button>
+                  <button class="fd-codeblock-tab" type="button" data-value="curl">cURL</button>
+                </div>
+                <div class="fd-codeblock-actions">
+                  <button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button>
+                </div>
+              </div>
+              <pre class="fd-codeblock-body" data-value="node"><code data-lang="javascript">import Ember from "@ember/sdk";
+
+const ember = new Ember({ apiKey: process.env.EMBER_API_KEY });
+
+const run = await ember.agent({
+  prompt: "Find engineering managers at lumenapi.com with verified work emails",
+  providers: ["northwind-people"],
+});
+
+console.log(run.output);</code></pre>
+              <pre class="fd-codeblock-body" data-value="python"><code data-lang="python">import os
+from ember import Ember
+
+ember = Ember(api_key=os.environ["EMBER_API_KEY"])
+
+run = ember.agent(
+    prompt="Find engineering managers at lumenapi.com with verified work emails",
+    providers=["northwind-people"],
+)
+print(run.output)</code></pre>
+              <pre class="fd-codeblock-body" data-value="curl"><code data-lang="bash">curl -X POST https://api.ember.dev/v2/agent \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Find engineering managers at lumenapi.com with verified work emails",
+    "providers": ["northwind-people"]
+  }'</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Docs -->
+        <div class="fd-playground-cols" data-view="docs" hidden>
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">1</span><span class="fd-playground-label">Parameters</span></div>
+            <div class="fd-schema">
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">organization_domains</code><span class="fd-schema-type">string[]</span><span class="fd-schema-req">required</span></div>
+                <p class="fd-schema-desc">Company domains to search within, for example <code>ember.dev</code>.</p>
+              </div>
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">person_titles</code><span class="fd-schema-type">string[]</span><span class="fd-schema-opt">optional</span></div>
+                <p class="fd-schema-desc">Job titles to match. Several titles widen the net.</p>
+              </div>
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">q_keywords</code><span class="fd-schema-type">string</span><span class="fd-schema-opt">optional</span></div>
+                <p class="fd-schema-desc">Free text matched across the person and their company.</p>
+              </div>
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">page</code><span class="fd-schema-type">number</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>1</code></span></div>
+                <p class="fd-schema-desc">Page of results, counted from 1.</p>
+              </div>
+              <div class="fd-schema-item">
+                <div class="fd-schema-head"><code class="fd-schema-name">per_page</code><span class="fd-schema-type">number</span><span class="fd-schema-opt">optional</span><span class="fd-schema-default">Default <code>25</code></span></div>
+                <p class="fd-schema-desc">Results per page. Maximum <code>100</code>. Each started group of 5 people costs 1 credit.</p>
+              </div>
+            </div>
+          </div>
+          <div class="fd-playground-col">
+            <div class="fd-playground-colhead"><span class="fd-playground-num">2</span><span class="fd-playground-label">Endpoint and response</span></div>
+            <div class="fd-row" data-wrap>
+              <button class="fd-endpoint" type="button" data-copyable><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path" id="cap-endpoint">/v2/providers/northwind-people/people/search</span></button>
+            </div>
+            <p class="fd-small fd-muted">Send the parameters as a JSON body with your API key as a bearer token. The response lists matching people, newest signal first.</p>
+            <div class="fd-json" data-variant="bare" data-depth="3" data-json='{"data":[{"id":"per_9f2a1c","first_name":"Maya","last_name":"Okafor","title":"Engineering Manager, Agents","organization":{"name":"Lumen API","domain":"lumenapi.com"}}],"page":1,"per_page":25,"credits_used":5}'></div>
+          </div>
+        </div>
+
+        <footer class="fd-playground-foot" data-view="try">
+          <span class="fd-playground-credits"><b>≈ 5 credits</b>per run</span>
+          <div class="fd-playground-foot-end">
+            <span class="fd-row" style="--fd-gap:4px"><kbd class="fd-kbd">⌘</kbd><kbd class="fd-kbd">↵</kbd></span>
+            <button class="fd-btn" type="button" data-variant="primary" data-action="run"><i data-icon="play"></i><span>Run</span></button>
+          </div>
+        </footer>
+        <template data-result>[
+          {"id": "per_9f2a1c", "first_name": "Maya", "last_name": "Okafor", "title": "Engineering Manager, Agents"},
+          {"id": "per_4b7e90", "first_name": "Tomás", "last_name": "Reyes", "title": "Engineering Manager, Platform"},
+          {"id": "per_c13d55", "first_name": "Ingrid", "last_name": "Halvorsen", "title": "Senior Engineering Manager"},
+          {"id": "per_7a0f2e", "first_name": "Dev", "last_name": "Raman", "title": "Engineering Manager, Data"},
+          {"id": "per_e5512b", "first_name": "Chloé", "last_name": "Martin", "title": "Engineering Manager, Console"}
+        ]</template>
+      </section>
+    </section>
+
+    <!-- Capabilities -->
+    <section class="fd-band" id="capabilities" aria-labelledby="h-caps">
+      <div class="fd-stack">
+        <div class="fd-row" data-justify="between">
+          <h2 class="fd-title" id="h-caps">Capabilities</h2>
+          <span class="fd-small fd-muted fd-num">10</span>
+        </div>
+        <div data-fd-loading="true">
+          <div class="fd-skeleton-list" data-rows="10"></div>
+          <ul class="fd-list" data-divided data-interactive aria-label="Capabilities">
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="people/search" data-name="Person search">people/search</a><span class="fd-list-desc">Find people by title, keyword and company domain.</span></div>
+              <span class="fd-list-meta" data-mono>1 credit</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="people/match" data-name="Person match">people/match</a><span class="fd-list-desc">Match a name and company to a single person record.</span></div>
+              <span class="fd-list-meta" data-mono>2 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="people/enrich" data-name="Person enrich">people/enrich</a><span class="fd-list-desc">Add work history, location and seniority to a person.</span></div>
+              <span class="fd-list-meta" data-mono>3 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="people/bulk-enrich" data-name="Bulk person enrich">people/bulk-enrich</a><span class="fd-list-desc">Enrich up to 10 people in one call.</span></div>
+              <span class="fd-list-meta" data-mono>15 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="emails/find" data-name="Work email finder">emails/find</a><span class="fd-list-desc">Find a verified work email from a name and a company domain.</span></div>
+              <span class="fd-list-meta" data-mono>5 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="emails/verify" data-name="Email verification">emails/verify</a><span class="fd-list-desc">Check whether an address is deliverable before you send.</span></div>
+              <span class="fd-list-meta" data-mono>0 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="orgs/search" data-name="Company search">orgs/search</a><span class="fd-list-desc">Search companies by size, industry and location.</span></div>
+              <span class="fd-list-meta" data-mono>1 credit</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="orgs/enrich" data-name="Company enrich">orgs/enrich</a><span class="fd-list-desc">Firmographics, funding and detected technologies for a domain.</span></div>
+              <span class="fd-list-meta" data-mono>3 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="orgs/headcount" data-name="Headcount history">orgs/headcount</a><span class="fd-list-desc">Monthly headcount by department for a company.</span></div>
+              <span class="fd-list-meta" data-mono>4 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+            <li class="fd-list-row">
+              <div class="fd-list-body"><a class="fd-list-link fd-list-title fd-mono" href="#pg" data-cap="jobs/postings" data-name="Job postings">jobs/postings</a><span class="fd-list-desc">Open roles at a company, with posted dates and seniority.</span></div>
+              <span class="fd-list-meta" data-mono>2 credits</span>
+              <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ready-made skills -->
+    <section class="fd-band" id="skills" aria-labelledby="h-skills">
+      <div class="fd-stack">
+        <div class="fd-stack" style="--fd-gap:4px">
+          <div class="fd-row" data-justify="between">
+            <h2 class="fd-title" id="h-skills">Ready-made skills</h2>
+            <span class="fd-small fd-muted fd-num">27</span>
+          </div>
+          <p class="fd-small fd-muted">Skills teach your agent a whole task that calls Northwind People. Copy one into your agent’s skills folder.</p>
+        </div>
+        <div data-fd-loading="true">
+          <div class="fd-skeleton-grid" data-count="3" style="--fd-min:300px"></div>
+          <div class="fd-card-grid" style="--fd-min:300px">
+            <article class="fd-card" data-interactive>
+              <div class="fd-card-head">
+                <span class="fd-tile" data-size="36" data-tone="neutral"><i data-icon="file-text"></i></span>
+                <div class="fd-card-heading"><span class="fd-card-name"><span>Build a prospect list</span></span><span class="fd-card-meta">Uses people/search, emails/find</span></div>
+              </div>
+              <p class="fd-card-text">Find people by title at a list of company domains and return one verified email for each.</p>
+              <code class="fd-mono-sm fd-muted fd-truncate">skills/northwind-prospect-list/SKILL.md</code>
+              <div class="fd-row"><button class="fd-btn" type="button" data-variant="accent-soft" data-size="sm" data-skill="northwind-people/prospect-list"><i data-icon="copy"></i><span>Copy skill</span></button></div>
+            </article>
+            <article class="fd-card" data-interactive>
+              <div class="fd-card-head">
+                <span class="fd-tile" data-size="36" data-tone="neutral"><i data-icon="file-text"></i></span>
+                <div class="fd-card-heading"><span class="fd-card-name"><span>Enrich a CRM export</span></span><span class="fd-card-meta">Uses people/match, orgs/enrich</span></div>
+              </div>
+              <p class="fd-card-text">Match rows from a CSV to people and companies, then fill in titles, locations and funding.</p>
+              <code class="fd-mono-sm fd-muted fd-truncate">skills/northwind-enrich-crm/SKILL.md</code>
+              <div class="fd-row"><button class="fd-btn" type="button" data-variant="accent-soft" data-size="sm" data-skill="northwind-people/enrich-crm"><i data-icon="copy"></i><span>Copy skill</span></button></div>
+            </article>
+            <article class="fd-card" data-interactive>
+              <div class="fd-card-head">
+                <span class="fd-tile" data-size="36" data-tone="neutral"><i data-icon="file-text"></i></span>
+                <div class="fd-card-heading"><span class="fd-card-name"><span>Hiring signal watch</span></span><span class="fd-card-meta">Uses jobs/postings, orgs/headcount</span></div>
+              </div>
+              <p class="fd-card-text">Track new job postings and headcount changes at your target accounts every week.</p>
+              <code class="fd-mono-sm fd-muted fd-truncate">skills/northwind-hiring-signals/SKILL.md</code>
+              <div class="fd-row"><button class="fd-btn" type="button" data-variant="accent-soft" data-size="sm" data-skill="northwind-people/hiring-signals"><i data-icon="copy"></i><span>Copy skill</span></button></div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing and limits -->
+    <section class="fd-band" id="pricing" aria-labelledby="h-pricing">
+      <div class="fd-stack" style="--fd-gap:20px">
+        <h2 class="fd-title" id="h-pricing">Pricing and limits</h2>
+        <div class="fd-grid" style="--fd-min:300px;--fd-gap:24px">
+          <dl class="fd-kv" data-layout="split" data-divided>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Price per call</dt><dd class="fd-kv-value" data-mono>0–15 credits</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Rate limit</dt><dd class="fd-kv-value" data-mono>60 requests / min</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Data freshness</dt><dd class="fd-kv-value">Refreshed daily · Nov 14, 2:10 AM</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Terms version</dt><dd class="fd-kv-value" data-mono>v1.2.0 · Aug 10, 2026</dd></div>
+          </dl>
+          <div class="fd-card" data-size="sm">
+            <div class="fd-meter" data-value="1000" data-max="1000" data-unit="free credits left" data-tone="success">
+              <div class="fd-meter-head"><span class="fd-meter-label">Free credits</span><span class="fd-meter-figure" data-auto></span></div>
+              <div class="fd-meter-track"><div class="fd-meter-fill"></div></div>
+              <div class="fd-meter-foot">Free credits are used first and apply to Northwind People only. They do not renew.</div>
+            </div>
+          </div>
+        </div>
+        <div class="fd-callout" data-tone="info" role="note">
+          <i class="fd-callout-icon" data-icon="info"></i>
+          <div class="fd-callout-content">
+            <p class="fd-callout-title">Northwind’s terms apply to this data</p>
+            <p class="fd-callout-body">Data from Northwind People is covered by Northwind’s own terms, separate from Ember’s. Quarry Labs accepted v1.2.0 on Nov 3, 2026, so every key on this team can call it.</p>
+            <div class="fd-callout-actions"><button class="fd-btn" type="button" data-variant="outline" data-size="sm" id="read-terms"><span>Read provider terms</span></button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Capability picker -->
+  <div class="fd-menu" id="menu-cap" popover role="menu" aria-label="Capability">
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="true" data-value="people/search" data-name="Person search"><span class="fd-menu-item-label">Person search<span class="fd-menu-item-desc">people/search</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="people/match" data-name="Person match"><span class="fd-menu-item-label">Person match<span class="fd-menu-item-desc">people/match</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="people/enrich" data-name="Person enrich"><span class="fd-menu-item-label">Person enrich<span class="fd-menu-item-desc">people/enrich</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="people/bulk-enrich" data-name="Bulk person enrich"><span class="fd-menu-item-label">Bulk person enrich<span class="fd-menu-item-desc">people/bulk-enrich</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="emails/find" data-name="Work email finder"><span class="fd-menu-item-label">Work email finder<span class="fd-menu-item-desc">emails/find</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="emails/verify" data-name="Email verification"><span class="fd-menu-item-label">Email verification<span class="fd-menu-item-desc">emails/verify</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="orgs/search" data-name="Company search"><span class="fd-menu-item-label">Company search<span class="fd-menu-item-desc">orgs/search</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="orgs/enrich" data-name="Company enrich"><span class="fd-menu-item-label">Company enrich<span class="fd-menu-item-desc">orgs/enrich</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="orgs/headcount" data-name="Headcount history"><span class="fd-menu-item-label">Headcount history<span class="fd-menu-item-desc">orgs/headcount</span></span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="jobs/postings" data-name="Job postings"><span class="fd-menu-item-label">Job postings<span class="fd-menu-item-desc">jobs/postings</span></span></button>
+  </div>
+
+  <!-- Agent picker -->
+  <div class="fd-menu" id="menu-agent" popover role="menu" aria-label="Agent">
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="true" data-value="claude-code"><span class="fd-use-agent-tile" data-tone="violet"><i data-icon="sparkle"></i></span><span class="fd-menu-item-label">Claude Code</span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="cursor"><span class="fd-use-agent-tile"><i data-icon="terminal"></i></span><span class="fd-menu-item-label">Cursor</span></button>
+    <button class="fd-menu-item" type="button" role="menuitemradio" aria-checked="false" data-value="codex"><span class="fd-use-agent-tile" data-tone="info"><i data-icon="bot"></i></span><span class="fd-menu-item-label">Codex</span></button>
+  </div>
+</main>
+
+<script type="module">
+import { init, copyText, reducedMotion, overlays, texture } from '../fire/fire.js';
+
+const { toast } = overlays;
+const { setLoading } = texture;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+/* Share */
+$('#share').addEventListener('click', async () => {
+  await copyText(location.href);
+  toast({ title: 'Link copied', description: 'Anyone on Quarry Labs can open this provider.', tone: 'success' });
+});
+
+/* "27 ready-made skills" scrolls to the skills section */
+$('#to-skills').addEventListener('click', (e) => {
+  e.preventDefault();
+  $('#h-skills').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+});
+
+/* Capability: the picker, the list rows and the docs endpoint stay in step */
+const DEFAULT_CAP = 'people/search';
+function chooseCapability(id, name, { announce = true } = {}) {
+  $('#cap-name').textContent = name;
+  $('#cap-endpoint').textContent = `/v2/providers/northwind-people/${id}`;
+  $$('#menu-cap [role="menuitemradio"]').forEach((item) => item.setAttribute('aria-checked', String(item.dataset.value === id)));
+  if (announce && id !== DEFAULT_CAP) {
+    toast({ title: name, description: 'Fields for this capability load here. This template keeps the Person search form.', tone: 'info' });
+  }
+}
+document.addEventListener('fd:select', (e) => {
+  const item = e.detail?.item;
+  if (item?.closest('#menu-cap')) chooseCapability(item.dataset.value, item.dataset.name);
+  if (item?.closest('#menu-agent')) {
+    const tile = item.querySelector('.fd-use-agent-tile');
+    $('#agent-trigger .fd-use-agent-tile')?.replaceWith(tile.cloneNode(true));
+    $('[data-agent-id]').textContent = item.dataset.value;
+  }
+});
+$$('[data-cap]').forEach((link) => link.addEventListener('click', (e) => {
+  e.preventDefault();
+  chooseCapability(link.dataset.cap, link.dataset.name);
+  $('#pg').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+}));
+
+/* Skills: the whole card copies, the button is the keyboard path */
+async function copySkill(button) {
+  await copyText(`ember skills add ${button.dataset.skill}`);
+  toast({ title: 'Skill copied', description: `Paste the command in your terminal to add ${button.dataset.skill}.`, tone: 'success' });
+}
+$$('[data-skill]').forEach((button) => {
+  button.addEventListener('click', (e) => { e.stopPropagation(); copySkill(button); });
+  button.closest('.fd-card').addEventListener('click', () => copySkill(button));
+});
+
+$('#read-terms').addEventListener('click', () => {
+  toast({ title: 'Northwind People terms v1.2.0', description: 'Accepted by Quarry Labs on Nov 3, 2026.', tone: 'info' });
+});
+
+/* First paint: skeletons for ~600ms, then swap */
+init(document);
+const holds = $$('[data-fd-loading="true"]');
+setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 600);
+</script>
+</body>
+</html>

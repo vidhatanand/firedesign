@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API keys · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="api-keys" data-title="API keys">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band fd-page-hero fd-rise">
+      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
+      <h1 class="fd-display">API keys</h1>
+      <p class="fd-page-hero-desc">Create and manage keys to authenticate with the Ember API.</p>
+    </section>
+
+    <section class="fd-band fd-rise" style="--fd-i:1" data-pad="sm" aria-label="Your API keys">
+      <div class="fd-row" data-justify="between" style="--fd-gap:16px">
+        <h2 class="fd-h3">Your API keys</h2>
+        <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-open="dlg-create"><i data-icon="plus"></i><span>Create</span></button>
+      </div>
+    </section>
+
+    <section class="fd-band" aria-label="Keys">
+      <div id="keys-wrap" data-fd-loading="true">
+        <div class="fd-skeleton-grid" style="--fd-min:100%">
+          <div class="fd-card fd-skeleton-card"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i:1"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i:2"></div>
+        </div>
+        <div class="fd-stack" id="keys-list" style="--fd-gap:12px"></div>
+        <div class="fd-card" id="keys-empty" data-flush hidden>
+          <div class="fd-empty" data-size="lg">
+            <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="waves"></div></div>
+            <span class="fd-empty-icon"><i data-icon="key-round"></i></span>
+            <h3 class="fd-empty-title">No API keys yet</h3>
+            <p class="fd-empty-text">Keys authenticate requests from your code. Create one, scope it to the endpoints it needs and rotate it whenever you like.</p>
+            <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-open="dlg-create"><i data-icon="plus"></i><span>Create API key</span></button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band" data-grow aria-label="Usage by key">
+      <div class="fd-grid" style="--fd-min:320px; --fd-gap:32px">
+        <div class="fd-stack" style="--fd-gap:16px">
+          <div class="fd-stack" style="--fd-gap:2px">
+            <h2 class="fd-h3">Usage by key</h2>
+            <p class="fd-small fd-muted" id="usage-total">Credits this month</p>
+          </div>
+          <ul class="fd-bars" id="usage-bars" aria-label="Credits this month by key"></ul>
+        </div>
+        <div class="fd-stack" style="--fd-gap:12px">
+          <div class="fd-callout" data-tone="info" role="note">
+            <i class="fd-callout-icon" data-icon="shield-check"></i>
+            <div class="fd-callout-content"><p class="fd-callout-title">Keep keys on the server</p><p class="fd-callout-body">Send requests from your backend and read the key from an environment variable. A key in browser code, a mobile app or a public repo is a key anyone can spend.</p></div>
+          </div>
+          <figure class="fd-codeblock">
+            <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+            <pre class="fd-codeblock-body"><code data-lang="bash">curl https://api.ember.dev/v1/scrape \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://docs.ember.dev"}'</code></pre>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Key actions (shared by every card) -->
+  <div class="fd-menu" id="menu-key" popover role="menu" aria-label="Key actions">
+    <button class="fd-menu-item" type="button" data-value="rename"><i data-icon="pencil"></i><span class="fd-menu-item-label">Rename</span></button>
+    <button class="fd-menu-item" type="button" data-value="rotate"><i data-icon="refresh-cw"></i><span class="fd-menu-item-label">Rotate<span class="fd-menu-item-desc">The old key keeps working for 24 hours</span></span></button>
+    <button class="fd-menu-item" type="button" data-value="restrict"><i data-icon="shield"></i><span class="fd-menu-item-label">Restrict endpoints</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" type="button" data-value="revoke" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Revoke</span></button>
+  </div>
+
+  <!-- Create API key -->
+  <dialog class="fd-dialog" id="dlg-create" data-size="md">
+    <section data-step="form">
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Create API key</h2>
+        <p class="fd-dialog-desc">Keys act on behalf of Quarry Labs. Limit each one to what it needs.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ck-name">Name</label>
+          <input class="fd-input" id="ck-name" placeholder="Production crawler" maxlength="40" autocomplete="off" autofocus aria-describedby="ck-name-error">
+          <p class="fd-field-error" id="ck-name-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Name the key so you can find it later.</span></p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="ck-expiry">Expires</label>
+          <div class="fd-select" data-variant="outline">
+            <select id="ck-expiry"><option value="30">In 30 days</option><option value="90" selected>In 90 days</option><option value="365">In 1 year</option><option value="never">Never</option></select>
+          </div>
+        </div>
+        <div class="fd-field" role="radiogroup" aria-labelledby="ck-scope-label">
+          <span class="fd-field-label" id="ck-scope-label">Access</span>
+          <div class="fd-choice-group">
+            <label class="fd-choice"><input type="radio" name="ck-scope" value="full" checked><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Full access</span><span class="fd-choice-desc">Every endpoint, plus runs, monitors and usage.</span></span></label>
+            <label class="fd-choice"><input type="radio" name="ck-scope" value="restricted"><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Restricted</span><span class="fd-choice-desc">Only the endpoints you tick below.</span></span></label>
+          </div>
+        </div>
+        <div class="fd-field" id="ck-endpoints" role="group" aria-labelledby="ck-endpoints-label" hidden>
+          <span class="fd-field-label" id="ck-endpoints-label">Endpoints <span class="fd-field-tag">optional</span></span>
+          <div class="fd-grid" style="--fd-min:132px; --fd-gap:8px 16px">
+            <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/search" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/search</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/scrape" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/scrape</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/crawl"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/crawl</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/map"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/map</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/extract"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/extract</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/agent"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/agent</span></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="button" id="ck-create" data-variant="primary" data-fd-dialog-step="created" data-fd-dialog-step-delay="700"><span>Create key</span></button>
+      </div>
+    </section>
+    <section data-step="created" hidden>
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Your new API key</h2>
+        <p class="fd-dialog-desc" id="ck-summary">Production crawler · full access · expires in 90 days</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-callout" data-tone="warning" role="note">
+          <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+          <div class="fd-callout-content"><p class="fd-callout-title">Copy it now</p><p class="fd-callout-body">We show this key once. Store it in your secrets manager before you close this dialog.</p></div>
+        </div>
+        <div class="fd-secret" id="ck-secret" data-fd-secret data-value="em_sk_7Hq2vN4c9xKp1tR8wB3mLd6Ye0aJ5fUz" data-noun="API key" data-state="revealed" role="group" aria-label="New API key">
+          <code class="fd-secret-value" data-tone="accent"></code>
+          <div class="fd-secret-actions">
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key" data-fd-toast='{"title":"Key copied","tone":"success"}'><i data-icon="copy"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close value="done">I’ve copied it</button>
+      </div>
+    </section>
+  </dialog>
+
+  <!-- Rename -->
+  <dialog class="fd-dialog" id="dlg-rename" data-size="sm">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title">Rename key</h2>
+      <p class="fd-dialog-desc">The name is only for you. Requests keep working.</p>
+    </div>
+    <div class="fd-dialog-body">
+      <div class="fd-field">
+        <label class="fd-field-label" for="rn-name">Name</label>
+        <input class="fd-input" id="rn-name" maxlength="40" autocomplete="off" autofocus>
+        <p class="fd-field-error" id="rn-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>A key needs a name.</span></p>
+      </div>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+      <button class="fd-btn" type="button" id="rn-save" data-variant="outline" data-fd-dialog-close value="save">Save name</button>
+    </div>
+  </dialog>
+
+  <!-- Restrict endpoints -->
+  <dialog class="fd-dialog" id="dlg-restrict" data-size="sm">
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title" id="rs-title">Restrict endpoints</h2>
+      <p class="fd-dialog-desc">Requests to any other endpoint are rejected with a 403.</p>
+    </div>
+    <div class="fd-dialog-body fd-stack">
+      <div class="fd-options" id="rs-list" role="group" aria-label="Allowed endpoints">
+        <label class="fd-checkbox"><input type="checkbox" value="/search"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/search</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" value="/scrape"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/scrape</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" value="/crawl"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/crawl</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" value="/map"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/map</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" value="/extract"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/extract</span></span></label>
+        <label class="fd-checkbox"><input type="checkbox" value="/agent"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/agent</span></span></label>
+      </div>
+      <p class="fd-field-error" id="rs-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Pick at least one endpoint.</span></p>
+    </div>
+    <div class="fd-dialog-foot">
+      <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+      <button class="fd-btn" type="button" id="rs-save" data-variant="outline" data-fd-dialog-close value="save">Save endpoints</button>
+    </div>
+  </dialog>
+
+  <!-- Revoke (type to confirm) -->
+  <dialog class="fd-dialog fd-confirm" id="dlg-revoke" data-size="sm" data-confirm="production-crawler">
+    <form method="dialog">
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title" id="rv-title">Revoke Production crawler?</h2>
+        <p class="fd-dialog-desc" id="rv-desc">Requests signed with this key fail at once. Crawls in progress stop at their next page.</p>
+      </div>
+      <div class="fd-dialog-body">
+        <div class="fd-field">
+          <label class="fd-field-label" for="rv-confirm">Type <span class="fd-confirm-phrase" id="rv-phrase">production-crawler</span> to confirm</label>
+          <input class="fd-input" id="rv-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false" autofocus>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Revoke key</span></button>
+      </div>
+    </form>
+  </dialog>
+</main>
+
+<script type="module">
+  import { init, overlays, forms, texture, reducedMotion } from '../fire/fire.js';
+
+  const { toast, openDialog } = overlays;
+  const { setSecret } = forms;
+  const { setLoading } = texture;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const slug = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  /* ---------- Sample data ---------- */
+  const TOTAL = 3000;
+  const USED = 1480;
+  const keys = [
+    { id: 'k1', name: 'Default', value: 'em_sk_227cd9a41c3b8e07f52d6a9144b0f16', created: 'Feb 10, 2026 4:29 PM', lastUsed: '2 min ago', endpoints: ['/scrape', '/crawl'], credits: 498 },
+    { id: 'k2', name: 'Production crawler', value: 'em_sk_7Hq2vN4c9xKp1tR8wB3mLd6Ye0aJ5fUz', created: 'Oct 12, 2026 9:41 AM', lastUsed: '14 min ago', endpoints: ['/crawl', '/map', '/extract'], credits: 812 },
+    { id: 'k3', name: 'CI', value: 'em_sk_Zb41nQ8rT6yVc3KdW9xLm2Pa7HeJ0sGf', created: 'Mar 3, 2026 11:08 AM', lastUsed: 'Nov 2, 2026', endpoints: ['/scrape'], credits: 170, expired: 'Nov 3' },
+  ];
+
+  const list = $('#keys-list');
+  const empty = $('#keys-empty');
+  const wrap = $('#keys-wrap');
+  const byId = (id) => keys.find((k) => k.id === id);
+
+  /* ---------- Rendering ---------- */
+  const cardHTML = (k) => `<article class="fd-card" data-key="${k.id}"${k.expired ? ' data-variant="quiet"' : ''} aria-label="${esc(k.name)}">
+      <header class="fd-card-head">
+        <div class="fd-card-heading"><h3 class="fd-title fd-row" style="--fd-gap:8px"><span>${esc(k.name)}</span>${k.expired ? `<span class="fd-badge" data-tone="warning">Expired ${k.expired}</span>` : ''}</h3></div>
+        <div class="fd-card-action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="menu-key" data-placement="bottom-end" aria-label="Actions for ${esc(k.name)}"><i data-icon="ellipsis"></i></button></div>
+      </header>
+      <div class="fd-card-body fd-stack" style="--fd-gap:12px">
+        <div class="fd-secret" data-value="${k.value}" data-noun="API key" role="group" aria-label="${esc(k.name)} API key">
+          <code class="fd-secret-value" data-tone="accent"></code>
+          <div class="fd-secret-actions">
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show API key"><i data-icon="eye"></i></button>
+            <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key" data-fd-toast='{"title":"Key copied","tone":"success"}'><i data-icon="copy"></i></button>
+          </div>
+        </div>
+        <div class="fd-row" data-wrap style="--fd-gap:6px 12px">
+          <span class="fd-small fd-muted">Created on ${k.created} · Last used ${k.lastUsed}${k.expires ? ` · Expires ${k.expires}` : ''}</span>
+          <span class="fd-row" style="--fd-gap:4px">${k.endpoints.map((e) => `<span class="fd-badge" data-variant="mono">${e}</span>`).join('')}</span>
+        </div>
+      </div>
+    </article>`;
+
+  function addCard(k, { rise = false, index = keys.indexOf(k) } = {}) {
+    list.insertAdjacentHTML('beforeend', cardHTML(k));
+    const el = list.lastElementChild;
+    if (index < list.children.length - 1) list.insertBefore(el, list.children[index]);
+    if (rise) el.classList.add('fd-rise');
+    init(el);
+    return el;
+  }
+
+  function syncPage() {
+    empty.hidden = keys.length > 0;
+    list.hidden = keys.length === 0;
+    const max = Math.max(...keys.map((k) => k.credits), 1);
+    const used = keys.reduce((sum, k) => sum + k.credits, 0);
+    $('#usage-total').textContent = keys.length ? `${used.toLocaleString('en-US')} of ${TOTAL.toLocaleString('en-US')} credits this month · resets Nov 23` : 'Credits this month';
+    const bars = $('#usage-bars');
+    bars.innerHTML = [...keys].sort((a, b) => b.credits - a.credits).map((k) =>
+      `<li class="fd-bars-row" style="--value: ${(k.credits / max).toFixed(3)}"><span class="fd-bars-label">${esc(k.name)}</span><span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">${k.credits.toLocaleString('en-US')}</span></li>`).join('')
+      || '<li class="fd-small fd-muted">Usage appears here once a key makes requests.</li>';
+  }
+
+  const renderAll = () => { list.innerHTML = ''; keys.forEach((k) => addCard(k)); syncPage(); };
+
+  /* ---------- Collapse a card out (and back in) ---------- */
+  async function collapse(el) {
+    if (!el) return;
+    if (!reducedMotion()) {
+      const last = !el.nextElementSibling;
+      el.style.overflow = 'hidden';
+      await el.animate([
+        { height: `${el.offsetHeight}px`, opacity: 1, marginBlockStart: '0px', marginBlockEnd: '0px' },
+        { height: '0px', opacity: 0, paddingBlock: '0px', borderBlockWidth: '0px', marginBlockStart: last && el.previousElementSibling ? '-12px' : '0px', marginBlockEnd: last ? '0px' : '-12px' },
+      ], { duration: 320, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', fill: 'forwards' }).finished.catch(() => {});
+    }
+    el.remove();
+  }
+
+  /* ---------- Menu actions ---------- */
+  let target = null;
+  const dialog = (id) => document.getElementById(id);
+
+  document.addEventListener('fd:select', (event) => {
+    const { item, trigger } = event.detail || {};
+    if (!item?.closest('#menu-key')) return;
+    const k = byId(trigger?.closest('[data-key]')?.dataset.key);
+    if (!k) return;
+    target = k;
+    const choice = item.dataset.value;
+    if (choice === 'rename') requestAnimationFrame(() => { $('#rn-name').value = k.name; $('#rn-error').hidden = true; openDialog('dlg-rename', { trigger }); });
+    if (choice === 'restrict') requestAnimationFrame(() => {
+      $('#rs-title').textContent = `Restrict ${k.name}`;
+      $$('#rs-list input').forEach((box) => { box.checked = k.endpoints.includes(box.value); });
+      $('#rs-error').hidden = true;
+      openDialog('dlg-restrict', { trigger });
+    });
+    if (choice === 'rotate') rotate(k);
+    if (choice === 'revoke') requestAnimationFrame(() => {
+      const d = dialog('dlg-revoke');
+      d.dataset.confirm = slug(k.name);
+      $('#rv-phrase').textContent = slug(k.name);
+      $('#rv-title').textContent = `Revoke ${k.name}?`;
+      $('#rv-desc').textContent = `Requests signed with ${k.value.slice(0, 6)}…${k.value.slice(-4)} fail at once. Crawls in progress stop at their next page. You can’t undo this from the key, only restore it for a few seconds.`;
+      openDialog(d, { trigger });
+    });
+  });
+
+  function rotate(k) {
+    const fresh = `em_sk_${token(32)}`;
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1200)), {
+      loading: { title: `Rotating ${k.name}`, description: 'Issuing a new key.' },
+      success: () => {
+        k.value = fresh;
+        const secret = $(`[data-key="${k.id}"] .fd-secret`);
+        if (secret) { secret.dataset.state = 'revealed'; setSecret(secret, fresh); }
+        return { title: `${k.name} rotated`, description: 'The old key keeps working for 24 hours. Copy the new one now.' };
+      },
+      error: 'Could not rotate the key',
+    });
+  }
+
+  /* ---------- Rename and restrict (validate before the dialog closes) ---------- */
+  dialog('dlg-rename').addEventListener('click', (event) => {
+    if (!event.target.closest('#rn-save')) return;
+    const ok = $('#rn-name').value.trim().length > 0;
+    $('#rn-error').hidden = ok;
+    if (!ok) { event.stopPropagation(); event.preventDefault(); $('#rn-name').focus(); }
+  }, true);
+  $('#rn-name').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('#rn-save').click(); });
+
+  dialog('dlg-restrict').addEventListener('click', (event) => {
+    if (!event.target.closest('#rs-save')) return;
+    const ok = $$('#rs-list input:checked').length > 0;
+    $('#rs-error').hidden = ok;
+    if (!ok) { event.stopPropagation(); event.preventDefault(); }
+  }, true);
+
+  document.addEventListener('fd:close', (event) => {
+    const el = event.target;
+    if (!(el instanceof Element) || event.detail?.value == null) return;
+    if (el.id === 'dlg-rename' && event.detail.value === 'save' && target) {
+      target.name = $('#rn-name').value.trim();
+      replaceCard(target);
+      toast.success('Key renamed', { description: target.name });
+    }
+    if (el.id === 'dlg-restrict' && event.detail.value === 'save' && target) {
+      target.endpoints = $$('#rs-list input:checked').map((box) => box.value);
+      replaceCard(target);
+      toast.success('Endpoints updated', { description: `${target.name} can call ${target.endpoints.join(', ')}.` });
+    }
+    if (el.id === 'dlg-revoke' && event.detail.value === 'confirm' && target) revoke(target);
+    if (el === dialog('dlg-create')) finishCreate();
+  });
+
+  function replaceCard(k) {
+    const old = $(`[data-key="${k.id}"]`);
+    const el = addCard(k, { index: keys.indexOf(k) });
+    old?.replaceWith(el);
+    syncPage();
+  }
+
+  /* ---------- Revoke, with Undo ---------- */
+  async function revoke(k) {
+    const index = keys.indexOf(k);
+    const el = $(`[data-key="${k.id}"]`);
+    keys.splice(index, 1);
+    await collapse(el);
+    syncPage();
+    toast({
+      title: `${k.name} revoked`,
+      description: keys.length ? 'Requests with this key now fail.' : 'You have no API keys left.',
+      tone: 'neutral',
+      duration: 8000,
+      action: { label: 'Undo', onClick: () => { keys.splice(index, 0, k); addCard(k, { rise: true, index }); syncPage(); } },
+    });
+  }
+
+  /* ---------- Create ---------- */
+  const create = dialog('dlg-create');
+  const token = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'[b % 56]).join('');
+  const EXPIRY = { 30: 'in 30 days', 90: 'in 90 days', 365: 'in 1 year', never: 'never' };
+  let pending = null;
+
+  create.addEventListener('fd:open', (event) => {
+    if (event.target !== create) return;
+    $('#ck-name').value = '';
+    $('#ck-name').removeAttribute('aria-invalid');
+    $('#ck-name-error').hidden = true;
+    $('#ck-expiry').value = '90';
+    $('input[name="ck-scope"][value="full"]').checked = true;
+    $('#ck-endpoints').hidden = true;
+    pending = null;
+  });
+  $$('input[name="ck-scope"]').forEach((radio) => radio.addEventListener('change', () => { $('#ck-endpoints').hidden = $('input[name="ck-scope"]:checked').value !== 'restricted'; }));
+  $('#ck-name').addEventListener('keydown', (event) => { if (event.key === 'Enter') $('#ck-create').click(); });
+
+  // The name is required: stop Fire's step handler until it is filled in.
+  create.addEventListener('click', (event) => {
+    if (!event.target.closest('#ck-create')) return;
+    const ok = $('#ck-name').value.trim().length > 0;
+    $('#ck-name-error').hidden = ok;
+    $('#ck-name').toggleAttribute('aria-invalid', !ok);
+    if (!ok) { event.stopPropagation(); event.preventDefault(); $('#ck-name').focus(); }
+  }, true);
+
+  create.addEventListener('fd:change', (event) => {
+    if (event.target !== create || event.detail.value !== 'created') return;
+    const restricted = $('input[name="ck-scope"]:checked').value === 'restricted';
+    const endpoints = restricted ? $$('input[name="ck-ep"]:checked').map((box) => box.value) : ['/search', '/scrape', '/crawl', '/map', '/extract', '/agent'];
+    const expiry = $('#ck-expiry').value;
+    pending = {
+      id: `k${Date.now()}`, name: $('#ck-name').value.trim(), value: `em_sk_${token(32)}`, created: 'Nov 14, 2026 4:36 PM', lastUsed: 'never', credits: 0,
+      endpoints: restricted && endpoints.length ? endpoints : ['All endpoints'],
+      expires: expiry === 'never' ? '' : new Date(new Date('2026-11-14').getTime() + Number(expiry) * 864e5).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    };
+    setSecret($('#ck-secret'), pending.value);
+    $('#ck-summary').textContent = `${pending.name} · ${restricted ? `${endpoints.length} endpoint${endpoints.length === 1 ? '' : 's'}` : 'full access'} · expires ${EXPIRY[expiry]}`;
+  });
+
+  function finishCreate() {
+    if (!pending) return;
+    keys.push(pending);
+    list.hidden = false;
+    addCard(pending, { rise: true });
+    syncPage();
+    toast.success('API key created', { description: `${pending.name} is ready to use.` });
+    pending = null;
+  }
+
+  /* ---------- First paint: skeleton for ~600 ms, then the keys ---------- */
+  renderAll();
+  setTimeout(() => setLoading(wrap, false), 600);
+</script>
+</body>
+</html>

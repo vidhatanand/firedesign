@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parse files · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="parse">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band fd-rise" data-pad="sm" style="--fd-i:0" aria-label="Parse files">
+      <div class="fd-page-head">
+        <div class="fd-page-head-text">
+          <h1 class="fd-page-head-title">Parse files</h1>
+          <p class="fd-page-head-desc">Drop documents, review pages and credits, then parse.</p>
+        </div>
+        <div class="fd-page-head-actions">
+          <button class="fd-btn" type="button" data-variant="outline" id="parse-code-btn" data-fd-dialog-open="parse-code"><i data-icon="code"></i><span>Get code</span></button>
+          <button class="fd-btn" type="button" data-variant="accent-soft" id="parse-skill"><i data-icon="scroll-text"></i><span>Copy skill</span></button>
+          <a class="fd-btn-text" href="#docs"><span>Docs</span><i data-icon="arrow-up-right" data-nudge="up-right"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band fd-rise" style="--fd-i:1" aria-label="Upload">
+      <div class="fd-stack" style="--fd-gap:12px">
+        <label class="fd-dropzone" id="parse-zone" data-fd-dropzone data-list="#parse-files" data-max-mb="50">
+          <input type="file" multiple accept=".pdf,.docx,.xlsx,.html,.htm,.txt,.md,.csv">
+          <span class="fd-dropzone-icon"><i data-icon="cloud-upload"></i></span>
+          <span class="fd-dropzone-text">
+            <span class="fd-dropzone-title">Drop PDFs or documents</span>
+            <span class="fd-dropzone-hint">PDF, DOCX, XLSX, HTML and other supported files, up to 50 MB each. 1 credit per page.</span>
+          </span>
+          <button class="fd-btn" type="button" id="parse-sample"><i data-icon="sparkles"></i><span>Try a sample</span></button>
+        </label>
+        <ul class="fd-filelist" id="parse-files" aria-label="Uploads"></ul>
+      </div>
+    </section>
+
+    <section class="fd-band" data-pad="none" data-grow aria-label="Documents and viewer">
+      <div class="fd-split" data-side="start">
+        <aside class="fd-panel" aria-label="Documents">
+          <div class="fd-panel-head"><h2 class="fd-panel-title">Documents</h2></div>
+          <p class="fd-small fd-muted" id="parse-count">Showing latest 0 docs, up to 100</p>
+          <div class="fd-callout" data-size="sm" role="note">
+            <i class="fd-callout-icon" data-icon="info"></i>
+            <div class="fd-callout-content"><p class="fd-callout-body">Parsed output is stored in your browser only</p></div>
+          </div>
+          <div class="fd-search" data-variant="soft">
+            <i data-icon="search"></i>
+            <input class="fd-search-input" id="parse-search" type="search" placeholder="Search files, job IDs, status" aria-label="Search documents" autocomplete="off">
+            <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+          </div>
+          <div id="parse-list" data-fd-loading="true" aria-busy="true">
+            <div class="fd-skeleton-list" data-rows="3"></div>
+            <div id="parse-list-body"></div>
+          </div>
+        </aside>
+
+        <div class="fd-split-main" id="parse-viewer" aria-live="polite">
+          <div class="fd-empty" data-size="lg" id="parse-empty">
+            <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="waves" data-fade="x"></div></div>
+            <span class="fd-empty-icon"><i data-icon="file-search"></i></span>
+            <h2 class="fd-empty-title">Choose a document to read it</h2>
+            <p class="fd-empty-text">Parsed markdown, JSON and page details appear here. Drop a file above or start with a sample.</p>
+            <div class="fd-empty-actions"><button class="fd-btn" type="button" data-sample><i data-icon="sparkles"></i><span>Try a sample</span></button></div>
+          </div>
+          <div id="parse-doc" hidden></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<dialog class="fd-dialog" id="parse-code" data-size="xl" aria-labelledby="parse-code-title">
+  <div class="fd-dialog-head">
+    <h2 class="fd-h3 fd-dialog-title" id="parse-code-title">Get code</h2>
+    <p class="fd-dialog-desc">Send a file to /parse and read the pages back as markdown or JSON.</p>
+    <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+  </div>
+  <div class="fd-dialog-body fd-stack" style="--fd-gap:12px">
+    <div class="fd-row" data-wrap data-justify="between">
+      <button class="fd-endpoint" type="button" data-copyable data-copy="https://api.ember.dev/v2/parse"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/parse</span></button>
+      <span class="fd-small fd-muted">1 credit per page</span>
+    </div>
+    <div id="parse-code-host"></div>
+  </div>
+  <div class="fd-dialog-foot"><button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-close>Done</button></div>
+</dialog>
+
+<script type="module">
+import { init, forms, texture, code, overlays, copyText } from '../fire/fire.js';
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const ico = (n) => `<i data-icon="${n}"></i>`;
+const toast = overlays.toast;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = (ms) => new Promise((r) => setTimeout(r, reduced ? 0 : ms));
+const bytes = (n) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+const when = () => new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+/* ---------- sample documents ---------- */
+const SAMPLES = [
+  { name: 'quarry-q3-pricing-report.pdf', type: 'application/pdf', size: 2411520, pages: 12, kind: 'pdf' },
+  { name: 'northwind-master-agreement.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 318000, pages: 8, kind: 'docx' },
+  { name: 'competitor-prices.xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', size: 96400, pages: 3, kind: 'xlsx' },
+];
+const KIND_ICON = { pdf: 'file-text', docx: 'file-text', xlsx: 'table', html: 'file-code', other: 'file' };
+const kindOf = (name) => { const e = name.split('.').pop().toLowerCase(); return { pdf: 'pdf', docx: 'docx', xlsx: 'xlsx', csv: 'xlsx', html: 'html', htm: 'html' }[e] || 'other'; };
+
+const table = (head, rows) => `<table><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+function contentFor(d) {
+  if (d.kind === 'pdf' && /pricing/.test(d.name)) {
+    return {
+      html: `<h1>Q3 pricing report</h1><p>Prepared by Quarry Labs on Oct 28, 2026. This report compares list prices across three web-data APIs and recommends where to revise ours.</p>
+<h2>Summary</h2><ul><li>Entry plans cluster between <strong>$16 and $29</strong> a month.</li><li>Credit allowances differ by 3x at the same price, so cost per 1,000 credits is the fairer yardstick.</li><li>Only one provider offers a daily free allowance.</li></ul>
+<h2>Plan comparison</h2>${table(['Provider', 'Plan', 'Price / mo', 'Credits'], [['Ember', 'Hobby', '$16', '3,000'], ['Northwind', 'Starter', '$29', '10,000'], ['Lumen', 'Developer', '$19', '5,000']])}
+<h2>Recommendation</h2><p>Keep Hobby at $16 and raise its allowance to 4,000 credits. Revisit Standard after the November changelog.</p>`,
+      tables: 2, words: 4870,
+    };
+  }
+  if (d.kind === 'docx') {
+    return {
+      html: `<h1>Master services agreement</h1><p>Between <strong>Northwind Data, Inc.</strong> and <strong>Quarry Labs</strong>, effective Nov 1, 2026.</p>
+<h2>1. Services</h2><p>Northwind provides access to its data API as described in Schedule A. Quarry Labs may use the service for internal analysis and for products it builds.</p>
+<h2>2. Fees</h2><p>Fees are billed monthly in arrears. Usage above the plan allowance is charged at <code>$0.002</code> per page.</p>
+<h2>3. Term</h2><ol><li>The initial term is 12 months.</li><li>Either party may end the agreement with 30 days' written notice.</li></ol>`,
+      tables: 1, words: 3120,
+    };
+  }
+  if (d.kind === 'xlsx') {
+    return {
+      html: `<h1>competitor-prices.xlsx</h1><h2>Sheet 1 · Plans</h2>${table(['Provider', 'Plan', 'Monthly', 'Yearly'], [['Ember', 'Standard', '$83', '$830'], ['Northwind', 'Team', '$149', '$1,490'], ['Lumen', 'Scale', '$249', '$2,490']])}
+<h2>Sheet 2 · Overage</h2>${table(['Provider', 'Unit', 'Price'], [['Northwind', 'page', '$0.002'], ['Lumen', '1k requests', '$0.90']])}`,
+      tables: 3, words: 640,
+    };
+  }
+  return {
+    html: `<h1>${esc(d.name.replace(/\.[^.]+$/, ''))}</h1><p>Ember read ${d.pages} ${d.pages === 1 ? 'page' : 'pages'} from this file and kept its headings, lists and tables. The text below is sample output for a file Ember has not seen before.</p><h2>Overview</h2><p>Section titles become markdown headings, tables become pipe tables, and page breaks are marked so you can cite them.</p>`,
+    tables: 0, words: d.pages * 410,
+  };
+}
+
+/* ---------- state ---------- */
+const docs = [];
+let selected = null;
+let counter = 0;
+const zone = $('#parse-zone');
+
+const pageKinds = ['Title and text', 'Text', 'Table', 'Text and figure', 'Text', 'Table', 'Text'];
+function pagesOf(d) { return Array.from({ length: d.pages }, (_, i) => ({ n: i + 1, kind: pageKinds[i % pageKinds.length], words: 280 + ((i * 97 + d.pages * 13) % 320) })); }
+
+/* ---------- document list ---------- */
+function renderList() {
+  const q = $('#parse-search').value.trim().toLowerCase();
+  const shown = docs.filter((d) => !q || d.name.toLowerCase().includes(q) || d.state.includes(q) || d.id.includes(q));
+  $('#parse-count').textContent = `Showing latest ${shown.length} ${shown.length === 1 ? 'doc' : 'docs'}, up to 100`;
+  const body = $('#parse-list-body');
+  if (!shown.length) {
+    body.innerHTML = `<div class="fd-session-list-empty" role="status">${q ? `No documents match “${esc($('#parse-search').value.trim())}”.` : 'The latest parse requests for this team will appear here.'}</div>`;
+  } else {
+    body.innerHTML = `<nav class="fd-session-list" aria-label="Documents"><div class="fd-session-list-body"><p class="fd-session-list-label fd-eyebrow">Today</p>${shown.map((d) => {
+      const trail = d.state === 'parsing' ? '<span class="fd-session-list-live" role="img" aria-label="Parsing"></span>' : `<span class="fd-session-list-time">${d.pages} pp</span>`;
+      return `<div class="fd-session-list-item"><a class="fd-session-list-link" href="#${d.id}" data-doc="${d.id}"${d.id === selected ? ' aria-current="page"' : ''}>${esc(d.name)}</a>${trail}<button type="button" class="fd-session-list-more" data-remove="${d.id}" aria-label="Remove ${esc(d.name)}">${ico('x')}</button></div>`;
+    }).join('')}</div></nav>`;
+  }
+  init(body);
+}
+
+/* ---------- viewer ---------- */
+let viewToken = 0;
+function renderViewer() {
+  const empty = $('#parse-empty');
+  const host = $('#parse-doc');
+  const d = docs.find((x) => x.id === selected);
+  empty.hidden = !!d;
+  host.hidden = !d;
+  if (!d) { host.replaceChildren(); return; }
+  const c = contentFor(d);
+  const pages = pagesOf(d);
+  const json = { id: d.id, file: d.name, pages: d.pages, words: c.words, tables: c.tables, markdown: c.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140) + '…', creditsUsed: d.pages };
+  const uid = `pv${++viewToken}`;
+  const parsing = d.state === 'parsing';
+  host.innerHTML = `<div class="fd-stack" style="--fd-gap:20px">
+    <header class="fd-row" data-wrap data-justify="between" style="--fd-gap:12px">
+      <div class="fd-row" style="--fd-gap:12px">
+        <span class="fd-tile" data-tone="accent">${ico(KIND_ICON[d.kind])}</span>
+        <div class="fd-stack" style="--fd-gap:2px">
+          <h2 class="fd-title fd-truncate">${esc(d.name)}</h2>
+          <p class="fd-mono-sm fd-muted">${d.pages} ${d.pages === 1 ? 'page' : 'pages'} · ${d.pages} credits · ${bytes(d.size)} · ${parsing ? 'parsing' : `parsed ${d.when}`}</p>
+        </div>
+      </div>
+      <div class="fd-row" style="--fd-gap:4px">
+        <span class="fd-status" data-size="sm" data-tone="${parsing ? 'info' : 'success'}"${parsing ? ' data-live' : ''}>${parsing ? 'Parsing' : 'Parsed'}</span>
+        <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-act="copy" aria-label="Copy markdown">${ico('copy')}</button>
+        <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-act="download" aria-label="Download JSON">${ico('download')}</button>
+      </div>
+    </header>
+    <div class="fd-tabs" role="tablist" aria-label="Output">
+      <button class="fd-tab" type="button" role="tab" aria-selected="true" aria-controls="${uid}-md" data-value="markdown">${ico('file-text')}Markdown</button>
+      <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="${uid}-json" data-value="json">${ico('braces')}JSON</button>
+      <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="${uid}-pages" data-value="pages">${ico('layers')}Pages <span class="fd-tab-count">${d.pages}</span></button>
+    </div>
+    <div id="${uid}-body" data-fd-loading="true" aria-busy="true">
+      <div class="fd-stack" style="--fd-gap:16px"><span class="fd-skeleton-title" data-size="h3" style="width:40%"></span><div class="fd-skeleton-text" data-lines="4"></div><div class="fd-skeleton-text" data-lines="3"></div></div>
+      <div>
+        <div class="fd-tab-panel" role="tabpanel" id="${uid}-md">${parsing ? '<p class="fd-muted">Parsing is still running. Pages appear as they finish.</p>' : `<div class="fd-message-body">${c.html}</div>`}</div>
+        <div class="fd-tab-panel" role="tabpanel" id="${uid}-json" hidden><div class="fd-json" data-toolbar data-label="POST /v2/parse · ${esc(d.id)}" data-depth="2" data-truncate="72" data-json="${esc(JSON.stringify(json))}"></div></div>
+        <div class="fd-tab-panel" role="tabpanel" id="${uid}-pages" hidden><ul class="fd-list" data-divided aria-label="Pages">${pages.map((p) => `<li class="fd-list-row"><span class="fd-list-lead">${p.n}</span><div class="fd-list-body"><span class="fd-list-title">Page ${p.n}</span><span class="fd-list-desc">${p.kind}</span></div><span class="fd-list-meta" data-mono>${p.words} words</span></li>`).join('')}</ul></div>
+      </div>
+    </div>
+  </div>`;
+  init(host);
+  $('[data-act="copy"]', host).addEventListener('click', async (e) => { if (await copyText(c.html.replace(/<\/(h\d|p|li|tr)>/g, '\n').replace(/<[^>]+>/g, ' ').replace(/ +/g, ' ').trim())) code.copied(e.currentTarget, { iconOnly: true }); });
+  $('[data-act="download"]', host).addEventListener('click', () => {
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' })), download: `${d.name}.json` });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  const my = viewToken;
+  setTimeout(() => { if (my === viewToken) texture.setLoading($(`#${uid}-body`), false); }, 600);
+}
+
+function select(id) { selected = id; renderList(); renderViewer(); }
+
+/* ---------- parsing ---------- */
+async function parseFile(file, row) {
+  const d = { id: `parse_${(++counter).toString(36)}${Math.random().toString(36).slice(2, 6)}`, name: file.name, size: file.size, kind: kindOf(file.name), state: 'parsing', when: '' };
+  const sample = SAMPLES.find((s) => s.name === file.name);
+  d.pages = sample ? sample.pages : Math.max(1, Math.min(24, Math.round(file.size / 90000) || 2));
+  docs.unshift(d);
+  renderList();
+  let pct = 0;
+  while (pct < 100) {
+    pct = Math.min(100, pct + 9 + Math.random() * 14);
+    if (row?.isConnected) {
+      forms.setFileProgress(row, pct);
+      const status = $('.fd-file-status', row);
+      if (status && pct < 100) status.textContent = `Parsing ${Math.round(pct)}%`;
+    }
+    await wait(150 + Math.random() * 150);
+  }
+  d.state = 'parsed';
+  d.when = when();
+  if (row?.isConnected) {
+    forms.setFileProgress(row, 100, { state: 'done', message: `Parsed · ${d.pages} ${d.pages === 1 ? 'page' : 'pages'}` });
+    setTimeout(() => row.remove(), reduced ? 0 : 1600);
+  }
+  if (selected === null) selected = d.id;
+  renderList();
+  if (selected === d.id) renderViewer();
+}
+
+zone.addEventListener('fd:files', (e) => {
+  e.preventDefault();
+  (e.detail.rows || []).forEach((row) => row.fdFile && parseFile(row.fdFile, row));
+});
+
+function addSample() {
+  const sample = SAMPLES[counter % SAMPLES.length];
+  const file = new File([new Uint8Array(Math.min(sample.size, 3 * 1048576))], sample.name, { type: sample.type });
+  Object.defineProperty(file, 'size', { value: sample.size });
+  forms.addFiles(zone, [file]);
+}
+$('#parse-sample').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); addSample(); });
+$('[data-sample]').addEventListener('click', addSample);
+
+/* ---------- list wiring ---------- */
+$('#parse-list').addEventListener('click', (e) => {
+  const remove = e.target.closest('[data-remove]');
+  if (remove) {
+    e.preventDefault();
+    const i = docs.findIndex((d) => d.id === remove.dataset.remove);
+    if (i > -1) docs.splice(i, 1);
+    if (selected === remove.dataset.remove) { selected = null; renderViewer(); }
+    renderList();
+    return;
+  }
+  const link = e.target.closest('[data-doc]');
+  if (link) { e.preventDefault(); select(link.dataset.doc); }
+});
+$('#parse-search').addEventListener('input', renderList);
+
+/* ---------- header actions ---------- */
+$('#parse-skill').addEventListener('click', async () => {
+  if (await copyText('npx -y @ember/cli skills add parse')) toast({ title: 'Skill copied', description: 'Paste it into your agent to give it /parse.', tone: 'success' });
+});
+
+const esc2 = (s) => s.replace(/'/g, "'\\''");
+$('#parse-code-btn').addEventListener('click', () => {
+  const name = docs.find((d) => d.id === selected)?.name || 'quarry-q3-pricing-report.pdf';
+  const panes = [
+    ['curl', 'bash', `curl -X POST https://api.ember.dev/v2/parse \\\n  -H "Authorization: Bearer $EMBER_API_KEY" \\\n  -F 'file=@${esc2(name)}' \\\n  -F 'options={"formats":["markdown"]}'`],
+    ['python', 'python', `import os\nimport requests\n\nwith open("${name}", "rb") as f:\n    res = requests.post(\n        "https://api.ember.dev/v2/parse",\n        headers={"Authorization": "Bearer " + os.environ["EMBER_API_KEY"]},\n        files={"file": f},\n        data={"options": '{"formats": ["markdown"]}'},\n    )\nprint(res.json()["markdown"][:280])`],
+    ['node', 'javascript', `import { readFile } from "node:fs/promises";\n\nconst form = new FormData();\nform.append("file", new Blob([await readFile("${name}")]), "${name}");\nform.append("options", JSON.stringify({ formats: ["markdown"] }));\n\nconst res = await fetch("https://api.ember.dev/v2/parse", {\n  method: "POST",\n  headers: { Authorization: "Bearer " + process.env.EMBER_API_KEY },\n  body: form,\n});\nconsole.log((await res.json()).markdown.slice(0, 280));`],
+    ['cli', 'bash', `$ npm install -g @ember/cli\n$ ember login\n$ ember parse ${name} --format markdown > report.md`],
+  ];
+  $('#parse-code-host').innerHTML = `<div class="fd-codeblock" data-sync="lang">
+    <div class="fd-codeblock-head">
+      <div class="fd-codeblock-tabs" aria-label="Language"><button class="fd-codeblock-tab" data-value="curl">cURL</button><button class="fd-codeblock-tab" data-value="python">Python</button><button class="fd-codeblock-tab" data-value="node">Node</button><button class="fd-codeblock-tab" data-value="cli">CLI</button></div>
+      <div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code">${ico('copy')}</button></div>
+    </div>
+    ${panes.map(([v, lang, text]) => `<pre class="fd-codeblock-body" data-value="${v}"><code data-lang="${lang}">${esc(text)}</code></pre>`).join('')}
+  </div>`;
+  init($('#parse-code-host'));
+});
+
+/* ---------- first paint ---------- */
+renderList();
+setTimeout(() => texture.setLoading($('#parse-list'), false), 650);
+</script>
+</body>
+</html>

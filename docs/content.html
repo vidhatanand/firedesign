@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cards &amp; feedback · Fire</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="content">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Cards &amp; feedback</h1>
+    <p class="doc-lede">Objects, labels and messages. A card is for something you can name and open: a provider, a plan, a key. Everything else on a page is a hairline, a badge or a quiet line of status.</p>
+  </header>
+
+  <!-- ===================== CARDS ===================== -->
+  <section class="doc-section" id="card">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Card</h2>
+      <p>White surface, a 1px faint edge and no shadow at rest. Head, body and foot are optional parts; the foot is separated by a hairline and sticks to the bottom when cards share a row.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" style="--min:300px">
+      <article class="fd-card">
+        <header class="fd-card-head">
+          <div class="fd-card-heading"><h3 class="fd-title">Production key</h3><p class="fd-card-desc">Created Feb 10, 2026 by Mara Voss</p></div>
+          <div class="fd-card-action"><button class="fd-btn" data-size="sm" data-variant="ghost" data-icon-only aria-label="More"><i data-icon="ellipsis"></i></button></div>
+        </header>
+        <div class="fd-card-body"><span class="fd-code">fc-live-••••••••a91f</span></div>
+        <footer class="fd-card-foot"><span>Last used 2 min ago</span><span class="fd-mono-sm">/scrape</span></footer>
+      </article>
+      <article class="fd-card" data-size="lg">
+        <header class="fd-card-head">
+          <div class="fd-card-heading"><h3 class="fd-title">Large card</h3><p class="fd-card-desc">16px radius, 24px padding</p></div>
+          <div class="fd-card-action"><button class="fd-btn" data-size="sm" data-variant="outline">Edit</button></div>
+        </header>
+        <p class="fd-card-body">Use the large size for single objects that own a column, like a plan or a team summary.</p>
+        <footer class="fd-card-foot"><span>4 members</span><span>Updated Nov 23</span></footer>
+      </article>
+    </div>
+    <ul class="doc-notes">
+      <li>Never nest a card in a card. If a section needs structure inside a card, use a hairline.</li>
+      <li><code class="fd-code">data-flush</code> removes the padding for tables and lists that run edge to edge.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="card-variants">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Variants</h2>
+      <p>Quiet drops the edge for a faint fill, sunken sets the card into the page, accent is for the one card you want people to notice.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" style="--min:200px">
+      <div class="fd-card"><h3 class="fd-title">Default</h3><p class="fd-card-body">Surface with a faint edge.</p></div>
+      <div class="fd-card" data-variant="quiet"><h3 class="fd-title">Quiet</h3><p class="fd-card-body">No edge, 3% ink fill.</p></div>
+      <div class="fd-card" data-variant="sunken"><h3 class="fd-title">Sunken</h3><p class="fd-card-body">Page-sunken background.</p></div>
+      <div class="fd-card" data-variant="accent"><h3 class="fd-title">Accent</h3><p class="fd-card-body">Accent wash and line.</p></div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="interactive">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Interactive cards</h2>
+      <p>When the whole card is a link or button, mark it <code class="fd-code">data-interactive</code>. The edge darkens, the corner arrow moves one pixel up and right, and a press scales it to 99%. Tab to the second card to see the focus ring.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" style="--min:260px">
+      <a class="fd-card" data-interactive href="#">
+        <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        <div class="fd-card-head"><span class="fd-tile" data-size="36" data-tone="accent"><i data-icon="radar"></i></span>
+          <div class="fd-card-heading"><span class="fd-card-name">Monitor the web</span><span class="fd-card-meta">3 active monitors</span></div></div>
+        <p class="fd-card-text">Watch pages for changes and get a webhook or an email when something moves.</p>
+      </a>
+      <button class="fd-card" data-interactive type="button">
+        <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        <div class="fd-card-head"><span class="fd-tile" data-size="36"><i data-icon="key-round"></i></span>
+          <div class="fd-card-heading"><span class="fd-card-name">Create an API key</span><span class="fd-card-meta">Takes a few seconds</span></div></div>
+        <p class="fd-card-text">Keys are scoped to a team and can be limited to specific endpoints.</p>
+      </button>
+      <a class="fd-card" data-interactive data-variant="quiet" href="#">
+        <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+        <div class="fd-card-head"><span class="fd-tile" data-size="36" data-tone="neutral"><i data-icon="book-open"></i></span>
+          <div class="fd-card-heading"><span class="fd-card-name">Read the docs</span><span class="fd-card-meta">docs.ember.dev</span></div></div>
+        <p class="fd-card-text">Quiet cards fill instead of lifting their edge.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="doc-section" id="provider">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Provider card</h2>
+      <p>The catalog card: a 44px logo tile, name with a verified seal, a two-line description, and a foot with a mono price range on the left and a muted count on the right. Cards in a <code class="fd-code">fd-card-grid</code> stretch to equal heights, so every foot lines up.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-card-grid" style="padding:32px; --fd-min:230px">
+    <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="info">NP</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Northwind People</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">People</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Person and company enrichment: find people by title and company, verified work emails and firmographics.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">0–15 credits</span>
+        <span class="fd-card-count">10 capabilities</span>
+      <span class="fd-card-note">1,000 of 1,000 free credits left</span>
+      </div>
+    </a>
+    <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="violet">TF</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Tessera Finance</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Finance</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Company fundamentals with the record around them: standardized filings, ratios and segment revenue.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">0–30 credits</span>
+        <span class="fd-card-count">34 capabilities</span>
+      </div>
+    </a>
+    <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="accent">HF</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Halyard Funding</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Finance</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Recent startup funding rounds, announced from 2026 onward: investors, amounts and stage.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">5 credits</span>
+        <span class="fd-card-count">9 capabilities</span>
+      </div>
+    </a>
+    <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="success">PR</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Parcel Retail</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Retail</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Search products across merchants or within one store: price history, stock and variants.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">2–300 credits</span>
+        <span class="fd-card-count">10 capabilities</span>
+      </div>
+    </a>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A <span class="fd-code">fd-card-note</span> pill in the foot carries one live fact, like free credits left. Use it for one card at a time.</li>
+      <li>Marks are letter tiles or glyphs. Use a tone to tell providers apart; do not paint them in brand colours.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="scroller">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Scroller</h2>
+      <p>A horizontal row of cards that snaps, for "Featured" and "Recommended". The arrows disable at either end and the whole control disappears when everything fits.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-scroller" data-fd-scroller style="padding:32px">
+        <div class="fd-scroller-head">
+          <h3 class="fd-title">Featured</h3>
+          <div class="fd-scroller-nav">
+            <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-scroll="prev" aria-label="Previous"><i data-icon="chevron-left"></i></button>
+            <button class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-scroll="next" aria-label="Next"><i data-icon="chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="fd-scroller-track">
+      <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="info">MP</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Mapleton Places</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Places</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Business listings, opening hours and reviews for any city, with geocoded results.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">1–8 credits</span>
+        <span class="fd-card-count">14 capabilities</span>
+      </div>
+    </a>
+      <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="violet">QP</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Quill Podcasts</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Podcasts</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Speaker-labelled transcripts, episode summaries and chapter markers.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">3 credits</span>
+        <span class="fd-card-count">6 capabilities</span>
+      </div>
+    </a>
+      <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="neutral">DS</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Docsmith</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Developer</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Search developer documentation, code repositories, issues and changelogs.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">0–4 credits</span>
+        <span class="fd-card-count">12 capabilities</span>
+      </div>
+    </a>
+      <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="warning">LL</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Ledgerline</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Finance</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Real-time financial newswire and analyst coverage for US-listed companies.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">2–20 credits</span>
+        <span class="fd-card-count">8 capabilities</span>
+      </div>
+    </a>
+      <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="success">SW</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Slate Weather</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Climate</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Hourly forecasts, historical normals and severe weather alerts by coordinates.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">1 credit</span>
+        <span class="fd-card-count">5 capabilities</span>
+      </div>
+    </a>
+      <a class="fd-card" data-interactive href="#">
+      <i class="fd-card-arrow" data-icon="arrow-up-right"></i>
+      <div class="fd-card-head">
+        <span class="fd-tile" data-size="40" data-tone="danger">RK</span>
+        <div class="fd-card-heading">
+          <span class="fd-card-name"><span>Rook Security</span><span class="fd-verified" role="img" aria-label="Verified"></span></span>
+          <span class="fd-card-meta">Public records</span>
+        </div>
+      </div>
+      <p class="fd-card-text">Domain, certificate and breach exposure lookups for any hostname.</p>
+      <div class="fd-card-foot">
+        <span class="fd-card-price">4–40 credits</span>
+        <span class="fd-card-count">11 capabilities</span>
+      </div>
+    </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="summary">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Summary cells</h2>
+      <p>A single object split by hairlines: the billing summary at the top of a settings page. Label, value, and one muted line each.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-card-cells">
+        <div class="fd-card-cell"><span class="fd-card-cell-label">Plan</span><span class="fd-card-cell-value">Hobby</span><span class="fd-card-cell-sub">$19 per month</span></div>
+        <div class="fd-card-cell"><span class="fd-card-cell-label">Renews</span><span class="fd-card-cell-value">Dec 4, 2026</span><span class="fd-card-cell-sub">In 20 days</span></div>
+        <div class="fd-card-cell"><span class="fd-card-cell-label">Credits remaining</span><span class="fd-card-cell-value">3,420</span><span class="fd-card-cell-sub">of 5,000 · resets Dec 4</span></div>
+        <div class="fd-card-cell"><span class="fd-card-cell-label">Payment method</span><span class="fd-card-cell-value">Visa •••• 4242</span><span class="fd-card-cell-sub"><a class="fd-link" href="#">Update card</a></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TILE / AVATAR ===================== -->
+  <section class="doc-section" id="tile">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tile</h2>
+      <p>A square holder for a logo, glyph or one or two letters. Sizes step 20, 28, 36, 44, 56 and the radius grows with them.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-tile" data-size="20">N</span>
+      <span class="fd-tile" data-size="28">NP</span>
+      <span class="fd-tile">NP</span>
+      <span class="fd-tile" data-size="40">NP</span>
+      <span class="fd-tile" data-size="56">NP</span>
+      <span class="fd-tile" data-size="28"><i data-icon="database"></i></span>
+      <span class="fd-tile"><i data-icon="database"></i></span>
+      <span class="fd-tile" data-size="40"><i data-icon="database"></i></span>
+      <span class="fd-tile" data-size="56"><i data-icon="database"></i></span>
+    </div>
+    <h3 class="doc-sub">Tones</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-tile" data-size="40">AB</span>
+      <span class="fd-tile" data-size="40" data-tone="neutral">NE</span>
+      <span class="fd-tile" data-size="40" data-tone="accent">AC</span>
+      <span class="fd-tile" data-size="40" data-tone="success">SU</span>
+      <span class="fd-tile" data-size="40" data-tone="warning">WA</span>
+      <span class="fd-tile" data-size="40" data-tone="danger">DA</span>
+      <span class="fd-tile" data-size="40" data-tone="info">IN</span>
+      <span class="fd-tile" data-size="40" data-tone="violet">VI</span>
+      <span class="fd-tile" data-size="40" data-tone="inverse">EM</span>
+      <span class="fd-tile" data-size="40" data-tone="info" data-bordered>BD</span>
+    </div>
+    <h3 class="doc-sub">Feature rows</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div>
+        <div class="fd-feature-row">
+          <span class="fd-tile" data-shape="wide" data-tone="accent">20x</span>
+          <div class="fd-feature-row-text"><span class="fd-feature-row-title">Faster crawls</span><span class="fd-feature-row-desc">Concurrent fetching and smarter queueing cut large crawls from minutes to seconds.</span></div>
+        </div>
+        <div class="fd-feature-row">
+          <span class="fd-tile" data-shape="wide" data-tone="accent"><i data-icon="sparkles"></i></span>
+          <div class="fd-feature-row-text"><span class="fd-feature-row-title">Structured extract</span><span class="fd-feature-row-desc">Describe the fields you want and /extract returns typed JSON.</span></div>
+        </div>
+        <div class="fd-feature-row">
+          <span class="fd-tile" data-shape="wide" data-tone="accent">99.9%</span>
+          <div class="fd-feature-row-text"><span class="fd-feature-row-title">Uptime on scrape</span><span class="fd-feature-row-desc">Measured over the last 90 days across all regions.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="avatar">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Avatar and stack</h2>
+      <p>Initials or an image, round by default and soft-square for teams and workspaces. A stack overlaps with a ring in the page colour; end it with an overflow count.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-avatar" data-size="20">MV</span>
+      <span class="fd-avatar" data-size="24">MV</span>
+      <span class="fd-avatar" data-size="28">MV</span>
+      <span class="fd-avatar">MV</span>
+      <span class="fd-avatar" data-size="40">MV</span>
+      <span class="fd-avatar" data-tone="accent">EM</span>
+      <span class="fd-avatar" data-shape="square" data-size="40" data-tone="accent">EM</span>
+      <span class="fd-avatar" data-shape="square" data-size="28">TD</span>
+    </div>
+    <h3 class="doc-sub">Status dot</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-avatar" data-size="40" data-status="online">MV</span>
+      <span class="fd-avatar" data-size="40" data-status="busy">JT</span>
+      <span class="fd-avatar" data-size="40" data-status="away">KO</span>
+      <span class="fd-avatar" data-size="40" data-status="offline">LR</span>
+      <span class="fd-avatar" data-size="28" data-status="online">MV</span>
+    </div>
+    <h3 class="doc-sub">Stacks</h3>
+    <div class="doc-specimen" data-code>
+      <div class="fd-row" style="--fd-gap:16px">
+        <div class="fd-avatar-stack">
+          <span class="fd-tile" data-size="20" data-tone="warning">N</span>
+          <span class="fd-tile" data-size="20" data-tone="info">T</span>
+          <span class="fd-tile" data-size="20" data-tone="accent">H</span>
+          <span class="fd-tile" data-size="20" data-tone="inverse">P</span>
+          <span class="fd-tile" data-size="20" data-tone="violet">Q</span>
+        </div>
+        <span class="fd-small"><b class="fd-label">27 new providers</b> <span class="fd-muted">in the last 3 days</span></span>
+      </div>
+      <div class="fd-avatar-stack">
+        <span class="fd-avatar" data-size="28">MV</span>
+        <span class="fd-avatar" data-size="28" data-tone="accent">JT</span>
+        <span class="fd-avatar" data-size="28">KO</span>
+        <span class="fd-avatar" data-size="28" data-overflow>+25</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BADGE / TAG ===================== -->
+  <section class="doc-section" id="badge">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Badge</h2>
+      <p>A 20px label that sits next to a name or a number. Neutral is the default; use a tone only when the word carries meaning.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-badge">Neutral</span>
+      <span class="fd-badge" data-tone="accent">Accent</span>
+      <span class="fd-badge" data-tone="success">Success</span>
+      <span class="fd-badge" data-tone="warning">Warning</span>
+      <span class="fd-badge" data-tone="danger">Danger</span>
+      <span class="fd-badge" data-tone="info">Info</span>
+      <span class="fd-badge" data-tone="violet">Violet</span>
+    </div>
+    <h3 class="doc-sub">Dot, icon and outline</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-badge" data-dot>Draft</span>
+      <span class="fd-badge" data-tone="success" data-dot>Active</span>
+      <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+      <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+      <span class="fd-badge" data-tone="success"><i data-icon="check"></i>Verified</span>
+      <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+      <span class="fd-badge" data-variant="outline">Outline</span>
+      <span class="fd-badge" data-variant="outline" data-tone="accent">Accent</span>
+      <span class="fd-badge" data-variant="outline" data-tone="danger">Deprecated</span>
+    </div>
+    <h3 class="doc-sub">Solid and mono</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-badge" data-variant="solid">New</span>
+      <span class="fd-badge" data-variant="solid" data-tone="neutral">Beta</span>
+      <span class="fd-badge" data-variant="solid" data-tone="success">Live</span>
+      <span class="fd-badge" data-variant="solid" data-tone="danger">Alert</span>
+      <span class="fd-badge" data-variant="mono">$0/month</span>
+      <span class="fd-badge" data-variant="mono">v2.4.1</span>
+      <span class="fd-badge" data-variant="mono">/scrape</span>
+      <span class="fd-badge" data-variant="mono" data-tone="accent">POST</span>
+      <span class="fd-badge" data-variant="mono" data-tone="success">200</span>
+      <span class="fd-badge" data-variant="mono" data-tone="danger">429</span>
+    </div>
+    <h3 class="doc-sub">Removable</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-badge" data-value="scrape">scrape <button class="fd-badge-remove" aria-label="Remove scrape"><i data-icon="x"></i></button></span>
+      <span class="fd-badge" data-tone="accent" data-value="crawl">crawl <button class="fd-badge-remove" aria-label="Remove crawl"><i data-icon="x"></i></button></span>
+      <span class="fd-badge" data-tone="info" data-value="extract">extract <button class="fd-badge-remove" aria-label="Remove extract"><i data-icon="x"></i></button></span>
+    </div>
+    <ul class="doc-notes">
+      <li>Removing fires a cancelable <code class="fd-code">fd:close</code> on the badge with <code class="fd-code">detail.value</code>, then removes it.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="tag">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tag</h2>
+      <p>A 24px pill for categories and filters. A button tag toggles with <code class="fd-code">aria-pressed</code>; a link tag marks the current one with <code class="fd-code">aria-current</code>.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <button class="fd-tag" aria-pressed="true">All</button>
+      <button class="fd-tag" aria-pressed="false"><i data-icon="building-2"></i>Company</button>
+      <button class="fd-tag" aria-pressed="false"><i data-icon="map-pin"></i>Places</button>
+      <button class="fd-tag" aria-pressed="false"><i data-icon="users"></i>People</button>
+      <button class="fd-tag" aria-pressed="false">Finance</button>
+      <button class="fd-tag" disabled>Sports</button>
+      <span class="fd-tag" data-variant="soft">Read only</span>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-tag" data-variant="soft">region: us-east <button class="fd-tag-remove" aria-label="Remove region filter"><i data-icon="x"></i></button></span>
+      <span class="fd-tag" data-variant="soft">status: failed <button class="fd-tag-remove" aria-label="Remove status filter"><i data-icon="x"></i></button></span>
+    </div>
+    <h3 class="doc-sub">Verified seal</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-label">Northwind People <span class="fd-verified" role="img" aria-label="Verified"></span></span>
+      <span class="fd-title">Tessera Finance <span class="fd-verified" data-size="lg" role="img" aria-label="Verified"></span></span>
+    </div>
+  </section>
+
+  <!-- ===================== STATUS ===================== -->
+  <section class="doc-section" id="status">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Status</h2>
+      <p>A dot and a word for the state of a run, a monitor or a key. Only a running item pulses, and only while it is running.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-status" data-tone="success">Completed</span>
+      <span class="fd-status" data-tone="danger">Failed</span>
+      <span class="fd-status" data-tone="warning">Rate limited</span>
+      <span class="fd-status" data-tone="info" data-live>Running</span>
+      <span class="fd-status" data-tone="neutral">Queued</span>
+      <span class="fd-status" data-tone="violet">Cached</span>
+      <span class="fd-status" data-tone="accent">Scheduled</span>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-status" data-size="sm" data-tone="success">Completed</span>
+      <span class="fd-status" data-size="sm" data-tone="danger">Failed</span>
+      <span class="fd-status" data-size="sm" data-tone="warning">Rate limited</span>
+      <span class="fd-status" data-size="sm" data-tone="info" data-live>Running</span>
+      <span class="fd-status" data-size="sm" data-tone="neutral">Queued</span>
+      <span class="fd-status" data-size="sm" data-tone="violet">Cached</span>
+    </div>
+    <h3 class="doc-sub">Icon variant</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-status" data-variant="icon" data-tone="success"><i data-icon="circle-check"></i>Completed</span>
+      <span class="fd-status" data-variant="icon" data-tone="danger"><i data-icon="circle-x"></i>Failed</span>
+      <span class="fd-status" data-variant="icon" data-tone="warning"><i data-icon="triangle-alert"></i>Rate limited</span>
+      <span class="fd-status" data-variant="icon" data-tone="info" data-live><i data-icon="loader-circle"></i>Running</span>
+      <span class="fd-status" data-variant="icon" data-tone="neutral"><i data-icon="clock"></i>Queued</span>
+    </div>
+    <h3 class="doc-sub">Pill variant</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-status" data-variant="pill" data-tone="success">Completed</span>
+      <span class="fd-status" data-variant="pill" data-tone="danger">Failed</span>
+      <span class="fd-status" data-variant="pill" data-tone="warning">Rate limited</span>
+      <span class="fd-status" data-variant="pill" data-tone="info" data-live>Running</span>
+      <span class="fd-status" data-variant="pill" data-tone="neutral">Queued</span>
+      <span class="fd-status" data-variant="pill" data-tone="violet">Cached</span>
+      <span class="fd-status" data-variant="pill" data-size="sm" data-tone="success">Operational</span>
+    </div>
+  </section>
+
+  <!-- ===================== CALLOUT / BANNER ===================== -->
+  <section class="doc-section" id="callout">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Callout</h2>
+      <p>A message that belongs to the content around it. Say what happened and what to do; one action is usually enough.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-callout" role="note">
+        <i class="fd-callout-icon" data-icon="info"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">Credits are shared across your team</p><p class="fd-callout-body">Every key in this team draws from the same monthly allowance. Use a separate team to keep projects apart.</p></div>
+      </div>
+      <div class="fd-callout" data-tone="info" role="note">
+        <i class="fd-callout-icon" data-icon="info"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">Crawl depth is limited on the Free plan</p><p class="fd-callout-body">Crawls stop at depth 2. Upgrade to follow links up to depth 10.</p>
+          <div class="fd-callout-actions"><button class="fd-btn" data-size="sm" data-variant="outline">Compare plans</button></div></div>
+      </div>
+      <div class="fd-callout" data-tone="success" role="status">
+        <i class="fd-callout-icon" data-icon="circle-check"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">Webhook verified</p><p class="fd-callout-body">Ember delivered a test event to <span class="fd-code">https://api.ledgerly.dev/hooks/ember</span> and received a 200.</p></div>
+      </div>
+      <div class="fd-callout" data-tone="warning" role="alert">
+        <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">You have used 90% of your credits</p><p class="fd-callout-body">At the current rate you will run out around Nov 21. Requests are rejected with a 402 once credits reach zero.</p>
+          <div class="fd-callout-actions"><button class="fd-btn" data-size="sm" data-variant="primary">Upgrade plan</button><button class="fd-btn" data-size="sm" data-variant="ghost">Turn on auto-recharge</button></div></div>
+      </div>
+      <div class="fd-callout" data-tone="danger" role="alert">
+        <i class="fd-callout-icon" data-icon="circle-alert"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">The last 3 deliveries to your endpoint failed</p><p class="fd-callout-body">The server returned 503. Fix the endpoint, then resend the events from the webhook log.</p>
+          <div class="fd-callout-actions"><button class="fd-btn" data-size="sm" data-variant="danger-soft">Resend events</button></div></div>
+      </div>
+      <div class="fd-callout" data-tone="accent" role="note">
+        <i class="fd-callout-icon" data-icon="sparkles"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">Try /agent on your next task</p><p class="fd-callout-body">Describe the data you need and let Ember browse, click and extract it for you.</p></div>
+      </div>
+    </div>
+    <h3 class="doc-sub">Dismissible</h3>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-callout" data-tone="info" data-fd-dismiss-key="ember-docs-callout-demo" role="note">
+        <i class="fd-callout-icon" data-icon="info"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">New: batch scrape</p><p class="fd-callout-body">Send up to 1,000 URLs in one request. Dismiss this and it stays gone in this browser.</p></div>
+        <button class="fd-callout-dismiss" data-fd-dismiss aria-label="Dismiss"><i data-icon="x"></i></button>
+      </div>
+    </div>
+    <h3 class="doc-sub">Compact, one line</h3>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-callout" data-size="sm" role="note">
+        <i class="fd-callout-icon" data-icon="info"></i>
+        <div class="fd-callout-content"><p class="fd-callout-body">Parsed output is stored in your browser only and is never sent to Ember.</p></div>
+      </div>
+      <div class="fd-callout" data-size="sm" data-tone="warning" role="note">
+        <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+        <div class="fd-callout-content"><p class="fd-callout-title">Privacy mode is off.</p><p class="fd-callout-body">Requests are kept for 30 days.</p></div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Dismissing fires a cancelable <code class="fd-code">fd:close</code>, collapses the callout and sets <code class="fd-code">hidden</code>. Set <code class="fd-code">data-fd-dismiss-key</code> to remember it.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="banner">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Banner</h2>
+      <p>A strip across the whole page, under the top bar, for things that affect the account rather than one screen. Keep it to one line and one action.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-banner" data-variant="announcement" data-fd-dismiss-key="ember-docs-banner-demo">
+        <span class="fd-badge" data-variant="solid">New</span>
+        <span class="fd-banner-text"><strong>Ember Agent is in public beta.</strong> Describe a task and watch it run.</span>
+        <a class="fd-banner-action" href="#">Try it<i data-icon="arrow-right"></i></a>
+        <button class="fd-banner-dismiss" data-fd-dismiss aria-label="Dismiss"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-banner" data-tone="info">
+        <i data-icon="info"></i>
+        <span class="fd-banner-text">Scheduled maintenance on <strong>Nov 28, 2:00 AM UTC</strong>. Monitors pause for about 10 minutes.</span>
+        <a class="fd-banner-action" href="#">Status page</a>
+        <button class="fd-banner-dismiss" data-fd-dismiss aria-label="Dismiss"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-banner" data-tone="warning" data-align="start">
+        <i data-icon="triangle-alert"></i>
+        <span class="fd-banner-text">Your card ending 4242 expires this month.</span>
+        <a class="fd-banner-action" href="#">Update payment method</a>
+        <button class="fd-banner-dismiss" data-fd-dismiss aria-label="Dismiss"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-banner" data-tone="danger">
+        <i data-icon="circle-alert"></i>
+        <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        <a class="fd-banner-action" href="#">Fix billing<i data-icon="arrow-right"></i></a>
+      </div>
+      <div class="fd-banner" data-tone="success">
+        <i data-icon="circle-check"></i>
+        <span class="fd-banner-text">Your plan was upgraded to Standard. 100,000 credits are available now.</span>
+        <button class="fd-banner-dismiss" data-fd-dismiss aria-label="Dismiss"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-banner">
+        <span class="fd-banner-text">You are viewing the Acme Labs team as a read-only guest.</span>
+        <a class="fd-banner-action" href="#">Switch team</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EMPTY ===================== -->
+  <section class="doc-section" id="empty">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Empty states</h2>
+      <p>Say what will appear here and give the one action that fills it. The art slot behind the text takes a texture from the <code class="fd-code">fd-ascii</code> family and fades out toward the edges.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed" data-surface="surface">
+      <div class="fd-empty">
+        <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="waves"></div></div>
+        <span class="fd-empty-icon"><i data-icon="scroll-text"></i></span>
+        <h3 class="fd-empty-title">No logs yet</h3>
+        <p class="fd-empty-text">Requests to the Ember API show up here within a few seconds. Make your first one from the playground or the command line.</p>
+        <div class="fd-empty-actions">
+          <button class="fd-btn" data-variant="primary"><i data-icon="play"></i><span>Open playground</span></button>
+          <button class="fd-btn" data-variant="outline"><span>Read the docs</span></button>
+        </div>
+        <code class="fd-empty-hint">curl -X POST https://api.ember.dev/v1/scrape -H "Authorization: Bearer $EMBER_KEY"</code>
+      </div>
+    </div>
+    <h3 class="doc-sub">Variants</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" style="--min:300px">
+      <div class="fd-empty" data-size="sm">
+        <span class="fd-empty-icon"><i data-icon="radar"></i></span>
+        <h3 class="fd-empty-title">No monitors yet</h3>
+        <p class="fd-empty-text">Watch a page and get notified when its content changes.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" data-size="sm" data-variant="primary"><i data-icon="plus"></i><span>New monitor</span></button></div>
+      </div>
+      <div class="fd-empty" data-size="sm">
+        <span class="fd-empty-icon"><i data-icon="bell"></i></span>
+        <h3 class="fd-empty-title">You're all caught up</h3>
+        <p class="fd-empty-text">Alerts for failed runs and low credits will appear here.</p>
+      </div>
+      <div class="fd-empty" data-size="sm">
+        <span class="fd-empty-icon"><i data-icon="search"></i></span>
+        <h3 class="fd-empty-title">No providers match "kubernetes"</h3>
+        <p class="fd-empty-text">Try a broader term, or clear the filters to see the full catalog.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" data-size="sm" data-variant="outline"><span>Clear filters</span></button></div>
+      </div>
+      <div class="fd-empty" data-size="sm" data-tone="danger">
+        <span class="fd-empty-icon"><i data-icon="circle-alert"></i></span>
+        <h3 class="fd-empty-title">Couldn't load runs</h3>
+        <p class="fd-empty-text">The request timed out after 10 seconds. Your data is safe.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" data-size="sm" data-variant="outline"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
+      </div>
+      <div class="fd-empty" data-size="sm">
+        <span class="fd-empty-icon"><i data-icon="lock"></i></span>
+        <h3 class="fd-empty-title">Webhooks are a Standard feature</h3>
+        <p class="fd-empty-text">Upgrade to send run events to your own endpoints.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" data-size="sm" data-variant="inverse">Upgrade</button></div>
+      </div>
+      <div class="fd-empty" data-size="sm" data-tone="warning">
+        <span class="fd-empty-icon"><i data-icon="wifi-off"></i></span>
+        <h3 class="fd-empty-title">You're offline</h3>
+        <p class="fd-empty-text">Changes will sync when your connection is back.</p>
+      </div>
+    </div>
+    <h3 class="doc-sub">Page-sized</h3>
+    <div class="doc-specimen" data-code data-layout="bleed" data-surface="surface">
+      <div class="fd-empty" data-size="lg">
+        <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="grid"></div></div>
+        <span class="fd-empty-icon"><i data-icon="key-round"></i></span>
+        <h3 class="fd-empty-title">Create your first API key</h3>
+        <p class="fd-empty-text">Keys authenticate requests from your code. You can scope each one to a team and rotate it at any time.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" data-variant="primary" data-size="lg"><i data-icon="plus"></i><span>Create API key</span></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ACCORDION ===================== -->
+  <section class="doc-section" id="accordion">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Accordion</h2>
+      <p>Built on native <code class="fd-code">&lt;details&gt;</code>, so it works without script and is keyboard operable; Fire adds the height animation. <code class="fd-code">data-single</code> keeps one item open.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack">
+        <div class="fd-accordion" data-single>
+          <details class="fd-accordion-item" open>
+            <summary class="fd-accordion-trigger"><span>How are credits counted?</span><i data-icon="chevron-down"></i></summary>
+            <div class="fd-accordion-panel"><div class="fd-accordion-inner">A scrape costs 1 credit. Crawls cost 1 credit per page, and /extract adds 4 credits per page for structured output.</div></div>
+          </details>
+          <details class="fd-accordion-item">
+            <summary class="fd-accordion-trigger"><span>Do unused credits roll over?</span><i data-icon="chevron-down"></i></summary>
+            <div class="fd-accordion-panel"><div class="fd-accordion-inner">Monthly credits reset on your renewal date. Credits from add-on packs never expire.</div></div>
+          </details>
+          <details class="fd-accordion-item">
+            <summary class="fd-accordion-trigger"><span>Can I scrape pages behind a login?</span><i data-icon="chevron-down"></i></summary>
+            <div class="fd-accordion-panel"><div class="fd-accordion-inner">Yes. Pass cookies or a saved session in the request, or use /agent to sign in on your behalf.</div></div>
+          </details>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <div class="fd-accordion" data-variant="card">
+          <details class="fd-accordion-item">
+            <summary class="fd-accordion-trigger"><span>Request headers</span><i data-icon="chevron-down"></i></summary>
+            <div class="fd-accordion-panel"><div class="fd-accordion-inner"><span class="fd-code">Authorization: Bearer fc-live-…</span></div></div>
+          </details>
+          <details class="fd-accordion-item">
+            <summary class="fd-accordion-trigger"><span>Response body</span><i data-icon="chevron-down"></i></summary>
+            <div class="fd-accordion-panel"><div class="fd-accordion-inner">12.4 KB of markdown, 38 links and 4 images.</div></div>
+          </details>
+          <details class="fd-accordion-item">
+            <summary class="fd-accordion-trigger"><span>Timing</span><i data-icon="chevron-down"></i></summary>
+            <div class="fd-accordion-panel"><div class="fd-accordion-inner">Queued 12 ms, fetched 840 ms, rendered 310 ms.</div></div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="disclosure">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Disclosure</h2>
+      <p>One inline toggle for secondary detail that most people never need. It reads as text, not a control.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-row" data-justify="between"><span class="fd-label">Credits remaining</span><span class="fd-mono">3,420</span></div>
+      <details class="fd-disclosure">
+        <summary class="fd-disclosure-trigger"><span>View all balances (3)</span><i data-icon="chevron-down"></i></summary>
+        <div class="fd-disclosure-panel"><div class="fd-disclosure-inner fd-stack" style="--fd-gap:8px">
+          <div class="fd-row" data-justify="between"><span class="fd-small fd-muted">Monthly allowance</span><span class="fd-mono">3,000</span></div>
+          <div class="fd-row" data-justify="between"><span class="fd-small fd-muted">Add-on pack</span><span class="fd-mono">400</span></div>
+          <div class="fd-row" data-justify="between"><span class="fd-small fd-muted">Referral bonus</span><span class="fd-mono">20</span></div>
+        </div></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===================== TIMELINE ===================== -->
+  <section class="doc-section" id="timeline">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Timeline</h2>
+      <p>The history of one thing: a run, a key, a deployment. A 1px rail joins 8px dots for ordinary events and 20px icon nodes for the ones that matter. The live item pulses until it finishes.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <ol class="fd-timeline">
+          <li class="fd-timeline-item" data-tone="info" data-live>
+            <span class="fd-timeline-node"></span>
+            <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Extracting fields</span><time class="fd-timeline-time">now</time></div><p class="fd-timeline-body">Page 14 of 38 · /extract</p></div>
+          </li>
+          <li class="fd-timeline-item" data-kind="group">
+            <span class="fd-timeline-node"></span>
+            <div class="fd-timeline-main"><button class="fd-timeline-more" type="button"><b>×12</b><span>similar events</span><i data-icon="chevron-down"></i></button></div>
+          </li>
+          <li class="fd-timeline-item" data-tone="success">
+            <span class="fd-timeline-node"></span>
+            <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Rendered page 1</span><time class="fd-timeline-time">4:29:12 PM</time></div><p class="fd-timeline-body">Waited for network idle, 310 ms.</p></div>
+          </li>
+          <li class="fd-timeline-item">
+            <span class="fd-timeline-node"></span>
+            <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Queued</span><time class="fd-timeline-time">4:29:11 PM</time></div></div>
+          </li>
+        </ol>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <ol class="fd-timeline">
+          <li class="fd-timeline-item" data-tone="danger">
+            <span class="fd-timeline-node"><i data-icon="x"></i></span>
+            <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Run failed</span><time class="fd-timeline-time">Nov 14, 4:31 PM</time></div>
+              <p class="fd-timeline-body">Target returned 403 after 3 retries.</p>
+              <div class="fd-timeline-card"><span class="fd-mono-sm">ERR_BLOCKED  https://shop.example.com/p/8812</span></div></div>
+          </li>
+          <li class="fd-timeline-item" data-tone="warning">
+            <span class="fd-timeline-node"><i data-icon="triangle-alert"></i></span>
+            <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Rate limited</span><time class="fd-timeline-time">Nov 14, 4:30 PM</time></div><p class="fd-timeline-body">Retrying in 20 seconds.</p></div>
+          </li>
+          <li class="fd-timeline-item" data-tone="accent">
+            <span class="fd-timeline-node"><i data-icon="play"></i></span>
+            <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Started by Mara Voss</span><time class="fd-timeline-time">Nov 14, 4:29 PM</time></div></div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SETTING ===================== -->
+  <section class="doc-section" id="setting">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Setting row</h2>
+      <p>The unit of a settings page: what it is and why on the left, the control on the right. Rows separate with hairlines, never boxes. On a phone the control drops below the text.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div>
+        <div class="fd-setting">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Two-factor authentication</h3><p class="fd-setting-desc">Add a second step when you sign in with an authenticator app. <a href="#">How it works</a></p></div>
+          <div class="fd-setting-control"><button class="fd-btn" data-variant="outline">Set up 2FA</button></div>
+        </div>
+        <div class="fd-setting">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Appearance</h3><p class="fd-setting-desc">Choose how Ember looks on this device.</p></div>
+          <div class="fd-setting-control"><div class="fd-btn-group" role="group" aria-label="Theme">
+            <button class="fd-btn" data-variant="outline" aria-pressed="true">System</button>
+            <button class="fd-btn" data-variant="outline" aria-pressed="false">Light</button>
+            <button class="fd-btn" data-variant="outline" aria-pressed="false">Dark</button></div></div>
+        </div>
+        <div class="fd-setting">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Privacy mode</h3><p class="fd-setting-desc">When on, Ember does not store page content or request bodies. Logs keep only the URL, status and timing. <strong>Runs cannot be replayed</strong> while this is on.</p></div>
+          <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Privacy mode"><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-setting" data-tone="danger">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Delete account</h3><p class="fd-setting-desc">Permanently delete your account, API keys and run history. <strong>This cannot be undone.</strong></p></div>
+          <div class="fd-setting-control"><button class="fd-btn" data-variant="danger">Delete account</button></div>
+        </div>
+      </div>
+    </div>
+    <h3 class="doc-sub">Dense</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div>
+        <div class="fd-setting" data-size="sm">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Email me when a run fails</h3><p class="fd-setting-desc">Sent to mara@ledgerly.dev, at most once an hour.</p></div>
+          <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Failure emails"><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-setting" data-size="sm">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Weekly usage summary</h3><p class="fd-setting-desc">Credits used per endpoint, every Monday.</p></div>
+          <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Weekly summary"><span class="fd-switch-track"></span></label></div>
+        </div>
+        <div class="fd-setting" data-size="sm" data-tone="danger">
+          <div class="fd-setting-text"><h3 class="fd-setting-title">Revoke all API keys</h3><p class="fd-setting-desc">Every key stops working immediately.</p></div>
+          <div class="fd-setting-control"><button class="fd-btn" data-variant="danger-soft" data-size="sm">Revoke keys</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLAN ===================== -->
+  <section class="doc-section" id="plan">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Plan</h2>
+      <p>In billing, a plan is one quiet row with its price and allowance. In a pricing grid it is a card with a figure, a pitch, a feature list and one call to action.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-plan" data-variant="row">
+        <div class="fd-plan-info"><span class="fd-plan-name">Free</span><span class="fd-badge" data-variant="mono">$0/month</span><span class="fd-plan-allowance">1,000 credits/mo</span></div>
+        <div class="fd-plan-actions"><button class="fd-btn" data-variant="primary">Upgrade</button><button class="fd-btn" data-variant="outline" data-icon-only aria-label="More"><i data-icon="ellipsis-vertical"></i></button></div>
+      </div>
+      <div class="fd-plan" data-variant="row">
+        <div class="fd-plan-info"><span class="fd-plan-name">Hobby</span><span class="fd-badge" data-variant="mono">$19/month</span><span class="fd-plan-allowance">3,000 credits/mo</span><span class="fd-status" data-size="sm" data-tone="success">Current</span></div>
+        <div class="fd-plan-actions"><button class="fd-btn" data-variant="outline">Manage</button></div>
+      </div>
+    </div>
+    <h3 class="doc-sub">Pricing grid</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-plan-grid" style="padding:32px">
+        <div class="fd-plan" data-current>
+          <div class="fd-plan-head"><h3 class="fd-plan-name">Free</h3></div>
+          <div class="fd-plan-price"><span class="fd-plan-amount">$0</span><span class="fd-plan-per">/month</span></div>
+          <p class="fd-plan-pitch">Try Ember on side projects.</p>
+          <ul class="fd-feature-list" data-size="sm">
+            <li><i data-icon="check"></i><span>1,000 credits per month</span></li>
+            <li><i data-icon="check"></i><span>2 concurrent requests</span></li>
+            <li><i data-icon="check"></i><span>Community support</span></li>
+            <li data-excluded><i data-icon="x"></i><span>Webhooks</span></li>
+            <li data-excluded><i data-icon="x"></i><span>Team seats</span></li>
+          </ul>
+          <div class="fd-plan-cta"><button class="fd-btn" data-block disabled>Current plan</button></div>
+        </div>
+        <div class="fd-plan" data-recommended>
+          <div class="fd-plan-head"><h3 class="fd-plan-name">Hobby</h3><span class="fd-badge" data-variant="solid">Most popular</span></div>
+          <div class="fd-plan-price"><span class="fd-plan-amount">$19</span><span class="fd-plan-per">/month</span></div>
+          <p class="fd-plan-pitch">For apps that scrape on a schedule.</p>
+          <ul class="fd-feature-list" data-size="sm" data-tone="accent">
+            <li><i data-icon="check"></i><span>3,000 credits per month</span></li>
+            <li><i data-icon="check"></i><span>5 concurrent requests</span></li>
+            <li><i data-icon="check"></i><span>Email support</span></li>
+            <li><i data-icon="check"></i><span>Webhooks</span></li>
+            <li data-excluded><i data-icon="x"></i><span>Team seats</span></li>
+          </ul>
+          <div class="fd-plan-cta"><button class="fd-btn" data-variant="primary" data-block>Upgrade to Hobby</button></div>
+        </div>
+        <div class="fd-plan">
+          <div class="fd-plan-head"><h3 class="fd-plan-name">Standard</h3></div>
+          <div class="fd-plan-price"><span class="fd-plan-amount">$99</span><span class="fd-plan-per">/month</span></div>
+          <p class="fd-plan-pitch">For products with real traffic.</p>
+          <ul class="fd-feature-list" data-size="sm">
+            <li><i data-icon="check"></i><span>100,000 credits per month</span></li>
+            <li><i data-icon="check"></i><span>50 concurrent requests</span></li>
+            <li><i data-icon="check"></i><span>Priority queue</span></li>
+            <li><i data-icon="check"></i><span>Webhooks and audit log</span></li>
+            <li><i data-icon="check"></i><span>5 team seats</span></li>
+          </ul>
+          <div class="fd-plan-cta"><button class="fd-btn" data-variant="outline" data-block>Upgrade to Standard</button></div>
+        </div>
+        <div class="fd-plan">
+          <div class="fd-plan-head"><h3 class="fd-plan-name">Scale</h3></div>
+          <div class="fd-plan-price"><span class="fd-plan-amount">$399</span><span class="fd-plan-per">/month</span></div>
+          <p class="fd-plan-pitch">For data teams running large crawls.</p>
+          <ul class="fd-feature-list" data-size="sm">
+            <li><i data-icon="check"></i><span>500,000 credits per month</span></li>
+            <li><i data-icon="check"></i><span>150 concurrent requests</span></li>
+            <li><i data-icon="check"></i><span>Dedicated support channel</span></li>
+            <li><i data-icon="check"></i><span>SSO and custom retention</span></li>
+            <li><i data-icon="check"></i><span>Unlimited team seats</span></li>
+          </ul>
+          <div class="fd-plan-cta"><button class="fd-btn" data-variant="outline" data-block>Talk to sales</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="feature-list">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Feature list</h2>
+      <p>Icon and text rows. Comfortable by default; <code class="fd-code">data-size="sm"</code> for dense cards. Excluded items stay in the list, muted, so plans compare line by line.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" style="--min:260px">
+      <ul class="fd-feature-list">
+        <li><i data-icon="check"></i><span>Unlimited API keys</span></li>
+        <li><i data-icon="check"></i><span>Run history for 30 days</span></li>
+        <li data-excluded><i data-icon="x"></i><span>SSO and SAML</span></li>
+      </ul>
+      <ul class="fd-feature-list" data-size="sm">
+        <li><i data-icon="check"></i><span>Unlimited API keys</span></li>
+        <li><i data-icon="check"></i><span>Run history for 30 days</span></li>
+        <li data-excluded><i data-icon="x"></i><span>SSO and SAML</span></li>
+      </ul>
+      <ul class="fd-feature-list" data-tone="accent">
+        <li><i data-icon="zap"></i><span>Priority queue</span></li>
+        <li><i data-icon="shield-check"></i><span>SOC 2 report on request</span></li>
+        <li><i data-icon="webhook"></i><span>Signed webhooks</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="doc-section" id="api">
+    <div class="doc-section-head"><h2 class="fd-h3">API</h2><p>Attributes, events and the script entry points.</p></div>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>Applies to</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>data-interactive</td><td>fd-card</td><td>Whole card is the link or button. Add <span class="fd-code">fd-card-arrow</span> for the corner arrow.</td></tr>
+        <tr><td>data-variant</td><td>fd-card · fd-badge · fd-status · fd-banner · fd-plan</td><td>Card: quiet, sunken, accent. Badge: solid, outline, mono. Status: icon, pill. Banner: announcement. Plan: row.</td></tr>
+        <tr><td>data-tone</td><td>badge, tile, status, callout, banner, empty, timeline item, avatar</td><td>neutral, accent, success, warning, danger, info, violet. Tile adds inverse.</td></tr>
+        <tr><td>data-live</td><td>fd-status · fd-timeline-item</td><td>Pulsing ping ring on the dot. Use only for work in progress.</td></tr>
+        <tr><td>data-single</td><td>fd-accordion</td><td>Opening an item closes its siblings.</td></tr>
+        <tr><td>data-fd-dismiss</td><td>button inside callout or banner</td><td>Dismisses the closest callout or banner. <span class="fd-code">data-fd-dismiss-key</span> on the host persists it.</td></tr>
+        <tr><td>data-fd-scroller</td><td>fd-scroller</td><td>Wires <span class="fd-code">data-fd-scroll="prev|next"</span> buttons; hides the nav when nothing overflows.</td></tr>
+        <tr><td>fd:change</td><td>details, scroller</td><td>Accordion and disclosure: <span class="fd-code">{ open }</span>. Scroller: <span class="fd-code">{ value: "start|middle|end" }</span>.</td></tr>
+        <tr><td>fd:close</td><td>callout, banner, badge, tag</td><td>Cancelable. Call <span class="fd-code">preventDefault()</span> to keep the element.</td></tr>
+        <tr><td>content.init(root)</td><td>script</td><td>Idempotent. Also exports <span class="fd-code">dismiss(el)</span> and <span class="fd-code">toggle(details, open?)</span>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

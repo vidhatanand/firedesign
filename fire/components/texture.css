@@ -1,0 +1,231 @@
+/* ==========================================================================
+   Texture & frame — the signature layer. Decorative, quiet, always aria-hidden.
+
+   <div class="fd-ascii" data-fd-ascii="terrain" data-fade="left" aria-hidden="true"></div>
+     A generative character field drawn by fire/js/texture.js. It fills its positioned
+     parent and sits between the parent's background and its content.
+     data-fd-ascii  terrain | waves | orbit | rain | grid | flame | halftone | spark
+     data-tone      neutral (default) | accent | contrast (on an accent or inverse surface)
+     data-fade      left | right | top | bottom | x | y | radial
+     data-inline    in normal flow; give it a height
+     (behaviour attributes are documented in fire/js/texture.js)
+
+   <div class="fd-dotgrid" data-fade="radial" aria-hidden="true"></div>   dot lattice backdrop
+   <span class="fd-crosshair" data-corner="tl"></span>                    one registration mark
+   <div class="fd-corners">…</div>                                        four marks framing a box
+   <div class="fd-noise" aria-hidden="true"></div>                        film grain for large accent areas
+   <span class="fd-glyph" aria-hidden="true"></span>                      empty-state character glyph
+   <span class="fd-shimmer">Searching the web…</span>                     moving highlight on a status
+   <section class="fd-announce">…</section>                               accent announcement surface
+
+   Contrast stays under ~1.6:1 against the surface: neutral ink is a24 in light, a16 in dark.
+   ========================================================================== */
+
+/* ---------- Layering: decorative layers sit above the host's background, below its content ---------- */
+:where(:has(> .fd-ascii:not([data-inline]), > .fd-dotgrid:not([data-inline]), > .fd-noise)) { isolation: isolate; }
+
+/* ---------- Character field ---------- */
+.fd-ascii {
+  --_tx-ink: light-dark(var(--fd-a24), var(--fd-a16));
+  --_tx-opacity: 1;
+  --_tx-font-size: 10px;
+  position: absolute; inset: 0; z-index: -1;
+  display: block; overflow: hidden;
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+  color: var(--_tx-ink);
+  opacity: var(--_tx-opacity);
+  font-family: var(--fd-font-mono); font-size: var(--_tx-font-size); font-weight: var(--fd-weight-regular);
+  contain: strict;
+  -webkit-mask-image: var(--_tx-mask, none);
+  mask-image: var(--_tx-mask, none);
+}
+.fd-ascii[data-inline] {
+  position: relative; inset: auto; z-index: auto;
+  width: 100%; height: 160px;
+  contain: layout paint;
+}
+.fd-ascii-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  max-width: none;
+}
+
+.fd-ascii[data-tone="accent"] { --_tx-ink: var(--fd-accent-text); --_tx-opacity: 0.4; }
+.fd-ascii[data-tone="contrast"] { --_tx-ink: var(--fd-accent-contrast); --_tx-opacity: 0.38; }
+.fd-ascii[data-tone="strong"] { --_tx-ink: light-dark(var(--fd-a32), var(--fd-a24)); }
+
+/* Fades. "left" means the field fades out toward the left edge. */
+:is(.fd-ascii, .fd-dotgrid)[data-fade="left"] { --_tx-mask: linear-gradient(to right, transparent, #000 var(--_tx-fade, 62%)); }
+:is(.fd-ascii, .fd-dotgrid)[data-fade="right"] { --_tx-mask: linear-gradient(to left, transparent, #000 var(--_tx-fade, 62%)); }
+:is(.fd-ascii, .fd-dotgrid)[data-fade="top"] { --_tx-mask: linear-gradient(to bottom, transparent, #000 var(--_tx-fade, 62%)); }
+:is(.fd-ascii, .fd-dotgrid)[data-fade="bottom"] { --_tx-mask: linear-gradient(to top, transparent, #000 var(--_tx-fade, 62%)); }
+:is(.fd-ascii, .fd-dotgrid)[data-fade="x"] { --_tx-mask: linear-gradient(to right, transparent, #000 22%, #000 78%, transparent); }
+:is(.fd-ascii, .fd-dotgrid)[data-fade="y"] { --_tx-mask: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent); }
+:is(.fd-ascii, .fd-dotgrid)[data-fade="radial"] { --_tx-mask: radial-gradient(closest-side, #000 30%, transparent); }
+
+/* ---------- Glyph: a small ember of characters for empty states ---------- */
+.fd-glyph {
+  --_tx-ink: var(--fd-accent-text);
+  --_tx-opacity: 0.78;
+  --_tx-size: 56px;
+  --_tx-font-size: 10px;
+  position: relative;
+  display: inline-block; flex: none;
+  width: var(--_tx-size); height: var(--_tx-size);
+  overflow: hidden; pointer-events: none; user-select: none; -webkit-user-select: none;
+  color: var(--_tx-ink); opacity: var(--_tx-opacity);
+  font-family: var(--fd-font-mono); font-size: var(--_tx-font-size);
+  vertical-align: middle;
+}
+.fd-glyph[data-size="40"] { --_tx-size: 40px; --_tx-font-size: 9px; }
+.fd-glyph[data-size="48"] { --_tx-size: 48px; }
+.fd-glyph[data-size="64"] { --_tx-size: 64px; }
+.fd-glyph[data-tone="neutral"] { --_tx-ink: var(--fd-a48); --_tx-opacity: 1; }
+
+/* ---------- Dot grid ---------- */
+.fd-dotgrid {
+  --_tx-gap: 16px;
+  --_tx-dot: var(--fd-a12);
+  --_tx-r: 0.75px;
+  position: absolute; inset: 0; z-index: -1;
+  display: block; pointer-events: none;
+  background-image: radial-gradient(circle at center, var(--_tx-dot) var(--_tx-r), transparent calc(var(--_tx-r) + 0.6px));
+  background-size: var(--_tx-gap) var(--_tx-gap);
+  background-position: center;
+  -webkit-mask-image: var(--_tx-mask, none);
+  mask-image: var(--_tx-mask, none);
+}
+.fd-dotgrid[data-inline] { position: relative; inset: auto; z-index: auto; width: 100%; height: 160px; }
+.fd-dotgrid[data-size="sm"] { --_tx-gap: 12px; }
+.fd-dotgrid[data-size="lg"] { --_tx-gap: 24px; --_tx-r: 0.9px; }
+.fd-dotgrid[data-tone="accent"] { --_tx-dot: var(--fd-accent-24); }
+
+/* ---------- Crosshair: one 9px registration mark ---------- */
+.fd-crosshair {
+  --_tx-c: var(--fd-line-strong);
+  --_tx-o: -4px;
+  display: inline-block; flex: none;
+  width: 9px; height: 9px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--_tx-c), var(--_tx-c)) center / 9px 1px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) center / 1px 9px no-repeat;
+}
+/* Placed: the mark's centre lands on the corner pixel of the positioned parent's padding box. */
+.fd-crosshair[data-corner] { position: absolute; z-index: 1; }
+.fd-crosshair[data-corner="tl"] { inset-block-start: var(--_tx-o); inset-inline-start: var(--_tx-o); }
+.fd-crosshair[data-corner="tr"] { inset-block-start: var(--_tx-o); inset-inline-end: var(--_tx-o); }
+.fd-crosshair[data-corner="bl"] { inset-block-end: var(--_tx-o); inset-inline-start: var(--_tx-o); }
+.fd-crosshair[data-corner="br"] { inset-block-end: var(--_tx-o); inset-inline-end: var(--_tx-o); }
+.fd-crosshair[data-tone="accent"] { --_tx-c: var(--fd-accent); }
+
+/* ---------- Corners: four marks on a wrapper's corners ---------- */
+.fd-corners {
+  --_tx-c: var(--fd-line-strong);
+  --_tx-gap: 0px;
+  position: relative;
+}
+.fd-corners::before {
+  content: "";
+  position: absolute; inset: calc(-4px - var(--_tx-gap)); z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left 0 top 4px / 9px 1px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left 4px top 0 / 1px 9px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right 0 top 4px / 9px 1px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right 4px top 0 / 1px 9px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left 0 bottom 4px / 9px 1px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) left 4px bottom 0 / 1px 9px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right 0 bottom 4px / 9px 1px no-repeat,
+    linear-gradient(var(--_tx-c), var(--_tx-c)) right 4px bottom 0 / 1px 9px no-repeat;
+}
+.fd-corners[data-gap] { --_tx-gap: 8px; }
+.fd-corners[data-tone="accent"] { --_tx-c: var(--fd-accent); }
+
+/* ---------- Grain: very subtle film noise for large accent areas ---------- */
+.fd-noise {
+  --_tx-opacity: 0.04;
+  position: absolute; inset: 0; z-index: -1;
+  pointer-events: none;
+  opacity: var(--_tx-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* ---------- Shimmer text: a highlight sweeping a live status ---------- */
+.fd-shimmer {
+  --_tx-base: var(--fd-text-3);
+  --_tx-hi: var(--fd-text);
+  color: var(--_tx-base);
+  background-image: linear-gradient(90deg, var(--_tx-base) 0%, var(--_tx-base) 38%, var(--_tx-hi) 50%, var(--_tx-base) 62%, var(--_tx-base) 100%);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fd-shimmer-text 2.2s var(--fd-ease-in-out) infinite;
+}
+.fd-shimmer[data-tone="accent"] { --_tx-base: color-mix(in srgb, var(--fd-accent-text) 56%, transparent); --_tx-hi: var(--fd-accent-text); }
+@keyframes fd-shimmer-text { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+/* ---------- Announcement surface: accent block, textures at both sides, contrast text in the middle ---------- */
+.fd-announce {
+  position: relative; isolation: isolate; overflow: hidden;
+  container: fd-announce / inline-size;
+  display: grid; place-items: center;
+  min-height: 280px;
+  padding: var(--fd-space-12) var(--fd-space-6);
+  border-radius: var(--fd-radius-xl);
+  background: var(--fd-accent);
+  color: var(--fd-accent-contrast);
+  text-align: center;
+}
+.fd-announce-art {
+  position: absolute; inset-block: 0; z-index: -1;
+  width: 36%;
+  pointer-events: none;
+}
+.fd-announce-art[data-side="start"] { inset-inline-start: 0; }
+.fd-announce-art[data-side="end"] { inset-inline-end: 0; }
+.fd-announce-body { display: grid; justify-items: center; gap: var(--fd-space-3); max-width: 34rem; }
+.fd-announce-body > :is(h1, h2, h3, .fd-h1, .fd-h2, .fd-h3) { text-wrap: balance; }
+.fd-announce-body > p { color: color-mix(in srgb, var(--fd-accent-contrast) 84%, transparent); }
+.fd-announce-tag {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1-5);
+  height: var(--fd-control-xs); padding-inline: var(--fd-space-2-5);
+  border-radius: var(--fd-radius-full);
+  background: color-mix(in srgb, var(--fd-accent-contrast) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-accent-contrast) 28%, transparent);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label);
+}
+.fd-announce-tag > .fd-icon { width: 14px; height: 14px; }
+.fd-announce-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--fd-space-2); margin-top: var(--fd-space-3); }
+/* On the accent, a ghost button becomes a contrast outline. */
+.fd-announce .fd-btn[data-variant="ghost"] {
+  --_b-fg: var(--fd-accent-contrast);
+  --_b-bg-hover: color-mix(in srgb, var(--fd-accent-contrast) 12%, transparent);
+  --_b-bg-active: color-mix(in srgb, var(--fd-accent-contrast) 18%, transparent);
+  --_b-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fd-accent-contrast) 40%, transparent);
+}
+.fd-announce .fd-btn[data-variant="ghost"]:hover { --_b-fg: var(--fd-accent-contrast); }
+.fd-announce .fd-btn:focus-visible { box-shadow: var(--_b-shadow), 0 0 0 2px var(--fd-accent), 0 0 0 4px var(--fd-accent-contrast); }
+
+@container fd-announce (max-width: 640px) {
+  .fd-announce-art[data-side="end"] { display: none; }
+  .fd-announce-art[data-side="start"] {
+    width: 100%; height: 46%;
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
+    mask-image: linear-gradient(to bottom, #000, transparent);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .fd-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--fd-text-3);
+  }
+  .fd-shimmer[data-tone="accent"] { color: var(--fd-accent-text); }
+}

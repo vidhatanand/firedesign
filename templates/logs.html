@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Activity logs · Ember</title>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="logs" data-title="Activity logs">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band fd-page-hero fd-rise">
+      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
+      <h1 class="fd-display">Activity logs</h1>
+      <p class="fd-page-hero-desc">Every request your keys made, with its endpoint, status and credits.</p>
+    </section>
+
+    <section class="fd-band fd-rise" style="--fd-i:1" data-pad="sm" aria-label="Filters">
+      <div class="fd-stack" style="--fd-gap:12px">
+        <div class="fd-toolbar">
+          <div class="fd-search fd-toolbar-search" data-variant="soft">
+            <i data-icon="search"></i>
+            <input class="fd-search-input" id="logs-search" type="search" placeholder="Search requests" aria-label="Search requests" autocomplete="off" data-fd-search-hotkey>
+            <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+            <kbd class="fd-kbd">/</kbd>
+          </div>
+          <div class="fd-filter" data-default="All endpoints">
+            <button class="fd-filter-trigger" type="button" data-fd-popover="pop-endpoint" data-placement="bottom-start"><i data-icon="funnel"></i><span class="fd-filter-value" data-fd-filter-label data-empty="All endpoints">All endpoints</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+          </div>
+          <div class="fd-filter" data-default="All API keys (3)">
+            <button class="fd-filter-trigger" type="button" data-fd-popover="pop-key" data-placement="bottom-start"><i data-icon="key-round"></i><span class="fd-filter-value" data-fd-filter-label data-empty="All API keys (3)">All API keys (3)</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+          </div>
+          <div class="fd-filter" data-default="All statuses">
+            <button class="fd-filter-trigger" type="button" data-fd-popover="pop-status" data-placement="bottom-start"><i data-icon="circle-dot"></i><span class="fd-filter-value" data-fd-filter-label data-empty="All statuses">All statuses</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+          </div>
+          <div class="fd-toolbar-end">
+            <div class="fd-filter">
+              <button class="fd-filter-trigger" type="button" data-fd-popover="pop-range" data-placement="bottom-end"><i data-icon="calendar"></i><span class="fd-filter-value" data-fd-daterange-label>Last 7 days</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+            </div>
+            <button class="fd-btn" type="button" id="logs-export"><i data-icon="download"></i><span>Export CSV</span></button>
+          </div>
+        </div>
+        <div class="fd-filter-applied" id="logs-applied" aria-label="Applied filters" hidden></div>
+      </div>
+    </section>
+
+    <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Requests">
+      <div class="fd-table-wrap" data-variant="plain">
+        <div class="fd-table-scroll">
+          <table class="fd-table" id="logs-table" data-stack aria-label="Activity log" aria-busy="true">
+            <thead>
+              <tr>
+                <th data-select><input type="checkbox" class="fd-table-check" data-select-all aria-label="Select all rows"></th>
+                <th aria-sort="descending" data-sort-type="date"><button class="fd-th-sort" type="button">Time</button></th>
+                <th aria-sort="none"><button class="fd-th-sort" type="button">Endpoint</button></th>
+                <th>Target</th>
+                <th aria-sort="none"><button class="fd-th-sort" type="button">Status</button></th>
+                <th data-num aria-sort="none" data-sort-type="number"><button class="fd-th-sort" type="button">Credits</button></th>
+                <th data-num aria-sort="none" data-sort-type="number"><button class="fd-th-sort" type="button">Duration</button></th>
+                <th data-actions><span class="fd-sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="logs-body" hidden>
+              <tr data-value="req_8f3a21" data-href="#req_8f3a21" data-key="Production crawler" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_8f3a21"></td>
+                <td data-sort-value="2026-11-14T16:29">Nov 14, 4:29 PM</td>
+                <td data-mono data-stack-title>/scrape</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://docs.ember.dev/guides/webhooks</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="1">1</td>
+                <td data-num data-sort-value="1.84">1.84 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_8f3a21" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_7c19be" data-href="#req_7c19be" data-key="Production crawler" data-status="running" data-code="202">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_7c19be"></td>
+                <td data-sort-value="2026-11-14T16:27">Nov 14, 4:27 PM</td>
+                <td data-mono data-stack-title>/crawl</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://ember.dev/blog</span></td>
+                <td data-sort-value="running"><span class="fd-status" data-tone="info" data-live>Running</span></td>
+                <td data-num data-sort-value="48">48</td>
+                <td data-num data-sort-value="">—</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_7c19be" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_6d02f4" data-href="#req_6d02f4" data-key="Default" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_6d02f4"></td>
+                <td data-sort-value="2026-11-14T16:21">Nov 14, 4:21 PM</td>
+                <td data-mono data-stack-title>/search</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">best vector databases for agents 2026</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="5">5</td>
+                <td data-num data-sort-value="2.31">2.31 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_6d02f4" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_5a77c0" data-href="#req_5a77c0" data-key="CI" data-status="failed" data-code="502">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_5a77c0"></td>
+                <td data-sort-value="2026-11-14T15:58">Nov 14, 3:58 PM</td>
+                <td data-mono data-stack-title>/extract</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://shop.example.com/products/trail-runner-2</span></td>
+                <td data-sort-value="failed"><span class="fd-status" data-tone="danger">Failed</span></td>
+                <td data-num data-sort-value="0">0</td>
+                <td data-num data-sort-value="12.07">12.07 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_5a77c0" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_4e91d8" data-href="#req_4e91d8" data-key="Default" data-status="cached" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_4e91d8"></td>
+                <td data-sort-value="2026-11-14T15:40">Nov 14, 3:40 PM</td>
+                <td data-mono data-stack-title>/scrape</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://news.example.org/2026/11/rate-limits-explained</span></td>
+                <td data-sort-value="cached"><span class="fd-status" data-tone="violet">Cached</span></td>
+                <td data-num data-sort-value="0">0</td>
+                <td data-num data-sort-value="0.04">0.04 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_4e91d8" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_3b6a5e" data-href="#req_3b6a5e" data-key="Production crawler" data-status="queued" data-code="202">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_3b6a5e"></td>
+                <td data-sort-value="2026-11-14T15:12">Nov 14, 3:12 PM</td>
+                <td data-mono data-stack-title>/agent</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">Compare pricing for the five largest EU hosting providers</span></td>
+                <td data-sort-value="queued"><span class="fd-status" data-tone="neutral">Queued</span></td>
+                <td data-num data-sort-value="">—</td>
+                <td data-num data-sort-value="">—</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_3b6a5e" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_2f4c83" data-href="#req_2f4c83" data-key="CI" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_2f4c83"></td>
+                <td data-sort-value="2026-11-14T14:47">Nov 14, 2:47 PM</td>
+                <td data-mono data-stack-title>/scrape</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://github.com/ember-dev/ember-js/releases</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="1">1</td>
+                <td data-num data-sort-value="1.12">1.12 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_2f4c83" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_1a08e9" data-href="#req_1a08e9" data-key="Production crawler" data-status="failed" data-code="403">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_1a08e9"></td>
+                <td data-sort-value="2026-11-14T13:05">Nov 14, 1:05 PM</td>
+                <td data-mono data-stack-title>/crawl</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://docs.example.io</span></td>
+                <td data-sort-value="failed"><span class="fd-status" data-tone="danger">Failed</span></td>
+                <td data-num data-sort-value="120">120</td>
+                <td data-num data-sort-value="48.6">48.60 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_1a08e9" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_0e5d77" data-href="#req_0e5d77" data-key="Default" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_0e5d77"></td>
+                <td data-sort-value="2026-11-14T11:52">Nov 14, 11:52 AM</td>
+                <td data-mono data-stack-title>/map</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://northwind.io</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="1">1</td>
+                <td data-num data-sort-value="3.4">3.40 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_0e5d77" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_f91b02" data-href="#req_f91b02" data-key="Production crawler" data-status="failed" data-code="429">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_f91b02"></td>
+                <td data-sort-value="2026-11-14T10:18">Nov 14, 10:18 AM</td>
+                <td data-mono data-stack-title>/scrape</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://lumenapi.com/pricing</span></td>
+                <td data-sort-value="failed"><span class="fd-status" data-tone="danger">Failed</span></td>
+                <td data-num data-sort-value="0">0</td>
+                <td data-num data-sort-value="0.31">0.31 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_f91b02" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_e4c8a9" data-href="#req_e4c8a9" data-key="Default" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_e4c8a9"></td>
+                <td data-sort-value="2026-11-13T18:40">Nov 13, 6:40 PM</td>
+                <td data-mono data-stack-title>/parse</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">quarterly-report-q3.pdf</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="12">12</td>
+                <td data-num data-sort-value="6.72">6.72 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_e4c8a9" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_d27a60" data-href="#req_d27a60" data-key="Production crawler" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_d27a60"></td>
+                <td data-sort-value="2026-11-13T14:15">Nov 13, 2:15 PM</td>
+                <td data-mono data-stack-title>/extract</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://northwind.io/plans</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="5">5</td>
+                <td data-num data-sort-value="4.18">4.18 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_d27a60" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_c10f3e" data-href="#req_c10f3e" data-key="CI" data-status="cached" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_c10f3e"></td>
+                <td data-sort-value="2026-11-12T09:03">Nov 12, 9:03 AM</td>
+                <td data-mono data-stack-title>/search</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">ember api rate limits</span></td>
+                <td data-sort-value="cached"><span class="fd-status" data-tone="violet">Cached</span></td>
+                <td data-num data-sort-value="0">0</td>
+                <td data-num data-sort-value="0.06">0.06 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_c10f3e" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="req_b83d19" data-href="#req_b83d19" data-key="CI" data-status="success" data-code="200">
+                <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_b83d19"></td>
+                <td data-sort-value="2026-11-11T17:47">Nov 11, 5:47 PM</td>
+                <td data-mono data-stack-title>/scrape</td>
+                <td data-mono data-muted><span class="fd-table-trunc" style="--w:260px">https://status.quarry.dev</span></td>
+                <td data-sort-value="success"><span class="fd-status" data-tone="success">Success</span></td>
+                <td data-num data-sort-value="1">1</td>
+                <td data-num data-sort-value="0.97">0.97 s</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_b83d19" data-fd-menu="menu-log-row" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+            </tbody>
+            <tbody id="logs-skeleton" aria-hidden="true">
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" style="--w:92px"></span></td><td><span class="fd-table-skeleton" style="--w:52px"></span></td><td><span class="fd-table-skeleton" style="--w:220px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:76px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:22px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:40px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" style="--w:92px"></span></td><td><span class="fd-table-skeleton" style="--w:60px"></span></td><td><span class="fd-table-skeleton" style="--w:180px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:18px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:40px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" style="--w:92px"></span></td><td><span class="fd-table-skeleton" style="--w:52px"></span></td><td><span class="fd-table-skeleton" style="--w:240px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:76px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:22px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:40px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" style="--w:92px"></span></td><td><span class="fd-table-skeleton" style="--w:68px"></span></td><td><span class="fd-table-skeleton" style="--w:200px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:26px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:40px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" style="--w:92px"></span></td><td><span class="fd-table-skeleton" style="--w:52px"></span></td><td><span class="fd-table-skeleton" style="--w:160px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:76px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:18px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:40px"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" style="--w:92px"></span></td><td><span class="fd-table-skeleton" style="--w:60px"></span></td><td><span class="fd-table-skeleton" style="--w:230px"></span></td><td><span class="fd-table-skeleton" data-shape="pill" style="--w:64px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:22px"></span></td><td data-num><span class="fd-table-skeleton" style="--w:40px"></span></td><td data-actions></td></tr>
+            </tbody>
+            <tbody id="logs-state" hidden></tbody>
+          </table>
+        </div>
+        <div class="fd-table-foot">
+          <span class="fd-table-foot-info" id="logs-info" aria-live="polite">Loading requests</span>
+          <div class="fd-table-foot-actions">
+            <label class="fd-table-rows"><span>Rows per page</span>
+              <select aria-label="Rows per page"><option>10</option><option selected>25</option><option>50</option><option>100</option></select>
+            </label>
+            <div class="fd-btn-group">
+              <button class="fd-btn" type="button" id="logs-prev" data-size="sm" data-icon-only disabled aria-label="Previous page"><i data-icon="chevron-left"></i></button>
+              <button class="fd-btn" type="button" id="logs-next" data-size="sm" data-icon-only disabled aria-label="Next page"><i data-icon="chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="fd-table-bulk" data-state="closed" role="region" aria-label="Bulk actions">
+          <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-bulk-clear aria-label="Clear selection"><i data-icon="x"></i></button>
+          <span class="fd-table-bulk-count" aria-live="polite"><span data-bulk-count>0</span> selected</span>
+          <div class="fd-table-bulk-actions">
+            <button class="fd-btn" type="button" data-variant="outline" data-size="sm" data-action="retry"><i data-icon="rotate-ccw"></i><span>Retry</span></button>
+            <button class="fd-btn" type="button" data-variant="outline" data-size="sm" data-action="export"><i data-icon="download"></i><span>Export</span></button>
+            <button class="fd-btn" type="button" data-variant="danger-soft" data-size="sm" data-action="delete"><i data-icon="trash-2"></i><span>Delete</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band" data-pad="sm" data-grow aria-label="Demo state">
+      <div class="fd-row" data-wrap data-justify="between">
+        <span class="fd-eyebrow">Demo state</span>
+        <div class="fd-segmented" data-size="sm" id="logs-state-switch" role="radiogroup" aria-label="Table state">
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loaded">Loaded</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="empty">Empty</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Row menu (shared by every row) -->
+  <div class="fd-menu" id="menu-log-row" popover role="menu" aria-label="Request actions">
+    <button class="fd-menu-item" type="button" data-value="open"><i data-icon="panel-right"></i><span class="fd-menu-item-label">Open details</span></button>
+    <button class="fd-menu-item" type="button" data-value="copy"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy request ID</span></button>
+    <button class="fd-menu-item" type="button" data-value="retry"><i data-icon="rotate-ccw"></i><span class="fd-menu-item-label">Retry request</span></button>
+    <hr class="fd-menu-sep">
+    <button class="fd-menu-item" type="button" data-value="delete" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Delete log</span></button>
+  </div>
+
+  <!-- Filter popovers -->
+  <div class="fd-popover" id="pop-endpoint" popover data-fd-filter-list data-filter="endpoint" data-size="sm" aria-label="Filter by endpoint">
+    <label class="fd-popover-search"><i data-icon="search"></i><input type="search" placeholder="Filter endpoints" aria-label="Filter endpoints" data-fd-filter-search autocomplete="off"></label>
+    <div class="fd-popover-body">
+      <div class="fd-checklist" aria-label="Endpoints">
+        <div class="fd-checklist-item" data-value="/scrape"><span class="fd-checklist-label fd-mono">/scrape</span><span class="fd-checklist-count">548</span></div>
+        <div class="fd-checklist-item" data-value="/search"><span class="fd-checklist-label fd-mono">/search</span><span class="fd-checklist-count">231</span></div>
+        <div class="fd-checklist-item" data-value="/crawl"><span class="fd-checklist-label fd-mono">/crawl</span><span class="fd-checklist-count">132</span></div>
+        <div class="fd-checklist-item" data-value="/extract"><span class="fd-checklist-label fd-mono">/extract</span><span class="fd-checklist-count">118</span></div>
+        <div class="fd-checklist-item" data-value="/map"><span class="fd-checklist-label fd-mono">/map</span><span class="fd-checklist-count">74</span></div>
+        <div class="fd-checklist-item" data-value="/agent"><span class="fd-checklist-label fd-mono">/agent</span><span class="fd-checklist-count">63</span></div>
+        <div class="fd-checklist-item" data-value="/parse"><span class="fd-checklist-label fd-mono">/parse</span><span class="fd-checklist-count">38</span></div>
+      </div>
+      <p class="fd-checklist-empty" hidden>No endpoints match “<span data-fd-filter-query></span>”</p>
+    </div>
+    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+  </div>
+
+  <div class="fd-popover" id="pop-key" popover data-fd-filter-list data-filter="key" data-size="sm" aria-label="Filter by API key">
+    <div class="fd-popover-body">
+      <div class="fd-checklist" aria-label="API keys">
+        <div class="fd-checklist-item" data-value="Production crawler"><span class="fd-checklist-label">Production crawler</span><span class="fd-checklist-count">812</span></div>
+        <div class="fd-checklist-item" data-value="Default"><span class="fd-checklist-label">Default</span><span class="fd-checklist-count">276</span></div>
+        <div class="fd-checklist-item" data-value="CI"><span class="fd-checklist-label">CI</span><span class="fd-checklist-count">116</span></div>
+      </div>
+    </div>
+    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+  </div>
+
+  <div class="fd-popover" id="pop-status" popover data-fd-filter-list data-filter="status" data-size="sm" aria-label="Filter by status">
+    <div class="fd-popover-body">
+      <div class="fd-checklist" aria-label="Statuses">
+        <div class="fd-checklist-item" data-value="success"><span class="fd-checklist-label">Success</span><span class="fd-checklist-count">1,019</span></div>
+        <div class="fd-checklist-item" data-value="failed"><span class="fd-checklist-label">Failed</span><span class="fd-checklist-count">62</span></div>
+        <div class="fd-checklist-item" data-value="running"><span class="fd-checklist-label">Running</span><span class="fd-checklist-count">3</span></div>
+        <div class="fd-checklist-item" data-value="queued"><span class="fd-checklist-label">Queued</span><span class="fd-checklist-count">5</span></div>
+        <div class="fd-checklist-item" data-value="cached"><span class="fd-checklist-label">Cached</span><span class="fd-checklist-count">115</span></div>
+      </div>
+    </div>
+    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+  </div>
+
+  <div class="fd-popover" id="pop-range" popover data-size="auto" aria-label="Date range">
+    <div class="fd-daterange" data-fd-daterange data-preset="7d" data-max="today">
+      <div class="fd-daterange-presets" role="group" aria-label="Presets">
+        <button class="fd-daterange-preset" type="button" data-preset="24h">Last 24 hours</button>
+        <button class="fd-daterange-preset" type="button" data-preset="7d">Last 7 days</button>
+        <button class="fd-daterange-preset" type="button" data-preset="30d">Last 30 days</button>
+        <button class="fd-daterange-preset" type="button" data-preset="month">This month</button>
+        <button class="fd-daterange-preset" type="button" data-preset="custom">Custom</button>
+      </div>
+      <div class="fd-daterange-main"><div class="fd-calendar"></div></div>
+      <div class="fd-daterange-foot">
+        <span class="fd-daterange-summary" data-fd-daterange-summary></span>
+        <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-daterange-cancel>Cancel</button>
+        <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-daterange-apply>Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log detail -->
+  <dialog class="fd-sheet" id="sheet-log" data-side="right" data-size="md">
+    <div class="fd-sheet-head">
+      <div class="fd-sheet-bar">
+        <span class="fd-status" id="lg-status" data-tone="success" data-variant="pill" data-size="sm">200</span>
+        <h2 class="fd-sheet-title"><span class="fd-mono" id="lg-id">req_8f3a21</span></h2>
+        <button class="fd-btn" type="button" id="lg-copy" data-variant="ghost" data-size="sm" data-icon-only data-fd-tooltip="Copy request ID" aria-label="Copy request ID"><i data-icon="copy"></i></button>
+        <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <p class="fd-sheet-desc" id="lg-desc"></p>
+      <div class="fd-tabs" role="tablist" aria-label="Request detail" data-size="sm">
+        <button class="fd-tab" type="button" role="tab" aria-selected="true" aria-controls="lg-overview">Overview</button>
+        <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="lg-request">Request</button>
+        <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="lg-response">Response</button>
+        <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="lg-timeline">Timeline</button>
+      </div>
+    </div>
+    <div class="fd-sheet-body">
+      <div class="fd-tab-panel fd-stack" role="tabpanel" id="lg-overview"></div>
+      <div class="fd-tab-panel" role="tabpanel" id="lg-request" hidden><div class="fd-json" id="lg-request-json" data-depth="3" data-json="{}"></div></div>
+      <div class="fd-tab-panel" role="tabpanel" id="lg-response" hidden><div class="fd-json" id="lg-response-json" data-depth="3" data-json="{}"></div></div>
+      <div class="fd-tab-panel" role="tabpanel" id="lg-timeline" hidden><ol class="fd-timeline" id="lg-timeline-list"></ol></div>
+    </div>
+    <div class="fd-sheet-foot">
+      <a class="fd-btn" id="lg-playground" data-variant="ghost" data-start href="playground.html?endpoint=scrape"><i data-icon="play"></i><span>Open in playground</span></a>
+      <button class="fd-btn" type="button" id="lg-retry" data-variant="primary"><i data-icon="rotate-ccw"></i><span>Retry</span></button>
+    </div>
+  </dialog>
+</main>
+
+<script type="module">
+  import { init, overlays, data, nav, code, copyText } from '../fire/fire.js';
+
+  const { toast, openDialog, closeDialog } = overlays;
+  const { renderJSON } = code;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  const table = $('#logs-table');
+  const body = $('#logs-body');
+  const skeleton = $('#logs-skeleton');
+  const stateBody = $('#logs-state');
+  const rows = $$('tr', body);
+  const applied = $('#logs-applied');
+  const searchInput = $('#logs-search');
+  const info = $('#logs-info');
+  const prev = $('#logs-prev');
+  const next = $('#logs-next');
+  const switcher = $('#logs-state-switch');
+
+  const NOW = new Date('2026-11-14T16:35:00'); // the demo data is fixed to this moment
+  const filters = { endpoint: [], key: [], status: [], range: { preset: '7d' } };
+  let state = 'loading';
+  let page = 1;
+  let query = '';
+
+  /* ---------- Table states: loaded, loading, empty, error ---------- */
+  const emptyRow = (filtered) => `<tr class="fd-table-state"><td colspan="8"><div class="fd-table-empty">
+      <div class="fd-ascii" data-fd-ascii="waves" data-fade="x" aria-hidden="true"></div>
+      <span class="fd-table-empty-icon"><i data-icon="clock"></i></span>
+      <p class="fd-table-empty-title">No activity logs found</p>
+      <p class="fd-table-empty-text">${filtered ? 'Nothing matches these filters. Try a wider date range or clear them.' : 'Requests to the Ember API appear here a few seconds after they finish.'}</p>
+      ${filtered ? '<button class="fd-btn" type="button" data-action="clear-filters"><span>Clear filters</span></button>' : '<a class="fd-btn" href="playground.html?endpoint=scrape"><i data-icon="play"></i><span>Send a test request</span></a>'}
+    </div></td></tr>`;
+  const errorRow = () => `<tr class="fd-table-state" data-state="error"><td colspan="8"><div class="fd-table-empty" data-tone="danger" role="alert">
+      <span class="fd-table-empty-icon"><i data-icon="triangle-alert"></i></span>
+      <p class="fd-table-empty-title">Couldn’t load activity logs</p>
+      <p class="fd-table-empty-text">The request timed out after 10 seconds. Check your connection, then try again.</p>
+      <button class="fd-btn" type="button" data-action="reload"><i data-icon="refresh-cw"></i><span>Retry</span></button>
+    </div></td></tr>`;
+
+  const isFiltered = () => Boolean(query.trim() || filters.endpoint.length || filters.key.length || filters.status.length || filters.range.preset !== '7d');
+
+  function setState(next_) {
+    state = next_;
+    data.clearSelection(table);
+    table.setAttribute('aria-busy', String(state === 'loading'));
+    body.hidden = state !== 'loaded';
+    skeleton.hidden = state !== 'loading';
+    stateBody.hidden = state === 'loaded' || state === 'loading';
+    if (state === 'empty') stateBody.innerHTML = emptyRow(false);
+    if (state === 'error') stateBody.innerHTML = errorRow();
+    if (state === 'loaded') apply(); else init(stateBody);
+    nav.selectSegment($(`.fd-segmented-item[data-value="${state}"]`, switcher), { silent: true });
+    syncFoot();
+  }
+
+  function syncFoot(shown = rows.filter((tr) => !tr.hidden).length) {
+    const filtered = isFiltered();
+    if (state === 'loading') info.textContent = 'Loading requests';
+    else if (state === 'error') info.textContent = 'Results unavailable';
+    else if (state === 'empty') info.innerHTML = 'Page <b>1</b> of 1 · 0 results';
+    else if (filtered) info.innerHTML = `Page <b>1</b> of 1 · ${shown.toLocaleString('en-US')} results`;
+    else info.innerHTML = `Page <b>${page}</b> of 12 · 1,204 results`;
+    const paged = state === 'loaded' && !filtered;
+    prev.disabled = !paged || page === 1;
+    next.disabled = !paged || page === 12;
+  }
+
+  /* ---------- Search and filters ---------- */
+  function inRange(tr) {
+    const at = new Date($('[data-sort-value]', tr).dataset.sortValue);
+    const { preset, start, end } = filters.range;
+    if (preset === '24h') return at >= new Date(NOW - 864e5);
+    if (preset === '7d') return at >= new Date(NOW - 7 * 864e5);
+    if (preset === 'month') return at.getMonth() === NOW.getMonth();
+    if (preset === 'custom') { const day = $('[data-sort-value]', tr).dataset.sortValue.slice(0, 10); return day >= start && day <= end; }
+    return true;
+  }
+
+  function matches(tr, q) {
+    if (tr.dataset.deleted) return false;
+    if (filters.endpoint.length && !filters.endpoint.includes(tr.children[2].textContent.trim())) return false;
+    if (filters.key.length && !filters.key.includes(tr.dataset.key)) return false;
+    if (filters.status.length && !filters.status.includes(tr.dataset.status)) return false;
+    if (!inRange(tr)) return false;
+    return !q || tr.textContent.toLowerCase().includes(q) || tr.dataset.key.toLowerCase().includes(q);
+  }
+
+  function apply() {
+    const q = query.trim().toLowerCase();
+    let shown = 0;
+    for (const tr of rows) { tr.hidden = !matches(tr, q); if (!tr.hidden) shown += 1; }
+    if (state === 'loaded') {
+      stateBody.hidden = shown > 0;
+      if (!shown) { stateBody.innerHTML = emptyRow(true); init(stateBody); }
+    }
+    syncFoot(shown);
+  }
+
+  function renderTokens() {
+    const tokens = ['endpoint', 'key', 'status'].flatMap((key) => filters[key].map((value) => [key, value]));
+    applied.hidden = tokens.length === 0;
+    applied.innerHTML = tokens.map(([key, value]) =>
+      `<span class="fd-filter-token"><span class="fd-filter-token-key">${key}</span><span class="fd-filter-token-value">${esc(value)}</span><button class="fd-filter-token-remove" type="button" aria-label="Remove ${key}: ${esc(value)}"><i data-icon="x" data-size="12"></i></button></span>`).join('')
+      + '<button class="fd-btn-text" type="button" data-filter-clear-all>Clear all</button>';
+    init(applied);
+  }
+
+  searchInput.addEventListener('input', () => { query = searchInput.value; apply(); });
+
+  document.addEventListener('fd:change', (event) => {
+    const el = event.target;
+    if (!(el instanceof Element)) return;
+    const list = el.closest?.('[data-fd-filter-list]');
+    if (list && el === list) { filters[list.dataset.filter] = event.detail.value; renderTokens(); apply(); return; }
+    if (el.matches('[data-fd-daterange]')) { filters.range = event.detail.value; apply(); return; }
+    if (el === applied && event.detail.source === 'filters') {
+      // A token was removed (or Clear all): untick the matching rows in each popover.
+      const left = new Set(event.detail.value.map((t) => `${t.key}:${t.value}`));
+      for (const key of ['endpoint', 'key', 'status']) {
+        for (const value of [...filters[key]]) {
+          if (!left.has(`${key}:${value}`)) $(`#pop-${key} .fd-checklist-item[data-value="${CSS.escape(value)}"]`)?.click();
+        }
+      }
+      return;
+    }
+    if (el === switcher) {
+      if (event.detail.value !== state) setState(event.detail.value);
+    }
+  });
+
+  /* ---------- Paging (the sample data covers page 1; the swap shows the loading state) ---------- */
+  function goToPage(n) {
+    page = n;
+    setState('loading');
+    setTimeout(() => setState('loaded'), 450);
+  }
+  prev.addEventListener('click', () => goToPage(Math.max(1, page - 1)));
+  next.addEventListener('click', () => goToPage(Math.min(12, page + 1)));
+
+  /* ---------- Log detail sheet ---------- */
+  const STATUS = {
+    success: { tone: 'success', label: 'Success' },
+    failed: { tone: 'danger', label: 'Failed' },
+    running: { tone: 'info', label: 'Running', live: true },
+    queued: { tone: 'neutral', label: 'Queued' },
+    cached: { tone: 'violet', label: 'Cached' },
+  };
+  const HTTP = { 200: 'OK', 202: 'Accepted', 403: 'Forbidden', 429: 'Too Many Requests', 502: 'Bad Gateway' };
+  const CLIENT = { 'Production crawler': 'ember-node 2.6.0', Default: 'Playground', CI: 'ember-py 2.4.1' };
+  const ERRORS = {
+    502: ['UPSTREAM_ERROR', 'The target server returned 502 Bad Gateway after 3 attempts.'],
+    403: ['ROBOTS_DISALLOWED', 'The site’s robots.txt disallows crawling this path. Choose another path or set ignoreRobotsTxt for your own domains.'],
+    429: ['TARGET_RATE_LIMITED', 'The target returned 429 Too Many Requests. Ember retries rate-limited pages for 60 seconds before it gives up.'],
+  };
+
+  function logOf(tr) {
+    const cells = tr.children;
+    const status = tr.dataset.status;
+    return {
+      id: tr.dataset.value,
+      key: tr.dataset.key,
+      status,
+      code: Number(tr.dataset.code),
+      at: new Date(cells[1].dataset.sortValue),
+      when: `${cells[1].textContent.trim().replace(/^(\w+ \d+),/, '$1, 2026')}`,
+      endpoint: cells[2].textContent.trim(),
+      target: cells[3].textContent.trim(),
+      credits: cells[5].textContent.trim(),
+      seconds: Number(cells[6].dataset.sortValue) || 0,
+      duration: cells[6].textContent.trim(),
+    };
+  }
+
+  function requestBody(l) {
+    const t = l.target;
+    switch (l.endpoint) {
+      case '/crawl': return { url: t, limit: 120, maxDiscoveryDepth: 3, scrapeOptions: { formats: ['markdown'] } };
+      case '/search': return { query: t, limit: 5, sources: ['web'] };
+      case '/extract': return { urls: [t], prompt: 'Extract the product name, price and availability.' };
+      case '/agent': return { prompt: t, maxCredits: 200 };
+      case '/map': return { url: t, limit: 500 };
+      case '/parse': return { file: t, formats: ['markdown'] };
+      default: return { url: t, formats: ['markdown', 'links'], onlyMainContent: true, timeout: 30000 };
+    }
+  }
+
+  function responseBody(l) {
+    if (l.status === 'failed') { const [code, message] = ERRORS[l.code]; return { success: false, error: { code, message, status: l.code }, creditsUsed: Number(l.credits) || 0 }; }
+    if (l.status === 'running') return { success: true, id: l.id, status: 'scraping', completed: 31, total: 120, creditsUsed: Number(l.credits) };
+    if (l.status === 'queued') return { success: true, id: l.id, status: 'queued', position: 3, estimatedStart: '~40 s' };
+    const base = { success: true, id: l.id, cached: l.status === 'cached', creditsUsed: Number(l.credits) || 0 };
+    if (l.endpoint === '/search') return { ...base, data: { web: [{ title: 'Vector databases compared', url: 'https://example.org/vector-dbs', position: 1 }, { title: 'Choosing a vector store for agents', url: 'https://example.net/agents/vector-store', position: 2 }] } };
+    if (l.endpoint === '/extract') return { ...base, data: { name: 'Trail Runner 2', price: 129, currency: 'USD', inStock: true } };
+    if (l.endpoint === '/map') return { ...base, links: 412, data: ['https://northwind.io/', 'https://northwind.io/plans', 'https://northwind.io/docs'] };
+    return { ...base, data: { url: l.target, title: 'Page title', statusCode: 200, markdown: '# Page title\n\nClean markdown of the page…', links: 42 } };
+  }
+
+  const clock = (l, offsetSeconds) => new Date(l.at.getTime() + 12000 + offsetSeconds * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  const phase = (title, time, text, tone, extra = '') => `<li class="fd-timeline-item"${tone ? ` data-tone="${tone}"` : ''}${extra}><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">${title}</span><time class="fd-timeline-time">${time}</time></div>${text ? `<p class="fd-timeline-body">${text}</p>` : ''}</div></li>`;
+
+  function timeline(l) {
+    const d = l.seconds || 1;
+    const received = phase('Request received', clock(l, 0), `${esc(l.key)} · ${l.endpoint}`);
+    const queued = phase('Queued', clock(l, 0.012), 'Waited 12 ms for a worker in eu-west-1.');
+    if (l.status === 'queued') return phase('Waiting for a worker', 'now', 'Position 3 in the queue · starts in about 40 s.', 'info', ' data-live') + queued + received;
+    if (l.status === 'cached') return phase('Responded', clock(l, d), `Served from cache · 0 credits.`, 'success') + phase('Cache hit', clock(l, 0.01), 'Fresh copy from 12 min ago.', 'info') + received;
+    if (l.status === 'running') return phase('Fetching pages', 'now', '31 of about 120 pages · 48 credits so far.', 'info', ' data-live') + phase('Crawl started', clock(l, 0.4), 'Following links to depth 3.') + queued + received;
+    if (l.status === 'failed') {
+      return phase('Request failed', clock(l, d), `${l.code} ${HTTP[l.code]} · ${esc(ERRORS[l.code][0])}`, 'danger').replace('<span class="fd-timeline-node"></span>', '<span class="fd-timeline-node"><i data-icon="x"></i></span>')
+        + phase('Retried 2 times', clock(l, d * 0.7), 'Different proxy each attempt.', 'warning')
+        + phase('Fetching page', clock(l, 0.1), esc(l.target)) + queued + received;
+    }
+    return phase('Responded', clock(l, d), `${l.code} ${HTTP[l.code]} · ${l.credits} credit${l.credits === '1' ? '' : 's'} charged`, 'success')
+      + phase('Extracted', clock(l, d * 0.85), 'Markdown and links.')
+      + phase('Rendered page', clock(l, d * 0.6), 'Waited for network idle.')
+      + phase('Fetching page', clock(l, 0.1), esc(l.target)) + queued + received;
+  }
+
+  let current = null;
+  function openLog(tr) {
+    const l = (current = logOf(tr));
+    const s = STATUS[l.status];
+    const pill = $('#lg-status');
+    pill.dataset.tone = s.tone;
+    pill.toggleAttribute('data-live', Boolean(s.live));
+    pill.textContent = l.code;
+    $('#lg-id').textContent = l.id;
+    $('#lg-desc').innerHTML = `<span class="fd-mono">POST ${l.endpoint}</span> · ${esc(l.when)} · ${esc(l.duration)}`;
+    $('#lg-playground').href = `playground.html?endpoint=${l.endpoint.slice(1)}`;
+    $('#lg-overview').innerHTML = `<dl class="fd-kv" data-cols="2">
+        <div class="fd-kv-item"><dt class="fd-kv-key">Request ID</dt><dd class="fd-kv-value" data-copy>${l.id}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value" data-mono>${l.endpoint}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-size="sm" data-tone="${s.tone}"${s.live ? ' data-live' : ''}>${s.label}</span></dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">HTTP</dt><dd class="fd-kv-value fd-num">${l.code} ${HTTP[l.code]}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Target</dt><dd class="fd-kv-value" data-copy="${esc(l.target)}">${esc(l.target)}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Started</dt><dd class="fd-kv-value">${esc(l.when)}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">${esc(l.duration)}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">${l.credits}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">API key</dt><dd class="fd-kv-value">${esc(l.key)}</dd></div>
+        <div class="fd-kv-item"><dt class="fd-kv-key">Client</dt><dd class="fd-kv-value" data-mono>${CLIENT[l.key]}</dd></div>
+      </dl>
+      ${l.status === 'failed' ? `<div class="fd-callout" data-tone="danger" role="alert"><i class="fd-callout-icon" data-icon="circle-alert"></i><div class="fd-callout-content"><p class="fd-callout-title">${ERRORS[l.code][0]}</p><p class="fd-callout-body">${esc(ERRORS[l.code][1])}</p></div></div>` : ''}`;
+    renderJSON($('#lg-request-json'), requestBody(l), { depth: 3 });
+    renderJSON($('#lg-response-json'), responseBody(l), { depth: 3 });
+    $('#lg-timeline-list').innerHTML = timeline(l);
+    init($('#sheet-log'));
+    openDialog('sheet-log', { trigger: tr });
+  }
+
+  const retry = (ids) => toast.promise(new Promise((resolve) => setTimeout(resolve, 1400)), {
+    loading: ids.length > 1 ? `Re-queuing ${ids.length} requests` : `Re-queuing ${ids[0]}`,
+    success: { title: ids.length > 1 ? `${ids.length} requests re-queued` : 'Request re-queued', description: 'New runs appear at the top of the log.' },
+    error: 'Could not retry',
+  });
+
+  $('#lg-copy').addEventListener('click', () => copyText(current.id).then(() => toast.success('Request ID copied')));
+  $('#lg-retry').addEventListener('click', () => { retry([current.id]); closeDialog('sheet-log'); });
+
+  /* ---------- Row, bulk and menu actions ---------- */
+  function remove(ids) {
+    data.clearSelection(table);
+    const gone = rows.filter((tr) => ids.includes(tr.dataset.value));
+    gone.forEach((tr) => { tr.dataset.deleted = '1'; });
+    apply();
+    toast({
+      title: gone.length > 1 ? `${gone.length} logs deleted` : 'Log deleted',
+      tone: 'neutral',
+      action: { label: 'Undo', onClick: () => { gone.forEach((tr) => delete tr.dataset.deleted); apply(); } },
+    });
+  }
+
+  document.addEventListener('fd:select', (event) => {
+    const { action, value, row, item, trigger } = event.detail || {};
+    if (action === 'open' && row?.closest('#logs-table')) { event.preventDefault(); openLog(row); return; }
+    if (action === 'clear-filters') { clearFilters(); return; }
+    if (action === 'reload') { setState('loading'); setTimeout(() => setState('loaded'), 900); return; }
+    if (action === 'retry') { retry(value); return; }
+    if (action === 'export') { toast.success(`Exported ${value.length} request${value.length === 1 ? '' : 's'}`, { description: 'activity-logs-selection.csv' }); return; }
+    if (action === 'delete') { remove(value); return; }
+    if (item?.closest('#menu-log-row')) {
+      const tr = trigger?.closest('tr');
+      if (!tr) return;
+      const id = tr.dataset.value;
+      const choice = item.dataset.value;
+      if (choice === 'open') requestAnimationFrame(() => openLog(tr));
+      if (choice === 'copy') copyText(id).then(() => toast.success('Request ID copied', { description: id }));
+      if (choice === 'retry') retry([id]);
+      if (choice === 'delete') remove([id]);
+    }
+  });
+
+  function clearFilters() {
+    searchInput.value = '';
+    query = '';
+    for (const key of ['endpoint', 'key', 'status']) $(`#pop-${key} [data-fd-filter-clear]`)?.click();
+    if (filters.range.preset !== '7d') {
+      $('#pop-range [data-preset="7d"]').click();
+      $('#pop-range [data-fd-daterange-apply]').click();
+    }
+    apply();
+  }
+
+  /* ---------- Export ---------- */
+  $('#logs-export').addEventListener('click', () => {
+    const count = rows.filter((tr) => !tr.hidden).length;
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 2200)), {
+      loading: { title: 'Preparing export', description: `${isFiltered() ? count : '1,204'} requests` },
+      success: { title: 'activity-logs.csv is ready', description: `${isFiltered() ? count : '1,204'} rows · 94 KB`, action: { label: 'Download' } },
+      error: 'Export failed',
+    });
+  });
+
+  /* ---------- First paint: skeleton rows for ~600 ms, then the data ---------- */
+  setState('loading');
+  setTimeout(() => state === 'loading' && setState('loaded'), 600);
+</script>
+</body>
+</html>

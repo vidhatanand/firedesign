@@ -4,7 +4,7 @@ How to write the words in a product built with Fire: labels, buttons, descriptio
 
 The aim is an interface that reads as clean because every word on it is doing work. That is different from an interface with few words. Cutting useful words makes a screen quiet and useless; the skill is knowing which words are useful.
 
-These rules come from studying a well-made developer console screen by screen, and noting what its copy does and does not do. The examples are written for Ember, the demo product.
+These rules come from studying a well-made developer console screen by screen, and noting what its copy does and does not do. The examples are written for Ember, the demo product. The docs site shows the same rules with live components side by side: `docs/writing.html`.
 
 ## 1. The idea
 

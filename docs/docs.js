@@ -9,6 +9,7 @@ const PAGES = [
     ['foundations', 'Foundations', 'swatch-book'],
     ['signature', 'Texture & frame', 'grid-3x3'],
     ['tweaks', 'Theming & tweaks', 'sliders-horizontal'],
+    ['writing', 'Writing', 'pencil'],
   ]],
   ['Components', [
     ['buttons', 'Buttons', 'mouse-pointer-click'],

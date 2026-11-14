@@ -89,7 +89,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (272 Lucide icons), `palettes.js` (palette data and the tone engine) and `tweaks.js` (the Tweaks panel). |
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
-| `docs/` | The documentation site: 17 pages. Start at `docs/index.html`. |
+| `docs/` | The documentation site: 18 pages. Start at `docs/index.html`. |
 | `templates/` | 21 screens for Ember: the app, sign-in, onboarding, a support page and a documentation site. Start at `templates/index.html`. |
 | `scripts/` | `serve.py` (dev server), `audit.mjs` (checks), `build-palettes.mjs` (regenerates and checks the palettes), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |

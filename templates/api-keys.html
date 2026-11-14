@@ -19,8 +19,8 @@
       <p class="fd-page-hero-desc">Create and manage keys to authenticate with the Ember API.</p>
     </section>
 
-    <section class="fd-band fd-rise" style="--fd-i:1" data-pad="sm" aria-label="Your API keys">
-      <div class="fd-row" data-justify="between" style="--fd-gap:16px">
+    <section class="fd-band fd-rise" style="--fd-i: 1" data-pad="sm" aria-label="Your API keys">
+      <div class="fd-row" data-justify="between" data-gap="4">
         <h2 class="fd-h3">Your API keys</h2>
         <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-open="dlg-create"><i data-icon="plus"></i><span>Create</span></button>
       </div>
@@ -28,12 +28,12 @@
 
     <section class="fd-band" aria-label="Keys">
       <div id="keys-wrap" data-fd-loading="true">
-        <div class="fd-skeleton-grid" style="--fd-min:100%">
+        <div class="fd-skeleton-grid" data-min="full">
           <div class="fd-card fd-skeleton-card"></div>
-          <div class="fd-card fd-skeleton-card" style="--fd-i:1"></div>
-          <div class="fd-card fd-skeleton-card" style="--fd-i:2"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i: 1"></div>
+          <div class="fd-card fd-skeleton-card" style="--fd-i: 2"></div>
         </div>
-        <div class="fd-stack" id="keys-list" style="--fd-gap:12px"></div>
+        <div class="fd-stack" id="keys-list" data-gap="3"></div>
         <div class="fd-card" id="keys-empty" data-flush hidden>
           <div class="fd-empty" data-size="lg">
             <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="waves"></div></div>
@@ -47,15 +47,15 @@
     </section>
 
     <section class="fd-band" data-grow aria-label="Usage by key">
-      <div class="fd-grid" style="--fd-min:320px; --fd-gap:32px">
-        <div class="fd-stack" style="--fd-gap:16px">
-          <div class="fd-stack" style="--fd-gap:2px">
+      <div class="fd-grid" data-min="lg" data-gap="8">
+        <div class="fd-stack" data-gap="4">
+          <div class="fd-stack" data-gap="0-5">
             <h2 class="fd-h3">Usage by key</h2>
             <p class="fd-small fd-muted" id="usage-total">Credits this month</p>
           </div>
           <ul class="fd-bars" id="usage-bars" aria-label="Credits this month by key"></ul>
         </div>
-        <div class="fd-stack" style="--fd-gap:12px">
+        <div class="fd-stack" data-gap="3">
           <div class="fd-callout" data-tone="info" role="note">
             <i class="fd-callout-icon" data-icon="shield-check"></i>
             <div class="fd-callout-content"><p class="fd-callout-title">Keep keys on the server</p><p class="fd-callout-body">Send requests from your backend and read the key from an environment variable. A key in browser code, a mobile app or a public repo is a key anyone can spend.</p></div>
@@ -111,7 +111,7 @@
         </div>
         <div class="fd-field" id="ck-endpoints" role="group" aria-labelledby="ck-endpoints-label" hidden>
           <span class="fd-field-label" id="ck-endpoints-label">Endpoints <span class="fd-field-tag">optional</span></span>
-          <div class="fd-grid" style="--fd-min:132px; --fd-gap:8px 16px">
+          <div class="fd-grid" data-min="sm" data-gap="2" data-gap-x="4">
             <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/search" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/search</span></span></label>
             <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/scrape" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/scrape</span></span></label>
             <label class="fd-checkbox"><input type="checkbox" name="ck-ep" value="/crawl"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label fd-mono">/crawl</span></span></label>
@@ -241,10 +241,10 @@
   /* ---------- Rendering ---------- */
   const cardHTML = (k) => `<article class="fd-card" data-key="${k.id}"${k.expired ? ' data-variant="quiet"' : ''} aria-label="${esc(k.name)}">
       <header class="fd-card-head">
-        <div class="fd-card-heading"><h3 class="fd-title fd-row" style="--fd-gap:8px"><span>${esc(k.name)}</span>${k.expired ? `<span class="fd-badge" data-tone="warning">Expired ${k.expired}</span>` : ''}</h3></div>
+        <div class="fd-card-heading"><h3 class="fd-title fd-row" data-gap="2"><span>${esc(k.name)}</span>${k.expired ? `<span class="fd-badge" data-tone="warning">Expired ${k.expired}</span>` : ''}</h3></div>
         <div class="fd-card-action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="menu-key" data-placement="bottom-end" aria-label="Actions for ${esc(k.name)}"><i data-icon="ellipsis"></i></button></div>
       </header>
-      <div class="fd-card-body fd-stack" style="--fd-gap:12px">
+      <div class="fd-card-body fd-stack" data-gap="3">
         <div class="fd-secret" data-value="${k.value}" data-noun="API key" role="group" aria-label="${esc(k.name)} API key">
           <code class="fd-secret-value" data-tone="accent"></code>
           <div class="fd-secret-actions">
@@ -252,9 +252,9 @@
             <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy API key" data-fd-toast='{"title":"Key copied","tone":"success"}'><i data-icon="copy"></i></button>
           </div>
         </div>
-        <div class="fd-row" data-wrap style="--fd-gap:6px 12px">
+        <div class="fd-row" data-wrap data-gap="1-5" data-gap-x="3">
           <span class="fd-small fd-muted">Created on ${k.created} · Last used ${k.lastUsed}${k.expires ? ` · Expires ${k.expires}` : ''}</span>
-          <span class="fd-row" style="--fd-gap:4px">${k.endpoints.map((e) => `<span class="fd-badge" data-variant="mono">${e}</span>`).join('')}</span>
+          <span class="fd-row" data-gap="1">${k.endpoints.map((e) => `<span class="fd-badge" data-variant="mono">${e}</span>`).join('')}</span>
         </div>
       </div>
     </article>`;

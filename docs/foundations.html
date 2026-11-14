@@ -111,7 +111,7 @@
         <code>fd-body<br>14 / 20 · 400</code><div class="fd-body fd-text-2">Invited members receive an email with instructions to join your team.</div>
         <code>fd-small<br>13 / 20 · 400</code><div class="fd-small fd-muted">Credits from successful jobs · resets Nov 23</div>
         <code>fd-caption<br>12 / 16 · 400</code><div class="fd-caption fd-muted">Dates use UTC. Weeks start Monday.</div>
-        <code>fd-stat<br>24 / 32 · 500</code><div class="fd-stat">1,520 <span class="fd-small fd-muted" style="letter-spacing:0;font-weight:400">credits</span></div>
+        <code>fd-stat<br>24 / 32 · 500</code><div class="fd-stat">1,520 <span class="fd-small fd-muted" style="letter-spacing: 0; font-weight: 400">credits</span></div>
         <code>fd-mono<br>13 / 20 · 500</code><div class="fd-mono">em-227cd••••••••••••••••144b0f16</div>
         <code>fd-mono-sm<br>12 / 16</code><div class="fd-mono-sm fd-accent-text">0–15 credits</div>
         <code>fd-eyebrow<br>12 / 16 · mono</code><div class="fd-eyebrow">Alerts (24h)</div>
@@ -132,6 +132,47 @@
     <div class="doc-specimen" data-surface="surface"><div class="fx-space" id="space-list"></div></div>
   </section>
 
+  <section class="doc-section" id="layout">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Layout</h2>
+      <p>Placing things on a screen uses three primitives and a short set of attributes. Markup never carries a pixel value: gaps come from the space scale, widths and heights from the size scale.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-stack" data-gap="6" data-w="full" data-max-w="3xl">
+        <div class="fd-row" data-gap="3">
+          <div class="fd-search" data-w="md"><i data-icon="search"></i><input class="fd-search-input" type="search" placeholder="Search keys" aria-label="Search keys"></div>
+          <label class="fd-select" data-w="sm"><span class="fd-sr-only">Environment</span><select aria-label="Environment"><option>Production</option><option>Staging</option></select></label>
+          <button class="fd-btn" data-variant="primary" type="button">Create key</button>
+        </div>
+        <div class="fd-grid" data-min="sm" data-cols="3" data-gap="3">
+          <div class="fd-card"><p class="fd-caption fd-muted">Requests</p><p class="fd-stat">48,213</p></div>
+          <div class="fd-card"><p class="fd-caption fd-muted">Credits</p><p class="fd-stat">1,520</p></div>
+          <div class="fd-card"><p class="fd-caption fd-muted">Errors</p><p class="fd-stat">0.4%</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Use</th><th>Values</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>fd-stack · fd-row · fd-grid</td><td>classes</td><td>A column, a row, and a grid that fills with as many equal columns as fit. <code class="fd-code">data-wrap</code>, <code class="fd-code">data-justify</code> and <code class="fd-code">data-align</code> adjust them.</td></tr>
+          <tr><td>data-gap</td><td>0 · 0-5 · 1 · 1-5 · 2 · 2-5 · 3 · 3-5 · 4 · 5 · 6 · 8 · 10 · 12 · 16 · 20 · 24</td><td>The space between children, by <code class="fd-code">--fd-space-*</code> step. <code class="fd-code">data-gap-x</code> sets the column gap on its own. A gap applies to that element only, never to boxes inside it.</td></tr>
+          <tr><td>data-w</td><td>4xs · 3xs · 2xs · xs · sm · md · lg · xl · 2xl · 3xl · 4xl · 5xl · 6xl · phone · full</td><td>Width from the size scale, never wider than the container.</td></tr>
+          <tr><td>data-max-w</td><td>the same steps, plus none</td><td>The widest it may grow: a form column, a text block, a dialog body.</td></tr>
+          <tr><td>data-h · data-min-h</td><td>the same steps</td><td>Height and minimum height: previews, panes, empty areas.</td></tr>
+          <tr><td>data-min</td><td>the same steps</td><td>The narrowest column of <code class="fd-code">fd-grid</code>, <code class="fd-code">fd-card-grid</code> and <code class="fd-code">fd-skeleton-grid</code>.</td></tr>
+          <tr><td>data-cols</td><td>1 · 2 · 3 · 4 · 5 · 6</td><td>The most columns those grids may have. They still drop columns on narrow screens to keep the minimum.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="doc-specimen" data-surface="surface"><div class="fx-space" id="size-list"></div></div>
+    <ul class="doc-notes">
+      <li>The size scale is <code class="fd-code">--fd-size-4xs</code> (24px) to <code class="fd-code">--fd-size-6xl</code> (960px). Pick the nearest step; do not invent a width between two steps.</li>
+      <li>A component parameter that has to stay a custom property reads the scale: <code class="fd-code">style="--fd-panel-w: var(--fd-size-xl)"</code>. Relative values (<code class="fd-code">72%</code>, <code class="fd-code">20ch</code>) and unitless parameters are fine inline.</li>
+      <li><code class="fd-code">node scripts/audit.mjs</code> reports any pixel value left in markup under <code class="fd-code">inline</code>.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="radius">
     <div class="doc-section-head">
       <h2 class="fd-h3">Radius</h2>
@@ -145,7 +186,7 @@
       <h2 class="fd-h3">Elevation</h2>
       <p>Most things have none. Shadows are short and layered, and the floating ones carry their own 1px ring so they never need a border.</p>
     </div>
-    <div class="doc-specimen" id="shadow-list" style="gap:28px"></div>
+    <div class="doc-specimen" id="shadow-list" data-gap="8"></div>
   </section>
 
   <section class="doc-section" id="motion">
@@ -210,7 +251,7 @@
   </section>
 </main>
 <script type="module">
-  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" style="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted" style="font-weight:400">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
+  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" style="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted" style="font-weight: 400">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
   const steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 88];
   document.getElementById('ladder').innerHTML = steps.map((s) => `<span style="--c:var(--fd-a${s})">${s}</span>`).join('');
   document.getElementById('surfaces-grid').innerHTML = [
@@ -226,14 +267,16 @@
     [`${t[0].toUpperCase() + t.slice(1)}`, `--fd-${t}-solid`], [`${t} text`, `--fd-${t}-text`], [`${t} bg`, `--fd-${t}-bg`],
   ]).map((a) => sw(...a)).join('');
   const space = [['0-5', 2], ['1', 4], ['1-5', 6], ['2', 8], ['2-5', 10], ['3', 12], ['3-5', 14], ['4', 16], ['5', 20], ['6', 24], ['8', 32], ['10', 40], ['12', 48], ['16', 64], ['20', 80], ['24', 96]];
-  document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i style="--w:${px}px"></i></div>`).join('');
+  document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i style="--w: var(--fd-space-${n})"></i></div>`).join('');
+  const sizes = [['4xs', 24], ['3xs', 48], ['2xs', 64], ['xs', 96], ['sm', 160], ['md', 240], ['lg', 320], ['xl', 400], ['2xl', 480], ['3xl', 560], ['4xl', 640], ['5xl', 768], ['6xl', 960]];
+  document.getElementById('size-list').innerHTML = sizes.map(([n, px]) => `<div><span>--fd-size-${n}</span><span>${px}px</span><i style="--w: min(100%, var(--fd-size-${n}))"></i></div>`).join('');
   const radius = [['xs', 4, 'checkbox'], ['sm', 6, 'chip, thumb'], ['md', 8, 'menu item'], ['lg', 10, 'control'], ['xl', 12, 'card'], ['2xl', 16, 'dialog'], ['3xl', 20, 'sheet']];
-  document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line style="border-radius:var(--fd-radius-${n})"><span style="color:var(--fd-text)">${n} · ${px}</span><span>${use}</span></div>`).join('');
+  document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line style="border-radius:var(--fd-radius-${n})"><span style="color: var(--fd-text)">${n} · ${px}</span><span>${use}</span></div>`).join('');
   const shadows = [['xs', 'outline button'], ['sm', 'composer'], ['md', 'card hover'], ['thumb', 'segmented, switch'], ['lg', 'menu, popover'], ['xl', 'dialog']];
-  document.getElementById('shadow-list').innerHTML = shadows.map(([n, use]) => `<div class="fx-box" style="border-radius:var(--fd-radius-xl);box-shadow:var(--fd-shadow-${n})"><span style="color:var(--fd-text)">${n}</span><span>${use}</span></div>`).join('');
+  document.getElementById('shadow-list').innerHTML = shadows.map(([n, use]) => `<div class="fx-box" style="border-radius:var(--fd-radius-xl);box-shadow:var(--fd-shadow-${n})"><span style="color: var(--fd-text)">${n}</span><span>${use}</span></div>`).join('');
   const motion = [['dur-2 · ease-out', '--fd-dur-2', '--fd-ease-out', '160ms hover, focus'], ['dur-3 · ease-out', '--fd-dur-3', '--fd-ease-out', '220ms menus, toggles'], ['dur-3 · ease-spring', '--fd-dur-3', '--fd-ease-spring', '220ms thumbs'], ['dur-4 · ease-emphasized', '--fd-dur-4', '--fd-ease-emphasized', '320ms dialogs, sheets'], ['dur-5 · ease-emphasized', '--fd-dur-5', '--fd-ease-emphasized', '520ms entrances']];
   const list = document.getElementById('motion-list');
-  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span style="color:var(--fd-text)">${n}</span><br>${use}</span><div class="fx-track" style="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
+  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span style="color: var(--fd-text)">${n}</span><br>${use}</span><div class="fx-track" style="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
   document.getElementById('motion-run').addEventListener('click', () => list.toggleAttribute('data-run'));
 </script>
 </body>

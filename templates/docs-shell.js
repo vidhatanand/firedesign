@@ -469,7 +469,8 @@ export function mountDemo(host, { section = 'docs', active = '', toc = true, nav
   // Shell links are relative to templates/; a page elsewhere passes `base` to reach them.
   if (base) shell.querySelectorAll('a[href]').forEach((a) => { const h = a.getAttribute('href'); if (!/^(#|[a-z][a-z0-9+.-]*:|\/)/i.test(h)) a.setAttribute('href', base + h); });
   shell.querySelector('template[data-slot]').replaceWith(article);
-  for (const attr of ['style']) if (host.hasAttribute(attr)) shell.setAttribute(attr, host.getAttribute(attr));
+  // The host's own placement (a phone-width frame, a fixed height) moves to the shell that replaces it.
+  for (const attr of ['style', 'data-w', 'data-max-w', 'data-h', 'data-min-h']) if (host.hasAttribute(attr)) shell.setAttribute(attr, host.getAttribute(attr));
   host.replaceWith(shell);
   return shell;
 }

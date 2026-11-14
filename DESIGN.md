@@ -29,6 +29,7 @@ Every value is a variable. Global tokens live in `fire/tokens.css`; values that 
 | Status | `--fd-{success,warning,danger,info,violet}-{solid,text,bg,line}` |
 | Type | sizes `--fd-text-{display,3xl,h1,h2,h3,xl,title,lg,compose,md,sm,xs,2xs,3xs,4xs,stat}` with matching `--fd-lh-*`; reading line heights `--fd-lh-{prose,prose-sm,code}`; tracking `--fd-ls-{display,lg,body,tag,caps,tight}`; weights `--fd-weight-{regular,label,medium,semibold}`; `--fd-font-sans`, `--fd-font-mono`, `--fd-font-display` (headings; the sans by default) |
 | Space | `--fd-space-{0,0-5,1,1-5,2,2-5,3,3-5,4,5,6,8,10,12,16,20,24}` (4px grid, each multiplied by `--fd-space-scale`) |
+| Size | `--fd-size-{4xs 24,3xs 48,2xs 64,xs 96,sm 160,md 240,lg 320,xl 400,2xl 480,3xl 560,4xl 640,5xl 768,6xl 960,phone 375}`: widths and heights given to things when they are placed on a screen |
 | Icons | `--fd-icon-{xs 12,sm 14}`, `--fd-icon` 16, `--fd-icon-{lg 20,xl 24}` |
 | Radius | `xs 4` · `sm 6` · `md 8` · `lg 10` (controls) · `xl 12` (cards, popovers) · `2xl 16` (dialogs) · `3xl 20` · `full` |
 | Controls | `--fd-control-{xs 24,sm 28,md 36,lg 40,xl 44}`, `--fd-control-px`, `--fd-row` (44), `--fd-row-px` |
@@ -48,6 +49,7 @@ The neutrals are alpha steps of two colours: `--fd-wash` (fills and tints) and `
 - Variants and sizes are data attributes on the block: `data-variant`, `data-size`, `data-tone` (`neutral|accent|success|warning|danger|info|violet`), `data-state`.
 - State comes from native and ARIA attributes, and CSS selects on them: `:disabled`, `[aria-current="page"]`, `[aria-selected="true"]`, `[aria-expanded="true"]`, `[aria-pressed="true"]`, `[aria-busy="true"]`, `[aria-invalid="true"]`, `[data-state="open"]`, `[hidden]`.
 - Component-private custom properties start with `--_` plus the family's prefix (`--_b-` button, `--_s-` shell, `--_n-` nav, `--_f-` forms, `--_o-` overlays, `--_d-` data, `--_c-` content, `--_k-` code, `--_a-` agent, `--_cht-` chat, `--_ch-` charts, `--_tx-` texture, `--_sk-` skeleton, `--_doc-` documentation, `--_tw-` tweaks). Custom properties inherit, so an unprefixed name set on a container leaks into every component inside it. To set another family's private property (for example a button's radius from a form rule), use that family's prefix.
+- **Layout in markup uses attributes, never pixel values** (`fire/layout.css`, loaded last): `data-gap="3"` (space steps; `data-gap-x` for the column gap), `data-w`, `data-max-w`, `data-h`, `data-min-h` (size steps, plus `full`; `none` for max-width) `data-min` (narrowest grid column) and `data-cols` (most grid columns). An inline `style` may only pass a token (`--fd-panel-w: var(--fd-size-xl)`), a relative value (`72%`, `20ch`) or a unitless parameter (`--value: 0.62`, `--fd-i: 2`). `node scripts/audit.mjs` reports pixel values in templates and docs under `inline`; it must report none. `--fd-gap`, `--fd-min` and `--fd-cols` are registered as non-inheriting, so a gap on a stack is not the gap of the rows inside it.
 - Use logical properties where direction matters (`padding-inline`, `margin-inline-start`, `inset-inline`).
 - Responsive behaviour uses container queries (`.fd-cq` or a named container on the component) before media queries. Breakpoints when a media query is needed: 640px (phone), 900px (tablet / sidebar collapses to a drawer), 1200px.
 - Icons: `<i data-icon="name"></i>` in markup (upgraded to an inline `<svg class="fd-icon">` by `fire/js/icons.js`), or `icon('name')` in JS. Names are Lucide names; the available set is the keys of `ICONS` in `fire/js/icons.js`. Icons are 16px with a 1.5 stroke; 14px inside small controls. Never use emoji as icons.
@@ -99,7 +101,7 @@ Every component family has a page in `docs/` built like `docs/buttons.html` (rea
 - Specimen options: `data-layout="stack|center|grid|bleed"`, `data-surface="surface|sunken"`, `data-height style="--h:420px"`.
 - Other helpers: `.doc-pair` (two specimens side by side), `.doc-notes`, `.doc-do` (do / don't), `.doc-table` (API table), `.doc-sub` (sub-heading).
 - Show every variant, size and state, including hover-independent states (disabled, loading, invalid, empty, selected, open). Use realistic Ember content, never lorem ipsum. Each section gets one or two sentences that explain when to use the thing, not what it is.
-- Do not add page-specific CSS files. If a demo needs layout help, use the base primitives (`.fd-stack`, `.fd-row`, `.fd-grid`) or a `style` attribute for width only.
+- Do not add page-specific CSS files. If a demo needs layout help, use the base primitives (`.fd-stack`, `.fd-row`, `.fd-grid`) and the layout attributes (`data-gap`, `data-w`, `data-max-w`, `data-h`, `data-min`, `data-cols`). No pixel values in markup.
 
 ## 8. Quality bar
 

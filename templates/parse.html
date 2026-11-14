@@ -13,7 +13,7 @@
 <main class="fd-page">
   <div class="fd-frame">
 
-    <section class="fd-band fd-rise" data-pad="sm" style="--fd-i:0" aria-label="Parse files">
+    <section class="fd-band fd-rise" data-pad="sm" style="--fd-i: 0" aria-label="Parse files">
       <div class="fd-page-head">
         <div class="fd-page-head-text">
           <h1 class="fd-page-head-title">Parse files</h1>
@@ -27,8 +27,8 @@
       </div>
     </section>
 
-    <section class="fd-band fd-rise" style="--fd-i:1" aria-label="Upload">
-      <div class="fd-stack" style="--fd-gap:12px">
+    <section class="fd-band fd-rise" style="--fd-i: 1" aria-label="Upload">
+      <div class="fd-stack" data-gap="3">
         <label class="fd-dropzone" id="parse-zone" data-fd-dropzone data-list="#parse-files" data-max-mb="50">
           <input type="file" multiple accept=".pdf,.docx,.xlsx,.html,.htm,.txt,.md,.csv">
           <span class="fd-dropzone-icon"><i data-icon="cloud-upload"></i></span>
@@ -84,7 +84,7 @@
     <p class="fd-dialog-desc">Send a file to /parse and read the pages back as markdown or JSON.</p>
     <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
   </div>
-  <div class="fd-dialog-body fd-stack" style="--fd-gap:12px">
+  <div class="fd-dialog-body fd-stack" data-gap="3">
     <div class="fd-row" data-wrap data-justify="between">
       <button class="fd-endpoint" type="button" data-copyable data-copy="https://api.ember.dev/v2/parse"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/parse</span></button>
       <span class="fd-small fd-muted">1 credit per page</span>
@@ -189,16 +189,16 @@ function renderViewer() {
   const json = { id: d.id, file: d.name, pages: d.pages, words: c.words, tables: c.tables, markdown: c.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140) + '…', creditsUsed: d.pages };
   const uid = `pv${++viewToken}`;
   const parsing = d.state === 'parsing';
-  host.innerHTML = `<div class="fd-stack" style="--fd-gap:20px">
-    <header class="fd-row" data-wrap data-justify="between" style="--fd-gap:12px">
-      <div class="fd-row" style="--fd-gap:12px">
+  host.innerHTML = `<div class="fd-stack" data-gap="5">
+    <header class="fd-row" data-wrap data-justify="between" data-gap="3">
+      <div class="fd-row" data-gap="3">
         <span class="fd-tile" data-tone="accent">${ico(KIND_ICON[d.kind])}</span>
-        <div class="fd-stack" style="--fd-gap:2px">
+        <div class="fd-stack" data-gap="0-5">
           <h2 class="fd-title fd-truncate">${esc(d.name)}</h2>
           <p class="fd-mono-sm fd-muted">${d.pages} ${d.pages === 1 ? 'page' : 'pages'} · ${d.pages} credits · ${bytes(d.size)} · ${parsing ? 'parsing' : `parsed ${d.when}`}</p>
         </div>
       </div>
-      <div class="fd-row" style="--fd-gap:4px">
+      <div class="fd-row" data-gap="1">
         <span class="fd-status" data-size="sm" data-tone="${parsing ? 'info' : 'success'}"${parsing ? ' data-live' : ''}>${parsing ? 'Parsing' : 'Parsed'}</span>
         <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-act="copy" aria-label="Copy markdown">${ico('copy')}</button>
         <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-act="download" aria-label="Download JSON">${ico('download')}</button>
@@ -210,7 +210,7 @@ function renderViewer() {
       <button class="fd-tab" type="button" role="tab" aria-selected="false" aria-controls="${uid}-pages" data-value="pages">${ico('layers')}Pages <span class="fd-tab-count">${d.pages}</span></button>
     </div>
     <div id="${uid}-body" data-fd-loading="true" aria-busy="true">
-      <div class="fd-stack" style="--fd-gap:16px"><span class="fd-skeleton-title" data-size="h3" style="width:40%"></span><div class="fd-skeleton-text" data-lines="4"></div><div class="fd-skeleton-text" data-lines="3"></div></div>
+      <div class="fd-stack" data-gap="4"><span class="fd-skeleton-title" data-size="h3" style="width: 40%"></span><div class="fd-skeleton-text" data-lines="4"></div><div class="fd-skeleton-text" data-lines="3"></div></div>
       <div>
         <div class="fd-tab-panel" role="tabpanel" id="${uid}-md">${parsing ? '<p class="fd-muted">Parsing is still running. Pages appear as they finish.</p>' : `<div class="fd-message-body">${c.html}</div>`}</div>
         <div class="fd-tab-panel" role="tabpanel" id="${uid}-json" hidden><div class="fd-json" data-toolbar data-label="POST /v2/parse · ${esc(d.id)}" data-depth="2" data-truncate="72" data-json="${esc(JSON.stringify(json))}"></div></div>

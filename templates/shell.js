@@ -145,7 +145,7 @@ export function renderTopbar({ prefix = 'ember', mobileOpen = false } = {}) {
   <a class="fd-topbar-brand" data-only="mobile" href="overview.html" aria-label="Ember overview">${EMBER_MARK}</a>
   <button class="fd-btn fd-team-switch" type="button" data-fd-menu="${prefix}-menu-team" data-placement="bottom-start"><span class="fd-team-switch-tile" aria-hidden="true" data-fd-team-tile>${a.teamInitial}</span><span data-fd-menu-value>${esc(a.team)}</span><span class="fd-team-switch-meta">Team</span>${i('chevrons-up-down')}</button>
   <div class="fd-topbar-actions">
-    <button class="fd-btn" type="button" data-only="desktop" data-fd-search-trigger data-fd-command-open="${prefix}-command" style="width: 220px">${i('search')}<span class="fd-grow fd-muted">Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
+    <button class="fd-btn" type="button" data-only="desktop" data-fd-search-trigger data-fd-command-open="${prefix}-command" data-w="md">${i('search')}<span class="fd-grow fd-muted">Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
     <button class="fd-btn" type="button" data-icon-only data-fd-popover="${prefix}-notifs" data-placement="bottom-end" data-fd-tooltip="Notifications" aria-label="Notifications">${i('bell')}<span class="fd-overlay-count" data-fd-unread-count="${prefix}-notifs">2</span></button>
     <button class="fd-btn" type="button" data-icon-only data-fd-tweaks-open data-fd-tooltip="Tweaks" aria-label="Tweaks" aria-expanded="false">${i('sliders-horizontal')}</button>
     <button class="fd-btn" type="button" data-icon-only data-only="desktop" data-fd-theme-toggle data-fd-tooltip="Theme" aria-label="Theme">${i('monitor')}</button>

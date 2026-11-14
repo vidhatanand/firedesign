@@ -9,8 +9,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const AS_JSON = process.argv.includes('--json');
-const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'literals', 'sizes'];
-const LEVELS = { icons: 'ERROR', colors: 'WARN', classes: 'WARN', ids: 'ERROR', links: 'ERROR', tokens: 'ERROR', sizes: 'INFO' };
+const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'literals', 'inline', 'sizes'];
+const LEVELS = { icons: 'ERROR', colors: 'WARN', classes: 'WARN', ids: 'ERROR', links: 'ERROR', tokens: 'ERROR', literals: 'WARN', inline: 'WARN', sizes: 'INFO' };
 const findings = []; // { check, level, file, line, message }
 
 // ---------- helpers ----------
@@ -281,6 +281,21 @@ function checkLiterals() {
   }
 }
 
+// ---------- 6b. inline: markup never carries a pixel value ----------
+// Sizes and gaps in templates and docs come from the layout attributes (fire/layout.css) or from tokens.
+// An inline style may pass a token, a relative value or a unitless parameter, never px, rem or ms.
+function checkInline() {
+  const dirs = ['templates', 'docs'];
+  const files = dirs.flatMap(d => fs.readdirSync(path.join(ROOT, d)).filter(f => /\.(html|js)$/.test(f)).map(f => `${d}/${f}`));
+  for (const f of files) {
+    const text = read(f);
+    for (const m of text.matchAll(/style="([^"]*)"/g)) {
+      const literals = [...m[1].matchAll(/(?<![\w.#-])(\d*\.?\d+)(px|rem|ms|s)(?![\w-])/g)].filter(x => Number(x[1]) !== 0).map(x => x[0]);
+      if (literals.length) add('inline', 'WARN', f, text.slice(0, m.index).split('\n').length, `style="${m[1].slice(0, 70)}"  ← ${[...new Set(literals)].join(', ')}`);
+    }
+  }
+}
+
 // ---------- 7. sizes ----------
 const countLines = t => (t.length === 0 ? 0 : t.split('\n').length - (t.endsWith('\n') ? 1 : 0));
 
@@ -311,6 +326,7 @@ async function main() {
   checkLinks();
   checkTokens();
   checkLiterals();
+  checkInline();
   reportSizes();
 
   const byPlace = (a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0);

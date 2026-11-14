@@ -46,6 +46,12 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* Layout parameters are read by the element they are set on and must not reach its descendants:
+   a gap given to a stack is not the gap of the rows inside it. */
+@property --fd-gap { syntax: "*"; inherits: false; }
+@property --fd-min { syntax: "*"; inherits: false; }
+@property --fd-cols { syntax: "*"; inherits: false; }
+
 :root { color-scheme: light dark; }
 [data-theme="light"] { color-scheme: light; }
 [data-theme="dark"] { color-scheme: dark; }
@@ -123,6 +129,24 @@
   --fd-gutter: 24px;          /* page gutter; 16px on phones */
   --fd-content-max: 1140px;   /* the framed column */
   --fd-measure: 68ch;         /* longest comfortable line of prose */
+
+  /* Sizes: the widths and heights things are given when they are placed on a screen (a select in a form
+     row, a dialog's text column, a preview's height). Set them with the layout attributes in layout.css
+     (data-w, data-max-w, data-h, data-min-h, data-min), or read the token. Never write a pixel size in markup. */
+  --fd-size-4xs: 24px;
+  --fd-size-3xs: 48px;
+  --fd-size-2xs: 64px;
+  --fd-size-xs: 96px;
+  --fd-size-sm: 160px;
+  --fd-size-md: 240px;
+  --fd-size-lg: 320px;
+  --fd-size-xl: 400px;
+  --fd-size-2xl: 480px;
+  --fd-size-3xl: 560px;
+  --fd-size-4xl: 640px;
+  --fd-size-5xl: 768px;
+  --fd-size-6xl: 960px;
+  --fd-size-phone: 375px;    /* a phone preview frame */
 
   /* ---------- Motion ---------- */
   --fd-ease-out: cubic-bezier(0.2, 0, 0, 1);

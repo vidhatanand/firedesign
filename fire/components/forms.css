@@ -36,6 +36,9 @@
   --fd-form-info: 18px;                /* the (i) button beside a label */
   --fd-form-error-icon-nudge: 3px;     /* aligns the error icon with the first text line */
   --fd-form-col-min: 220px;            /* .fd-form-cols: narrowest column */
+  --fd-form-measure: 560px;            /* the widest a form, a column group or a stacked row's control grows */
+  --fd-form-measure-sm: 400px;
+  --fd-form-measure-lg: 768px;
   --fd-form-clear: 20px;               /* search clear button */
   --fd-form-chevron-inset: 11px;       /* select chevron: distance from the end edge */
   --fd-form-number-w: 9.5rem;          /* number stepper width */
@@ -265,7 +268,18 @@
 .fd-field-req { color: var(--fd-danger-text); }
 
 /* Layout helpers */
+/* A control that should not fill its column sizes to its content: the input's own `size` attribute, a
+   select's longest option. */
+:is(.fd-input, .fd-input-group, .fd-select, .fd-number, .fd-search)[data-fit] { inline-size: auto; flex: none; max-inline-size: 100%; }
+.fd-input-group[data-fit] > .fd-input { inline-size: auto; flex: 0 1 auto; }
+
+/* A form sets its own width: it fills its container up to a readable measure. Fields fill the form, or one
+   column of .fd-form-cols; a field that should be wider than one column takes data-span. Nothing sets a width. */
 .fd-form { display: grid; gap: var(--fd-space-5); min-inline-size: 0; }
+.fd-form, .fd-form-cols { max-inline-size: var(--fd-form-measure); }
+:is(.fd-form, .fd-form-cols)[data-size="sm"] { max-inline-size: var(--fd-form-measure-sm); }
+:is(.fd-form, .fd-form-cols)[data-size="lg"] { max-inline-size: var(--fd-form-measure-lg); }
+:is(.fd-form, .fd-form-cols)[data-size="full"] { max-inline-size: none; }
 .fd-form-cols { display: grid; gap: var(--fd-space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--fd-form-col-min)), 1fr)); align-items: start; }
 
 /* ==========================================================================
@@ -857,6 +871,8 @@
 .fd-form-row-control { display: flex; align-items: center; justify-content: flex-end; gap: var(--fd-space-2); min-inline-size: 0; }
 .fd-form-row[data-layout="stack"] { grid-template-columns: minmax(0, 1fr); gap: var(--fd-space-3); }
 .fd-form-row[data-layout="stack"] > .fd-form-row-control { display: block; }
+/* A field under a stacked row stops at the form measure; a list or a table there keeps the full width. */
+.fd-form-row[data-layout="stack"] > .fd-form-row-control > .fd-field { max-inline-size: var(--fd-form-measure); }
 @media (max-width: 640px) {
   .fd-form-row { grid-template-columns: minmax(0, 1fr); gap: var(--fd-space-3); }
   .fd-form-row-control { justify-content: flex-start; flex-wrap: wrap; }

@@ -1,0 +1,173 @@
+# Building a product with Fire
+
+This guide is for anyone, person or AI agent, who is building real screens with Fire. It covers how to add Fire to a project, how to build a screen, the rules that keep a product consistent, and what to do when Fire does not have what you need.
+
+Read in this order: this guide, then the live docs (`npm run dev`, open `/docs/index.html`), then `DESIGN.md` when you are about to add something to the system itself.
+
+## 1. What Fire gives you
+
+| You need | Where it is |
+|---|---|
+| Every component, with markup to copy | `docs/*.html` (each specimen has a "Markup" view) |
+| Full screens to start from | `templates/*.html` (app screens, sign-in, onboarding, a docs site) |
+| The list of every class and attribute | `docs/_ref/VOCABULARY.md` |
+| The rules of the system | `DESIGN.md` |
+| The styles and behaviour themselves | `fire/` (the only folder a product ships) |
+
+## 2. Add Fire to a project
+
+Fire is plain CSS and ES modules. There is no build step and no package to install.
+
+1. Copy the `fire/` folder into the project (or add this repository as a git submodule and point at its `fire/` folder). Do not edit files inside it; see section 7 for how to change the system.
+2. Load it on every page:
+
+```html
+<script src="/fire/boot.js"></script>              <!-- restores saved theme and tweaks before first paint -->
+<link rel="stylesheet" href="/fire/fire.css">
+<script type="module" src="/fire/fire.js"></script>
+```
+
+3. Serve over HTTP. ES modules do not load from `file://`.
+4. Copy `GUIDE.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
+
+**With a framework (React, Vue, Svelte, server templates).** Fire is class names and data attributes, so it works in any of them. Render the same markup the docs show. Two things to know:
+
+- Behaviour attaches through `data-fd-*` attributes with listeners on `document`, so most components work on markup inserted later. After rendering new markup that contains icons, charts, textures or sliders, call `init(root)`:
+
+```js
+import { init } from '/fire/fire.js';
+init(containerElement);   // safe to call more than once
+```
+
+- Components report changes with bubbling events: `fd:change` (`detail.value`), `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`. Listen for these to update your own state; write state back through the same attributes the docs show (`aria-selected`, `aria-pressed`, `data-state`, `hidden`).
+
+## 3. Build a screen
+
+1. **Start from the nearest template.** Open `templates/index.html`, pick the screen closest to what you need, and copy it. `templates/blank.html` is the empty app screen.
+2. **Keep the shell, replace the content.** `templates/shell.js` builds the sidebar, top bar, menus and command palette for the demo product. Copy it into your project and change its navigation, account and labels to your own. The page itself is:
+
+```html
+<body data-shell data-active="logs">
+<main class="fd-page">
+  <div class="fd-frame">
+    <section class="fd-band fd-page-hero"> … title and one-line description … </section>
+    <section class="fd-band"> … content … </section>
+  </div>
+</main>
+</body>
+```
+
+3. **Fill each band with components from the docs.** Find the component in `docs/`, open its "Markup" view, paste, and change the content. Do not retype components from memory.
+4. **Add every state.** A screen is not finished with only the happy path: add the empty state, the loading state (skeletons), the error state and disabled states. The templates show each one.
+5. **Check it** (section 6).
+
+## 4. Rules for product code
+
+These keep a product looking like one product. They apply to people and to AI agents equally.
+
+1. **Only Fire classes.** Every class in your markup starts with `fd-` and exists in `VOCABULARY.md`. No page-specific stylesheets and no `<style>` blocks.
+2. **No pixel values in markup.** An inline `style` may pass a token to a component parameter (`--fd-panel-w: var(--fd-size-xl)`), a relative value (`72%`) or a unitless number (`--value: 0.62`). Nothing else.
+3. **Structure decides width.** Never set a width or a height on an element. Place things with a stack, a row, a grid or a column (section 5), and let components bring their own sizes.
+4. **Variants are attributes.** Use `data-variant`, `data-size`, `data-tone` and `data-state` as the docs show. Do not override a component's look from outside.
+5. **State is native or ARIA.** `disabled`, `aria-current="page"`, `aria-selected`, `aria-expanded`, `aria-busy`, `aria-invalid`, `hidden`. The styles read these; do not add state classes.
+6. **One accent, used sparingly.** The primary button, the active nav item, links, focus, switches that are on, the lead chart series. One primary button per view.
+7. **Icons** are `<i data-icon="name"></i>` with a Lucide name that exists in `fire/js/icons.js`. Never emoji.
+8. **Words.** Sentence case. Buttons are verb plus object ("Create key"). Empty states say what will appear and offer the action. Errors say what happened and what to change. Identifiers, keys, paths and units are mono.
+
+## 5. Layout
+
+| To do this | Use |
+|---|---|
+| Things one above another | `fd-stack` |
+| Things side by side | `fd-row` (`data-wrap`, `data-justify="between|end|center"`, `data-align`); `fd-grow` on the child that takes the leftover space |
+| Equal columns that fill the width | `fd-grid` with `data-min="md"` (narrowest column) and `data-cols="3"` (most columns) |
+| One child across several columns | `data-span="2"` (or `full`) on the child |
+| A narrow block on a wide page | `fd-column` (`data-size="xs|sm|md|lg|xl"`, `data-align="center"`) |
+| Space between children | `data-gap="3"` on the parent (space steps 0 to 24) |
+| A form | `fd-form` or `fd-form-cols`: they stop at a readable width by themselves (`data-size="sm|lg|full"`). Fields fill the form or one column |
+| A short control | `data-fit` on the input, input group or select; it sizes to its content (the input's `size` attribute) |
+| A setting with a control | `fd-setting`: text, control, and anything else underneath at full width |
+| Table column widths | `data-col="fit|sm|md|lg|fill"` on the header cell |
+| A main area with a side panel | `fd-split` |
+
+Grids, stacks and rows nest freely. If you are about to write a width, you are missing one of the rows above.
+
+## 6. Theming and checks
+
+**Theme and character.** Everything visual is a variable.
+
+- `data-theme="light|dark"` on `<html>` or any subtree; omit it to follow the system.
+- `data-palette="volt"` (fifteen palettes; see `docs/tweaks.html`) recolours neutrals and accent together. A brand palette is one CSS block that sets about twenty variables; the page shows how.
+- `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
+- The Tweaks panel lets you try palettes, tone, density, corners, heading font and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
+
+**Checks before you call a screen done.**
+
+- Light and dark, at 1440px and 375px wide. Nothing overflows at 320px.
+- Keyboard only: every control reachable and operable, focus always visible.
+- Every state present: empty, loading, error, disabled.
+- In the Fire repository, `npm run audit` must report no errors and no `literals` or `inline` findings. Copy `scripts/audit.mjs` into a project to run the same checks on its pages.
+
+## 7. When Fire does not have what you need
+
+This will happen. How you handle it decides whether the product stays consistent, so follow the steps in order.
+
+**Step 1: look again.** Search `VOCABULARY.md` and the docs for the thing by what it does, not by what you would call it. Most "missing" components exist under another name (a "pill" is a badge, a "drawer" is a sheet, a "wizard" is steps).
+
+**Step 2: compose.** Most new things are arrangements of existing components: a card with a table inside it, a setting row with a secret field. Build it from parts with the layout primitives. This needs no request.
+
+**Step 3: decide whether it is a gap.** It is a gap in the system, and worth a request, when any of these is true:
+
+- You wanted to write a custom class, a `<style>` block, a pixel value or a width to make it work.
+- An existing component needs a variant, size, tone or state it does not have.
+- A token is missing (a colour, a size, a duration) and you reached for a raw value.
+- You have built the same arrangement for the second time. It should become a named pattern.
+- A component cannot be operated by keyboard or reads wrongly to a screen reader in your case.
+- The same need will plainly come up on other screens or in other products.
+
+**Step 4: file a request, then continue.** Do not stop the product work, and do not quietly build a one-off.
+
+File an issue in the Fire repository using the "Component or extension request" template (`.github/ISSUE_TEMPLATE/component-request.md`). If you cannot reach the repository, add the same fields as a new entry at the top of `REQUESTS.md` in your project and tell the project owner. A request contains:
+
+| Field | What to write |
+|---|---|
+| Kind | New component · new variant, size or state · new token · new pattern (arrangement) · bug or accessibility fix |
+| What you were building | The screen and the user's task, in two sentences |
+| What is missing | The thing, named by what it does |
+| What you tried | Which existing components you looked at and why they do not fit |
+| Proposed shape | Markup sketch using Fire's naming (`fd-<block>`, `data-variant`, …), the variants and states it needs, how it behaves on a phone and by keyboard |
+| Where else it applies | Other screens or products that would use it |
+| Stopgap in use | What you did in the meantime (see below), with file and line |
+| Evidence | A screenshot or a link to the screen |
+
+**Step 5: use a stopgap that is easy to remove.** Until the request is answered:
+
+- Prefer the closest existing component, even if it is not perfect.
+- If you must write styles, put them in one file named `fire-local.css`, loaded after `fire.css`. Use the prefix `x-` for classes (never `fd-`), use only Fire tokens for every value, and put the request's link in a comment above each rule.
+- Never edit files inside `fire/`, and never copy a Fire component and modify the copy.
+
+**Step 6: when the request ships,** update `fire/`, replace the stopgap with the real component, and delete its rules from `fire-local.css`. An empty `fire-local.css` is the goal.
+
+**For whoever maintains Fire.** A request is accepted when the need is real on more than one screen and cannot be met by composition. The new part follows `DESIGN.md` exactly: tokens only, the naming rules, every state, light and dark, phone and desktop, keyboard operation, a docs section with live specimens, an entry in `VOCABULARY.md`, and a clean `npm run audit`.
+
+## 8. Instructions for an AI agent working in a project
+
+Paste this into the project's agent instructions (for example `CLAUDE.md` or `AGENTS.md`), and adjust the paths.
+
+```markdown
+## UI: use the Fire design system
+
+- All UI is built with Fire (`/fire`). Read `fire-docs/GUIDE.md` before writing any UI, and look up classes in
+  `fire-docs/VOCABULARY.md`. Copy markup from the docs pages or the nearest template; do not write components
+  from memory.
+- Use only `fd-` classes that exist in the vocabulary. No custom CSS, no `<style>` blocks, no pixel values and
+  no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`,
+  `data-cols` and `data-span`.
+- Never edit files inside `/fire`.
+- Build every state: empty, loading, error, disabled. Check light and dark, 1440px and 375px, and keyboard use.
+- If Fire lacks something, follow GUIDE.md section 7: look again, compose from existing parts, and if it is a
+  real gap, write a component request (use the template), tell me, and continue with a removable stopgap in
+  `fire-local.css` using `x-` classes and Fire tokens only. Do not build a one-off silently.
+- While you work, watch for chances to improve the system and raise them the same way: the same arrangement
+  built twice, a variant you wished existed, a token you had to approximate, anything awkward to use.
+```

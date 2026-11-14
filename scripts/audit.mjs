@@ -282,7 +282,8 @@ function checkLiterals() {
 }
 
 // ---------- 6b. inline: markup never carries a pixel value ----------
-// Sizes and gaps in templates and docs come from the layout attributes (fire/layout.css) or from tokens.
+// Gaps and grid columns come from the layout attributes (fire/layout.css); widths come from structure
+// (.fd-column, grids, forms) and from component variants, never from markup.
 // An inline style may pass a token, a relative value or a unitless parameter, never px, rem or ms.
 function checkInline() {
   const dirs = ['templates', 'docs'];
@@ -293,6 +294,8 @@ function checkInline() {
       const literals = [...m[1].matchAll(/(?<![\w.#-])(\d*\.?\d+)(px|rem|ms|s)(?![\w-])/g)].filter(x => Number(x[1]) !== 0).map(x => x[0]);
       if (literals.length) add('inline', 'WARN', f, text.slice(0, m.index).split('\n').length, `style="${m[1].slice(0, 70)}"  ← ${[...new Set(literals)].join(', ')}`);
     }
+    // Widths and heights are not set in markup at all: structure and component variants decide them.
+    for (const m of text.matchAll(/\sdata-(w|max-w|h|min-h)="[^"]*"/g)) add('inline', 'WARN', f, text.slice(0, m.index).split('\n').length, `${m[0].trim()}  ← width / height attribute`);
   }
 }
 

@@ -19,6 +19,12 @@
   --fd-base-code-px: 5px;
   /* layout */
   --fd-base-grid-min: 260px;          /* default minimum column of .fd-grid */
+  /* .fd-column: a block that stops growing at a readable width */
+  --fd-column-xs: 320px;
+  --fd-column-sm: 400px;
+  --fd-column-md: 560px;              /* default */
+  --fd-column-lg: 640px;
+  --fd-column-xl: 768px;
   /* utilities and motion */
   --fd-base-sr-size: 1px;             /* the visually hidden box */
   --fd-base-rise: 8px;                /* how far .fd-rise travels */
@@ -167,6 +173,16 @@ i[data-icon] { display: inline-block; width: var(--fd-icon); height: var(--fd-ic
 .fd-row[data-align="baseline"] { align-items: baseline; }
 .fd-grow { flex: 1 1 0; min-width: 0; }
 .fd-grid { display: grid; gap: var(--fd-gap, var(--fd-space-4)); grid-template-columns: repeat(auto-fill, minmax(min(100%, max(var(--fd-min, var(--fd-base-grid-min)), (100% - (var(--fd-cols, 99) - 1) * var(--fd-gap, var(--fd-space-4))) / var(--fd-cols, 99))), 1fr)); }
+/* A column that fills its container up to a readable width. It is how a narrow block is placed on a wide
+   page: nothing else in markup sets a width. Combine it with fd-stack / fd-row / fd-grid, or wrap a component. */
+.fd-column { --_l-col: var(--fd-column-md); inline-size: 100%; max-inline-size: var(--_l-col); min-inline-size: 0; }
+.fd-column[data-size="xs"] { --_l-col: var(--fd-column-xs); }
+.fd-column[data-size="sm"] { --_l-col: var(--fd-column-sm); }
+.fd-column[data-size="lg"] { --_l-col: var(--fd-column-lg); }
+.fd-column[data-size="xl"] { --_l-col: var(--fd-column-xl); }
+.fd-column[data-align="center"] { margin-inline: auto; }
+/* Beside other things in a row, a column is that wide and gives way when the row runs out of room. */
+.fd-row > .fd-column { flex: 0 1 var(--_l-col); inline-size: auto; }
 .fd-divider { height: var(--fd-hairline); background: var(--fd-line-faint); border: 0; flex: none; }
 .fd-divider[data-vertical] { width: var(--fd-hairline); height: auto; align-self: stretch; }
 

@@ -60,6 +60,17 @@
   --fd-data-trunc: 240px;            /* .fd-table-trunc default width */
   --fd-data-detail-ps: 44px;         /* expanded detail: start padding */
   --fd-data-skeleton-h: 10px;
+  --fd-data-skeleton-2xs: 24px;      /* placeholder lengths: an icon or a flag … */
+  --fd-data-skeleton-xs: 48px;
+  --fd-data-skeleton-sm: 64px;       /* … a short value */
+  --fd-data-skeleton-md: 96px;
+  --fd-data-skeleton-lg: 160px;      /* … a name */
+  --fd-data-skeleton-xl: 240px;      /* … a URL or a sentence */
+  --fd-data-col-sm: 96px;            /* th[data-col]: fixed column widths */
+  --fd-data-col-md: 160px;
+  --fd-data-col-lg: 240px;
+  --fd-data-trunc-sm: 160px;         /* .fd-table-trunc[data-size] */
+  --fd-data-trunc-lg: 320px;
   --fd-data-skeleton-pill: 20px;
   --fd-data-empty-top: 56px;         /* empty state padding */
   --fd-data-empty-bottom: 60px;
@@ -190,6 +201,13 @@
 }
 .fd-table[data-sticky] thead th { position: sticky; top: 0; z-index: 2; }
 .fd-table thead th[data-num] { text-align: end; }
+/* Column widths are set on the header cell, never on the cells below it:
+   fit hugs its content, fill takes what is left, sm / md / lg are fixed. */
+.fd-table thead th[data-col="fit"] { width: 1%; white-space: nowrap; }
+.fd-table thead th[data-col="fill"] { width: 100%; }
+.fd-table thead th[data-col="sm"] { width: var(--fd-data-col-sm); }
+.fd-table thead th[data-col="md"] { width: var(--fd-data-col-md); }
+.fd-table thead th[data-col="lg"] { width: var(--fd-data-col-lg); }
 .fd-table thead th[data-actions] { width: 1%; padding-inline: var(--fd-space-2); }
 .fd-table thead th[data-select] { width: 1%; padding-inline: var(--fd-row-px) 0; }
 .fd-table thead th[data-expand] { width: 1%; padding-inline: var(--fd-space-3) 0; }
@@ -315,6 +333,8 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table-sub[data-mono] { font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; }
 /* Truncate long strings (URLs) to a width set with --w. */
 .fd-table-trunc { display: block; max-inline-size: var(--w, var(--fd-data-trunc)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-table-trunc[data-size="sm"] { max-inline-size: var(--fd-data-trunc-sm); }
+.fd-table-trunc[data-size="lg"] { max-inline-size: var(--fd-data-trunc-lg); }
 
 /* ---------- Expandable rows ---------- */
 .fd-table-expand {
@@ -343,6 +363,13 @@ th[aria-sort="descending"] .fd-th-sort {
   background-size: 200% 100%;
   animation: fd-shimmer var(--fd-loop-shimmer) linear infinite;
 }
+/* The placeholder's length says what kind of value is loading; it also gives the column its width. */
+.fd-table-skeleton[data-size="2xs"] { width: var(--fd-data-skeleton-2xs); }
+.fd-table-skeleton[data-size="xs"] { width: var(--fd-data-skeleton-xs); }
+.fd-table-skeleton[data-size="sm"] { width: var(--fd-data-skeleton-sm); }
+.fd-table-skeleton[data-size="md"] { width: var(--fd-data-skeleton-md); }
+.fd-table-skeleton[data-size="lg"] { width: var(--fd-data-skeleton-lg); }
+.fd-table-skeleton[data-size="xl"] { width: var(--fd-data-skeleton-xl); }
 .fd-table-skeleton[data-shape="tile"] { width: var(--fd-data-lead-sm); height: var(--fd-data-lead-sm); border-radius: var(--fd-radius-md); flex: none; }
 .fd-table-skeleton[data-shape="circle"] { width: var(--fd-data-lead-sm); height: var(--fd-data-lead-sm); border-radius: 50%; flex: none; }
 .fd-table-skeleton[data-shape="pill"] { height: var(--fd-data-skeleton-pill); border-radius: var(--fd-radius-full); }

@@ -135,13 +135,13 @@
   <section class="doc-section" id="layout">
     <div class="doc-section-head">
       <h2 class="fd-h3">Layout</h2>
-      <p>Placing things on a screen uses three primitives and a short set of attributes. Markup never carries a pixel value: gaps come from the space scale, widths and heights from the size scale.</p>
+      <p>Structure decides how wide things are. A stack, a row, a grid and a bounded column place everything; components bring their own widths (a form's measure, a dialog's size, a table's columns). Markup never sets a width, a height or a pixel value.</p>
     </div>
     <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
-      <div class="fd-stack" data-gap="6" data-w="full" data-max-w="3xl">
+      <div class="fd-stack fd-column" data-size="xl" data-gap="6">
         <div class="fd-row" data-gap="3">
-          <div class="fd-search" data-w="md"><i data-icon="search"></i><input class="fd-search-input" type="search" placeholder="Search keys" aria-label="Search keys"></div>
-          <label class="fd-select" data-w="sm"><span class="fd-sr-only">Environment</span><select aria-label="Environment"><option>Production</option><option>Staging</option></select></label>
+          <div class="fd-search fd-grow"><i data-icon="search"></i><input class="fd-search-input" type="search" placeholder="Search keys" aria-label="Search keys"></div>
+          <label class="fd-select" data-fit><span class="fd-sr-only">Environment</span><select aria-label="Environment"><option>Production</option><option>Staging</option></select></label>
           <button class="fd-btn" data-variant="primary" type="button">Create key</button>
         </div>
         <div class="fd-grid" data-min="sm" data-cols="3" data-gap="3">
@@ -149,27 +149,44 @@
           <div class="fd-card"><p class="fd-caption fd-muted">Credits</p><p class="fd-stat">1,520</p></div>
           <div class="fd-card"><p class="fd-caption fd-muted">Errors</p><p class="fd-stat">0.4%</p></div>
         </div>
+        <div class="fd-form-cols" data-size="full">
+          <div class="fd-field" data-span="2"><label class="fd-field-label" for="lay-name">Key name</label><input class="fd-input" id="lay-name" value="production-crawler"></div>
+          <div class="fd-field"><label class="fd-field-label" for="lay-limit">Monthly limit</label><div class="fd-input-group"><input class="fd-input" id="lay-limit" type="number" value="1000"><span class="fd-input-affix" data-kind="unit">credits</span></div></div>
+        </div>
       </div>
     </div>
     <div class="doc-table-wrap">
       <table class="doc-table">
         <thead><tr><th>Use</th><th>Values</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td>fd-stack · fd-row · fd-grid</td><td>classes</td><td>A column, a row, and a grid that fills with as many equal columns as fit. <code class="fd-code">data-wrap</code>, <code class="fd-code">data-justify</code> and <code class="fd-code">data-align</code> adjust them.</td></tr>
+          <tr><td>fd-stack · fd-row · fd-grid</td><td>classes</td><td>A column of things, a row of things, and a grid that fills with as many equal columns as fit. <code class="fd-code">data-wrap</code>, <code class="fd-code">data-justify</code> and <code class="fd-code">data-align</code> adjust them; <code class="fd-code">fd-grow</code> lets one child of a row take the space that is left.</td></tr>
+          <tr><td>fd-column</td><td>data-size: xs · sm · md · lg · xl</td><td>A block that fills its container up to a readable width (320 to 768px; md, 560px, by default). <code class="fd-code">data-align="center"</code> centres it. This is how a narrow block sits on a wide page.</td></tr>
           <tr><td>data-gap</td><td>0 · 0-5 · 1 · 1-5 · 2 · 2-5 · 3 · 3-5 · 4 · 5 · 6 · 8 · 10 · 12 · 16 · 20 · 24</td><td>The space between children, by <code class="fd-code">--fd-space-*</code> step. <code class="fd-code">data-gap-x</code> sets the column gap on its own. A gap applies to that element only, never to boxes inside it.</td></tr>
-          <tr><td>data-w</td><td>4xs · 3xs · 2xs · xs · sm · md · lg · xl · 2xl · 3xl · 4xl · 5xl · 6xl · phone · full</td><td>Width from the size scale, never wider than the container.</td></tr>
-          <tr><td>data-max-w</td><td>the same steps, plus none</td><td>The widest it may grow: a form column, a text block, a dialog body.</td></tr>
-          <tr><td>data-h · data-min-h</td><td>the same steps</td><td>Height and minimum height: previews, panes, empty areas.</td></tr>
-          <tr><td>data-min</td><td>the same steps</td><td>The narrowest column of <code class="fd-code">fd-grid</code>, <code class="fd-code">fd-card-grid</code> and <code class="fd-code">fd-skeleton-grid</code>.</td></tr>
+          <tr><td>data-min</td><td>4xs … 6xl</td><td>The narrowest column of <code class="fd-code">fd-grid</code>, <code class="fd-code">fd-card-grid</code> and <code class="fd-code">fd-skeleton-grid</code>, by <code class="fd-code">--fd-size-*</code> step.</td></tr>
           <tr><td>data-cols</td><td>1 · 2 · 3 · 4 · 5 · 6</td><td>The most columns those grids may have. They still drop columns on narrow screens to keep the minimum.</td></tr>
+          <tr><td>data-span</td><td>2 · 3 · 4 · 5 · 6 · full</td><td>How many columns of its grid a child covers. Grids nest: a grid can be a child of a grid or a stack.</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="doc-specimen" data-surface="surface"><div class="fx-space" id="size-list"></div></div>
+    <h3 class="doc-sub">Where widths come from</h3>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Thing</th><th>Its width is decided by</th></tr></thead>
+        <tbody>
+          <tr><td>A form</td><td><code class="fd-code">fd-form</code> and <code class="fd-code">fd-form-cols</code> stop at a readable measure (560px; <code class="fd-code">data-size="sm | lg | full"</code>). Fields fill the form or one column; <code class="fd-code">data-span</code> widens one.</td></tr>
+          <tr><td>A short control</td><td><code class="fd-code">data-fit</code> on an input, input group, select or search sizes it to its content: the input's own <code class="fd-code">size</code> attribute, a select's longest option.</td></tr>
+          <tr><td>A setting row</td><td><code class="fd-code">fd-setting</code>: text, then a control; anything else inside it takes the full row underneath. <code class="fd-code">data-control="wide"</code> gives the control column room for a field.</td></tr>
+          <tr><td>A table column</td><td>The header cell: <code class="fd-code">data-col="fit | sm | md | lg | fill"</code>. Long values use <code class="fd-code">fd-table-trunc</code> (<code class="fd-code">data-size="sm | lg"</code>).</td></tr>
+          <tr><td>A loading placeholder</td><td><code class="fd-code">fd-table-skeleton</code> with <code class="fd-code">data-size="2xs … xl"</code>: its length says what kind of value is loading.</td></tr>
+          <tr><td>A dialog, sheet, popover or panel</td><td>Its own <code class="fd-code">data-size</code>.</td></tr>
+          <tr><td>A framed figure</td><td><code class="fd-code">fd-corners</code> with <code class="fd-code">data-size="sm | md | lg | xl"</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
     <ul class="doc-notes">
-      <li>The size scale is <code class="fd-code">--fd-size-4xs</code> (24px) to <code class="fd-code">--fd-size-6xl</code> (960px). Pick the nearest step; do not invent a width between two steps.</li>
-      <li>A component parameter that has to stay a custom property reads the scale: <code class="fd-code">style="--fd-panel-w: var(--fd-size-xl)"</code>. Relative values (<code class="fd-code">72%</code>, <code class="fd-code">20ch</code>) and unitless parameters are fine inline.</li>
-      <li><code class="fd-code">node scripts/audit.mjs</code> reports any pixel value left in markup under <code class="fd-code">inline</code>.</li>
+      <li>If something needs a width that structure does not give it, the answer is a grid, a column, or a size variant on the component, not a number in the markup.</li>
+      <li>An inline <code class="fd-code">style</code> may pass a token to a component parameter, a relative value (<code class="fd-code">72%</code>, <code class="fd-code">20ch</code>) or a unitless number. <code class="fd-code">node scripts/audit.mjs</code> reports pixel values and width attributes in markup under <code class="fd-code">inline</code>.</li>
+      <li>These docs sometimes show a component inside a narrow preview frame. The frame belongs to the docs page and is left out of the markup you copy.</li>
     </ul>
   </section>
 
@@ -268,8 +285,6 @@
   ]).map((a) => sw(...a)).join('');
   const space = [['0-5', 2], ['1', 4], ['1-5', 6], ['2', 8], ['2-5', 10], ['3', 12], ['3-5', 14], ['4', 16], ['5', 20], ['6', 24], ['8', 32], ['10', 40], ['12', 48], ['16', 64], ['20', 80], ['24', 96]];
   document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i style="--w: var(--fd-space-${n})"></i></div>`).join('');
-  const sizes = [['4xs', 24], ['3xs', 48], ['2xs', 64], ['xs', 96], ['sm', 160], ['md', 240], ['lg', 320], ['xl', 400], ['2xl', 480], ['3xl', 560], ['4xl', 640], ['5xl', 768], ['6xl', 960]];
-  document.getElementById('size-list').innerHTML = sizes.map(([n, px]) => `<div><span>--fd-size-${n}</span><span>${px}px</span><i style="--w: min(100%, var(--fd-size-${n}))"></i></div>`).join('');
   const radius = [['xs', 4, 'checkbox'], ['sm', 6, 'chip, thumb'], ['md', 8, 'menu item'], ['lg', 10, 'control'], ['xl', 12, 'card'], ['2xl', 16, 'dialog'], ['3xl', 20, 'sheet']];
   document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line style="border-radius:var(--fd-radius-${n})"><span style="color: var(--fd-text)">${n} · ${px}</span><span>${use}</span></div>`).join('');
   const shadows = [['xs', 'outline button'], ['sm', 'composer'], ['md', 'card hover'], ['thumb', 'segmented, switch'], ['lg', 'menu, popover'], ['xl', 'dialog']];

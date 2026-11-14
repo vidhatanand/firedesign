@@ -86,7 +86,9 @@
   --fd-timeline-rail-top-group: 16px;
   --fd-timeline-rail-bottom: 3px;
   --fd-timeline-more-h: 24px;
+  --fd-empty-control: 320px;                /* a field, snippet or progress bar in an empty state */
   --fd-setting-basis: 320px;
+  --fd-setting-control-wide: 400px;         /* data-control="wide": a control column that holds a field */
   --fd-plan-head-min: 24px;
   --fd-plan-min: 232px;                     /* narrowest plan card */
   --fd-plan-halo: 3px;                      /* halo of the recommended plan */
@@ -564,6 +566,8 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
 .fd-empty-title { font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); color: var(--fd-text); text-wrap: balance; }
 .fd-empty-text { max-width: 42ch; margin-block-start: var(--fd-space-2); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); color: var(--fd-a48); }
 .fd-empty-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--fd-space-2); margin-block-start: var(--fd-space-5); }
+/* Something other than a button in the actions row (a request ID, a progress bar) gets a set width. */
+.fd-empty-actions > :is(.fd-progress, .fd-snippet, .fd-copy-field, .fd-input-group) { flex: 0 1 var(--fd-empty-control); }
 .fd-empty-hint {
   display: inline-block; max-width: 100%; margin-block-start: var(--fd-space-4); padding: var(--fd-space-1-5) var(--fd-space-2-5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   border-radius: var(--fd-radius-md); background: var(--fd-fill); color: var(--fd-text-3);
@@ -703,6 +707,10 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
 .fd-setting-desc a:not(.fd-btn):hover { text-decoration-color: currentColor; }
 .fd-setting-desc strong { font-weight: var(--fd-weight-semibold); color: var(--fd-text-2); }
 .fd-setting-control { flex: none; display: flex; align-items: center; gap: var(--fd-space-2); }
+/* Anything in a setting that is not its text or its control is its body: it takes the full row underneath. */
+.fd-setting > :not(.fd-setting-text, .fd-setting-control) { flex: 1 0 100%; min-inline-size: 0; }
+.fd-setting[data-control="wide"] > .fd-setting-control { flex: 0 1 var(--fd-setting-control-wide); }
+.fd-setting[data-control="wide"] > .fd-setting-control > * { flex: 1 1 auto; min-inline-size: 0; }
 .fd-setting[data-size="sm"] { padding-block: var(--fd-space-4); }
 .fd-setting[data-size="sm"] .fd-setting-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); letter-spacing: 0; font-weight: var(--fd-weight-label); }
 .fd-setting[data-tone="danger"] .fd-setting-title { color: var(--fd-text); }

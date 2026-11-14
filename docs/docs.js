@@ -1,6 +1,6 @@
 /* Docs chrome: builds the sidebar and top bar around <main class="doc-main">,
  * and turns every .doc-specimen[data-code] into a live example with a code view. */
-import { setTheme, getTheme, setAccent, setDensity, copyText, ready } from '../fire/js/core.js';
+import { setTheme, getTheme, copyText, ready } from '../fire/js/core.js';
 import { icon, upgradeIcons } from '../fire/js/icons.js';
 
 const PAGES = [
@@ -8,6 +8,7 @@ const PAGES = [
     ['index', 'Overview', 'flame'],
     ['foundations', 'Foundations', 'swatch-book'],
     ['signature', 'Texture & frame', 'grid-3x3'],
+    ['tweaks', 'Theming & tweaks', 'sliders-horizontal'],
   ]],
   ['Components', [
     ['buttons', 'Buttons', 'mouse-pointer-click'],
@@ -28,7 +29,6 @@ const PAGES = [
     ['../templates/index', 'All screens', 'monitor'],
   ]],
 ];
-const ACCENTS = [['ember', '#fa5d19'], ['volt', '#b8f02c'], ['iris', '#6a5cff'], ['ocean', '#1f6feb'], ['forest', '#1f9d55'], ['ink', 'var(--fd-ink)']];
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -66,8 +66,7 @@ function buildChrome() {
   top.innerHTML = `
     <button class="fd-btn doc-menu-btn" data-icon-only aria-label="Open navigation">${icon('menu')}</button>
     <span class="doc-top-title">fire / ${current}</span>
-    <div class="doc-swatches" role="group" aria-label="Accent">${ACCENTS.map(([name, c]) => `<button class="doc-swatch" style="--c:${c}" data-accent-pick="${name}" aria-label="${name} accent" aria-pressed="${(document.documentElement.dataset.accent || 'ember') === name}"></button>`).join('')}</div>
-    <button class="fd-btn" data-icon-only data-doc-density aria-label="Toggle compact density" aria-pressed="${document.documentElement.dataset.density === 'compact'}">${icon('list')}</button>
+    <button class="fd-btn doc-tweaks-btn" type="button" data-fd-tweaks-open aria-expanded="false">${icon('sliders-horizontal')}<span>Tweaks</span></button>
     <div class="fd-btn-group" role="group" aria-label="Theme">
       ${[['light', 'sun'], ['dark', 'moon'], ['system', 'monitor']].map(([t, ic]) => `<button class="fd-btn" data-icon-only data-theme-pick="${t}" aria-label="${t} theme" aria-pressed="${theme === t}">${icon(ic)}</button>`).join('')}
     </div>`;
@@ -78,13 +77,13 @@ function buildChrome() {
   top.addEventListener('click', (e) => {
     const t = e.target.closest('[data-theme-pick]');
     if (t) { setTheme(t.dataset.themePick); top.querySelectorAll('[data-theme-pick]').forEach((b) => b.setAttribute('aria-pressed', String(b === t))); }
-    const a = e.target.closest('[data-accent-pick]');
-    if (a) { setAccent(a.dataset.accentPick); top.querySelectorAll('[data-accent-pick]').forEach((b) => b.setAttribute('aria-pressed', String(b === a))); }
-    const d = e.target.closest('[data-doc-density]');
-    if (d) { const on = d.getAttribute('aria-pressed') !== 'true'; setDensity(on ? 'compact' : 'comfortable'); d.setAttribute('aria-pressed', String(on)); }
     if (e.target.closest('.doc-menu-btn')) body.toggleAttribute('data-nav-open');
   });
   scrim.addEventListener('click', () => body.removeAttribute('data-nav-open'));
+  // The Tweaks panel can change the theme too: keep the top bar's theme buttons in step.
+  document.documentElement.addEventListener('fd:theme', (e) => {
+    top.querySelectorAll('[data-theme-pick]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themePick === e.detail.theme)));
+  });
 }
 
 function buildCode() {

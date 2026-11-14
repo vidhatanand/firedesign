@@ -17,7 +17,7 @@ This file is the contract. Anyone adding to Fire, human or model, follows it exa
 
 ## 2. Tokens
 
-All values come from `fire/tokens.css`. Do not hardcode colours, radii, shadows, durations or font sizes; add a token if one is missing and say so.
+Every value is a variable. Global tokens live in `fire/tokens.css`; values that belong to one component live in a `:root {}` block at the top of that component's file, named `--fd-<component>-<what>` (`--fd-avatar-md`, `--fd-dialog-w-sm`). Component rules never contain a raw `px`, `rem`, `ms` or `s` value, a letter-spacing or a decimal line height: `node scripts/audit.mjs` checks this (`literals`) and must report none. Add a token if one is missing and say so.
 
 | Group | Tokens |
 |---|---|
@@ -27,23 +27,27 @@ All values come from `fire/tokens.css`. Do not hardcode colours, radii, shadows,
 | Fills | `--fd-fill`, `--fd-fill-hover`, `--fd-fill-active`, `--fd-fill-subtle`, `--fd-fill-disabled`, and the raw ladder `--fd-a1…a88` |
 | Accent | `--fd-accent`, `--fd-accent-hover`, `--fd-accent-contrast`, `--fd-accent-text`, washes `--fd-accent-4/8/12/16/24/40` |
 | Status | `--fd-{success,warning,danger,info,violet}-{solid,text,bg,line}` |
-| Type | sizes `--fd-text-{display,h1,h2,h3,title,lg,md,sm,xs,2xs,stat}` with matching `--fd-lh-*`; weights `--fd-weight-{regular,label,medium,semibold}`; `--fd-font-sans`, `--fd-font-mono` |
-| Space | `--fd-space-{0,0-5,1,1-5,2,2-5,3,3-5,4,5,6,8,10,12,16,20,24}` (4px grid) |
+| Type | sizes `--fd-text-{display,3xl,h1,h2,h3,xl,title,lg,compose,md,sm,xs,2xs,3xs,4xs,stat}` with matching `--fd-lh-*`; reading line heights `--fd-lh-{prose,prose-sm,code}`; tracking `--fd-ls-{display,lg,body,tag,caps,tight}`; weights `--fd-weight-{regular,label,medium,semibold}`; `--fd-font-sans`, `--fd-font-mono`, `--fd-font-display` (headings; the sans by default) |
+| Space | `--fd-space-{0,0-5,1,1-5,2,2-5,3,3-5,4,5,6,8,10,12,16,20,24}` (4px grid, each multiplied by `--fd-space-scale`) |
+| Icons | `--fd-icon-{xs 12,sm 14}`, `--fd-icon` 16, `--fd-icon-{lg 20,xl 24}` |
 | Radius | `xs 4` · `sm 6` · `md 8` · `lg 10` (controls) · `xl 12` (cards, popovers) · `2xl 16` (dialogs) · `3xl 20` · `full` |
 | Controls | `--fd-control-{xs 24,sm 28,md 36,lg 40,xl 44}`, `--fd-control-px`, `--fd-row` (44), `--fd-row-px` |
 | Layout | `--fd-sidebar-w 256`, `--fd-rail-w 64`, `--fd-topbar-h 64`, `--fd-panel-w 320`, `--fd-subnav-w 280`, `--fd-gutter 24/16`, `--fd-content-max 1140` |
 | Shadow | `--fd-shadow-{xs,sm,md,lg,xl,thumb,inset,accent}`, `--fd-ring`, `--fd-ring-inset` |
-| Motion | `--fd-dur-{1 100,2 160,3 220,4 320,5 520}`, `--fd-ease-{out,in-out,in,emphasized,spring}`, `--fd-press-scale` |
+| Motion | `--fd-dur-{1 100,2 160,3 220,4 320,5 520}` (each multiplied by `--fd-motion`), loops `--fd-loop-{spin,shimmer,pulse,blink,dots}`, `--fd-stagger`, `--fd-ease-{out,in-out,in,emphasized,spring}`, `--fd-press-scale` |
+| Character | `--fd-space-scale`, `--fd-radius-scale`, `--fd-motion`, `--fd-texture`, `--fd-hairline`, `--fd-font-display`: one number or family each, and the whole system follows |
 | Layers | `--fd-z-{sticky,topbar,sidebar,overlay,dialog,popover,toast,tooltip}` |
 
-Theming: tokens use `light-dark()`. `data-theme="dark|light"` works on `<html>` or any subtree. `data-accent` swaps the accent; `data-density="compact"` tightens controls and rows. Components must look right in all combinations without theme-specific selectors. If you need a different value per theme, make a token with `light-dark()`.
+Theming: tokens use `light-dark()`. `data-theme="dark|light"` works on `<html>` or any subtree. `data-palette="name"` (`fire/palettes.css`, fifteen of them; `ember` is the default and needs no attribute) recolours neutrals and accent together; `data-accent` swaps only the accent. `data-density="compact|spacious"` changes controls, rows and the space scale; `data-contrast="high"` strengthens muted text and lines; `data-text-size="sm|lg"` scales all type. Components must look right in all combinations without theme-specific selectors. If you need a different value per theme, make a token with `light-dark()`.
+
+The neutrals are alpha steps of two colours: `--fd-wash` (fills and tints) and `--fd-ink-wash` (text). A palette sets those two, the page and surface colours, the three line colours and the accent; every other step derives from them. The **Tweaks** panel (`fire/js/tweaks.js`, any `[data-fd-tweaks-open]` button, or `data-fd-tweaks` on `<html>` for a floating launcher) changes palette, tone, theme, density, corners, lines, heading font, text size, contrast, motion and texture live, and remembers them; `fire/boot.js`, a small classic script for `<head>`, puts the saved look back before the first paint. See `docs/tweaks.html`.
 
 ## 3. Naming and structure
 
 - Block class `fd-<block>`; parts `fd-<block>-<part>`. Flat, no nesting deeper than block → part.
 - Variants and sizes are data attributes on the block: `data-variant`, `data-size`, `data-tone` (`neutral|accent|success|warning|danger|info|violet`), `data-state`.
 - State comes from native and ARIA attributes, and CSS selects on them: `:disabled`, `[aria-current="page"]`, `[aria-selected="true"]`, `[aria-expanded="true"]`, `[aria-pressed="true"]`, `[aria-busy="true"]`, `[aria-invalid="true"]`, `[data-state="open"]`, `[hidden]`.
-- Component-private custom properties start with `--_` plus the family's prefix (`--_b-` button, `--_s-` shell, `--_n-` nav, `--_f-` forms, `--_o-` overlays, `--_d-` data, `--_c-` content, `--_k-` code, `--_a-` agent, `--_cht-` chat, `--_ch-` charts, `--_tx-` texture, `--_sk-` skeleton, `--_doc-` documentation). Custom properties inherit, so an unprefixed name set on a container leaks into every component inside it. To set another family's private property (for example a button's radius from a form rule), use that family's prefix.
+- Component-private custom properties start with `--_` plus the family's prefix (`--_b-` button, `--_s-` shell, `--_n-` nav, `--_f-` forms, `--_o-` overlays, `--_d-` data, `--_c-` content, `--_k-` code, `--_a-` agent, `--_cht-` chat, `--_ch-` charts, `--_tx-` texture, `--_sk-` skeleton, `--_doc-` documentation, `--_tw-` tweaks). Custom properties inherit, so an unprefixed name set on a container leaks into every component inside it. To set another family's private property (for example a button's radius from a form rule), use that family's prefix.
 - Use logical properties where direction matters (`padding-inline`, `margin-inline-start`, `inset-inline`).
 - Responsive behaviour uses container queries (`.fd-cq` or a named container on the component) before media queries. Breakpoints when a media query is needed: 640px (phone), 900px (tablet / sidebar collapses to a drawer), 1200px.
 - Icons: `<i data-icon="name"></i>` in markup (upgraded to an inline `<svg class="fd-icon">` by `fire/js/icons.js`), or `icon('name')` in JS. Names are Lucide names; the available set is the keys of `ICONS` in `fire/js/icons.js`. Icons are 16px with a 1.5 stroke; 14px inside small controls. Never use emoji as icons.
@@ -57,7 +61,7 @@ Theming: tokens use `light-dark()`. `data-theme="dark|light"` works on `<html>` 
 - **Loading**: keep layout; swap content for a spinner or skeleton. Buttons use `aria-busy="true"`.
 - **Open/close**: floating surfaces animate `opacity` and `scale` from 0.96 with `transform-origin` at the anchor side (`data-side`), `--fd-dur-3 --fd-ease-out` in, `--fd-dur-2` out. Dialogs and sheets use `--fd-dur-4 --fd-ease-emphasized`.
 - **Touch**: targets are at least 40px (tokens grow automatically under `pointer: coarse`). Hover-only affordances must have a visible or focusable equivalent.
-- **Reduced motion**: durations collapse to 0 through tokens. Do not add animation that ignores the tokens.
+- **Reduced motion**: `--fd-motion` becomes 0, so every duration collapses through the tokens. Do not add animation that ignores the tokens.
 - **Keyboard**: every component is fully operable by keyboard with the standard ARIA pattern for its role (menu, tabs, listbox, dialog, switch, slider, combobox, disclosure).
 
 ## 5. JavaScript
@@ -99,4 +103,4 @@ Every component family has a page in `docs/` built like `docs/buttons.html` (rea
 
 ## 8. Quality bar
 
-A component is done when: it is correct in light and dark, with ember and volt accents, in compact density, at 1440px and 375px; it is operable by keyboard; nothing overflows at 320px; hover, focus-visible, active, disabled and loading states exist where they apply; text never touches an edge; and numbers align.
+A component is done when: it is correct in light and dark, under at least the ember, volt and midnight palettes, in compact and spacious density, with corners at 0 and 2, at 1440px and 375px; it is operable by keyboard; nothing overflows at 320px; hover, focus-visible, active, disabled and loading states exist where they apply; text never touches an edge; and numbers align.

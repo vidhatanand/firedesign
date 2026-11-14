@@ -214,6 +214,7 @@ export function renderTop({ section = 'docs', active = '', prefix = 'docs' } = {
       <a class="fd-btn" href="https://status.ember.dev" target="_blank" rel="noopener" data-doc-hide="lg md sm">Status</a>
       <a class="fd-btn" href="mailto:support@ember.dev" data-doc-hide="lg md sm">Support</a>
       <a class="fd-btn" data-variant="primary" href="auth.html" data-doc-hide="sm">Sign up</a>
+      <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-hide="sm" data-fd-tweaks-open data-fd-tooltip="Tweaks" aria-label="Tweaks" aria-expanded="false">${i('sliders-horizontal')}</button>
       <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-hide="sm" data-fd-theme-toggle data-fd-tooltip="Theme" aria-label="Theme">${i('monitor')}</button>
       <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-show="sm" data-fd-command-open="${prefix}-command" aria-label="Search the docs">${i('search')}</button>
       <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-show="sm" data-fd-menu="${prefix}-more" data-placement="bottom-end" aria-label="More">${i('ellipsis-vertical')}</button>
@@ -385,6 +386,7 @@ export function renderOverlays({ prefix = 'docs' } = {}) {
     <a class="fd-menu-item" href="mailto:support@ember.dev">${i('mail')}<span class="fd-menu-item-label">Support</span></a>
     <a class="fd-menu-item" href="https://code.ember.dev/ember/ember" target="_blank" rel="noopener">${i('git-branch')}<span class="fd-menu-item-label">Repository</span><span class="fd-menu-item-hint fd-mono">48,213</span></a>
     <hr class="fd-menu-sep">
+    <button class="fd-menu-item" data-value="tweaks" data-fd-tweaks-open>${i('sliders-horizontal')}<span class="fd-menu-item-label">Tweaks</span></button>
     <button class="fd-menu-item" data-value="theme" data-fd-theme-toggle>${i('moon')}<span class="fd-menu-item-label">Switch theme</span></button>
   </div>
   <div class="fd-menu" id="${prefix}-copy" popover role="menu" aria-label="Use this page" data-fd-doc-copy-menu>

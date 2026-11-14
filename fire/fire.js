@@ -14,8 +14,9 @@ import * as chat from './js/chat.js';
 import * as charts from './js/charts.js';
 import * as texture from './js/texture.js';
 import * as docsite from './js/docsite.js';
+import * as tweaks from './js/tweaks.js';
 
-const modules = { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite };
+const modules = { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks };
 
 /** Initialise every behaviour inside `root`. Call again after inserting markup. */
 export function init(root = document) {
@@ -44,4 +45,4 @@ ready(() => { initIcons(); init(document); bindCopy(); document.documentElement.
 
 export * from './js/core.js';
 export { icon, ICONS } from './js/icons.js';
-export { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite };
+export { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks };

@@ -58,14 +58,16 @@
 
 /* ---------- Character field ---------- */
 .fd-ascii {
-  --_tx-ink: light-dark(var(--fd-a24), var(--fd-a16));
-  --_tx-opacity: 1;
+  /* Ink at twice the resting strength, shown at half opacity: the same tone as --fd-a24 / --fd-a16,
+     with headroom for --fd-texture to go above 1. */
+  --_tx-ink: light-dark(color-mix(in srgb, var(--fd-wash) 48%, transparent), color-mix(in srgb, var(--fd-wash) 36%, transparent));
+  --_tx-opacity: 0.5;
   --_tx-font-size: var(--fd-ascii-font);
   position: absolute; inset: 0; z-index: -1;
   display: block; overflow: hidden;
   pointer-events: none; user-select: none; -webkit-user-select: none;
   color: var(--_tx-ink);
-  opacity: var(--_tx-opacity);
+  opacity: calc(var(--_tx-opacity) * var(--fd-texture));
   font-family: var(--fd-font-mono); font-size: var(--_tx-font-size); font-weight: var(--fd-weight-regular);
   contain: strict;
   -webkit-mask-image: var(--_tx-mask, none);
@@ -84,7 +86,7 @@
 
 .fd-ascii[data-tone="accent"] { --_tx-ink: var(--fd-accent-text); --_tx-opacity: 0.4; }
 .fd-ascii[data-tone="contrast"] { --_tx-ink: var(--fd-accent-contrast); --_tx-opacity: 0.38; }
-.fd-ascii[data-tone="strong"] { --_tx-ink: light-dark(var(--fd-a32), var(--fd-a24)); }
+.fd-ascii[data-tone="strong"] { --_tx-ink: light-dark(color-mix(in srgb, var(--fd-ink-wash) 64%, transparent), color-mix(in srgb, var(--fd-wash) 52%, transparent)); }
 
 /* Fades. "left" means the field fades out toward the left edge. */
 :is(.fd-ascii, .fd-dotgrid)[data-fade="left"] { --_tx-mask: linear-gradient(to right, transparent, #000 var(--_tx-fade, 62%)); }
@@ -105,7 +107,7 @@
   display: inline-block; flex: none;
   width: var(--_tx-size); height: var(--_tx-size);
   overflow: hidden; pointer-events: none; user-select: none; -webkit-user-select: none;
-  color: var(--_tx-ink); opacity: var(--_tx-opacity);
+  color: var(--_tx-ink); opacity: calc(var(--_tx-opacity) * var(--fd-texture));
   font-family: var(--fd-font-mono); font-size: var(--_tx-font-size);
   vertical-align: middle;
 }
@@ -117,7 +119,7 @@
 /* ---------- Dot grid ---------- */
 .fd-dotgrid {
   --_tx-gap: var(--fd-dotgrid-gap);
-  --_tx-dot: var(--fd-a12);
+  --_tx-dot: light-dark(color-mix(in srgb, var(--fd-wash) calc(12% * var(--fd-texture)), transparent), color-mix(in srgb, var(--fd-wash) calc(14% * var(--fd-texture)), transparent));
   --_tx-r: var(--fd-dotgrid-r);
   position: absolute; inset: 0; z-index: -1;
   display: block; pointer-events: none;
@@ -130,7 +132,7 @@
 .fd-dotgrid[data-inline] { position: relative; inset: auto; z-index: auto; width: 100%; height: var(--fd-ascii-inline-h); }
 .fd-dotgrid[data-size="sm"] { --_tx-gap: var(--fd-dotgrid-gap-sm); }
 .fd-dotgrid[data-size="lg"] { --_tx-gap: var(--fd-dotgrid-gap-lg); --_tx-r: var(--fd-dotgrid-r-lg); }
-.fd-dotgrid[data-tone="accent"] { --_tx-dot: var(--fd-accent-24); }
+.fd-dotgrid[data-tone="accent"] { --_tx-dot: color-mix(in srgb, var(--fd-accent) calc(24% * var(--fd-texture)), transparent); }
 
 /* ---------- Crosshair: one registration mark (9px) ---------- */
 .fd-crosshair {
@@ -179,7 +181,7 @@
   --_tx-opacity: 0.04;
   position: absolute; inset: 0; z-index: -1;
   pointer-events: none;
-  opacity: var(--_tx-opacity);
+  opacity: calc(var(--_tx-opacity) * var(--fd-texture));
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: var(--fd-noise-tile) var(--fd-noise-tile);
 }

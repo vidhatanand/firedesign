@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theming and tweaks · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<style>
+  /* A palette card paints its own page and text, so a palette or a forced theme on it is self-contained. */
+  .tw-card { display: grid; gap: var(--fd-space-3); align-content: start; min-width: 0; padding: var(--fd-space-5); border-radius: var(--fd-radius-xl); background: var(--fd-bg); color: var(--fd-text); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint); }
+  .tw-card > .fd-nav-item { justify-self: start; }
+</style>
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="tweaks">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Foundations</p>
+    <h1 class="fd-display">Theming and tweaks</h1>
+    <p class="doc-lede">Fire's whole look runs on variables: fifteen palettes recolour every neutral and the accent, tone bends whichever palette you pick, and a handful of scales set density, corners, lines, type and motion. The Tweaks panel turns all of it into live controls.</p>
+  </header>
+
+  <section class="doc-section" id="panel">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tweaks panel</h2>
+      <p>Use it to find a product's character before you commit to it, or ship it so your users can tune density, contrast and motion for themselves. It floats beside the page and is not modal, so every change can be watched on the real screen.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" data-variant="primary" type="button" data-fd-tweaks-open aria-expanded="false"><i data-icon="sliders-horizontal"></i><span>Open tweaks</span></button>
+    </div>
+    <ul class="doc-notes">
+      <li>Any element with <code class="fd-code">data-fd-tweaks-open</code> toggles the panel and carries its <code class="fd-code">aria-expanded</code> state. The docs top bar has one.</li>
+      <li>No trigger of your own? Put <code class="fd-code">data-fd-tweaks</code> on <code class="fd-code">&lt;html&gt;</code> and a round launcher appears bottom-left.</li>
+      <li>Choices are saved in <code class="fd-code">localStorage["fd-tweaks"]</code> (only what differs from the default) and applied as soon as the module runs. Load <code class="fd-code">fire/boot.js</code> as a plain (non-module) script in <code class="fd-code">&lt;head&gt;</code>, before the stylesheet, and the saved look is on <code class="fd-code">&lt;html&gt;</code> before the first paint, so a reload never flashes the default. Reset leaves no attribute or inline style behind.</li>
+      <li>Copy CSS gives you a block to paste into your product: the attributes for <code class="fd-code">&lt;html&gt;</code> and a <code class="fd-code">:root</code> rule with every overridden variable, toned palette colours included.</li>
+      <li>Keyboard: Tab moves between controls, arrows move inside a group (the palette grid is 5 × 3), Escape closes the panel and returns focus to its trigger. On desktop the header drags; double-click it to dock again. Under 640px it is a bottom sheet.</li>
+    </ul>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>JavaScript</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td>open(trigger) · close() · toggle(trigger)</td><td>Show or hide the panel. Focus returns to <code class="fd-code">trigger</code> on close.</td></tr>
+          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, tone, theme, density, corners, lines, display, textSize, contrast, motion, texture }</code>.</td></tr>
+          <tr><td>set(partial)</td><td>Merge and apply, for example <code class="fd-code">set({ palette: "paper", tone: { warmth: 30 } })</code>. Unknown or out-of-range values are ignored or clamped.</td></tr>
+          <tr><td>reset()</td><td>Everything back to the default look.</td></tr>
+          <tr><td>toCss()</td><td>The Copy CSS text for the current state.</td></tr>
+          <tr><td>fd:change</td><td>Fires on <code class="fd-code">&lt;html&gt;</code> after every change with <code class="fd-code">detail: { name: "tweaks", value: state }</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="doc-section" id="palettes">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Palettes</h2>
+      <p>A palette is one attribute, <code class="fd-code">data-palette</code>, on <code class="fd-code">&lt;html&gt;</code> or any subtree. It sets the page, surfaces, lines, ink and accent for both themes, so every component inside takes its colour without a line of extra CSS. The neutrals are tinted to match the accent, so greys read as stone, slate or sand rather than one grey with a new accent.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="tw-card" data-palette="ember">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Ember</p><code class="fd-mono-sm fd-faint">ember</code></div>
+        <p class="fd-small fd-muted">Orange on pure grey. The default.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Ember)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="volt">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Volt</p><code class="fd-mono-sm fd-faint">volt</code></div>
+        <p class="fd-small fd-muted">Electric lime on warm stone. High-energy, terminal.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Volt)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="iris">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Iris</p><code class="fd-mono-sm fd-faint">iris</code></div>
+        <p class="fd-small fd-muted">Indigo-violet on cool slate. Calm, product-like.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Iris)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="ocean">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Ocean</p><code class="fd-mono-sm fd-faint">ocean</code></div>
+        <p class="fd-small fd-muted">Developer blue on blue-grey. Familiar.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Ocean)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="forest">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Forest</p><code class="fd-mono-sm fd-faint">forest</code></div>
+        <p class="fd-small fd-muted">Green on green-grey. Quiet, operational.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Forest)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="graphite">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Graphite</p><code class="fd-mono-sm fd-faint">graphite</code></div>
+        <p class="fd-small fd-muted">Monochrome. The ink is the accent; no colour anywhere.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Graphite)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="rose">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Rose</p><code class="fd-mono-sm fd-faint">rose</code></div>
+        <p class="fd-small fd-muted">Rose on warm pink-grey. Warm, consumer.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Rose)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="honey">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Honey</p><code class="fd-mono-sm fd-faint">honey</code></div>
+        <p class="fd-small fd-muted">Amber on cream. Friendly and warm.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Honey)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="plum">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Plum</p><code class="fd-mono-sm fd-faint">plum</code></div>
+        <p class="fd-small fd-muted">Magenta-purple on purple-grey. Rich, night-time.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Plum)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="lagoon">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Lagoon</p><code class="fd-mono-sm fd-faint">lagoon</code></div>
+        <p class="fd-small fd-muted">Teal on teal-grey. Fresh, data-heavy.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Lagoon)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="paper">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Paper</p><code class="fd-mono-sm fd-faint">paper</code></div>
+        <p class="fd-small fd-muted">Cobalt ink on sepia paper. Editorial.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Paper)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="clay">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Clay</p><code class="fd-mono-sm fd-faint">clay</code></div>
+        <p class="fd-small fd-muted">Terracotta on sand. Earthy, muted.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Clay)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="mint">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Mint</p><code class="fd-mono-sm fd-faint">mint</code></div>
+        <p class="fd-small fd-muted">Mint on pale grey-green. Light and airy.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Mint)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="glacier">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Glacier</p><code class="fd-mono-sm fd-faint">glacier</code></div>
+        <p class="fd-small fd-muted">Sky blue on icy grey. Crisp.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Glacier)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="midnight">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Midnight</p><code class="fd-mono-sm fd-faint">midnight</code></div>
+        <p class="fd-small fd-muted">Periwinkle on navy. Made for dark mode.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Midnight)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+    </div>
+    <h3 class="doc-sub">Forced dark</h3>
+    <p class="fd-muted">Palettes are <code class="fd-code">light-dark()</code> pairs, so <code class="fd-code">data-theme="dark"</code> works inside them. Midnight is drawn for dark mode: a clearly blue-black page with blue-tinted lines.</p>
+    <div class="doc-pair">
+      <div class="tw-card" data-palette="volt" data-theme="dark">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Volt</p><code class="fd-mono-sm fd-faint">volt</code></div>
+        <p class="fd-small fd-muted">Electric lime on warm stone. High-energy, terminal.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Volt)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="plum" data-theme="dark">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Plum</p><code class="fd-mono-sm fd-faint">plum</code></div>
+        <p class="fd-small fd-muted">Magenta-purple on purple-grey. Rich, night-time.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Plum)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+      <div class="tw-card" data-palette="midnight" data-theme="dark">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Midnight</p><code class="fd-mono-sm fd-faint">midnight</code></div>
+        <p class="fd-small fd-muted">Periwinkle on navy. Made for dark mode.</p>
+        <a class="fd-nav-item" href="#palettes" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (Midnight)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#tone">View usage</a></p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Ember is the default and needs no attribute: <code class="fd-code">data-palette="ember"</code> only matters inside a subtree that sits in another palette.</li>
+      <li>Status colours, syntax colours and chart series 2 and up stay fixed in every palette, so a warning still reads as a warning.</li>
+      <li>With <code class="fd-code">data-contrast="high"</code> the lines step up in the palette's own hue.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="tone">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Tone</h2>
+      <p>Tone bends the chosen palette instead of replacing it: rotate the accent toward your brand, mute it, lift it, or warm the page. At zero every control is exactly the palette. Try one on this page:</p>
+    </div>
+    <div class="doc-specimen" data-layout="center">
+      <button class="fd-btn" data-size="sm" type="button" data-tw-tone='{"warmth":60}'>Warm the page</button>
+      <button class="fd-btn" data-size="sm" type="button" data-tw-tone='{"warmth":-60}'>Cool the page</button>
+      <button class="fd-btn" data-size="sm" type="button" data-tw-tone='{"hue":120}'>Rotate the accent 120°</button>
+      <button class="fd-btn" data-size="sm" type="button" data-tw-tone='{"vivid":35}'>Mute the accent</button>
+      <button class="fd-btn" data-size="sm" type="button" data-tw-tone='{"light":-10}'>Deepen the accent</button>
+      <button class="fd-btn" data-size="sm" data-variant="ghost" type="button" data-tw-tone='{"hue":0,"vivid":100,"light":0,"warmth":0}'><i data-icon="rotate-ccw"></i><span>Reset tone</span></button>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Control</th><th>Range</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>hue</td><td>−180° to 180°</td><td>Rotates the accent, its hover, its text colour and the primary button's inner shade, in OKLCH, so lightness holds while the colour turns.</td></tr>
+          <tr><td>vivid</td><td>0% to 150%</td><td>Scales the accent's chroma. 0% is a grey accent; above 100% it saturates until the screen's gamut stops it.</td></tr>
+          <tr><td>light</td><td>−12 to 12</td><td>Shifts the accent's lightness by that many hundredths of L.</td></tr>
+          <tr><td>warmth</td><td>−100 to 100</td><td>Tints the page, surfaces, lines, ink and washes toward blue or yellow-orange. At ±100 the page is clearly tinted but still neutral; the whitest surface takes the least.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>After every bend the engine re-applies the palette rules: accent text stays at 4.5:1 or more on the page and on surfaces, and the label on the accent keeps its colour while it reaches 3:1, switching between white and near-black when it would not.</li>
+      <li>Ink on the page stays at 12:1 or more in every palette and theme.</li>
+      <li>A toned palette is written as inline variables on <code class="fd-code">&lt;html&gt;</code>; Copy CSS writes the same values out as a palette you can keep.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="scales">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Scales</h2>
+      <p>The character variables multiply every token in their family, so one number retunes the whole system. Set them on <code class="fd-code">:root</code>, or on a subtree together with <code class="fd-code">data-scale</code> so the derived tokens recompute there.</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Variable</th><th>Default</th><th>What it changes</th></tr></thead>
+        <tbody>
+          <tr><td>--fd-space-scale</td><td>1</td><td>Every <code class="fd-code">--fd-space-*</code> step. Density sets it to 0.875 or 1.125.</td></tr>
+          <tr><td>--fd-radius-scale</td><td>1</td><td>Every radius except full: 0 is square, 2 is soft and round. The panel steps it by 0.125.</td></tr>
+          <tr><td>--fd-motion</td><td>1</td><td>Every duration (<code class="fd-code">--fd-dur-*</code> and timed component tokens). 0 turns motion off; reduced motion sets it for you.</td></tr>
+          <tr><td>--fd-texture</td><td>1</td><td>Strength of the generative textures, 0 to 1.5.</td></tr>
+          <tr><td>--fd-hairline</td><td>1px</td><td>The width of every rule, edge and ring.</td></tr>
+          <tr><td>--fd-font-display</td><td>var(--fd-font-sans)</td><td>The face of headings and display type. Point it at <code class="fd-code">var(--fd-font-mono)</code> or a serif stack to change the voice.</td></tr>
+          <tr><td>data-density</td><td>comfortable</td><td><code class="fd-code">compact</code> or <code class="fd-code">spacious</code>: control and row heights, control padding, the gutter and the space scale.</td></tr>
+          <tr><td>data-contrast</td><td>(none)</td><td><code class="fd-code">high</code> strengthens muted text, lines and control edges.</td></tr>
+          <tr><td>data-text-size</td><td>(md)</td><td><code class="fd-code">sm</code> or <code class="fd-code">lg</code> on <code class="fd-code">&lt;html&gt;</code>: the root size, so everything set in rem follows.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="doc-sub">Sharp and round</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-scale style="--fd-radius-scale: 0">
+        <span class="doc-specimen-label">--fd-radius-scale: 0</span>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" type="button"><i data-icon="key-round"></i><span>Create key</span></button>
+          <button class="fd-btn" type="button">Cancel</button>
+        </div>
+        <input class="fd-input" placeholder="Key name, e.g. production-crawler" aria-label="Key name">
+        <div class="fd-segmented" role="radiogroup" aria-label="Environment">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="production">Production</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="staging">Staging</button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-scale style="--fd-radius-scale: 1.75">
+        <span class="doc-specimen-label">--fd-radius-scale: 1.75</span>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" type="button"><i data-icon="key-round"></i><span>Create key</span></button>
+          <button class="fd-btn" type="button">Cancel</button>
+        </div>
+        <input class="fd-input" placeholder="Key name, e.g. production-crawler" aria-label="Key name">
+        <div class="fd-segmented" role="radiogroup" aria-label="Environment">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="production">Production</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="staging">Staging</button>
+        </div>
+      </div>
+    </div>
+    <h3 class="doc-sub">Compact and spacious</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-density="compact">
+        <span class="doc-specimen-label">data-density="compact"</span>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" type="button"><i data-icon="key-round"></i><span>Create key</span></button>
+          <button class="fd-btn" type="button">Cancel</button>
+        </div>
+        <input class="fd-input" placeholder="Key name, e.g. production-crawler" aria-label="Key name">
+        <div class="fd-segmented" role="radiogroup" aria-label="Environment">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="production">Production</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="staging">Staging</button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-density="spacious">
+        <span class="doc-specimen-label">data-density="spacious"</span>
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" type="button"><i data-icon="key-round"></i><span>Create key</span></button>
+          <button class="fd-btn" type="button">Cancel</button>
+        </div>
+        <input class="fd-input" placeholder="Key name, e.g. production-crawler" aria-label="Key name">
+        <div class="fd-segmented" role="radiogroup" aria-label="Environment">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="production">Production</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="staging">Staging</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="custom">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Make your own palette</h2>
+      <p>A palette sets nineteen tokens, each as a <code class="fd-code">light-dark()</code> pair. Start from Copy CSS in the panel (pick the nearest palette, tone it, copy) and rename the block.</p>
+    </div>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code>[data-palette="harbor"] {
+  --fd-ink: light-dark(#21272e, #f2f5f8);
+  --fd-ink-inverse: light-dark(#fdfefe, #080a0e);
+  --fd-wash: light-dark(#0e1720, #f8fafd);
+  --fd-ink-wash: light-dark(#21272e, #f8fafd);
+  --fd-bg: light-dark(#f7fafb, #080a0e);
+  --fd-bg-sunken: light-dark(#f2f5f7, #040609);
+  --fd-surface: light-dark(#fdfefe, #111519);
+  --fd-surface-raised: light-dark(#fdfefe, #191d20);
+  --fd-surface-inverse: light-dark(#21272e, #f2f5f8);
+  --fd-scrim: light-dark(rgb(247 250 251 / 0.72), rgb(2 3 5 / 0.64));
+  --fd-thumb: light-dark(#fdfefe, #f2f5f8);
+  --fd-line-faint: light-dark(#eaeef0, #1b2024);
+  --fd-line: light-dark(#e5e9eb, #262b2f);
+  --fd-line-strong: light-dark(#d1d5d8, #383e43);
+  --fd-accent: light-dark(#00878f, #00a5ac);
+  --fd-accent-hover: light-dark(#007c83, #00b0b9);
+  --fd-accent-contrast: #ffffff;
+  --fd-accent-text: light-dark(#007f87, #00a5ac);
+  --fd-accent-glow: light-dark(rgb(0 85 90 / 0.3), rgb(0 112 117 / 0.38));
+}</code></pre>
+    </figure>
+    <ul class="doc-notes">
+      <li>Page and surfaces: <code class="fd-code">--fd-bg</code>, <code class="fd-code">--fd-bg-sunken</code>, <code class="fd-code">--fd-surface</code>, <code class="fd-code">--fd-surface-raised</code>, <code class="fd-code">--fd-surface-inverse</code>, <code class="fd-code">--fd-scrim</code>, <code class="fd-code">--fd-thumb</code>. Keep surfaces lighter than the page in both themes.</li>
+      <li>Lines: <code class="fd-code">--fd-line-faint</code>, <code class="fd-code">--fd-line</code>, <code class="fd-code">--fd-line-strong</code>.</li>
+      <li>Ink: <code class="fd-code">--fd-ink</code>, <code class="fd-code">--fd-ink-inverse</code>, and the two wash colours. <code class="fd-code">--fd-wash</code> makes every fill and tint (its alpha steps are <code class="fd-code">--fd-a1</code> to <code class="fd-code">--fd-a24</code>); <code class="fd-code">--fd-ink-wash</code> makes every text step (<code class="fd-code">--fd-a32</code> to <code class="fd-code">--fd-a88</code>). Give both a little of your neutral hue.</li>
+      <li>Accent: <code class="fd-code">--fd-accent</code>, <code class="fd-code">--fd-accent-hover</code>, <code class="fd-code">--fd-accent-contrast</code> (the label on it), <code class="fd-code">--fd-accent-text</code> (AA on the page), <code class="fd-code">--fd-accent-glow</code> (the primary button's inner shade).</li>
+      <li>Everything else derives by itself on <code class="fd-code">[data-palette]</code>: the ink ladder, text steps, fills, accent washes, the focus ring and the primary button's shadow.</li>
+    </ul>
+  </section>
+</main>
+<script type="module">
+  // Tone demo buttons on this page.
+  import { set } from '../fire/js/tweaks.js';
+  document.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-tw-tone]') : null;
+    if (button) set({ tone: JSON.parse(button.dataset.twTone) });
+  });
+</script>
+</body>
+</html>

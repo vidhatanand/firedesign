@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fire · design system</title>
+<script src="../fire/boot.js"></script>
 <link rel="stylesheet" href="../fire/fire.css">
 <link rel="stylesheet" href="docs.css">
 <style>
@@ -45,7 +46,7 @@
   <section class="doc-section" id="live">
     <div class="doc-section-head">
       <h2 class="fd-h3">The system, assembled</h2>
-      <p>Every screen below is built only from Fire components, with no page CSS. Switch screens and widths; the theme, accent and density controls in the top bar apply inside the preview too.</p>
+      <p>Every screen below is built only from Fire components, with no page CSS. Switch screens and widths; the theme switch and everything in the Tweaks panel (palette, tone, density, corners) apply inside the preview too.</p>
     </div>
     <div class="ov-stage">
       <div class="ov-stage-bar">
@@ -103,7 +104,7 @@
     <table class="ov-compare">
       <thead><tr><th>Decision</th><th>Volt</th><th>Fire</th></tr></thead>
       <tbody>
-        <tr><td>Accent</td><td>The accent token is the text colour; lime appears on one button per screen.</td><td>One hue for action, selection, links, focus and live marks, each at a defined strength. Add <code class="fd-code">data-accent="volt"</code> to keep the lime.</td></tr>
+        <tr><td>Accent</td><td>The accent token is the text colour; lime appears on one button per screen.</td><td>One hue for action, selection, links, focus and live marks, each at a defined strength. Add <code class="fd-code">data-palette="volt"</code> to keep the lime.</td></tr>
         <tr><td>Type scale</td><td>Page titles 24px, sections 16px. Uppercase and letter-spacing are lint errors.</td><td>40px display titles with tight tracking, 20px sections at weight 450, 13px navigation, mono uppercase eyebrows for labels and table headers.</td></tr>
         <tr><td>Weight</td><td>400, 500 and 600 with selected items in semibold.</td><td>450 for every label, 500 for headings. Selection is shown by colour, never by weight, so nothing shifts.</td></tr>
         <tr><td>Neutrals</td><td>A fixed warm-stone palette with separate dark values.</td><td>One ink at 20 opacities. The same step works on any surface and in both themes.</td></tr>
@@ -125,7 +126,7 @@
       <pre class="fd-codeblock-body"><code data-lang="html">&lt;link rel="stylesheet" href="fire/fire.css"&gt;
 &lt;script type="module" src="fire/fire.js"&gt;&lt;/script&gt;
 
-&lt;html data-theme="dark" data-accent="volt" data-density="compact"&gt;
+&lt;html data-theme="dark" data-palette="volt" data-density="compact"&gt;
 
 &lt;button class="fd-btn" data-variant="primary"&gt;
   &lt;i data-icon="plus"&gt;&lt;/i&gt;&lt;span&gt;New monitor&lt;/span&gt;
@@ -172,10 +173,19 @@
     frame.src = url; open.href = url;
   });
   document.getElementById('ov-width').addEventListener('fd:change', (e) => frame.style.setProperty('--w', e.detail.value));
-  // The preview shares localStorage with this page, so theme, accent and density carry over on reload.
-  const sync = () => { try { frame.contentWindow.location.reload(); } catch { /* not loaded yet */ } };
+  // The preview follows this page live: the theme and every tweak are attributes and custom properties on <html>,
+  // so they are copied across as they change. (It also shares localStorage, so a reload keeps them.)
+  const LOOK = ['data-theme', 'data-palette', 'data-density', 'data-contrast', 'data-text-size', 'style'];
+  const sync = () => {
+    try {
+      const from = document.documentElement;
+      const to = frame.contentDocument.documentElement;
+      for (const name of LOOK) from.hasAttribute(name) ? to.setAttribute(name, from.getAttribute(name)) : to.removeAttribute(name);
+    } catch { /* not loaded yet */ }
+  };
   document.documentElement.addEventListener('fd:theme', sync);
-  document.documentElement.addEventListener('fd:accent', sync);
+  document.documentElement.addEventListener('fd:change', (e) => { if (e.detail?.name === 'tweaks') sync(); });
+  frame.addEventListener('load', sync);
 </script>
 </body>
 </html>

@@ -147,6 +147,7 @@ export function renderTopbar({ prefix = 'ember', mobileOpen = false } = {}) {
   <div class="fd-topbar-actions">
     <button class="fd-btn" type="button" data-only="desktop" data-fd-search-trigger data-fd-command-open="${prefix}-command" style="width: 220px">${i('search')}<span class="fd-grow fd-muted">Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
     <button class="fd-btn" type="button" data-icon-only data-fd-popover="${prefix}-notifs" data-placement="bottom-end" data-fd-tooltip="Notifications" aria-label="Notifications">${i('bell')}<span class="fd-overlay-count" data-fd-unread-count="${prefix}-notifs">2</span></button>
+    <button class="fd-btn" type="button" data-icon-only data-fd-tweaks-open data-fd-tooltip="Tweaks" aria-label="Tweaks" aria-expanded="false">${i('sliders-horizontal')}</button>
     <button class="fd-btn" type="button" data-icon-only data-only="desktop" data-fd-theme-toggle data-fd-tooltip="Theme" aria-label="Theme">${i('monitor')}</button>
     <button class="fd-btn" type="button" data-only="desktop" data-fd-menu="${prefix}-menu-help" data-placement="bottom-end">${i('circle-help')}<span>Help</span></button>
     <a class="fd-btn" data-only="desktop" href="${DOCS}" target="_blank" rel="noopener">${i('book-open')}<span>Docs</span></a>
@@ -292,6 +293,7 @@ export function renderOverlays({ prefix = 'ember' } = {}) {
         <a class="fd-command-item" href="api-keys.html#create" data-keywords="token new secret">${i('plus')}<span class="fd-command-item-label">Create API key</span></a>
         <a class="fd-command-item" href="settings.html#team" data-keywords="member team people invite">${i('user-plus')}<span class="fd-command-item-label">Invite a teammate</span></a>
         <div class="fd-command-item" data-value="chat" data-keywords="help support question contact person talk ai">${i('message-circle')}<span class="fd-command-item-label">Chat with support</span><span class="fd-command-item-hint">Ember AI and the support team</span></div>
+        <div class="fd-command-item" data-value="tweaks" data-keywords="palette colour color density corners appearance customise">${i('sliders-horizontal')}<span class="fd-command-item-label">Open tweaks</span><span class="fd-command-item-hint">Palette, tone, density, corners</span></div>
         <div class="fd-command-item" data-value="theme" data-keywords="dark light mode appearance">${i('moon')}<span class="fd-command-item-label">Switch theme</span><span class="fd-command-item-hint">Light, dark or system</span></div>
       </div>
       <div class="fd-command-group">
@@ -358,6 +360,8 @@ function bindBehaviour(fire, prefix) {
       setTimeout(() => command.open(`${prefix}-command`), 60);
     } else if (item.closest(`#${prefix}-command`) && value === 'theme') {
       fire.shell.cycleTheme();
+    } else if (item.closest(`#${prefix}-command`) && value === 'tweaks') {
+      setTimeout(() => fire.tweaks.open(), 60);
     } else if (item.closest(`#${prefix}-command`) && value === 'chat') {
       // Open the support chat once the palette has closed, so focus lands in the composer.
       setTimeout(() => fire.chat.get(`${prefix}-chat`)?.open(), 60);

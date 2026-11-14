@@ -28,7 +28,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 ```
 
 3. Serve over HTTP. ES modules do not load from `file://`.
-4. Copy `GUIDE.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
+4. Copy `GUIDE.md`, `WRITING.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
 
 **With a framework (React, Vue, Svelte, server templates).** Fire is class names and data attributes, so it works in any of them. Render the same markup the docs show. Two things to know:
 
@@ -72,7 +72,7 @@ These keep a product looking like one product. They apply to people and to AI ag
 5. **State is native or ARIA.** `disabled`, `aria-current="page"`, `aria-selected`, `aria-expanded`, `aria-busy`, `aria-invalid`, `hidden`. The styles read these; do not add state classes.
 6. **One accent, used sparingly.** The primary button, the active nav item, links, focus, switches that are on, the lead chart series. One primary button per view.
 7. **Icons** are `<i data-icon="name"></i>` with a Lucide name that exists in `fire/js/icons.js`. Never emoji.
-8. **Words.** Sentence case. Buttons are verb plus object ("Create key"). Empty states say what will appear and offer the action. Errors say what happened and what to change. Identifiers, keys, paths and units are mono.
+8. **Words.** Follow [WRITING.md](WRITING.md). In short: write only what the layout does not already say, one job per element, inside the word budgets. Sentence case. Buttons are verb plus object ("Create key"). Empty states say what will appear and offer the action. Errors say what happened and what to change. Identifiers, keys, paths and units are mono.
 
 ## 5. Layout
 
@@ -158,7 +158,8 @@ Paste this into the project's agent instructions (for example `CLAUDE.md` or `AG
 ```markdown
 ## UI: use the Fire design system
 
-- All UI is built with Fire (`/fire`). Read `fire-docs/GUIDE.md` before writing any UI, and look up classes in
+- All UI is built with Fire (`/fire`). Read `fire-docs/GUIDE.md` before writing any UI and `fire-docs/WRITING.md`
+  before writing any text that appears in it, and look up classes in
   `fire-docs/VOCABULARY.md`. Copy markup from the docs pages or the nearest template; do not write components
   from memory.
 - Use only `fd-` classes that exist in the vocabulary. No custom CSS, no `<style>` blocks, no pixel values and

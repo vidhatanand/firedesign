@@ -78,6 +78,8 @@ The neutrals are alpha steps of two colours: `--fd-wash` (fills and tints) and `
 
 ## 6. Voice
 
+The full guide to interface text is `WRITING.md`: how to decide what to write, word budgets per element, help text, empty states, errors and agent messages. The summary:
+
 Sentence case everywhere except mono eyebrows (uppercase). Name things by what they do. Buttons are verb + object ("Start scraping", "Copy referral link"). Empty states say what will appear and give the action. Errors say what happened and what to change. Numbers use tabular figures and thousands separators; identifiers, keys, paths and units are mono. Dates are short ("Nov 23", "Feb 10, 2026 4:29 PM").
 
 Demo content is for a fictional developer platform called **Ember** (a web-data and agent API): teams, API keys, credits, endpoints `/search` `/scrape` `/crawl` `/extract` `/agent`, monitors, runs, logs, providers. Do not use real company logos or names other than as plain text in sample data; draw provider marks as simple letter or glyph tiles.

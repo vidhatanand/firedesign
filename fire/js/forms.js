@@ -60,6 +60,10 @@
  *                        data-mask-from, eight dots and the last data-mask-keep characters, and masks even with no reveal
  *                        button. The value is drawn as .fd-secret-start + .fd-secret-end (.fd-copy-field-start / -end):
  *                        the start shortens with an ellipsis, the end never does. Copy always copies data-value.
+ *                        Entry: <div class="fd-secret" data-mode="entry" [data-noun="password"]><input class="fd-secret-input"
+ *                        type="password" name id autocomplete="new-password"><div class="fd-secret-actions"><button
+ *                        data-fd-field-action="reveal"></div></div>. Reveal switches the input to text and back (aria-pressed);
+ *                        it is masked again on submit and reset. No data-value, no copy, no rotate. Posts as a plain field.
  * Dropzone               <label class="fd-dropzone" data-fd-dropzone data-list="#files" data-max-mb="50"><input type="file" multiple accept=".pdf,.docx">…</label>
  *                        <ul class="fd-filelist" id="files"></ul>
  * One-time code          <div class="fd-otp" data-fd-otp data-length="6" [data-type="numeric|alphanumeric"]> (inputs are generated when empty)
@@ -1180,7 +1184,25 @@ function endParts(value, el, revealed) {
   return [start, rest.length > keep ? MASK.repeat(8) + rest.slice(-keep) : MASK.repeat(8)];
 }
 
+/* Entry mode: the reveal button only switches the input between password and text, so it shows what was typed
+   here and never a stored value. */
+const isEntry = (el) => el.dataset.mode === 'entry';
+function renderEntry(el) {
+  const input = $('.fd-secret-input', el);
+  const reveal = $('[data-fd-field-action="reveal"]', el);
+  const revealed = el.dataset.state === 'revealed';
+  if (input) input.type = revealed ? 'text' : 'password';
+  if (reveal) {
+    const noun = el.dataset.noun || 'password';
+    reveal.setAttribute('aria-pressed', String(revealed));
+    reveal.setAttribute('aria-label', `${revealed ? 'Hide' : 'Show'} ${noun}`);
+    if (input?.id) reveal.setAttribute('aria-controls', input.id);
+    setIcon(reveal, revealed ? 'eye-off' : 'eye');
+  }
+}
+
 function renderSecret(el) {
+  if (isEntry(el)) { renderEntry(el); return; }
   const valueEl = $('.fd-secret-value, .fd-copy-field-value', el);
   if (!valueEl) return;
   const value = el.dataset.value ?? '';
@@ -1212,6 +1234,7 @@ function renderSecret(el) {
 
 function setupSecret(el) {
   if (!once(el, 'secret')) return;
+  if (isEntry(el)) { if (!el.dataset.state) el.dataset.state = 'masked'; renderEntry(el); return; }
   const valueEl = $('.fd-secret-value, .fd-copy-field-value', el);
   if (el.dataset.value === undefined && valueEl) el.dataset.value = valueEl.textContent.trim();
   if ($('[data-fd-field-action="reveal"]', el) && !el.dataset.state) el.dataset.state = 'masked';
@@ -1782,10 +1805,19 @@ function bind() {
   });
 
   /* Secret and copy field */
+  // A typed secret goes back under its mask when its form is sent or reset, so the browser and any password
+  // manager see a password field.
+  const maskEntries = (e) => {
+    if (!(e.target instanceof HTMLFormElement)) return;
+    $$('.fd-secret[data-mode="entry"][data-state="revealed"]', e.target).forEach((el) => { el.dataset.state = 'masked'; renderEntry(el); });
+  };
+  document.addEventListener('submit', (e) => { if (!e.defaultPrevented) maskEntries(e); });
+  document.addEventListener('reset', maskEntries);
   on(document, 'click', '[data-fd-field-action]', (e, button) => {
     const el = button.closest('.fd-secret, .fd-copy-field, [data-fd-secret], [data-fd-copy-field]');
     if (!el) return;
     const action = button.dataset.fdFieldAction;
+    if (isEntry(el) && action !== 'reveal') return;   // an entry field has nothing to copy or rotate
     if (action === 'reveal') {
       el.dataset.state = el.dataset.state === 'revealed' ? 'masked' : 'revealed';
       renderSecret(el);

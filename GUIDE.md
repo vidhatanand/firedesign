@@ -109,7 +109,7 @@ Grids, stacks and rows nest freely. If you are about to write a width, you are m
 | A number with a unit | `fd-number`, or an `fd-input-group` with the unit as an affix | A bare text box with the unit only in the label |
 | A list of free values (URLs, domains, emails) | `fd-tag-input` | A JSON array, or a comma-separated text box |
 | Names with values (scopes, headers, labels) | `fd-pairs` | A JSON object |
-| A secret | `fd-secret` | A plain text input |
+| A secret | `fd-secret`; to type a new one, `fd-secret` with `data-mode="entry"` | A plain text input |
 | Raw configuration, for experts only | `fd-codefield` with `data-fd-json` | An ordinary text area |
 
 A checkbox group posts one field per ticked box under the same name (`methods=email&methods=passkey`). If your server rejects repeated names, give each box its own name (`methods.email`, `methods.passkey`).

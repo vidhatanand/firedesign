@@ -112,6 +112,8 @@ Grids, stacks and rows nest freely. If you are about to write a width, you are m
 | A secret | `fd-secret` | A plain text input |
 | Raw configuration, for experts only | `fd-codefield` with `data-fd-json` | An ordinary text area |
 
+A checkbox group posts one field per ticked box under the same name (`methods=email&methods=passkey`). If your server rejects repeated names, give each box its own name (`methods.email`, `methods.passkey`).
+
 All of these post in a plain form. `fd-tag-input`, `fd-pairs` and `fd-codefield` each wrap one named text area: without script the text area is the field (one value per line, or `name = value` per line), and with `fire/js/forms.js` it becomes the full control and posts the same shape, or JSON with `data-format="json"`. So a server that stores a list or a map as JSON does not need to show JSON to anyone.
 
 **A long create or edit form** is a column of `fd-form-section`s inside `<form class="fd-form" data-size="full">`: each section has a title and one line on the left and its fields on a white surface on the right. Start from `templates/form.html`. Do not lay a long form out as a full-width two-column grid of fields on the bare page: fields become too wide to read and nothing groups them.

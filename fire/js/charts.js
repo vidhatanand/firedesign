@@ -917,14 +917,152 @@ function initDonut(el) {
    </div>
    One value per day, starting on `start` (any weekday). Columns are weeks, rows Monday to Sunday.
    ← → move by week, ↑ ↓ by day while the grid is focused.
+
+   Strip: one row of days, each in a tone, with no axis (an outcome per day, not an amount):
+   <div class="fd-heatgrid" data-variant="strip" data-size="sm|md">
+     <script type="application/json">{ "start": "2026-10-18", "tones": ["success", "danger", null, ...],
+       "legend": { "success": "No problem found", "danger": "Problem found" }, "none"?: "Not run",
+       "hrefs"?: ["/results/2026-10-18", ...], "titles"?: ["Round 41", ...], "label"?: "...", "summary"?: "..." }</script>
+   </div>
+   A tone per point (neutral|muted|accent|success|warning|danger|info|violet; null = nothing that day), named by
+   `legend`. The foot shows the legend and `summary` when either is given (not at data-size="sm", for a table cell). ← → Home End walk the days; the tooltip
+   names the day and its legend entry only. A point with an href is a link: click it, or press Enter while it is
+   active. Click and Enter fire fd:select { index, label, tone, name, href }. The aria-label counts each tone.
    ========================================================================== */
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const utc = (iso) => { const [y, m, d] = String(iso).split('-').map(Number); return Date.UTC(y, (m || 1) - 1, d || 1); };
 const dayLabel = (ms) => { const d = new Date(ms); return `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCDate()).padStart(2, '0')}, ${d.getUTCFullYear()}`; };
 
+const STRIP_TONES = ['neutral', 'muted', 'accent', 'success', 'warning', 'danger', 'info', 'violet'];
+
+function heatstrip(el, cfg) {
+  const tones = (cfg.tones || []).map((t) => (STRIP_TONES.includes(t) ? t : null));
+  const n = tones.length;
+  const legend = cfg.legend && typeof cfg.legend === 'object' ? cfg.legend : {};
+  const hrefs = Array.isArray(cfg.hrefs) ? cfg.hrefs : [];
+  const DAY = 86400000;
+  const start = cfg.start ? utc(cfg.start) : null;
+  const title = (i) => cfg.titles?.[i] ?? (start != null ? dayLabel(start + i * DAY) : `Point ${i + 1}`);
+  const name = (t) => (t ? legend[t] ?? t : cfg.none ?? 'No data');
+
+  settleEnter(el);
+  clearDrawn(el);
+  el.style.setProperty('--_ch-points', n);
+  const grid = html('div', 'fd-heatgrid-grid', null, el);
+  grid.setAttribute('role', 'img');
+  grid.setAttribute('tabindex', '0');
+  const order = [...Object.keys(legend).filter((t) => STRIP_TONES.includes(t)), ...STRIP_TONES.filter((t) => !(t in legend)), null];
+  const counts = order.map((t) => [t, tones.filter((x) => x === t).length]).filter(([, c]) => c);
+  const span = start != null && n ? ` from ${dayLabel(start)} to ${dayLabel(start + (n - 1) * DAY)}` : '';
+  const noun = start != null ? (n === 1 ? 'day' : 'days') : (n === 1 ? 'point' : 'points');
+  grid.setAttribute('aria-label', cfg.label || el.dataset.label || `${n} ${noun}${span}: ${counts.map(([t, c]) => `${c} ${name(t).toLowerCase()}`).join(', ')}`);
+
+  const cells = tones.map((t, i) => {
+    const cell = html(hrefs[i] ? 'a' : 'span', 'fd-heatgrid-cell', null, grid);
+    if (hrefs[i]) { cell.href = hrefs[i]; cell.tabIndex = -1; }
+    cell.dataset.k = i;
+    if (t) cell.dataset.tone = t; else cell.dataset.none = '';
+    cell.style.setProperty('--_ch-wk', i);
+    return cell;
+  });
+
+  const keys = Object.keys(legend).filter((t) => STRIP_TONES.includes(t));
+  if ((keys.length || cfg.summary) && el.dataset.size !== 'sm') {
+    const foot = html('div', 'fd-heatgrid-foot', null, el);
+    if (cfg.summary) html('span', 'fd-heatgrid-summary', cfg.summary, foot);
+    if (keys.length) {
+      const box = html('div', 'fd-legend', null, foot);
+      for (const t of keys) {
+        const item = html('span', 'fd-legend-item', null, box);
+        item.dataset.tone = t;
+        html('span', 'fd-legend-swatch', null, item).dataset.shape = 'square';
+        html('span', '', legend[t], item);
+      }
+    }
+  }
+
+  const tip = html('div', 'fd-chart-tooltip', null, el);
+  tip.setAttribute('aria-hidden', 'true');
+  const status = html('div', 'fd-sr-only', null, el);
+  status.setAttribute('aria-live', 'polite');
+  // A table ignores the 1px box of fd-sr-only, so it sits in a wrapper that does not.
+  const table = html('table', '', null, html('div', 'fd-sr-only', null, el));
+  html('caption', '', cfg.label || el.dataset.label || 'Each day', table);
+  const head = html('tr', '', null, html('thead', '', null, table));
+  html('th', '', start != null ? 'Date' : 'Point', head).scope = 'col';
+  html('th', '', 'Result', head).scope = 'col';
+  const body = html('tbody', '', null, table);
+  tones.forEach((t, i) => { const row = html('tr', '', null, body); html('th', '', title(i), row).scope = 'row'; html('td', '', name(t), row); });
+
+  let active = -1;
+  const detail = (i) => ({ index: i, label: title(i), tone: tones[i], name: name(tones[i]), href: hrefs[i] || null });
+  const show = (i, announce = false) => {
+    const cell = cells[i];
+    if (!cell) return;
+    cells.forEach((c) => c.removeAttribute('data-active'));
+    cell.setAttribute('data-active', '');
+    active = i;
+    const first = tip.dataset.state !== 'open';
+    tip.replaceChildren();
+    html('div', 'fd-chart-tooltip-title', title(i), tip);
+    const row = html('div', 'fd-chart-tooltip-row', null, tip);
+    if (tones[i]) { const sw = html('span', 'fd-chart-tooltip-swatch', null, row); sw.dataset.shape = 'square'; sw.dataset.tone = tones[i]; }
+    html('span', 'fd-chart-tooltip-value', name(tones[i]), row);
+    if (first) tip.dataset.snap = '';
+    const host = el.getBoundingClientRect();
+    const box = cell.getBoundingClientRect();
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    const tx = clamp(box.left - host.left + box.width / 2 - tw / 2, 0, Math.max(0, host.width - tw));
+    // Above the day unless that leaves the viewport: a strip in a table cell has no room below its row.
+    const ty = box.top - th - 8 >= 0 ? box.top - host.top - th - 8 : box.top - host.top + box.height + 8;
+    tip.style.translate = `${Math.round(tx)}px ${Math.round(ty)}px`;
+    if (first) { void tip.offsetWidth; tip.dataset.state = 'open'; requestAnimationFrame(() => tip.removeAttribute('data-snap')); }
+    if (announce) status.textContent = `${title(i)}: ${name(tones[i])}${hrefs[i] ? '. Press Enter to open.' : ''}`;
+    emit(el, 'fd:hover', detail(i));
+  };
+  const hide = () => {
+    tip.dataset.state = 'closed';
+    cells.forEach((c) => c.removeAttribute('data-active'));
+    active = -1;
+  };
+  grid.addEventListener('pointerover', (event) => {
+    const cell = event.target.closest?.('.fd-heatgrid-cell[data-k]');
+    if (cell) show(Number(cell.dataset.k));
+  });
+  grid.addEventListener('pointerleave', hide);
+  grid.addEventListener('blur', hide);
+  grid.addEventListener('focus', () => { if (grid.matches(':focus-visible') && n && active < 0) show(n - 1, true); });
+  grid.addEventListener('click', (event) => {
+    const cell = event.target.closest?.('.fd-heatgrid-cell[data-k]');
+    if (cell) emit(el, 'fd:select', detail(Number(cell.dataset.k)));
+  });
+  grid.addEventListener('keydown', (event) => {
+    if (!n) return;
+    let next = null;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const rtl = getComputedStyle(grid).direction === 'rtl';
+      const step = (event.key === 'ArrowRight') !== rtl ? 1 : -1;
+      next = clamp(active < 0 ? n - 1 : active + step, 0, n - 1);
+    } else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = n - 1;
+    else if (event.key === 'Escape') { hide(); return; }
+    else if (event.key === 'Enter' && active >= 0) {
+      event.preventDefault();
+      if (hrefs[active]) cells[active].click(); else emit(el, 'fd:select', detail(active));
+      return;
+    }
+    if (next == null) return;
+    event.preventDefault();
+    show(next, true);
+  });
+  armEnter(el);
+}
+
 export function heatgrid(el) {
   const cfg = readJSON(el);
+  if (el.dataset.variant === 'strip') { heatstrip(el, cfg); return; }
   const values = (cfg.values || []).map((v) => Math.max(0, Number(v) || 0));
   const unit = cfg.unit || 'events';
   const start = cfg.start ? utc(cfg.start) : Date.UTC(2026, 0, 5);

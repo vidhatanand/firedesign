@@ -37,7 +37,9 @@
   --_b-bg-hover: var(--fd-fill-hover);
   --_b-bg-active: var(--fd-fill-active);
   --_b-fg: var(--fd-text);
-  --_b-shadow: none;
+  /* An empty shadow, not none: the focus ring is appended to this list
+     (var(--_b-shadow), var(--fd-ring)), and none inside a list is invalid. */
+  --_b-shadow: 0 0 0 0 transparent;
   --_b-radius: var(--fd-radius-lg);
 
   position: relative;
@@ -119,7 +121,7 @@
 /* ---------- Disabled & loading ---------- */
 .fd-btn:disabled, .fd-btn[aria-disabled="true"] {
   --_b-bg: var(--fd-fill-disabled); --_b-bg-hover: var(--fd-fill-disabled); --_b-bg-active: var(--fd-fill-disabled);
-  --_b-fg: var(--fd-text-4); --_b-shadow: none;
+  --_b-fg: var(--fd-text-4); --_b-shadow: 0 0 0 0 transparent;
   cursor: not-allowed; scale: 1;
 }
 .fd-btn:disabled::before, .fd-btn[aria-disabled="true"]::before { display: none; }
@@ -142,7 +144,7 @@
 .fd-btn-group > .fd-btn + .fd-btn { margin-inline-start: var(--fd-hairline); }
 .fd-btn-group > .fd-btn[data-variant="outline"] + .fd-btn[data-variant="outline"] { margin-inline-start: calc(var(--fd-hairline) * -1); }
 .fd-btn-group > .fd-btn:hover, .fd-btn-group > .fd-btn:focus-visible { z-index: 1; }
-.fd-btn-group > .fd-btn[data-variant="primary"] + .fd-btn[data-variant="primary"] { box-shadow: var(--fd-shadow-accent), inset var(--fd-hairline) 0 0 0 rgb(255 255 255 / 0.24); margin-inline-start: 0; }
+.fd-btn-group > .fd-btn[data-variant="primary"] + .fd-btn[data-variant="primary"] { --_b-shadow: var(--fd-shadow-accent), inset var(--fd-hairline) 0 0 0 rgb(255 255 255 / 0.24); margin-inline-start: 0; }
 
 /* ---------- Label swap: "Copy" becomes "Copied" in place, so the button never changes width ----------
    <button class="fd-btn" data-fd-copy="npx ember init"><span class="fd-btn-swap"><span>Copy</span><span>Copied</span></span></button>
@@ -175,4 +177,5 @@
 }
 .fd-fab:hover { scale: 1.06; background: var(--fd-accent-hover); }
 .fd-fab:active { scale: 0.96; }
+.fd-fab:focus-visible { box-shadow: var(--fd-shadow-accent), var(--fd-shadow-md), var(--fd-ring); border-radius: 50%; }
 .fd-fab > .fd-icon { width: var(--fd-fab-icon); height: var(--fd-fab-icon); }

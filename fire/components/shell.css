@@ -93,6 +93,7 @@
   --fd-hero-min-h: 240px;
   --fd-hero-min-h-sm: 160px;
   --fd-hero-measure: 560px;
+  --fd-hero-actions-clear: 16px;    /* the art clears this far around actions at the end of the title row */
   --fd-page-head-basis: 240px;
   --fd-toolbar-search-basis: 220px;
   --fd-toolbar-search-max: 280px;
@@ -618,9 +619,29 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   padding: var(--_s-py) var(--_s-px, var(--fd-gutter));
 }
 .fd-page-hero > :not(.fd-page-hero-art) { position: relative; z-index: 1; max-width: min(100%, var(--fd-hero-measure)); }
-.fd-page-hero > .fd-eyebrow { margin-bottom: var(--fd-space-2); }
+:is(.fd-page-hero, .fd-page-hero-text) > .fd-eyebrow { margin-bottom: var(--fd-space-2); }
 .fd-page-hero-desc { font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); letter-spacing: var(--fd-ls-lg); color: var(--fd-text-2); text-wrap: pretty; }
 .fd-page-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); margin-top: var(--fd-space-5); }
+/* Actions beside the title. Wrap the eyebrow, title and line in -text and put -actions after it:
+   the text keeps the hero's measure, the actions sit at the end of the row on the line's last
+   baseline, and they drop under the text (at the start) when the row has no room for both.
+   <section class="fd-band fd-page-hero">
+     <div class="fd-page-hero-art" aria-hidden="true">…</div>
+     <div class="fd-page-hero-text"><h1 class="fd-display">Monitoring</h1><p class="fd-page-hero-desc">…</p></div>
+     <div class="fd-page-hero-actions"><button class="fd-btn">…</button></div>
+   </section> */
+.fd-page-hero:has(> .fd-page-hero-text) {
+  flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-content: center;
+  align-items: flex-end; align-items: last baseline;
+  gap: var(--fd-space-5) var(--fd-space-6);
+}
+.fd-page-hero-text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--fd-space-1); flex: 0 1 var(--fd-hero-measure); min-width: 0; }
+.fd-page-hero-text ~ .fd-page-hero-actions { flex: none; margin-top: 0; }
+/* At the end of the row the actions sit over the art: clear it around them so the buttons read. */
+.fd-page-hero:has(> .fd-page-hero-art) > .fd-page-hero-text ~ .fd-page-hero-actions {
+  border-radius: var(--fd-radius-lg); background: var(--fd-bg);
+  box-shadow: 0 0 var(--fd-hero-actions-clear) calc(var(--fd-hero-actions-clear) / 2) var(--fd-bg);
+}
 .fd-page-hero-art {
   position: absolute; z-index: 0;
   inset-block: 0; inset-inline-end: 0;

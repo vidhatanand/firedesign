@@ -135,8 +135,9 @@
 :is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input)[data-mono][data-size="sm"] { --_f-fs: var(--fd-text-xs); }
 
 /* Standalone controls: the element itself is the box. A text area alone inside a tag input or a pairs editor is
-   the plain field a server rendered for use without script, and wears the same skin. */
-:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select) {
+   the plain field a server rendered for use without script, and wears the same skin. An .fd-input inside an
+   .fd-input-group is bare (the group is the box), so it is left out here; the :where() keeps the specificity. */
+:is(.fd-input:not(:where(.fd-input-group > *)), .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select) {
   --_f-line: var(--fd-control-line);
   --_f-lw: var(--fd-hairline);
   --_f-halo: transparent;
@@ -204,7 +205,7 @@
   flex: 1 1 0; inline-size: auto; min-inline-size: 0; align-self: stretch;
   padding: 0 var(--_f-px, var(--fd-control-px));
   border: 0; border-radius: 0; background: transparent; color: inherit; box-shadow: none;
-  font: inherit; text-overflow: ellipsis; caret-color: var(--fd-accent);
+  font: inherit; letter-spacing: inherit; text-overflow: ellipsis; caret-color: var(--fd-accent);
 }
 :is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field):is(:focus, :focus-visible) { box-shadow: none; }
 :is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field):disabled { cursor: not-allowed; -webkit-text-fill-color: var(--fd-text-4); }

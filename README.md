@@ -22,6 +22,7 @@ Then open http://127.0.0.1:4747/docs/index.html.
 |---|---|
 | Building a product with Fire | [GUIDE.md](GUIDE.md): adding Fire to a project, building a screen, layout, theming, and what to do when Fire does not have what you need |
 | Writing the words on a screen | [WRITING.md](WRITING.md): how to write labels, buttons, help text, empty states and errors so the interface stays clean and useful |
+| Setting up an AI agent to build with Fire | [AGENT-RULES.md](AGENT-RULES.md): the rules, and the three-line pointer for a project's `AGENTS.md` |
 | Adding to or changing Fire itself | [DESIGN.md](DESIGN.md): the contract every contribution follows |
 | Looking up a class or attribute | [docs/_ref/VOCABULARY.md](docs/_ref/VOCABULARY.md) |
 | Asking for a component or an extension | GUIDE.md section 7, then the "Component or extension request" issue template |
@@ -85,7 +86,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 
 | Path | What |
 |---|---|
-| `GUIDE.md`, `WRITING.md` | How to build a product with Fire, and how to write its interface text. |
+| `GUIDE.md`, `WRITING.md`, `AGENT-RULES.md` | How to build a product with Fire, how to write its interface text, and the rules an AI agent follows. |
 | `fire/` | The system itself; the only folder a product ships. |
 | `fire/tokens.css` | Global values: the ink ladder, surfaces, accent, status tones, type, space, sizes, radius, shadows, motion. Light and dark through `light-dark()`. |
 | `fire/palettes.css` | Fifteen palettes, generated from `fire/js/palettes.js`. |

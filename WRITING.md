@@ -250,22 +250,4 @@ Words to delete on sight: *simply, just, easily, quickly, successfully, please n
 
 ## 10. Instructions for an AI agent
 
-Paste this into the project's agent instructions with the block from `GUIDE.md`.
-
-```markdown
-## UI copy: follow WRITING.md
-
-- Read `fire-docs/WRITING.md` before writing any text that appears in the interface.
-- Write for the gaps only: if the layout, a label or a value already says it, do not write it.
-- One job per element. Stay inside the word budgets in section 3. If a text is over budget, split it
-  or move the detail to a tooltip, a "Learn more" link or the docs.
-- Buttons are a verb, or a verb and its object. Placeholders are realistic examples. Hints say one
-  thing: the effect, the default, the limit or an example.
-- Empty states say what will appear and how. Errors say what happened and what to do. Success says
-  what is now true, without "successfully".
-- Sentence case. Digits with units. Identifiers in mono. No exclamation marks, no "please", "simply",
-  "just", "easily", "Oops".
-- Do not add explanatory sentences "to be safe". Add help only for money, security, irreversible
-  actions, or a mistake a careful first-time user would make.
-- Before finishing, run the checklist in section 9 on every screen you touched and fix what fails.
-```
+The rules an agent follows when it writes interface text are section 4 of [AGENT-RULES.md](AGENT-RULES.md), which a project points to from its own agent instructions. `GUIDE.md` section 8 says how to set that up.

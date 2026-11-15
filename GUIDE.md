@@ -28,7 +28,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 ```
 
 3. Serve over HTTP. ES modules do not load from `file://`.
-4. Copy `GUIDE.md`, `WRITING.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
+4. Copy `GUIDE.md`, `WRITING.md`, `AGENT-RULES.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
 
 **With a framework (React, Vue, Svelte, server templates).** Fire is class names and data attributes, so it works in any of them. Render the same markup the docs show. Two things to know:
 
@@ -192,27 +192,16 @@ File an issue in the Fire repository using the "Component or extension request" 
 
 ## 8. Instructions for an AI agent working in a project
 
-Paste this into the project's agent instructions (for example `CLAUDE.md` or `AGENTS.md`), and adjust the paths.
+The rules an agent follows are in [AGENT-RULES.md](AGENT-RULES.md). They are kept in one file, in Fire, so that updating Fire updates the rules and the project's own instruction file never has to change.
+
+Copy `AGENT-RULES.md` into the project beside this guide, then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`) and adjust the three paths:
 
 ```markdown
-## UI: use the Fire design system
+## Interface: the Fire design system
 
-- All UI is built with Fire (`/fire`). Read `fire-docs/GUIDE.md` before writing any UI and `fire-docs/WRITING.md`
-  before writing any text that appears in it, and look up classes in
-  `fire-docs/VOCABULARY.md`. Copy markup from the docs pages or the nearest template; do not write components
-  from memory.
-- Use only `fd-` classes that exist in the vocabulary. No custom CSS, no `<style>` blocks, no pixel values and
-  no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`,
-  `data-cols` and `data-span`.
-- Never edit files inside `/fire`.
-- Forms: choose each control from the kind of value (GUIDE.md section 5, "Forms"). Never render a setting as a text
-  box when it is a choice, a switch, a list or a set of pairs, and never show JSON outside `fd-codefield`. Do not
-  write one generic "render any field as a text box" helper. A long form starts from `templates/form.html`.
-- Build every state: empty, loading, error, disabled. Check light and dark, 1440px and 375px, and keyboard use.
-- Look at every screen you build, in a browser, before you call it done. If it looks like a database form, it is.
-- If Fire lacks something, follow GUIDE.md section 7: look again, compose from existing parts, and if it is a
-  real gap, write a component request (use the template), tell me, and continue with a removable stopgap in
-  `fire-local.css` using `x-` classes and Fire tokens only. Do not build a one-off silently.
-- While you work, watch for chances to improve the system and raise them the same way: the same arrangement
-  built twice, a variant you wished existed, a token you had to approximate, anything awkward to use.
+- For any interface work, read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
+- Fire is in `public/fire`. Never edit it.
+- Gaps in Fire go in `docs/fire/REQUESTS.md`. Stopgap styles go in `fire-local.css`.
 ```
+
+Keep the project's instruction file for what only the project knows: its layouts, its helpers, its security policy. Do not copy Fire's rules into it; a copy goes stale the next time Fire changes.

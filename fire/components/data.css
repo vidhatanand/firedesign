@@ -40,6 +40,9 @@
    METER     fd-meter[data-value][data-max][data-tone][data-variant="inline|segmented"][data-size="sm|lg"]
    PROGRESS  fd-progress[data-value][data-variant="ring|steps"][data-size="16|24|40"][data-indeterminate]
    DATA CARD fd-data-card > fd-data-card-head, -body, -toggle, -more
+   PIPELINE  fd-pipeline[data-size="sm"][data-orientation="vertical|horizontal"][data-fd-pipeline="manual"][aria-busy]
+             > fd-pipeline-stages (ol) > fd-pipeline-stage[data-when] (li) > fd-pipeline-stage-label + fd-pipeline-jobs (ul) > li
+             > fd-pipeline-job[data-tone][data-live][data-state="skipped"][aria-current] > icon, fd-pipeline-job-name, fd-pipeline-job-meta
    ========================================================================== */
 
 /* ---------- Tokens ---------- */
@@ -115,6 +118,32 @@
   --fd-data-toggle-h: 48px;
 }
 
+/* Pipeline tokens are built from the scaled globals (space, controls), so they are declared again wherever a
+   density or scale is overridden, like the scaled tokens in tokens.css: a compact card on a comfortable page. */
+:root, [data-density], [data-scale] {
+  /* pipeline: stages left to right, parallel jobs stacked; connectors meet the middle of a job's first line */
+  --fd-pipeline-job-h: var(--fd-control-md);        /* a job on one line; stubs and links sit at half of it */
+  --fd-pipeline-job-h-sm: var(--fd-control-sm);
+  --fd-pipeline-job-min: calc(var(--fd-size-sm) - var(--fd-space-4));  /* narrowest stage column, 144 */
+  --fd-pipeline-job-max: var(--fd-size-md);         /* widest stage column; longer names wrap */
+  --fd-pipeline-job-min-sm: var(--fd-size-xs);
+  --fd-pipeline-job-max-sm: var(--fd-size-sm);
+  --fd-pipeline-job-gap: var(--fd-space-2);         /* between parallel jobs */
+  --fd-pipeline-job-gap-sm: var(--fd-space-1-5);
+  --fd-pipeline-gap: var(--fd-space-8);             /* between stages: stub, link, stub */
+  --fd-pipeline-gap-sm: var(--fd-space-6);
+  --fd-pipeline-stub: var(--fd-space-2-5);           /* from a job's edge to its stage's rail */
+  --fd-pipeline-stub-sm: var(--fd-space-2);
+  --fd-pipeline-label-gap: var(--fd-space-2);       /* stage label to its first job */
+  --fd-pipeline-stage-gap: var(--fd-space-4);       /* vertical: between stages */
+  --fd-pipeline-stage-gap-sm: var(--fd-space-3);
+  --fd-pipeline-rail: var(--fd-space-5);            /* vertical: room on the leading edge; the line runs down its middle */
+  --fd-pipeline-rail-sm: var(--fd-space-4);
+  --fd-pipeline-pad: var(--fd-space-1-5);           /* scroller inset, so focus rings are never clipped */
+  --fd-pipeline-spin: var(--fd-loop-spin);          /* the icon of a live job */
+  --fd-pipeline-skeleton-min: 40%;                  /* shortest placeholder name, of the job */
+}
+
 @property --_d-fl { syntax: "<length>"; inherits: false; initial-value: 0px; }
 @property --_d-fr { syntax: "<length>"; inherits: false; initial-value: 0px; }
 
@@ -167,14 +196,14 @@
   scrollbar-gutter: auto;
 }
 .fd-table-scroll:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 0; }
-.fd-table-scroll[data-overflow] {
+.fd-table-scroll[data-overflow], .fd-pipeline[data-overflow] {
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--_d-fl), #000 calc(100% - var(--_d-fr)), transparent 100%);
           mask-image: linear-gradient(to right, transparent 0, #000 var(--_d-fl), #000 calc(100% - var(--_d-fr)), transparent 100%);
   transition: --_d-fl var(--fd-dur-3) var(--fd-ease-out), --_d-fr var(--fd-dur-3) var(--fd-ease-out);
 }
-.fd-table-scroll[data-overflow="end"] { --_d-fr: var(--fd-data-fade); }
-.fd-table-scroll[data-overflow="start"] { --_d-fl: var(--fd-data-fade); }
-.fd-table-scroll[data-overflow="both"] { --_d-fl: var(--fd-data-fade); --_d-fr: var(--fd-data-fade); }
+.fd-table-scroll[data-overflow="end"], .fd-pipeline[data-overflow="end"] { --_d-fr: var(--fd-data-fade); }
+.fd-table-scroll[data-overflow="start"], .fd-pipeline[data-overflow="start"] { --_d-fl: var(--fd-data-fade); }
+.fd-table-scroll[data-overflow="both"], .fd-pipeline[data-overflow="both"] { --_d-fl: var(--fd-data-fade); --_d-fr: var(--fd-data-fade); }
 /* A bare table directly inside the wrap still scrolls (data.js wraps it for you). */
 .fd-table-wrap:not(:has(> .fd-table-scroll)) { overflow-x: auto; }
 
@@ -874,3 +903,249 @@ a.fd-stat-tile:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 
 .fd-data-card-more .fd-table-wrap { border-top: var(--fd-hairline) solid var(--fd-line-faint); }
 .fd-data-card-more .fd-table :is(th, td):first-child { padding-inline-start: var(--fd-space-6); }
 .fd-data-card-more .fd-table :is(th, td):last-child { padding-inline-end: var(--fd-space-6); }
+
+/* ==========================================================================
+   Pipeline: staged work. Stages run left to right; the jobs of one stage run in parallel.
+   <div class="fd-pipeline" role="group" aria-label="Crawl crl_8f3a21 stages">
+     <ol class="fd-pipeline-stages">
+       <li class="fd-pipeline-stage">
+         <p class="fd-pipeline-stage-label">Fetch</p>
+         <ul class="fd-pipeline-jobs">
+           <li><button class="fd-pipeline-job" type="button" data-value="fetch-1" data-tone="success" aria-current="true">
+             <i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Worker 1</span>
+             <span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">41 s</span></button></li>
+         </ul>
+       </li>
+       <li class="fd-pipeline-stage" data-when="failure"><p class="fd-pipeline-stage-label">On failure</p>…</li>
+     </ol>
+   </div>
+   A job is a <button> when it selects, an <a href> when it navigates, a <span> when it only shows.
+
+   Connectors are borders on pseudo-elements, measured from the top of each job, never from its height:
+     li::after (stage that is not last)    stub out to the rail, then the rail down to the next job's stub  ┐
+     li::before (stage that is not first)  the same, mirrored, into the job                                  ┌
+     .fd-pipeline-jobs::after              the link from this stage's rail to the next stage's rail          ─
+   Every stub sits at half the one-line job height (--_d-pl-mid), and a job's first line is centred there, so a
+   name that wraps to two lines grows the job downwards and the lines stay put. Stage labels share one grid row
+   (subgrid), so every stage's first job starts at the same height, with or without a label.
+   ========================================================================== */
+.fd-pipeline {
+  --_d-pl-h: var(--fd-pipeline-job-h);
+  --_d-pl-lh: var(--fd-lh-md);
+  --_d-pl-icon: var(--fd-icon);
+  --_d-pl-gap: var(--fd-pipeline-gap);
+  --_d-pl-stub: var(--fd-pipeline-stub);
+  --_d-pl-jgap: var(--fd-pipeline-job-gap);
+  --_d-pl-sgap: var(--fd-pipeline-stage-gap);
+  --_d-pl-rail: var(--fd-pipeline-rail);
+  --_d-pl-min: var(--fd-pipeline-job-min);
+  --_d-pl-max: var(--fd-pipeline-job-max);
+  --_d-pl-mid: calc(var(--_d-pl-h) / 2);
+  --_d-pl-line: var(--fd-line-strong);
+  container: fd-pipeline / inline-size;
+  display: block; min-width: 0; max-width: 100%;
+  padding: var(--fd-pipeline-pad);
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--fd-pipeline-pad);
+  font-variant-numeric: tabular-nums;
+}
+.fd-pipeline[data-size="sm"] {
+  --_d-pl-h: var(--fd-pipeline-job-h-sm);
+  --_d-pl-lh: var(--fd-lh-sm);
+  --_d-pl-icon: var(--fd-icon-sm);
+  --_d-pl-gap: var(--fd-pipeline-gap-sm);
+  --_d-pl-stub: var(--fd-pipeline-stub-sm);
+  --_d-pl-jgap: var(--fd-pipeline-job-gap-sm);
+  --_d-pl-sgap: var(--fd-pipeline-stage-gap-sm);
+  --_d-pl-rail: var(--fd-pipeline-rail-sm);
+  --_d-pl-min: var(--fd-pipeline-job-min-sm);
+  --_d-pl-max: var(--fd-pipeline-job-max-sm);
+}
+.fd-pipeline[aria-busy="true"] { --_d-pl-line: var(--fd-line); }
+
+.fd-pipeline-stages {
+  --_d-pl-axis: horizontal;           /* read by data.js to pick the arrow keys */
+  display: grid; grid-template-rows: auto auto; grid-auto-flow: column; grid-auto-columns: auto;
+  justify-content: start; column-gap: var(--_d-pl-gap);
+  inline-size: max-content; margin: 0; padding: 0; list-style: none;
+}
+.fd-pipeline-stage {
+  display: grid; grid-row: span 2; grid-template-rows: subgrid;
+  min-inline-size: var(--_d-pl-min); max-inline-size: var(--_d-pl-max);
+}
+.fd-pipeline-stage-label {
+  grid-row: 1; align-self: end; margin: 0 0 var(--fd-pipeline-label-gap);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-xs);
+  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; font-weight: var(--fd-weight-regular);
+  color: var(--fd-text-3); overflow-wrap: anywhere;
+}
+.fd-pipeline-jobs {
+  grid-row: 2; position: relative;
+  display: flex; flex-direction: column; gap: var(--_d-pl-jgap);
+  margin: 0; padding: 0; list-style: none;
+}
+.fd-pipeline-jobs > li { position: relative; display: flex; min-width: 0; }
+
+/* ---------- Job ---------- */
+.fd-pipeline-job {
+  --_d-pl-edge: var(--fd-line);
+  --_d-pl-tone: var(--fd-text-3);
+  display: flex; align-items: flex-start; gap: var(--fd-space-2);
+  inline-size: 100%; min-inline-size: 0; min-block-size: var(--_d-pl-h);
+  padding: calc((var(--_d-pl-h) - var(--_d-pl-lh)) / 2) var(--fd-space-3);
+  border: 0; border-radius: var(--fd-radius-md);
+  background-color: var(--fd-surface);
+  box-shadow: inset 0 0 0 var(--fd-hairline) var(--_d-pl-edge);
+  color: var(--fd-text); font-size: var(--fd-text-md); line-height: var(--_d-pl-lh);
+  text-align: start; text-decoration: none;
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-pipeline[data-size="sm"] .fd-pipeline-job { gap: var(--fd-space-1-5); padding-inline: var(--fd-space-2-5); font-size: var(--fd-text-sm); }
+.fd-pipeline-job > :is(.fd-icon, i[data-icon]) {
+  flex: none; inline-size: var(--_d-pl-icon); block-size: var(--_d-pl-icon);
+  margin-block: calc((var(--_d-pl-lh) - var(--_d-pl-icon)) / 2);
+  color: var(--_d-pl-tone);
+}
+.fd-pipeline-job[data-live] > .fd-icon { animation: fd-spin var(--fd-pipeline-spin) linear infinite; }
+.fd-pipeline-job-name { flex: 1 1 auto; min-inline-size: 0; font-weight: var(--fd-weight-label); overflow-wrap: anywhere; }
+.fd-pipeline-job-meta {
+  flex: none; margin-inline-start: auto; padding-inline-start: var(--fd-space-1);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--_d-pl-lh);
+  color: var(--fd-text-3); white-space: nowrap;
+}
+.fd-pipeline[data-size="sm"] .fd-pipeline-job-meta { display: none; }
+
+/* Status: the icon carries the tone; a failed job also tints its edge. */
+.fd-pipeline-job[data-tone="neutral"] { --_d-pl-tone: var(--fd-text-3); }
+.fd-pipeline-job[data-tone="success"] { --_d-pl-tone: var(--fd-success-text); }
+.fd-pipeline-job[data-tone="warning"] { --_d-pl-tone: var(--fd-warning-text); }
+.fd-pipeline-job[data-tone="info"] { --_d-pl-tone: var(--fd-info-text); }
+.fd-pipeline-job[data-tone="violet"] { --_d-pl-tone: var(--fd-violet-text); }
+.fd-pipeline-job[data-tone="danger"] { --_d-pl-tone: var(--fd-danger-text); --_d-pl-edge: var(--fd-danger-line); }
+/* Skipped: did not run, still selectable. No fill and a dashed edge, so it reads as absent work. */
+.fd-pipeline-job[data-state="skipped"] {
+  --_d-pl-edge: transparent; --_d-pl-tone: var(--fd-text-4);
+  background-color: transparent; color: var(--fd-text-3);
+  outline: var(--fd-hairline) dashed var(--fd-line-strong); outline-offset: calc(var(--fd-hairline) * -1);
+}
+.fd-pipeline-job[data-state="skipped"] .fd-pipeline-job-meta { color: var(--fd-text-4); }
+
+/* Interaction (buttons and links only; a <span> job only shows) */
+:is(button, a).fd-pipeline-job { cursor: pointer; }
+:is(button, a).fd-pipeline-job:not([data-tone="danger"]):hover { --_d-pl-edge: var(--fd-line-strong); }
+:is(button, a).fd-pipeline-job:active { scale: var(--fd-press-scale); }
+.fd-pipeline-job:focus-visible { box-shadow: inset 0 0 0 var(--fd-hairline) var(--_d-pl-edge), var(--fd-ring); border-radius: var(--fd-radius-md); }
+.fd-pipeline-job:disabled { --_d-pl-edge: transparent; --_d-pl-tone: var(--fd-text-4); background-color: var(--fd-fill-disabled); color: var(--fd-text-4); cursor: not-allowed; scale: none; }
+/* Selected: the accent wash and edge of a selected item, never a status colour; the icon keeps its tone. */
+.fd-pipeline .fd-pipeline-job[aria-current]:not([aria-current="false"]) {
+  --_d-pl-edge: var(--fd-accent-40);
+  background-color: color-mix(in srgb, var(--fd-accent) 8%, var(--fd-surface));
+  outline-color: transparent;
+}
+.fd-pipeline :is(button, a).fd-pipeline-job[aria-current]:not([aria-current="false"]):hover { background-color: color-mix(in srgb, var(--fd-accent) 12%, var(--fd-surface)); }
+
+/* ---------- Connectors (horizontal) ---------- */
+.fd-pipeline-jobs > li::before,
+.fd-pipeline-jobs > li::after,
+.fd-pipeline-jobs::after {
+  position: absolute; box-sizing: border-box; pointer-events: none;
+  border: 0 solid var(--_d-pl-line);
+}
+.fd-pipeline-stage:not(:last-child) > .fd-pipeline-jobs > li::after {
+  content: ""; inset-inline-start: 100%; inline-size: var(--_d-pl-stub);
+  top: var(--_d-pl-mid); bottom: calc(-1 * (var(--_d-pl-jgap) + var(--_d-pl-mid)));
+  border-block-start-width: var(--fd-hairline); border-inline-end-width: var(--fd-hairline);
+}
+.fd-pipeline-stage:not(:first-child) > .fd-pipeline-jobs > li::before {
+  content: ""; inset-inline-end: 100%; inline-size: var(--_d-pl-stub);
+  top: var(--_d-pl-mid); bottom: calc(-1 * (var(--_d-pl-jgap) + var(--_d-pl-mid)));
+  border-block-start-width: var(--fd-hairline); border-inline-start-width: var(--fd-hairline);
+}
+.fd-pipeline-stage:not(:last-child) > .fd-pipeline-jobs > li:last-child::after,
+.fd-pipeline-stage:not(:first-child) > .fd-pipeline-jobs > li:last-child::before { bottom: auto; border-inline-width: 0; }
+.fd-pipeline-stage:not(:last-child) > .fd-pipeline-jobs::after {
+  content: ""; top: var(--_d-pl-mid);
+  inset-inline-start: calc(100% + var(--_d-pl-stub) - var(--fd-hairline));
+  inline-size: calc(var(--_d-pl-gap) - 2 * var(--_d-pl-stub) + 2 * var(--fd-hairline));
+  border-block-start-width: var(--fd-hairline);
+}
+/* A stage that runs on a condition is joined by a dashed link; its label says the condition. */
+.fd-pipeline-stage:has(+ .fd-pipeline-stage[data-when]) > .fd-pipeline-jobs::after,
+.fd-pipeline-stage[data-when] > .fd-pipeline-jobs > li::before { border-style: dashed; }
+
+/* ---------- Vertical: stages top to bottom, a line down the leading edge ----------
+   Below 480px of its own width a pipeline turns vertical by itself; data-orientation="vertical" forces it and
+   data-orientation="horizontal" keeps it scrolling sideways. The two blocks below are the same rules: a container
+   query cannot also match an attribute. Each job draws └ (from its top down to its stub) and the line below its
+   stub down to the next job's top; a stage label is one line tall here, so the line can cross it. */
+@container fd-pipeline (max-width: 479.98px) {
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stages {
+    --_d-pl-axis: vertical;
+    display: flex; flex-direction: column; gap: var(--_d-pl-sgap);
+    inline-size: auto; padding-inline-start: var(--_d-pl-rail);
+  }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage { display: block; min-inline-size: 0; max-inline-size: none; }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage-label { block-size: var(--fd-lh-xs); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage > .fd-pipeline-jobs::after { content: none; }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage > .fd-pipeline-jobs > li::before {
+    content: ""; inset-inline: calc(var(--_d-pl-rail) / -2) auto; inline-size: calc(var(--_d-pl-rail) / 2);
+    top: 0; bottom: auto; block-size: calc(var(--_d-pl-mid) + var(--fd-hairline));
+    border-width: 0; border-inline-start-width: var(--fd-hairline); border-block-end-width: var(--fd-hairline);
+  }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage:first-child > .fd-pipeline-jobs > li:first-child::before { border-inline-start-width: 0; }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage > .fd-pipeline-jobs > li::after {
+    content: ""; inset-inline: calc(var(--_d-pl-rail) / -2) auto; inline-size: 0;
+    top: var(--_d-pl-mid); bottom: calc(-1 * var(--_d-pl-jgap));
+    border-width: 0; border-inline-start-width: var(--fd-hairline);
+  }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage > .fd-pipeline-jobs > li:last-child::after { bottom: calc(-1 * var(--_d-pl-sgap)); }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage:has(+ .fd-pipeline-stage > .fd-pipeline-stage-label) > .fd-pipeline-jobs > li:last-child::after {
+    bottom: calc(-1 * (var(--_d-pl-sgap) + var(--fd-lh-xs) + var(--fd-pipeline-label-gap)));
+  }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage:last-child > .fd-pipeline-jobs > li:last-child::after { content: none; }
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage:has(+ .fd-pipeline-stage[data-when]) > .fd-pipeline-jobs > li:last-child::after,
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage[data-when] > .fd-pipeline-jobs > li::before,
+  .fd-pipeline:not([data-orientation="horizontal"]) .fd-pipeline-stage[data-when] > .fd-pipeline-jobs > li::after { border-style: dashed; }
+}
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stages {
+  --_d-pl-axis: vertical;
+  display: flex; flex-direction: column; gap: var(--_d-pl-sgap);
+  inline-size: auto; padding-inline-start: var(--_d-pl-rail);
+}
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage { display: block; min-inline-size: 0; max-inline-size: none; }
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage-label { block-size: var(--fd-lh-xs); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage > .fd-pipeline-jobs::after { content: none; }
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage > .fd-pipeline-jobs > li::before {
+  content: ""; inset-inline: calc(var(--_d-pl-rail) / -2) auto; inline-size: calc(var(--_d-pl-rail) / 2);
+  top: 0; bottom: auto; block-size: calc(var(--_d-pl-mid) + var(--fd-hairline));
+  border-width: 0; border-inline-start-width: var(--fd-hairline); border-block-end-width: var(--fd-hairline);
+}
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage:first-child > .fd-pipeline-jobs > li:first-child::before { border-inline-start-width: 0; }
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage > .fd-pipeline-jobs > li::after {
+  content: ""; inset-inline: calc(var(--_d-pl-rail) / -2) auto; inline-size: 0;
+  top: var(--_d-pl-mid); bottom: calc(-1 * var(--_d-pl-jgap));
+  border-width: 0; border-inline-start-width: var(--fd-hairline);
+}
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage > .fd-pipeline-jobs > li:last-child::after { bottom: calc(-1 * var(--_d-pl-sgap)); }
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage:has(+ .fd-pipeline-stage > .fd-pipeline-stage-label) > .fd-pipeline-jobs > li:last-child::after {
+  bottom: calc(-1 * (var(--_d-pl-sgap) + var(--fd-lh-xs) + var(--fd-pipeline-label-gap)));
+}
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage:last-child > .fd-pipeline-jobs > li:last-child::after { content: none; }
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage:has(+ .fd-pipeline-stage[data-when]) > .fd-pipeline-jobs > li:last-child::after,
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage[data-when] > .fd-pipeline-jobs > li::before,
+.fd-pipeline[data-orientation="vertical"] .fd-pipeline-stage[data-when] > .fd-pipeline-jobs > li::after { border-style: dashed; }
+
+/* ---------- Loading: aria-busy keeps every box and line where it will be; only the contents shimmer ---------- */
+.fd-pipeline[aria-busy="true"] .fd-pipeline-job { pointer-events: none; }
+.fd-pipeline[aria-busy="true"] .fd-pipeline-job > .fd-icon { color: transparent; border-radius: var(--fd-radius-full); background: var(--fd-a6); animation: none; }
+.fd-pipeline[aria-busy="true"] :is(.fd-pipeline-job-name, .fd-pipeline-job-meta, .fd-pipeline-stage-label) {
+  flex: 0 1 auto; block-size: var(--fd-data-skeleton-h); overflow: hidden; color: transparent;
+  border-radius: var(--fd-radius-xs);
+  background-color: var(--fd-a6);
+  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a8) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: fd-shimmer var(--fd-loop-shimmer) linear infinite;
+}
+.fd-pipeline[aria-busy="true"] .fd-pipeline-job-name { min-inline-size: var(--fd-pipeline-skeleton-min); margin-block: calc((var(--_d-pl-lh) - var(--fd-data-skeleton-h)) / 2); }
+.fd-pipeline[aria-busy="true"] .fd-pipeline-job-meta { inline-size: var(--fd-data-skeleton-2xs); margin-block: calc((var(--_d-pl-lh) - var(--fd-data-skeleton-h)) / 2); }
+.fd-pipeline[aria-busy="true"] .fd-pipeline-stage-label { justify-self: start; min-inline-size: var(--fd-data-skeleton-xs); margin-block: calc((var(--fd-lh-xs) - var(--fd-data-skeleton-h)) / 2) calc((var(--fd-lh-xs) - var(--fd-data-skeleton-h)) / 2 + var(--fd-pipeline-label-gap)); }

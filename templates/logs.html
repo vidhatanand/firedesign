@@ -575,6 +575,33 @@
       + phase('Fetching page', clock(l, 0.1), esc(l.target)) + queued + received;
   }
 
+  /* A crawl's stages, as a small pipeline in the overview. */
+  const JOB = {
+    passed: ['success', 'circle-check', 'Passed'], failed: ['danger', 'circle-x', 'Failed'], running: ['info', 'loader-circle', 'Running'],
+    queued: ['neutral', 'circle-dashed', 'Queued'], skipped: ['neutral', 'circle-minus', 'Skipped'],
+  };
+  function crawlStages(l) {
+    const blocked = l.status === 'failed' && l.code === 403;
+    const failed = l.status === 'failed';
+    const done = l.status === 'success' || l.status === 'cached';
+    const after = done ? 'passed' : failed ? 'skipped' : 'queued';
+    const fetch = l.status === 'running' ? ['passed', 'running'] : failed && !blocked ? ['passed', 'failed'] : [after, after];
+    const stages = [
+      ['Discover', null, [['Read robots.txt', blocked ? 'failed' : l.status === 'queued' ? 'queued' : 'passed'], ['Read sitemap', blocked ? 'skipped' : l.status === 'queued' ? 'queued' : 'passed']]],
+      ['Fetch', null, [['Worker 1', blocked ? 'skipped' : fetch[0]], ['Worker 2', blocked ? 'skipped' : fetch[1]]]],
+      ['Extract', null, [['Markdown', after]]],
+      ['Deliver', null, [['Webhook', after]]],
+      ['On failure', 'failure', [['Notify', failed ? 'passed' : done ? 'skipped' : 'queued']]],
+    ];
+    const job = ([name, state]) => {
+      const [tone, glyph, word] = JOB[state];
+      return `<li><span class="fd-pipeline-job" data-tone="${tone}"${state === 'running' ? ' data-live' : ''}${state === 'skipped' ? ' data-state="skipped"' : ''}><i data-icon="${glyph}"></i><span class="fd-pipeline-job-name">${name}</span><span class="fd-sr-only">${word}</span></span></li>`;
+    };
+    return `<div class="fd-stack" data-gap="2"><p class="fd-label">Stages</p>
+      <div class="fd-pipeline" data-size="sm" role="group" aria-label="Crawl stages"><ol class="fd-pipeline-stages">${stages.map(([label, when, jobs]) =>
+        `<li class="fd-pipeline-stage"${when ? ` data-when="${when}"` : ''}><p class="fd-pipeline-stage-label">${label}</p><ul class="fd-pipeline-jobs">${jobs.map(job).join('')}</ul></li>`).join('')}</ol></div></div>`;
+  }
+
   let current = null;
   function openLog(tr) {
     const l = (current = logOf(tr));
@@ -598,7 +625,8 @@
         <div class="fd-kv-item"><dt class="fd-kv-key">API key</dt><dd class="fd-kv-value">${esc(l.key)}</dd></div>
         <div class="fd-kv-item"><dt class="fd-kv-key">Client</dt><dd class="fd-kv-value" data-mono>${CLIENT[l.key]}</dd></div>
       </dl>
-      ${l.status === 'failed' ? `<div class="fd-callout" data-tone="danger" role="alert"><i class="fd-callout-icon" data-icon="circle-alert"></i><div class="fd-callout-content"><p class="fd-callout-title">${ERRORS[l.code][0]}</p><p class="fd-callout-body">${esc(ERRORS[l.code][1])}</p></div></div>` : ''}`;
+      ${l.status === 'failed' ? `<div class="fd-callout" data-tone="danger" role="alert"><i class="fd-callout-icon" data-icon="circle-alert"></i><div class="fd-callout-content"><p class="fd-callout-title">${ERRORS[l.code][0]}</p><p class="fd-callout-body">${esc(ERRORS[l.code][1])}</p></div></div>` : ''}
+      ${l.endpoint === '/crawl' ? crawlStages(l) : ''}`;
     renderJSON($('#lg-request-json'), requestBody(l), { depth: 3 });
     renderJSON($('#lg-response-json'), responseBody(l), { depth: 3 });
     $('#lg-timeline-list').innerHTML = timeline(l);

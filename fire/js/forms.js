@@ -54,8 +54,12 @@
  *                        enclosing .fd-field. Format pretty-prints valid JSON with two spaces, keeping every literal as
  *                        written. The script sets data-ready on the field; the Format button is hidden until it does.
  * Choice card            <label class="fd-choice"><input type="radio"><span class="fd-choice-mark"></span><span class="fd-choice-body">…</span></label>
- * Secret / copy field    <div class="fd-secret" data-fd-secret data-value="…" [data-mask="partial|full"] [data-state="revealed"]> with buttons
+ * Secret / copy field    <div class="fd-secret" data-fd-secret data-value="…" [data-mask="partial|full|end"] [data-state="revealed"]> with buttons
  *                        carrying data-fd-field-action="reveal|copy|rotate"; works the same on .fd-copy-field.
+ *                        data-mask="end" [data-mask-keep="4"] [data-mask-from="/"]: shows the start up to the last
+ *                        data-mask-from, eight dots and the last data-mask-keep characters, and masks even with no reveal
+ *                        button. The value is drawn as .fd-secret-start + .fd-secret-end (.fd-copy-field-start / -end):
+ *                        the start shortens with an ellipsis, the end never does. Copy always copies data-value.
  * Dropzone               <label class="fd-dropzone" data-fd-dropzone data-list="#files" data-max-mb="50"><input type="file" multiple accept=".pdf,.docx">…</label>
  *                        <ul class="fd-filelist" id="files"></ul>
  * One-time code          <div class="fd-otp" data-fd-otp data-length="6" [data-type="numeric|alphanumeric"]> (inputs are generated when empty)
@@ -1163,13 +1167,39 @@ function maskValue(value, mode) {
   return value.slice(0, 8) + MASK.repeat(18) + value.slice(-8);
 }
 
+/* data-mask="end": keep a readable start (everything up to the last data-mask-from, if given) and the last
+   data-mask-keep characters (4), and mask what is between. The value is drawn as a start that may shorten with an
+   ellipsis and an end that never does, so on a narrow screen the characters that identify it stay in view. */
+function endParts(value, el, revealed) {
+  const keep = Math.max(1, Number.parseInt(el.dataset.maskKeep, 10) || 4);
+  if (revealed) return value.length > keep ? [value.slice(0, -keep), value.slice(-keep)] : ['', value];
+  const from = el.dataset.maskFrom;
+  const at = from ? value.lastIndexOf(from) : -1;
+  const start = at >= 0 ? value.slice(0, at + from.length) : '';
+  const rest = value.slice(start.length);
+  return [start, rest.length > keep ? MASK.repeat(8) + rest.slice(-keep) : MASK.repeat(8)];
+}
+
 function renderSecret(el) {
   const valueEl = $('.fd-secret-value, .fd-copy-field-value', el);
   if (!valueEl) return;
   const value = el.dataset.value ?? '';
   const reveal = $('[data-fd-field-action="reveal"]', el);
-  const revealed = !reveal || el.dataset.state === 'revealed';
-  valueEl.textContent = revealed ? value : maskValue(value, el.dataset.mask);
+  const endMask = el.dataset.mask === 'end';
+  // An end mask holds without a reveal button: a field that must never show its value has none.
+  const revealed = endMask ? el.dataset.state === 'revealed' && !!reveal : !reveal || el.dataset.state === 'revealed';
+  if (endMask) {
+    const block = el.classList.contains('fd-copy-field') ? 'fd-copy-field' : 'fd-secret';
+    const parts = endParts(value, el, revealed).map((text, i) => {
+      const span = document.createElement('span');
+      span.className = `${block}-${i ? 'end' : 'start'}`;
+      span.textContent = text;
+      return span;
+    });
+    valueEl.replaceChildren(...parts);
+  } else {
+    valueEl.textContent = revealed ? value : maskValue(value, el.dataset.mask);
+  }
   if (reveal) {
     const noun = el.dataset.noun || 'value';
     reveal.setAttribute('aria-pressed', String(revealed));

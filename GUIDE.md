@@ -139,6 +139,7 @@ Never give a card title `fd-h3` and put `fd-setting` rows inside it at their pag
 - `data-palette="volt"` (fifteen palettes; see `docs/tweaks.html`) recolours neutrals and accent together. A brand palette is one CSS block that sets about twenty variables; the page shows how.
 - `data-type="editorial"` (twelve type sets, all open source) changes the heading, interface and mono faces together.
 - `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
+- **Your product's look is the default.** Declare it on `<html>` (`<html data-palette="graphite" data-type="editorial">`). The Tweaks panel and `fire/boot.js` treat the page's own palette and type set as the default: the page keeps them on load, Reset returns to them, and only what someone changes away from them is saved and restored on the next page. A product on Ember and Geist declares nothing. (`boot.js` notes the declared values in `data-fd-default-palette` / `data-fd-default-type` before it puts a saved look back; do not write those yourself.)
 - The Tweaks panel lets you try palettes, tone, typefaces, density, corners and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
 
 **Checks before you call a screen done.**

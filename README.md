@@ -13,7 +13,7 @@ npm run dev
 Then open http://127.0.0.1:4747/docs/index.html.
 
 - **Docs** (`/docs/index.html`): every component, live, with a "Markup" view to copy from.
-- **Templates** (`/templates/index.html`): 21 full screens for a fictional product, Ember, built only from Fire components.
+- **Templates** (`/templates/index.html`): 23 full screens for a fictional product, Ember, built only from Fire components.
 - **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, switch the typeface, change density, corners, contrast, motion and texture. Choices are saved and follow you across pages.
 
 ## Read next
@@ -74,6 +74,13 @@ tweaks.set({ palette: 'midnight', corners: 1.5 });
 
 Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`.
 
+**Pages a server renders**
+
+- `templates/shell-static.html` is the whole app shell as plain markup, with no shell script. Per page the server changes the title, the current nav item and the content.
+- `templates/auth-centered.html` is the centred screen (`fd-screen`) for one task on a page of its own: sign in, a second step, consent, a result.
+- A one-time-code field works in a plain form: put one named input inside `fd-otp`. Without script it is an ordinary field; with it, the boxes appear and a hidden input carries the code.
+- Under a strict Content Security Policy the stylesheets need `style-src 'self'`, `font-src 'self'` and `img-src 'self' data:`. Some modules (skeleton presets, the file-upload list, chat, charts, agent blocks) still write inline styles; `GUIDE.md` lists them.
+
 ## What is here
 
 | Path | What |
@@ -90,7 +97,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site: 18 pages. Start at `docs/index.html`. |
-| `templates/` | 21 screens for Ember: the app, sign-in, onboarding, a support page and a documentation site. Start at `templates/index.html`. |
+| `templates/` | 23 screens for Ember: the app, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Start at `templates/index.html`. |
 | `scripts/` | `serve.py` (dev server), `audit.mjs` (checks), `build-palettes.mjs` (regenerates and checks the palettes), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |
 

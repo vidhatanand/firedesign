@@ -47,6 +47,7 @@
   --fd-brand-mark: 36px;
   --fd-brand-logo-h: 32px;         /* an uploaded logo standing in for the mark and the name */
   --fd-wordmark-h: 20px;           /* a wordmark drawn in the current colour */
+  --fd-wordmark-h-sm: 14px;        /* in a caption or a line of small text */
   /* nav */
   --fd-nav-icon: 15px;
   --fd-nav-icon-margin: 10.5px;    /* icon + margins fill the 36px lead */
@@ -173,7 +174,7 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 }
 .fd-brand-mark {
   flex: none; display: grid; place-items: center;
-  width: var(--fd-brand-mark); height: var(--fd-brand-mark); color: var(--fd-accent);
+  width: var(--fd-brand-mark); height: var(--fd-brand-mark); color: var(--fd-accent-text);
   transition: opacity var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-3) var(--fd-ease-spring);
 }
 .fd-brand-mark > svg { width: var(--fd-icon-xl); height: var(--fd-icon-xl); }
@@ -186,8 +187,10 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 /* A wordmark: a wide logotype drawn in the current colour, in the brand or in a line of text.
    <svg class="fd-wordmark" [data-size="sm"] [data-tone="accent"] viewBox="…" role="img" aria-label="Ember">…</svg> */
 .fd-wordmark { flex: none; display: inline-block; width: auto; height: var(--fd-wordmark-h); fill: currentColor; vertical-align: middle; }
-.fd-wordmark[data-size="sm"] { height: var(--fd-icon-sm); }
-.fd-wordmark[data-tone="accent"] { color: var(--fd-accent); }
+.fd-wordmark[data-size="sm"] { height: var(--fd-wordmark-h-sm); }
+/* A mark is drawn in the accent that reads on the page: under a light accent (lime, amber, mint) the solid
+   would all but disappear. */
+.fd-wordmark[data-tone="accent"] { color: var(--fd-accent-text); }
 
 .fd-sidebar-toggle { flex: none; margin-inline-end: var(--fd-space-1-5); transition: opacity var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out); }
 

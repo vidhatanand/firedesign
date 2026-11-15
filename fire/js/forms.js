@@ -37,7 +37,8 @@
  * One-time code          <div class="fd-otp" data-fd-otp data-length="6" [data-type="numeric|alphanumeric"]> (inputs are generated when empty)
  *                         In a form: data-name="code" adds a hidden input that carries the whole code. Or put one ordinary
  *                         named input inside (<input name="code" required>): it works as a plain field without script and
- *                         becomes the boxes with it, keeping its name, id, value, required, autofocus and aria-invalid.
+ *                         becomes the boxes with it, keeping its name, id, value, required, disabled, readonly, autofocus
+ *                         and aria-invalid. Resetting the form clears the carried code too.
  * Validation             <form data-fd-validate> validates on blur and submit with native constraint validation and fills .fd-field-error
  * Unsaved changes        <form data-fd-dirty> toggles [data-dirty] and shows .fd-form-actions[data-variant="sticky"]
  *
@@ -302,7 +303,8 @@ function setupOtp(el) {
   if (plain) {
     if (plain.id) inputs[0].id = plain.id;
     [...otpClean(el, plain.value)].slice(0, inputs.length).forEach((char, i) => { inputs[i].value = char; });
-    inputs.forEach((input) => { input.required = plain.required; });
+    inputs.forEach((input) => { input.required = plain.required; input.disabled = plain.disabled; input.readOnly = plain.readOnly; });
+    if (plain.disabled && otpCarrier(el)) otpCarrier(el).disabled = true;   // a disabled field posts nothing
     if (plain.getAttribute('aria-invalid') === 'true') setOtpInvalid(el, true);
     const describedBy = plain.getAttribute('aria-describedby');
     if (describedBy && !el.hasAttribute('aria-describedby')) el.setAttribute('aria-describedby', describedBy);
@@ -990,6 +992,16 @@ function bind() {
   ['pointerup', 'pointercancel', 'blur'].forEach((type) => window.addEventListener(type, stopRepeat));
 
   /* One-time code */
+  // A form reset empties the boxes but leaves a hidden input as it was: bring the carried code back in line.
+  document.addEventListener('reset', (e) => {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    setTimeout(() => $$('.fd-otp', form).forEach((el) => {
+      const carrier = otpCarrier(el);
+      if (carrier) carrier.value = otpValue(el);
+      setOtpInvalid(el, false);
+    }));
+  });
   on(document, 'input', '.fd-otp > input', (e, input) => {
     const el = input.closest('.fd-otp');
     const inputs = otpInputs(el);

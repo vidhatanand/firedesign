@@ -45,6 +45,8 @@
   --fd-brand-size: 1.0625rem;      /* 17px wordmark */
   --fd-brand-h: 40px;
   --fd-brand-mark: 36px;
+  --fd-brand-logo-h: 32px;         /* an uploaded logo standing in for the mark and the name */
+  --fd-wordmark-h: 20px;           /* a wordmark drawn in the current colour */
   /* nav */
   --fd-nav-icon: 15px;
   --fd-nav-icon-margin: 10.5px;    /* icon + margins fill the 36px lead */
@@ -177,6 +179,15 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-brand-mark > svg { width: var(--fd-icon-xl); height: var(--fd-icon-xl); }
 .fd-brand:hover .fd-brand-mark { scale: 1.06; }
 .fd-brand-name { transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+/* The mark may be an image (a customer's uploaded icon). A wide logo stands in for the mark and the name;
+   it cannot shrink to the rail, so use it on a centred screen or in a sidebar that does not collapse. */
+.fd-brand-mark > img { width: var(--fd-icon-xl); height: var(--fd-icon-xl); object-fit: contain; }
+.fd-brand-logo { flex: none; width: auto; height: var(--fd-brand-logo-h); max-width: var(--fd-size-sm); object-fit: contain; }
+/* A wordmark: a wide logotype drawn in the current colour, in the brand or in a line of text.
+   <svg class="fd-wordmark" [data-size="sm"] [data-tone="accent"] viewBox="…" role="img" aria-label="Ember">…</svg> */
+.fd-wordmark { flex: none; display: inline-block; width: auto; height: var(--fd-wordmark-h); fill: currentColor; vertical-align: middle; }
+.fd-wordmark[data-size="sm"] { height: var(--fd-icon-sm); }
+.fd-wordmark[data-tone="accent"] { color: var(--fd-accent); }
 
 .fd-sidebar-toggle { flex: none; margin-inline-end: var(--fd-space-1-5); transition: opacity var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out); }
 
@@ -540,6 +551,7 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
    data-pad      none | sm | md (default) | lg
    data-surface  surface (white band)
    data-grow     band fills the remaining height
+   data-align    center: the band's content sits in the middle of its height (with data-grow)
    data-marks    none hides the crosshairs (on a band, or on the frame for all bands)
 */
 .fd-frame {
@@ -565,6 +577,7 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-band[data-surface="surface"] { background: var(--fd-surface); }
 .fd-band[data-surface="sunken"] { background: var(--fd-bg-sunken); }
 .fd-band[data-grow] { flex: 1 0 auto; }
+.fd-band[data-align="center"] { display: flex; flex-direction: column; justify-content: center; }
 /* Outside the app shell (sign-in, onboarding, a gallery) the frame can fill the screen itself. */
 .fd-frame[data-fill] { min-height: 100dvh; }
 .fd-band[data-grow]:has(> .fd-split:only-child) { display: flex; flex-direction: column; }
@@ -634,6 +647,44 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-page-head-title { font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); }
 .fd-page-head-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
 .fd-page-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); }
+
+/* ---------- Centred screen ----------
+   One task on a page of its own: sign in, a second step, consent, a result. The brand, one card, one quiet line.
+
+   <main class="fd-page"><div class="fd-frame" data-fill>
+     <section class="fd-band" data-pad="lg" data-grow data-align="center">
+       <div class="fd-dotgrid" data-fade="radial" aria-hidden="true"></div>
+       <div class="fd-screen">
+         <a class="fd-brand" href="…"><span class="fd-brand-mark">svg</span><span class="fd-brand-name">Ember</span></a>
+         <div class="fd-corners"><article class="fd-card" data-size="lg">
+           <header class="fd-screen-head">
+             [<span class="fd-tile" data-size="44" data-tone="accent"><i data-icon="mail"></i></span>]
+             <h1 class="fd-h1">Sign in to Ember</h1><p class="fd-muted">…</p>
+           </header>
+           …a form, or the actions…
+           [<p class="fd-screen-note">…</p>]
+         </article></div>
+         <p class="fd-screen-note">…</p>
+       </div>
+     </section>
+   </div></main>
+
+   data-size  sm (default) | md, for a screen with more to read (consent, a list of codes)
+*/
+.fd-screen {
+  --_s-screen: var(--fd-column-sm);
+  display: flex; flex-direction: column; align-items: center; gap: var(--fd-space-6);
+  width: 100%; max-width: var(--_s-screen); min-width: 0; margin-inline: auto;
+}
+.fd-screen[data-size="md"] { --_s-screen: var(--fd-column-md); }
+.fd-screen > :is(.fd-corners, .fd-card) { align-self: stretch; min-width: 0; }
+.fd-screen > .fd-corners > .fd-card, .fd-screen > .fd-card { gap: var(--fd-space-6); }
+.fd-screen-head { display: flex; flex-direction: column; align-items: center; gap: var(--fd-space-1-5); min-width: 0; text-align: center; text-wrap: balance; }
+.fd-screen-head > .fd-tile { margin-block-end: var(--fd-space-2-5); }
+.fd-screen-note {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--fd-space-1) var(--fd-space-2);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); text-align: center;
+}
 
 /* ---------- Toolbar ---------- */
 .fd-toolbar {

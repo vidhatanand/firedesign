@@ -318,7 +318,8 @@ const section = (id, title, body) =>
   `<section class="fd-tweaks-section" aria-labelledby="fd-tw-${id}-head"><h3 class="fd-eyebrow fd-tweaks-eyebrow" id="fd-tw-${id}-head">${title}</h3>${body}</section>`;
 
 function markup() {
-  const rule = (w) => `<span class="fd-tweaks-rule" style="--_tw-w: ${w}px" aria-hidden="true"></span>`;
+  // The weight is an attribute, not an inline style, so the panel also works under a strict Content Security Policy.
+  const rule = (w) => `<span class="fd-tweaks-rule" data-weight="${w}" aria-hidden="true"></span>`;
   return `
   <header class="fd-tweaks-head">
     <span class="fd-tweaks-grab" aria-hidden="true"></span>

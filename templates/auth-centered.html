@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en" data-fd-tweaks>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · Ember</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body>
+<main class="fd-page">
+  <div class="fd-frame" data-fill>
+
+    <section class="fd-band" data-pad="lg" data-grow data-align="center" aria-label="Sign in to Ember">
+      <div class="fd-dotgrid" data-fade="radial" aria-hidden="true"></div>
+      <div class="fd-screen fd-rise">
+
+        <a class="fd-brand" href="index.html" aria-label="Ember, template index">
+          <span class="fd-brand-mark" data-ember-mark></span><span class="fd-brand-name">Ember</span>
+        </a>
+
+        <div class="fd-corners">
+          <article class="fd-card" data-size="lg">
+
+            <!-- Sign in -->
+            <div class="fd-stack" data-gap="6" id="view-signin">
+              <header class="fd-screen-head">
+                <h1 class="fd-h1">Sign in to Ember</h1>
+                <p class="fd-muted">Welcome back. Pick up where your agents left off.</p>
+              </header>
+
+              <div class="fd-stack" data-gap="2-5">
+                <button class="fd-btn" type="button" data-variant="outline" data-size="lg" data-block data-provider="Google"><span class="fd-tile" data-size="20" data-tone="neutral" aria-hidden="true">G</span><span>Continue with Google</span></button>
+                <button class="fd-btn" type="button" data-variant="outline" data-size="lg" data-block data-provider="GitHub"><span class="fd-tile" data-size="20" data-tone="inverse" aria-hidden="true">GH</span><span>Continue with GitHub</span></button>
+              </div>
+
+              <div class="fd-row" data-gap="3" role="separator" aria-label="or">
+                <hr class="fd-divider fd-grow"><span class="fd-eyebrow">or</span><hr class="fd-divider fd-grow">
+              </div>
+
+              <form class="fd-stack" data-gap="4" id="form-signin" novalidate>
+                <div class="fd-callout" data-tone="danger" role="alert" id="signin-error" hidden>
+                  <i class="fd-callout-icon" data-icon="circle-alert"></i>
+                  <div class="fd-callout-content"><p class="fd-callout-title">That email and password don't match</p><p class="fd-callout-body">Check both and try again, or reset your password.</p></div>
+                </div>
+                <div class="fd-field">
+                  <label class="fd-field-label" for="si-email">Email</label>
+                  <input class="fd-input" data-size="lg" type="email" id="si-email" name="email" placeholder="maya@quarry.dev" autocomplete="email" required>
+                </div>
+                <div class="fd-field">
+                  <div class="fd-field-head">
+                    <label class="fd-field-label" for="si-password">Password</label>
+                    <button class="fd-btn-text fd-field-aside" type="button" id="forgot">Forgot password?</button>
+                  </div>
+                  <input class="fd-input" data-size="lg" type="password" id="si-password" name="password" autocomplete="current-password" required>
+                </div>
+                <button class="fd-btn" type="submit" data-variant="primary" data-size="lg" data-block id="signin-submit"><span>Sign in</span></button>
+                <button class="fd-btn" type="button" data-variant="outline" data-size="lg" data-block id="magic-link"><i data-icon="mail"></i><span>Email me a sign-in link</span></button>
+              </form>
+
+              <p class="fd-screen-note">New to Ember? <a class="fd-link" href="auth.html">Create an account</a></p>
+            </div>
+
+            <!-- Link sent: a result. The tile says what happened before the words do. -->
+            <div class="fd-stack" data-gap="6" id="view-sent" hidden>
+              <header class="fd-screen-head">
+                <span class="fd-tile" data-size="44" data-tone="accent"><i data-icon="mail"></i></span>
+                <h1 class="fd-h1">Check your inbox</h1>
+                <p class="fd-muted">We sent a link to <span class="fd-mono" id="sent-email">maya@quarry.dev</span>. It expires in 10 minutes.</p>
+              </header>
+              <div class="fd-field">
+                <span class="fd-field-label" id="otp-label">Sign-in code</span>
+                <div class="fd-otp" data-fd-otp data-length="6" role="group" aria-labelledby="otp-label" id="auth-otp"></div>
+                <p class="fd-field-hint">Or paste the 6-digit code from the email.</p>
+              </div>
+              <button class="fd-btn" type="button" data-size="lg" data-block id="back"><span>Use a different email</span></button>
+            </div>
+
+          </article>
+        </div>
+
+        <p class="fd-screen-note"><i data-icon="lock" data-size="12"></i><span>Secured with passkeys and single sign-on</span></p>
+      </div>
+    </section>
+
+    <footer class="fd-band" data-pad="sm" aria-label="Legal">
+      <div class="fd-row fd-small fd-muted" data-justify="center" data-wrap data-gap="4">
+        <span>© Quarry Labs</span>
+        <a class="fd-link" href="#privacy">Privacy</a>
+        <a class="fd-link" href="#terms">Terms</a>
+        <a class="fd-link" href="#help">Help</a>
+        <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-theme-toggle aria-label="Theme"><i data-icon="monitor"></i></button>
+      </div>
+    </footer>
+
+  </div>
+</main>
+<script type="module">
+  import { overlays } from '../fire/fire.js';
+  import { EMBER_MARK } from './shell.js';
+
+  const $ = (sel) => document.querySelector(sel);
+  const toast = overlays.toast;
+  document.querySelectorAll('[data-ember-mark]').forEach((el) => { el.innerHTML = EMBER_MARK; });
+
+  /* Views: sign in, link sent */
+  function show(name) {
+    $('#view-signin').hidden = name !== 'signin';
+    $('#view-sent').hidden = name !== 'sent';
+    document.title = `${name === 'sent' ? 'Check your inbox' : 'Sign in'} · Ember`;
+    $(`#view-${name}`).querySelector('input')?.focus();
+  }
+
+  /* Sign in: busy, then a wrong-password callout on the first try, success on the second */
+  let tries = 0;
+  const signin = $('#form-signin');
+  signin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!signin.reportValidity()) return;
+    const btn = $('#signin-submit');
+    btn.setAttribute('aria-busy', 'true');
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.removeAttribute('aria-busy');
+      btn.disabled = false;
+      if (tries++ === 0) {
+        $('#signin-error').hidden = false;
+        signin.querySelectorAll('input').forEach((i) => i.setAttribute('aria-invalid', 'true'));
+        $('#si-password').focus();
+      } else {
+        toast({ title: 'Signed in', description: 'Opening your dashboard…', tone: 'success' });
+        setTimeout(() => { location.href = 'overview.html'; }, 700);
+      }
+    }, 900);
+  });
+  signin.addEventListener('input', () => {
+    $('#signin-error').hidden = true;
+    signin.querySelectorAll('input').forEach((i) => i.removeAttribute('aria-invalid'));
+  });
+  $('#forgot').addEventListener('click', () => toast({ title: 'Reset link sent', description: 'Check your inbox for a link to choose a new password.', tone: 'info' }));
+  document.querySelectorAll('[data-provider]').forEach((b) => b.addEventListener('click', () => toast({ title: `Continuing with ${b.dataset.provider}`, description: 'This is a demo screen, so nothing leaves the page.', tone: 'neutral' })));
+
+  /* Magic link */
+  $('#magic-link').addEventListener('click', () => {
+    const email = $('#si-email');
+    if (!email.value || !email.checkValidity()) { email.setAttribute('aria-invalid', 'true'); email.focus(); toast({ title: 'Enter your email first', tone: 'warning' }); return; }
+    $('#sent-email').textContent = email.value;
+    show('sent');
+  });
+  $('#back').addEventListener('click', () => show('signin'));
+  $('#auth-otp').addEventListener('fd:change', (e) => {
+    if (!e.detail.complete) return;
+    toast({ title: 'Code accepted', description: 'Opening your dashboard…', tone: 'success' });
+    setTimeout(() => { location.href = 'overview.html'; }, 700);
+  });
+</script>
+</body>
+</html>

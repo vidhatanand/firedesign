@@ -9,7 +9,7 @@ Read in this order: this guide, then the live docs (`npm run dev`, open `/docs/i
 | You need | Where it is |
 |---|---|
 | Every component, with markup to copy | `docs/*.html` (each specimen has a "Markup" view) |
-| Full screens to start from | `templates/*.html` (app screens, sign-in, onboarding, a docs site) |
+| Full screens to start from | `templates/*.html` (app screens, sign-in split or centred, onboarding, a docs site, the shell as plain markup) |
 | The list of every class and attribute | `docs/_ref/VOCABULARY.md` |
 | The rules of the system | `DESIGN.md` |
 | The styles and behaviour themselves | `fire/` (the only folder a product ships) |
@@ -39,11 +39,14 @@ import { init } from '/fire/fire.js';
 init(containerElement);   // safe to call more than once
 ```
 
+- **Rendering on a server.** Copy the shell from `templates/shell-static.html`: it is the whole shell as plain markup, with no `shell.js`. Per page the server changes the title, which nav item is current, the hero and the bands. A page that should carry little script can render icons as inline SVG (the paths are `ICONS` in `fire/js/icons.js`) and load single modules, for example only `fire/js/shell.js` for the sidebar and the phone menu; each module works on its own.
+- **Strict Content Security Policy.** The stylesheets need `style-src 'self'` and `font-src 'self'`; the frame's marks are `data:` images, so allow `img-src 'self' data:`. The shell, navigation, icons, textures, overlays' menus and the Tweaks panel write no inline `style` attribute. Skeleton presets, the file-upload list, chat, charts and the agent blocks still build some markup with inline styles and need `style-src 'unsafe-inline'` until they are converted.
+
 - Components report changes with bubbling events: `fd:change` (`detail.value`), `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`. Listen for these to update your own state; write state back through the same attributes the docs show (`aria-selected`, `aria-pressed`, `data-state`, `hidden`).
 
 ## 3. Build a screen
 
-1. **Start from the nearest template.** Open `templates/index.html`, pick the screen closest to what you need, and copy it. `templates/blank.html` is the empty app screen.
+1. **Start from the nearest template.** Open `templates/index.html`, pick the screen closest to what you need, and copy it. `templates/blank.html` is the empty app screen. A single task outside the app (sign in, a second step, consent, a result) is a centred screen: start from `templates/auth-centered.html`.
 2. **Keep the shell, replace the content.** `templates/shell.js` builds the sidebar, top bar, menus and command palette for the demo product. Copy it into your project and change its navigation, account and labels to your own. The page itself is:
 
 ```html

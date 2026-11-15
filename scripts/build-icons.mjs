@@ -17,10 +17,12 @@ const js = `/* Fire icons — a curated subset of Lucide (ISC License, see fire/
 export const ICONS = ${JSON.stringify(out, null, 0)};
 const NS = 'http://www.w3.org/2000/svg';
 export function icon(name, { size, cls = '' } = {}) {
+  injectSprite();   // a module loaded on its own, without fire.js, still gets the sprite its icons draw from
   return \`<svg class="fd-icon \${cls}"\${size ? \` data-size="\${size}"\` : ''} aria-hidden="true"><use href="#i-\${name}"/></svg>\`;
 }
 function injectSprite() {
-  if (document.getElementById('fd-icon-sprite')) return;
+  if (typeof document === 'undefined' || document.getElementById('fd-icon-sprite')) return;
+  if (!document.body) { document.addEventListener('DOMContentLoaded', injectSprite, { once: true }); return; }
   const svg = document.createElementNS(NS, 'svg');
   svg.id = 'fd-icon-sprite'; svg.setAttribute('aria-hidden', 'true');
   svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';

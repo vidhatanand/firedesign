@@ -4,7 +4,7 @@ Templates are full Ember app screens assembled ONLY from Fire components. They p
 
 ## Read first
 1. `DESIGN.md` (contract) and `docs/_ref/VOCABULARY.md`.
-2. `templates/blank.html` and `templates/shell.js` (how a page mounts the shell: `<body data-shell data-active="…">` + your content in `<main>`).
+2. `templates/blank.html` and `templates/shell.js` (how a page mounts the shell: `<body data-shell data-active="…">` + your content in `<main>`). `templates/shell-static.html` is the same shell as plain markup, for pages a server renders; `templates/auth-centered.html` is the centred screen for a single task outside the shell.
 3. The docs pages are the source of truth for markup. Open the ones you need and copy their markup patterns exactly (class names, parts, data attributes): `docs/shell.html` (frame, bands, page hero, page head, toolbar, split, panels), `docs/navigation.html`, `docs/forms.html`, `docs/overlays.html`, `docs/data.html`, `docs/content.html`, `docs/charts.html`, `docs/code.html`, `docs/agent.html`, `docs/signature.html` (textures), `docs/skeletons.html`, `docs/buttons.html`. When unsure how a component is marked up, grep its class in `fire/components/*.css` and `fire/js/*.js`. Never invent a class that has no CSS.
 
 ## Rules

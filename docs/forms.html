@@ -968,8 +968,21 @@ Ignore cookie banners and chat widgets.</textarea>
         </div>
       </div>
     </div>
-    <ul class="doc-notes">
+        <div class="doc-specimen" data-code data-surface="surface">
+      <form class="fd-form" data-size="sm" action="#otp" method="get">
+        <div class="fd-field">
+          <label class="fd-field-label" for="otp-form-code">Code</label>
+          <div class="fd-otp" data-fd-otp data-length="6" role="group" aria-label="6-digit code">
+            <input id="otp-form-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+          </div>
+          <p class="fd-field-hint">Open your authenticator app and enter the 6-digit code.</p>
+        </div>
+        <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="primary"><span>Continue</span></button></div>
+      </form>
+    </div>
+<ul class="doc-notes">
       <li><code class="fd-code">fd:change</code> fires on every edit with <code class="fd-code">{ value, complete }</code>. Verify when <code class="fd-code">complete</code> is true; do not make people press a button after the sixth digit. Leave out the inputs and set <code class="fd-code">data-length</code> to have them generated.</li>
+          <li>In a form a server posts, put one ordinary named input inside the group. Without script it is a plain field; with it, <code class="fd-code">forms.js</code> swaps it for the boxes and a hidden input of the same name carries the whole code, so the form posts <code class="fd-code">code=482913</code> either way. The input's <code class="fd-code">id</code>, value, <code class="fd-code">required</code>, <code class="fd-code">autofocus</code> and <code class="fd-code">aria-invalid</code> carry over. When the script builds the boxes itself, <code class="fd-code">data-name="code"</code> adds the same hidden input.</li>
     </ul>
   </section>
 

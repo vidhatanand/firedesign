@@ -35,6 +35,9 @@
  * Dropzone               <label class="fd-dropzone" data-fd-dropzone data-list="#files" data-max-mb="50"><input type="file" multiple accept=".pdf,.docx">…</label>
  *                        <ul class="fd-filelist" id="files"></ul>
  * One-time code          <div class="fd-otp" data-fd-otp data-length="6" [data-type="numeric|alphanumeric"]> (inputs are generated when empty)
+ *                         In a form: data-name="code" adds a hidden input that carries the whole code. Or put one ordinary
+ *                         named input inside (<input name="code" required>): it works as a plain field without script and
+ *                         becomes the boxes with it, keeping its name, id, value, required, autofocus and aria-invalid.
  * Validation             <form data-fd-validate> validates on blur and submit with native constraint validation and fills .fd-field-error
  * Unsaved changes        <form data-fd-dirty> toggles [data-dirty] and shows .fd-form-actions[data-variant="sticky"]
  *
@@ -271,17 +274,41 @@ const stopRepeat = () => { clearTimeout(repeatDelay); clearInterval(repeatTimer)
    One-time code
    ========================================================================== */
 
-const otpInputs = (el) => $$(':scope > input', el);
+const otpInputs = (el) => $$(':scope > input:not([type="hidden"])', el);
+const otpCarrier = (el) => $(':scope > input[type="hidden"]', el);
 const otpClean = (el, text) => (el.dataset.type === 'alphanumeric' ? text.replace(/[^a-z0-9]/gi, '') : text.replace(/\D/g, ''));
 const otpValue = (el) => otpInputs(el).map((input) => input.value).join('');
 
 function setupOtp(el) {
   if (!once(el, 'otp')) return;
   const length = Number(el.dataset.length) || 6;
+  // A form a server rendered may hold one ordinary named input, so the field works without script. It becomes
+  // the boxes here, and its name moves to a hidden input that carries the whole code.
+  const plain = otpInputs(el).length === 1 && otpInputs(el)[0].name ? otpInputs(el)[0] : null;
+  if (plain) {
+    if (!el.dataset.name) el.dataset.name = plain.name;
+    el.removeChild(plain);
+  }
   if (!otpInputs(el).length) {
     el.insertAdjacentHTML('beforeend', Array.from({ length }, () => '<input>').join(''));
   }
   const inputs = otpInputs(el);
+  if (el.dataset.name && !otpCarrier(el)) {
+    const carrier = document.createElement('input');
+    carrier.type = 'hidden';
+    carrier.name = el.dataset.name;
+    el.append(carrier);
+  }
+  if (plain) {
+    if (plain.id) inputs[0].id = plain.id;
+    [...otpClean(el, plain.value)].slice(0, inputs.length).forEach((char, i) => { inputs[i].value = char; });
+    inputs.forEach((input) => { input.required = plain.required; });
+    if (plain.getAttribute('aria-invalid') === 'true') setOtpInvalid(el, true);
+    const describedBy = plain.getAttribute('aria-describedby');
+    if (describedBy && !el.hasAttribute('aria-describedby')) el.setAttribute('aria-describedby', describedBy);
+    if (otpCarrier(el)) otpCarrier(el).value = otpValue(el);
+    if (plain.autofocus) inputs[0].focus();
+  }
   if (!el.hasAttribute('role')) el.setAttribute('role', 'group');
   inputs.forEach((input, i) => {
     input.setAttribute('inputmode', el.dataset.type === 'alphanumeric' ? 'text' : 'numeric');
@@ -301,6 +328,8 @@ export function setOtpInvalid(el, invalid = true) {
 export function resetOtp(el) {
   const inputs = otpInputs(el);
   inputs.forEach((input) => { input.value = ''; });
+  const carrier = otpCarrier(el);
+  if (carrier) carrier.value = '';
   setOtpInvalid(el, false);
   inputs[0]?.focus();
 }
@@ -316,6 +345,8 @@ function otpFill(el, start, text) {
 
 function otpChanged(el) {
   const value = otpValue(el);
+  const carrier = otpCarrier(el);
+  if (carrier) carrier.value = value;
   emit(el, 'fd:change', { value, complete: value.length === otpInputs(el).length });
 }
 

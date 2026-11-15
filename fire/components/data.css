@@ -317,12 +317,14 @@ th[aria-sort="descending"] .fd-th-sort {
 
 /* Actions: always the last column. Faint at rest, full strength on row hover or focus. */
 .fd-table td[data-actions] { width: 1%; padding-inline: var(--fd-space-2); text-align: end; }
-.fd-table td[data-actions] > .fd-btn { opacity: 0.5; }
+/* Quiet row actions (ghost buttons) wait at half strength until the row is hovered or focused. A labelled
+   primary, outline or default button is the row's one thing to do, and stays at full strength. */
+.fd-table td[data-actions] > .fd-btn[data-variant="ghost"] { opacity: 0.5; }
 .fd-table td[data-actions] > .fd-btn + .fd-btn { margin-inline-start: var(--fd-space-0-5); }
 .fd-table tbody tr:hover td[data-actions] > .fd-btn,
 .fd-table tbody tr:focus-within td[data-actions] > .fd-btn,
 .fd-table td[data-actions] > .fd-btn:is(:hover, :focus-visible, [aria-expanded="true"]) { opacity: 1; }
-@media (hover: none) { .fd-table td[data-actions] > .fd-btn { opacity: 1; } }
+@media (hover: none) { .fd-table td[data-actions] > .fd-btn[data-variant="ghost"] { opacity: 1; } }
 
 /* ---------- Cell compositions ---------- */
 .fd-table-cell { display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; }

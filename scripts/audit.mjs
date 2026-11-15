@@ -9,8 +9,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const AS_JSON = process.argv.includes('--json');
-const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'literals', 'inline', 'sizes'];
-const LEVELS = { icons: 'ERROR', colors: 'WARN', classes: 'WARN', ids: 'ERROR', links: 'ERROR', tokens: 'ERROR', literals: 'WARN', inline: 'WARN', sizes: 'INFO' };
+const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'literals', 'inline', 'attrs', 'sizes'];
+const LEVELS = { icons: 'ERROR', colors: 'WARN', classes: 'WARN', ids: 'ERROR', links: 'ERROR', tokens: 'ERROR', literals: 'WARN', inline: 'WARN', attrs: 'WARN', sizes: 'INFO' };
 const findings = []; // { check, level, file, line, message }
 
 // ---------- helpers ----------
@@ -300,6 +300,51 @@ function checkInline() {
 }
 
 // ---------- 7. sizes ----------
+// ---------- 6c. attrs: an attribute value the styles never define does nothing, silently ----------
+// For every data attribute a component styles by value (data-align="start", data-size="sm" …), markup may only use
+// the values the styles define for that component. A value nobody defines (data-align="end" before it existed)
+// renders as if the attribute were absent, and nothing says so.
+function checkAttrs() {
+  const sheets = [...cssFiles(), ...['fire/layout.css', 'fire/tokens.css', 'fire/palettes.css', 'fire/typefaces.css', 'docs/docs.css'].map(f => path.join(ROOT, f))].filter(f => fs.existsSync(f));
+  const PRIMITIVES = new Set(['fd-stack', 'fd-row', 'fd-grid', 'fd-column']);
+  const DEFAULTS = { 'data-size': ['md'], 'data-theme': ['system'], 'data-density': ['comfortable'], 'data-palette': ['ember'], 'data-text-size': ['md'] };
+  const known = new Map();   // "class|attr" or "*|attr" -> Set(values)
+  const note = (ctx, attr, value) => { const k = `${ctx}|${attr}`; if (!known.has(k)) known.set(k, new Set()); known.get(k).add(value); };
+  for (const f of sheets) {
+    const text = stripCss(read(f));
+    for (const rule of text.matchAll(/([^{}]+)\{/g)) {
+      for (const selector of rule[1].split(/,(?![^()[\]]*[)\]])/)) {
+        const attrs = [...selector.matchAll(/\[(data-[a-z0-9-]+)[~|^$*]?="([^"]*)"\]/g)];
+        if (!attrs.length) continue;
+        const classes = [...selector.matchAll(/\.(fd-[a-z0-9-]+)/g)].map(m => m[1]);
+        // Only fire/layout.css defines attributes for any element; a class-less selector elsewhere is page chrome.
+        const contexts = classes.length ? classes : (f.endsWith('layout.css') ? ['*'] : []);
+        for (const [, attr, value] of attrs) for (const ctx of contexts) note(ctx, attr, value);
+      }
+    }
+  }
+  const files = ['templates', 'docs'].flatMap(d => fs.readdirSync(path.join(ROOT, d)).filter(f => /\.(html|js)$/.test(f)).map(f => `${d}/${f}`));
+  for (const f of files) {
+    const text = read(f);
+    for (const tag of text.matchAll(/<[a-z][a-z0-9-]*\b[^<>]*>/g)) {
+      const classes = ((/\sclass="([^"]*)"/.exec(tag[0]) || [])[1] || '').split(/\s+/).filter(c => c.startsWith('fd-') && !c.includes('${'));
+      for (const m of tag[0].matchAll(/\s(data-[a-z0-9-]+)="([^"$]*)"/g)) {
+        const [, attr, raw] = m;
+        // Checked where the set of values is closed and has no unwritten default: the layout attributes
+        // (fire/layout.css, any element) and the layout primitives. Components often have a default value with
+        // no selector of its own (data-size="md") or values only script reads, so they are left alone.
+        const sets = [...classes.filter(c => PRIMITIVES.has(c)).map(c => known.get(`${c}|${attr}`)), known.get(`*|${attr}`)].filter(Boolean);
+        if (!sets.length || (DEFAULTS[attr] || []).includes(raw)) continue;
+        for (const value of raw.split(/\s+/).filter(Boolean)) {
+          if (sets.some(set => set.has(value))) continue;
+          const allowed = [...new Set(sets.flatMap(set => [...set]))].sort().slice(0, 12).join(' | ');
+          add('attrs', 'WARN', f, text.slice(0, tag.index).split('\n').length, `${attr}="${value}" on ${classes[0] || tag[0].slice(1, 12)}  ← not a value the styles define (${allowed})`);
+        }
+      }
+    }
+  }
+}
+
 const countLines = t => (t.length === 0 ? 0 : t.split('\n').length - (t.endsWith('\n') ? 1 : 0));
 
 function reportSizes() {
@@ -330,6 +375,7 @@ async function main() {
   checkTokens();
   checkLiterals();
   checkInline();
+  checkAttrs();
   reportSizes();
 
   const byPlace = (a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0);

@@ -82,7 +82,8 @@ These keep a product looking like one product. They apply to people and to AI ag
 | To do this | Use |
 |---|---|
 | Things one above another | `fd-stack` |
-| Things side by side | `fd-row` (`data-wrap`, `data-justify="between|end|center"`, `data-align`); `fd-grow` on the child that takes the leftover space |
+| Things side by side | `fd-row` (`data-wrap`, `data-justify="between|end|center"`, `data-align="start|end|baseline|stretch"`); `fd-grow` on the child that takes the leftover space |
+| A field with a button beside it (search, filter) | `fd-row` with `data-align="end"`, so the button lines up with the input and not with the label |
 | Equal columns that fill the width | `fd-grid` with `data-min="md"` (narrowest column) and `data-cols="3"` (most columns) |
 | One child across several columns | `data-span="2"` (or `full`) on the child |
 | A narrow block on a wide page | `fd-column` (`data-size="xs|sm|md|lg|xl"`, `data-align="center"`) |
@@ -94,6 +95,39 @@ These keep a product looking like one product. They apply to people and to AI ag
 | A main area with a side panel | `fd-split` |
 
 Grids, stacks and rows nest freely. If you are about to write a width, you are missing one of the rows above.
+
+### Forms
+
+**Choose the control from the kind of value, never from how the server stores it.** A person should never type something they could pick, and should never see JSON, `0` or `1`, or a list of allowed words in a hint.
+
+| The value is | Use | Never |
+|---|---|---|
+| Yes or no | `fd-switch` (takes effect at once) or `fd-checkbox` (saved with the form) | A text box holding `0` or `1`, `on` or `off` |
+| One of 2 to 4 options | `fd-segmented` (in a form, each item is a label around a native radio, so it posts) or `fd-radio` | A text box with the options listed in its hint |
+| One of many options | `fd-select`, or `fd-combobox` when the list is long | The same |
+| Several of a fixed set | An `fd-checkbox` group or `fd-choice` cards | A comma-separated text box |
+| A number with a unit | `fd-number`, or an `fd-input-group` with the unit as an affix | A bare text box with the unit only in the label |
+| A list of free values (URLs, domains, emails) | `fd-tag-input` | A JSON array, or a comma-separated text box |
+| Names with values (scopes, headers, labels) | `fd-pairs` | A JSON object |
+| A secret | `fd-secret` | A plain text input |
+| Raw configuration, for experts only | `fd-codefield` with `data-fd-json` | An ordinary text area |
+
+All of these post in a plain form. `fd-tag-input`, `fd-pairs` and `fd-codefield` each wrap one named text area: without script the text area is the field (one value per line, or `name = value` per line), and with `fire/js/forms.js` it becomes the full control and posts the same shape, or JSON with `data-format="json"`. So a server that stores a list or a map as JSON does not need to show JSON to anyone.
+
+**A long create or edit form** is a column of `fd-form-section`s inside `<form class="fd-form" data-size="full">`: each section has a title and one line on the left and its fields on a white surface on the right. Start from `templates/form.html`. Do not lay a long form out as a full-width two-column grid of fields on the bare page: fields become too wide to read and nothing groups them.
+
+**Heading levels.** Each level is one step, so two levels never look the same:
+
+| Level | Class |
+|---|---|
+| The page | The hero's `fd-display` |
+| A section of the page | `fd-h2`, or `fd-form-section-title` in a form |
+| A card | `fd-title` inside `fd-card-heading` |
+| A setting or a field | `fd-setting-title` (it steps down to label size by itself inside a card or a form section) and `fd-field-label` |
+
+Never give a card title `fd-h3` and put `fd-setting` rows inside it at their page size: that is two headings of one size. Inside a card the setting rows are already the smaller size.
+
+**A value shown in a field's shape** (a sample in a preview, something read-only) is `<span class="fd-input">…</span>`; it lines up with real inputs.
 
 ## 6. Theming and checks
 
@@ -169,7 +203,11 @@ Paste this into the project's agent instructions (for example `CLAUDE.md` or `AG
   no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`,
   `data-cols` and `data-span`.
 - Never edit files inside `/fire`.
+- Forms: choose each control from the kind of value (GUIDE.md section 5, "Forms"). Never render a setting as a text
+  box when it is a choice, a switch, a list or a set of pairs, and never show JSON outside `fd-codefield`. Do not
+  write one generic "render any field as a text box" helper. A long form starts from `templates/form.html`.
 - Build every state: empty, loading, error, disabled. Check light and dark, 1440px and 375px, and keyboard use.
+- Look at every screen you build, in a browser, before you call it done. If it looks like a database form, it is.
 - If Fire lacks something, follow GUIDE.md section 7: look again, compose from existing parts, and if it is a
   real gap, write a component request (use the template), tell me, and continue with a removable stopgap in
   `fire-local.css` using `x-` classes and Fire tokens only. Do not build a one-off silently.

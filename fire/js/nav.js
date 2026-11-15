@@ -186,7 +186,7 @@ const segmentValue = (item) => item.dataset.value ?? item.getAttribute('aria-lab
 function placeThumb(root) {
   const thumb = root.querySelector(':scope > .fd-segmented-thumb');
   if (!thumb) return;
-  const item = segmentsIn(root).find((i) => i.matches(SELECTED));
+  const item = segmentsIn(root).find((i) => i.matches(SELECTED) || segmentRadio(i)?.checked);
   if (!item || !item.offsetParent) { thumb.setAttribute('data-empty', ''); return; }
   thumb.removeAttribute('data-empty');
   const { x, y } = offsetWithin(item, root);
@@ -196,7 +196,12 @@ function placeThumb(root) {
   root.style.setProperty('--_n-th', `${item.offsetHeight}px`);
 }
 
+/* In a plain form each item is a label around a native radio: the browser owns selection, focus and the posted
+   value, and this module only slides the thumb. */
+const segmentRadio = (item) => item.querySelector(':scope > input[type="radio"]');
+
 function segmentMode(root, items) {
+  if (items.some(segmentRadio)) return 'native';
   if (root.getAttribute('role') === 'radiogroup' || items.some((i) => i.getAttribute('role') === 'radio')) return 'radio';
   if (items.some((i) => i.hasAttribute('aria-pressed'))) return 'pressed';
   if (items.some((i) => i.tagName === 'A')) return 'link';
@@ -237,6 +242,12 @@ export function selectSegment(item, { focus = false, silent = false } = {}) {
   setupSegmented(root);
   const items = segmentsIn(root);
   const mode = root.dataset.fdMode;
+  if (mode === 'native') {
+    const radio = segmentRadio(item);
+    if (radio && !radio.checked) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+    if (focus) radio?.focus();
+    return;
+  }
   const already = item.matches(SELECTED);
   items.forEach((i) => {
     const on = i === item;
@@ -434,6 +445,7 @@ function onClick(event) {
 
   const seg = target.closest('.fd-segmented-item');
   if (seg && seg.closest('.fd-segmented')) {
+    if (segmentRadio(seg)) return;                       // a native radio: the browser selects it
     if (isDisabled(seg)) { event.preventDefault(); return; }
     selectSegment(seg);
     return;
@@ -477,6 +489,17 @@ export function init(root = document) {
   if (once(document, 'fd-nav')) {
     document.addEventListener('click', onClick);
     document.addEventListener('keydown', onKeydown);
+    // Native-radio segments: follow the browser's selection, and a form reset.
+    document.addEventListener('change', (event) => {
+      const radio = event.target instanceof HTMLInputElement && event.target.type === 'radio' ? event.target : null;
+      const root = radio?.closest('.fd-segmented-item')?.closest('.fd-segmented');
+      if (!root) return;
+      placeThumb(root);
+      emit(root, 'fd:change', { value: radio.value, item: radio.closest('.fd-segmented-item') });
+    });
+    document.addEventListener('reset', (event) => {
+      if (event.target instanceof HTMLFormElement) setTimeout(() => $$('.fd-segmented', event.target).forEach(placeThumb));
+    });
     addEventListener('scroll', onScroll, { capture: true, passive: true });
     addEventListener('resize', onScroll, { passive: true });
     document.fonts?.ready?.then(() => {

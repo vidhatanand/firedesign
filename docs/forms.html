@@ -82,6 +82,81 @@
     </ul>
   </section>
 
+  <!-- ===================================================================== Choosing a control -->
+  <section class="doc-section" id="choosing">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Choosing a control</h2>
+      <p>Pick the control from the kind of value, not from what the server stores. A text box that asks people to type <span class="fd-mono">0</span>, an option name or a JSON object makes them learn your schema and lets them post a typo.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>The value is</th><th>Use</th><th>Never</th></tr></thead>
+      <tbody>
+        <tr><td>Yes or no</td><td><code class="fd-code">fd-switch</code> (applies at once) or <code class="fd-code">fd-checkbox</code> (saved with the form)</td><td>A text box holding <span class="fd-mono">0</span> or <span class="fd-mono">1</span>, <span class="fd-mono">on</span> or <span class="fd-mono">off</span></td></tr>
+        <tr><td>One of 2 to 4 options</td><td><code class="fd-code">fd-segmented</code> or <code class="fd-code">fd-radio</code></td><td>A text box with the options listed in its hint</td></tr>
+        <tr><td>One of many options</td><td><code class="fd-code">fd-select</code>, or <code class="fd-code">fd-combobox</code> when the list is long</td><td>The same</td></tr>
+        <tr><td>Several of a fixed set</td><td>An <code class="fd-code">fd-checkbox</code> group or <code class="fd-code">fd-choice</code> cards</td><td>A comma-separated text box</td></tr>
+        <tr><td>A number with a unit</td><td><code class="fd-code">fd-number</code> or an <code class="fd-code">fd-input-group</code> with a unit affix</td><td>A bare text box; a unit only in the label</td></tr>
+        <tr><td>A list of free values (URLs, domains, emails)</td><td><code class="fd-code">fd-tag-input</code></td><td>A JSON array or a comma-separated text box</td></tr>
+        <tr><td>Names with values (scopes, headers, labels)</td><td><code class="fd-code">fd-pairs</code></td><td>A JSON object</td></tr>
+        <tr><td>A secret</td><td><code class="fd-code">fd-secret</code></td><td>A plain text input</td></tr>
+        <tr><td>Raw configuration for experts</td><td><code class="fd-code">fd-codefield</code> with <code class="fd-code">data-fd-json</code></td><td>An ordinary text area</td></tr>
+      </tbody>
+    </table>
+    <div class="doc-do">
+      <div data-dont>
+        <strong>Don't</strong>
+        <div class="fd-stack" data-gap="4">
+          <div class="fd-field">
+            <label class="fd-field-label" for="ch-bad-passkeys">Passkeys</label>
+            <input class="fd-input" id="ch-bad-passkeys" value="1" aria-describedby="ch-bad-passkeys-hint" autocomplete="off">
+            <p class="fd-field-hint" id="ch-bad-passkeys-hint">1 to allow, 0 to turn off.</p>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="ch-bad-2fa">Two-step sign-in</label>
+            <input class="fd-input" id="ch-bad-2fa" value="optional" aria-describedby="ch-bad-2fa-hint" autocomplete="off">
+            <p class="fd-field-hint" id="ch-bad-2fa-hint">off, optional or required</p>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="ch-bad-redirects">Redirect URIs</label>
+            <textarea class="fd-textarea" id="ch-bad-redirects" data-mono rows="2" spellcheck="false">["https://app.ember.dev/callback", "https://app.ember.dev/silent"]</textarea>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="ch-bad-scopes">Scopes</label>
+            <textarea class="fd-textarea" id="ch-bad-scopes" data-mono rows="2" spellcheck="false">{"read:runs": "Read your runs", "write:runs": "Start and stop runs"}</textarea>
+          </div>
+        </div>
+      </div>
+      <div data-do>
+        <strong>Do</strong>
+        <div class="fd-stack" data-gap="4">
+          <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Passkeys</span><span class="fd-switch-desc">Let people sign in with a passkey.</span></span></label>
+          <div class="fd-field">
+            <span class="fd-field-label" id="ch-2fa-label">Two-step sign-in</span>
+            <div class="fd-segmented" role="radiogroup" aria-labelledby="ch-2fa-label">
+              <label class="fd-segmented-item"><input type="radio" name="ch-2fa" value="off"><span>Off</span></label>
+              <label class="fd-segmented-item"><input type="radio" name="ch-2fa" value="optional" checked><span>Optional</span></label>
+              <label class="fd-segmented-item"><input type="radio" name="ch-2fa" value="required"><span>Required</span></label>
+            </div>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="ch-redirects">Redirect URIs</label>
+            <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^https://">
+              <textarea name="ch-redirects" id="ch-redirects" rows="2" placeholder="https://app.ember.dev/callback" spellcheck="false">https://app.ember.dev/callback
+https://app.ember.dev/silent</textarea>
+            </div>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="ch-scopes">Scopes</label>
+            <div class="fd-pairs" data-fd-pairs data-key-label="Scope" data-value-label="What people see" data-mono="key" data-add-label="Add scope">
+              <textarea name="ch-scopes" id="ch-scopes" rows="2">read:runs = Read your runs
+write:runs = Start and stop runs</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================================================================== Textarea -->
   <section class="doc-section" id="textarea">
     <div class="doc-section-head">
@@ -174,6 +249,44 @@ Ignore cookie banners and chat widgets.</textarea>
     </div>
     <ul class="doc-notes">
       <li>For API parameter forms the label becomes a mono name with a quieter mono type. Generate these from the schema; do not write them by hand.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Static value -->
+  <section class="doc-section" id="static-value">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">A value in a field's shape</h2>
+      <p>For a value people read but do not edit here: a sample in a preview, or a setting that is changed somewhere else. It sits on the same line as a real input, so a row of both still lines up.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid">
+      <div class="fd-field">
+        <span class="fd-field-label">Owner</span>
+        <span class="fd-input">dana@example.com</span>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="sv-billing">Billing email</label>
+        <input class="fd-input" id="sv-billing" value="billing@northwind.dev" autocomplete="off">
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label">Team ID</span>
+        <span class="fd-input" data-mono>team_8fK2xQvLm</span>
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label">Callback</span>
+        <output class="fd-input" data-mono>https://hooks.northwind.dev/ember/events/monitor-changes/v2</output>
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label">Small</span>
+        <span class="fd-input" data-size="sm">Northwind Data</span>
+      </div>
+      <div class="fd-field">
+        <span class="fd-field-label">Large</span>
+        <span class="fd-input" data-size="lg">Northwind Data</span>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Write <code class="fd-code">&lt;span class="fd-input"&gt;</code> (or a <code class="fd-code">div</code> or <code class="fd-code">output</code>). The text is centred in the field's height, a long value ends in an ellipsis, and <code class="fd-code">data-size</code> and <code class="fd-code">data-mono</code> work as on an input. It takes no focus and does not post; when the value must reach the server, use a <code class="fd-code">readonly</code> input instead.</li>
+      <li>It needs no script.</li>
     </ul>
   </section>
 
@@ -754,6 +867,136 @@ Ignore cookie banners and chat widgets.</textarea>
     </div>
   </section>
 
+  <!-- ===================================================================== List field in a plain form -->
+  <section class="doc-section" id="list-field">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">List field in a plain form</h2>
+      <p>For a list a server renders and reads back: redirect URIs, allowed domains, notification emails. Write a named text area inside the tag input. It is a plain one-per-line field without script and becomes tokens with it; the form posts the same text either way.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <form class="fd-form" id="list-demo" action="#list-field" method="get" data-demo-post>
+        <div class="fd-field">
+          <label class="fd-field-label" for="lf-redirects" data-required>Redirect URIs</label>
+          <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^https://" data-max="10">
+            <textarea name="redirect_uris" id="lf-redirects" rows="3" placeholder="https://app.northwind.dev/callback" spellcheck="false" aria-describedby="lf-redirects-hint" required>https://app.northwind.dev/callback
+https://app.northwind.dev/silent</textarea>
+          </div>
+          <p class="fd-field-hint" id="lf-redirects-hint">One per line. Each must start with https://.</p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="lf-domains">Allowed domains <span class="fd-field-tag">optional</span></label>
+          <div class="fd-tag-input" data-fd-tag-input data-format="json" data-mono>
+            <textarea name="allowed_domains" id="lf-domains" rows="2" placeholder="docs.northwind.dev" spellcheck="false" aria-describedby="lf-domains-hint">["docs.northwind.dev", "blog.northwind.dev"]</textarea>
+          </div>
+          <p class="fd-field-hint" id="lf-domains-hint">Ember only crawls these domains for this key.</p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="lf-paths">Blocked paths</label>
+          <div class="fd-tag-input" data-fd-tag-input data-mono>
+            <textarea name="blocked_paths" id="lf-paths" rows="2" disabled>/admin
+/checkout</textarea>
+          </div>
+        </div>
+        <div class="fd-form-actions">
+          <button type="reset" class="fd-btn" data-variant="ghost">Reset</button>
+          <button type="submit" class="fd-btn" data-variant="primary">Save</button>
+        </div>
+        <output class="fd-field-hint" data-mono data-demo-posted>Save to see what the form posts.</output>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li><strong>Without script</strong> it is an ordinary text area, one value per line, and the form posts <span class="fd-mono">redirect_uris</span> as those lines. <strong>With script</strong> one hidden input of the same name carries the values joined by new lines, so the server parses one shape either way. Add <code class="fd-code">data-format="json"</code> to post a JSON array of strings instead; the text area may then start as a JSON array too.</li>
+      <li>The text area's <code class="fd-code">id</code> moves to the typing field, so the label still works. <code class="fd-code">placeholder</code>, <code class="fd-code">disabled</code>, <code class="fd-code">readonly</code>, <code class="fd-code">aria-describedby</code>, <code class="fd-code">aria-invalid</code> and <code class="fd-code">required</code> carry over; <code class="fd-code">required</code> holds only while the list is empty. Resetting the form brings back the rendered values.</li>
+      <li><code class="fd-code">data-pattern</code> marks values that do not match, and <code class="fd-code">data-max</code> stops adding past a count. The older contract (<code class="fd-code">data-name</code>, <code class="fd-code">data-value</code>, one hidden input per value) works as before.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Pairs -->
+  <section class="doc-section" id="pairs">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pairs</h2>
+      <p>For a set of names with values: OAuth scopes and what people see for each, request headers, labels, environment variables. Each pair is a row with its own remove button, so nobody edits an object by hand.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <form class="fd-form" id="pairs-demo" action="#pairs" method="get" data-demo-post>
+        <div class="fd-field">
+          <label class="fd-field-label" for="pr-scopes">Scopes</label>
+          <div class="fd-pairs" data-fd-pairs data-key-label="Scope" data-value-label="What people see" data-key-placeholder="read:runs" data-value-placeholder="Read your runs" data-add-label="Add scope" data-mono="key">
+            <textarea name="scopes" id="pr-scopes" rows="4" spellcheck="false" aria-describedby="pr-scopes-hint">read:runs = Read your runs
+write:runs = Start and stop runs
+read:usage = See credit usage</textarea>
+          </div>
+          <p class="fd-field-hint" id="pr-scopes-hint">Shown on the consent screen. Try giving two rows the same scope.</p>
+        </div>
+        <div class="fd-form-actions">
+          <button type="reset" class="fd-btn" data-variant="ghost">Reset</button>
+          <button type="submit" class="fd-btn" data-variant="primary">Save</button>
+        </div>
+        <output class="fd-field-hint" data-mono data-demo-posted>Save to see what the form posts.</output>
+      </form>
+    </div>
+    <h3 class="doc-sub">JSON, narrow and read-only</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field" data-frame="lg">
+        <label class="fd-field-label" for="pr-headers">Request headers</label>
+        <div class="fd-pairs" data-fd-pairs data-format="json" data-key-label="Header" data-value-label="Value" data-key-placeholder="X-Team" data-value-placeholder="northwind" data-add-label="Add header" data-mono="both">
+          <textarea name="headers" id="pr-headers" rows="3" spellcheck="false">{"User-Agent": "EmberBot/2.1", "Accept-Language": "en-US"}</textarea>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="pr-labels">Labels</label>
+        <div class="fd-pairs" data-fd-pairs data-key-label="Label" data-value-label="Value" data-size="sm" data-mono="key">
+          <textarea name="labels" id="pr-labels" rows="2" readonly aria-describedby="pr-labels-hint">env = production
+team = growth</textarea>
+        </div>
+        <p class="fd-field-hint" id="pr-labels-hint">Set by your deploy pipeline.</p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><strong>Without script</strong> it is a text area with one <span class="fd-mono">name = value</span> per line, split on the first <span class="fd-mono">=</span>. <strong>With script</strong> one hidden input of the same name posts the same lines, or a JSON object with <code class="fd-code">data-format="json"</code>. Rows with an empty name are left out.</li>
+      <li>Enter in a value adds a row below; Enter in a name moves to its value. Backspace in an empty row removes it. Each input is labelled from the column names (“Scope 2”, “What people see for read:runs”), and the remove button names its row.</li>
+      <li>A name used twice marks both names invalid, says so under the field and stops the form posting. Below about 480px a row stacks: the name and its remove button, the value under them.</li>
+      <li><code class="fd-code">data-mono="key|value|both"</code> sets identifiers in mono. The text area's <code class="fd-code">id</code> goes to the first name, and <code class="fd-code">disabled</code>, <code class="fd-code">readonly</code> and <code class="fd-code">aria-describedby</code> carry over. Read it with <code class="fd-code">pairsValue(el)</code>, replace it with <code class="fd-code">setPairs(el, object)</code>, and listen for <code class="fd-code">fd:change</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Code field -->
+  <section class="doc-section" id="codefield">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Code field</h2>
+      <p>For the few places raw code really is the input, such as an expert's config override. It looks like code, checks itself, and never stands in for a control that would fit the value better.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <label class="fd-field-label" for="cf-config">Crawler override <span class="fd-field-tag">optional</span></label>
+        <div class="fd-codefield" data-fd-json>
+          <div class="fd-codefield-head"><span class="fd-codefield-lang">JSON</span>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="xs" data-fd-codefield-format>Format</button></div>
+          <textarea class="fd-codefield-input" name="config" id="cf-config" rows="8" spellcheck="false" autocapitalize="off" aria-describedby="cf-config-hint">{"maxDepth": 3, "respectRobots": true,
+"waitFor": {"selector": "#pricing", "timeoutMs": 8000}}</textarea>
+        </div>
+        <p class="fd-field-hint" id="cf-config-hint">Merged over the team defaults on every crawl.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="cf-invalid">Extraction schema</label>
+        <div class="fd-codefield" data-fd-json>
+          <div class="fd-codefield-head"><span class="fd-codefield-lang">JSON</span></div>
+          <textarea class="fd-codefield-input" name="schema" id="cf-invalid" rows="6" spellcheck="false" autocapitalize="off" aria-invalid="true" aria-describedby="cf-invalid-error">{
+  "plan": "string",
+  "price_usd": "number"
+  "credits": "number"
+}</textarea>
+        </div>
+        <p class="fd-field-error" id="cf-invalid-error"><i data-icon="circle-alert" data-size="14"></i><span>This isn't valid JSON: expected a comma or }, line 4.</span></p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A sunken well in the code face and size, with the input's own focus line. With the script, Tab inserts two spaces; press Escape, then Tab, to leave the field.</li>
+      <li><code class="fd-code">data-fd-json</code> checks the value when the field loses focus and when the form is sent. If it does not parse, the text area gets <code class="fd-code">aria-invalid="true"</code> and the field's error says why and on which line; both clear as soon as it parses. Format re-indents valid JSON with two spaces and keeps every number as written.</li>
+      <li><strong>Without script</strong> it is a plain text area and the Format button stays hidden. An empty field is not checked; add <code class="fd-code">required</code> when a value is needed.</li>
+    </ul>
+  </section>
+
   <!-- ===================================================================== Choice -->
   <section class="doc-section" id="choice">
     <div class="doc-section-head">
@@ -1057,6 +1300,107 @@ Ignore cookie banners and chat widgets.</textarea>
     </ul>
   </section>
 
+  <!-- ===================================================================== Form sections -->
+  <section class="doc-section" id="form-sections">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Form sections</h2>
+      <p>For a long create or edit form. Each section names one group of settings in a narrow column and holds its fields on a white surface beside it, so people can scan the titles and skip what they do not need.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <form class="fd-form" data-size="full" id="sections-demo" action="#form-sections" method="get" data-fd-validate data-demo-post>
+        <section class="fd-form-section">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title">Basics</h2>
+            <p class="fd-form-section-desc">How this app appears on the consent screen.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="sx-name" data-required>App name</label>
+              <input class="fd-input" id="sx-name" name="name" value="Northwind Reports" required autocomplete="off" data-error-required="Name the app so people know who is asking.">
+            </div>
+            <div class="fd-form-cols">
+              <div class="fd-field">
+                <span class="fd-field-label">Client ID</span>
+                <span class="fd-input" data-mono>app_3Hq9xL2vTk</span>
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="sx-type">App type</label>
+                <div class="fd-select" data-variant="outline"><select id="sx-type" name="type"><option>Web app</option><option>Single-page app</option><option>Command-line tool</option></select></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="fd-form-section">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title">Callbacks</h2>
+            <p class="fd-form-section-desc">Where this app receives people and events.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="sx-redirects" data-required>Redirect URIs</label>
+              <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^https://">
+                <textarea name="redirect_uris" id="sx-redirects" rows="2" placeholder="https://reports.northwind.dev/callback" spellcheck="false" required>https://reports.northwind.dev/callback</textarea>
+              </div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="sx-webhook">Webhook URL <span class="fd-field-tag">optional</span></label>
+              <input class="fd-input" type="url" id="sx-webhook" name="webhook" data-mono placeholder="https://reports.northwind.dev/hooks/ember" spellcheck="false" autocomplete="off">
+            </div>
+          </div>
+        </section>
+        <section class="fd-form-section">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title">Access</h2>
+            <p class="fd-form-section-desc">What the app may do once someone approves it.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="sx-scopes">Scopes</label>
+              <div class="fd-pairs" data-fd-pairs data-key-label="Scope" data-value-label="What people see" data-add-label="Add scope" data-mono="key">
+                <textarea name="scopes" id="sx-scopes" rows="2" spellcheck="false">read:runs = Read your runs
+read:usage = See credit usage</textarea>
+              </div>
+            </div>
+            <div class="fd-form-row">
+              <div class="fd-form-row-text"><span class="fd-form-row-label" id="sx-refresh-label">Refresh tokens</span><span class="fd-form-row-desc">Keep people signed in for 30 days.</span></div>
+              <div class="fd-form-row-control"><label class="fd-switch"><input type="checkbox" role="switch" name="refresh" checked aria-labelledby="sx-refresh-label"><span class="fd-switch-track"></span></label></div>
+            </div>
+            <div class="fd-form-row">
+              <div class="fd-form-row-text"><span class="fd-form-row-label" id="sx-pkce-label">Require PKCE</span><span class="fd-form-row-desc">Needed for apps that cannot keep a secret.</span></div>
+              <div class="fd-form-row-control"><label class="fd-switch"><input type="checkbox" role="switch" name="pkce" aria-labelledby="sx-pkce-label"><span class="fd-switch-track"></span></label></div>
+            </div>
+          </div>
+        </section>
+        <section class="fd-form-section" data-layout="stack">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title">Advanced</h2>
+            <p class="fd-form-section-desc">Stacked at every width with data-layout="stack".</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="sx-override">Token override <span class="fd-field-tag">optional</span></label>
+              <div class="fd-codefield" data-fd-json>
+                <div class="fd-codefield-head"><span class="fd-codefield-lang">JSON</span>
+                  <button class="fd-btn" type="button" data-variant="ghost" data-size="xs" data-fd-codefield-format>Format</button></div>
+                <textarea class="fd-codefield-input" name="override" id="sx-override" rows="4" spellcheck="false" autocapitalize="off">{"accessTokenTtl": 3600}</textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="fd-form-actions">
+          <button type="reset" class="fd-btn" data-variant="ghost">Reset</button>
+          <button type="submit" class="fd-btn" data-variant="primary">Save app</button>
+        </div>
+        <output class="fd-field-hint" data-mono data-demo-posted>Save to see what the form posts.</output>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li>In a wide form the head is a narrow column that stays in view while its body scrolls past; the body is a white surface no wider than the form measure. Below about 720px of form width the head stacks above the body. Give the form <code class="fd-code">data-size="full"</code> so the sections, not the form measure, set the width.</li>
+      <li>Heading levels never collide: the page title is the hero, a section title is the title size at weight 500, field labels stay at 14px, and the description is small and muted.</li>
+      <li>Inside a body, <code class="fd-code">fd-form-cols</code> fills the body, <code class="fd-code">fd-form-row</code> rows sit in one list with hairlines between them, and an <code class="fd-code">fd-form-actions</code> aligns to the end. The sticky unsaved-changes bar still works on the form. It all needs no script.</li>
+    </ul>
+  </section>
+
   <!-- ===================================================================== Validation -->
   <section class="doc-section" id="validation">
     <div class="doc-section-head">
@@ -1120,6 +1464,7 @@ Ignore cookie banners and chat widgets.</textarea>
       <tbody>
         <tr><td>fd:change</td><td>{ value }</td><td>combobox (string or array), tag input (array), number, slider, search, dropzone (files)</td></tr>
         <tr><td>fd:change</td><td>{ value, complete }</td><td>one-time code</td></tr>
+        <tr><td>fd:change</td><td>{ value }</td><td>pairs (an object of name → value); read it any time with <span class="fd-mono">pairsValue(el)</span>, replace it with <span class="fd-mono">setPairs(el, object)</span></td></tr>
         <tr><td>fd:select</td><td>{ value, item }</td><td>combobox, when an option is chosen</td></tr>
         <tr><td>fd:open · fd:close</td><td>none</td><td>combobox listbox</td></tr>
         <tr><td>fd:copy</td><td>{ value }</td><td>secret, copy field</td></tr>
@@ -1412,6 +1757,22 @@ Ignore cookie banners and chat widgets.</textarea>
     }, 800);
   });
   validation?.addEventListener('reset', () => { document.getElementById('va-status').hidden = true; });
+
+  // List, pairs and section demos: show the body the form would post instead of leaving the page.
+  // Runs after forms.js, which stops a form whose JSON does not parse or whose pairs repeat a name.
+  document.querySelectorAll('form[data-demo-post]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      if (event.defaultPrevented) return;
+      event.preventDefault();
+      const out = form.querySelector('[data-demo-posted]');
+      const lines = [...new FormData(form)].map(([name, value]) => `${name}: ${JSON.stringify(value)}`);
+      if (out) out.textContent = lines.join('  ·  ') || 'Nothing to post.';
+    });
+    form.addEventListener('reset', () => {
+      const out = form.querySelector('[data-demo-posted]');
+      if (out) out.textContent = 'Save to see what the form posts.';
+    });
+  });
 
   // Create-key form: no navigation.
   document.getElementById('key-demo')?.addEventListener('submit', (event) => event.preventDefault());

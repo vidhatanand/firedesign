@@ -729,8 +729,12 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
 .fd-setting > :not(.fd-setting-text, .fd-setting-control) { flex: 1 0 100%; min-inline-size: 0; }
 .fd-setting[data-control="wide"] > .fd-setting-control { flex: 0 1 var(--fd-setting-control-wide); }
 .fd-setting[data-control="wide"] > .fd-setting-control > * { flex: 1 1 auto; min-inline-size: 0; }
-.fd-setting[data-size="sm"] { padding-block: var(--fd-space-4); }
-.fd-setting[data-size="sm"] .fd-setting-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); letter-spacing: 0; font-weight: var(--fd-weight-label); }
+/* A setting is small when asked, and always inside a card or a form section: there the card's or the section's
+   own title is the heading, so the setting's title steps down to a label and the two never read as the same level. */
+:is(.fd-setting[data-size="sm"], .fd-card .fd-setting, .fd-form-section-body .fd-setting) { padding-block: var(--fd-space-4); }
+:is(.fd-setting[data-size="sm"], .fd-card .fd-setting, .fd-form-section-body .fd-setting) .fd-setting-title { font-family: var(--fd-font-sans); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); letter-spacing: 0; font-weight: var(--fd-weight-label); }
+:is(.fd-card, .fd-form-section-body) > .fd-setting:first-child, :is(.fd-card, .fd-form-section-body) > .fd-stack > .fd-setting:first-child { padding-block-start: 0; }
+:is(.fd-card, .fd-form-section-body) > .fd-setting:last-child, :is(.fd-card, .fd-form-section-body) > .fd-stack > .fd-setting:last-child { padding-block-end: 0; }
 .fd-setting[data-tone="danger"] .fd-setting-title { color: var(--fd-text); }
 .fd-setting[data-tone="danger"] .fd-setting-desc strong { color: var(--fd-danger-text); }
 @media (max-width: 640px) { .fd-setting-control { flex: 1 1 100%; } }

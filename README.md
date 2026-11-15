@@ -13,7 +13,7 @@ npm run dev
 Then open http://127.0.0.1:4747/docs/index.html.
 
 - **Docs** (`/docs/index.html`): every component, live, with a "Markup" view to copy from.
-- **Templates** (`/templates/index.html`): 23 full screens for a fictional product, Ember, built only from Fire components.
+- **Templates** (`/templates/index.html`): 24 full screens for a fictional product, Ember, built only from Fire components.
 - **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, switch the typeface, change density, corners, contrast, motion and texture. Choices are saved and follow you across pages.
 
 ## Read next
@@ -97,7 +97,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site: 18 pages. Start at `docs/index.html`. |
-| `templates/` | 23 screens for Ember: the app, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Start at `templates/index.html`. |
+| `templates/` | 24 screens for Ember: the app, a long create form, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Start at `templates/index.html`. |
 | `scripts/` | `serve.py` (dev server), `audit.mjs` (checks), `build-palettes.mjs` (regenerates and checks the palettes), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |
 

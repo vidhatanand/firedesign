@@ -105,6 +105,7 @@ A verb, or a verb and its object. The label says what happens when it is pressed
 - **Placeholder:** an example that could be real. `production-crawler`, `https://docs.example.com`. Never the label again, never "Enter…".
 - **Hint:** only when a careful person could still get it wrong. Say one thing: the effect ("Shown on invoices."), the default ("Leave blank to use the team ID."), the limit ("Up to 100 per page."), or an example ("For example `VP of Sales`. Separate several with commas.").
 - **Error:** what is wrong and what to change, in the field's own terms. "Use 3 to 40 characters." "This name is taken. Try `quarry-labs-2`." Not "Invalid input".
+- **A hint never lists the allowed answers.** If you are writing "off, optional or required" or "1 allows it, 0 does not" under a text box, the control is wrong, not the hint. A choice is a select or a segmented control, yes or no is a switch, a list is a tag input, names with values are a pairs editor. `GUIDE.md` section 5 has the table. Nobody should type, or read, JSON in a form.
 
 ### Filters and controls that hold a value
 Show the current value as the label: "All endpoints", "Last 7 days", "Format: Markdown", "All API keys (3)". The control then needs no separate caption, and the screen reads as a sentence about what is being shown.

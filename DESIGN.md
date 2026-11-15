@@ -109,3 +109,5 @@ Every component family has a page in `docs/` built like `docs/buttons.html` (rea
 ## 8. Quality bar
 
 A component is done when: it is correct in light and dark, under at least the ember, volt and midnight palettes, in compact and spacious density, with corners at 0 and 2, at 1440px and 375px; it is operable by keyboard; nothing overflows at 320px; hover, focus-visible, active, disabled and loading states exist where they apply; text never touches an edge; and numbers align.
+
+A screen is done when, as well as the above: every control matches the kind of value it holds (`GUIDE.md` section 5, "Forms": nobody types a choice, a yes or no, a list or JSON); each heading level is a visible step from the one above it; a long form sits in `fd-form-section`s on a surface; and someone has looked at it in a browser. Every attribute value used in markup is one the vocabulary lists: an attribute Fire does not define does nothing, silently.

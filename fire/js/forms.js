@@ -29,6 +29,30 @@
  *                        Multiple: use <div class="fd-tag-input"><input class="fd-tag-input-field" role="combobox"></div> instead of the group.
  * Tag input              <div class="fd-tag-input" data-fd-tag-input data-name="domains" data-value="a.com,b.com" data-max="10" data-pattern="…">
  *                          <input class="fd-tag-input-field"></div>
+ *                        In a posted form, put one named text area inside instead (one value per line). Without script it
+ *                        is that text area; with it, the text area becomes the tokens and one hidden input of the same
+ *                        name carries the values joined by new lines, or a JSON array with data-format="json" (the text
+ *                        area may then hold a JSON array too). id, placeholder, disabled, readonly, aria-describedby,
+ *                        aria-invalid and required carry over (required applies only while the list is empty).
+ *                          <div class="fd-tag-input" data-fd-tag-input [data-format="json"] [data-mono] [data-pattern] [data-max]>
+ *                            <textarea name="redirect_uris" id="f-redirects" rows="3">https://app.example.com/callback</textarea></div>
+ * Pairs                  <div class="fd-pairs" data-fd-pairs [data-format="json"] data-key-label="Scope" data-value-label="What people see"
+ *                          [data-key-placeholder] [data-value-placeholder] [data-add-label="Add scope"] [data-mono="key|value|both"] [data-size="sm"]>
+ *                          <textarea name="scopes" id="f-scopes" rows="4">read:runs = Read your runs</textarea></div>
+ *                        Without script: a text area, one "name = value" per line (split on the first "="). With it: a
+ *                        head (.fd-pairs-head), one .fd-pairs-row per pair (key input, value input, remove button), an
+ *                        add button (.fd-pairs-add) and one hidden input with the text area's name holding the same lines,
+ *                        or a JSON object with data-format="json". Rows with an empty key are left out; a key used twice
+ *                        marks both keys aria-invalid and the group data-invalid, and stops the form posting.
+ *                        id (to the first key), disabled, readonly and aria-describedby carry over; reset restores the pairs.
+ * Code field             <div class="fd-codefield" [data-fd-json]>
+ *                          <div class="fd-codefield-head"><span class="fd-codefield-lang">JSON</span>
+ *                            [<button class="fd-btn" type="button" data-variant="ghost" data-size="xs" data-fd-codefield-format>Format</button>]</div>
+ *                          <textarea class="fd-codefield-input" name="config" spellcheck="false" autocapitalize="off">{}</textarea></div>
+ *                        Tab inserts two spaces (Escape, then Tab, leaves the field). data-fd-json checks the value on blur
+ *                        and on submit and writes "This isn't valid JSON: <reason>, line N." into the .fd-field-error of the
+ *                        enclosing .fd-field. Format pretty-prints valid JSON with two spaces, keeping every literal as
+ *                        written. The script sets data-ready on the field; the Format button is hidden until it does.
  * Choice card            <label class="fd-choice"><input type="radio"><span class="fd-choice-mark"></span><span class="fd-choice-body">…</span></label>
  * Secret / copy field    <div class="fd-secret" data-fd-secret data-value="…" [data-mask="partial|full"] [data-state="revealed"]> with buttons
  *                        carrying data-fd-field-action="reveal|copy|rotate"; works the same on .fd-copy-field.
@@ -43,7 +67,8 @@
  * Unsaved changes        <form data-fd-dirty> toggles [data-dirty] and shows .fd-form-actions[data-variant="sticky"]
  *
  * Events (all bubble, from the component root)
- *   fd:change   { value }                       combobox, tag input, otp ({ value, complete }), number, slider, search, dropzone
+ *   fd:change   { value }                       combobox, tag input, otp ({ value, complete }), number, slider, search, dropzone,
+ *                                               pairs (an object of name → value)
  *   fd:select   { value, item }                 combobox option chosen
  *   fd:open / fd:close                          combobox popover
  *   fd:copy     { value }                       secret / copy field
@@ -359,8 +384,43 @@ function otpChanged(el) {
 const tokenHTML = (label, value, fresh) =>
   `<span class="fd-token" data-value="${esc(value)}"${fresh ? ' data-new' : ''}><span class="fd-token-label">${esc(label)}</span><button type="button" class="fd-token-remove" tabindex="-1" aria-label="Remove ${esc(label)}">${icon('x')}</button></span>`;
 
+/* A list written by a server as a text area: its initial values, and whether it was required. */
+const lists = new WeakMap();
+const carrierOf = (root) => $(':scope > input[data-fd-carrier]', root);
+
+/** Read a list from text: one value per line, or a JSON array of strings when `json` is set. */
+export function parseList(text, { json = false } = {}) {
+  const source = String(text ?? '').trim();
+  if (json && source.startsWith('[')) {
+    try {
+      const array = JSON.parse(source);
+      if (Array.isArray(array)) return array.map((v) => (typeof v === 'string' ? v : JSON.stringify(v)).trim()).filter(Boolean);
+    } catch { /* not JSON after all: read it as lines */ }
+  }
+  return source.split(/\r?\n/).map((v) => v.trim()).filter(Boolean);
+}
+
+/** The text a list posts: the values on separate lines, or a JSON array with data-format="json". */
+export const formatList = (root, values) => (root.dataset.format === 'json' ? JSON.stringify(values) : values.join('\n'));
+
+const uniqueValues = (values) => [...new Set(values.map((v) => String(v).trim()).filter(Boolean))];
+
+function markPatterns(root) {
+  const pattern = root.dataset.pattern ? new RegExp(root.dataset.pattern) : null;
+  $$(':scope > .fd-token', root).forEach((token) => token.toggleAttribute('data-invalid', Boolean(pattern) && !pattern.test(token.dataset.value)));
+}
+
 function syncHidden(root, values) {
   $$(':scope > input[data-fd-hidden]', root).forEach((el) => el.remove());
+  const carrier = carrierOf(root);
+  if (carrier) {
+    carrier.value = formatList(root, values);
+    const field = $(':scope > .fd-tag-input-field', root);
+    if (field && lists.get(root)?.required) {
+      field.required = !values.length;   // native validation says "fill this in" only on an empty list
+      if (field.hasAttribute('aria-invalid') && field.closest('form[data-fd-validate]')) validateControl(field);
+    }
+  }
   const name = root.dataset.name;
   if (!name) return;
   values.forEach((value) => root.insertAdjacentHTML('beforeend', `<input type="hidden" name="${esc(name)}" value="${esc(value)}" data-fd-hidden>`));
@@ -383,6 +443,7 @@ export function setTags(el, values, { silent = true } = {}) {
   $$(':scope > .fd-token', el).forEach((token) => token.remove());
   const field = $(':scope > .fd-tag-input-field', el);
   values.forEach((value) => field.insertAdjacentHTML('beforebegin', tokenHTML(value, value, false)));
+  markPatterns(el);
   syncHidden(el, tagValues(el));
   if (!silent) emit(el, 'fd:change', { value: tagValues(el) });
 }
@@ -423,10 +484,469 @@ function removeToken(token) {
   emit(owner, 'fd:change', { value: tagValues(owner) });
 }
 
+const CARRY = ['placeholder', 'aria-describedby', 'aria-invalid', 'aria-label', 'aria-labelledby', 'spellcheck', 'autocapitalize', 'title'];
+
+/* A text area a server rendered, so the list works without script: it becomes the tokens, its name moves to a
+   hidden input that carries every value in the shape the text area would have posted. */
+function listFromTextarea(el, area) {
+  const values = uniqueValues(parseList(area.value, { json: el.dataset.format === 'json' }));
+  const field = document.createElement('input');
+  field.type = 'text';
+  field.className = 'fd-tag-input-field';
+  field.setAttribute('autocomplete', 'off');
+  CARRY.forEach((name) => { if (area.hasAttribute(name)) field.setAttribute(name, area.getAttribute(name)); });
+  field.disabled = area.disabled;
+  field.readOnly = area.readOnly;
+  const carrier = document.createElement('input');
+  carrier.type = 'hidden';
+  carrier.name = area.name;
+  carrier.disabled = area.disabled;   // a disabled field posts nothing
+  carrier.setAttribute('data-fd-carrier', '');
+  if (area.hasAttribute('form')) carrier.setAttribute('form', area.getAttribute('form'));
+  lists.set(el, { required: area.required, initial: values });
+  const { id, autofocus } = area;
+  area.remove();
+  if (id) field.id = id;   // the label still points at the place people type
+  el.append(field, carrier);
+  setTags(el, values);
+  if (autofocus) field.focus();
+}
+
+/** Put a list written as a text area back to the values it was rendered with (a form reset). */
+function resetList(el) {
+  const state = lists.get(el);
+  if (state) setTags(el, state.initial);
+}
+
 function setupTagInput(el) {
   if (!once(el, 'tags')) return;
+  const area = $(':scope > textarea', el);
+  if (area && !$(':scope > .fd-tag-input-field', el)) { listFromTextarea(el, area); return; }
   if (el.dataset.value) setTags(el, el.dataset.value.split(',').map((v) => v.trim()).filter(Boolean));
   else syncHidden(el, tagValues(el));
+}
+
+/* ==========================================================================
+   Field errors written by a component (pairs, code field)
+   ========================================================================== */
+
+const ownErrors = new WeakMap();   // owner (a code field's text area, a pairs editor) -> the message this module wrote
+
+/**
+ * Show (message) or clear (null) a component's own error in the error slot of the field around `owner`.
+ * `control` is the input the message is about; it points at the slot with aria-describedby.
+ */
+function setOwnError(owner, control, message) {
+  const field = owner.closest('.fd-field');
+  if (message) {
+    ownErrors.set(owner, message);
+    const slot = field && control?.isConnected ? errorSlot(control) : null;
+    if (!slot) return;
+    const described = new Set((control.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+    described.add(slot.id);
+    control.setAttribute('aria-describedby', [...described].join(' '));
+    if (slot.hidden || slot.dataset.message !== message) slot.innerHTML = `${icon('circle-alert', { size: 14 })}<span>${esc(message)}</span>`;
+    slot.dataset.message = message;
+    slot.hidden = false;
+    return;
+  }
+  const previous = ownErrors.get(owner);
+  ownErrors.delete(owner);
+  const slot = field && $('.fd-field-error', field);
+  if (slot && previous && slot.dataset.message === previous) slot.hidden = true;
+}
+
+/* ==========================================================================
+   Pairs: name and value rows
+   ========================================================================== */
+
+const pairsState = new WeakMap();
+const pairRows = (el) => $$(':scope > .fd-pairs-row', el);
+const rowKey = (row) => $(':scope > .fd-pairs-key', row);
+const rowValue = (row) => $(':scope > .fd-pairs-value', row);
+
+/** Read pairs from text: one "name = value" per line (split on the first "="), or a JSON object when `json` is set. */
+export function parsePairs(text, { json = false } = {}) {
+  const source = String(text ?? '').trim();
+  if (json && source.startsWith('{')) {
+    try {
+      const object = JSON.parse(source);
+      if (object && typeof object === 'object' && !Array.isArray(object)) {
+        return Object.entries(object).map(([key, value]) => [key.trim(), typeof value === 'string' ? value : JSON.stringify(value)]);
+      }
+    } catch { /* not JSON after all: read it as lines */ }
+  }
+  return source.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => {
+    const at = line.indexOf('=');
+    return at < 0 ? [line, ''] : [line.slice(0, at).trim(), line.slice(at + 1).trim()];
+  });
+}
+
+/** The text pairs post: "name = value" lines, or a JSON object with data-format="json". Empty names are left out. */
+export function formatPairs(root, entries) {
+  const kept = entries.filter(([key]) => key);
+  if (root.dataset.format === 'json') return JSON.stringify(Object.fromEntries(kept));
+  return kept.map(([key, value]) => `${key} = ${value}`.trimEnd()).join('\n');
+}
+
+const pairEntries = (el) => pairRows(el).map((row) => [rowKey(row).value.trim(), rowValue(row).value.trim()]);
+
+/** The pairs as an object of name → value (a name used twice keeps its last value). */
+export const pairsValue = (el) => Object.fromEntries(pairEntries(el).filter(([key]) => key));
+
+function pairRowHTML(el, key = '', value = '') {
+  const { mono, size, keyPlaceholder, valuePlaceholder } = el.dataset;
+  const monoAttr = (part) => (mono === part || mono === 'both' ? ' data-mono spellcheck="false" autocapitalize="off"' : '');
+  const sizeAttr = size ? ` data-size="${esc(size)}"` : '';
+  const placeholder = (text) => (text ? ` placeholder="${esc(text)}"` : '');
+  return `<div class="fd-pairs-row">`
+    + `<input class="fd-input fd-pairs-key" type="text" autocomplete="off" data-fd-skip value="${esc(key)}"${sizeAttr}${monoAttr('key')}${placeholder(keyPlaceholder)}>`
+    + `<input class="fd-input fd-pairs-value" type="text" autocomplete="off" data-fd-skip value="${esc(value)}"${sizeAttr}${monoAttr('value')}${placeholder(valuePlaceholder)}>`
+    + `<button type="button" class="fd-btn" data-variant="ghost" data-icon-only${sizeAttr} data-fd-pairs-remove aria-label="Remove row">${icon('x')}</button>`
+    + `</div>`;
+}
+
+/** Re-read every row: labels, duplicate names, the carried value, and the id the label points at. */
+function syncPairs(el, { notify = false } = {}) {
+  const state = pairsState.get(el);
+  if (!state) return;
+  const rows = pairRows(el);
+  const keyLabel = el.dataset.keyLabel || 'Name';
+  const valueLabel = el.dataset.valueLabel || 'Value';
+  const counts = new Map();
+  rows.forEach((row) => { const key = rowKey(row).value.trim(); if (key) counts.set(key, (counts.get(key) || 0) + 1); });
+  let firstDuplicate = null;
+  rows.forEach((row, i) => {
+    const keyInput = rowKey(row);
+    const valueInput = rowValue(row);
+    const key = keyInput.value.trim();
+    const n = i + 1;
+    keyInput.setAttribute('aria-label', `${keyLabel} ${n}`);
+    valueInput.setAttribute('aria-label', key ? `${valueLabel} for ${key}` : `${valueLabel} ${n}`);
+    $(':scope > [data-fd-pairs-remove]', row).setAttribute('aria-label', key ? `Remove ${key}` : `Remove row ${n}`);
+    const duplicate = Boolean(key) && counts.get(key) > 1;
+    if (duplicate) {
+      keyInput.setAttribute('aria-invalid', 'true');
+      keyInput.setCustomValidity(`“${key}” is listed twice. Remove one.`);
+      firstDuplicate ??= keyInput;
+    } else {
+      keyInput.removeAttribute('aria-invalid');
+      keyInput.setCustomValidity('');
+    }
+    if (i === 0 && state.id) keyInput.id = state.id;
+    else if (state.id && keyInput.id === state.id) keyInput.removeAttribute('id');
+  });
+  el.toggleAttribute('data-invalid', Boolean(firstDuplicate));
+  if (firstDuplicate) setOwnError(el, firstDuplicate, firstDuplicate.validationMessage);
+  else if (ownErrors.has(el)) setOwnError(el, null, null);
+  if (state.carrier) state.carrier.value = formatPairs(el, pairEntries(el));
+  if (notify) emit(el, 'fd:change', { value: pairsValue(el) });
+}
+
+function lockRow(el, row) {
+  const { disabled, readOnly } = pairsState.get(el);
+  [rowKey(row), rowValue(row)].forEach((input) => { input.disabled = disabled; input.readOnly = readOnly; });
+  const remove = $(':scope > [data-fd-pairs-remove]', row);
+  remove.disabled = disabled;
+  remove.hidden = readOnly;
+}
+
+function addPairRow(el, after = null, key = '', value = '') {
+  const add = $(':scope > .fd-pairs-add', el);
+  if (after) after.insertAdjacentHTML('afterend', pairRowHTML(el, key, value));
+  else if (add) add.insertAdjacentHTML('beforebegin', pairRowHTML(el, key, value));
+  else el.insertAdjacentHTML('beforeend', pairRowHTML(el, key, value));
+  const row = after ? after.nextElementSibling : add ? add.previousElementSibling : pairRows(el).pop();
+  lockRow(el, row);
+  return row;
+}
+
+function renderPairs(el, entries) {
+  pairRows(el).forEach((row) => row.remove());
+  (entries.length ? entries : [['', '']]).forEach(([key, value]) => addPairRow(el, null, key, value));
+}
+
+const toEntries = (value) => (Array.isArray(value) ? value : Object.entries(value ?? {})).map(([key, v]) => [String(key).trim(), v == null ? '' : String(v)]);
+
+/** Replace the pairs (an object of name → value, or an array of [name, value]). */
+export function setPairs(el, value, { silent = true } = {}) {
+  setupPairs(el);
+  if (!pairsState.has(el)) return;
+  renderPairs(el, toEntries(value));
+  syncPairs(el, { notify: !silent });
+}
+
+function removePairRow(el, row) {
+  const rows = pairRows(el);
+  const key = rowKey(row).value.trim();
+  if (rows.length === 1) {
+    rowKey(row).value = '';
+    rowValue(row).value = '';
+    syncPairs(el, { notify: true });
+    rowKey(row).focus();
+  } else {
+    const next = row.nextElementSibling?.matches('.fd-pairs-row') ? row.nextElementSibling : null;
+    row.remove();
+    syncPairs(el, { notify: true });
+    (next ? rowKey(next) : $(':scope > .fd-pairs-add > button', el) ?? rowKey(pairRows(el).pop())).focus();
+  }
+  if (key) announce(el, `Removed ${key}`);
+}
+
+function setupPairs(el) {
+  if (!once(el, 'pairs')) return;
+  const area = $(':scope > textarea', el);
+  const json = el.dataset.format === 'json';
+  const initial = parsePairs(area ? area.value : '', { json });
+  const name = area?.name || el.dataset.name || '';
+  const state = { initial, id: area?.id || '', disabled: Boolean(area?.disabled), readOnly: Boolean(area?.readOnly), carrier: null };
+  pairsState.set(el, state);
+  if (!el.hasAttribute('role')) el.setAttribute('role', 'group');
+  if (area) {
+    const label = area.id ? $(`label[for="${CSS.escape(area.id)}"]`) : null;
+    if (label && !el.hasAttribute('aria-labelledby') && !el.hasAttribute('aria-label')) el.setAttribute('aria-labelledby', ensureId(label, 'fd-label'));
+    const describedBy = area.getAttribute('aria-describedby');
+    if (describedBy && !el.hasAttribute('aria-describedby')) el.setAttribute('aria-describedby', describedBy);
+    area.remove();
+  }
+  const keyLabel = el.dataset.keyLabel || 'Name';
+  const valueLabel = el.dataset.valueLabel || 'Value';
+  el.insertAdjacentHTML('afterbegin', `<div class="fd-pairs-head" aria-hidden="true"><span>${esc(keyLabel)}</span><span>${esc(valueLabel)}</span></div>`);
+  el.insertAdjacentHTML('beforeend', `<div class="fd-pairs-add"${state.readOnly ? ' hidden' : ''}><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-fd-pairs-add${state.disabled ? ' disabled' : ''}>${icon('plus')}<span>${esc(el.dataset.addLabel || 'Add row')}</span></button></div>`);
+  if (name) {
+    const carrier = document.createElement('input');
+    carrier.type = 'hidden';
+    carrier.name = name;
+    carrier.disabled = state.disabled;
+    carrier.setAttribute('data-fd-carrier', '');
+    if (area?.hasAttribute('form')) carrier.setAttribute('form', area.getAttribute('form'));
+    el.append(carrier);
+    state.carrier = carrier;
+  }
+  renderPairs(el, initial);
+  syncPairs(el);
+}
+
+/** Put pairs written as a text area back to the pairs they were rendered with (a form reset). */
+function resetPairs(el) {
+  const state = pairsState.get(el);
+  if (!state) return;
+  renderPairs(el, state.initial);
+  syncPairs(el);
+}
+
+/* ==========================================================================
+   Code field
+   ========================================================================== */
+
+const escaped = new WeakSet();   // code fields where Escape was just pressed, so the next Tab leaves
+
+const WS = ' \t\n\r';
+
+/**
+ * Find what is wrong with a JSON text: { reason, line } in plain words, or null when it parses. JSON.parse decides
+ * validity; a small scanner finds the place, so the message is the same in every browser.
+ */
+export function jsonProblem(text) {
+  try { JSON.parse(text); return null; } catch (error) {
+    const found = locateJson(text);
+    if (found) return found;
+    const message = String(error?.message || '');
+    const position = Number(message.match(/position (\d+)/)?.[1]);
+    const line = Number(message.match(/line (\d+)/)?.[1]) || (Number.isFinite(position) ? text.slice(0, position).split('\n').length : 1);
+    const reason = message.replace(/^JSON(\.parse| Parse error)?:?\s*/i, '').replace(/\s*(in JSON )?at (position|line) [\s\S]*$/i, '').replace(/,\s*".*$/, '').trim();
+    return { reason: (reason || 'it could not be read').replace(/^\w/, (c) => c.toLowerCase()), line };
+  }
+}
+
+function locateJson(text) {
+  let i = 0;
+  const n = text.length;
+  const stop = (reason, at = i) => { throw { reason, at }; };
+  const space = () => { while (i < n && WS.includes(text[i])) i++; };
+  const what = () => {
+    if (text.startsWith('//', i) || text.startsWith('/*', i)) return 'comments are not allowed';
+    if (text[i] === "'") return 'use double quotes, not single quotes';
+    const word = text.slice(i).match(/^[A-Za-z_$][\w$]*/)?.[0];
+    if (word) return `“${word}” is not a JSON value`;
+    return `unexpected “${text[i]}”`;
+  };
+  const string = () => {
+    i++;
+    while (i < n) {
+      const c = text[i];
+      if (c === '"') { i++; return; }
+      if (c === '\n' || c === '\r') stop('a string runs onto the next line');
+      if (c < ' ') stop('a string holds a control character');
+      if (c === '\\') {
+        const next = text[i + 1];
+        if (next === 'u') { if (!/^[0-9a-fA-F]{4}$/.test(text.slice(i + 2, i + 6))) stop('a \\u escape needs four hex digits'); i += 6; continue; }
+        if (!next || !'"\\/bfnrt'.includes(next)) stop(`“\\${next ?? ''}” is not an escape JSON knows`);
+        i += 2;
+        continue;
+      }
+      i++;
+    }
+    stop('a string is not closed');
+  };
+  const number = () => {
+    const match = text.slice(i).match(/^-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/);
+    if (!match) stop('a number is not written right');
+    i += match[0].length;
+    if (/^[\d.eE]/.test(text[i] ?? '')) stop('a number is not written right');
+  };
+  const container = (close) => {
+    i++;
+    space();
+    if (text[i] === close) { i++; return; }
+    for (;;) {
+      space();
+      if (close === '}') {
+        if (i >= n) stop('it ends before the closing }');
+        if (text[i] === '}') stop('there is a comma before the }');
+        if (text[i] !== '"') stop(text[i] === "'" ? 'names need double quotes' : 'expected a name in double quotes');
+        string();
+        space();
+        if (text[i] !== ':') stop(i >= n ? 'it ends before the value' : 'expected a colon after the name');
+        i++;
+      } else if (text[i] === ']') stop('there is a comma before the ]');
+      value();
+      space();
+      if (text[i] === ',') { i++; continue; }
+      if (text[i] === close) { i++; return; }
+      if (i >= n) stop(`it ends before the closing ${close}`);
+      stop(`expected a comma or ${close}`);
+    }
+  };
+  function value() {
+    space();
+    if (i >= n) stop('it ends before a value');
+    const c = text[i];
+    if (c === '{') return container('}');
+    if (c === '[') return container(']');
+    if (c === '"') return string();
+    if (c === '-' || (c >= '0' && c <= '9')) return number();
+    for (const word of ['true', 'false', 'null']) if (text.startsWith(word, i) && !/[\w$]/.test(text[i + word.length] ?? '')) { i += word.length; return undefined; }
+    return stop(what());
+  }
+  try {
+    value();
+    space();
+    if (i < n) stop('there is more after the end of the value');
+    return null;
+  } catch (problem) {
+    if (!problem || typeof problem.reason !== 'string') return null;
+    return { reason: problem.reason, line: text.slice(0, Math.min(problem.at, n)).split('\n').length };
+  }
+}
+
+/** Re-indent valid JSON with two spaces. Literals are kept exactly as written (no rounding of big numbers). */
+export function formatJson(text) {
+  let out = '';
+  let depth = 0;
+  let i = 0;
+  const line = () => `\n${'  '.repeat(depth)}`;
+  while (i < text.length) {
+    const c = text[i];
+    if (WS.includes(c)) { i++; continue; }
+    if (c === '"') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== '"') j += text[j] === '\\' ? 2 : 1;
+      out += text.slice(i, j + 1);
+      i = j + 1;
+    } else if (c === '{' || c === '[') {
+      let j = i + 1;
+      while (WS.includes(text[j] ?? '-')) j++;
+      if (text[j] === (c === '{' ? '}' : ']')) { out += c + text[j]; i = j + 1; continue; }
+      depth++;
+      out += c + line();
+      i++;
+    } else if (c === '}' || c === ']') { depth--; out += line() + c; i++; }
+    else if (c === ',') { out += `,${line()}`; i++; }
+    else if (c === ':') { out += ': '; i++; }
+    else {
+      let j = i;
+      while (j < text.length && !`${WS},:]}`.includes(text[j])) j++;
+      out += text.slice(i, j);
+      i = j;
+    }
+  }
+  return out;
+}
+
+/** Check a JSON code field and show or clear its error. Returns true when the value is empty or valid JSON. */
+export function checkJson(area) {
+  const problem = area.value.trim() ? jsonProblem(area.value) : null;
+  if (problem) {
+    const message = `This isn't valid JSON: ${problem.reason}, line ${problem.line}.`;
+    area.setCustomValidity(message);
+    area.setAttribute('aria-invalid', 'true');
+    setOwnError(area, area, message);
+    return false;
+  }
+  if (ownErrors.has(area)) {
+    area.setCustomValidity('');
+    area.removeAttribute('aria-invalid');
+    setOwnError(area, area, null);
+  }
+  return true;
+}
+
+function insertText(area, text) {
+  let done = false;
+  try { done = document.execCommand('insertText', false, text); } catch { /* not supported */ }   // keeps undo working
+  if (!done) {
+    area.setRangeText(text, area.selectionStart, area.selectionEnd, 'end');
+    fire(area, 'input');
+  }
+}
+
+function indentCode(area) {
+  const { selectionStart: start, selectionEnd: end, value } = area;
+  if (start !== end && value.slice(start, end).includes('\n')) {
+    const from = value.lastIndexOf('\n', start - 1) + 1;
+    const block = value.slice(from, end).replace(/^(?=[^\n])/gm, '  ');
+    area.setSelectionRange(from, end);
+    insertText(area, block);
+    area.setSelectionRange(from, from + block.length);
+  } else insertText(area, '  ');
+}
+
+function formatCode(area) {
+  if (!area.value.trim() || area.readOnly || area.disabled) return;
+  if (!checkJson(area)) { area.focus(); return; }
+  const pretty = formatJson(area.value);
+  if (pretty === area.value) return;
+  area.focus();
+  area.select();
+  insertText(area, pretty);
+  area.setSelectionRange(0, 0);
+  area.scrollTop = 0;
+}
+
+function setupCodefield(el) {
+  if (!once(el, 'codefield')) return;
+  const area = $(':scope > .fd-codefield-input', el);
+  if (!area) return;
+  el.setAttribute('data-ready', '');
+  if (!area.hasAttribute('spellcheck')) area.setAttribute('spellcheck', 'false');
+  if (!area.hasAttribute('autocapitalize')) area.setAttribute('autocapitalize', 'off');
+  if (!area.hasAttribute('autocomplete')) area.setAttribute('autocomplete', 'off');
+  const note = document.createElement('span');
+  note.className = 'fd-sr-only';
+  ensureId(note, 'fd-codefield-keys');
+  note.textContent = 'Tab inserts two spaces. To leave the field, press Escape, then Tab.';
+  el.append(note);
+  const described = new Set((area.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+  described.add(note.id);
+  area.setAttribute('aria-describedby', [...described].join(' '));
+}
+
+function resetCodefield(area) {
+  if (!ownErrors.has(area)) return;
+  area.setCustomValidity('');
+  area.removeAttribute('aria-invalid');
+  setOwnError(area, area, null);
 }
 
 /* ==========================================================================
@@ -741,7 +1261,7 @@ export function setFileProgress(row, pct, { state, message } = {}) {
 
 function fileRow(file, problem) {
   const name = esc(file.name);
-  return `<li class="fd-file" data-state="${problem ? 'error' : 'uploading'}" style="--fd-progress:0">
+  return `<li class="fd-file" data-state="${problem ? 'error' : 'uploading'}">
     <span class="fd-file-icon">${icon(fileIconName(file))}</span>
     <div class="fd-file-main">
       <div class="fd-file-name">${name}</div>
@@ -791,7 +1311,7 @@ function simulateUpload(row) {
    Validation
    ========================================================================== */
 
-const SKIP_VALIDATION = '.fd-otp > input, .fd-search-input, .fd-tag-input-field, [role="combobox"], [data-fd-skip], input[type="hidden"], input[type="submit"], input[type="button"], input[type="reset"], input[type="file"]';
+const SKIP_VALIDATION = '.fd-otp > input, .fd-search-input, .fd-tag-input-field:not([required]),[role="combobox"], [data-fd-skip], input[type="hidden"], input[type="submit"], input[type="button"], input[type="reset"], input[type="file"]';
 const validatable = (el) => el instanceof HTMLElement && /^(input|select|textarea)$/i.test(el.tagName) && !el.matches(SKIP_VALIDATION) && !el.disabled && el.willValidate;
 const labelOf = (el) => {
   const named = el.labels?.[0] ?? el.closest('.fd-field')?.querySelector('.fd-field-label');
@@ -907,7 +1427,7 @@ function setupDirty(form) {
    Init
    ========================================================================== */
 
-const UPGRADE = 'input[data-fd-checkall], input[data-indeterminate], [data-fd-otp], .fd-checkbox-box, .fd-choice-mark, .fd-search-input, .fd-slider, .fd-number, .fd-otp, [data-fd-tag-input], [data-fd-combobox], [data-fd-secret], [data-fd-copy-field], .fd-copy-field, .fd-secret, textarea[data-fd-autogrow], .fd-field-counter, form[data-fd-validate], form[data-fd-dirty]';
+const UPGRADE = 'input[data-fd-checkall], input[data-indeterminate], [data-fd-otp], .fd-checkbox-box, .fd-choice-mark, .fd-search-input, .fd-slider, .fd-number, .fd-otp, [data-fd-tag-input], [data-fd-pairs], .fd-codefield, [data-fd-combobox], [data-fd-secret], [data-fd-copy-field], .fd-copy-field, .fd-secret, textarea[data-fd-autogrow], .fd-field-counter, form[data-fd-validate], form[data-fd-dirty]';
 
 function upgrade(root) {
   enhanceChecks(root);
@@ -917,6 +1437,8 @@ function upgrade(root) {
   each(root, '.fd-number', (el) => { if (once(el, 'number')) syncNumber(el); });
   each(root, '.fd-otp, [data-fd-otp]', setupOtp);
   each(root, '[data-fd-tag-input]', setupTagInput);
+  each(root, '[data-fd-pairs]', setupPairs);
+  each(root, '.fd-codefield', setupCodefield);
   each(root, '[data-fd-combobox]', setupCombobox);
   each(root, '.fd-secret, .fd-copy-field, [data-fd-secret], [data-fd-copy-field]', setupSecret);
   each(root, 'textarea[data-fd-autogrow]', autogrow);
@@ -996,11 +1518,17 @@ function bind() {
   document.addEventListener('reset', (e) => {
     const form = e.target;
     if (!(form instanceof HTMLFormElement)) return;
-    setTimeout(() => $$('.fd-otp', form).forEach((el) => {
-      const carrier = otpCarrier(el);
-      if (carrier) carrier.value = otpValue(el);
-      setOtpInvalid(el, false);
-    }));
+    setTimeout(() => {
+      $$('.fd-otp', form).forEach((el) => {
+        const carrier = otpCarrier(el);
+        if (carrier) carrier.value = otpValue(el);
+        setOtpInvalid(el, false);
+      });
+      // Lists and pairs a server wrote as text areas go back to the values they were rendered with.
+      $$('[data-fd-tag-input]', form).forEach(resetList);
+      $$('[data-fd-pairs]', form).forEach(resetPairs);
+      $$('.fd-codefield-input', form).forEach(resetCodefield);
+    });
   });
   on(document, 'input', '.fd-otp > input', (e, input) => {
     const el = input.closest('.fd-otp');
@@ -1053,7 +1581,7 @@ function bind() {
   /* Tag input */
   on(document, 'keydown', '.fd-tag-input-field', (e, field) => {
     const el = field.closest('[data-fd-tag-input]');
-    if (!el || e.isComposing) return;
+    if (!el || e.isComposing || field.readOnly) return;
     if (e.key === 'Enter' || e.key === ',') {
       if (field.value.trim()) { e.preventDefault(); addTags(el, [field.value]); field.value = ''; }
       else if (e.key === ',') e.preventDefault();
@@ -1072,7 +1600,7 @@ function bind() {
   on(document, 'paste', '.fd-tag-input-field', (e, field) => {
     const el = field.closest('[data-fd-tag-input]');
     const text = e.clipboardData?.getData('text') ?? '';
-    if (!el || !/[\n,;]/.test(text)) return;
+    if (!el || field.readOnly || !/[\n,;]/.test(text)) return;
     e.preventDefault();
     addTags(el, text.split(/[\n,;]/));
   });
@@ -1083,10 +1611,81 @@ function bind() {
   on(document, 'click', '.fd-token-remove', (e, button) => {
     const token = button.closest('.fd-token');
     const owner = token.closest('[data-fd-tag-input], [data-fd-combobox]');
+    const field = $(':scope > .fd-tag-input-field', owner);
+    if (field && (field.readOnly || field.disabled)) return;
     removeToken(token);
     $('input:not([type="hidden"])', owner)?.focus();
   });
   on(document, 'click', '[data-fd-tag-input]', (e, el) => { if (!e.target.closest('.fd-token')) $('.fd-tag-input-field', el)?.focus(); });
+
+  /* Pairs */
+  on(document, 'input', '.fd-pairs-row > input', (e, input) => syncPairs(input.closest('[data-fd-pairs]'), { notify: true }));
+  on(document, 'keydown', '.fd-pairs-row > input', (e, input) => {
+    const el = input.closest('[data-fd-pairs]');
+    const row = input.parentElement;
+    if (!el || e.isComposing || input.readOnly || input.disabled || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'Enter' && input.matches('.fd-pairs-key')) {
+      e.preventDefault();   // Enter moves to the value instead of posting a half-written pair
+      rowValue(row).focus();
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const next = addPairRow(el, row);
+      syncPairs(el, { notify: true });
+      rowKey(next).focus();
+    } else if (e.key === 'Backspace' && input.matches('.fd-pairs-key') && !input.value && !rowValue(row).value) {
+      const above = row.previousElementSibling?.matches('.fd-pairs-row') ? row.previousElementSibling : null;
+      if (!above) return;
+      e.preventDefault();
+      row.remove();
+      syncPairs(el, { notify: true });
+      const target = rowValue(above);
+      target.focus();
+      target.setSelectionRange(target.value.length, target.value.length);
+    }
+  });
+  on(document, 'click', '[data-fd-pairs-remove]', (e, button) => {
+    const el = button.closest('[data-fd-pairs]');
+    if (el && !button.disabled) removePairRow(el, button.closest('.fd-pairs-row'));
+  });
+  on(document, 'click', '[data-fd-pairs-add]', (e, button) => {
+    const el = button.closest('[data-fd-pairs]');
+    if (!el || button.disabled) return;
+    const row = addPairRow(el);
+    syncPairs(el, { notify: true });
+    rowKey(row).focus();
+  });
+
+  /* Code field: Tab indents (Escape, then Tab, leaves), JSON is checked on blur, Format re-indents */
+  on(document, 'keydown', '.fd-codefield-input', (e, area) => {
+    if (e.key === 'Escape') { escaped.add(area); return; }
+    if (e.key !== 'Tab') { if (e.key !== 'Shift') escaped.delete(area); return; }
+    if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey || area.readOnly || area.disabled || !area.closest('.fd-codefield[data-ready]')) return;
+    if (escaped.has(area)) { escaped.delete(area); return; }   // let focus move on
+    e.preventDefault();
+    indentCode(area);
+  });
+  on(document, 'focusout', '.fd-codefield-input', (e, area) => {
+    escaped.delete(area);
+    if (area.closest('.fd-codefield[data-fd-json]')) checkJson(area);
+  });
+  on(document, 'input', '.fd-codefield[data-fd-json] > .fd-codefield-input', (e, area) => { if (ownErrors.has(area)) checkJson(area); });
+  on(document, 'click', '[data-fd-codefield-format]', (e, button) => {
+    const area = $(':scope > .fd-codefield-input', button.closest('.fd-codefield'));
+    if (area) formatCode(area);
+  });
+  // Invalid JSON and a name used twice stop the form posting. This runs before form[data-fd-validate] so that
+  // form's own pass sees the same errors.
+  document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    const blocked = [
+      ...$$('.fd-codefield[data-fd-json] > .fd-codefield-input', form).filter((area) => !area.disabled && !checkJson(area)),
+      ...$$('[data-fd-pairs][data-invalid]', form).map((el) => $('.fd-pairs-key[aria-invalid="true"]', el)).filter((key) => key && !key.disabled),
+    ];
+    if (!blocked.length) return;
+    e.preventDefault();
+    blocked[0].focus();
+  }, true);
 
   /* Combobox */
   on(document, 'keydown', '[data-fd-combobox] [role="combobox"], [data-fd-combobox] .fd-input-group > .fd-input', (e, input) => {
@@ -1219,7 +1818,7 @@ function bind() {
       e.preventDefault();
       invalid[0].focus();
       emit(form, 'fd:invalid', { fields: invalid });
-    } else emit(form, 'fd:valid', {});
+    } else if (!e.defaultPrevented) emit(form, 'fd:valid', {});   // a code field or pairs editor may have stopped it
   }, true);
   document.addEventListener('reset', (e) => {
     const form = e.target;

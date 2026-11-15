@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register an app · Ember</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="api-keys" data-title="Register an app">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band" data-pad="sm">
+      <a class="fd-back" href="api-keys.html"><i data-icon="arrow-left"></i><span>Back to API keys</span></a>
+    </section>
+
+    <section class="fd-band fd-page-hero">
+      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
+      <h1 class="fd-display">Register an app</h1>
+      <p class="fd-page-hero-desc">Let people sign in to your app through Ember, and let agents act for them.</p>
+    </section>
+
+    <section class="fd-band" data-grow aria-label="Register an app">
+      <form class="fd-form" data-size="full" id="register-app" method="post" data-fd-validate autocomplete="off">
+
+        <!-- ===================================================== App -->
+        <section class="fd-form-section" aria-labelledby="ra-app-title">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title" id="ra-app-title">App</h2>
+            <p class="fd-form-section-desc">What people see when they sign in.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-form-cols">
+              <div class="fd-field">
+                <label class="fd-field-label" for="ra-name" data-required>Name</label>
+                <input class="fd-input" id="ra-name" name="name" value="Quarry console" required maxlength="40" autocomplete="off" data-error-required="Name the app so people recognise it.">
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="ra-app-id" data-required>App ID</label>
+                <input class="fd-input" id="ra-app-id" name="app_id" data-mono value="quarry-console" required pattern="[A-Za-z0-9\-]+" autocomplete="off" spellcheck="false" aria-describedby="ra-app-id-hint" data-error-required="Choose an ID for the app." data-error-pattern="Use letters, numbers and dashes only.">
+                <p class="fd-field-hint" id="ra-app-id-hint">It can't change later.</p>
+              </div>
+            </div>
+            <div class="fd-field" role="radiogroup" aria-labelledby="ra-kind-label">
+              <span class="fd-field-label" id="ra-kind-label">Kind</span>
+              <div class="fd-choice-group">
+                <label class="fd-choice"><input type="radio" name="kind" value="web" checked><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Web app</span><span class="fd-choice-desc">Runs on a server and keeps a secret.</span></span></label>
+                <label class="fd-choice"><input type="radio" name="kind" value="spa"><span class="fd-choice-mark"></span><span class="fd-choice-body"><span class="fd-choice-title">Single-page or mobile app</span><span class="fd-choice-desc">Runs on a device and can't keep a secret.</span></span></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Callbacks -->
+        <section class="fd-form-section" aria-labelledby="ra-callbacks-title">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title" id="ra-callbacks-title">Callbacks</h2>
+            <p class="fd-form-section-desc">Where Ember sends people and events.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-redirects" data-required>Redirect URLs</label>
+              <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^https://">
+                <textarea name="redirect_uris" id="ra-redirects" rows="3" required placeholder="https://console.quarry.dev/auth/callback" aria-describedby="ra-redirects-hint" data-error-required="Add at least one redirect URL.">https://console.quarry.dev/auth/callback
+https://staging.quarry.dev/auth/callback</textarea>
+              </div>
+              <p class="fd-field-hint" id="ra-redirects-hint">Exact HTTPS URLs. People return here after signing in.</p>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-signout">Sign-out URLs</label>
+              <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^https://">
+                <textarea name="signout_uris" id="ra-signout" rows="3" placeholder="https://console.quarry.dev/signed-out"></textarea>
+              </div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-backchannel">Back-channel URL</label>
+              <input class="fd-input" type="url" id="ra-backchannel" name="backchannel_uri" data-mono placeholder="https://console.quarry.dev/hooks/ember" autocomplete="off" spellcheck="false" aria-describedby="ra-backchannel-hint" data-error-type="Enter a full URL, starting with https://.">
+              <p class="fd-field-hint" id="ra-backchannel-hint">Ember posts sign-out events here.</p>
+            </div>
+            <div class="fd-form-row">
+              <div class="fd-form-row-text">
+                <span class="fd-form-row-label" id="ra-dev-label">Development mode</span>
+                <span class="fd-form-row-desc" id="ra-dev-desc">Allows <span class="fd-mono">http://localhost</span> callbacks. Turn off in production.</span>
+              </div>
+              <div class="fd-form-row-control"><label class="fd-switch"><input type="checkbox" role="switch" id="ra-dev" name="dev_mode" aria-labelledby="ra-dev-label" aria-describedby="ra-dev-desc"><span class="fd-switch-track"></span></label></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Sign-in -->
+        <section class="fd-form-section" aria-labelledby="ra-signin-title">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title" id="ra-signin-title">Sign-in</h2>
+            <p class="fd-form-section-desc">How people get in, and who may.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-field" role="group" aria-labelledby="ra-methods-label">
+              <span class="fd-field-label" id="ra-methods-label">Methods</span>
+              <div class="fd-grid" data-min="sm" data-gap="2" data-gap-x="4">
+                <label class="fd-checkbox"><input type="checkbox" name="methods" value="email-link" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Email link</span></span></label>
+                <label class="fd-checkbox"><input type="checkbox" name="methods" value="password"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Password</span></span></label>
+                <label class="fd-checkbox"><input type="checkbox" name="methods" value="passkey" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Passkey</span></span></label>
+                <label class="fd-checkbox"><input type="checkbox" name="methods" value="github" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">GitHub</span></span></label>
+                <label class="fd-checkbox"><input type="checkbox" name="methods" value="google"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Google</span></span></label>
+              </div>
+            </div>
+            <div class="fd-field">
+              <span class="fd-field-label" id="ra-signup-label">Who can sign up</span>
+              <div><div class="fd-segmented" role="radiogroup" aria-labelledby="ra-signup-label">
+                <label class="fd-segmented-item"><input type="radio" name="signup" value="invited" checked><span>Invited only</span></label>
+                <label class="fd-segmented-item"><input type="radio" name="signup" value="anyone"><span>Anyone</span></label>
+              </div></div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-domains">Allowed email domains</label>
+              <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^[a-z0-9-]+(\.[a-z0-9-]+)+$">
+                <textarea name="email_domains" id="ra-domains" rows="2" placeholder="quarry.dev" aria-describedby="ra-domains-hint">quarry.dev
+northwind.dev</textarea>
+              </div>
+              <p class="fd-field-hint" id="ra-domains-hint">People with these domains join without an invitation.</p>
+            </div>
+            <div class="fd-form-cols">
+              <div class="fd-field">
+                <label class="fd-field-label" for="ra-2fa">Two-factor</label>
+                <div class="fd-select" data-variant="outline">
+                  <select id="ra-2fa" name="two_factor">
+                    <option value="off">Off</option>
+                    <option value="optional" selected>Optional</option>
+                    <option value="required">Required</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fd-field">
+                <label class="fd-field-label" for="ra-remember">Remember browsers for</label>
+                <div class="fd-input-group" data-fit>
+                  <input class="fd-input" type="number" size="4" id="ra-remember" name="remember_days" value="30" min="0" max="365" step="1" aria-describedby="ra-remember-hint">
+                  <span class="fd-input-affix" data-kind="unit">days</span>
+                </div>
+                <p class="fd-field-hint" id="ra-remember-hint">0 asks every time.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Agents -->
+        <section class="fd-form-section" aria-labelledby="ra-agents-title">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title" id="ra-agents-title">Agents</h2>
+            <p class="fd-form-section-desc">AI agents acting for a person in this app.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <div class="fd-form-row">
+              <div class="fd-form-row-text">
+                <span class="fd-form-row-label" id="ra-agent-access-label">Agent access</span>
+                <span class="fd-form-row-desc" id="ra-agent-access-desc">Turning it off revokes every agent grant for this app.</span>
+              </div>
+              <div class="fd-form-row-control"><label class="fd-switch"><input type="checkbox" role="switch" id="ra-agent-access" name="agent_access" checked aria-labelledby="ra-agent-access-label" aria-describedby="ra-agent-access-desc"><span class="fd-switch-track"></span></label></div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-scopes">Scopes</label>
+              <div class="fd-pairs" data-fd-pairs data-key-label="Scope" data-value-label="What people see at consent" data-key-placeholder="runs:read" data-value-placeholder="Read your runs" data-add-label="Add scope" data-mono="key">
+                <textarea name="scopes" id="ra-scopes" rows="4">runs:read = Read your runs
+runs:write = Start and stop runs
+monitors:read = See your monitors</textarea>
+              </div>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-agents">Allowed agents</label>
+              <div class="fd-tag-input" data-fd-tag-input data-mono data-pattern="^[a-z0-9-]+(\.[a-z0-9-]+)+$">
+                <textarea name="allowed_agents" id="ra-agents" rows="2" placeholder="agent.quarry.dev" aria-describedby="ra-agents-hint"></textarea>
+              </div>
+              <p class="fd-field-hint" id="ra-agents-hint">Leave empty to allow any agent.</p>
+            </div>
+            <div class="fd-field">
+              <label class="fd-field-label" for="ra-grant">Longest grant</label>
+              <div class="fd-input-group" data-fit>
+                <input class="fd-input" type="number" size="4" id="ra-grant" name="grant_days" value="90" min="1" max="365" step="1" aria-describedby="ra-grant-hint">
+                <span class="fd-input-affix" data-kind="unit">days</span>
+              </div>
+              <p class="fd-field-hint" id="ra-grant-hint">People approve again after this long.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== Advanced -->
+        <section class="fd-form-section" aria-labelledby="ra-advanced-title">
+          <header class="fd-form-section-head">
+            <h2 class="fd-form-section-title" id="ra-advanced-title">Advanced</h2>
+            <p class="fd-form-section-desc">Overrides for this app only.</p>
+          </header>
+          <div class="fd-form-section-body">
+            <details class="fd-disclosure">
+              <summary class="fd-disclosure-trigger"><span>Override branding</span><i data-icon="chevron-down"></i></summary>
+              <div class="fd-disclosure-panel"><div class="fd-disclosure-inner">
+                <div class="fd-field">
+                  <label class="fd-field-label" for="ra-branding">Branding</label>
+                  <div class="fd-codefield" data-fd-json>
+                    <div class="fd-codefield-head"><span class="fd-codefield-lang">JSON</span>
+                      <button class="fd-btn" type="button" data-variant="ghost" data-size="xs" data-fd-codefield-format>Format</button></div>
+                    <textarea class="fd-codefield-input" name="branding" id="ra-branding" rows="8" spellcheck="false" autocapitalize="off" aria-describedby="ra-branding-hint">{
+  "name": "Quarry console",
+  "logo_url": "https://console.quarry.dev/logo.svg",
+  "palette": "ember",
+  "links": {
+    "help": "https://quarry.dev/help",
+    "terms": "https://quarry.dev/terms"
+  }
+}</textarea>
+                  </div>
+                  <p class="fd-field-hint" id="ra-branding-hint">Overrides the team's name, look and links for this app.</p>
+                </div>
+              </div></div>
+            </details>
+          </div>
+        </section>
+
+        <!-- A create form always shows its actions. On an edit form, use data-variant="sticky" with data-fd-dirty on
+             the form: the bar then appears only while there are unsaved changes. -->
+        <div class="fd-form-actions">
+          <a class="fd-btn" data-variant="ghost" href="api-keys.html">Cancel</a>
+          <button type="submit" class="fd-btn" data-variant="primary"><span>Register app</span></button>
+        </div>
+      </form>
+    </section>
+
+  </div>
+</main>
+
+<script type="module">
+  import { overlays } from '../fire/fire.js';
+
+  const form = document.getElementById('register-app');
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.checkValidity() || form.querySelector('[aria-invalid="true"]')) return;
+    overlays.toast.success('App registered');
+  });
+</script>
+</body>
+</html>

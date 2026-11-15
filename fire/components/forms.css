@@ -106,6 +106,14 @@
   --fd-form-matrix-col-sm: 60px;
   --fd-form-matrix-head: 40px;
   --fd-form-dot: 6px;                  /* unsaved-changes dot */
+  /* form sections */
+  --fd-form-section-head: 280px;       /* the head column of a section in a wide form */
+  --fd-form-section-top: var(--fd-space-6);   /* where a section's head stops while its body scrolls past */
+  /* pairs */
+  --fd-pairs-key: 2fr;                 /* share of a row the name takes … */
+  --fd-pairs-value: 3fr;               /* … and the value */
+  /* code field */
+  --fd-codefield-head: var(--fd-control-sm);  /* the language and Format row */
 }
 
 @keyframes fd-field-rise { from { opacity: 0; transform: translateY(var(--fd-form-rise)); } }
@@ -115,10 +123,10 @@
    ========================================================================== */
 
 /* Sizes. Padding-block of a textarea is derived from the height so every density lines up. */
-:is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-select, .fd-otp)[data-size="sm"] {
+:is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-pairs, .fd-select, .fd-otp)[data-size="sm"] {
   --_f-h: var(--fd-control-sm); --_f-px: var(--fd-space-2-5); --_f-radius: var(--fd-radius-md); --_f-fs: var(--fd-text-sm);
 }
-:is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-select, .fd-otp)[data-size="lg"] {
+:is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-pairs, .fd-select, .fd-otp)[data-size="lg"] {
   --_f-h: var(--fd-control-lg); --_f-px: var(--fd-space-3-5); --_f-radius: var(--fd-radius-lg); --_f-fs: var(--fd-text-md);
 }
 :is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input)[data-mono] {
@@ -126,8 +134,9 @@
 }
 :is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input)[data-mono][data-size="sm"] { --_f-fs: var(--fd-text-xs); }
 
-/* Standalone controls: the element itself is the box. */
-:is(.fd-input, .fd-textarea, .fd-otp > input, .fd-select[data-variant="outline"] > select) {
+/* Standalone controls: the element itself is the box. A text area alone inside a tag input or a pairs editor is
+   the plain field a server rendered for use without script, and wears the same skin. */
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select) {
   --_f-line: var(--fd-control-line);
   --_f-lw: var(--fd-hairline);
   --_f-halo: transparent;
@@ -139,7 +148,7 @@
   padding: 0 var(--_f-px, var(--fd-control-px));
   border: 0; border-radius: var(--_f-radius, var(--fd-radius-md));
   background: var(--_f-bg); color: var(--_f-fg); caret-color: var(--fd-accent);
-  font-size: var(--_f-fs, var(--fd-text-md)); line-height: var(--fd-lh-md); letter-spacing: var(--fd-ls-body);
+  font-size: var(--_f-fs, var(--fd-text-md)); line-height: var(--_f-lh, var(--fd-lh-md)); letter-spacing: var(--fd-ls-body);
   text-overflow: ellipsis;
   box-shadow: inset 0 0 0 var(--_f-lw, var(--fd-hairline)) var(--_f-line), 0 0 0 var(--fd-form-halo) var(--_f-halo);
   transition:
@@ -147,12 +156,13 @@
     background-color var(--fd-dur-2) var(--fd-ease-out),
     color var(--fd-dur-2) var(--fd-ease-out);
 }
-:is(.fd-input, .fd-textarea, .fd-otp > input, .fd-select[data-variant="outline"] > select):hover:not(:focus, :disabled, [readonly]) { --_f-line: var(--fd-control-line-hover); --_f-bg: color-mix(in srgb, var(--fd-surface) 55%, var(--fd-bg-sunken)); }
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):hover:not(:focus, :disabled, [readonly], span, div, output) { --_f-line: var(--fd-control-line-hover); --_f-bg: color-mix(in srgb, var(--fd-surface) 55%, var(--fd-bg-sunken)); }
 :is(.fd-input, .fd-textarea)[readonly] { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
-:is(.fd-input, .fd-textarea, .fd-otp > input, .fd-select[data-variant="outline"] > select):focus { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
-:is(.fd-input, .fd-textarea, .fd-otp > input, .fd-select[data-variant="outline"] > select)[aria-invalid="true"] { --_f-line: var(--fd-danger-solid); }
-:is(.fd-input, .fd-textarea, .fd-otp > input, .fd-select[data-variant="outline"] > select)[aria-invalid="true"]:focus { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
-:is(.fd-input, .fd-textarea, .fd-otp > input, .fd-select[data-variant="outline"] > select):disabled {
+:is(.fd-tag-input, .fd-pairs) > textarea:only-child[readonly] { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):focus { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select)[aria-invalid="true"] { --_f-line: var(--fd-danger-solid); }
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select)[aria-invalid="true"]:focus { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):disabled {
   --_f-bg: var(--fd-fill-disabled); --_f-fg: var(--fd-text-4); --_f-line: var(--fd-line-faint);
   cursor: not-allowed; -webkit-text-fill-color: var(--fd-text-4);
 }
@@ -210,7 +220,7 @@
   background: var(--fd-fill); color: var(--fd-text); font: inherit; font-size: var(--fd-text-sm); font-weight: var(--fd-weight-label); cursor: pointer;
 }
 
-.fd-textarea {
+.fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child {
   block-size: auto; min-block-size: var(--_f-h, var(--fd-control-md));
   padding-block: calc((var(--_f-h, var(--fd-control-md)) - var(--fd-lh-md)) / 2);
   resize: vertical; overflow: auto; text-overflow: clip;
@@ -218,6 +228,17 @@
 }
 .fd-textarea[data-fd-autogrow] { resize: none; overflow-y: hidden; }
 .fd-textarea[data-resize="none"] { resize: none; }
+/* The wrapper around that plain text area draws nothing, so there is one edge, not two. */
+.fd-tag-input:has(> textarea:only-child) { display: block; padding: 0; min-block-size: 0; background: none; box-shadow: none; cursor: auto; }
+.fd-pairs[data-mono] > textarea:only-child { font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; --_f-fs: var(--fd-text-sm); }
+
+/* A value shown in a field's shape (a sample in a preview, a read-only value): it sits on the same baseline as a
+   real input, in every size, and is not a control. */
+:where(span, div, output).fd-input {
+  --_f-lh: var(--_f-h, var(--fd-control-md));   /* one line box the height of the field: the text sits in the middle */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default;
+}
+:where(span, div, output).fd-input > * { vertical-align: middle; }
 
 /* ==========================================================================
    Field: label, control, hint, error
@@ -270,7 +291,8 @@
 /* Layout helpers */
 /* A control that should not fill its column sizes to its content: the input's own `size` attribute, a
    select's longest option. */
-:is(.fd-input, .fd-input-group, .fd-select, .fd-number, .fd-search)[data-fit] { inline-size: auto; flex: none; max-inline-size: 100%; }
+/* justify-self: inside a field (a grid) an auto width would still stretch to the column. */
+:is(.fd-input, .fd-input-group, .fd-select, .fd-number, .fd-search)[data-fit] { inline-size: auto; flex: none; max-inline-size: 100%; justify-self: start; }
 .fd-input-group[data-fit] > .fd-input { inline-size: auto; flex: 0 1 auto; }
 
 /* A form sets its own width: it fills its container up to a readable measure. Fields fill the form, or one
@@ -674,6 +696,80 @@
 .fd-token[data-invalid] .fd-token-remove { color: inherit; }
 .fd-tag-input:has(> .fd-tag-input-field:disabled) .fd-token { background: var(--fd-fill); color: var(--fd-text-4); }
 .fd-tag-input:has(> .fd-tag-input-field:disabled) .fd-token-remove { pointer-events: none; }
+.fd-tag-input:has(> .fd-tag-input-field[readonly]) .fd-token-remove { display: none; }
+.fd-tag-input:has(> .fd-tag-input-field[readonly]) .fd-token { padding-inline-end: var(--fd-space-2); }
+
+/* ==========================================================================
+   Pairs: a name and a value per row
+   ========================================================================== */
+
+.fd-pairs {
+  --_f-btn: var(--fd-control-md);
+  container: fd-pairs / inline-size;
+  display: grid; gap: var(--fd-space-2); min-inline-size: 0;
+}
+.fd-pairs[data-size="sm"] { --_f-btn: var(--fd-control-sm); }
+.fd-pairs[data-size="lg"] { --_f-btn: var(--fd-control-lg); }
+.fd-pairs-head, .fd-pairs-row {
+  display: grid; grid-template-columns: minmax(0, var(--fd-pairs-key)) minmax(0, var(--fd-pairs-value)) var(--_f-btn);
+  grid-template-areas: "key value remove"; align-items: center; gap: var(--fd-space-1-5) var(--fd-space-2); min-inline-size: 0;
+}
+/* The column labels: quiet, in the eyebrow style, lined up with the text inside the inputs. */
+.fd-pairs-head > * {
+  padding-inline: var(--_f-px, var(--fd-control-px)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); text-transform: uppercase;
+  font-weight: var(--fd-weight-regular); color: var(--fd-text-3);
+}
+.fd-pairs-head > :first-child, .fd-pairs-key { grid-area: key; }
+.fd-pairs-head > :nth-child(2), .fd-pairs-value { grid-area: value; }
+.fd-pairs-row > .fd-btn { grid-area: remove; color: var(--fd-text-3); }
+.fd-pairs-row > .fd-btn:hover:not(:disabled) { color: var(--fd-text); }
+.fd-pairs-add { display: flex; }
+/* A narrow container stacks each row: the name with its remove button, the value under it. */
+@container fd-pairs (max-width: 480px) {
+  .fd-pairs-head, .fd-pairs-row { grid-template-columns: minmax(0, 1fr) var(--_f-btn); grid-template-areas: "key remove" "value value"; }
+  .fd-pairs-row + .fd-pairs-row { padding-block-start: var(--fd-space-2); border-block-start: var(--fd-hairline) solid var(--fd-line-faint); }
+}
+
+/* ==========================================================================
+   Code field: raw code as the input
+   ========================================================================== */
+
+.fd-codefield {
+  --_f-line: var(--fd-control-line);
+  --_f-lw: var(--fd-hairline);
+  --_f-halo: transparent;
+  display: grid; min-inline-size: 0; overflow: hidden;
+  border-radius: var(--fd-radius-lg); background: var(--fd-bg-sunken); color: var(--fd-text);
+  box-shadow: inset 0 0 0 var(--_f-lw) var(--_f-line), 0 0 0 var(--fd-form-halo) var(--_f-halo);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-codefield:focus-within { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
+.fd-codefield:has(> .fd-codefield-input[aria-invalid="true"]) { --_f-line: var(--fd-danger-solid); }
+.fd-codefield:has(> .fd-codefield-input[aria-invalid="true"]):focus-within { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
+.fd-codefield:has(> .fd-codefield-input:disabled) { --_f-line: var(--fd-line-faint); background: var(--fd-fill-disabled); color: var(--fd-text-4); }
+.fd-codefield-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2); min-inline-size: 0;
+  min-block-size: var(--fd-codefield-head); padding-inline: var(--fd-control-px) var(--fd-space-1);
+  border-block-end: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-codefield-lang {
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); text-transform: uppercase;
+  font-weight: var(--fd-weight-regular); color: var(--fd-text-3);
+}
+/* Format needs the script; without it the button would do nothing, so it waits for data-ready. */
+.fd-codefield:not([data-ready]) [data-fd-codefield-format] { display: none; }
+.fd-codefield-input {
+  -webkit-appearance: none; appearance: none;
+  display: block; inline-size: 100%; min-inline-size: 0; min-block-size: var(--fd-control-xl);
+  margin: 0; padding: var(--fd-space-3) var(--fd-control-px);
+  border: 0; border-radius: 0; background: transparent; color: inherit; caret-color: var(--fd-accent);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-code); font-feature-settings: "zero", "ss01"; letter-spacing: 0;
+  tab-size: 2; white-space: pre; overflow: auto; overflow-wrap: normal; resize: vertical;
+}
+.fd-codefield-input:is(:focus, :focus-visible) { outline: none; box-shadow: none; }
+.fd-codefield-input::placeholder { color: var(--fd-text-4); }
+.fd-codefield-input:disabled { cursor: not-allowed; -webkit-text-fill-color: var(--fd-text-4); }
 
 /* ==========================================================================
    Combobox and listbox
@@ -882,7 +978,8 @@
   .fd-form-row-control > :is(.fd-input, .fd-input-group, .fd-select, .fd-combobox, .fd-tag-input, .fd-secret) { inline-size: 100% !important; }
   .fd-form-row[data-inline-mobile] { grid-template-columns: minmax(0, 1fr) auto; }
 }
-@container (max-width: 560px) {
+/* Below 480px, not 560: a form section's body is 560px wide inside, and a label with a switch beside it fits there. */
+@container (max-width: 480px) {
   .fd-form-row { grid-template-columns: minmax(0, 1fr); gap: var(--fd-space-3); }
   .fd-form-row-control { justify-content: flex-start; flex-wrap: wrap; }
 }
@@ -920,4 +1017,57 @@
   .fd-form-actions[data-variant="sticky"] { padding: var(--fd-space-3); }
   .fd-form-actions[data-variant="sticky"] > .fd-form-actions-text { flex-basis: 100%; }
   .fd-form-actions[data-variant="sticky"] > .fd-btn { flex: 1 1 0; }
+}
+
+/* ==========================================================================
+   Form sections: a long create or edit form
+   ========================================================================== */
+
+/* A form made of sections measures itself, so each section can put its head beside or above its body. */
+.fd-form:has(> .fd-form-section) { container: fd-form / inline-size; gap: var(--fd-space-8); }
+.fd-form-section {
+  display: grid; grid-template-columns: var(--fd-form-section-head) minmax(0, 1fr); align-items: start;
+  gap: var(--fd-space-4) var(--fd-space-8); min-inline-size: 0;
+}
+/* The head: a narrow column that stays at the top of its section while the body scrolls past. */
+.fd-form-section-head {
+  display: grid; gap: var(--fd-space-1); align-content: start; min-inline-size: 0;
+  position: sticky; inset-block-start: var(--fd-form-section-top);
+}
+/* Heading scale: the page title is the hero, a section title is the title size, field labels stay at md. */
+.fd-form-section-title {
+  font-family: var(--fd-font-display); font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title);
+  font-weight: var(--fd-weight-medium); color: var(--fd-text);
+}
+.fd-form-section-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); max-inline-size: 60ch; }
+.fd-form-section-desc a { color: var(--fd-accent-text); text-decoration: underline; text-decoration-color: var(--fd-accent-40); text-underline-offset: var(--fd-form-link-offset); }
+/* The body: a white surface holding a column of fields, no wider than the form measure plus its padding. */
+.fd-form-section-body {
+  container-type: inline-size;   /* rows and pairs inside answer to the body's width, not the form's */
+  display: grid; gap: var(--fd-space-5); align-content: start; min-inline-size: 0;
+  max-inline-size: calc(var(--fd-form-measure) + var(--fd-space-6) * 2); padding: var(--fd-space-6);
+  border-radius: var(--fd-radius-xl); background: var(--fd-surface); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint);
+}
+.fd-form-section-body > .fd-form-cols { max-inline-size: none; }
+/* Rows inside a body are one list: no gap between them, the usual hairline, no padding at the body's edges. */
+.fd-form-section-body > .fd-form-row + .fd-form-row { margin-block-start: calc(var(--fd-space-5) * -1); }
+.fd-form-section-body > .fd-form-row:first-child { padding-block-start: 0; }
+.fd-form-section-body > .fd-form-row:last-child { padding-block-end: 0; }
+.fd-form-section-body > .fd-form-actions { justify-self: stretch; justify-content: flex-end; }
+.fd-form-section-body > .fd-form-actions[data-align="between"] { justify-content: space-between; }
+/* The form's own actions, after the last section, line up with the section bodies, not with the page edge. */
+.fd-form > .fd-form-section ~ .fd-form-actions:not([data-variant="sticky"]) {
+  margin-inline-start: calc(var(--fd-form-section-head) + var(--fd-space-8));
+  max-inline-size: calc(var(--fd-form-measure) + var(--fd-space-6) * 2);
+}
+/* Narrow forms, and sections that ask for it, stack the head above the body. */
+.fd-form-section[data-layout="stack"] { grid-template-columns: minmax(0, 1fr); gap: var(--fd-space-4); }
+.fd-form-section[data-layout="stack"] > .fd-form-section-head { position: static; }
+@container fd-form (max-width: 720px) {
+  .fd-form > .fd-form-section ~ .fd-form-actions:not([data-variant="sticky"]) { margin-inline-start: 0; }
+  .fd-form-section { grid-template-columns: minmax(0, 1fr); gap: var(--fd-space-4); }
+  .fd-form-section-head { position: static; }
+}
+@container fd-form (max-width: 480px) {
+  .fd-form-section-body { padding: var(--fd-space-4); }
 }

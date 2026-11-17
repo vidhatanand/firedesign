@@ -210,33 +210,44 @@
 
   /* Fills for neutral controls: rest / hover / pressed / selected */
 
-  /* Status. `-solid` for fills and dots, `-text` for words (AA on surfaces),
-     `-bg` for tinted backgrounds, `-line` for tinted edges. */
+  /* Status. `-solid` for dots, lines, chart marks and icons; `-fill` for a fill that carries text (the danger
+     button, a solid badge, a tile) with `-contrast` as its label at 4.5:1 or more; `-text` for words (AA on
+     surfaces); `-bg` for tinted backgrounds; `-line` for tinted edges. Danger, info and violet keep a white label
+     on a fill a little darker than the solid; success and warning keep the solid and take a tinted near-black. */
   --fd-success-solid: light-dark(#2fb457, #4ccd75);
   --fd-success-text: light-dark(#1a7a3a, #6fdc91);
   --fd-success-bg: light-dark(rgb(47 180 87 / 0.1), rgb(76 205 117 / 0.12));
   --fd-success-line: light-dark(rgb(47 180 87 / 0.28), rgb(76 205 117 / 0.28));
+  --fd-success-fill: var(--fd-success-solid);
+  --fd-success-contrast: #0e1910;
 
   --fd-warning-solid: light-dark(#e8a917, #f0c550);
   --fd-warning-text: light-dark(#8a5c00, #f0c550);
   --fd-warning-bg: light-dark(rgb(232 169 23 / 0.12), rgb(240 197 80 / 0.12));
-  --fd-warning-contrast: #1a1200;  /* text on the solid warning fill */
   --fd-warning-line: light-dark(rgb(232 169 23 / 0.36), rgb(240 197 80 / 0.28));
+  --fd-warning-fill: var(--fd-warning-solid);
+  --fd-warning-contrast: #1a1200;
 
   --fd-danger-solid: light-dark(#e5372b, #f05545);
   --fd-danger-text: light-dark(#c2271c, #ff7a6b);
   --fd-danger-bg: light-dark(rgb(229 55 43 / 0.08), rgb(240 85 69 / 0.13));
   --fd-danger-line: light-dark(rgb(229 55 43 / 0.28), rgb(240 85 69 / 0.32));
+  --fd-danger-fill: light-dark(#de2f25, #d63c2f);
+  --fd-danger-contrast: #ffffff;
 
   --fd-info-solid: light-dark(#2a6dfb, #5a8ffc);
   --fd-info-text: light-dark(#1d55d6, #84adff);
   --fd-info-bg: light-dark(rgb(42 109 251 / 0.08), rgb(90 143 252 / 0.14));
   --fd-info-line: light-dark(rgb(42 109 251 / 0.26), rgb(90 143 252 / 0.32));
+  --fd-info-fill: light-dark(#286bf9, #3e70db);
+  --fd-info-contrast: #ffffff;
 
   --fd-violet-solid: light-dark(#8a5cf6, #a07aff);
   --fd-violet-text: light-dark(#6b3fe0, #b79cff);
   --fd-violet-bg: light-dark(rgb(138 92 246 / 0.08), rgb(160 122 255 / 0.14));
   --fd-violet-line: light-dark(rgb(138 92 246 / 0.26), rgb(160 122 255 / 0.32));
+  --fd-violet-fill: light-dark(#8456ef, #845bde);
+  --fd-violet-contrast: #ffffff;
 
   /* Categorical series for charts (ordered; the accent always leads). */
   --fd-chart-1: var(--fd-accent);
@@ -248,7 +259,7 @@
 
   /* Syntax (code blocks, JSON viewer). Deliberately few hues. */
   --fd-syntax-plain: var(--fd-text);
-  --fd-syntax-comment: var(--fd-text-4);
+  --fd-syntax-comment: var(--fd-text-3);   /* comments inform: AA like any muted text */
   --fd-syntax-punct: var(--fd-text-3);
   --fd-syntax-keyword: var(--fd-accent-text);
   --fd-syntax-string: light-dark(#1a7a3a, #8fdca8);
@@ -275,21 +286,22 @@
 /* ---------- Accent ----------------------------------------------------------
    Declared on :root and on every [data-accent] and [data-palette] so derived steps follow overrides.
    --fd-accent           solid fill (buttons, switches, active dots, chart lead)
-   --fd-accent-hover     solid fill, hovered
-   --fd-accent-contrast  text/icon on the solid fill
-   --fd-accent-text      accent used AS text on neutral surfaces (AA)
+   --fd-accent-hover     solid fill, hovered: moves away from the label (lighter under a dark one, darker under white)
+   --fd-accent-contrast  text/icon on the solid fill: white or a near-black tinted to the accent, whichever
+                         reaches 4.5:1 (white when both do and the accent asks for it)
+   --fd-accent-text      accent used AS text: 4.5:1 on the page, on surfaces and on the 8% accent wash over them
    -------------------------------------------------------------------------- */
 :root,
 [data-accent="ember"] {
   --fd-accent: light-dark(#fa5d19, #fb6a2a);
-  --fd-accent-hover: light-dark(#ef5210, #ff7c42);
-  --fd-accent-contrast: #ffffff;
-  --fd-accent-text: light-dark(#fa5d19, #fb6a2a);
+  --fd-accent-hover: light-dark(#ff6d37, #ff7c42);   /* lighter in both modes: away from the dark label */
+  --fd-accent-contrast: #20120e;   /* white reaches only 3.2:1 on this orange; the brown-black reaches 5.8 */
+  --fd-accent-text: light-dark(#be4000, #fb6a2a);   /* the orange itself is 3:1 on the light page */
   --fd-accent-glow: light-dark(rgb(250 60 25 / 0.28), rgb(250 60 25 / 0.36)); /* warm inner shade of the primary button */
 }
 [data-accent="volt"] {
   --fd-accent: light-dark(#b8f02c, #c6f63f);
-  --fd-accent-hover: light-dark(#a9e21c, #d3fb62);
+  --fd-accent-hover: light-dark(#c2fa3d, #d3fb62);
   --fd-accent-contrast: #141412;
   --fd-accent-text: light-dark(#4d6b00, #c6f63f);
   --fd-accent-glow: light-dark(rgb(120 170 0 / 0.3), rgb(120 170 0 / 0.3));
@@ -297,27 +309,27 @@
 [data-accent="iris"] {
   --fd-accent: light-dark(#6a5cff, #8478ff);
   --fd-accent-hover: light-dark(#5a4bf5, #978dff);
-  --fd-accent-contrast: #ffffff;
+  --fd-accent-contrast: light-dark(#ffffff, #151521);
   --fd-accent-text: light-dark(#5140e6, #a79eff);
   --fd-accent-glow: light-dark(rgb(70 40 230 / 0.3), rgb(70 40 230 / 0.4));
 }
 [data-accent="ocean"] {
   --fd-accent: light-dark(#1f6feb, #4b8ff5);
   --fd-accent-hover: light-dark(#1a62d4, #68a2f8);
-  --fd-accent-contrast: #ffffff;
+  --fd-accent-contrast: light-dark(#ffffff, #0f1621);
   --fd-accent-text: light-dark(#1a5bc4, #7fb0fa);
   --fd-accent-glow: light-dark(rgb(10 60 200 / 0.3), rgb(10 60 200 / 0.4));
 }
 [data-accent="forest"] {
   --fd-accent: light-dark(#1f9d55, #3cc47a);
-  --fd-accent-hover: light-dark(#198a4a, #55d18e);
-  --fd-accent-contrast: #ffffff;
+  --fd-accent-hover: light-dark(#2ea65e, #55d18e);
+  --fd-accent-contrast: light-dark(#0f1911, #0e1912);
   --fd-accent-text: light-dark(#167a41, #5fd896);
   --fd-accent-glow: light-dark(rgb(0 110 50 / 0.3), rgb(0 110 50 / 0.4));
 }
 [data-accent="ink"] {
   --fd-accent: light-dark(#262626, #f5f5f5);
-  --fd-accent-hover: light-dark(#3a3a3a, #ffffff);
+  --fd-accent-hover: light-dark(#1e1e1e, #ffffff);
   --fd-accent-contrast: light-dark(#ffffff, #0a0a0a);
   --fd-accent-text: light-dark(#262626, #f5f5f5);
   --fd-accent-glow: light-dark(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.1));
@@ -370,12 +382,17 @@
   --fd-a72: light-dark(color-mix(in srgb, var(--fd-ink-wash) 72%, transparent), color-mix(in srgb, var(--fd-ink-wash) 72%, transparent));
   --fd-a88: light-dark(color-mix(in srgb, var(--fd-ink-wash) 88%, transparent), color-mix(in srgb, var(--fd-ink-wash) 88%, transparent));
 
-  /* Aliases of the ladder: text, control edges and neutral fills. */
+  /* Text steps. Every step that carries information reaches 4.5:1 on the page, the sunken well, surfaces,
+     neutral fills (a segmented track on a well) and the accent wash, in every palette, light and dark: --fd-text, -2 and -3.
+     --fd-text-4 is for placeholders, disabled text and decoration only, at 3:1 or more; --fd-text-5 is never
+     text (rules, dots, decorative marks). Hierarchy below -3 comes from size, weight, case and spacing, not
+     from lightness. scripts/build-palettes.mjs --check measures all of this. Light mode needs more ink than
+     the ladder steps give (a56 is 3.5:1 on the page), so -3 and -4 mix their own amounts. */
   --fd-text: var(--fd-ink);
   --fd-text-2: var(--fd-a72);      /* body copy beside a heading */
-  --fd-text-3: var(--fd-a56);      /* muted: meta, captions, resting labels */
-  --fd-text-4: var(--fd-a40);      /* placeholders, disabled, faint counts */
-  --fd-text-5: var(--fd-a24);      /* the quietest text: sidebar section labels */
+  --fd-text-3: light-dark(color-mix(in srgb, var(--fd-ink-wash) 67%, transparent), color-mix(in srgb, var(--fd-ink-wash) 56%, transparent));   /* muted: meta, captions, labels, counts, keys */
+  --fd-text-4: light-dark(color-mix(in srgb, var(--fd-ink-wash) 52%, transparent), color-mix(in srgb, var(--fd-ink-wash) 42%, transparent));   /* placeholders, disabled, decorative icons: 3:1 */
+  --fd-text-5: var(--fd-a24);      /* never text: rules, dots, decorative marks */
   --fd-text-inverse: var(--fd-ink-inverse);
   --fd-control-line: var(--fd-a8);
   --fd-control-line-hover: var(--fd-a12);
@@ -451,11 +468,13 @@
   --fd-space-scale: 1.125;
 }
 
-/* ---------- Contrast: stronger muted text and edges ---------- */
-[data-contrast="high"] {
+/* ---------- Contrast: stronger muted text and edges (each text step at least one ladder step up) ----------
+   Also on a palette inside a high-contrast page, which redeclares the default text steps. */
+[data-contrast="high"],
+[data-contrast="high"] [data-palette] {
   --fd-text-2: var(--fd-a88);
   --fd-text-3: var(--fd-a72);
-  --fd-text-4: var(--fd-a56);
+  --fd-text-4: var(--fd-a64);
   --fd-text-5: var(--fd-a40);
   --fd-line-faint: light-dark(#dcdcdc, #333333);
   --fd-line: light-dark(#cfcfcf, #404040);

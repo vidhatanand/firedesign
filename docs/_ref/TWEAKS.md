@@ -67,12 +67,12 @@ give each a clear character, not just a different accent on the same grey.
 | `paper` | sepia paper: noticeably cream page (chroma ≈ .015–.02, hue ≈ 85), warm brown-black ink | cobalt ink `#2b4bd6` | white | Editorial. The strongest neutral tint in light mode. |
 | `clay` | sand (≈ 60) | terracotta `#c2552d` | white | Earthy, muted. |
 | `mint` | cool pale grey-green (≈ 170) | mint `#3ddc97` | near-black | Light and airy. Accent text is a deep green in light mode. |
-| `glacier` | icy blue (≈ 230) | sky `#0ea5e9` | white (check contrast; use near-black if white fails 3:1) | Crisp. |
+| `glacier` | icy blue (≈ 230) | sky `#0ea5e9` | white (check contrast; use near-black if white fails 4.5:1) | Crisp. |
 | `midnight` | navy: in dark mode a clearly blue-black page (L ≈ .16, chroma ≈ .03, hue ≈ 265) with blue-tinted lines; cool in light mode | periwinkle `#7c9cff` dark / `#4f6ef7` light | white in light, near-black in dark | The strongest neutral tint in dark mode. |
 
 Rules the engine enforces for every palette, in both modes, and that your Node test prints:
-- `--fd-accent-text` on `--fd-bg` and on `--fd-surface` ≥ 4.5:1 (darken in light mode / lighten in dark mode until it passes).
-- `--fd-accent-contrast` on `--fd-accent` ≥ 4.5:1 where possible, never below 3:1; pick white or near-black by which is higher unless the table says otherwise.
+- `--fd-accent-text` on `--fd-bg`, on `--fd-surface` and on the 8% accent wash over each ≥ 4.5:1 (darken in light mode / lighten in dark mode until it passes).
+- `--fd-accent-contrast` on `--fd-accent` ≥ 4.5:1: the label the table asks for while it passes, otherwise the other of white and the tinted near-black.
 - `--fd-ink` on `--fd-bg` ≥ 12:1.
 - `--fd-accent-hover` is the accent moved about .03–.04 L (darker in light mode, lighter in dark mode).
 - `--fd-accent-glow` is a darker, more saturated accent at about .3 alpha (see the existing accent blocks in `tokens.css`).

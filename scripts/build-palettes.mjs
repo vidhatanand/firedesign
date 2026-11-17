@@ -4,6 +4,20 @@
 //   node scripts/build-palettes.mjs --check   also print every palette's contrast ratios and fail on a violation,
 //                                             assert ember equals the tokens.css literals and that a zero tone is
 //                                             the identity, and sweep extreme tones through the contrast rules.
+// The contrast rules (WCAG 2), in every palette, light and dark, default and high contrast:
+//   --fd-text, --fd-text-2, --fd-text-3   4.5:1 on --fd-bg, --fd-bg-sunken, --fd-surface, --fd-surface-raised,
+//                                         --fd-fill laid over each of them (a segmented track, a well's fill), and
+//                                         --fd-accent-8 over the page and surface (the active nav item, a selected row)
+//   --fd-text-4                           3:1 on the same (placeholders, disabled text, decorative icons only)
+//   high contrast                         every text step mixes more ink than its default
+//   --fd-accent-contrast                  4.5:1 on --fd-accent and on --fd-accent-hover, which moves away from the
+//                                         label; here and in every [data-accent] block of tokens.css
+//   --fd-<tone>-contrast on --fd-<tone>-fill   4.5:1 for success, warning, danger, info and violet, wherever
+//                                         tokens.css declares them
+//   --fd-accent-text                      4.5:1 on --fd-bg, --fd-surface and --fd-accent-8 over each, here and in
+//                                         every [data-accent] block (against every palette's page and surface)
+// The text steps are read from tokens.css and mixed exactly as the browser does: ink-wash at the step's alpha,
+// composited in sRGB over the background.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +25,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const engine = await import(pathToFileURL(path.join(ROOT, 'fire/js/palettes.js')).href);
-const { PALETTES, PALETTE_TOKENS, CONTRAST_TOKENS, TONE_DEFAULT, toneTokens, cssValue, contrast, toOklch, parse } = engine;
+const { PALETTES, PALETTE_TOKENS, CONTRAST_TOKENS, TONE_DEFAULT, toneTokens, cssValue, contrast, toOklch, parse, format, washOver } = engine;
 
 /* ---------- Write ---------- */
 function build() {
@@ -45,35 +59,139 @@ function build() {
 
 /* ---------- Check ---------- */
 const errors = [];
-const warnings = [];
 const fail = (msg) => errors.push(msg);
-const warn = (msg) => warnings.push(msg);
 const r2 = (n) => n.toFixed(2).padStart(5);
 const L = (c) => toOklch(parse(c).rgb)[0];
 
-// Known exceptions: ember is the tokens.css literals byte for byte, and those literals predate the rules.
-const LOCKED = new Set(['ember']);
+
+const TEXT_MIN = 4.5;    // text that carries information
+const FAINT_MIN = 3;     // --fd-text-4: placeholders, disabled text, decoration
+const BASES = ['--fd-bg', '--fd-bg-sunken', '--fd-surface', '--fd-surface-raised'];
+const BASE_SHORT = { '--fd-bg': 'bg', '--fd-bg-sunken': 'sunken', '--fd-surface': 'surface', '--fd-surface-raised': 'raised' };
+const TEXT_STEPS = ['--fd-text', '--fd-text-2', '--fd-text-3', '--fd-text-4'];
+
+/* ---------- tokens.css, read as the browser reads it ---------- */
+const CSS = fs.readFileSync(path.join(ROOT, 'fire/tokens.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+// Every innermost rule as [selector, body]; a media block's own prelude is dropped by the regex.
+const RULES = [...CSS.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1].trim().replace(/\s+/g, ' '), m[2]]);
+const decls = (text) => Object.fromEntries([...text.matchAll(/(--fd-[\w-]+)\s*:\s*([^;]+);/g)].map((m) => [m[1], m[2].trim().replace(/\s+/g, ' ')]));
+function block(selector) {
+  const found = RULES.filter(([s]) => s === selector);
+  if (!found.length) throw new Error(`tokens.css: block ${selector} not found`);
+  return found.map(([, body]) => body).join('\n');
+}
+const LADDER = decls(block(':root, [data-palette]'));
+const HIGH_SELECTOR = '[data-contrast="high"], [data-contrast="high"] [data-palette]';
+const HIGH = decls(block(HIGH_SELECTOR));
+
+/** Split a CSS value on its top-level commas. */
+function args(text) {
+  const out = [];
+  let depth = 0;
+  let cur = '';
+  for (const ch of text) {
+    if (ch === '(') depth++;
+    if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) { out.push(cur.trim()); cur = ''; } else cur += ch;
+  }
+  out.push(cur.trim());
+  return out;
+}
+/** A text or fill token in one mode → { base: palette colour token, alpha }, following var(), light-dark() and
+ *  color-mix(in srgb, var(--x) N%, transparent) the way tokens.css writes them. */
+function mixOf(name, m, table) {
+  const value = table[name];
+  if (value === undefined) {
+    if (PALETTE_TOKENS.includes(name)) return { base: name, alpha: 1 };
+    throw new Error(`tokens.css: ${name} is not declared`);
+  }
+  return mixValue(value, m, table);
+}
+function mixValue(value, m, table) {
+  let mm;
+  if ((mm = value.match(/^var\((--fd-[\w-]+)\)$/))) return mixOf(mm[1], m, table);
+  if ((mm = value.match(/^light-dark\((.*)\)$/))) return mixValue(args(mm[1])[m], m, table);
+  if ((mm = value.match(/^color-mix\(in srgb, var\((--fd-[\w-]+)\) ([\d.]+)%, transparent\)$/))) {
+    const inner = mixOf(mm[1], m, table);
+    return { base: inner.base, alpha: inner.alpha * Number(mm[2]) / 100 };
+  }
+  throw new Error(`tokens.css: cannot resolve "${value}"`);
+}
+/** `fg` at `alpha` over the opaque `bg`, composited in sRGB as the browser does. */
+function over(fg, alpha, bg) {
+  const f = parse(fg).rgb;
+  const b = parse(bg).rgb;
+  return format(f.map((c, i) => c * alpha + b[i] * (1 - alpha)));
+}
+/** Each text step's worst contrast over every background a palette offers, in one mode and contrast level. */
+function measureText(tokens, m, level) {
+  const table = level === 'high' ? { ...LADDER, ...HIGH } : LADDER;
+  const v = (k) => tokens[k][m];
+  const fill = mixOf('--fd-fill', m, LADDER);
+  const grounds = [];
+  for (const b of BASES) {
+    grounds.push([BASE_SHORT[b], v(b)]);
+    grounds.push([`fill/${BASE_SHORT[b]}`, over(v(fill.base), fill.alpha, v(b))]);
+  }
+  // The accent wash sits on the page (the active nav item) and on surfaces (a selected row).
+  for (const b of ['--fd-bg', '--fd-surface']) grounds.push([`wash/${BASE_SHORT[b]}`, washOver(v('--fd-accent'), v(b))]);
+  const out = {};
+  for (const step of TEXT_STEPS) {
+    const { base, alpha } = mixOf(step, m, table);
+    let worst = Infinity;
+    let where = '';
+    for (const [label, bg] of grounds) {
+      const c = contrast(over(v(base), alpha, bg), bg);
+      if (c < worst) { worst = c; where = label; }
+    }
+    out[step] = { worst, where, alpha };
+  }
+  return out;
+}
+/** The text rules for one palette map; returns [light, dark] × { default, high } measurements. */
+function checkText(tokens, name, context = '') {
+  const result = [];
+  for (const m of [0, 1]) {
+    const mode = m === 0 ? 'light' : 'dark';
+    const row = {};
+    for (const level of ['default', 'high']) {
+      const t = measureText(tokens, m, level);
+      row[level] = t;
+      const where = `${name} ${mode}${level === 'high' ? ' high contrast' : ''}${context ? ` (${context})` : ''}`;
+      for (const step of TEXT_STEPS) {
+        const min = step === '--fd-text-4' ? FAINT_MIN : TEXT_MIN;
+        if (t[step].worst < min) fail(`${where}: ${step} ${t[step].worst.toFixed(2)} on ${t[step].where} < ${min}`);
+      }
+    }
+    if (!context) {
+      for (const step of TEXT_STEPS.slice(1)) {
+        if (row.high[step].alpha <= row.default[step].alpha) fail(`${name} ${mode}: high-contrast ${step} (${row.high[step].alpha}) is not stronger than the default (${row.default[step].alpha})`);
+      }
+    }
+    result.push(row);
+  }
+  return result;
+}
 
 /** The rules every palette (and every toned palette) must meet in both modes. Returns the measured ratios. */
-function measure(tokens, name, context, locked = false) {
+function measure(tokens, name, context) {
   const rows = [];
   for (const m of [0, 1]) {
     const mode = m === 0 ? 'light' : 'dark';
     const v = (k) => tokens[k][m];
     const textBg = contrast(v('--fd-accent-text'), v('--fd-bg'));
     const textSurface = contrast(v('--fd-accent-text'), v('--fd-surface'));
+    const textWash = Math.min(...['--fd-bg', '--fd-surface'].map((k) => contrast(v('--fd-accent-text'), washOver(v('--fd-accent'), v(k)))));
     const label = contrast(v('--fd-accent-contrast'), v('--fd-accent'));
+    const labelHover = contrast(v('--fd-accent-contrast'), v('--fd-accent-hover'));
     const ink = contrast(v('--fd-ink'), v('--fd-bg'));
     const hoverDL = L(v('--fd-accent-hover')) - L(v('--fd-accent'));
     const where = `${name} ${mode}${context ? ` (${context})` : ''}`;
-    const report = locked ? warn : fail;
-    if (textBg < 4.5) report(`${where}: accent-text on bg ${textBg.toFixed(2)} < 4.5`);
-    if (textSurface < 4.5) report(`${where}: accent-text on surface ${textSurface.toFixed(2)} < 4.5`);
-    if (label < 3) report(`${where}: label on accent ${label.toFixed(2)} < 3`);
-    else if (label < 4.5 && !context) {
-      const other = v('--fd-accent-contrast').toLowerCase() === '#ffffff' ? 'near-black' : 'white';
-      warn(`${where}: label on accent ${label.toFixed(2)} (≥ 3, < 4.5; the table asks for this label over ${other})`);
-    }
+    if (textBg < TEXT_MIN) fail(`${where}: accent-text on bg ${textBg.toFixed(2)} < ${TEXT_MIN}`);
+    if (textSurface < TEXT_MIN) fail(`${where}: accent-text on surface ${textSurface.toFixed(2)} < ${TEXT_MIN}`);
+    if (textWash < TEXT_MIN) fail(`${where}: accent-text on the accent wash ${textWash.toFixed(2)} < ${TEXT_MIN}`);
+    if (label < TEXT_MIN) fail(`${where}: label on accent ${label.toFixed(2)} < ${TEXT_MIN}`);
+    if (labelHover < TEXT_MIN) fail(`${where}: label on accent-hover ${labelHover.toFixed(2)} < ${TEXT_MIN}`);
     if (ink < 12) fail(`${where}: ink on bg ${ink.toFixed(2)} < 12`);
     if (!context) {
       // Structure: surfaces lighter than the page, lines stepping darker (light) / lighter (dark), hover direction.
@@ -82,36 +200,27 @@ function measure(tokens, name, context, locked = false) {
       const lines = ['--fd-line-faint', '--fd-line', '--fd-line-strong'].map((k) => L(v(k)));
       const ordered = m === 0 ? lines[0] > lines[1] && lines[1] > lines[2] : lines[0] < lines[1] && lines[1] < lines[2];
       if (!ordered) fail(`${where}: line steps out of order (${lines.map((x) => x.toFixed(3)).join(', ')})`);
-      const want = m === 0 ? hoverDL < 0 : hoverDL > 0;
-      if (!want && !locked) fail(`${where}: accent-hover moves the wrong way (${hoverDL.toFixed(3)})`);
-      if ((Math.abs(hoverDL) > 0.05 || Math.abs(hoverDL) < 0.02) && !locked) fail(`${where}: accent-hover moves ${hoverDL.toFixed(3)} L (want about .03–.04)`);
+      // The hover moves away from the label: darker under a light label, lighter under a dark one.
+      const want = L(v('--fd-accent-contrast')) > 0.6 ? hoverDL < 0 : hoverDL > 0;
+      if (!want) fail(`${where}: accent-hover moves toward its label (${hoverDL.toFixed(3)})`);
+      if (Math.abs(hoverDL) > 0.05 || Math.abs(hoverDL) < 0.02) fail(`${where}: accent-hover moves ${hoverDL.toFixed(3)} L (want about .03–.04)`);
     }
-    rows.push({ mode, textBg, textSurface, label, ink, hoverDL });
+    rows.push({ mode, textBg, textSurface, textWash, label, labelHover, ink, hoverDL });
   }
   return rows;
 }
 
 function check() {
   // 1. Ember equals the literals in tokens.css.
-  const css = fs.readFileSync(path.join(ROOT, 'fire/tokens.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  // Every innermost rule as [selector, body]; a media block's own prelude is dropped by the regex.
-  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1].trim().replace(/\s+/g, ' '), m[2]]);
-  const decls = (text) => Object.fromEntries([...text.matchAll(/(--fd-[\w-]+)\s*:\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
-  const block = (selector) => {
-    const found = rules.filter(([s]) => s === selector);
-    if (!found.length) throw new Error(`tokens.css: block ${selector} not found`);
-    return found.map(([, body]) => body).join('\n');
-  };
   const rootTokens = { ...decls(block(':root')), ...decls(block(':root, [data-accent="ember"]')) };
   const ember = PALETTES.find((p) => p.name === 'ember');
   for (const key of PALETTE_TOKENS) {
     const ours = cssValue(ember.tokens[key]);
     if (rootTokens[key] !== ours) fail(`ember ${key}: engine "${ours}" ≠ tokens.css "${rootTokens[key]}"`);
   }
-  const highTokens = decls(block('[data-contrast="high"]'));
   for (const key of CONTRAST_TOKENS) {
     const ours = cssValue(ember.contrast[key]);
-    if (highTokens[key] !== ours) fail(`ember high-contrast ${key}: engine "${ours}" ≠ tokens.css "${highTokens[key]}"`);
+    if (HIGH[key] !== ours) fail(`ember high-contrast ${key}: engine "${ours}" ≠ tokens.css "${HIGH[key]}"`);
   }
 
   // 2. A zero tone is the identity, for every palette.
@@ -123,20 +232,97 @@ function check() {
   }
 
   // 3. The table.
-  const head = 'palette    mode   bg       accent   text     label    text/bg text/sf label  ink   hover';
+  const head = 'palette    mode   bg       accent   text     label    text/bg text/sf /wash  label  /hover ink   hover';
   console.log(`\n${head}\n${'-'.repeat(head.length)}`);
   for (const p of PALETTES) {
-    const rows = measure(p.tokens, p.name, '', LOCKED.has(p.name));
+    const rows = measure(p.tokens, p.name, '');
     rows.forEach((row, m) => {
       const v = (k) => p.tokens[k][m];
-      console.log(`${(m ? '' : p.name).padEnd(10)} ${row.mode.padEnd(6)} ${v('--fd-bg')}  ${v('--fd-accent')}  ${v('--fd-accent-text')}  ${v('--fd-accent-contrast')}  ${r2(row.textBg)}  ${r2(row.textSurface)}  ${r2(row.label)} ${r2(row.ink)}  ${row.hoverDL >= 0 ? '+' : ''}${row.hoverDL.toFixed(3)}`);
+      console.log(`${(m ? '' : p.name).padEnd(10)} ${row.mode.padEnd(6)} ${v('--fd-bg')}  ${v('--fd-accent')}  ${v('--fd-accent-text')}  ${v('--fd-accent-contrast')}  ${r2(row.textBg)}  ${r2(row.textSurface)}  ${r2(row.textWash)}  ${r2(row.label)}  ${r2(row.labelHover)} ${r2(row.ink)}  ${row.hoverDL >= 0 ? '+' : ''}${row.hoverDL.toFixed(3)}`);
     });
     // Neutral chroma, so "tinted, not grey" is visible at a glance.
     const chroma = (k, m) => toOklch(parse(p.tokens[k][m]).rgb)[1].toFixed(3);
     console.log(`${''.padEnd(10)} chroma bg ${chroma('--fd-bg', 0)}/${chroma('--fd-bg', 1)} · surface ${chroma('--fd-surface', 0)}/${chroma('--fd-surface', 1)} · line ${chroma('--fd-line', 0)}/${chroma('--fd-line', 1)} · ink ${chroma('--fd-ink', 0)}/${chroma('--fd-ink', 1)}`);
   }
 
-  // 4. Tone sweep: extreme and mixed tones on every palette, in both contrast levels, must still meet the rules.
+  // 4. Text steps: the worst ratio of each step over bg, sunken, surface, raised and the fill on each.
+  const alphas = (level) => [0, 1].map((m) => TEXT_STEPS.slice(1).map((s) => `${Math.round(mixOf(s, m, level === 'high' ? { ...LADDER, ...HIGH } : LADDER).alpha * 100)}`).join('/')).join(' · ');
+  console.log(`\ntext steps, worst ratio over bg · sunken · surface · raised, --fd-fill on each, --fd-accent-8 on bg and surface (want text–text-3 ≥ ${TEXT_MIN}, text-4 ≥ ${FAINT_MIN})`);
+  console.log(`ink alpha of text-2/3/4, light · dark: default ${alphas('default')}; high ${alphas('high')}`);
+  const thead = 'palette    mode   default: text  t-2   t-3   t-4  | high: text  t-2   t-3   t-4  | t-3 worst on';
+  console.log(`${thead}\n${'-'.repeat(thead.length)}`);
+  for (const p of PALETTES) {
+    // High contrast changes the text steps (read from tokens.css) and the lines; the backgrounds stay.
+    checkText(p.tokens, p.name).forEach((row, m) => {
+      const cells = (t) => TEXT_STEPS.map((s) => r2(t[s].worst)).join(' ');
+      console.log(`${(m ? '' : p.name).padEnd(10)} ${(m ? 'dark' : 'light').padEnd(6)}          ${cells(row.default)}  |       ${cells(row.high)}  | ${row.default['--fd-text-3'].where}`);
+    });
+  }
+
+  // 5. The [data-accent] blocks of tokens.css: label on the fill, and accent text on every palette's page and surface.
+  const accentRows = [];
+  for (const [selector, body] of RULES) {
+    const mm = selector.match(/\[data-accent="([\w-]+)"\]$/);
+    if (!mm) continue;
+    const d = decls(body);
+    const pairOf = (value) => { const lm = value.match(/^light-dark\((.*)\)$/); return lm ? args(lm[1]) : [value, value]; };
+    const accent = pairOf(d['--fd-accent']);
+    const hover = pairOf(d['--fd-accent-hover']);
+    const label = pairOf(d['--fd-accent-contrast']);
+    const text = pairOf(d['--fd-accent-text']);
+    const cells = [];
+    for (const m of [0, 1]) {
+      const mode = m === 0 ? 'light' : 'dark';
+      const lc = contrast(label[m], accent[m]);
+      const lh = contrast(label[m], hover[m]);
+      if (lc < TEXT_MIN) fail(`[data-accent="${mm[1]}"] ${mode}: label on accent ${lc.toFixed(2)} < ${TEXT_MIN}`);
+      if (lh < TEXT_MIN) fail(`[data-accent="${mm[1]}"] ${mode}: label on accent-hover ${lh.toFixed(2)} < ${TEXT_MIN}`);
+      const dL = L(hover[m]) - L(accent[m]);
+      if (L(label[m]) > 0.6 ? dL >= 0 : dL <= 0) fail(`[data-accent="${mm[1]}"] ${mode}: accent-hover moves toward its label (${dL.toFixed(3)})`);
+      let worst = Infinity;
+      for (const p of PALETTES) {
+        for (const k of ['--fd-bg', '--fd-surface']) {
+          worst = Math.min(worst, contrast(text[m], p.tokens[k][m]), contrast(text[m], washOver(accent[m], p.tokens[k][m])));
+        }
+      }
+      if (worst < TEXT_MIN) fail(`[data-accent="${mm[1]}"] ${mode}: accent-text ${worst.toFixed(2)} on a palette's page or surface (or the accent wash on it) < ${TEXT_MIN}`);
+      cells.push(`${mode} label ${lc.toFixed(2)}/${lh.toFixed(2)} text ${worst.toFixed(2)}`);
+    }
+    accentRows.push(`${mm[1]}: ${cells.join(', ')}`);
+  }
+  console.log(`\n[data-accent] blocks (accent text: worst over every palette's page and surface and the wash on them): ${accentRows.join(' · ')}`);
+
+  // 6. Status fills that carry text: each tone's label on its fill, on :root and on any other block that sets them.
+  const TONES = ['success', 'warning', 'danger', 'info', 'violet'];
+  const root = decls(block(':root'));
+  const pairOfValue = (value, table) => {
+    const vm = value.match(/^var\((--fd-[\w-]+)\)$/);
+    if (vm) {
+      if (!table[vm[1]]) throw new Error(`tokens.css: ${vm[1]} is not declared`);
+      return pairOfValue(table[vm[1]], table);
+    }
+    const lm = value.match(/^light-dark\((.*)\)$/);
+    return lm ? args(lm[1]) : [value, value];
+  };
+  const toneRows = [];
+  const toneBlocks = RULES.filter(([sel, body]) => sel === ':root' || TONES.some((t) => new RegExp(`--fd-${t}-(fill|contrast)\\s*:`).test(body)));
+  const selectors = [...new Set(toneBlocks.map(([sel]) => sel))];
+  for (const sel of selectors) {
+    const table = { ...root, ...decls(block(sel)) };
+    for (const tone of TONES) {
+      const fillKey = `--fd-${tone}-fill`;
+      const labelKey = `--fd-${tone}-contrast`;
+      if (!table[fillKey] || !table[labelKey]) { fail(`tokens.css ${sel}: ${fillKey} and ${labelKey} must both be declared`); continue; }
+      const fill = pairOfValue(table[fillKey], table);
+      const label = pairOfValue(table[labelKey], table);
+      const ratios = [0, 1].map((m) => contrast(label[m], fill[m]));
+      ratios.forEach((r, m) => { if (r < TEXT_MIN) fail(`${sel} ${m ? 'dark' : 'light'}: ${labelKey} on ${fillKey} ${r.toFixed(2)} < ${TEXT_MIN}`); });
+      if (sel === ':root') toneRows.push(`${tone} ${fill[0]}/${fill[1]} ${label[0] === label[1] ? label[0] : label.join('/')} ${ratios.map((r) => r.toFixed(2)).join('/')}`);
+    }
+  }
+  console.log(`\nstatus fills that carry text (fill light/dark, label, ratio light/dark): ${toneRows.join(' · ')}`);
+
+  // 7. Tone sweep: extreme and mixed tones on every palette, in both contrast levels, must still meet the rules.
   const tones = [];
   for (const hue of [-180, -90, -24, 0, 45, 120, 180]) for (const vivid of [0, 60, 100, 150]) for (const light of [-12, 0, 12]) for (const warmth of [-100, 0, 100]) tones.push({ hue, vivid, light, warmth });
   let swept = 0;
@@ -145,7 +331,11 @@ function check() {
       const base = engine.paletteTokens(p.name, { contrast: level });
       for (const tone of tones) {
         if (Object.keys(TONE_DEFAULT).every((k) => tone[k] === TONE_DEFAULT[k])) continue;
-        measure(toneTokens(base, tone), p.name, `tone ${JSON.stringify(tone)}${level === 'high' ? ', high contrast' : ''}`);
+        const toned = toneTokens(base, tone);
+        const context = `tone ${JSON.stringify(tone)}${level === 'high' ? ', high contrast' : ''}`;
+        measure(toned, p.name, context);
+        // The text steps (both levels) do not depend on the high-contrast lines, so once per tone is enough.
+        if (level === 'default') checkText(toned, p.name, `tone ${JSON.stringify(tone)}`);
         swept++;
       }
     }
@@ -170,7 +360,6 @@ function check() {
   console.log(`\nwarmth ±100, chroma added to the light page: ${warmthReport.join(' · ')}`);
   console.log(`\ntone sweep: ${swept} toned maps checked (${tones.length - 1} tones × ${PALETTES.length} palettes × 2 contrast levels)`);
 
-  if (warnings.length) console.log(`\nwarnings (${warnings.length}):\n${warnings.map((w) => `  ${w}`).join('\n')}`);
   if (errors.length) {
     console.error(`\nFAILED: ${errors.length} violation(s)\n${errors.slice(0, 60).map((e) => `  ✗ ${e}`).join('\n')}${errors.length > 60 ? `\n  … and ${errors.length - 60} more` : ''}`);
     process.exitCode = 1;

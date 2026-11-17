@@ -22,11 +22,11 @@ Every value is a variable. Global tokens live in `fire/tokens.css`; values that 
 | Group | Tokens |
 |---|---|
 | Surfaces | `--fd-bg`, `--fd-bg-sunken`, `--fd-surface`, `--fd-surface-raised`, `--fd-surface-inverse`, `--fd-scrim` |
-| Text | `--fd-text`, `--fd-text-2` (72%, descriptions), `--fd-text-3` (56%, meta), `--fd-text-4` (40%, placeholder/disabled), `--fd-text-5` (24%, sidebar section labels), `--fd-text-inverse` |
+| Text | `--fd-text`, `--fd-text-2` (72%, descriptions), `--fd-text-3` (67% light / 56% dark: meta, labels, headers, counts, keys), `--fd-text-4` (placeholders, disabled text and decorative icons only), `--fd-text-5` (never text: rules, dots), `--fd-text-inverse`. Text through `--fd-text-3` reaches 4.5:1 on every background in every palette and `--fd-text-4` 3:1; `node scripts/build-palettes.mjs --check` enforces it |
 | Lines | `--fd-line-faint` (structure), `--fd-line` (controls, table rules), `--fd-line-strong` (hover) |
 | Fills | `--fd-fill`, `--fd-fill-hover`, `--fd-fill-active`, `--fd-fill-subtle`, `--fd-fill-disabled`, and the raw ladder `--fd-a1…a88` |
 | Accent | `--fd-accent`, `--fd-accent-hover`, `--fd-accent-contrast`, `--fd-accent-text`, washes `--fd-accent-4/8/12/16/24/40` |
-| Status | `--fd-{success,warning,danger,info,violet}-{solid,text,bg,line}` |
+| Status | `--fd-{success,warning,danger,info,violet}-{solid,text,bg,line,fill,contrast}`: `-solid` for dots, lines and marks, `-fill` with its `-contrast` label (4.5:1) wherever text or an icon sits on the tone |
 | Type | sizes `--fd-text-{display,3xl,h1,h2,h3,xl,title,lg,compose,md,sm,xs,2xs,3xs,4xs,stat}` with matching `--fd-lh-*`; reading line heights `--fd-lh-{prose,prose-sm,code}`; tracking `--fd-ls-{display,lg,body,tag,caps,tight}`; weights `--fd-weight-{regular,label,medium,semibold}`; `--fd-font-sans`, `--fd-font-mono`, `--fd-font-display` (headings; the sans by default), `--fd-weight-display` (heading weight) |
 | Space | `--fd-space-{0,0-5,1,1-5,2,2-5,3,3-5,4,5,6,8,10,12,16,20,24}` (4px grid, each multiplied by `--fd-space-scale`) |
 | Size | `--fd-size-{4xs 24,3xs 48,2xs 64,xs 96,sm 160,md 240,lg 320,xl 400,2xl 480,3xl 560,4xl 640,5xl 768,6xl 960,phone 375}`: a shared ladder of lengths for components and grid minimums. Markup does not set widths |

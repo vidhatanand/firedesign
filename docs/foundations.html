@@ -23,6 +23,11 @@
   .fx-space > div { display: grid; grid-template-columns: 96px 44px minmax(0, 1fr); align-items: center; gap: 12px; font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); }
   .fx-space i { display: block; height: 12px; width: var(--w); background: var(--fd-accent); border-radius: 2px; }
   .fx-box { display: grid; place-items: center; gap: 4px; width: 112px; height: 88px; background: var(--fd-surface); font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); text-align: center; }
+  .fx-box { border-radius: var(--r, 0); }
+  .fx-box[data-shadow] { --r: var(--fd-radius-xl); box-shadow: var(--s); }
+  .fx-name { color: var(--fd-text); }
+  .fx-aside { letter-spacing: 0; font-weight: 400; }
+  .fx-note { font-weight: 400; }
   .fx-box[data-line] { box-shadow: inset 0 0 0 1px var(--fd-line); }
   .fx-motion { display: grid; gap: 14px; width: 100%; }
   .fx-track { position: relative; height: 28px; border-radius: var(--fd-radius-full); background: var(--fd-fill); }
@@ -111,7 +116,7 @@
         <code>fd-body<br>14 / 20 · 400</code><div class="fd-body fd-text-2">Invited members receive an email with instructions to join your team.</div>
         <code>fd-small<br>13 / 20 · 400</code><div class="fd-small fd-muted">Credits from successful jobs · resets Nov 23</div>
         <code>fd-caption<br>12 / 16 · 400</code><div class="fd-caption fd-muted">Dates use UTC. Weeks start Monday.</div>
-        <code>fd-stat<br>24 / 32 · 500</code><div class="fd-stat">1,520 <span class="fd-small fd-muted" style="letter-spacing: 0; font-weight: 400">credits</span></div>
+        <code>fd-stat<br>24 / 32 · 500</code><div class="fd-stat">1,520 <span class="fd-small fd-muted fx-aside">credits</span></div>
         <code>fd-mono<br>13 / 20 · 500</code><div class="fd-mono">em-227cd••••••••••••••••144b0f16</div>
         <code>fd-mono-sm<br>12 / 16</code><div class="fd-mono-sm fd-accent-text">0–15 credits</div>
         <code>fd-eyebrow<br>12 / 16 · mono</code><div class="fd-eyebrow">Alerts (24h)</div>
@@ -268,7 +273,7 @@
   </section>
 </main>
 <script type="module">
-  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" data-fd-vars="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted" style="font-weight: 400">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
+  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" data-fd-vars="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted fx-note">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
   const steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 88];
   document.getElementById('ladder').innerHTML = steps.map((s) => `<span data-fd-vars="--c:var(--fd-a${s})">${s}</span>`).join('');
   document.getElementById('surfaces-grid').innerHTML = [
@@ -286,12 +291,12 @@
   const space = [['0-5', 2], ['1', 4], ['1-5', 6], ['2', 8], ['2-5', 10], ['3', 12], ['3-5', 14], ['4', 16], ['5', 20], ['6', 24], ['8', 32], ['10', 40], ['12', 48], ['16', 64], ['20', 80], ['24', 96]];
   document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i data-fd-vars="--w: var(--fd-space-${n})"></i></div>`).join('');
   const radius = [['xs', 4, 'checkbox'], ['sm', 6, 'chip, thumb'], ['md', 8, 'menu item'], ['lg', 10, 'control'], ['xl', 12, 'card'], ['2xl', 16, 'dialog'], ['3xl', 20, 'sheet']];
-  document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line style="border-radius:var(--fd-radius-${n})"><span style="color: var(--fd-text)">${n} · ${px}</span><span>${use}</span></div>`).join('');
+  document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line data-fd-vars="--r:var(--fd-radius-${n})"><span class="fx-name">${n} · ${px}</span><span>${use}</span></div>`).join('');
   const shadows = [['xs', 'outline button'], ['sm', 'composer'], ['md', 'card hover'], ['thumb', 'segmented, switch'], ['lg', 'menu, popover'], ['xl', 'dialog']];
-  document.getElementById('shadow-list').innerHTML = shadows.map(([n, use]) => `<div class="fx-box" style="border-radius:var(--fd-radius-xl);box-shadow:var(--fd-shadow-${n})"><span style="color: var(--fd-text)">${n}</span><span>${use}</span></div>`).join('');
+  document.getElementById('shadow-list').innerHTML = shadows.map(([n, use]) => `<div class="fx-box" data-shadow data-fd-vars="--s:var(--fd-shadow-${n})"><span class="fx-name">${n}</span><span>${use}</span></div>`).join('');
   const motion = [['dur-2 · ease-out', '--fd-dur-2', '--fd-ease-out', '160ms hover, focus'], ['dur-3 · ease-out', '--fd-dur-3', '--fd-ease-out', '220ms menus, toggles'], ['dur-3 · ease-spring', '--fd-dur-3', '--fd-ease-spring', '220ms thumbs'], ['dur-4 · ease-emphasized', '--fd-dur-4', '--fd-ease-emphasized', '320ms dialogs, sheets'], ['dur-5 · ease-emphasized', '--fd-dur-5', '--fd-ease-emphasized', '520ms entrances']];
   const list = document.getElementById('motion-list');
-  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span style="color: var(--fd-text)">${n}</span><br>${use}</span><div class="fx-track" data-fd-vars="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
+  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span class="fx-name">${n}</span><br>${use}</span><div class="fx-track" data-fd-vars="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
   document.getElementById('motion-run').addEventListener('click', () => list.toggleAttribute('data-run'));
 </script>
 </body>

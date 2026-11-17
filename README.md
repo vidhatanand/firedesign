@@ -60,7 +60,7 @@ Serve the folder over HTTP; ES modules do not load from `file://`.
 
 **Layout**
 
-Structure decides width. Place things with `fd-stack`, `fd-row`, `fd-grid` and `fd-column`, tuned by `data-gap`, `data-min`, `data-cols` and `data-span`. Forms, settings rows, tables and dialogs bring their own widths. Markup never sets a width, a height or a pixel value.
+Structure decides width. Place things with `fd-stack`, `fd-row`, `fd-grid` and `fd-column`, tuned by `data-gap`, `data-min`, `data-cols` and `data-span`. Forms, settings rows, tables and dialogs bring their own widths. Markup never sets a width, a height, a pixel value or a `style` attribute.
 
 **Behaviour**
 
@@ -80,7 +80,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 - `templates/shell-static.html` is the whole app shell as plain markup, with no shell script. Per page the server changes the title, the current nav item and the content.
 - `templates/auth-centered.html` is the centred screen (`fd-screen`) for one task on a page of its own: sign in, a second step, consent, a result.
 - A one-time-code field works in a plain form: put one named input inside `fd-otp`. Without script it is an ordinary field; with it, the boxes appear and a hidden input carries the code.
-- Under a strict Content Security Policy the stylesheets need `style-src 'self'`, `font-src 'self'` and `img-src 'self' data:`. Some modules (skeleton presets, the file-upload list, chat, charts, agent blocks) still write inline styles; `GUIDE.md` lists them.
+- Under a strict Content Security Policy the stylesheets need `style-src 'self'`, `font-src 'self'` and `img-src 'self' data:`. No Fire script or page writes a `style` attribute, so `'unsafe-inline'` is not needed. A custom property is passed as `data-fd-vars="--value: 0.4"`, and `fire/boot.js` applies it before the first paint.
 
 ## What is here
 
@@ -112,7 +112,7 @@ Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Ca
 npm run audit
 ```
 
-It reports unknown icons, classes and tokens, broken links and duplicate ids. It also reports raw values in component styles (`literals`) and pixel values or widths in markup (`inline`); both must be zero.
+It reports unknown icons, classes and tokens, broken links and duplicate ids. It also reports raw values in component styles (`literals`) and pixel values, widths or `style` attributes in markup (`inline`); both must be zero.
 
 ```bash
 node scripts/build-palettes.mjs --check

@@ -51,7 +51,7 @@
   <section class="doc-section" id="ink">
     <div class="doc-section-head">
       <h2 class="fd-h3">The ink ladder</h2>
-      <p>Every neutral is the ink at an opacity. A hover is the next step up, a muted label is a step down. Because the steps are transparent they sit correctly on white, on the page, on a tinted card and in dark mode without a second palette.</p>
+      <p>Every neutral is the ink at an opacity. A hover is the next step up, a pressed fill the next again. Because the steps are transparent they sit correctly on white, on the page, on a tinted card and in dark mode without a second palette. Text takes the text steps in <a class="fd-link" href="#contrast">Contrast</a>, not raw ladder steps.</p>
     </div>
     <div class="doc-specimen" data-surface="surface"><div class="fx-ladder" id="ladder"></div></div>
     <div class="doc-table-wrap">
@@ -60,14 +60,67 @@
         <tbody>
           <tr><td>a3 · a4 · a6 · a8</td><td>Wells, the resting fill of a soft control, its hover, its pressed state.</td></tr>
           <tr><td>a8 · a12 · a16</td><td>Chart grid, switch tracks, scrollbar thumbs, skeleton blocks.</td></tr>
-          <tr><td>a24</td><td>The quietest text: sidebar section labels.</td></tr>
-          <tr><td>a40 · a48</td><td>Placeholders, disabled text, faint counts, stat sub-lines.</td></tr>
-          <tr><td>a56</td><td>Muted text: meta, captions, resting labels. 3.7:1 on the page, so never for body copy.</td></tr>
-          <tr><td>a72</td><td>Descriptions under a heading, resting nav labels. 6:1.</td></tr>
+          <tr><td>a24</td><td>Decoration only: dots, dashed outlines, the strike through a hidden series. Never text.</td></tr>
+          <tr><td>a32 · a40 · a48</td><td>Edges that must be seen: a checkbox at rest and on hover, chart thresholds, a muted chart series.</td></tr>
+          <tr><td>a56 · a64</td><td>Neutral meters and progress bars. In dark mode a56 is <code class="fd-code">--fd-text-3</code>; in light mode muted text needs 67%.</td></tr>
+          <tr><td>a72 · a88</td><td><code class="fd-code">--fd-text-2</code>, and its high-contrast step.</td></tr>
           <tr><td>ink</td><td>Headings, values, anything the eye should land on.</td></tr>
         </tbody>
       </table>
     </div>
+  </section>
+
+  <section class="doc-section" id="contrast">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Contrast</h2>
+      <p>Text that carries information reads at 4.5:1 or more wherever it sits, in every palette, light and dark, at default and high contrast. Quiet things stay quiet through size, weight, case and spacing: a table header is small uppercase mono, a sidebar group label is small tracked caps, a count sits in the same step as its label.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack">
+        <p class="fd-eyebrow">Page · --fd-bg</p>
+        <p class="fd-label">Production crawler</p>
+        <p class="fd-body fd-text-2">Crawls docs.ember.dev every 6 hours and posts what changed.</p>
+        <p class="fd-small fd-muted">Updated Nov 23 · 1,520 credits</p>
+        <p class="fd-small fd-faint">Search runs</p>
+        <div class="fd-row" data-gap="3"><button class="fd-btn" data-variant="primary" type="button">Run now</button><a class="fd-link" href="#contrast">View runs</a></div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="surface">
+        <p class="fd-eyebrow">Surface · --fd-surface</p>
+        <p class="fd-label">Production crawler</p>
+        <p class="fd-body fd-text-2">Crawls docs.ember.dev every 6 hours and posts what changed.</p>
+        <p class="fd-small fd-muted">Updated Nov 23 · 1,520 credits</p>
+        <p class="fd-small fd-faint">Search runs</p>
+        <div class="fd-row" data-gap="3"><button class="fd-btn" data-variant="primary" type="button">Run now</button><a class="fd-link" href="#contrast">View runs</a></div>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-surface="sunken">
+        <p class="fd-eyebrow">Sunken · --fd-bg-sunken</p>
+        <p class="fd-label">Production crawler</p>
+        <p class="fd-body fd-text-2">Crawls docs.ember.dev every 6 hours and posts what changed.</p>
+        <p class="fd-small fd-muted">Updated Nov 23 · 1,520 credits</p>
+        <p class="fd-small fd-faint">Search runs</p>
+        <div class="fd-row" data-gap="3"><button class="fd-btn" data-variant="primary" type="button">Run now</button><a class="fd-link" href="#contrast">View runs</a></div>
+      </div>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Step</th><th>For</th><th>Guarantee</th></tr></thead>
+        <tbody>
+          <tr><td>--fd-text</td><td>Headings, values, names.</td><td>12:1 or more on the page.</td></tr>
+          <tr><td>--fd-text-2</td><td>Descriptions and body copy beside a heading, resting nav labels.</td><td>4.5:1 on the page, the sunken well, surfaces, raised surfaces, a neutral fill on any of them and the accent wash.</td></tr>
+          <tr><td>--fd-text-3</td><td>Meta, captions, table headers, keys, counts, group labels, unselected items.</td><td>The same: 4.5:1 everywhere text sits.</td></tr>
+          <tr><td>--fd-text-4</td><td>Placeholders, disabled text, icons beside a label.</td><td>3:1. Never text that informs.</td></tr>
+          <tr><td>--fd-text-5</td><td>Rules, dots, decorative marks.</td><td>None: never text.</td></tr>
+          <tr><td>--fd-accent-contrast</td><td>The label on the accent fill: primary button, nav badge, team tile.</td><td>4.5:1. White where white reaches it, otherwise a near-black tinted to the accent.</td></tr>
+          <tr><td>--fd-accent-text</td><td>The accent used as text: links, the active nav item, accent figures.</td><td>4.5:1 on the page, surfaces and the accent wash.</td></tr>
+          <tr><td>--fd-&lt;tone&gt;-contrast</td><td>The label on <code class="fd-code">--fd-&lt;tone&gt;-fill</code>: the danger button, solid badges, source tiles. <code class="fd-code">--fd-&lt;tone&gt;-solid</code> stays for dots, lines and chart marks that carry no text.</td><td>4.5:1. White on a slightly deeper danger, info and violet; a tinted near-black on success and warning.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>To make something quieter, make it smaller, lighter in weight, uppercase mono or further away. Do not reach for <code class="fd-code">--fd-text-4</code>: it is for things nobody has to read.</li>
+      <li><code class="fd-code">data-contrast="high"</code> moves each step at least one ladder step up: descriptions to 88%, muted text to 72%, placeholders to 64%.</li>
+      <li><code class="fd-code">node scripts/build-palettes.mjs --check</code> measures every step over every background in all fifteen palettes, light and dark, default and high contrast, and the Tweaks tones, and fails on any miss.</li>
+    </ul>
   </section>
 
   <section class="doc-section" id="surfaces">
@@ -86,8 +139,8 @@
     <div class="doc-specimen"><div class="fx-swatches" id="accent-grid"></div></div>
     <ul class="doc-notes">
       <li>Accent appears on the primary button, the active nav item, links, focus, switches that are on, the lead chart series and "new / live" marks. If a screen has more than about five accent touches, remove some.</li>
-      <li>Accent text on a neutral surface uses <code class="fd-code">--fd-accent-text</code>. For ember it is the same orange as the fill (3.1:1), so keep it to short labels, links and figures, never sentences.</li>
-      <li>White on the ember solid is 3.1:1. It is used only for 14px/450 button labels and icons, which meets the 3:1 requirement for interface components; never set paragraph text on the accent.</li>
+      <li>Accent text on a neutral surface uses <code class="fd-code">--fd-accent-text</code>, which reaches 4.5:1 on the page, on surfaces and on the 8% accent wash in every palette. For ember it is a deeper orange than the fill, because the fill itself is 3:1 as text.</li>
+      <li>The label on the accent fill, <code class="fd-code">--fd-accent-contrast</code>, reaches 4.5:1: white where white does, otherwise a near-black tinted toward the accent. Ember's orange takes the brown-black, like volt's lime and honey's amber. Never set paragraph text on the accent.</li>
     </ul>
   </section>
 

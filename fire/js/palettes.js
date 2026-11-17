@@ -22,6 +22,7 @@
  *   toneTokens(tokens, tone) the same map bent by a tone; identity when tone equals TONE_DEFAULT
  *   cssValue([light, dark])  'light-dark(#…, #…)' (or the single value when both are equal)
  *   contrast(a, b)           WCAG 2 contrast ratio of two colours
+ *   washOver(accent, bg)     the 8% accent wash composited over an opaque background
  *   toOklch(color)           [L, C, h] · oklch(L, C, h) → '#rrggbb' gamut-mapped by reducing chroma
  */
 
@@ -164,9 +165,9 @@ const EMBER = {
   '--fd-line': ['#e8e8e8', '#2a2a2a'],
   '--fd-line-strong': ['#d4d4d4', '#3d3d3d'],
   '--fd-accent': ['#fa5d19', '#fb6a2a'],
-  '--fd-accent-hover': ['#ef5210', '#ff7c42'],
-  '--fd-accent-contrast': ['#ffffff', '#ffffff'],
-  '--fd-accent-text': ['#fa5d19', '#fb6a2a'],
+  '--fd-accent-hover': ['#ff6d37', '#ff7c42'],      // lighter in both modes: away from the dark label
+  '--fd-accent-contrast': ['#20120e', '#20120e'],  // white is 3.2:1 on this orange; this brown-black is 5.8
+  '--fd-accent-text': ['#be4000', '#fb6a2a'],       // the orange is 3:1 as text on the light page
   '--fd-accent-glow': ['rgb(250 60 25 / 0.28)', 'rgb(250 60 25 / 0.36)'],
 };
 /* [data-contrast="high"] lines in tokens.css. */
@@ -188,7 +189,7 @@ for (const [key, pair] of Object.entries({ ...EMBER, '--hc-line-faint': EMBER_CO
    ========================================================================== */
 
 const AA = 4.5;
-const LABEL_MIN = 3;
+const LABEL_MIN = AA; // text on the accent fill (primary button, nav badge, team tile) is text like any other
 const TEXT_TARGET = 4.56; // a hair over 4.5 so the rounded hex still passes
 
 /** Move L (down in light mode, up in dark) until `color` reaches `min` against every colour in `against`. */
@@ -207,19 +208,39 @@ function ensureContrast(color, against, mode, min = TEXT_TARGET) {
   return best;
 }
 
+/** The 8% accent wash (--fd-accent-8: the active nav item, a selected row) laid over an opaque background. */
+export function washOver(accent, bg, amount = 0.08) {
+  const a = parse(accent).rgb;
+  const b = parse(bg).rgb;
+  return format(a.map((c, i) => c * amount + b[i] * (1 - amount)));
+}
+/** What accent text sits on: the page, a surface, and the accent wash on each. */
+const accentGrounds = (accent, bg, surface) => [bg, surface, washOver(accent, bg), washOver(accent, surface)];
+
 const WHITE = '#ffffff';
-/** A near-black label tinted toward the accent's hue (olive-black on lime, brown-black on amber). */
+const isLightLabel = (label) => toOklch(label)[0] > 0.6;
+/** The hovered accent moves away from its label, in both modes: lighter under a dark label, darker under a white
+ *  one. The label then reads at least as well on the hover as on the fill. */
+const hoverOf = (accent, label) => shift(accent, isLightLabel(label) ? -0.035 : 0.035);
+
+/** A near-black label tinted toward the accent's hue (olive-black on lime, brown-black on amber) at L 0.2, or
+ *  darker on a mid-light accent where 0.2 does not reach the label rule (rose, periwinkle). */
 const nearBlack = (accent) => {
   const [, C, h] = toOklch(accent);
-  return oklch(0.2, Math.min(0.024, C * 0.14), h);
+  const c = Math.min(0.024, C * 0.14);
+  for (let l = 0.2; l > 0; l -= 0.005) {
+    const hex = oklch(l, c, h);
+    if (contrast(hex, accent) >= LABEL_MIN) return hex;
+  }
+  return oklch(0, 0, h);
 };
 
-/** Label on the accent: keep the preferred colour while it reaches 3:1, otherwise take whichever is higher. */
+/** Label on the accent: the preferred colour while it reaches 4.5:1, otherwise the other of white and the tinted
+ *  near-black. White or black always reaches 4.5 on an opaque colour, so one of them passes. */
 function pickLabel(accent, preferred) {
-  if (contrast(preferred, accent) >= LABEL_MIN) return preferred;
-  const dark = nearBlack(accent);
-  const options = [WHITE, dark, preferred];
-  return options.reduce((a, b) => (contrast(b, accent) > contrast(a, accent) ? b : a));
+  const passes = (c) => contrast(c, accent) >= LABEL_MIN;
+  const options = isLightLabel(preferred) ? [preferred, WHITE, nearBlack(accent)] : [preferred, nearBlack(accent), WHITE];
+  return options.find(passes) ?? options.reduce((a, b) => (contrast(b, accent) > contrast(a, accent) ? b : a));
 }
 
 /** The warm inner shade of the primary button: a darker, richer accent at about 0.3 alpha. */
@@ -322,21 +343,22 @@ function expand(spec) {
     accent = [...t['--fd-ink']];
   } else {
     const light = spec.accent[0];
-    // A white label that cannot reach 3:1 even on the light accent (glacier's sky blue) gives way to near-black.
+    // A white label that cannot reach 4.5:1 on the light accent (forest's green, glacier's sky blue) gives way to
+    // near-black in both modes.
     if (contrast(WHITE, light) < LABEL_MIN) on.forEach((v, m) => { if (v === 'white') on[m] = 'dark'; });
     let dark = spec.accent[1];
     if (!dark) {
-      // A little lighter in dark mode, but never so light that a white label drops under 3:1.
+      // A little lighter in dark mode, but never so light that a white label drops under 4.5:1.
       let lift = 0.05;
       dark = shift(light, lift);
-      while (on[1] === 'white' && lift > 0 && contrast(WHITE, dark) < LABEL_MIN + 0.05) { lift -= 0.005; dark = shift(light, lift); }
+      while (on[1] === 'white' && lift > 0 && contrast(WHITE, dark) < LABEL_MIN + 0.05) { lift = Math.max(0, lift - 0.005); dark = shift(light, lift); }
     }
     accent = [light, dark];
   }
   t['--fd-accent'] = accent;
-  t['--fd-accent-hover'] = pair((m) => shift(accent[m], m === 0 ? -0.035 : 0.035));
   t['--fd-accent-contrast'] = pair((m) => pickLabel(accent[m], prefer(m) ?? nearBlack(accent[m])));
-  t['--fd-accent-text'] = pair((m) => ensureContrast(accent[m], [t['--fd-bg'][m], t['--fd-surface'][m]], m));
+  t['--fd-accent-hover'] = pair((m) => hoverOf(accent[m], t['--fd-accent-contrast'][m]));
+  t['--fd-accent-text'] = pair((m) => ensureContrast(accent[m], accentGrounds(accent[m], t['--fd-bg'][m], t['--fd-surface'][m]), m));
   t['--fd-accent-glow'] = pair((m) => glowOf(accent[m], m));
 
   // High-contrast lines: tokens.css's [data-contrast="high"] steps, in this palette's hue.
@@ -424,11 +446,14 @@ function toneAccent(value, tone) {
   });
 }
 
-/** Re-apply the palette rules after a tone: accent text AA on page and surface, a readable label on the accent. */
+/** Re-apply the palette rules after a tone: accent text AA on page, surface and their accent wash, a readable label
+ *  on the accent, and a hover that moves away from that label. */
 function enforce(t, labels) {
   for (const m of [0, 1]) {
-    t['--fd-accent-text'][m] = ensureContrast(t['--fd-accent-text'][m], [t['--fd-bg'][m], t['--fd-surface'][m]], m);
+    t['--fd-accent-text'][m] = ensureContrast(t['--fd-accent-text'][m], accentGrounds(t['--fd-accent'][m], t['--fd-bg'][m], t['--fd-surface'][m]), m);
     t['--fd-accent-contrast'][m] = pickLabel(t['--fd-accent'][m], labels[m]);
+    // The bent hover follows the label the bent accent ended up with.
+    if (t['--fd-accent-hover']) t['--fd-accent-hover'][m] = hoverOf(t['--fd-accent'][m], t['--fd-accent-contrast'][m]);
   }
   return t;
 }

@@ -44,5 +44,5 @@ function bindCopy() {
 ready(() => { initIcons(); init(document); bindCopy(); document.documentElement.dataset.fdReady = ''; });
 
 export * from './js/core.js';
-export { icon, ICONS } from './js/icons.js';
+export { icon, setIcon, ICONS } from './js/icons.js';
 export { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks };

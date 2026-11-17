@@ -61,7 +61,7 @@
  * API: init(root), selection(table), clearSelection(table), sortTable(table, index, direction),
  *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max), selectJob(pipeline, value).
  */
-import { $$, on, once, emit, copyText } from './core.js';
+import { $$, on, once, emit, copyText, label } from './core.js';
 import { icon } from './icons.js';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
@@ -142,7 +142,7 @@ function watchOverflow(scroller, table) {
     if (state && !scroller.hasAttribute('tabindex')) {
       scroller.tabIndex = 0;
       scroller.setAttribute('role', 'region');
-      scroller.setAttribute('aria-label', table.getAttribute('aria-label') || table.querySelector('caption')?.textContent || 'Scrollable table');
+      scroller.setAttribute('aria-label', table.getAttribute('aria-label') || table.querySelector('caption')?.textContent || label(scroller, 'table.scroll', 'Scrollable table'));
       scroller.dataset.fdFocusable = '';
     } else if (!state && 'fdFocusable' in scroller.dataset) {
       scroller.removeAttribute('tabindex');
@@ -340,7 +340,7 @@ function initCopy(root) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'fd-kv-copy';
-    button.dataset.label = key ? `Copy ${key.toLowerCase()}` : 'Copy value';
+    button.dataset.label = key ? label(value, 'copy.key', 'Copy {key}', { key: key.toLowerCase() }) : label(value, 'copy.value', 'Copy value');
     button.setAttribute('aria-label', button.dataset.label);
     button.innerHTML = icon('copy') + icon('check');
     value.append(text, button);
@@ -353,11 +353,11 @@ async function copyValue(button) {
   const text = value.dataset.copy || value.querySelector('.fd-kv-text')?.textContent.trim() || '';
   if (!(await copyText(text))) return;
   button.dataset.copied = '';
-  button.setAttribute('aria-label', 'Copied');
+  button.setAttribute('aria-label', label(button, 'copy.done', 'Copied'));
   clearTimeout(button._fdTimer);
   button._fdTimer = setTimeout(() => {
     delete button.dataset.copied;
-    button.setAttribute('aria-label', button.dataset.label || 'Copy value');
+    button.setAttribute('aria-label', button.dataset.label || label(button, 'copy.value', 'Copy value'));
   }, 1400);
 }
 

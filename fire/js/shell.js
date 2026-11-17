@@ -18,8 +18,8 @@
  * API: init(root), setSidebar(app, state), toggleSidebar(app), setNavGroup(button, open),
  *  openMobileNav(sheet, trigger), closeMobileNav(), cycleTheme()
  */
-import { $$, once, emit, ensureId, focusables, position, getTheme, setTheme } from './core.js';
-import { icon } from './icons.js';
+import { $$, once, emit, ensureId, focusables, position, getTheme, setTheme, label } from './core.js';
+import { icon, setIcon } from './icons.js';
 
 const STORE_KEY = 'fd-sidebar';
 const store = {
@@ -40,13 +40,10 @@ function duration(el, name = '--fd-dur-3') {
 }
 function swapIcon(host, name) {
   const current = host.querySelector(':scope > .fd-icon, :scope > i[data-icon]');
-  if (current?.dataset.fdIconName === name) return;
+  if (current) { setIcon(current, name); return; }
   const t = document.createElement('template');
   t.innerHTML = icon(name);
-  const svg = t.content.firstElementChild;
-  svg.dataset.fdIconName = name;
-  if (current) current.replaceWith(svg);
-  else host.prepend(svg);
+  host.prepend(t.content.firstElementChild);
 }
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -59,7 +56,7 @@ function syncToggles(app) {
   if (sidebar) ensureId(sidebar, 'fd-sidebar');
   $$('[data-fd-sidebar-toggle]', app).forEach((btn) => {
     if (btn.closest('.fd-app') !== app) return;
-    btn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    btn.setAttribute('aria-label', collapsed ? label(btn, 'nav.expand', 'Expand sidebar') : label(btn, 'nav.collapse', 'Collapse sidebar'));
     if (sidebar) btn.setAttribute('aria-controls', sidebar.id);
   });
 }
@@ -209,7 +206,7 @@ function scrimFor(sheet) {
 function setTrigger(trigger, open) {
   if (!trigger) return;
   trigger.setAttribute('aria-expanded', String(open));
-  trigger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  trigger.setAttribute('aria-label', open ? label(trigger, 'menu.close', 'Close menu') : label(trigger, 'menu.open', 'Open menu'));
   swapIcon(trigger, open ? 'x' : 'menu');
 }
 
@@ -235,7 +232,7 @@ export function openMobileNav(sheet, trigger) {
   ensureId(sheet, 'fd-mobile-nav');
   if (!sheet.hasAttribute('role')) sheet.setAttribute('role', 'dialog');
   sheet.setAttribute('aria-modal', 'true');
-  if (!sheet.hasAttribute('aria-label') && !sheet.hasAttribute('aria-labelledby')) sheet.setAttribute('aria-label', 'Menu');
+  if (!sheet.hasAttribute('aria-label') && !sheet.hasAttribute('aria-labelledby')) sheet.setAttribute('aria-label', label(sheet, 'menu.title', 'Menu'));
   const triggers = trigger ? [trigger] : $$(`[data-fd-mobile-nav][aria-controls="${sheet.id}"]`);
   trigger = triggers[0] || app?.querySelector('[data-fd-mobile-nav]') || null;
   if (trigger) trigger.setAttribute('aria-controls', sheet.id);
@@ -292,7 +289,8 @@ function syncThemeToggles(root = document) {
   const next = NEXT_THEME[theme];
   $$('[data-fd-theme-toggle]', root).forEach((btn) => {
     swapIcon(btn, THEMES[theme][0]);
-    btn.setAttribute('aria-label', `Theme: ${THEMES[theme][1]}. Switch to ${THEMES[next][1].toLowerCase()}`);
+    const name = (key) => label(btn, `theme.${key}`, THEMES[key][1]);   // English reads "Switch to dark"; a translation is used as written
+    btn.setAttribute('aria-label', label(btn, 'theme.switch', 'Theme: {theme}. Switch to {next}', { theme: name(theme), next: name(next) === THEMES[next][1] ? name(next).toLowerCase() : name(next) }));
     btn.dataset.themeState = theme;
   });
 }

@@ -286,6 +286,19 @@
     </ul>
   </section>
 
+  <section class="doc-section" id="icons">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Changing an icon</h2>
+      <p>Fire draws each <span class="fd-mono">&lt;i data-icon&gt;</span> once, at start. To change it afterwards, call <span class="fd-mono">setIcon(el, name)</span> with the drawn icon, an element holding one icon, or an icon not yet drawn. Classes, size, <span class="fd-mono">aria-hidden</span> and any label stay. Setting <span class="fd-mono">data-icon</span> on a drawn icon does the same. An unknown name keeps the current drawing and warns once.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="surface">
+      <div><button class="fd-btn" id="icon-toggle" aria-pressed="false"><i data-icon="play"></i><span>Play</span></button></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Change the label with the icon: a play and pause button is one control whose icon, word and <span class="fd-mono">aria-pressed</span> move together.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="theming">
     <div class="doc-section-head">
       <h2 class="fd-h3">Theming</h2>
@@ -333,6 +346,7 @@
   </section>
 </main>
 <script type="module">
+  import { setIcon } from '../fire/js/icons.js';
   const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" data-fd-vars="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted fx-note">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
   const steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 88];
   document.getElementById('ladder').innerHTML = steps.map((s) => `<span data-fd-vars="--c:var(--fd-a${s})">${s}</span>`).join('');
@@ -357,6 +371,12 @@
   const motion = [['dur-2 · ease-out', '--fd-dur-2', '--fd-ease-out', '160ms hover, focus'], ['dur-3 · ease-out', '--fd-dur-3', '--fd-ease-out', '220ms menus, toggles'], ['dur-3 · ease-spring', '--fd-dur-3', '--fd-ease-spring', '220ms thumbs'], ['dur-4 · ease-emphasized', '--fd-dur-4', '--fd-ease-emphasized', '320ms dialogs, sheets'], ['dur-5 · ease-emphasized', '--fd-dur-5', '--fd-ease-emphasized', '520ms entrances']];
   const list = document.getElementById('motion-list');
   list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span class="fx-name">${n}</span><br>${use}</span><div class="fx-track" data-fd-vars="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
+  document.getElementById('icon-toggle').addEventListener('click', (e) => {
+    const b = e.currentTarget, on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', String(on));
+    b.querySelector('span').textContent = on ? 'Pause' : 'Play';
+    setIcon(b, on ? 'pause' : 'play');
+  });
   document.getElementById('motion-run').addEventListener('click', () => list.toggleAttribute('data-run'));
 </script>
 </body>

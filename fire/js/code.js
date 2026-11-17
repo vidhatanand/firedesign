@@ -37,7 +37,7 @@
  *      playTerminal(el, script?) → Promise, copied(button, {label, slot}).
  * Events: fd:change (tabs, view switch; detail.value).
  */
-import { $, $$, on, once, emit, copyText, ensureId, reducedMotion } from './core.js';
+import { $, $$, on, once, emit, copyText, ensureId, reducedMotion, label as fdLabel } from './core.js';
 import { icon } from './icons.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -235,12 +235,12 @@ function announce(message) {
 const ORIGINAL = new WeakMap();
 const TIMERS = new WeakMap();
 /** Swap a button's content to a check (+ label) for 1.4s. `slot` swaps only part of the button. */
-export function copied(btn, { label = 'Copied', slot = btn, iconOnly = false } = {}) {
+export function copied(btn, { label = fdLabel(btn, 'copy.done', 'Copied'), slot = btn, iconOnly = false } = {}) {
   if (!ORIGINAL.has(slot)) ORIGINAL.set(slot, slot.innerHTML);
   clearTimeout(TIMERS.get(btn));
   slot.innerHTML = (iconOnly || !label ? icon('check') : `${icon('check')}<span class="fd-copied-label">${label}</span>`);
   btn.dataset.state = 'copied';
-  announce('Copied to clipboard');
+  announce(fdLabel(btn, 'copy.announce', 'Copied to clipboard'));
   TIMERS.set(btn, setTimeout(() => {
     slot.innerHTML = ORIGINAL.get(slot);
     ORIGINAL.delete(slot);
@@ -338,7 +338,7 @@ function updateMore(block) {
   const expanded = block.hasAttribute('data-expanded');
   const btn = more.querySelector('.fd-codeblock-expand');
   btn.setAttribute('aria-expanded', String(expanded));
-  btn.querySelector('span').textContent = expanded ? 'Show less' : `Show all ${count.toLocaleString()} lines`;
+  btn.querySelector('span').textContent = expanded ? fdLabel(btn, 'code.less', 'Show less') : fdLabel(btn, 'code.more', 'Show all {count} lines', { count: count.toLocaleString() });
 }
 
 /** Select a language tab. Persists and syncs other blocks in the same group unless { persist: false }. */
@@ -966,7 +966,7 @@ function bindGlobal() {
     const path = line.dataset.path;
     const value = state.values.get(path);
     const text = btn.dataset.copy === 'path' ? path : typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-    if (await copyText(text)) copied(btn, { label: 'Copied', iconOnly: false });
+    if (await copyText(text)) copied(btn, { iconOnly: false });
   });
   on(document, 'click', '.fd-json-btn[data-action]', async (e, btn) => {
     const el = btn.closest('.fd-json');

@@ -85,8 +85,8 @@
  *   fd:invalid  { fields } / fd:valid           validated form
  *   fd:dirty    { dirty }                       form[data-fd-dirty]
  */
-import { $, $$, on, once, emit, ensureId, position, autoUpdate, copyText, clamp, reducedMotion } from './core.js';
-import { icon } from './icons.js';
+import { $, $$, on, once, emit, ensureId, position, autoUpdate, copyText, clamp, reducedMotion, label as fdLabel } from './core.js';
+import { icon, setIcon } from './icons.js';
 
 const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const each = (root, selector, fn) => {
@@ -98,11 +98,6 @@ const later = (el, key, fn, ms) => {
   const map = timers.get(el) ?? timers.set(el, {}).get(el);
   clearTimeout(map[key]);
   map[key] = setTimeout(fn, ms);
-};
-const setIcon = (button, name, size) => {
-  const use = button.querySelector('use');
-  if (use) use.setAttribute('href', `#i-${name}`);
-  else button.innerHTML = icon(name, { size });
 };
 const fire = (el, type) => el.dispatchEvent(new Event(type, { bubbles: true }));
 const HAS_POPOVER = typeof HTMLElement !== 'undefined' && 'popover' in HTMLElement.prototype;
@@ -350,7 +345,7 @@ function setupOtp(el) {
     input.setAttribute('autocomplete', i === 0 ? 'one-time-code' : 'off');
     input.setAttribute('autocapitalize', 'off');
     input.setAttribute('spellcheck', 'false');
-    if (!input.hasAttribute('aria-label')) input.setAttribute('aria-label', `Character ${i + 1} of ${inputs.length}`);
+    if (!input.hasAttribute('aria-label')) input.setAttribute('aria-label', fdLabel(el, 'otp.char', 'Character {n} of {total}', { n: i + 1, total: inputs.length }));
   });
 }
 
@@ -389,8 +384,8 @@ function otpChanged(el) {
    Tokens: tag input
    ========================================================================== */
 
-const tokenHTML = (label, value, fresh) =>
-  `<span class="fd-token" data-value="${esc(value)}"${fresh ? ' data-new' : ''}><span class="fd-token-label">${esc(label)}</span><button type="button" class="fd-token-remove" tabindex="-1" aria-label="Remove ${esc(label)}">${icon('x')}</button></span>`;
+const tokenHTML = (el, label, value, fresh) =>
+  `<span class="fd-token" data-value="${esc(value)}"${fresh ? ' data-new' : ''}><span class="fd-token-label">${esc(label)}</span><button type="button" class="fd-token-remove" tabindex="-1" aria-label="${esc(fdLabel(el, 'token.remove', 'Remove {label}', { label }))}">${icon('x')}</button></span>`;
 
 /* A list written by a server as a text area: its initial values, and whether it was required. */
 const lists = new WeakMap();
@@ -450,7 +445,7 @@ export const tagValues = (el) => $$(':scope > .fd-token', el).map((token) => tok
 export function setTags(el, values, { silent = true } = {}) {
   $$(':scope > .fd-token', el).forEach((token) => token.remove());
   const field = $(':scope > .fd-tag-input-field', el);
-  values.forEach((value) => field.insertAdjacentHTML('beforebegin', tokenHTML(value, value, false)));
+  values.forEach((value) => field.insertAdjacentHTML('beforebegin', tokenHTML(field, value, value, false)));
   markPatterns(el);
   syncHidden(el, tagValues(el));
   if (!silent) emit(el, 'fd:change', { value: tagValues(el) });
@@ -466,7 +461,7 @@ function addTags(el, raw, { user = true } = {}) {
     const value = piece.trim();
     if (!value || existing.has(value) || existing.size >= max) continue;
     existing.add(value);
-    field.insertAdjacentHTML('beforebegin', tokenHTML(value, value, user));
+    field.insertAdjacentHTML('beforebegin', tokenHTML(field, value, value, user));
     if (pattern && !pattern.test(value)) $(`:scope > .fd-token[data-value="${CSS.escape(value)}"]`, el)?.setAttribute('data-invalid', '');
     added.push(value);
   }
@@ -610,7 +605,7 @@ function pairRowHTML(el, key = '', value = '') {
   return `<div class="fd-pairs-row">`
     + `<input class="fd-input fd-pairs-key" type="text" autocomplete="off" data-fd-skip value="${esc(key)}"${sizeAttr}${monoAttr('key')}${placeholder(keyPlaceholder)}>`
     + `<input class="fd-input fd-pairs-value" type="text" autocomplete="off" data-fd-skip value="${esc(value)}"${sizeAttr}${monoAttr('value')}${placeholder(valuePlaceholder)}>`
-    + `<button type="button" class="fd-btn" data-variant="ghost" data-icon-only${sizeAttr} data-fd-pairs-remove aria-label="Remove row">${icon('x')}</button>`
+    + `<button type="button" class="fd-btn" data-variant="ghost" data-icon-only${sizeAttr} data-fd-pairs-remove aria-label="${esc(fdLabel(el, 'pairs.remove-row', 'Remove row'))}">${icon('x')}</button>`
     + `</div>`;
 }
 
@@ -631,7 +626,7 @@ function syncPairs(el, { notify = false } = {}) {
     const n = i + 1;
     keyInput.setAttribute('aria-label', `${keyLabel} ${n}`);
     valueInput.setAttribute('aria-label', key ? `${valueLabel} for ${key}` : `${valueLabel} ${n}`);
-    $(':scope > [data-fd-pairs-remove]', row).setAttribute('aria-label', key ? `Remove ${key}` : `Remove row ${n}`);
+    $(':scope > [data-fd-pairs-remove]', row).setAttribute('aria-label', key ? fdLabel(el, 'pairs.remove-key', 'Remove {key}', { key }) : fdLabel(el, 'pairs.remove-n', 'Remove row {n}', { n }));
     const duplicate = Boolean(key) && counts.get(key) > 1;
     if (duplicate) {
       keyInput.setAttribute('aria-invalid', 'true');
@@ -943,7 +938,7 @@ function setupCodefield(el) {
   const note = document.createElement('span');
   note.className = 'fd-sr-only';
   ensureId(note, 'fd-codefield-keys');
-  note.textContent = 'Tab inserts two spaces. To leave the field, press Escape, then Tab.';
+  note.textContent = fdLabel(el, 'textarea.tab', 'Tab inserts two spaces. To leave the field, press Escape, then Tab.');
   el.append(note);
   const described = new Set((area.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
   described.add(note.id);
@@ -997,8 +992,8 @@ function setupCombobox(root) {
   input.setAttribute('aria-controls', ensureId(list, 'fd-listbox'));
   list.setAttribute('role', 'listbox');
   if (multiple) list.setAttribute('aria-multiselectable', 'true');
-  if (!input.hasAttribute('aria-label') && !input.id) input.setAttribute('aria-label', input.getAttribute('placeholder') || 'Search options');
-  if (!list.hasAttribute('aria-label') && !list.hasAttribute('aria-labelledby')) list.setAttribute('aria-label', input.getAttribute('aria-label') || 'Options');
+  if (!input.hasAttribute('aria-label') && !input.id) input.setAttribute('aria-label', input.getAttribute('placeholder') || fdLabel(root, 'search.options', 'Search options'));
+  if (!list.hasAttribute('aria-label') && !list.hasAttribute('aria-labelledby')) list.setAttribute('aria-label', input.getAttribute('aria-label') || fdLabel(root, 'options.list', 'Options'));
   if (HAS_POPOVER) list.setAttribute('popover', 'manual');
   else { list.dataset.fallback = ''; list.hidden = true; }
 
@@ -1034,7 +1029,7 @@ function commitCombo(state) {
   if (multiple) {
     const container = $('.fd-tag-input', root) || root;
     $$(':scope > .fd-token', container).forEach((token) => token.remove());
-    state.selected.forEach((label, value) => input.insertAdjacentHTML('beforebegin', tokenHTML(label, value, state.fresh?.has(value))));
+    state.selected.forEach((label, value) => input.insertAdjacentHTML('beforebegin', tokenHTML(input, label, value, state.fresh?.has(value))));
     state.fresh = null;
     if (input.dataset.placeholder === undefined) input.dataset.placeholder = input.getAttribute('placeholder') ?? '';
     input.setAttribute('placeholder', values.length ? '' : input.dataset.placeholder);
@@ -1195,7 +1190,7 @@ function renderEntry(el) {
   if (reveal) {
     const noun = el.dataset.noun || 'password';
     reveal.setAttribute('aria-pressed', String(revealed));
-    reveal.setAttribute('aria-label', `${revealed ? 'Hide' : 'Show'} ${noun}`);
+    reveal.setAttribute('aria-label', revealed ? fdLabel(el, 'secret.hide', 'Hide {noun}', { noun }) : fdLabel(el, 'secret.show', 'Show {noun}', { noun }));
     if (input?.id) reveal.setAttribute('aria-controls', input.id);
     setIcon(reveal, revealed ? 'eye-off' : 'eye');
   }
@@ -1225,11 +1220,11 @@ function renderSecret(el) {
   if (reveal) {
     const noun = el.dataset.noun || 'value';
     reveal.setAttribute('aria-pressed', String(revealed));
-    reveal.setAttribute('aria-label', `${revealed ? 'Hide' : 'Show'} ${noun}`);
+    reveal.setAttribute('aria-label', revealed ? fdLabel(el, 'secret.hide', 'Hide {noun}', { noun }) : fdLabel(el, 'secret.show', 'Show {noun}', { noun }));
     setIcon(reveal, revealed ? 'eye-off' : 'eye');
   }
   const copy = $('[data-fd-field-action="copy"]', el);
-  if (copy && !copy.dataset.state) copy.setAttribute('aria-label', `Copy ${el.dataset.noun || 'value'}`);
+  if (copy && !copy.dataset.state) copy.setAttribute('aria-label', fdLabel(el, 'secret.copy', 'Copy {noun}', { noun: el.dataset.noun || 'value' }));
 }
 
 function setupSecret(el) {
@@ -1254,11 +1249,11 @@ async function copySecret(el, button) {
   const noun = el.dataset.noun || 'value';
   button.dataset.state = 'copied';
   setIcon(button, 'check');
-  button.setAttribute('aria-label', `Copied ${noun}`);
+  button.setAttribute('aria-label', fdLabel(el, 'secret.copied', 'Copied {noun}', { noun }));
   later(button, 'copied', () => {
     delete button.dataset.state;
     setIcon(button, 'copy');
-    button.setAttribute('aria-label', `Copy ${noun}`);
+    button.setAttribute('aria-label', fdLabel(el, 'secret.copy', 'Copy {noun}', { noun }));
   }, 1400);
   emit(el, 'fd:copy', { value });
 }

@@ -25,6 +25,7 @@ Then open http://127.0.0.1:4747/docs/index.html.
 | Setting up an AI agent to build with Fire | [AGENT-RULES.md](AGENT-RULES.md): the rules, and the three-line pointer for a project's `AGENTS.md` |
 | Adding to or changing Fire itself | [DESIGN.md](DESIGN.md): the contract every contribution follows |
 | Looking up a class or attribute | [docs/_ref/VOCABULARY.md](docs/_ref/VOCABULARY.md) |
+| Updating a product to a newer Fire | [CHANGELOG.md](CHANGELOG.md): what changed in each release and what to check |
 | Asking for a component or an extension | GUIDE.md section 7, then the "Component or extension request" issue template |
 
 ## Use it
@@ -99,7 +100,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site: 18 pages. Start at `docs/index.html`. |
 | `templates/` | 24 screens for Ember: the app, a long create form, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Start at `templates/index.html`. |
-| `scripts/` | `serve.py` (dev server), `audit.mjs` (checks), `build-palettes.mjs` (regenerates and checks the palettes), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds). |
+| `scripts/` | `serve.py` (dev server), `audit.mjs` (checks), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |
 
 ## Families

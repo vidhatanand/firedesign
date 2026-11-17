@@ -221,12 +221,15 @@
   background: var(--fd-fill); color: var(--fd-text); font: inherit; font-size: var(--fd-text-sm); font-weight: var(--fd-weight-label); cursor: pointer;
 }
 
-.fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child {
-  block-size: auto; min-block-size: var(--_f-h, var(--fd-control-md));
+/* :is() takes the specificity of the shared skin above, so the height and padding here are not overridden by it.
+   Without rows the field keeps the control height; rows sets the starting height; autogrow takes over from there. */
+:is(.fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child) {
+  min-block-size: var(--_f-h, var(--fd-control-md));
   padding-block: calc((var(--_f-h, var(--fd-control-md)) - var(--fd-lh-md)) / 2);
   resize: vertical; overflow: auto; text-overflow: clip;
   max-block-size: var(--fd-form-textarea-max);
 }
+:is(.fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child)[rows] { block-size: auto; }
 .fd-textarea[data-fd-autogrow] { resize: none; overflow-y: hidden; }
 .fd-textarea[data-resize="none"] { resize: none; }
 /* The wrapper around that plain text area draws nothing, so there is one edge, not two. */

@@ -75,7 +75,7 @@ export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)'
 export const coarsePointer = () => matchMedia('(pointer: coarse)').matches;
 export const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
 
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), details:not([disabled]) > summary, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 export function focusables(root) {
   return $$(FOCUSABLE, root).filter((el) => !el.closest('[hidden], [inert]') && el.getClientRects().length);
 }
@@ -191,6 +191,7 @@ export async function copyText(text) {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
+    const holder = document.activeElement;
     const area = document.createElement('textarea');
     area.value = text;
     area.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
@@ -199,6 +200,7 @@ export async function copyText(text) {
     let ok = false;
     try { ok = document.execCommand('copy'); } catch { /* ignore */ }
     area.remove();
+    if (holder && holder !== document.body && holder.isConnected) holder.focus?.({ preventScroll: true });
     return ok;
   }
 }

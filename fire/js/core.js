@@ -205,6 +205,36 @@ export async function copyText(text) {
   }
 }
 
+/* ---------- Labels ----------
+ * Interface text that Fire's scripts write at runtime (accessible names and visible words of controls Fire creates
+ * or toggles) can be translated by the page. label(el, key, fallback, vars) answers, in order:
+ *   1. the attribute data-label-<key> on `el` or the nearest ancestor (its component root, or <html> for the page);
+ *      the key's dots become hyphens: menu.open reads data-label-menu-open
+ *   2. the page dictionary: <script type="application/json" data-fd-labels>{"menu.open": "Menü öffnen"}</script>,
+ *      parsed once (it is data, so a strict Content Security Policy allows it)
+ *   3. `fallback`, the English default written at the call site.
+ * {name} placeholders are filled from `vars`. Keys and English defaults (vars in braces):
+ *   secret.show "Show {noun}" · secret.hide "Hide {noun}" · secret.copy "Copy {noun}" · secret.copied "Copied {noun}"
+ *   search.options "Search options" · options.list "Options" · otp.char "Character {n} of {total}"
+ *   token.remove "Remove {label}" · pairs.remove-row "Remove row" · pairs.remove-key "Remove {key}"
+ *   pairs.remove-n "Remove row {n}" · textarea.tab "Tab inserts two spaces. To leave the field, press Escape, then Tab."
+ *   nav.expand "Expand sidebar" · nav.collapse "Collapse sidebar" · menu.open "Open menu" · menu.close "Close menu"
+ *   menu.title "Menu" · theme.switch "Theme: {theme}. Switch to {next}" · theme.light "Light" · theme.dark "Dark"
+ *   theme.system "System" · copy.done "Copied" · copy.announce "Copied to clipboard" · copy.value "Copy value"
+ *   copy.key "Copy {key}" · code.more "Show all {count} lines" · code.less "Show less" · table.scroll "Scrollable table"
+ *   calendar.prev "Previous month" · calendar.next "Next month" · filter.selected "{count} selected"
+ *   filter.none "None selected" · toast.region "Notifications" · toast.dismiss "Dismiss notification"
+ */
+let dictionary;
+export function label(el, key, fallback, vars) {
+  const attr = `data-label-${key.replace(/\./g, '-')}`;
+  dictionary ??= (() => {
+    try { return JSON.parse(document.querySelector('script[type="application/json"][data-fd-labels]')?.textContent || '{}') || {}; } catch { return {}; }
+  })();
+  const text = el?.closest?.(`[${attr}]`)?.getAttribute(attr) ?? dictionary[key] ?? fallback;
+  return vars ? text.replace(/\{(\w+)\}/g, (m, name) => (name in vars ? vars[name] : m)) : text;
+}
+
 /** Run `fn` when the DOM is ready. */
 export function ready(fn) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });

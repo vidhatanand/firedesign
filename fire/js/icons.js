@@ -7,7 +7,7 @@ export const ICONS = {"home":"<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1
 const NS = 'http://www.w3.org/2000/svg';
 export function icon(name, { size, cls = '' } = {}) {
   injectSprite();   // a module loaded on its own, without fire.js, still gets the sprite its icons draw from
-  return `<svg class="fd-icon ${cls}"${size ? ` data-size="${size}"` : ''} aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  return `<svg class="fd-icon ${cls}"${size ? ` data-size="${size}"` : ''} data-icon="${name}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 }
 function injectSprite() {
   if (typeof document === 'undefined' || document.getElementById('fd-icon-sprite')) return;
@@ -18,14 +18,40 @@ function injectSprite() {
   svg.innerHTML = Object.entries(ICONS).map(([n, p]) => `<symbol id="i-${n}" viewBox="0 0 24 24">${p}</symbol>`).join('');
   document.body.prepend(svg);
 }
-export function upgradeIcons(root = document) {
-  root.querySelectorAll('i[data-icon]').forEach((el) => {
-    const name = el.dataset.icon; if (!ICONS[name]) { console.warn('[fire] unknown icon', name); return; }
-    const t = document.createElement('template');
-    t.innerHTML = icon(name, { size: el.dataset.size, cls: el.className });
-    const svg = t.content.firstElementChild;
-    for (const a of el.attributes) if (!['data-icon', 'data-size', 'class'].includes(a.name)) svg.setAttribute(a.name, a.value);
-    el.replaceWith(svg);
-  });
+const warned = new Set();
+const known = (name) => ICONS[name] || (warned.has(name) || (warned.add(name), console.warn('[fire] unknown icon', name)), false);
+/* Draw one <i data-icon>; returns the SVG, or null (and the <i> stays) when the name is unknown. */
+function draw(el) {
+  const name = el.dataset.icon; if (!known(name)) return null;
+  const t = document.createElement('template');
+  t.innerHTML = icon(name, { size: el.dataset.size, cls: el.className });
+  const svg = t.content.firstElementChild;
+  for (const a of el.attributes) if (!['data-icon', 'data-size', 'class'].includes(a.name)) svg.setAttribute(a.name, a.value);
+  el.replaceWith(svg);
+  return svg;
 }
-export function initIcons() { injectSprite(); upgradeIcons(); }
+export function upgradeIcons(root = document) { root.querySelectorAll('i[data-icon]').forEach(draw); }
+/* Point a drawn icon at the name in its data-icon. An unknown name is put back to the drawing it already has. */
+function redraw(svg) {
+  const use = svg.querySelector('use'); if (!use) return;
+  const name = svg.dataset.icon, current = use.getAttribute('href').slice(3);
+  if (name === current) return;
+  if (known(name)) { injectSprite(); use.setAttribute('href', `#i-${name}`); } else svg.dataset.icon = current;
+}
+/* Change an icon after the page has drawn. `el` is a drawn icon, an <i data-icon> not yet drawn, or an element
+ * holding exactly one icon. Classes, size, aria-hidden and any label stay; an unknown name keeps the old drawing. */
+export function setIcon(el, name) {
+  const target = el.matches('svg.fd-icon, i[data-icon]') ? el : el.querySelector('svg.fd-icon[data-icon], i[data-icon]');
+  if (!target) return;
+  target.dataset.icon = name;
+  if (target.localName === 'i') draw(target); else redraw(target);
+}
+let watching = false;
+export function initIcons() {
+  injectSprite(); upgradeIcons();
+  if (watching || typeof MutationObserver === 'undefined') return;
+  watching = true;
+  new MutationObserver((records) => {
+    for (const { target } of records) if (target.matches?.('svg.fd-icon')) redraw(target); else if (target.matches?.('i[data-icon]')) draw(target);
+  }).observe(document, { subtree: true, attributes: true, attributeFilter: ['data-icon'] });
+}

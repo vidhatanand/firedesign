@@ -811,6 +811,69 @@
       <li>The full text is in <a class="fd-link" href="../WRITING.md">WRITING.md</a>. The rules an AI agent follows are in <a class="fd-link" href="../AGENT-RULES.md">AGENT-RULES.md</a>.</li>
     </ul>
   </section>
+
+  <!-- ===================== TRANSLATING LABELS ===================== -->
+  <section class="doc-section" id="translating">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Translating Fire's labels</h2>
+      <p>Most words on a page are your markup, so you translate them yourself. A few are written by Fire's scripts as people use the page, such as “Show API key” on a secret field. Give those the page's language and they follow it through every interaction.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-secret" data-value="em-227cd9a41c3b8e07f52d6a9144b0f16" data-noun="API-Schlüssel" data-label-secret-show="{noun} anzeigen" data-label-secret-hide="{noun} verbergen" data-label-secret-copy="{noun} kopieren" data-label-secret-copied="{noun} kopiert" role="group" aria-label="API-Schlüssel">
+        <code class="fd-secret-value" data-tone="accent"></code>
+        <div class="fd-secret-actions">
+          <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal"><i data-icon="eye"></i></button>
+          <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy"><i data-icon="copy"></i></button>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Put <span class="fd-mono">data-label-&lt;key&gt;</span> on the component, or on <span class="fd-mono">html</span> for the whole page. Dots in the key become hyphens: <span class="fd-mono">menu.open</span> is read from <span class="fd-mono">data-label-menu-open</span>.</li>
+      <li>For a whole language at once, add one dictionary to the page: <span class="fd-mono">&lt;script type="application/json" data-fd-labels&gt;{"menu.open": "Menü öffnen"}&lt;/script&gt;</span>. It is data, so a strict Content Security Policy allows it. An attribute beats the dictionary, and the dictionary beats English.</li>
+      <li><span class="fd-mono">{name}</span> marks a value Fire fills in. Keep it in the translation, in the order your language needs.</li>
+      <li>Words you wrote in markup are never replaced. Sample content in these docs, and the Tweaks panel, are not translated.</li>
+    </ul>
+    <table class="doc-table">
+      <caption>Labels Fire writes, with their English defaults</caption>
+      <thead><tr><th>Key</th><th>English default</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td><span class="fd-mono">secret.show</span></td><td>Show {noun}</td><td>secret and copy field: reveal button</td></tr>
+        <tr><td><span class="fd-mono">secret.hide</span></td><td>Hide {noun}</td><td>the same, once revealed</td></tr>
+        <tr><td><span class="fd-mono">secret.copy</span></td><td>Copy {noun}</td><td>copy button</td></tr>
+        <tr><td><span class="fd-mono">secret.copied</span></td><td>Copied {noun}</td><td>copy button, for 1.4 seconds</td></tr>
+        <tr><td><span class="fd-mono">search.options</span></td><td>Search options</td><td>combobox input with no name</td></tr>
+        <tr><td><span class="fd-mono">options.list</span></td><td>Options</td><td>combobox list with no name</td></tr>
+        <tr><td><span class="fd-mono">otp.char</span></td><td>Character {n} of {total}</td><td>one-time code boxes</td></tr>
+        <tr><td><span class="fd-mono">token.remove</span></td><td>Remove {label}</td><td>tag input and multi-select chips</td></tr>
+        <tr><td><span class="fd-mono">pairs.remove-row</span></td><td>Remove row</td><td>pairs, a new row</td></tr>
+        <tr><td><span class="fd-mono">pairs.remove-key</span></td><td>Remove {key}</td><td>pairs, a row with a name</td></tr>
+        <tr><td><span class="fd-mono">pairs.remove-n</span></td><td>Remove row {n}</td><td>pairs, a row without one</td></tr>
+        <tr><td><span class="fd-mono">textarea.tab</span></td><td>Tab inserts two spaces. To leave the field, press Escape, then Tab.</td><td>code field, read by screen readers</td></tr>
+        <tr><td><span class="fd-mono">nav.expand</span></td><td>Expand sidebar</td><td>sidebar toggle</td></tr>
+        <tr><td><span class="fd-mono">nav.collapse</span></td><td>Collapse sidebar</td><td>sidebar toggle</td></tr>
+        <tr><td><span class="fd-mono">menu.open</span></td><td>Open menu</td><td>phone menu button</td></tr>
+        <tr><td><span class="fd-mono">menu.close</span></td><td>Close menu</td><td>phone menu button, once open</td></tr>
+        <tr><td><span class="fd-mono">menu.title</span></td><td>Menu</td><td>phone menu sheet</td></tr>
+        <tr><td><span class="fd-mono">theme.switch</span></td><td>Theme: {theme}. Switch to {next}</td><td>theme toggle</td></tr>
+        <tr><td><span class="fd-mono">theme.light</span></td><td>Light</td><td>theme names used by theme.switch</td></tr>
+        <tr><td><span class="fd-mono">theme.dark</span></td><td>Dark</td><td>theme names used by theme.switch</td></tr>
+        <tr><td><span class="fd-mono">theme.system</span></td><td>System</td><td>theme names used by theme.switch</td></tr>
+        <tr><td><span class="fd-mono">copy.done</span></td><td>Copied</td><td>copy buttons that show a check</td></tr>
+        <tr><td><span class="fd-mono">copy.announce</span></td><td>Copied to clipboard</td><td>announced to screen readers</td></tr>
+        <tr><td><span class="fd-mono">copy.key</span></td><td>Copy {key}</td><td>key-value copy button</td></tr>
+        <tr><td><span class="fd-mono">copy.value</span></td><td>Copy value</td><td>key-value copy button without a key</td></tr>
+        <tr><td><span class="fd-mono">code.more</span></td><td>Show all {count} lines</td><td>collapsed code block</td></tr>
+        <tr><td><span class="fd-mono">code.less</span></td><td>Show less</td><td>collapsed code block, once open</td></tr>
+        <tr><td><span class="fd-mono">table.scroll</span></td><td>Scrollable table</td><td>scroll region of a table with no name</td></tr>
+        <tr><td><span class="fd-mono">calendar.prev</span></td><td>Previous month</td><td>calendar</td></tr>
+        <tr><td><span class="fd-mono">calendar.next</span></td><td>Next month</td><td>calendar</td></tr>
+        <tr><td><span class="fd-mono">filter.selected</span></td><td>{count} selected</td><td>filter list summary</td></tr>
+        <tr><td><span class="fd-mono">filter.none</span></td><td>None selected</td><td>filter list summary</td></tr>
+        <tr><td><span class="fd-mono">toast.region</span></td><td>Notifications</td><td>toast area</td></tr>
+        <tr><td><span class="fd-mono">toast.dismiss</span></td><td>Dismiss notification</td><td>toast close button</td></tr>
+      </tbody>
+    </table>
+  </section>
 </main>
 </body>
 </html>

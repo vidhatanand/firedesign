@@ -83,7 +83,7 @@
  *   command.open() · command.close() · command.toggle() ·
  *   command.register([{ id, label, group, icon, hint, shortcut, keywords, href, perform }]) → unregister
  */
-import { $$, on, once, emit, position, autoUpdate, focusables, trapFocus, ensureId, clamp, reducedMotion } from './core.js';
+import { $$, on, once, emit, position, autoUpdate, focusables, trapFocus, ensureId, clamp, reducedMotion, label as fdLabel } from './core.js';
 import { icon } from './icons.js';
 
 const doc = document;
@@ -572,9 +572,9 @@ function buildCalendar(root) {
   heading.setAttribute('aria-live', 'polite');
   heading.textContent = title;
   head.append(
-    nav(-1, 'Previous month', 'chevron-left', !!min && new Date(year, month, 1) <= min),
+    nav(-1, fdLabel(root, 'calendar.prev', 'Previous month'), 'chevron-left', !!min && new Date(year, month, 1) <= min),
     heading,
-    nav(1, 'Next month', 'chevron-right', !!max && new Date(year, month + 1, 1) > max),
+    nav(1, fdLabel(root, 'calendar.next', 'Next month'), 'chevron-right', !!max && new Date(year, month + 1, 1) > max),
   );
 
   const grid = doc.createElement('div');
@@ -730,7 +730,7 @@ function syncFilter(root) {
   if (list && !list.hasAttribute('role')) { list.setAttribute('role', 'listbox'); list.setAttribute('aria-multiselectable', 'true'); }
   if (options.length && !options.some((o) => o.tabIndex === 0)) options[0].tabIndex = 0;
   const selected = options.filter((o) => o.getAttribute('aria-selected') === 'true');
-  for (const sum of $$('[data-fd-filter-summary]', root)) sum.textContent = selected.length ? `${selected.length} selected` : 'None selected';
+  for (const sum of $$('[data-fd-filter-summary]', root)) sum.textContent = selected.length ? fdLabel(sum, 'filter.selected', '{count} selected', { count: selected.length }) : fdLabel(sum, 'filter.none', 'None selected');
   for (const clear of $$('[data-fd-filter-clear]', root)) clear.disabled = selected.length === 0;
   const pop = root.closest('.fd-popover');
   if (!pop?.id || isStatic(pop)) return selected;
@@ -1079,7 +1079,7 @@ function getToaster() {
   toaster.className = 'fd-toaster';
   toaster.setAttribute('aria-live', 'polite');
   toaster.setAttribute('aria-relevant', 'additions text');
-  toaster.setAttribute('aria-label', 'Notifications');
+  toaster.setAttribute('aria-label', fdLabel(doc.documentElement, 'toast.region', 'Notifications'));
   modes.set(toaster, 'manual');
   if (HAS_POPOVER) toaster.setAttribute('popover', 'manual');
   toaster.dataset.state = 'closed';
@@ -1171,7 +1171,7 @@ function renderToast(t) {
     const close = doc.createElement('button');
     close.type = 'button';
     close.className = 'fd-toast-close';
-    close.setAttribute('aria-label', 'Dismiss notification');
+    close.setAttribute('aria-label', fdLabel(doc.documentElement, 'toast.dismiss', 'Dismiss notification'));
     close.innerHTML = icon('x');
     close.addEventListener('click', () => dismissToast(t.id));
     parts.push(close);

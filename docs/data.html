@@ -209,7 +209,7 @@
                 <td><span class="fd-badge" data-tone="warning">Read &amp; write</span></td>
                 <td><span class="fd-meter" data-variant="inline" data-value="2940" data-max="3000" data-unit=""><span class="fd-meter-track"><span class="fd-meter-fill"></span></span><span class="fd-meter-figure" data-auto></span></span></td>
                 <td data-muted>12 min ago</td>
-                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Copy key Local development"><i data-icon="copy"></i></button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Local development"><i data-icon="ellipsis"></i></button></td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="primary" data-size="sm">Renew key</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Local development"><i data-icon="ellipsis"></i></button></td>
               </tr>
               <tr data-value="key_prod">
                 <td>
@@ -245,7 +245,8 @@
     <ul class="doc-notes">
       <li>Two-line cell: <code class="fd-code">fd-table-cell</code> holding a <code class="fd-code">fd-table-lead</code> tile and <code class="fd-code">fd-table-two</code> (title plus a muted line). Tiles take a letter, a glyph, an image or an avatar; <code class="fd-code">data-shape="round"</code> for people.</li>
       <li>The inline meter turns warning at 80% and danger at 95% on its own. Use it for quota, never for decoration.</li>
-      <li>The actions cell is always last. Its icon buttons are faint at rest, full strength on row hover or focus, and always full strength on touch.</li>
+      <li>The actions cell is always last. Its ghost icon buttons are faint at rest, full strength on row hover or focus, and always full strength on touch.</li>
+      <li>When one row has a single thing to do (a key about to expire), put a labelled button in its actions cell, before the row menu. Any variant other than ghost stays at full strength, so it never looks disabled. Keep it to one such button per table.</li>
     </ul>
   </section>
 
@@ -571,7 +572,7 @@
     </div>
     <div class="doc-specimen" data-code data-layout="stack">
       <div class="fd-table-wrap">
-        <div class="fd-table-scroll" style="--fd-table-max: var(--fd-size-lg)">
+        <div class="fd-table-scroll" data-fd-vars="--fd-table-max: var(--fd-size-lg)">
           <table class="fd-table" data-sticky aria-label="Activity log, sticky header">
             <thead>
               <tr>
@@ -1321,6 +1322,45 @@
         </div>
       </div>
     </div>
+    <h3 class="doc-sub">Figures with a unit</h3>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-stats">
+        <div class="fd-stat-tile">
+          <span class="fd-stat-label">Uptime</span>
+          <div class="fd-stat-row"><span class="fd-stat">27</span><span class="fd-stat-unit">of 30 days</span></div>
+          <span class="fd-stat-sub">3 days with a failed check</span>
+        </div>
+        <div class="fd-stat-tile">
+          <span class="fd-stat-label">Failed runs</span>
+          <div class="fd-stat-row"><span class="fd-stat">4</span><span class="fd-stat-unit">runs</span></div>
+          <span class="fd-stat-sub">all from /crawl</span>
+        </div>
+        <div class="fd-stat-tile">
+          <span class="fd-stat-label">Credits used</span>
+          <div class="fd-stat-row"><span class="fd-stat">1,520</span><span class="fd-stat-unit">of 3,000</span></div>
+          <span class="fd-stat-sub">resets Nov 23</span>
+        </div>
+        <div class="fd-stat-tile">
+          <span class="fd-stat-label">Spend</span>
+          <div class="fd-stat-row"><span class="fd-stat">$412</span><span class="fd-stat-unit">this month</span></div>
+          <span class="fd-stat-sub">limit $500</span>
+        </div>
+        <div class="fd-stat-tile">
+          <span class="fd-stat-label">p95 latency</span>
+          <div class="fd-stat-row"><span class="fd-stat">1.84</span><span class="fd-stat-unit">seconds</span></div>
+          <span class="fd-stat-sub">across all endpoints</span>
+        </div>
+        <div class="fd-stat-tile">
+          <span class="fd-stat-label">Agents</span>
+          <div class="fd-stat-row"><span class="fd-stat">9</span><span class="fd-stat-unit">decisions waiting</span></div>
+          <span class="fd-stat-sub">oldest 2 hours ago</span>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Put the noun or period beside the figure with <code class="fd-code">fd-stat-unit</code> inside an <code class="fd-code">fd-stat-row</code>: it sits on the figure's baseline, smaller and quieter, so six tiles stay one line tall. On a narrow tile the whole unit drops under the figure; the figure itself never breaks.</li>
+      <li>Keep the unit to a few words. Context that is a sentence belongs in <code class="fd-code">fd-stat-sub</code> below.</li>
+    </ul>
     <div class="doc-pair">
     <div>
     <h3 class="doc-sub">Standalone cards</h3>

@@ -27,9 +27,13 @@
  *                <footer class="fd-tweaks-foot"> Copy CSS (data-tweaks-action="copy", data-state="done" for 1.4s) + summary
  *              Escape closes it while focus is inside and returns focus to the trigger.
  *
- * State (only non-default keys are stored, as JSON in localStorage['fd-tweaks']; theme and density persist through core)
- *  palette   ember · volt · iris · …         data-palette on <html> (removed for ember)
- *  type      geist · editorial · book · …   data-type on <html> (removed for geist); the list is typefaces.js, the styles typefaces.css
+ * Defaults  the page's own look: a data-palette / data-type the page declares on <html> is the default palette and
+ *            type set (load, Reset, "is default", what is stored). fire/boot.js keeps the declared values in
+ *            data-fd-default-palette / data-fd-default-type before it restores a saved look. Otherwise Ember and Geist.
+ *
+ * State (only keys that differ from the defaults are stored, as JSON in localStorage['fd-tweaks']; theme and density persist through core)
+ *  palette   ember · volt · iris · …         data-palette on <html> (removed for ember, unless the page declared another)
+ *  type      geist · editorial · book · …   data-type on <html> (removed for geist, likewise); the list is typefaces.js, the styles typefaces.css
  *  tone      { hue, vivid, light, warmth }  the toned palette written as inline light-dark() custom properties on <html>
  *  theme     system · light · dark          setTheme()
  *  density   compact · comfortable · spacious  setDensity()
@@ -70,14 +74,27 @@ const CHOICES = {
   motion: ['off', 'default', 'slow'],
 };
 const RANGES = { corners: [0, 2, 0.125], texture: [0, 1.5, 0.05] };
-const DEFAULTS = Object.freeze({
-  palette: DEFAULT_PALETTE, type: DEFAULT_TYPEFACE, tone: TONE_DEFAULT, theme: 'system', density: 'comfortable', corners: 1, lines: 1,
-  textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
-});
 /* Every inline custom property this module may write on <html>. */
 const OWNED = [...PALETTE_TOKENS, '--fd-radius-scale', '--fd-hairline', '--fd-motion', '--fd-texture'];
 
 const root = document.documentElement;
+
+/* The page's own look is the default. A page that declares data-palette or data-type on <html> keeps it: on load,
+   after Reset, and as the base of what is saved. fire/boot.js may already have put a saved look on <html>; it keeps
+   the page's value in data-fd-default-palette / data-fd-default-type first (empty: the page declared none). */
+function declared(name, list, fallback) {
+  const kept = `data-fd-default-${name}`;
+  const value = root.hasAttribute(kept) ? root.getAttribute(kept) : root.getAttribute(`data-${name}`);
+  return list.some((item) => item.name === value) ? value : fallback;
+}
+const PAGE = Object.freeze({
+  palette: declared('palette', PALETTES, DEFAULT_PALETTE),
+  type: declared('type', TYPEFACES, DEFAULT_TYPEFACE),
+});
+const DEFAULTS = Object.freeze({
+  palette: PAGE.palette, type: PAGE.type, tone: TONE_DEFAULT, theme: 'system', density: 'comfortable', corners: 1, lines: 1,
+  textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
+});
 /* Storage can throw (private mode, sandboxed frames): every access stays inside the try. */
 const store = {
   get(k, area = 'localStorage') { try { return globalThis[area].getItem(k); } catch { return null; } },
@@ -132,8 +149,9 @@ function inlineProps(s) {
 const attr = (name, value) => (value == null ? root.removeAttribute(name) : root.getAttribute(name) !== value && root.setAttribute(name, value));
 
 function apply(s) {
-  attr('data-palette', s.palette === DEFAULT_PALETTE ? null : s.palette);
-  attr('data-type', s.type === DEFAULT_TYPEFACE ? null : s.type);
+  // Fire's own default leaves no attribute, unless the page declared another look that it must replace.
+  attr('data-palette', s.palette === DEFAULT_PALETTE && PAGE.palette === DEFAULT_PALETTE ? null : s.palette);
+  attr('data-type', s.type === DEFAULT_TYPEFACE && PAGE.type === DEFAULT_TYPEFACE ? null : s.type);
   attr('data-text-size', s.textSize === 'md' ? null : s.textSize);
   attr('data-contrast', s.contrast === 'high' ? 'high' : null);
   if (getTheme() !== s.theme) setTheme(s.theme);
@@ -155,8 +173,8 @@ function flush() {
   store.set(KEY, Object.keys(out).length ? JSON.stringify(out) : null);
   // What fire/boot.js puts back on <html> before the first paint of the next page.
   const attrs = {};
-  if (state.palette !== DEFAULT_PALETTE) attrs['data-palette'] = state.palette;
-  if (state.type !== DEFAULT_TYPEFACE) attrs['data-type'] = state.type;
+  if (state.palette !== PAGE.palette) attrs['data-palette'] = state.palette;
+  if (state.type !== PAGE.type) attrs['data-type'] = state.type;
   if (state.textSize !== 'md') attrs['data-text-size'] = state.textSize;
   if (state.contrast === 'high') attrs['data-contrast'] = 'high';
   const props = inlineProps(state);
@@ -202,7 +220,8 @@ export function set(partial = {}) {
   return get();
 }
 
-/** Everything back to the default look: no attributes, no inline properties. */
+/** Everything back to the page's own look (its declared palette and type set, else Ember and Geist): no inline
+ *  properties, and no attribute the page did not declare. */
 export function reset() {
   commit(fresh());
   return get();
@@ -223,8 +242,8 @@ function summary(s = state) {
 export function toCss(s = state) {
   const toned = !isDefaultTone(s.tone);
   const attrs = [];
-  if (s.palette !== DEFAULT_PALETTE && !toned) attrs.push(`data-palette="${s.palette}"`);
-  if (s.type !== DEFAULT_TYPEFACE) attrs.push(`data-type="${s.type}"`);
+  if ((s.palette !== DEFAULT_PALETTE || PAGE.palette !== DEFAULT_PALETTE) && !toned) attrs.push(`data-palette="${s.palette}"`);
+  if (s.type !== DEFAULT_TYPEFACE || PAGE.type !== DEFAULT_TYPEFACE) attrs.push(`data-type="${s.type}"`);
   if (s.theme !== 'system') attrs.push(`data-theme="${s.theme}"`);
   if (s.density !== 'comfortable') attrs.push(`data-density="${s.density}"`);
   if (s.textSize !== 'md') attrs.push(`data-text-size="${s.textSize}"`);

@@ -204,7 +204,7 @@ const BLOCKS = {
   },
   'quick-replies'(b) {
     const opts = (b.options || []).map((o) => (typeof o === 'string' ? { label: o } : o));
-    return `<div class="fd-chat-replies" role="group" aria-label="${esc(b.label || 'Suggested replies')}">${opts.map((o, i) => `<button type="button" class="fd-chat-pill" data-value="${esc(o.value ?? o.label)}" style="--fd-i:${i}"${b.multi ? ' aria-pressed="false"' : ''}>${o.icon ? icon(o.icon) : ''}${esc(o.label)}</button>`).join('')}${b.multi ? `<button type="button" class="fd-btn" data-variant="primary" data-size="sm" data-chat-confirm disabled>${esc(b.confirm || 'Confirm')}</button>` : ''}</div>`;
+    return `<div class="fd-chat-replies" role="group" aria-label="${esc(b.label || 'Suggested replies')}">${opts.map((o, i) => `<button type="button" class="fd-chat-pill" data-value="${esc(o.value ?? o.label)}" data-fd-vars="--fd-i:${i}"${b.multi ? ' aria-pressed="false"' : ''}>${o.icon ? icon(o.icon) : ''}${esc(o.label)}</button>`).join('')}${b.multi ? `<button type="button" class="fd-btn" data-variant="primary" data-size="sm" data-chat-confirm disabled>${esc(b.confirm || 'Confirm')}</button>` : ''}</div>`;
   },
   actions: (b) => `<div class="fd-chat-actions-row">${(b.items || []).map(actionHTML).join('')}</div>`,
   card: (b) => cardHTML(b.card || b),
@@ -309,7 +309,7 @@ const BLOCKS = {
 };
 const slotsHTML = (slots = []) => slots.map((s, i) => {
   const t = typeof s === 'string' ? { time: s } : s;
-  return `<button type="button" class="fd-chat-slot" data-value="${esc(t.time)}" aria-pressed="false" style="--fd-i:${i}"${t.disabled ? ' disabled' : ''}>${esc(t.time)}</button>`;
+  return `<button type="button" class="fd-chat-slot" data-value="${esc(t.time)}" aria-pressed="false" data-fd-vars="--fd-i:${i}"${t.disabled ? ' disabled' : ''}>${esc(t.time)}</button>`;
 }).join('');
 const ordinal = (n) => `${n}${['th', 'st', 'nd', 'rd'][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] || 'th'}`;
 const queueText = (pos, wait = 'about 2 min') => (pos > 0 ? `You're ${ordinal(pos + 1)} in line · ${esc(wait)}` : 'Joining now…');
@@ -325,7 +325,7 @@ function fileHTML(f = {}) {
   else if (state === 'uploading') action = `<button type="button" class="fd-btn" data-variant="ghost" data-size="xs" data-icon-only data-chat-cancel-upload aria-label="Cancel upload of ${name}">${icon('x')}</button>`;
   else if (f.url) action = `<a class="fd-btn" data-variant="ghost" data-size="xs" data-icon-only href="${esc(f.url)}" download="${name}" aria-label="Download ${name}">${icon('download')}</a>`;
   else action = `<button type="button" class="fd-btn" data-variant="ghost" data-size="xs" data-icon-only data-chat-download aria-label="Download ${name}">${icon('download')}</button>`;
-  return `<div class="fd-chat-file" data-state="${state}" data-name="${name}" style="--_cht-p:${p}%"><span class="fd-tile" data-size="28" data-tone="${kind === 'pdf' ? 'danger' : kind === 'sheet' ? 'success' : 'neutral'}">${icon(KIND_ICON[kind] || 'file')}</span><span class="fd-chat-file-text"><span class="fd-chat-file-name">${name}</span><span class="fd-chat-file-meta">${meta}</span></span>${action}</div>`;
+  return `<div class="fd-chat-file" data-state="${state}" data-name="${name}" data-fd-vars="--_cht-p:${p}%"><span class="fd-tile" data-size="28" data-tone="${kind === 'pdf' ? 'danger' : kind === 'sheet' ? 'success' : 'neutral'}">${icon(KIND_ICON[kind] || 'file')}</span><span class="fd-chat-file-text"><span class="fd-chat-file-name">${name}</span><span class="fd-chat-file-meta">${meta}</span></span>${action}</div>`;
 }
 
 function blockHTML(b = {}, author = 'ai') {
@@ -392,7 +392,7 @@ function actionsHTML(author) {
   const b = (action, ic, label, extra = '') => `<button type="button" class="fd-message-action" data-chat-action="${action}" aria-label="${label}"${extra}>${icon(ic)}</button>`;
   const tools = b('copy', 'copy', 'Copy message') + b('react', 'heart', 'Add a reaction', ' aria-expanded="false"') + b('reply', 'corner-down-left', 'Reply')
     + (author === 'ai' ? b('up', 'thumbs-up', 'Good answer', ' aria-pressed="false"') + b('down', 'thumbs-down', 'Bad answer', ' aria-pressed="false"') : '');
-  const picker = REACTIONS.map(([ic, label], i) => `<button type="button" class="fd-message-action" data-reaction="${ic}" aria-label="${label}" style="--fd-i:${i}">${icon(ic)}</button>`).join('');
+  const picker = REACTIONS.map(([ic, label], i) => `<button type="button" class="fd-message-action" data-reaction="${ic}" aria-label="${label}" data-fd-vars="--fd-i:${i}">${icon(ic)}</button>`).join('');
   return `<div class="fd-chat-msg-actions" role="toolbar" aria-label="Message actions"><div class="fd-chat-msg-tools">${tools}</div><div class="fd-chat-react-picker" role="group" aria-label="Reactions">${picker}</div></div>`;
 }
 
@@ -499,7 +499,7 @@ ${banner ? `<div class="fd-chat-banner" data-tone="${esc(banner.tone || 'warning
   <div class="fd-chat-view" data-view="home">
     <div class="fd-chat-home">
       <div class="fd-chat-home-head"><h3 class="fd-chat-greeting">${greeting}</h3><p class="fd-chat-intro">${esc(intro)}</p></div>
-      <div class="fd-chat-suggestions" role="group" aria-label="Suggested questions">${suggestions.map((s, i) => `<button type="button" class="fd-chat-pill" style="--fd-i:${i}">${esc(s)}</button>`).join('')}</div>
+      <div class="fd-chat-suggestions" role="group" aria-label="Suggested questions">${suggestions.map((s, i) => `<button type="button" class="fd-chat-pill" data-fd-vars="--fd-i:${i}">${esc(s)}</button>`).join('')}</div>
       <button type="button" class="fd-chat-continue" data-fd-chat-view="conversation" hidden>${markHTML(28)}<span class="fd-chat-continue-label">Continue conversation</span><span class="fd-chat-continue-text"></span><span class="fd-chat-continue-meta"><time></time><span class="fd-chat-unread-dot" hidden></span></span></button>
       <div class="fd-chat-home-foot">
         <div class="fd-chat-links">

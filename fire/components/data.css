@@ -37,6 +37,7 @@
    LIST      fd-list[data-divided|data-card|data-interactive] > fd-list-row > fd-list-lead, -body (-title, -desc), -meta, -trail
    KEY-VALUE fd-kv[data-cols="1|2|3"][data-layout="split"][data-divided] > fd-kv-item > fd-kv-key + fd-kv-value[data-copy|data-mono|data-plain]
    STATS     fd-stats[data-variant="cards"] > fd-stat-tile > fd-stat-label, fd-stat, fd-stat-sub, fd-stat-delta, fd-stat-slot, fd-stat-action
+             fd-stat-row > fd-stat + fd-stat-unit   a figure with a small unit on its baseline ("27 of 30 days")
    METER     fd-meter[data-value][data-max][data-tone][data-variant="inline|segmented"][data-size="sm|lg"]
    PROGRESS  fd-progress[data-value][data-variant="ring|steps"][data-size="16|24|40"][data-indeterminate]
    DATA CARD fd-data-card > fd-data-card-head, -body, -toggle, -more
@@ -317,12 +318,14 @@ th[aria-sort="descending"] .fd-th-sort {
 
 /* Actions: always the last column. Faint at rest, full strength on row hover or focus. */
 .fd-table td[data-actions] { width: 1%; padding-inline: var(--fd-space-2); text-align: end; }
-.fd-table td[data-actions] > .fd-btn { opacity: 0.5; }
+/* Quiet row actions (ghost buttons) wait at half strength until the row is hovered or focused. A labelled
+   primary, outline or default button is the row's one thing to do, and stays at full strength. */
+.fd-table td[data-actions] > .fd-btn[data-variant="ghost"] { opacity: 0.5; }
 .fd-table td[data-actions] > .fd-btn + .fd-btn { margin-inline-start: var(--fd-space-0-5); }
 .fd-table tbody tr:hover td[data-actions] > .fd-btn,
 .fd-table tbody tr:focus-within td[data-actions] > .fd-btn,
 .fd-table td[data-actions] > .fd-btn:is(:hover, :focus-visible, [aria-expanded="true"]) { opacity: 1; }
-@media (hover: none) { .fd-table td[data-actions] > .fd-btn { opacity: 1; } }
+@media (hover: none) { .fd-table td[data-actions] > .fd-btn[data-variant="ghost"] { opacity: 1; } }
 
 /* ---------- Cell compositions ---------- */
 .fd-table-cell { display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; }
@@ -495,7 +498,7 @@ th[aria-sort="descending"] .fd-th-sort {
    ========================================================================== */
 .fd-filter {
   --_d-h: var(--fd-control-md); --_d-px: var(--fd-control-px);
-  --_d-bg: var(--fd-fill); --_d-shadow: none;
+  --_d-bg: var(--fd-fill); --_d-shadow: 0 0 0 0 transparent; /* not none: the focus ring is appended to it */
   position: relative; display: inline-flex; align-items: center; gap: var(--fd-space-2); max-width: 100%;
   height: var(--_d-h); padding: 0;
   border-radius: var(--fd-radius-lg);
@@ -540,7 +543,7 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-filter-clear:hover { background: var(--fd-a8); color: var(--fd-text); }
 .fd-filter-clear .fd-icon { width: var(--fd-icon-xs); height: var(--fd-icon-xs); stroke-width: 1.75; color: inherit; }
 .fd-filter:is([aria-disabled="true"], :has(> .fd-filter-trigger:disabled), :disabled) {
-  --_d-bg: var(--fd-fill-disabled); --_d-shadow: none; color: var(--fd-text-4); cursor: not-allowed; scale: 1;
+  --_d-bg: var(--fd-fill-disabled); --_d-shadow: 0 0 0 0 transparent; color: var(--fd-text-4); cursor: not-allowed; scale: 1;
 }
 
 .fd-filter-bar { container: fd-filter-bar / inline-size; display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); min-width: 0; }
@@ -719,6 +722,11 @@ a.fd-stat-tile:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 
 .fd-stat-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--fd-space-1) var(--fd-space-2-5); min-width: 0; }
 .fd-stat-tile .fd-stat { max-width: 100%; }
 .fd-stat-sub { color: var(--fd-a48); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); }
+/* A figure with a small unit after it ("27 of 30 days", "4 problems"): on the figure's baseline, close to it. On a
+   narrow tile the whole unit drops under the figure; it never pushes the figure onto two lines. */
+.fd-stat-row:has(> .fd-stat-unit) { align-items: baseline; column-gap: var(--fd-space-1-5); }
+.fd-stat-row:has(> .fd-stat-unit) > .fd-stat { white-space: nowrap; }
+.fd-stat-unit { min-width: 0; color: var(--fd-text-3); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-variant-numeric: tabular-nums; }
 .fd-stat-slot { align-self: stretch; margin-top: auto; padding-top: var(--fd-space-2-5); min-height: var(--fd-data-slot-min); }
 .fd-stat-tile > .fd-meter { align-self: stretch; margin-top: var(--fd-space-1-5); }
 .fd-stat-action {

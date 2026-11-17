@@ -135,8 +135,9 @@
 :is(.fd-input, .fd-textarea, .fd-input-group, .fd-search, .fd-number, .fd-tag-input)[data-mono][data-size="sm"] { --_f-fs: var(--fd-text-xs); }
 
 /* Standalone controls: the element itself is the box. A text area alone inside a tag input or a pairs editor is
-   the plain field a server rendered for use without script, and wears the same skin. */
-:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select) {
+   the plain field a server rendered for use without script, and wears the same skin. An .fd-input inside an
+   .fd-input-group is bare (the group is the box), so it is left out here; the :where() keeps the specificity. */
+:is(.fd-input:not(:where(.fd-input-group > *)), .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select) {
   --_f-line: var(--fd-control-line);
   --_f-lw: var(--fd-hairline);
   --_f-halo: transparent;
@@ -170,7 +171,7 @@
 .fd-input::-webkit-search-cancel-button, .fd-input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 
 /* Wrapped controls: the wrapper is the box and a bare input lives inside. */
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input) {
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])) {
   --_f-line: var(--fd-control-line);
   --_f-lw: var(--fd-hairline);
   --_f-halo: transparent;
@@ -188,26 +189,26 @@
     background-color var(--fd-dur-2) var(--fd-ease-out),
     color var(--fd-dur-2) var(--fd-ease-out);
 }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input):hover:not(:has(> :is(input, textarea):is(:focus, :disabled, [readonly]))) { --_f-line: var(--fd-control-line-hover); --_f-bg: color-mix(in srgb, var(--fd-surface) 55%, var(--fd-bg-sunken)); }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input):has(> :is(input, textarea)[readonly]) { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input):has(> :is(input, textarea):focus) { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input):has(> :is(input, textarea, select)[aria-invalid="true"]),
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input)[aria-invalid="true"] { --_f-line: var(--fd-danger-solid); }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input):has(> :is(input, textarea)[aria-invalid="true"]:focus) { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input):has(> :is(input, textarea):disabled) {
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):hover:not(:has(> :is(input, textarea):is(:focus, :disabled, [readonly]))) { --_f-line: var(--fd-control-line-hover); --_f-bg: color-mix(in srgb, var(--fd-surface) 55%, var(--fd-bg-sunken)); }
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea)[readonly]) { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea):focus) { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea, select)[aria-invalid="true"]),
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"]))[aria-invalid="true"] { --_f-line: var(--fd-danger-solid); }
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea)[aria-invalid="true"]:focus) { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea):disabled) {
   --_f-bg: var(--fd-fill-disabled); --_f-fg: var(--fd-text-4); --_f-line: var(--fd-line-faint); cursor: not-allowed;
 }
 
 /* The bare input inside a wrapper. */
-:is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field) {
+:is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field, .fd-secret-input) {
   -webkit-appearance: none; appearance: none;
   flex: 1 1 0; inline-size: auto; min-inline-size: 0; align-self: stretch;
   padding: 0 var(--_f-px, var(--fd-control-px));
   border: 0; border-radius: 0; background: transparent; color: inherit; box-shadow: none;
-  font: inherit; text-overflow: ellipsis; caret-color: var(--fd-accent);
+  font: inherit; letter-spacing: inherit; text-overflow: ellipsis; caret-color: var(--fd-accent);
 }
-:is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field):is(:focus, :focus-visible) { box-shadow: none; }
-:is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field):disabled { cursor: not-allowed; -webkit-text-fill-color: var(--fd-text-4); }
+:is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field, .fd-secret-input):is(:focus, :focus-visible) { box-shadow: none; }
+:is(.fd-input-group > .fd-input, .fd-search-input, .fd-number-input, .fd-tag-input-field, .fd-secret-input):disabled { cursor: not-allowed; -webkit-text-fill-color: var(--fd-text-4); }
 
 /* ==========================================================================
    Input, textarea
@@ -866,6 +867,13 @@
   display: flex; align-items: center; gap: var(--fd-space-2); min-block-size: var(--fd-form-secret-h); padding: var(--fd-space-1) var(--fd-space-1-5) var(--fd-space-1) var(--fd-space-3-5); min-inline-size: 0;
   border-radius: var(--fd-radius-lg); background: var(--fd-fill);
 }
+/* Entry: a field to type a new secret into (data-mode="entry" > input.fd-secret-input + a reveal button). It wears the
+   wrapped-control skin above, like an input group, and never holds a stored value. */
+.fd-secret[data-mode="entry"] {
+  gap: 0; min-block-size: var(--_f-h, var(--fd-control-md)); padding: 0 var(--fd-space-1) 0 0;
+  border-radius: var(--_f-radius, var(--fd-radius-md)); background: var(--_f-bg);
+}
+.fd-secret[data-mode="entry"] .fd-secret-actions > .fd-btn:not([data-fd-field-action="reveal"]) { display: none; }
 .fd-secret-value, .fd-copy-field-value {
   flex: 1 1 auto; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-feature-settings: "zero", "ss01";
@@ -873,6 +881,10 @@
 }
 .fd-secret-value[data-tone="accent"] { color: var(--fd-accent-text); }
 .fd-secret[data-state="revealed"] .fd-secret-value { user-select: all; }
+/* data-mask="end": a start that shortens with an ellipsis and an end that never does (forms.js draws both). */
+:is(.fd-secret, .fd-copy-field)[data-mask="end"] :is(.fd-secret-value, .fd-copy-field-value) { display: flex; }
+:is(.fd-secret-start, .fd-copy-field-start) { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:is(.fd-secret-end, .fd-copy-field-end) { flex: none; white-space: nowrap; }
 .fd-secret-actions, .fd-copy-field-actions { display: flex; align-items: center; gap: var(--fd-space-0-5); flex: none; }
 .fd-secret-actions > .fd-btn, .fd-copy-field-actions > .fd-btn { --_b-radius: var(--fd-radius-md); }
 [data-fd-field-action][data-state="copied"] { color: var(--fd-success-text); }

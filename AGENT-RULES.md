@@ -28,7 +28,7 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 ## 2. Always
 
 1. Use only `fd-` classes and attribute values that the vocabulary lists. A value Fire does not define does nothing, and nothing warns you.
-2. No custom CSS, no `<style>` blocks, no inline `style` with pixel values, and no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`, `data-cols` and `data-span`.
+2. No custom CSS, no `<style>` blocks, no `style` attributes in markup (a custom property goes in `data-fd-vars="--name: value"`, and Fire sets it with `setProperty`, so pages work under a strict CSP), no pixel values, and no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`, `data-cols` and `data-span`.
 3. Never edit the project's copy of Fire, and never copy a Fire component and change the copy.
 4. Build every state: empty, loading, error, disabled.
 5. One primary button per view. One step between heading levels: page, section, card, field (`GUIDE.md` section 5, "Heading levels").

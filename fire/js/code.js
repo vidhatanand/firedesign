@@ -26,6 +26,7 @@
  *                                    inside data-target (selector) or the nearest `[data-fd-views]`.
  *  .fd-log                           search, level chips, Follow, wrap, download; "Jump to latest" when the reader scrolls up.
  *    data-follow data-paused data-height="320" data-max="1000" data-filename="ember-logs.txt"
+ *    data-fit                        the body fits its lines, up to that height, then scrolls.
  *    data-fd-log-demo="api|cli"      streams demo lines (api) or plays a CLI session (cli) once in view.
  *  .fd-diff  > script.fd-diff-src    unified diff text → rows with old/new numbers; data-file adds a header.
  *  .fd-schema-toggle                 shows/hides the next `.fd-schema-children`.

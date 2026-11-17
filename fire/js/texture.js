@@ -923,28 +923,28 @@ const builders = {
   },
   'fd-skeleton-card'(el) {
     el.innerHTML = `
-      <div class="fd-skeleton-card-head">${block('fd-skeleton-tile')}<div class="fd-skeleton-card-titles">${block('fd-skeleton-title', ' style="--_sk-w:58%"')}${block('fd-skeleton-title', ' data-size="label" style="--_sk-w:34%"')}</div></div>
+      <div class="fd-skeleton-card-head">${block('fd-skeleton-tile')}<div class="fd-skeleton-card-titles">${block('fd-skeleton-title', ' data-fd-vars="--_sk-w:58%"')}${block('fd-skeleton-title', ' data-size="label" data-fd-vars="--_sk-w:34%"')}</div></div>
       <div class="fd-skeleton-text" data-lines="2"></div>
-      <div class="fd-skeleton-card-foot">${block('fd-skeleton-title', ' data-size="mono" style="--_sk-w:28%"')}${block('fd-skeleton-title', ' data-size="mono" style="--_sk-w:24%"')}</div>`;
+      <div class="fd-skeleton-card-foot">${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:28%"')}${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:24%"')}</div>`;
   },
   'fd-skeleton-grid'(el) {
     const count = intAttr(el, 'data-count', 4, 1, 24);
-    el.innerHTML = Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-card" style="--fd-i:${i}"></div>`).join('');
+    el.innerHTML = Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-card" data-fd-vars="--fd-i:${i}"></div>`).join('');
   },
   'fd-skeleton-table'(el) {
     const rows = intAttr(el, 'data-rows', 5, 1, 40);
     const cols = intAttr(el, 'data-cols', 4, 1, 8);
-    const cells = (r, head) => Array.from({ length: cols }, (_, c) => `<span class="fd-skeleton-table-cell">${block('fd-skeleton', ` style="--_sk-w:${head ? 24 + ((c * 13) % 22) : pick(r, c)}%"`)}</span>`).join('');
-    el.innerHTML = `<div class="fd-skeleton-table-head">${cells(0, true)}</div>${Array.from({ length: rows }, (_, r) => `<div class="fd-skeleton-table-row" style="--fd-i:${r}">${cells(r + 1, false)}</div>`).join('')}`;
+    const cells = (r, head) => Array.from({ length: cols }, (_, c) => `<span class="fd-skeleton-table-cell">${block('fd-skeleton', ` data-fd-vars="--_sk-w:${head ? 24 + ((c * 13) % 22) : pick(r, c)}%"`)}</span>`).join('');
+    el.innerHTML = `<div class="fd-skeleton-table-head">${cells(0, true)}</div>${Array.from({ length: rows }, (_, r) => `<div class="fd-skeleton-table-row" data-fd-vars="--fd-i:${r}">${cells(r + 1, false)}</div>`).join('')}`;
   },
   'fd-skeleton-stat'(el) {
     const count = intAttr(el, 'data-count', 4, 1, 6);
-    el.innerHTML = Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-stat-tile" style="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="eyebrow" style="--_sk-w:${36 + (i * 11) % 24}%"`)}${block('fd-skeleton-title', ` data-size="stat" style="--_sk-w:${48 + (i * 17) % 26}%"`)}${block('fd-skeleton-title', ` data-size="caption" style="--_sk-w:${54 + (i * 7) % 20}%"`)}</div>`).join('');
+    el.innerHTML = Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-stat-tile" data-fd-vars="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="eyebrow" data-fd-vars="--_sk-w:${36 + (i * 11) % 24}%"`)}${block('fd-skeleton-title', ` data-size="stat" data-fd-vars="--_sk-w:${48 + (i * 17) % 26}%"`)}${block('fd-skeleton-title', ` data-size="caption" data-fd-vars="--_sk-w:${54 + (i * 7) % 20}%"`)}</div>`).join('');
   },
   'fd-skeleton-chart'(el) {
     const ticks = (n, cls) => Array.from({ length: n }, () => block(cls)).join('');
     el.innerHTML = `
-      <div class="fd-skeleton-chart-head"><div class="fd-skeleton-chart-titles">${block('fd-skeleton-title', ' style="--_sk-w:44%"')}${block('fd-skeleton-title', ' data-size="caption" style="--_sk-w:28%"')}</div>${block('fd-skeleton-title', ' data-size="stat" style="--_sk-w:72px"')}</div>
+      <div class="fd-skeleton-chart-head"><div class="fd-skeleton-chart-titles">${block('fd-skeleton-title', ' data-fd-vars="--_sk-w:44%"')}${block('fd-skeleton-title', ' data-size="caption" data-fd-vars="--_sk-w:28%"')}</div>${block('fd-skeleton-title', ' data-size="stat" data-fd-vars="--_sk-w:72px"')}</div>
       <div class="fd-skeleton-chart-body">
         <div class="fd-skeleton-chart-y">${ticks(5, 'fd-skeleton')}</div>
         <div class="fd-skeleton-chart-plot"><span class="fd-skeleton-chart-area"></span><span class="fd-skeleton-chart-line"></span></div>
@@ -953,34 +953,34 @@ const builders = {
   },
   'fd-skeleton-list'(el) {
     const rows = intAttr(el, 'data-rows', 4, 1, 24);
-    el.innerHTML = Array.from({ length: rows }, (_, r) => `<div class="fd-skeleton-list-row" style="--fd-i:${r}">${block('fd-skeleton-avatar')}<div class="fd-skeleton-list-text">${block('fd-skeleton-title', ` data-size="label" style="--_sk-w:${pick(r, 1) - 10}%"`)}${block('fd-skeleton-title', ` data-size="caption" style="--_sk-w:${pick(r, 2) - 4}%"`)}</div>${block('fd-skeleton-button', ' data-size="sm"')}</div>`).join('');
+    el.innerHTML = Array.from({ length: rows }, (_, r) => `<div class="fd-skeleton-list-row" data-fd-vars="--fd-i:${r}">${block('fd-skeleton-avatar')}<div class="fd-skeleton-list-text">${block('fd-skeleton-title', ` data-size="label" data-fd-vars="--_sk-w:${pick(r, 1) - 10}%"`)}${block('fd-skeleton-title', ` data-size="caption" data-fd-vars="--_sk-w:${pick(r, 2) - 4}%"`)}</div>${block('fd-skeleton-button', ' data-size="sm"')}</div>`).join('');
   },
   'fd-skeleton-thread'(el) {
     el.innerHTML = `
       <div class="fd-skeleton-thread-user"><div class="fd-skeleton-text" data-lines="2"></div></div>
-      <div class="fd-skeleton-thread-reply" style="--fd-i:1">
+      <div class="fd-skeleton-thread-reply" data-fd-vars="--fd-i:1">
         <div class="fd-skeleton-text" data-lines="3"></div>
-        <div class="fd-skeleton-thread-tool">${block('fd-skeleton-tile', ' data-size="16"')}${block('fd-skeleton-title', ' data-size="mono" style="--_sk-w:96px"')}${block('fd-skeleton-title', ' data-size="mono" style="--_sk-w:140px"')}<span class="fd-grow"></span>${block('fd-skeleton-title', ' data-size="caption" style="--_sk-w:44px"')}</div>
+        <div class="fd-skeleton-thread-tool">${block('fd-skeleton-tile', ' data-size="16"')}${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:96px"')}${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:140px"')}<span class="fd-grow"></span>${block('fd-skeleton-title', ' data-size="caption" data-fd-vars="--_sk-w:44px"')}</div>
         <div class="fd-skeleton-text" data-lines="2"></div>
       </div>`;
   },
   'fd-skeleton-form'(el) {
     const count = intAttr(el, 'data-count', 3, 1, 12);
-    el.innerHTML = `${Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-form-field" style="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="label" style="--_sk-w:${22 + (i * 9) % 18}%"`)}<div class="fd-skeleton-form-control">${block('fd-skeleton', ` style="--_sk-w:${30 + (i * 13) % 26}%"`)}</div>${block('fd-skeleton-title', ` data-size="caption" style="--_sk-w:${46 + (i * 11) % 24}%"`)}</div>`).join('')}
-      <div class="fd-skeleton-form-actions">${block('fd-skeleton-button', ' style="--_sk-w:76px"')}${block('fd-skeleton-button', ' style="--_sk-w:112px"')}</div>`;
+    el.innerHTML = `${Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-form-field" data-fd-vars="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="label" data-fd-vars="--_sk-w:${22 + (i * 9) % 18}%"`)}<div class="fd-skeleton-form-control">${block('fd-skeleton', ` data-fd-vars="--_sk-w:${30 + (i * 13) % 26}%"`)}</div>${block('fd-skeleton-title', ` data-size="caption" data-fd-vars="--_sk-w:${46 + (i * 11) % 24}%"`)}</div>`).join('')}
+      <div class="fd-skeleton-form-actions">${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:76px"')}${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:112px"')}</div>`;
   },
   'fd-skeleton-hero'(el) {
-    el.innerHTML = `${block('fd-skeleton-title', ' data-size="display" style="--_sk-w:38%"')}${block('fd-skeleton-title', ' data-size="lead" style="--_sk-w:56%"')}`;
+    el.innerHTML = `${block('fd-skeleton-title', ' data-size="display" data-fd-vars="--_sk-w:38%"')}${block('fd-skeleton-title', ' data-size="lead" data-fd-vars="--_sk-w:56%"')}`;
   },
   'fd-skeleton-page'(el) {
     const rail = Array.from({ length: 9 }, (_, i) => (i === 3 || i === 6 ? '<span class="fd-skeleton-page-sep"></span>' : '') + block('fd-skeleton-tile', ' data-size="20"')).join('');
     el.innerHTML = `
       <div class="fd-skeleton-page-rail">${block('fd-skeleton-tile', ' data-size="24"')}<div class="fd-skeleton-page-icons">${rail}</div>${block('fd-skeleton-avatar', ' data-size="24"')}</div>
       <div class="fd-skeleton-page-main">
-        <div class="fd-skeleton-page-top">${block('fd-skeleton-button', ' style="--_sk-w:148px"')}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' style="--_sk-w:84px"')}</div>
+        <div class="fd-skeleton-page-top">${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:148px"')}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:84px"')}</div>
         <div class="fd-skeleton-page-body">
           <div class="fd-skeleton-hero"></div>
-          <div class="fd-skeleton-page-toolbar"><div class="fd-skeleton-form-control" data-search>${block('fd-skeleton', ' style="--_sk-w:44%"')}</div>${block('fd-skeleton-button', ' style="--_sk-w:132px"')}${block('fd-skeleton-button', ' style="--_sk-w:120px"')}<span class="fd-grow"></span>${block('fd-skeleton-button', ' style="--_sk-w:108px"')}</div>
+          <div class="fd-skeleton-page-toolbar"><div class="fd-skeleton-form-control" data-search>${block('fd-skeleton', ' data-fd-vars="--_sk-w:44%"')}</div>${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:132px"')}${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:120px"')}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:108px"')}</div>
           <div class="fd-skeleton-table" data-rows="6" data-cols="5"></div>
         </div>
       </div>`;

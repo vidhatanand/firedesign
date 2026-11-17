@@ -40,7 +40,7 @@ init(containerElement);   // safe to call more than once
 ```
 
 - **Rendering on a server.** Copy the shell from `templates/shell-static.html`: it is the whole shell as plain markup, with no `shell.js`. Per page the server changes the title, which nav item is current, the hero and the bands. A page that should carry little script can render icons as inline SVG (the paths are `ICONS` in `fire/js/icons.js`) and load single modules, for example only `fire/js/shell.js` for the sidebar and the phone menu; each module works on its own.
-- **Strict Content Security Policy.** The stylesheets need `style-src 'self'` and `font-src 'self'`; the frame's marks are `data:` images, so allow `img-src 'self' data:`. The shell, navigation, icons, textures, overlays' menus and the Tweaks panel write no inline `style` attribute. Skeleton presets, the file-upload list, chat, charts and the agent blocks still build some markup with inline styles and need `style-src 'unsafe-inline'` until they are converted.
+- **Strict Content Security Policy.** The stylesheets need `style-src 'self'` and `font-src 'self'`; the frame's marks are `data:` images, so allow `img-src 'self' data:`. No Fire script writes a `style` attribute (skeletons, the file-upload list, chat, charts, agent blocks, the shell and Tweaks included), so `style-src 'unsafe-inline'` is not needed. Markup and scripts pass custom properties as `data-fd-vars="--fd-i:2;--value:0.4"`; Fire sets them with `setProperty` and removes the attribute.
 
 - Components report changes with bubbling events: `fd:change` (`detail.value`), `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`. Listen for these to update your own state; write state back through the same attributes the docs show (`aria-selected`, `aria-pressed`, `data-state`, `hidden`).
 
@@ -69,7 +69,7 @@ init(containerElement);   // safe to call more than once
 These keep a product looking like one product. They apply to people and to AI agents equally.
 
 1. **Only Fire classes.** Every class in your markup starts with `fd-` and exists in `VOCABULARY.md`. No page-specific stylesheets and no `<style>` blocks.
-2. **No pixel values in markup.** An inline `style` may pass a token to a component parameter (`--fd-panel-w: var(--fd-size-xl)`), a relative value (`72%`) or a unitless number (`--value: 0.62`). Nothing else.
+2. **No pixel values in markup, and no `style` attributes.** Pass a token to a component parameter (`data-fd-vars="--fd-panel-w: var(--fd-size-xl)"`), a relative value (`72%`) or a unitless number (`--value: 0.62`) with `data-fd-vars`, never with `style`. Custom properties are set from JS with `setProperty`, so pages work under a strict Content Security Policy. Nothing else.
 3. **Structure decides width.** Never set a width or a height on an element. Place things with a stack, a row, a grid or a column (section 5), and let components bring their own sizes.
 4. **Variants are attributes.** Use `data-variant`, `data-size`, `data-tone` and `data-state` as the docs show. Do not override a component's look from outside.
 5. **State is native or ARIA.** `disabled`, `aria-current="page"`, `aria-selected`, `aria-expanded`, `aria-busy`, `aria-invalid`, `hidden`. The styles read these; do not add state classes.
@@ -109,7 +109,7 @@ Grids, stacks and rows nest freely. If you are about to write a width, you are m
 | A number with a unit | `fd-number`, or an `fd-input-group` with the unit as an affix | A bare text box with the unit only in the label |
 | A list of free values (URLs, domains, emails) | `fd-tag-input` | A JSON array, or a comma-separated text box |
 | Names with values (scopes, headers, labels) | `fd-pairs` | A JSON object |
-| A secret | `fd-secret` | A plain text input |
+| A secret | `fd-secret`; to type a new one, `fd-secret` with `data-mode="entry"` | A plain text input |
 | Raw configuration, for experts only | `fd-codefield` with `data-fd-json` | An ordinary text area |
 
 A checkbox group posts one field per ticked box under the same name (`methods=email&methods=passkey`). If your server rejects repeated names, give each box its own name (`methods.email`, `methods.passkey`).
@@ -139,6 +139,7 @@ Never give a card title `fd-h3` and put `fd-setting` rows inside it at their pag
 - `data-palette="volt"` (fifteen palettes; see `docs/tweaks.html`) recolours neutrals and accent together. A brand palette is one CSS block that sets about twenty variables; the page shows how.
 - `data-type="editorial"` (twelve type sets, all open source) changes the heading, interface and mono faces together.
 - `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
+- **Your product's look is the default.** Declare it on `<html>` (`<html data-palette="graphite" data-type="editorial">`). The Tweaks panel and `fire/boot.js` treat the page's own palette and type set as the default: the page keeps them on load, Reset returns to them, and only what someone changes away from them is saved and restored on the next page. A product on Ember and Geist declares nothing. (`boot.js` notes the declared values in `data-fd-default-palette` / `data-fd-default-type` before it puts a saved look back; do not write those yourself.)
 - The Tweaks panel lets you try palettes, tone, typefaces, density, corners and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
 
 **Checks before you call a screen done.**

@@ -751,7 +751,7 @@ Ignore cookie banners and chat widgets.</textarea>
       <h2 class="fd-h3">Combobox</h2>
       <p>A text field with a listbox. Type to filter, arrow keys to move, Enter to choose, Escape to close. The selected option shows a check; the multiple variant keeps choices as removable tokens in the field.</p>
     </div>
-    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" data-height style="--h: var(--fd-size-lg)">
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" data-height data-fd-vars="--h: var(--fd-size-lg)">
       <div class="fd-field">
         <label class="fd-field-label" for="cb-model">Model</label>
         <div class="fd-combobox" data-fd-combobox data-name="model" data-value="ember-pro">
@@ -1100,7 +1100,61 @@ team = growth</textarea>
         </div>
         <code class="fd-copy-field-value"></code>
       </div>
+      <div class="fd-copy-field" data-value="https://hooks.ember.dev/in/wh_5k8w2n7q4m1x3f9a" data-mask="end" data-mask-from="/" data-noun="inbound webhook URL">
+        <span class="fd-copy-field-label">Inbound webhook</span>
+        <div class="fd-copy-field-actions"><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy inbound webhook URL"><i data-icon="copy"></i></button></div>
+        <code class="fd-copy-field-value"></code>
+      </div>
+      <div class="fd-secret" data-value="em_agent_8b2f04d6a9c13e57b7c1e" data-mask="end" data-mask-from="_" data-noun="agent key" role="group" aria-label="Agent key">
+        <code class="fd-secret-value"></code>
+        <div class="fd-secret-actions">
+          <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy agent key"><i data-icon="copy"></i></button>
+        </div>
+      </div>
     </div>
+    <ul class="doc-notes">
+      <li>An address or key that people recognise by its last characters takes <code class="fd-code">data-mask="end"</code>: the start up to the last <code class="fd-code">data-mask-from</code> stays readable, the rest is eight dots and the last <code class="fd-code">data-mask-keep</code> characters (4 by default). It stays masked with no reveal button, so leave the button out when nobody may see the value; Copy still copies all of <code class="fd-code">data-value</code>.</li>
+      <li>On a narrow screen the readable start shortens with an ellipsis in the middle; the end is never cut off. The same works on <code class="fd-code">fd-secret</code>.</li>
+    </ul>
+
+    <h3 class="doc-sub">Typing a new secret</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-form">
+        <div class="fd-field">
+          <label class="fd-field-label" for="se-password">Password for the test account</label>
+          <div class="fd-secret" data-mode="entry" data-noun="password">
+            <input class="fd-secret-input" type="password" id="se-password" name="password" autocomplete="new-password" aria-describedby="se-password-hint" required>
+            <div class="fd-secret-actions">
+              <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show password"><i data-icon="eye"></i></button>
+            </div>
+          </div>
+          <p class="fd-field-hint" id="se-password-hint">Stored encrypted. Nobody can see it again, you included.</p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="se-key">Provider API key</label>
+          <div class="fd-secret" data-mode="entry" data-noun="API key">
+            <input class="fd-secret-input" type="password" id="se-key" name="provider_key" autocomplete="off" spellcheck="false" aria-invalid="true" aria-describedby="se-key-error">
+            <div class="fd-secret-actions">
+              <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show API key"><i data-icon="eye"></i></button>
+            </div>
+          </div>
+          <p class="fd-field-error" id="se-key-error"><i data-icon="circle-alert" data-size="14"></i><span>Ember could not sign in with that key. Paste the whole key again.</span></p>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="se-old">Current password</label>
+          <div class="fd-secret" data-mode="entry">
+            <input class="fd-secret-input" type="password" id="se-old" name="current" autocomplete="current-password" disabled>
+            <div class="fd-secret-actions">
+              <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="reveal" aria-label="Show password" disabled><i data-icon="eye"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>To ask for a new password or key, use <code class="fd-code">data-mode="entry"</code> with a named <code class="fd-code">input.fd-secret-input</code> inside. It looks like an input, posts in a plain form, and its eye button only shows what was typed on this page: there is no stored value, no copy and no rotate. It goes back under its mask when the form is sent or reset.</li>
+      <li>Set <code class="fd-code">autocomplete</code> for what it holds: <code class="fd-code">new-password</code>, <code class="fd-code">current-password</code>, or <code class="fd-code">off</code> for an API key. Hint and error go in the surrounding <code class="fd-code">fd-field</code>, with <code class="fd-code">aria-invalid</code> on the input. Never write a stored secret into its <code class="fd-code">value</code>.</li>
+    </ul>
   </section>
 
   <!-- ===================================================================== Dropzone -->
@@ -1138,7 +1192,7 @@ team = growth</textarea>
           </span>
         </label>
         <ul class="fd-filelist" id="dz-inline-files">
-          <li class="fd-file" data-state="uploading" style="--fd-progress: 64">
+          <li class="fd-file" data-state="uploading" data-fd-vars="--fd-progress: 64">
             <span class="fd-file-icon"><i data-icon="file-text"></i></span>
             <div class="fd-file-main">
               <div class="fd-file-name">q3-pricing-report.pdf</div>
@@ -1147,7 +1201,7 @@ team = growth</textarea>
             </div>
             <button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only aria-label="Remove q3-pricing-report.pdf" data-fd-file-remove><i data-icon="x"></i></button>
           </li>
-          <li class="fd-file" data-state="done" style="--fd-progress: 100">
+          <li class="fd-file" data-state="done" data-fd-vars="--fd-progress: 100">
             <span class="fd-file-icon"><i data-icon="table"></i></span>
             <div class="fd-file-main">
               <div class="fd-file-name">competitor-prices.xlsx</div>

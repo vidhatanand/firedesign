@@ -7,7 +7,8 @@
  *              A sliding .fd-tabs-indicator is added; arrow keys / Home / End move and select.
  *  Segmented   .fd-segmented[role=radiogroup] > .fd-segmented-item[role=radio][aria-checked][data-value]
  *              (items may sit inside .fd-segmented-group). Toggle-button groups with aria-pressed work too.
- *              A sliding .fd-segmented-thumb is added; arrow keys move the selection.
+ *              A sliding .fd-segmented-thumb is added; arrow keys move the selection. A track narrower than its
+ *              items scrolls sideways (without data-block), and the chosen item is scrolled into view.
  *  Chip nav    .fd-chip-nav > .fd-chip — links (aria-current) navigate; buttons (aria-pressed) select one.
  *  Subnav      .fd-subnav > .fd-subnav-item — links navigate; buttons get aria-current="true" on click.
  *  Steps       .fd-steps[data-current="n"] (0-based) or call setStep(stepsEl, n).
@@ -233,6 +234,7 @@ function setupSegmented(root) {
   root.setAttribute('data-thumb', '');
   track(root, () => placeThumb(root), items);
   instantly(root, () => placeThumb(root));
+  revealInStrip(root, items.find((i) => i.matches(SELECTED) || segmentRadio(i)?.checked), false);
 }
 
 /** Select a segment: updates aria-checked / aria-pressed, slides the thumb, fires fd:change on the group. */
@@ -255,8 +257,9 @@ export function selectSegment(item, { focus = false, silent = false } = {}) {
     else if (mode === 'pressed') i.setAttribute('aria-pressed', String(on));
     else if (mode === 'link') { if (on) i.setAttribute('aria-current', 'page'); else i.removeAttribute('aria-current'); }
   });
-  if (focus) item.focus();
+  if (focus) item.focus({ preventScroll: true });
   placeThumb(root);
+  revealInStrip(root, item);
   if (!already && !silent) emit(root, 'fd:change', { value: segmentValue(item), item });
 }
 
@@ -495,6 +498,7 @@ export function init(root = document) {
       const root = radio?.closest('.fd-segmented-item')?.closest('.fd-segmented');
       if (!root) return;
       placeThumb(root);
+      revealInStrip(root, radio.closest('.fd-segmented-item'));
       emit(root, 'fd:change', { value: radio.value, item: radio.closest('.fd-segmented-item') });
     });
     document.addEventListener('reset', (event) => {

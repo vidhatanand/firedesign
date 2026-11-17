@@ -65,6 +65,10 @@
   --fd-heatgrid-min-cell: 8px;          /* narrowest a week column can squeeze */
   --fd-heatgrid-min-label: 32px;        /* day-label column in that minimum */
   --fd-heatgrid-ring: 1.5px;            /* active cell outline */
+  --fd-heatgrid-strip-h: 28px;          /* strip: day height */
+  --fd-heatgrid-strip-h-sm: 16px;       /* strip in a table cell */
+  --fd-heatgrid-strip-min: 3px;         /* narrowest a day can squeeze */
+  --fd-heatgrid-strip-max: 40px;        /* widest a day grows on a short range */
   /* chart card */
   --fd-chart-card-text-basis: 220px;
 }
@@ -325,6 +329,24 @@ button.fd-legend-item:hover { color: var(--fd-text); }
 .fd-heatgrid-legend > span:first-child { margin-inline-end: var(--fd-space-1); }
 .fd-heatgrid-legend > span:last-child { margin-inline-start: var(--fd-space-1); }
 .fd-heatgrid-swatch { width: var(--fd-chart-swatch-size); height: var(--fd-chart-swatch-size); border-radius: var(--fd-chart-swatch-radius); background: var(--fd-a6); }
+
+/* Strip: one row of days, a tone each, no axis. Days share the width, between a minimum and a maximum. */
+.fd-heatgrid[data-variant="strip"] { --_ch-strip-h: var(--fd-heatgrid-strip-h); gap: var(--fd-space-2-5); }
+.fd-heatgrid[data-variant="strip"][data-size="sm"] { --_ch-strip-h: var(--fd-heatgrid-strip-h-sm); }
+.fd-heatgrid[data-variant="strip"] > .fd-heatgrid-grid {
+  display: flex; align-items: stretch; width: 100%; min-width: calc(var(--_ch-points) * (var(--fd-heatgrid-strip-min) + var(--_ch-gap)));
+  block-size: var(--_ch-strip-h);
+}
+.fd-heatgrid[data-variant="strip"] .fd-heatgrid-cell {
+  flex: 1 1 0; min-width: var(--fd-heatgrid-strip-min); max-width: var(--fd-heatgrid-strip-max); aspect-ratio: auto;
+  background: var(--_ch-c);
+}
+.fd-heatgrid[data-variant="strip"] .fd-heatgrid-cell[data-none] { background: var(--fd-a6); }
+.fd-heatgrid[data-variant="strip"] a.fd-heatgrid-cell { cursor: pointer; }
+.fd-heatgrid[data-variant="strip"] .fd-heatgrid-foot { justify-content: flex-start; }
+.fd-heatgrid[data-variant="strip"] .fd-heatgrid-foot > .fd-legend { margin-inline-start: auto; }
+/* A strip in a table cell can be narrower than a tooltip: keep the tooltip inside it, so the table never scrolls for it. */
+.fd-heatgrid[data-variant="strip"] > .fd-chart-tooltip { min-width: min(var(--fd-chart-tooltip-min), calc(100% - var(--fd-chart-tooltip-inset))); }
 
 /* ---------- Chart card ---------- */
 .fd-chart-card { display: flex; flex-direction: column; gap: var(--fd-space-5); min-width: 0; padding: var(--fd-space-5) var(--fd-space-6) var(--fd-space-6); background: var(--fd-surface); border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); }

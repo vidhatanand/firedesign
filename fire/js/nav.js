@@ -47,6 +47,17 @@ function instantly(container, fn) {
   requestAnimationFrame(() => requestAnimationFrame(() => container.removeAttribute('data-fd-instant')));
 }
 
+/* Size-dependent custom properties are written in the next frame and only when they changed: writing one on an
+   element an observer is watching, inside the same delivery, makes WebKit report a ResizeObserver loop. */
+const written = new WeakMap();
+function setVar(el, name, value) {
+  const seen = written.get(el) || {};
+  if (seen[name] === value) return;
+  seen[name] = value;
+  written.set(el, seen);
+  requestAnimationFrame(() => el.style.setProperty(name, value));
+}
+
 const placers = new WeakMap();
 let resizeObserver;
 const queued = new Set();
@@ -114,10 +125,10 @@ function placeIndicator(list) {
   const indicator = list.querySelector(':scope > .fd-tabs-indicator');
   const tab = tabsIn(list).find((t) => t.matches(SELECTED));
   if (!indicator) return;
-  if (!tab || !tab.offsetParent) { list.style.setProperty('--_n-w', '0px'); return; }
+  if (!tab || !tab.offsetParent) { setVar(list, '--_n-w', '0px'); return; }
   const { x } = offsetWithin(tab, list);
-  list.style.setProperty('--_n-x', `${x}px`);
-  list.style.setProperty('--_n-w', `${tab.offsetWidth}px`);
+  setVar(list, '--_n-x', `${x}px`);
+  setVar(list, '--_n-w', `${tab.offsetWidth}px`);
 }
 
 function setupTabs(list) {
@@ -191,10 +202,10 @@ function placeThumb(root) {
   if (!item || !item.offsetParent) { thumb.setAttribute('data-empty', ''); return; }
   thumb.removeAttribute('data-empty');
   const { x, y } = offsetWithin(item, root);
-  root.style.setProperty('--_n-x', `${x}px`);
-  root.style.setProperty('--_n-y', `${y}px`);
-  root.style.setProperty('--_n-w', `${item.offsetWidth}px`);
-  root.style.setProperty('--_n-th', `${item.offsetHeight}px`);
+  setVar(root, '--_n-x', `${x}px`);
+  setVar(root, '--_n-y', `${y}px`);
+  setVar(root, '--_n-w', `${item.offsetWidth}px`);
+  setVar(root, '--_n-th', `${item.offsetHeight}px`);
 }
 
 /* In a plain form each item is a label around a native radio: the browser owns selection, focus and the posted
@@ -314,8 +325,8 @@ function placeTocMarker(list) {
   if (!item || !item.offsetParent) { marker.setAttribute('data-empty', ''); return; }
   marker.removeAttribute('data-empty');
   const { y } = offsetWithin(item, list);
-  list.style.setProperty('--_n-y', `${y + 4}px`);
-  list.style.setProperty('--_n-h', `${Math.max(8, item.offsetHeight - 8)}px`);
+  setVar(list, '--_n-y', `${y + 4}px`);
+  setVar(list, '--_n-h', `${Math.max(8, item.offsetHeight - 8)}px`);
 }
 
 function setTocCurrent(toc, item, { silent = false } = {}) {

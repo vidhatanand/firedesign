@@ -31,6 +31,8 @@
    Row classes       fd-table-detail (expanded detail row) · fd-table-state (empty / error row)
    Table attributes  data-sticky · data-stack · data-wrap · data-sort="server" · aria-busy
    Cell parts        fd-table-cell > fd-table-lead + fd-table-two > fd-table-title + fd-table-sub · fd-table-trunc · fd-table-link
+   Stacked cells     td|th[data-stack="hide"] (dropped when the table stacks) · [data-stack-only] inside a cell (shown only when stacked)
+   Foot              fd-table-foot > fd-table-foot-info (count or summary, left) + fd-table-foot-actions (right)
    Wrap attributes   data-variant="plain"
 
    FILTERS   fd-filter (> fd-filter-trigger + fd-filter-clear) · fd-filter-bar · fd-filter-search · fd-filter-applied > fd-filter-token
@@ -360,7 +362,7 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table-cell { display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; }
 .fd-table-two { display: flex; flex-direction: column; min-width: 0; padding-block: var(--fd-space-2); }
 [data-density="compact"] .fd-table-two { padding-block: var(--fd-space-1); }
-.fd-table-title { color: var(--fd-text); font-weight: var(--fd-weight-label); line-height: var(--fd-lh-md); overflow: hidden; text-overflow: ellipsis; }
+.fd-table-title { color: var(--fd-text); font-weight: var(--fd-weight-label); line-height: var(--fd-lh-md); overflow: hidden; text-overflow: ellipsis; overflow-wrap: break-word; }
 .fd-table-sub { color: var(--fd-text-3); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-regular); overflow: hidden; text-overflow: ellipsis; }
 .fd-table-sub[data-mono] { font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; }
 /* Truncate long strings (URLs) to a width set with --w. */
@@ -433,6 +435,9 @@ th[aria-sort="descending"] .fd-th-sort {
   font-variant-numeric: tabular-nums;
 }
 .fd-table-foot b { color: var(--fd-text-2); font-weight: var(--fd-weight-label); }
+/* The left slot: a count or summary. It takes the free width, so the actions sit at the end. */
+.fd-table-foot-info { flex: 1 1 auto; min-width: 0; font-variant-numeric: tabular-nums; }
+.fd-table-foot-info b { color: var(--fd-text-2); font-weight: var(--fd-weight-label); }
 .fd-table-foot-actions { display: flex; align-items: center; gap: var(--fd-space-4); }
 .fd-table-rows { position: relative; display: inline-flex; align-items: center; gap: var(--fd-space-2); }
 .fd-table-rows select {
@@ -470,8 +475,12 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table-bulk-count + .fd-table-bulk-actions { margin-inline-start: 0; }
 
 /* ---------- Phones: rows become stacked cards ---------- */
+/* [data-stack-only] is a stacked-card extra (a meta line under the name): hidden until the table stacks. */
+.fd-table [data-stack-only] { display: none; }
 @container fd-table (max-width: 559.98px) {
   .fd-table[data-stack] { display: block; }
+  .fd-table[data-stack] :is(td, th)[data-stack="hide"] { display: none; }
+  .fd-table[data-stack] [data-stack-only] { display: revert; }
   .fd-table[data-stack] thead {
     position: absolute; width: var(--fd-data-sr); height: var(--fd-data-sr); margin: calc(var(--fd-data-sr) * -1); overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
   }
@@ -519,6 +528,7 @@ th[aria-sort="descending"] .fd-th-sort {
   .fd-table-bulk-actions .fd-btn > span {
     position: absolute; width: var(--fd-data-sr); height: var(--fd-data-sr); margin: calc(var(--fd-data-sr) * -1); overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
   }
+  .fd-table-foot-info { flex-basis: 100%; }
   .fd-table-foot-actions { width: 100%; justify-content: space-between; }
 }
 
@@ -890,7 +900,7 @@ a.fd-stat-tile:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 
    ========================================================================== */
 .fd-data-card { min-width: 0; background: var(--fd-surface); border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); overflow: clip; }
 .fd-data-card-head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: var(--fd-space-2) var(--fd-space-6); padding: var(--fd-space-5) var(--fd-space-6) var(--fd-space-4); }
-.fd-data-card-title { font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-data-card-title { overflow-wrap: anywhere; font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); color: var(--fd-text); }
 .fd-data-card-desc { margin-top: var(--fd-space-1); color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); max-width: 56ch; }
 .fd-data-card-figure { display: flex; align-items: baseline; gap: var(--fd-space-2); margin-inline-start: auto; white-space: nowrap; }
 .fd-data-card-unit { font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); }

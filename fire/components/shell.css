@@ -27,7 +27,7 @@
 
    data-sidebar       expanded (default) | collapsed (64px icon rail)
    data-contained     the shell fills its parent box instead of the viewport (docs, previews)
-   data-only          desktop | mobile — hide an element on the other side of the 900px breakpoint
+   data-only          desktop | mobile — hide an element on the other side of the 900px breakpoint (the shell's width inside .fd-app, the viewport's elsewhere)
    Responsive: the shell is a size container named `fd-app`; under 900px the sidebar
    hides and .fd-mobile-nav takes over. Page parts query the `fd-page` container.
    ========================================================================== */
@@ -668,7 +668,8 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   min-width: 0;
 }
 .fd-page-head-text { display: flex; flex-direction: column; flex: 1 1 var(--fd-page-head-basis); min-width: 0; }
-.fd-page-head-title { font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); }
+.fd-page-head-title { font-family: var(--fd-font-display); font-size: var(--fd-text-h2); line-height: var(--fd-lh-h2); letter-spacing: var(--fd-ls-h2); font-weight: var(--fd-weight-display); overflow-wrap: anywhere; }
+.fd-page-head[data-size="sm"] .fd-page-head-title { font-family: inherit; font-size: var(--fd-text-title); line-height: var(--fd-lh-title); letter-spacing: var(--fd-ls-title); font-weight: var(--fd-weight-label); }
 .fd-page-head-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
 .fd-page-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); }
 
@@ -842,6 +843,10 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-mobile-nav-item[aria-current="page"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
 .fd-mobile-nav-item[aria-current="page"] > .fd-icon:last-child { color: var(--fd-accent-text); }
 .fd-mobile-nav-item[data-level="2"] { padding-inline-start: var(--fd-space-6); font-size: var(--fd-text-md); min-height: var(--fd-control-lg); }
+
+/* ---------- data-only outside the shell: the same 900px, measured on the viewport ---------- */
+@media (min-width: 900px) { [data-only="mobile"]:not(.fd-app [data-only]) { display: none !important; } }
+@media (max-width: 899.98px) { [data-only="desktop"]:not(.fd-app [data-only]) { display: none !important; } }
 
 /* ---------- Breakpoint: 900px (the shell's own width) ---------- */
 @container fd-app (min-width: 900px) {

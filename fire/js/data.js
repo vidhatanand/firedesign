@@ -15,7 +15,10 @@
  *             <tr class="fd-table-detail" id="detail-id" hidden>.
  *  Rows       tr[data-href] navigates on click or Enter (tabindex is added). Prefer a stretched .fd-table-link in markup.
  *  Stacked    <table data-stack>: data-label on each cell is filled in from the header text when missing.
- *  Actions    any [data-action] inside a wrap emits fd:select { action, value: selected values, row }.
+ *             td|th[data-stack="hide"] is dropped, and [data-stack-only] inside a cell is shown, only while the table stacks.
+ *  Actions    any [data-action] emits fd:select once per click (except buttons inside components that handle their own:
+ *             messages, results, playgrounds, code, JSON and log toolbars). Inside a wrap: { action, value: selected values, row, wrap }.
+ *             Anywhere else (a toolbar's "Clear filters"): { action, value: [], row: null, wrap: null }.
  *  Filters    .fd-filter[data-active][data-default="All endpoints"] with .fd-filter-value and .fd-filter-clear.
  *             .fd-filter-applied > .fd-filter-token (+ .fd-filter-token-remove) and [data-filter-clear-all].
  *  Key-value  .fd-kv-value[data-copy] (optionally data-copy="text to copy") gains a copy button.
@@ -125,12 +128,17 @@ function syncLabels(table) {
 
 /** Mark which sides of a scroller hold more content, and keep empty states centred in the visible width. */
 function watchOverflow(scroller, table) {
+  let written = '';
   const update = () => {
     const max = scroller.scrollWidth - scroller.clientWidth;
     const left = Math.abs(scroller.scrollLeft);
     const state = max <= 1 ? null : left <= 1 ? 'end' : left >= max - 1 ? 'start' : 'both';
     if (state) scroller.dataset.overflow = state; else delete scroller.dataset.overflow;
-    scroller.style.setProperty('--_d-vw', `${scroller.clientWidth}px`);
+    const vw = `${scroller.clientWidth}px`;
+    if (vw !== written) { // a size-dependent write waits for the next frame, so an observer never writes into its own delivery
+      written = vw;
+      requestAnimationFrame(() => scroller.style.setProperty('--_d-vw', vw));
+    }
     if (state && !scroller.hasAttribute('tabindex')) {
       scroller.tabIndex = 0;
       scroller.setAttribute('role', 'region');
@@ -602,6 +610,9 @@ function onPipelineKey(event, job) {
 
 /* ------------------------------------------------------------------ init */
 
+/** Components that answer their own [data-action] buttons; a click inside them is not a list action. */
+const OWN_ACTIONS = '.fd-message-action, .fd-result, [data-fd-playground], .fd-codeblock-btn, .fd-json-btn, .fd-log-btn';
+
 let delegated = false;
 function bindDelegates() {
   if (delegated) return;
@@ -640,12 +651,13 @@ function bindDelegates() {
     const table = wrap.querySelector('.fd-table');
     if (table && selection(table).length) { clearSelection(table); event.preventDefault(); }
   });
-  on(document, 'click', '.fd-table-wrap [data-action]', (event, button) => {
+  on(document, 'click', '[data-action]', (event, button) => {
+    if (button.closest(OWN_ACTIONS)) return;
     const wrap = button.closest('.fd-table-wrap');
-    const table = wrap.querySelector('.fd-table');
+    const table = wrap?.querySelector('.fd-table');
     const rowEl = button.closest('tbody tr');
     const value = table ? selection(table).map((tr) => rowValue(tr, bodyRows(table).indexOf(tr))) : [];
-    emit(button, 'fd:select', { action: button.dataset.action, value, row: rowEl, wrap });
+    emit(button, 'fd:select', { action: button.dataset.action, value, row: wrap ? rowEl : null, wrap });
   });
 
   on(document, 'click', '.fd-filter-clear', (event, button) => {

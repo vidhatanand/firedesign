@@ -160,6 +160,7 @@
     <ul class="doc-notes">
       <li>Header cells are mono eyebrows on the page colour, so the white body reads as the object. Rows are 44px with hairlines and no zebra.</li>
       <li>The first column is the row’s name at weight 450; every other column is secondary. Numbers use <code class="fd-code">data-num</code> (right-aligned, tabular) and identifiers use <code class="fd-code">data-mono</code>.</li>
+      <li>The footer’s left slot, <code class="fd-code">fd-table-foot-info</code>, holds the count or summary in quiet tabular text, with <code class="fd-code">&lt;b&gt;</code> for the numbers; <code class="fd-code">fd-table-foot-actions</code> sits on the right and stacks under it on a phone.</li>
       <li>Click <strong>Credits</strong> or <strong>Duration</strong> to sort numerically, <strong>Time</strong> by date. Empty values (a queued request has no duration) always sort last.</li>
       <li>On narrow screens the scroller fades the edge that has more content and becomes keyboard-focusable.</li>
     </ul>
@@ -429,7 +430,7 @@
     </div>
     <ul class="doc-notes">
       <li>The header checkbox is indeterminate when some rows are chosen. Shift-click selects a range, clicking anywhere in the checkbox cell works, and Escape clears.</li>
-      <li>The table emits <code class="fd-code">fd:change</code> with <code class="fd-code">detail.selected</code>, an array of each row’s <code class="fd-code">data-value</code>. Bulk buttons carry <code class="fd-code">data-action</code> and emit <code class="fd-code">fd:select</code>.</li>
+      <li>The table emits <code class="fd-code">fd:change</code> with <code class="fd-code">detail.selected</code>, an array of each row’s <code class="fd-code">data-value</code>. Bulk buttons carry <code class="fd-code">data-action</code> and emit <code class="fd-code">fd:select</code> with <code class="fd-code">detail { action, value, row, wrap }</code>. Any <code class="fd-code">[data-action]</code> outside a table (a “Clear filters” button in a toolbar) emits it too, once per click, with <code class="fd-code">{ action, value: [], row: null, wrap: null }</code>.</li>
       <li>Under 480px the bulk buttons collapse to icons; their labels stay available to screen readers.</li>
     </ul>
   </section>
@@ -956,7 +957,7 @@
                   <th>Target</th>
                   <th>Status</th>
                   <th data-num>Credits</th>
-                  <th data-num>Duration</th>
+                  <th data-num data-stack="hide">Duration</th>
                   <th data-actions><span class="fd-sr-only">Actions</span></th>
                 </tr>
               </thead>
@@ -965,27 +966,27 @@
                   <td data-sort-value="2026-11-14T16:29">Nov 14, 4:29 PM</td>
                   <td data-mono data-stack-title>/scrape</td>
                   <td data-mono data-muted><span class="fd-table-trunc">https://docs.ember.dev/guides/webhooks</span></td>
-                  <td><span class="fd-status" data-tone="success">Success</span></td>
+                  <td><span><span class="fd-status" data-tone="success">Success</span> <span class="fd-table-sub" data-stack-only>1.84 s</span></span></td>
                   <td data-num>1</td>
-                  <td data-num>1.84 s</td>
+                  <td data-num data-stack="hide">1.84 s</td>
                   <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_8f3a21"><i data-icon="ellipsis"></i></button></td>
                 </tr>
                 <tr data-value="req_5a77c0">
                   <td data-sort-value="2026-11-14T15:58">Nov 14, 3:58 PM</td>
                   <td data-mono data-stack-title>/extract</td>
                   <td data-mono data-muted><span class="fd-table-trunc">https://shop.example.com/products/trail-runner-2</span></td>
-                  <td><span class="fd-status" data-tone="danger">Failed</span></td>
+                  <td><span><span class="fd-status" data-tone="danger">Failed</span> <span class="fd-table-sub" data-stack-only>12.07 s</span></span></td>
                   <td data-num>0</td>
-                  <td data-num>12.07 s</td>
+                  <td data-num data-stack="hide">12.07 s</td>
                   <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_5a77c0"><i data-icon="ellipsis"></i></button></td>
                 </tr>
                 <tr data-value="req_7c19be">
                   <td data-sort-value="2026-11-14T16:27">Nov 14, 4:27 PM</td>
                   <td data-mono data-stack-title>/crawl</td>
                   <td data-mono data-muted><span class="fd-table-trunc">https://ember.dev/blog</span></td>
-                  <td><span class="fd-status" data-tone="info" data-live>Running</span></td>
+                  <td><span><span class="fd-status" data-tone="info" data-live>Running</span></span></td>
                   <td data-num>48</td>
-                  <td data-num>—</td>
+                  <td data-num data-stack="hide">—</td>
                   <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_7c19be"><i data-icon="ellipsis"></i></button></td>
                 </tr>
               </tbody>
@@ -996,6 +997,7 @@
     </div>
     <ul class="doc-notes">
       <li>Captions come from the header text (or <code class="fd-code">data-label</code>); mark one cell <code class="fd-code">data-stack-title</code> to promote it. Actions float to the card’s corner.</li>
+      <li><code class="fd-code">data-stack="hide"</code> on a <code class="fd-code">td</code> or <code class="fd-code">th</code> drops that column when the table stacks (Duration above), and <code class="fd-code">data-stack-only</code> on an element inside a cell shows it only then (the time under the status). Both follow the table’s own 560px container, not the viewport, so use them instead of <code class="fd-code">data-only</code> in a cell.</li>
       <li>Stacked mode drops the expand column and detail rows; use clickable rows instead on phones.</li>
     </ul>
   </section>

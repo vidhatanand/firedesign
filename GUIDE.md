@@ -22,7 +22,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 2. Load it on every page:
 
 ```html
-<script src="/fire/boot.js"></script>              <!-- restores saved theme and tweaks before first paint -->
+<script src="/fire/boot.js"></script>              <!-- before first paint: restores saved theme and tweaks, applies data-fd-vars -->
 <link rel="stylesheet" href="/fire/fire.css">
 <script type="module" src="/fire/fire.js"></script>
 ```
@@ -40,7 +40,7 @@ init(containerElement);   // safe to call more than once
 ```
 
 - **Rendering on a server.** Copy the shell from `templates/shell-static.html`: it is the whole shell as plain markup, with no `shell.js`. Per page the server changes the title, which nav item is current, the hero and the bands. A page that should carry little script can render icons as inline SVG (the paths are `ICONS` in `fire/js/icons.js`) and load single modules, for example only `fire/js/shell.js` for the sidebar and the phone menu; each module works on its own.
-- **Strict Content Security Policy.** The stylesheets need `style-src 'self'` and `font-src 'self'`; the frame's marks are `data:` images, so allow `img-src 'self' data:`. No Fire script writes a `style` attribute (skeletons, the file-upload list, chat, charts, agent blocks, the shell and Tweaks included), so `style-src 'unsafe-inline'` is not needed. Markup and scripts pass custom properties as `data-fd-vars="--fd-i:2;--value:0.4"`; Fire sets them with `setProperty` and removes the attribute.
+- **Strict Content Security Policy.** The stylesheets need `style-src 'self'` and `font-src 'self'`; the frame's marks are `data:` images, so allow `img-src 'self' data:`. No Fire script writes a `style` attribute (skeletons, the file-upload list, chat, charts, agent blocks, the shell and Tweaks included), so `style-src 'unsafe-inline'` is not needed. Markup and scripts pass custom properties as `data-fd-vars="--fd-i:2;--value:0.4"`; Fire sets them with `setProperty` and removes the attribute. Only names that start with `--` are accepted, so the attribute cannot set a real property. `fire/boot.js` applies them while the page is parsed, so the first paint is already right; without it the modules apply them a frame later, and with no script at all they are not applied, so a page that must work without script should not depend on one.
 
 - Components report changes with bubbling events: `fd:change` (`detail.value`), `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`. Listen for these to update your own state; write state back through the same attributes the docs show (`aria-selected`, `aria-pressed`, `data-state`, `hidden`).
 

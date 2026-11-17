@@ -28,6 +28,9 @@ export function on(root, type, selector, handler, options) {
  * innerHTML or setAttribute. Markup that needs a custom property carries `data-fd-vars="--fd-i:2;--value:0.4"` instead;
  * Fire copies each pair onto the element with style.setProperty (allowed under that policy) and removes the attribute.
  * It runs on the page at load and, through a MutationObserver, on anything inserted later, before the next paint.
+ * Only custom properties (names starting with --) are accepted, so the attribute can never set a real property.
+ * fire/boot.js does the same while the page is still being parsed, which keeps the first paint right; when it is
+ * loaded it does the watching and this module only sweeps once at load.
  */
 export function applyVars(root = document) {
   const nodes = root.querySelectorAll ? [...root.querySelectorAll('[data-fd-vars]')] : [];
@@ -35,12 +38,13 @@ export function applyVars(root = document) {
   for (const el of nodes) {
     for (const pair of el.getAttribute('data-fd-vars').split(';')) {
       const at = pair.indexOf(':');
-      if (at > 0) el.style.setProperty(pair.slice(0, at).trim(), pair.slice(at + 1).trim());
+      const name = pair.slice(0, at).trim();
+      if (at > 0 && name.startsWith('--')) el.style.setProperty(name, pair.slice(at + 1).trim());
     }
     el.removeAttribute('data-fd-vars');
   }
 }
-if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') {
+if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined' && !globalThis.__fdVars) {
   new MutationObserver((records) => {
     for (const r of records) {
       if (r.type === 'attributes') applyVars(r.target);

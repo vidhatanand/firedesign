@@ -969,7 +969,7 @@ function heatstrip(el, cfg) {
   const counts = order.map((t) => [t, tones.filter((x) => x === t).length]).filter(([, c]) => c);
   const span = start != null && n ? ` from ${dayLabel(start)} to ${dayLabel(start + (n - 1) * DAY)}` : '';
   const noun = start != null ? (n === 1 ? 'day' : 'days') : (n === 1 ? 'point' : 'points');
-  grid.setAttribute('aria-label', cfg.label || el.dataset.label || `${n} ${noun}${span}: ${counts.map(([t, c]) => `${c} ${name(t).toLowerCase()}`).join(', ')}`);
+  grid.setAttribute('aria-label', cfg.label || el.dataset.label || `${n} ${noun}${span}. ${counts.map(([t, c]) => `${name(t)}: ${c}`).join(', ')}`);
 
   const cells = tones.map((t, i) => {
     const cell = html(hrefs[i] ? 'a' : 'span', 'fd-heatgrid-cell', null, grid);

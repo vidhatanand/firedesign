@@ -52,10 +52,11 @@
  *   <button data-fd-dialog-open="create-key">…</button>
  *   <dialog class="fd-dialog|fd-sheet" id="create-key" [data-static] [data-reset]>… [data-fd-dialog-close] …</dialog>
  *   Escape, [data-fd-dialog-close] and backdrop clicks close (data-static keeps backdrop clicks).
- *   Focus goes to [autofocus] or the first focusable and returns to the trigger. data-reset resets
+ *   Focus goes to [autofocus], else the first form field of the body, else the title (made tabindex=-1 while
+ *   open) or the surface itself, never a footer action; it returns to the trigger. data-reset resets
  *   forms on open. Steps: <section data-step="form">… and buttons [data-fd-dialog-step="next|prev|<name>"]
  *   (a submit button validates its form first; data-fd-dialog-step-delay="600" shows a busy state);
- *   .fd-dialog-dots > span reflect the step. Fires fd:open, fd:close (detail.value = returnValue)
+ *   .fd-dialog-dots > span reflect the step. Fires fd:open, fd:close (detail.value = returnValue; once per close, after the native close event, however it closed)
  *   and fd:change (detail.value = step name). openDialog(id, { trigger }), closeDialog(id, value).
  *   Below 640px dialogs and sheets are bottom sheets that can be dragged down to close.
  *
@@ -953,6 +954,7 @@ function afterClose(dialog) {
   dialog.removeAttribute('data-dragging');
   fallbackTraps.get(dialog)?.();
   fallbackTraps.delete(dialog);
+  for (const t of $$('[tabindex="-1"]', dialog)) if (titleMade.has(t)) { t.removeAttribute('tabindex'); titleMade.delete(t); }
   const origin = dialogOrigin.get(dialog);
   dialogOrigin.delete(dialog);
   const top = modalStack[modalStack.length - 1];
@@ -972,12 +974,20 @@ function resetDialog(dialog) {
   if (dialog.matches('.fd-command')) resetCommand(dialog);
 }
 
+const FIELD = 'input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]), select, textarea, [contenteditable="true"], [role="textbox"], [role="combobox"], [role="searchbox"]';
+const titleMade = new WeakSet();
+
+/** Where focus starts: [autofocus], else the first form field of the body, else the title (or the surface). Never a footer action. */
 function focusDialog(dialog) {
   const scope = currentStep(dialog) || dialog;
   const auto = $$('[autofocus]', scope).find(visible);
-  const items = focusables(scope);
-  const first = items.find((el) => !el.closest('.fd-dialog-close, .fd-sheet-close'));
-  focusEl(auto || first || items[0] || dialog);
+  const field = focusables(scope).find((el) => el.matches(FIELD) && !el.closest('.fd-dialog-close, .fd-sheet-close'));
+  if (auto || field) { focusEl(auto || field); return; }
+  const title = scope.querySelector('.fd-dialog-title, .fd-sheet-title');
+  if (title && visible(title)) {
+    if (!title.hasAttribute('tabindex')) { title.tabIndex = -1; titleMade.add(title); }
+    focusEl(title);
+  } else focusEl(dialog);
 }
 
 function showStep(dialog, target, moveFocus = true) {
@@ -1088,7 +1098,7 @@ function getToaster() {
 /** Keep the stack above whatever opened last (dialogs make everything outside them inert). */
 function remountToaster() {
   if (!toaster || !toasts.length) return;
-  const host = modalStack[modalStack.length - 1] || doc.body;
+  const host = modalStack.findLast((d) => d.open || d.hasAttribute('open')) || doc.body;
   const moved = toaster.parentElement !== host;
   if (moved) host.append(toaster);
   if (HAS_POPOVER && (moved || lastLayerAt > toasterShownAt || !toaster.matches(':popover-open'))) {
@@ -1098,6 +1108,9 @@ function remountToaster() {
       toasterShownAt = performance.now();
     } catch { /* not connected */ }
   }
+  // A list that was hidden or inside a closed dialog measured 0; measure again now that it shows.
+  const unmeasured = toasts.filter((t) => !t.height);
+  if (unmeasured.length) { unmeasured.forEach(measureToast); layoutToasts(); }
   toaster.dataset.state = 'open';
 }
 
@@ -1881,7 +1894,14 @@ function bindGlobal() {
     if (dialog.hasAttribute('data-static')) bump(dialog); else closeDialog(dialog, 'dismiss');
   });
   // Native close (Escape, form[method=dialog], close()) → bookkeeping.
-  doc.addEventListener('close', (event) => { if (event.target instanceof HTMLElement && event.target.matches(MODAL)) afterClose(event.target); }, true);
+  // One native `close` event per close, whoever caused it, so fd:close follows it exactly once. A dialog that script
+  // opened with showModal() itself (never through openDialog) still announces its close.
+  doc.addEventListener('close', (event) => {
+    const dialog = event.target;
+    if (!(dialog instanceof HTMLElement) || !dialog.matches(MODAL)) return;
+    if (dialog.dataset.state === 'open') afterClose(dialog);
+    else emit(dialog, 'fd:close', { value: dialog.returnValue });
+  }, true);
 
   // Notifications
   on(doc, 'click', '[data-fd-notifications] [data-fd-show]', (event, btn) => {

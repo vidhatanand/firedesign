@@ -481,6 +481,7 @@
     <div class="doc-section-head">
       <h2 class="fd-h3">Dialogs</h2>
       <p>Use a dialog when the task must finish or be dismissed before the page makes sense again: confirming, creating a key, choosing providers. The page behind is washed out and blurred. Below 640px every dialog becomes a bottom sheet you can drag down.</p>
+      <p>Closing always ends in one native <code>close</code> event, and <code>fd:close</code> follows it exactly once, whether the dialog closed from a button, Escape, a backdrop click, <code>closeDialog()</code> or <code>dialog.close()</code> in your own script (a dialog you opened yourself with <code>showModal()</code> reports it too). A toast made while a dialog is closing lands on the page, not inside the closing dialog.</p>
     </div>
     <div class="doc-specimen" data-code data-layout="center">
       <button class="fd-btn" type="button" data-fd-dialog-open="dlg-revoke">Revoke key</button>
@@ -789,11 +790,13 @@
     <div class="doc-section-head">
       <h2 class="fd-h3">Sheets</h2>
       <p>A sheet holds the detail of something picked from a list, a log entry or a run, without losing the list. It slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones.</p>
+      <p>Focus never opens on a footer action, so a second Enter cannot confirm a decision. It goes to <code>[autofocus]</code> if the sheet or dialog has one, else to the first form field in the body, else to the title. Open <em>Review decision</em> with the keyboard: focus starts on the title, and the footer waits until you have read the body.</p>
     </div>
     <div class="doc-specimen" data-code data-layout="center">
       <button class="fd-btn" type="button" data-fd-dialog-open="sheet-log"><i data-icon="panel-right"></i><span>Open log entry</span></button>
       <button class="fd-btn" type="button" data-fd-dialog-open="sheet-filters"><i data-icon="panel-left"></i><span>Filters</span></button>
       <button class="fd-btn" type="button" data-fd-dialog-open="sheet-share"><i data-icon="share-2"></i><span>Share run</span></button>
+      <button class="fd-btn" type="button" data-fd-dialog-open="sheet-decision"><i data-icon="check"></i><span>Review decision</span></button>
 
       <dialog class="fd-sheet" id="sheet-log" data-side="right" data-size="md">
         <div class="fd-sheet-head">
@@ -840,6 +843,23 @@
         <div class="fd-sheet-foot">
           <button class="fd-btn" type="button" data-variant="ghost" data-start><i data-icon="code"></i><span>Copy as cURL</span></button>
           <button class="fd-btn" type="button" data-variant="primary"><i data-icon="play"></i><span>Replay request</span></button>
+        </div>
+      </dialog>
+
+      <dialog class="fd-sheet" id="sheet-decision" data-side="right" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <h2 class="fd-sheet-title">Approve crawl of docs.ember.dev?</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc">Requested by Maya Chen · 500 pages · 500 credits</p>
+        </div>
+        <div class="fd-sheet-body">
+          <p>The job follows links up to 3 hops from the start URL and skips anything outside <span class="fd-mono">docs.ember.dev</span>. Credits are charged as pages are scraped, so a stopped job only bills what it finished.</p>
+        </div>
+        <div class="fd-sheet-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close="reject" data-start>Reject</button>
+          <button class="fd-btn" type="button" data-variant="primary" data-fd-dialog-close="approve">Approve</button>
         </div>
       </dialog>
 

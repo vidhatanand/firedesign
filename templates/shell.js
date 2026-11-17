@@ -127,7 +127,7 @@ export function renderSidebar({ active = '', prefix = 'ember' } = {}) {
   <div class="fd-sidebar-foot">
     <div class="fd-usage-card">
       <div class="fd-usage-card-head">
-        <span class="fd-usage-card-ring" style="--value: ${a.creditsLeft}" aria-hidden="true"></span>
+        <span class="fd-usage-card-ring" data-fd-vars="--value: ${a.creditsLeft}" aria-hidden="true"></span>
         <span class="fd-usage-card-title">${a.credits} credits left</span>
         <a class="fd-usage-card-link" href="usage.html" aria-label="View usage">${i('chart-column')}</a>
       </div>

@@ -290,7 +290,7 @@ function checkInline() {
   const files = dirs.flatMap(d => fs.readdirSync(path.join(ROOT, d)).filter(f => /\.(html|js)$/.test(f)).map(f => `${d}/${f}`));
   for (const f of files) {
     const text = read(f);
-    for (const m of text.matchAll(/style="([^"]*)"/g)) {
+    for (const m of text.matchAll(/(?:style|data-fd-vars)="([^"]*)"/g)) {
       const literals = [...m[1].matchAll(/(?<![\w.#-])(\d*\.?\d+)(px|rem|ms|s)(?![\w-])/g)].filter(x => Number(x[1]) !== 0).map(x => x[0]);
       if (literals.length) add('inline', 'WARN', f, text.slice(0, m.index).split('\n').length, `style="${m[1].slice(0, 70)}"  ← ${[...new Set(literals)].join(', ')}`);
     }

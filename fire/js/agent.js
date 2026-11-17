@@ -401,7 +401,7 @@ async function runPlayground(pg) {
   try { rows = JSON.parse($('template[data-result]', pg)?.content.textContent || '[]'); } catch { rows = []; }
   const keys = $$('.fd-playground-output thead th', pg).map((th) => th.dataset.key || th.textContent.trim());
   if (tbody) {
-    tbody.innerHTML = rows.map((row, i) => `<tr data-new style="--fd-i:${i}">${keys.map((k) => `<td${typeof row[k] === 'number' ? ' data-num' : /^(id|.*_id)$/.test(k) ? ' data-mono' : ''}>${esc(row[k] ?? '—')}</td>`).join('')}</tr>`).join('');
+    tbody.innerHTML = rows.map((row, i) => `<tr data-new data-fd-vars="--fd-i:${i}">${keys.map((k) => `<td${typeof row[k] === 'number' ? ' data-num' : /^(id|.*_id)$/.test(k) ? ' data-mono' : ''}>${esc(row[k] ?? '—')}</td>`).join('')}</tr>`).join('');
   }
   const json = $('.fd-playground-output .fd-json', pg);
   if (json) renderJSON(json, rows, { depth: 2 });
@@ -481,7 +481,7 @@ const toolcallHTML = (call, state) => {
 };
 const resultHTML = () => {
   const head = '<tr><th>Provider</th><th>Plan</th><th data-num>Price / mo</th><th data-num>Credits</th></tr>';
-  const body = DEMO.rows.map((r, i) => `<tr style="--fd-i:${i}"><td>${r.provider}</td><td>${r.plan}</td><td data-num>$${r.price}</td><td data-num>${r.credits.toLocaleString()}</td></tr>`).join('');
+  const body = DEMO.rows.map((r, i) => `<tr data-fd-vars="--fd-i:${i}"><td>${r.provider}</td><td>${r.plan}</td><td data-num>$${r.price}</td><td data-num>${r.credits.toLocaleString()}</td></tr>`).join('');
   return '<section class="fd-result" data-fd-views data-atomic>'
     + `<header class="fd-result-head"><div class="fd-result-title"><span>Pricing tiers</span><span class="fd-result-count">${DEMO.rows.length} rows</span></div>`
     + '<div class="fd-result-tools"><div class="fd-viewswitch" role="tablist" aria-label="Result view"><button class="fd-viewswitch-item" role="tab" data-value="table" aria-selected="true">Table</button><button class="fd-viewswitch-item" role="tab" data-value="json">JSON</button></div>'

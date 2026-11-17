@@ -45,9 +45,22 @@ const live = new Set();
 
 /* ---------- small helpers ---------- */
 const r2 = (n) => Math.round(n * 100) / 100;
+/* "--a:1;--b:2px" onto an element through the CSSOM. */
+const setStyle = (node, text) => {
+  for (const pair of String(text).split(';')) {
+    const at = pair.indexOf(':');
+    if (at > 0) node.style.setProperty(pair.slice(0, at).trim(), pair.slice(at + 1).trim());
+  }
+};
 const svg = (tag, attrs, parent) => {
   const node = document.createElementNS(NS, tag);
-  if (attrs) for (const k in attrs) if (attrs[k] != null && attrs[k] !== false) node.setAttribute(k, attrs[k]);
+  if (attrs) {
+    for (const k in attrs) {
+      if (attrs[k] == null || attrs[k] === false) continue;
+      if (k === 'style') setStyle(node, attrs[k]); // never a style attribute: it would need style-src 'unsafe-inline'
+      else node.setAttribute(k, attrs[k]);
+    }
+  }
   if (parent) parent.append(node);
   return node;
 };
@@ -1201,7 +1214,7 @@ function initHeatgrid(el) {
 /* ==========================================================================
    Ranked bars (pure CSS; JS only arms the entrance when scrolled into view)
    <ul class="fd-bars">
-     <li class="fd-bars-row" style="--value: 0.62"><span class="fd-bars-label">/scrape</span>
+     <li class="fd-bars-row" data-fd-vars="--value: 0.62"><span class="fd-bars-label">/scrape</span>
        <span class="fd-bars-track"><span class="fd-bars-fill"></span></span><span class="fd-bars-value">12,480</span></li>
    </ul>
    ========================================================================== */

@@ -268,9 +268,9 @@
   </section>
 </main>
 <script type="module">
-  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" style="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted" style="font-weight: 400">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
+  const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" data-fd-vars="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted" style="font-weight: 400">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
   const steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 88];
-  document.getElementById('ladder').innerHTML = steps.map((s) => `<span style="--c:var(--fd-a${s})">${s}</span>`).join('');
+  document.getElementById('ladder').innerHTML = steps.map((s) => `<span data-fd-vars="--c:var(--fd-a${s})">${s}</span>`).join('');
   document.getElementById('surfaces-grid').innerHTML = [
     ['Page', '--fd-bg'], ['Sunken', '--fd-bg-sunken'], ['Surface', '--fd-surface'], ['Raised', '--fd-surface-raised'], ['Inverse', '--fd-surface-inverse'],
     ['Line, faint', '--fd-line-faint', 'structure'], ['Line', '--fd-line', 'controls'], ['Line, strong', '--fd-line-strong', 'hover'],
@@ -284,14 +284,14 @@
     [`${t[0].toUpperCase() + t.slice(1)}`, `--fd-${t}-solid`], [`${t} text`, `--fd-${t}-text`], [`${t} bg`, `--fd-${t}-bg`],
   ]).map((a) => sw(...a)).join('');
   const space = [['0-5', 2], ['1', 4], ['1-5', 6], ['2', 8], ['2-5', 10], ['3', 12], ['3-5', 14], ['4', 16], ['5', 20], ['6', 24], ['8', 32], ['10', 40], ['12', 48], ['16', 64], ['20', 80], ['24', 96]];
-  document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i style="--w: var(--fd-space-${n})"></i></div>`).join('');
+  document.getElementById('space-list').innerHTML = space.map(([n, px]) => `<div><span>--fd-space-${n}</span><span>${px}px</span><i data-fd-vars="--w: var(--fd-space-${n})"></i></div>`).join('');
   const radius = [['xs', 4, 'checkbox'], ['sm', 6, 'chip, thumb'], ['md', 8, 'menu item'], ['lg', 10, 'control'], ['xl', 12, 'card'], ['2xl', 16, 'dialog'], ['3xl', 20, 'sheet']];
   document.getElementById('radius-list').innerHTML = radius.map(([n, px, use]) => `<div class="fx-box" data-line style="border-radius:var(--fd-radius-${n})"><span style="color: var(--fd-text)">${n} · ${px}</span><span>${use}</span></div>`).join('');
   const shadows = [['xs', 'outline button'], ['sm', 'composer'], ['md', 'card hover'], ['thumb', 'segmented, switch'], ['lg', 'menu, popover'], ['xl', 'dialog']];
   document.getElementById('shadow-list').innerHTML = shadows.map(([n, use]) => `<div class="fx-box" style="border-radius:var(--fd-radius-xl);box-shadow:var(--fd-shadow-${n})"><span style="color: var(--fd-text)">${n}</span><span>${use}</span></div>`).join('');
   const motion = [['dur-2 · ease-out', '--fd-dur-2', '--fd-ease-out', '160ms hover, focus'], ['dur-3 · ease-out', '--fd-dur-3', '--fd-ease-out', '220ms menus, toggles'], ['dur-3 · ease-spring', '--fd-dur-3', '--fd-ease-spring', '220ms thumbs'], ['dur-4 · ease-emphasized', '--fd-dur-4', '--fd-ease-emphasized', '320ms dialogs, sheets'], ['dur-5 · ease-emphasized', '--fd-dur-5', '--fd-ease-emphasized', '520ms entrances']];
   const list = document.getElementById('motion-list');
-  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span style="color: var(--fd-text)">${n}</span><br>${use}</span><div class="fx-track" style="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
+  list.innerHTML = motion.map(([n, d, e, use]) => `<div class="fx-mrow"><span><span style="color: var(--fd-text)">${n}</span><br>${use}</span><div class="fx-track" data-fd-vars="--d:var(${d});--e:var(${e})"><i></i></div></div>`).join('');
   document.getElementById('motion-run').addEventListener('click', () => list.toggleAttribute('data-run'));
 </script>
 </body>

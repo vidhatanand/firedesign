@@ -1,4 +1,4 @@
-/* Fire data — tables, filters, key-values, meters, progress, data cards.
+/* Fire data — tables, filters, key-values, meters, progress, data cards, pipelines.
  *
  * Markup contract (full class list in fire/components/data.css):
  *
@@ -23,6 +23,26 @@
  *             Segmented: .fd-meter-seg[data-value] children. .fd-meter-figure[data-auto] is filled "1,520 of 3,000 {data-unit}".
  *  Progress   .fd-progress[data-value][data-max][data-indeterminate][data-unit]; variants ring and steps.
  *  Data card  button.fd-data-card-toggle[aria-controls] reveals .fd-data-card-more.
+ *  Pipeline   <div class="fd-pipeline" role="group" aria-label="Crawl crl_8f3a21 stages">
+ *               <ol class="fd-pipeline-stages">
+ *                 <li class="fd-pipeline-stage" [data-when="failure"]>
+ *                   <p class="fd-pipeline-stage-label">Fetch</p>
+ *                   <ul class="fd-pipeline-jobs">
+ *                     <li><button class="fd-pipeline-job" type="button" data-value="fetch-2" data-tone="danger" [data-live]
+ *                           [data-state="skipped"] [aria-current="true"]>
+ *                       <i data-icon="circle-x"></i><span class="fd-pipeline-job-name">Worker 2</span>
+ *                       <span class="fd-sr-only">Failed</span><span class="fd-pipeline-job-meta">12 s</span>
+ *                     </button></li>
+ *                   </ul>
+ *                 </li>
+ *               </ol>
+ *             </div>
+ *             A job is a <button> (selects), an <a href> (navigates) or a <span> (only shows). One tab stop: Tab lands on
+ *             the current job or the first; Arrow Right/Left go to the next/previous stage (same row, clamped), Up/Down
+ *             within a stage, Home/End to the first/last job; when vertical, Up/Down walk every job in order.
+ *             Clicking a button job moves aria-current="true" to it unless the pipeline has data-fd-pipeline="manual".
+ *             The pipeline scrolls sideways inside itself and keeps the current job in view; data-overflow marks
+ *             the sides with more stages. aria-busy="true" shows every job and label as a placeholder.
  *
  * Events (bubbling, from the element that changed):
  *   fd:change  table  { source: 'selection', value, selected, rows }       value is an array of row values
@@ -32,9 +52,11 @@
  *   fd:select  wrap   { action, value, row }                                  bulk, empty and error action buttons
  *   fd:select  tr     { action: 'open', href, row }                           data-href rows (cancelable: preventDefault stops navigation)
  *   fd:open / fd:close  .fd-data-card-toggle  { target }
+ *   fd:select  .fd-pipeline-job  { value, item }                            value is the job's data-value; cancelable:
+ *                                                                            preventDefault keeps aria-current where it was, or stops a link
  *
  * API: init(root), selection(table), clearSelection(table), sortTable(table, index, direction),
- *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max).
+ *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max), selectJob(pipeline, value).
  */
 import { $$, on, once, emit, copyText } from './core.js';
 import { icon } from './icons.js';
@@ -463,6 +485,121 @@ function syncToggle(button) {
   target.inert = !open;
 }
 
+/* ------------------------------------------------------------------ pipeline */
+
+const PIPELINE_JOB = 'button.fd-pipeline-job:not(:disabled), a.fd-pipeline-job[href]';
+const isCurrent = (el) => el.hasAttribute('aria-current') && el.getAttribute('aria-current') !== 'false';
+const ownJobs = (pipeline) => $$(PIPELINE_JOB, pipeline).filter((job) => job.closest('.fd-pipeline') === pipeline);
+const jobValue = (job) => job.dataset.value ?? job.querySelector('.fd-pipeline-job-name')?.textContent.trim() ?? '';
+
+/** Jobs that take focus, one array per stage, empty stages left out. */
+function pipelineGrid(pipeline) {
+  return $$('.fd-pipeline-stage', pipeline)
+    .filter((stage) => stage.closest('.fd-pipeline') === pipeline)
+    .map((stage) => $$(PIPELINE_JOB, stage))
+    .filter((jobs) => jobs.length);
+}
+
+/** One tab stop: the focused job while focus is inside, else the current job, else the first. */
+function syncPipeline(pipeline, { leaving = false } = {}) {
+  const jobs = ownJobs(pipeline);
+  const active = leaving ? null : jobs.find((job) => job === document.activeElement);
+  const home = active ?? jobs.find(isCurrent) ?? jobs[0];
+  jobs.forEach((job) => { job.tabIndex = job === home ? 0 : -1; });
+}
+
+/** Scroll the pipeline (never the page) so a job is fully visible. */
+function revealJob(pipeline, job) {
+  if (pipeline.scrollWidth <= pipeline.clientWidth + 1) return;
+  const box = pipeline.getBoundingClientRect();
+  const rect = job.getBoundingClientRect();
+  const style = getComputedStyle(pipeline);
+  const start = box.left + (parseFloat(style.paddingLeft) || 0);
+  const end = box.right - (parseFloat(style.paddingRight) || 0);
+  if (rect.left < start) pipeline.scrollLeft -= start - rect.left;
+  else if (rect.right > end) pipeline.scrollLeft += Math.min(rect.right - end, rect.left - start);
+}
+
+/** Mark the sides that hold more stages, for the edge fades. */
+function watchPipeline(pipeline) {
+  const update = () => {
+    const max = pipeline.scrollWidth - pipeline.clientWidth;
+    const left = Math.abs(pipeline.scrollLeft);
+    const state = max <= 1 ? null : left <= 1 ? 'end' : left >= max - 1 ? 'start' : 'both';
+    if (state) pipeline.dataset.overflow = state; else delete pipeline.dataset.overflow;
+  };
+  pipeline.addEventListener('scroll', update, { passive: true });
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(update);
+    observer.observe(pipeline);
+    const stages = pipeline.querySelector('.fd-pipeline-stages');
+    if (stages) observer.observe(stages);
+  }
+  update();
+}
+
+function setupPipeline(pipeline) {
+  if (!once(pipeline, 'fd-pipeline')) return;
+  syncPipeline(pipeline);
+  watchPipeline(pipeline);
+  if ('MutationObserver' in window) {
+    new MutationObserver(() => syncPipeline(pipeline)).observe(pipeline, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-current', 'disabled', 'href'] });
+  }
+  const current = ownJobs(pipeline).find(isCurrent);
+  if (current) requestAnimationFrame(() => revealJob(pipeline, current));
+}
+
+/** Make the job with this data-value (or this element) the current one. Emits nothing. */
+export function selectJob(pipeline, value) {
+  const job = value instanceof Element ? value : ownJobs(pipeline).find((el) => jobValue(el) === String(value));
+  if (!job) return null;
+  $$('.fd-pipeline-job', pipeline).forEach((el) => { if (el !== job && isCurrent(el)) el.removeAttribute('aria-current'); });
+  job.setAttribute('aria-current', 'true');
+  syncPipeline(pipeline);
+  revealJob(pipeline, job);
+  return job;
+}
+
+function onPipelineClick(event, job) {
+  const pipeline = job.closest('.fd-pipeline');
+  if (!pipeline || !job.matches(PIPELINE_JOB) || pipeline.getAttribute('aria-busy') === 'true') return;
+  if (!emit(job, 'fd:select', { value: jobValue(job), item: job })) {
+    if (job.matches('a')) event.preventDefault();
+    return;
+  }
+  if (job.matches('button') && pipeline.dataset.fdPipeline !== 'manual') selectJob(pipeline, job);
+}
+
+function onPipelineKey(event, job) {
+  const pipeline = job.closest('.fd-pipeline');
+  if (!pipeline || event.altKey || event.ctrlKey || event.metaKey || !job.matches(PIPELINE_JOB)) return;
+  const grid = pipelineGrid(pipeline);
+  const flat = grid.flat();
+  const s = grid.findIndex((jobs) => jobs.includes(job));
+  if (s < 0) return;
+  const j = grid[s].indexOf(job);
+  const at = flat.indexOf(job);
+  const stages = pipeline.querySelector('.fd-pipeline-stages');
+  const vertical = Boolean(stages) && getComputedStyle(stages).getPropertyValue('--_d-pl-axis').trim() === 'vertical';
+  const rtl = getComputedStyle(pipeline).direction === 'rtl';
+  const across = (step) => { const jobs = grid[s + step]; return jobs ? jobs[Math.min(j, jobs.length - 1)] : null; };
+  let target;
+  switch (event.key) {
+    case 'ArrowRight': if (vertical) return; target = across(rtl ? -1 : 1); break;
+    case 'ArrowLeft': if (vertical) return; target = across(rtl ? 1 : -1); break;
+    case 'ArrowDown': target = vertical ? flat[at + 1] : grid[s][j + 1]; break;
+    case 'ArrowUp': target = vertical ? flat[at - 1] : grid[s][j - 1]; break;
+    case 'Home': target = flat[0]; break;
+    case 'End': target = flat[flat.length - 1]; break;
+    default: return;
+  }
+  event.preventDefault();
+  if (!target || target === job) return;
+  flat.forEach((el) => { el.tabIndex = el === target ? 0 : -1; });
+  target.focus({ preventScroll: true });
+  target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
 /* ------------------------------------------------------------------ init */
 
 let delegated = false;
@@ -531,6 +668,16 @@ function bindDelegates() {
 
   on(document, 'click', '.fd-kv-copy', (event, button) => copyValue(button));
 
+  on(document, 'click', '.fd-pipeline-job', onPipelineClick);
+  on(document, 'keydown', '.fd-pipeline-job', onPipelineKey);
+  on(document, 'focusin', '.fd-pipeline-job', (event, job) => {
+    const pipeline = job.closest('.fd-pipeline');
+    if (pipeline && job.matches(PIPELINE_JOB)) ownJobs(pipeline).forEach((el) => { el.tabIndex = el === job ? 0 : -1; });
+  });
+  on(document, 'focusout', '.fd-pipeline', (event, pipeline) => {
+    if (!pipeline.contains(event.relatedTarget)) syncPipeline(pipeline, { leaving: true });
+  });
+
   on(document, 'click', '.fd-data-card-toggle', (event, button) => {
     const open = button.getAttribute('aria-expanded') !== 'true';
     button.setAttribute('aria-expanded', String(open));
@@ -555,4 +702,5 @@ export function init(root = document) {
   initMeters(root);
   initProgress(root);
   matchesIn(root, '.fd-data-card-toggle').forEach((button) => once(button, 'fd-toggle') && syncToggle(button));
+  matchesIn(root, '.fd-pipeline').forEach(setupPipeline);
 }

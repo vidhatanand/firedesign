@@ -1559,6 +1559,370 @@
     </ul>
   </section>
 
+  <section class="doc-section" id="pipeline">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pipeline</h2>
+      <p>One run of staged work: a crawl, a deploy, a data job, an agent’s plan. Stages read left to right, jobs stacked in a stage run in parallel, and every job shows its status with an icon and a word for screen readers.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-pipeline" role="group" aria-label="Crawl crl_8f3a21 stages">
+        <ol class="fd-pipeline-stages">
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Discover</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="robots" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Read robots.txt</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">0.4 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="sitemap" data-tone="neutral" data-state="skipped"><i data-icon="circle-minus"></i><span class="fd-pipeline-job-name">Read sitemap</span><span class="fd-sr-only">Skipped</span></button></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Fetch</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="fetch-1" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Worker 1</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">41 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="fetch-2" data-tone="warning"><i data-icon="triangle-alert"></i><span class="fd-pipeline-job-name">Worker 2</span><span class="fd-sr-only">Passed with retries</span><span class="fd-pipeline-job-meta">52 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="fetch-3" data-tone="violet"><i data-icon="circle-dot"></i><span class="fd-pipeline-job-name">Worker 3</span><span class="fd-sr-only">Cached</span><span class="fd-pipeline-job-meta">Cached</span></button></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Extract</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="markdown" data-tone="info" data-live><i data-icon="loader-circle"></i><span class="fd-pipeline-job-name">Markdown</span><span class="fd-sr-only">Running</span><span class="fd-pipeline-job-meta">0:18</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="links" data-tone="danger"><i data-icon="circle-x"></i><span class="fd-pipeline-job-name">Links</span><span class="fd-sr-only">Failed</span><span class="fd-pipeline-job-meta">6 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="metadata" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Metadata</span><span class="fd-sr-only">Queued</span><span class="fd-pipeline-job-meta">Queued</span></button></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Deliver</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="webhook" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Webhook</span><span class="fd-sr-only">Queued</span></button></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage" data-when="failure">
+            <p class="fd-pipeline-stage-label">On failure</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="notify" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Notify</span><span class="fd-sr-only">Queued</span></button></li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Use it when the order and the parallelism are the point: what runs after what, and what runs at the same time. A list of steps that run one after another is <code class="fd-code">fd-run-steps</code> or <code class="fd-code">fd-timeline</code>.</li>
+      <li>It is not a node editor. Stages are a fixed sequence and every job of a stage feeds the next stage; there are no arbitrary edges, no dragging and no zoom.</li>
+      <li>Status is <code class="fd-code">data-tone</code> on the job (<code class="fd-code">success</code>, <code class="fd-code">danger</code>, <code class="fd-code">warning</code>, <code class="fd-code">info</code>, <code class="fd-code">violet</code>, <code class="fd-code">neutral</code>) with a different icon for each, <code class="fd-code">data-live</code> for work in progress (the icon turns; it stops under reduced motion) and <code class="fd-code">data-state="skipped"</code> for work that did not run. Put the status word in an <code class="fd-code">fd-sr-only</code> span inside the job: colour is never the only signal.</li>
+      <li>A failed job also tints its edge. Everything else keeps the surface and its hairline, so a long run of passed jobs stays quiet.</li>
+      <li>Connectors are drawn in CSS from each job’s first line: a stub out of every job, a rail joining the stubs of a stage, and one link to the next stage. A name that wraps to two lines grows its job downwards and the lines stay put.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pipeline-select">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pipeline with a detail panel</h2>
+      <p>Pick a job to read it beside the graph. The run page opens on the failed job; arrow keys walk the stages, Enter or Space selects.</p>
+    </div>
+    <div class="doc-specimen fd-cq" data-code data-layout="bleed">
+      <div class="fd-split" id="pipeline-run">
+        <div class="fd-split-main">
+          <div class="fd-pipeline" role="group" aria-label="Crawl crl_8f3a21 stages">
+            <ol class="fd-pipeline-stages">
+              <li class="fd-pipeline-stage">
+                <p class="fd-pipeline-stage-label">Discover</p>
+                <ul class="fd-pipeline-jobs">
+                  <li><button class="fd-pipeline-job" type="button" data-value="robots" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Read robots.txt</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">0.4 s</span></button></li>
+                  <li><button class="fd-pipeline-job" type="button" data-value="sitemap" data-tone="neutral" data-state="skipped"><i data-icon="circle-minus"></i><span class="fd-pipeline-job-name">Read sitemap</span><span class="fd-sr-only">Skipped</span></button></li>
+                </ul>
+              </li>
+              <li class="fd-pipeline-stage">
+                <p class="fd-pipeline-stage-label">Fetch</p>
+                <ul class="fd-pipeline-jobs">
+                  <li><button class="fd-pipeline-job" type="button" data-value="fetch-1" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Worker 1</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">41 s</span></button></li>
+                  <li><button class="fd-pipeline-job" type="button" data-value="fetch-2" data-tone="warning"><i data-icon="triangle-alert"></i><span class="fd-pipeline-job-name">Worker 2</span><span class="fd-sr-only">Passed with retries</span><span class="fd-pipeline-job-meta">52 s</span></button></li>
+                  <li><button class="fd-pipeline-job" type="button" data-value="fetch-3" data-tone="violet"><i data-icon="circle-dot"></i><span class="fd-pipeline-job-name">Worker 3</span><span class="fd-sr-only">Cached</span><span class="fd-pipeline-job-meta">Cached</span></button></li>
+                </ul>
+              </li>
+              <li class="fd-pipeline-stage">
+                <p class="fd-pipeline-stage-label">Extract</p>
+                <ul class="fd-pipeline-jobs">
+                  <li><button class="fd-pipeline-job" type="button" data-value="markdown" data-tone="info" data-live><i data-icon="loader-circle"></i><span class="fd-pipeline-job-name">Markdown</span><span class="fd-sr-only">Running</span><span class="fd-pipeline-job-meta">0:18</span></button></li>
+                  <li><button class="fd-pipeline-job" type="button" data-value="links" data-tone="danger" aria-current="true"><i data-icon="circle-x"></i><span class="fd-pipeline-job-name">Links</span><span class="fd-sr-only">Failed</span><span class="fd-pipeline-job-meta">6 s</span></button></li>
+                  <li><button class="fd-pipeline-job" type="button" data-value="metadata" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Metadata</span><span class="fd-sr-only">Queued</span><span class="fd-pipeline-job-meta">Queued</span></button></li>
+                </ul>
+              </li>
+              <li class="fd-pipeline-stage">
+                <p class="fd-pipeline-stage-label">Deliver</p>
+                <ul class="fd-pipeline-jobs">
+                  <li><button class="fd-pipeline-job" type="button" data-value="webhook" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Webhook</span><span class="fd-sr-only">Queued</span></button></li>
+                </ul>
+              </li>
+              <li class="fd-pipeline-stage" data-when="failure">
+                <p class="fd-pipeline-stage-label">On failure</p>
+                <ul class="fd-pipeline-jobs">
+                  <li><button class="fd-pipeline-job" type="button" data-value="notify" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Notify</span><span class="fd-sr-only">Queued</span></button></li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+        </div>
+        <aside class="fd-panel" aria-label="Job details" aria-live="polite">
+          <div class="fd-panel-head"><h3 class="fd-panel-title" data-job="name">Links</h3></div>
+          <dl class="fd-kv" data-cols="1">
+            <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-size="sm" data-tone="danger" data-job="status">Failed</span></dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Stage</dt><dd class="fd-kv-value" data-job="stage">Extract</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Started</dt><dd class="fd-kv-value" data-job="started">Nov 14, 4:31 PM</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num" data-job="duration">6 s</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Pages</dt><dd class="fd-kv-value fd-num" data-job="pages">0 of 118</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Note</dt><dd class="fd-kv-value" data-job="note">Link extractor ran out of memory on page 1.</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A job that selects is a <code class="fd-code">&lt;button type="button"&gt;</code>; one that opens its own page is an <code class="fd-code">&lt;a href&gt;</code> and the server marks it <code class="fd-code">aria-current="page"</code>.</li>
+      <li>Selecting fires a bubbling, cancelable <code class="fd-code">fd:select</code> with <code class="fd-code">detail.value</code>, the job’s <code class="fd-code">data-value</code>. The pipeline moves <code class="fd-code">aria-current="true"</code> itself; with <code class="fd-code">data-fd-pipeline="manual"</code> it only emits, and you set <code class="fd-code">aria-current</code> (or call <code class="fd-code">selectJob(pipeline, value)</code>).</li>
+      <li>The selected job takes the accent wash and edge of a selected item, like the active nav item. Its icon keeps its status colour, so a selected failure still reads as a failure.</li>
+      <li>One tab stop: Tab lands on the selected job, or the first. Arrow Right and Left go to the next and previous stage on the same row (or its last job), Up and Down move within a stage, Home and End go to the first and last job.</li>
+      <li>When the graph is wider than its container it scrolls sideways inside itself, never the page, with a fade on the side that has more. The selected job is scrolled into view when the page opens, and the focused job as you move.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pipeline-when">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Conditional stage</h2>
+      <p>A stage that runs only on a condition, like a notification when the run fails, joins the graph by a dashed link, and its label names the condition.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-pipeline" role="group" aria-label="Crawl crl_1a08e9 stages">
+        <ol class="fd-pipeline-stages">
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Extract</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="markdown" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Markdown</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">12 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="links" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Links</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">9 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="metadata" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Metadata</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">7 s</span></button></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Deliver</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="webhook" data-tone="danger"><i data-icon="circle-x"></i><span class="fd-pipeline-job-name">Webhook</span><span class="fd-sr-only">Failed</span><span class="fd-pipeline-job-meta">30 s</span></button></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage" data-when="failure">
+            <p class="fd-pipeline-stage-label">On failure</p>
+            <ul class="fd-pipeline-jobs">
+              <li><button class="fd-pipeline-job" type="button" data-value="notify" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Notify the team</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">1 s</span></button></li>
+              <li><button class="fd-pipeline-job" type="button" data-value="rollback" data-tone="info" data-live><i data-icon="loader-circle"></i><span class="fd-pipeline-job-name">Delete partial results</span><span class="fd-sr-only">Running</span><span class="fd-pipeline-job-meta">0:04</span></button></li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Mark the stage with <code class="fd-code">data-when</code> (the condition, for example <code class="fd-code">failure</code>). The dash is the only thing it draws; write the condition in the label so it is read aloud.</li>
+      <li>Three jobs fanning in to one, then one fanning out to two: the rails make both readable without arrows.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pipeline-small">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Small pipeline</h2>
+      <p>For a card, a table’s expanded row or a summary: icon and name only, tighter. The run page holds the durations.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <article class="fd-card" data-frame="5xl">
+        <header class="fd-card-head">
+          <div class="fd-card-heading"><h3 class="fd-title"><span class="fd-mono">crl_7c19be</span></h3><p class="fd-card-desc">docs.northwind.io · started Nov 14, 4:29 PM</p></div>
+          <div class="fd-card-action"><span class="fd-status" data-size="sm" data-tone="info" data-live>Running</span></div>
+        </header>
+        <div class="fd-card-body">
+            <div class="fd-pipeline" role="group" aria-label="Crawl crl_7c19be stages" data-size="sm">
+              <ol class="fd-pipeline-stages">
+                <li class="fd-pipeline-stage">
+                  <p class="fd-pipeline-stage-label">Discover</p>
+                  <ul class="fd-pipeline-jobs">
+                    <li><span class="fd-pipeline-job" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Read robots.txt</span><span class="fd-sr-only">Passed</span></span></li>
+                    <li><span class="fd-pipeline-job" data-tone="neutral" data-state="skipped"><i data-icon="circle-minus"></i><span class="fd-pipeline-job-name">Read sitemap</span><span class="fd-sr-only">Skipped</span></span></li>
+                  </ul>
+                </li>
+                <li class="fd-pipeline-stage">
+                  <p class="fd-pipeline-stage-label">Fetch</p>
+                  <ul class="fd-pipeline-jobs">
+                    <li><span class="fd-pipeline-job" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Worker 1</span><span class="fd-sr-only">Passed</span></span></li>
+                    <li><span class="fd-pipeline-job" data-tone="warning"><i data-icon="triangle-alert"></i><span class="fd-pipeline-job-name">Worker 2</span><span class="fd-sr-only">Passed with retries</span></span></li>
+                    <li><span class="fd-pipeline-job" data-tone="violet"><i data-icon="circle-dot"></i><span class="fd-pipeline-job-name">Worker 3</span><span class="fd-sr-only">Cached</span></span></li>
+                  </ul>
+                </li>
+                <li class="fd-pipeline-stage">
+                  <p class="fd-pipeline-stage-label">Extract</p>
+                  <ul class="fd-pipeline-jobs">
+                    <li><span class="fd-pipeline-job" data-tone="info" data-live><i data-icon="loader-circle"></i><span class="fd-pipeline-job-name">Markdown</span><span class="fd-sr-only">Running</span></span></li>
+                    <li><span class="fd-pipeline-job" data-tone="danger"><i data-icon="circle-x"></i><span class="fd-pipeline-job-name">Links</span><span class="fd-sr-only">Failed</span></span></li>
+                    <li><span class="fd-pipeline-job" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Metadata</span><span class="fd-sr-only">Queued</span></span></li>
+                  </ul>
+                </li>
+                <li class="fd-pipeline-stage">
+                  <p class="fd-pipeline-stage-label">Deliver</p>
+                  <ul class="fd-pipeline-jobs">
+                    <li><span class="fd-pipeline-job" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Webhook</span><span class="fd-sr-only">Queued</span></span></li>
+                  </ul>
+                </li>
+                <li class="fd-pipeline-stage" data-when="failure">
+                  <p class="fd-pipeline-stage-label">On failure</p>
+                  <ul class="fd-pipeline-jobs">
+                    <li><span class="fd-pipeline-job" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Notify</span><span class="fd-sr-only">Queued</span></span></li>
+                  </ul>
+                </li>
+              </ol>
+            </div>
+        </div>
+        <footer class="fd-card-foot"><span>31 of about 120 pages</span><span class="fd-num">48 credits</span></footer>
+      </article>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-size="sm"</code> hides <code class="fd-code">fd-pipeline-job-meta</code> and steps the job down to the small control height.</li>
+      <li>Jobs that only show are <code class="fd-code">&lt;span&gt;</code>: no tab stop, no hover. Make the card itself the link to the run.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pipeline-vertical">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Vertical</h2>
+      <p>On a phone, or in any container under 480px, the stages stack top to bottom with each label above its jobs and one line down the leading edge.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center">
+      <div data-frame="lg">
+        <div class="fd-pipeline" role="group" aria-label="Crawl crl_8f3a21 stages">
+          <ol class="fd-pipeline-stages">
+            <li class="fd-pipeline-stage">
+              <p class="fd-pipeline-stage-label">Discover</p>
+              <ul class="fd-pipeline-jobs">
+                <li><button class="fd-pipeline-job" type="button" data-value="robots" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Read robots.txt</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">0.4 s</span></button></li>
+                <li><button class="fd-pipeline-job" type="button" data-value="sitemap" data-tone="neutral" data-state="skipped"><i data-icon="circle-minus"></i><span class="fd-pipeline-job-name">Read sitemap</span><span class="fd-sr-only">Skipped</span></button></li>
+              </ul>
+            </li>
+            <li class="fd-pipeline-stage">
+              <p class="fd-pipeline-stage-label">Fetch</p>
+              <ul class="fd-pipeline-jobs">
+                <li><button class="fd-pipeline-job" type="button" data-value="fetch-1" data-tone="success"><i data-icon="circle-check"></i><span class="fd-pipeline-job-name">Worker 1</span><span class="fd-sr-only">Passed</span><span class="fd-pipeline-job-meta">41 s</span></button></li>
+                <li><button class="fd-pipeline-job" type="button" data-value="fetch-2" data-tone="warning"><i data-icon="triangle-alert"></i><span class="fd-pipeline-job-name">Worker 2</span><span class="fd-sr-only">Passed with retries</span><span class="fd-pipeline-job-meta">52 s</span></button></li>
+                <li><button class="fd-pipeline-job" type="button" data-value="fetch-3" data-tone="violet"><i data-icon="circle-dot"></i><span class="fd-pipeline-job-name">Worker 3</span><span class="fd-sr-only">Cached</span><span class="fd-pipeline-job-meta">Cached</span></button></li>
+              </ul>
+            </li>
+            <li class="fd-pipeline-stage">
+              <p class="fd-pipeline-stage-label">Extract</p>
+              <ul class="fd-pipeline-jobs">
+                <li><button class="fd-pipeline-job" type="button" data-value="markdown" data-tone="info" data-live><i data-icon="loader-circle"></i><span class="fd-pipeline-job-name">Markdown</span><span class="fd-sr-only">Running</span><span class="fd-pipeline-job-meta">0:18</span></button></li>
+                <li><button class="fd-pipeline-job" type="button" data-value="links" data-tone="danger"><i data-icon="circle-x"></i><span class="fd-pipeline-job-name">Links</span><span class="fd-sr-only">Failed</span><span class="fd-pipeline-job-meta">6 s</span></button></li>
+                <li><button class="fd-pipeline-job" type="button" data-value="metadata" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Metadata</span><span class="fd-sr-only">Queued</span><span class="fd-pipeline-job-meta">Queued</span></button></li>
+              </ul>
+            </li>
+            <li class="fd-pipeline-stage">
+              <p class="fd-pipeline-stage-label">Deliver</p>
+              <ul class="fd-pipeline-jobs">
+                <li><button class="fd-pipeline-job" type="button" data-value="webhook" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Webhook</span><span class="fd-sr-only">Queued</span></button></li>
+              </ul>
+            </li>
+            <li class="fd-pipeline-stage" data-when="failure">
+              <p class="fd-pipeline-stage-label">On failure</p>
+              <ul class="fd-pipeline-jobs">
+                <li><button class="fd-pipeline-job" type="button" data-value="notify" data-tone="neutral"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name">Notify</span><span class="fd-sr-only">Queued</span></button></li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The pipeline is its own container, so it turns vertical wherever it is narrow (a side panel, a sheet), not only on small screens. <code class="fd-code">data-orientation="vertical"</code> forces it at any width; <code class="fd-code">data-orientation="horizontal"</code> keeps the sideways scroll instead.</li>
+      <li>Vertical, Up and Down walk every job in order. Labels stay on one line here and shorten with an ellipsis.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pipeline-loading">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Loading</h2>
+      <p>While a run loads, <code class="fd-code">aria-busy="true"</code> turns every icon, name, duration and label into a placeholder, in the shape the run will have.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-pipeline" role="group" aria-label="Loading crawl stages" aria-busy="true">
+        <ol class="fd-pipeline-stages">
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Discover</p>
+            <ul class="fd-pipeline-jobs">
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Fetch</p>
+            <ul class="fd-pipeline-jobs">
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Extract</p>
+            <ul class="fd-pipeline-jobs">
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+            </ul>
+          </li>
+          <li class="fd-pipeline-stage">
+            <p class="fd-pipeline-stage-label">Deliver</p>
+            <ul class="fd-pipeline-jobs">
+              <li><span class="fd-pipeline-job"><i data-icon="circle-dashed"></i><span class="fd-pipeline-job-name"></span><span class="fd-pipeline-job-meta"></span></span></li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Render the stages you expect, with empty jobs, or the real jobs before their statuses arrive: both shimmer the same way.</li>
+      <li>The connectors do not flicker because nothing they hang on moves: a placeholder job is exactly one line tall, the lines are fixed to that first line, and they never animate. Only the shimmer moves, and the lines are drawn a step fainter until the pipeline is no longer busy.</li>
+      <li>While busy, jobs ignore clicks. Remove <code class="fd-code">aria-busy</code> and swap the contents in place.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="pipeline-api">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pipeline reference</h2>
+      <p>Parts, attributes and the event. Behaviour is in <code class="fd-code">fire/js/data.js</code>.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>Attributes and parts</th></tr></thead>
+      <tbody>
+        <tr><td>fd-pipeline</td><td>The block and its own container. <code class="fd-code">data-size="sm"</code> <code class="fd-code">data-orientation="vertical|horizontal"</code> <code class="fd-code">data-fd-pipeline="manual"</code> <code class="fd-code">aria-busy="true"</code>; give it <code class="fd-code">role="group"</code> and an <code class="fd-code">aria-label</code>. Script adds <code class="fd-code">data-overflow</code> while it scrolls.</td></tr>
+        <tr><td>fd-pipeline-stages</td><td>The <code class="fd-code">&lt;ol&gt;</code> of stages, in order.</td></tr>
+        <tr><td>fd-pipeline-stage</td><td>An <code class="fd-code">&lt;li&gt;</code>. <code class="fd-code">data-when</code> marks a stage that runs on a condition (dashed link).</td></tr>
+        <tr><td>fd-pipeline-stage-label</td><td>Optional; a mono eyebrow above the stage’s jobs.</td></tr>
+        <tr><td>fd-pipeline-jobs</td><td>The <code class="fd-code">&lt;ul&gt;</code> of the stage’s parallel jobs, each in an <code class="fd-code">&lt;li&gt;</code>.</td></tr>
+        <tr><td>fd-pipeline-job</td><td><code class="fd-code">&lt;button type="button"&gt;</code> to select, <code class="fd-code">&lt;a href&gt;</code> to navigate, <code class="fd-code">&lt;span&gt;</code> to only show. <code class="fd-code">data-value</code> <code class="fd-code">data-tone="neutral|success|danger|warning|info|violet"</code> <code class="fd-code">data-live</code> <code class="fd-code">data-state="skipped"</code> <code class="fd-code">aria-current</code> <code class="fd-code">disabled</code>. Contains an icon first, then the parts below and an <code class="fd-code">fd-sr-only</code> status word.</td></tr>
+        <tr><td>fd-pipeline-job-name</td><td>The job’s name; wraps when longer than the widest stage.</td></tr>
+        <tr><td>fd-pipeline-job-meta</td><td>A duration or a short note, mono with tabular figures. Hidden at <code class="fd-code">data-size="sm"</code>.</td></tr>
+      </tbody>
+    </table>
+    <h3 class="doc-sub">Keyboard</h3>
+    <table class="doc-table">
+      <thead><tr><th>Key</th><th>Does</th></tr></thead>
+      <tbody>
+        <tr><td>Tab</td><td>Lands on the selected job, or the first job; the pipeline is one tab stop.</td></tr>
+        <tr><td>Arrow Right, Arrow Left</td><td>Next or previous stage, same row or that stage’s last job (horizontal only).</td></tr>
+        <tr><td>Arrow Down, Arrow Up</td><td>Next or previous job in the stage; vertical, the next or previous job in order.</td></tr>
+        <tr><td>Home, End</td><td>First or last job.</td></tr>
+        <tr><td>Enter, Space</td><td>Select (native button), or follow the link.</td></tr>
+      </tbody>
+    </table>
+    <h3 class="doc-sub">Event and API</h3>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>fd:select (job)</td><td><code class="fd-code">{{ value, item }}</code>: <code class="fd-code">value</code> is the job’s <code class="fd-code">data-value</code>. Bubbling and cancelable; <code class="fd-code">preventDefault()</code> leaves <code class="fd-code">aria-current</code> where it was, or stops a link.</td></tr>
+        <tr><td>selectJob(pipeline, value)</td><td>Moves <code class="fd-code">aria-current</code> to the job with that value (or element) and scrolls it into view. Emits nothing.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
   <section class="doc-section" id="reference">
     <div class="doc-section-head">
       <h2 class="fd-h3">Reference</h2>
@@ -1584,6 +1948,7 @@
         <tr><td>fd-meter</td><td><code class="fd-code">data-value</code> <code class="fd-code">data-max</code> <code class="fd-code">data-tone</code> <code class="fd-code">data-warn</code> <code class="fd-code">data-danger</code> <code class="fd-code">data-size="sm|lg"</code> <code class="fd-code">data-variant="inline|segmented"</code></td></tr>
         <tr><td>fd-progress</td><td><code class="fd-code">data-value</code> <code class="fd-code">data-max</code> <code class="fd-code">data-indeterminate</code> <code class="fd-code">data-tone</code> <code class="fd-code">data-variant="ring|steps"</code> <code class="fd-code">data-size="16|24|40"</code></td></tr>
         <tr><td>fd-data-card</td><td>Head, body, <code class="fd-code">fd-data-card-toggle</code> and <code class="fd-code">fd-data-card-more[data-state]</code>.</td></tr>
+        <tr><td>fd-pipeline</td><td>Stages and parallel jobs; <code class="fd-code">data-size="sm"</code> <code class="fd-code">data-orientation</code> <code class="fd-code">data-fd-pipeline="manual"</code> <code class="fd-code">aria-busy</code>. Parts and keys in <a class="fd-link" href="#pipeline-api">Pipeline reference</a>.</td></tr>
       </tbody>
     </table>
     <h3 class="doc-sub">Events</h3>
@@ -1593,6 +1958,7 @@
         <tr><td>fd:change (table)</td><td><code class="fd-code">{ source: 'selection', value, selected, rows }</code> or <code class="fd-code">{ source: 'sort', value: { key, index, direction } }</code></td></tr>
         <tr><td>fd:change (filter)</td><td><code class="fd-code">{ source: 'filter', value, filter }</code>, and <code class="fd-code">{ source: 'filters', value: [{ key, value }] }</code> from applied tokens</td></tr>
         <tr><td>fd:select</td><td><code class="fd-code">{ action, value, row }</code> from any <code class="fd-code">[data-action]</code> in a table frame; <code class="fd-code">{ action: 'open', href, row }</code> from <code class="fd-code">tr[data-href]</code></td></tr>
+        <tr><td>fd:select (pipeline job)</td><td><code class="fd-code">{ value, item }</code> when a job is picked</td></tr>
         <tr><td>fd:open, fd:close</td><td>Expand chevrons and data card toggles</td></tr>
       </tbody>
     </table>
@@ -1608,5 +1974,32 @@
     </div>
   </section>
 </main>
+<script type="module">
+  /* Pipeline with a detail panel: show the picked job's facts. */
+  const JOBS = {
+    robots: ['Read robots.txt', 'Discover', 'success', 'Passed', 'Nov 14, 4:29 PM', '0.4 s', '1 of 1', 'Crawling allowed for /docs and /blog.'],
+    sitemap: ['Read sitemap', 'Discover', 'neutral', 'Skipped', 'Never', 'None', 'None', 'No sitemap.xml at docs.northwind.io; links are discovered while fetching.'],
+    'fetch-1': ['Worker 1', 'Fetch', 'success', 'Passed', 'Nov 14, 4:29 PM', '41 s', '40 of 40', 'eu-west-1'],
+    'fetch-2': ['Worker 2', 'Fetch', 'warning', 'Passed with retries', 'Nov 14, 4:29 PM', '52 s', '39 of 39', '3 pages returned 429 and passed on retry.'],
+    'fetch-3': ['Worker 3', 'Fetch', 'violet', 'Cached', 'Nov 14, 4:29 PM', '2 s', '39 of 39', 'Every page was unchanged since the crawl 12 minutes ago.'],
+    markdown: ['Markdown', 'Extract', 'info', 'Running', 'Nov 14, 4:30 PM', '0:18 so far', '31 of 118', 'Converting pages to clean markdown.'],
+    links: ['Links', 'Extract', 'danger', 'Failed', 'Nov 14, 4:31 PM', '6 s', '0 of 118', 'Link extractor ran out of memory on page 1.'],
+    metadata: ['Metadata', 'Extract', 'neutral', 'Queued', 'Not started', 'None', '0 of 118', 'Starts when a worker is free.'],
+    webhook: ['Webhook', 'Deliver', 'neutral', 'Waiting', 'Not started', 'None', 'None', 'Posts results to https://hooks.northwind.io/ember.'],
+    notify: ['Notify', 'On failure', 'neutral', 'Queued', 'Not started', 'None', 'None', 'Runs if the crawl fails: emails dana@northwind.io.'],
+  };
+  const panel = document.querySelector('#pipeline-run .fd-panel');
+  document.getElementById('pipeline-run')?.addEventListener('fd:select', (event) => {
+    const facts = JOBS[event.detail.value];
+    if (!facts) return;
+    const [name, stage, tone, status, started, duration, pages, note] = facts;
+    const set = (key, text) => { panel.querySelector(`[data-job="${key}"]`).textContent = text; };
+    set('name', name); set('stage', stage); set('status', status); set('started', started);
+    set('duration', duration); set('pages', pages); set('note', note);
+    const pill = panel.querySelector('[data-job="status"]');
+    pill.dataset.tone = tone;
+    pill.toggleAttribute('data-live', status === 'Running');
+  });
+</script>
 </body>
 </html>

@@ -779,7 +779,7 @@
           "good"
         ]
       },
-      "element": null,
+      "element": "fd-chart",
       "events": [],
       "docs": "docs/charts.html#states"
     },
@@ -1294,7 +1294,7 @@
         ],
         "data-wrap": []
       },
-      "element": null,
+      "element": "fd-code",
       "events": [],
       "docs": "docs/code.html#syntax"
     },
@@ -2745,7 +2745,7 @@
           "warning"
         ]
       },
-      "element": null,
+      "element": "fd-icon",
       "events": [],
       "docs": null
     },
@@ -5459,7 +5459,7 @@
           "strong"
         ]
       },
-      "element": null,
+      "element": "fd-texture",
       "events": [],
       "docs": "docs/signature.html#fields"
     },
@@ -7308,7 +7308,624 @@
     "fd-warning-text": "text",
     "fd-wordmark": "brand"
   },
-  "elements": [],
+  "elements": [
+    {
+      "tagName": "fd-chart",
+      "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
+      "attributes": [
+        {
+          "name": "area",
+          "type": "boolean",
+          "default": "false",
+          "description": "Sparkline: fill the area under the line."
+        },
+        {
+          "name": "data",
+          "type": "FdChartData | undefined",
+          "default": "",
+          "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
+        },
+        {
+          "name": "dot",
+          "type": "boolean",
+          "default": "false",
+          "description": "Sparkline: mark the last point."
+        },
+        {
+          "name": "fluid",
+          "type": "boolean",
+          "default": "false",
+          "description": "Sparkline: take the width of its container and redraw when it changes."
+        },
+        {
+          "name": "format",
+          "type": "ChartFormat | undefined",
+          "default": "",
+          "description": "Donut: value format when the data gives none (a name, as in `yFormat`)."
+        },
+        {
+          "name": "grid",
+          "type": "'dashed' | 'solid' | 'none' | undefined",
+          "default": "",
+          "description": "Cartesian: grid lines, `dashed` (default), `solid` or `none`."
+        },
+        {
+          "name": "height",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24)."
+        },
+        {
+          "name": "invert",
+          "type": "boolean",
+          "default": "false",
+          "description": "Sparkline: lower is better, so a falling trend is coloured as good."
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Accessible name override (all types); a progress ring also shows it as its caption."
+        },
+        {
+          "name": "legend",
+          "type": "boolean",
+          "default": "false",
+          "description": "Cartesian: show the built-in legend, whose items toggle series."
+        },
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Progress ring: the maximum (default 100)."
+        },
+        {
+          "name": "size",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Donut: diameter in px (default 144, progress 96). Heat grid: cell size, `sm`, `md` (default) or `lg`."
+        },
+        {
+          "name": "state",
+          "type": "'loading' | 'empty' | undefined",
+          "default": "",
+          "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
+        },
+        {
+          "name": "thickness",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Donut: ring thickness in px."
+        },
+        {
+          "name": "tone",
+          "type": "ChartTone | undefined",
+          "default": "",
+          "description": "Sparkline and progress ring: a fixed tone instead of the trend colour or the accent."
+        },
+        {
+          "name": "type",
+          "type": "FdChartType",
+          "default": "'line'",
+          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
+        },
+        {
+          "name": "value",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Progress ring: the value."
+        },
+        {
+          "name": "values",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Sparkline: values as text, `3,5,4,8`, when `data` is not set."
+        },
+        {
+          "name": "variant",
+          "type": "'bars' | 'progress' | 'strip' | undefined",
+          "default": "",
+          "description": "Variant of a type: `bars` for a sparkline (`data-type=\"bars\"`), `progress` for a donut (a progress ring, `data-type=\"progress\"`), `strip` for a heat grid (`data-variant=\"strip\"`)."
+        },
+        {
+          "name": "width",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Sparkline: width in px (default from CSS, 80)."
+        },
+        {
+          "name": "y-format",
+          "type": "ChartFormat | undefined",
+          "default": "",
+          "description": "Cartesian: value format when the data gives none, `number`, `compact`, `percent`, `ms` or `credits`."
+        }
+      ],
+      "properties": [
+        {
+          "name": "area",
+          "type": "boolean",
+          "attribute": "area",
+          "description": "Sparkline: fill the area under the line."
+        },
+        {
+          "name": "data",
+          "type": "FdChartData | undefined",
+          "attribute": "data",
+          "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
+        },
+        {
+          "name": "dot",
+          "type": "boolean",
+          "attribute": "dot",
+          "description": "Sparkline: mark the last point."
+        },
+        {
+          "name": "fluid",
+          "type": "boolean",
+          "attribute": "fluid",
+          "description": "Sparkline: take the width of its container and redraw when it changes."
+        },
+        {
+          "name": "format",
+          "type": "ChartFormat | undefined",
+          "attribute": "format",
+          "description": "Donut: value format when the data gives none (a name, as in `yFormat`)."
+        },
+        {
+          "name": "grid",
+          "type": "'dashed' | 'solid' | 'none' | undefined",
+          "attribute": "grid",
+          "description": "Cartesian: grid lines, `dashed` (default), `solid` or `none`."
+        },
+        {
+          "name": "height",
+          "type": "number | undefined",
+          "attribute": "height",
+          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24)."
+        },
+        {
+          "name": "invert",
+          "type": "boolean",
+          "attribute": "invert",
+          "description": "Sparkline: lower is better, so a falling trend is coloured as good."
+        },
+        {
+          "name": "label",
+          "type": "string | undefined",
+          "attribute": "label",
+          "description": "Accessible name override (all types); a progress ring also shows it as its caption."
+        },
+        {
+          "name": "legend",
+          "type": "boolean",
+          "attribute": "legend",
+          "description": "Cartesian: show the built-in legend, whose items toggle series."
+        },
+        {
+          "name": "max",
+          "type": "number | undefined",
+          "attribute": "max",
+          "description": "Progress ring: the maximum (default 100)."
+        },
+        {
+          "name": "size",
+          "type": "string | undefined",
+          "attribute": "size",
+          "description": "Donut: diameter in px (default 144, progress 96). Heat grid: cell size, `sm`, `md` (default) or `lg`."
+        },
+        {
+          "name": "state",
+          "type": "'loading' | 'empty' | undefined",
+          "attribute": "state",
+          "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
+        },
+        {
+          "name": "thickness",
+          "type": "number | undefined",
+          "attribute": "thickness",
+          "description": "Donut: ring thickness in px."
+        },
+        {
+          "name": "tone",
+          "type": "ChartTone | undefined",
+          "attribute": "tone",
+          "description": "Sparkline and progress ring: a fixed tone instead of the trend colour or the accent."
+        },
+        {
+          "name": "type",
+          "type": "FdChartType",
+          "attribute": "type",
+          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
+        },
+        {
+          "name": "value",
+          "type": "number | undefined",
+          "attribute": "value",
+          "description": "Progress ring: the value."
+        },
+        {
+          "name": "values",
+          "type": "string | undefined",
+          "attribute": "values",
+          "description": "Sparkline: values as text, `3,5,4,8`, when `data` is not set."
+        },
+        {
+          "name": "variant",
+          "type": "'bars' | 'progress' | 'strip' | undefined",
+          "attribute": "variant",
+          "description": "Variant of a type: `bars` for a sparkline (`data-type=\"bars\"`), `progress` for a donut (a progress ring, `data-type=\"progress\"`), `strip` for a heat grid (`data-variant=\"strip\"`)."
+        },
+        {
+          "name": "width",
+          "type": "number | undefined",
+          "attribute": "width",
+          "description": "Sparkline: width in px (default from CSS, 80)."
+        },
+        {
+          "name": "yFormat",
+          "type": "ChartFormat | undefined",
+          "attribute": "y-format",
+          "description": "Cartesian: value format when the data gives none, `number`, `compact`, `percent`, `ms` or `credits`."
+        }
+      ],
+      "events": [
+        {
+          "name": "fd:change",
+          "type": "",
+          "description": "A legend item toggled a series: `{ value: seriesName, index, visible }`."
+        },
+        {
+          "name": "fd:hover",
+          "type": "",
+          "description": "The active point changed (pointer or keyboard). Cartesian and strip: `{ index, label, values }` or `{ index, label, tone, name, href }`; heat grid: `{ index, date, value }`."
+        },
+        {
+          "name": "fd:select",
+          "type": "",
+          "description": "A point was clicked, tapped or chosen with Enter. Cartesian: `{ index, label, values }`; strip: `{ index, label, tone, name, href }`."
+        }
+      ]
+    },
+    {
+      "tagName": "fd-code",
+      "description": "A Fire code block that highlights the text it is given. The element is the block's root: it carries\n`class=\"fd-codeblock\"` and the markup form's data-* attributes, renders the block's internals (an optional header\nor copy button, then `<pre class=\"fd-codeblock-body\"><code data-lang=\"…\">`), puts `code` in it as text and lets\nFire's code module tokenise it into lines, so it looks and behaves exactly like the markup form. Unlike the markup\nform inside a framework, Fire never rewrites text nodes the framework owns: changing `code` (or any attribute)\nrenders the internals afresh.\n\nLanguages: `json`, `bash`, `javascript`, `typescript`, `python` and their aliases (`sh`, `curl`, `js`, `ts`, `py`, …);\nany other name shows plain text.",
+      "attributes": [
+        {
+          "name": "code",
+          "type": "string",
+          "default": "''",
+          "description": "The code, as text (never HTML). As an attribute, the text itself."
+        },
+        {
+          "name": "collapse",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Collapse to this height in px with a \"Show all N lines\" button when the code is taller (`data-collapse`)."
+        },
+        {
+          "name": "copy",
+          "type": "boolean",
+          "default": "false",
+          "description": "Add a copy button: in the header when there is a file name, otherwise floating in the corner."
+        },
+        {
+          "name": "filename",
+          "type": "string | undefined",
+          "default": "",
+          "description": "A file name shown in a header above the code (`.fd-codeblock-file`)."
+        },
+        {
+          "name": "highlight",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Lines to highlight, `3,5-7` (`data-highlight`)."
+        },
+        {
+          "name": "language",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Language for highlighting (the markup form's `data-lang` on `<code>`; `lang` is HTML's own attribute)."
+        },
+        {
+          "name": "lines",
+          "type": "boolean",
+          "default": "false",
+          "description": "Show line numbers (`data-lines`)."
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "default": "false",
+          "description": "Soft-wrap long lines (`data-wrap`)."
+        }
+      ],
+      "properties": [
+        {
+          "name": "code",
+          "type": "string",
+          "attribute": "code",
+          "description": "The code, as text (never HTML). As an attribute, the text itself."
+        },
+        {
+          "name": "collapse",
+          "type": "number | undefined",
+          "attribute": "collapse",
+          "description": "Collapse to this height in px with a \"Show all N lines\" button when the code is taller (`data-collapse`)."
+        },
+        {
+          "name": "copy",
+          "type": "boolean",
+          "attribute": "copy",
+          "description": "Add a copy button: in the header when there is a file name, otherwise floating in the corner."
+        },
+        {
+          "name": "filename",
+          "type": "string | undefined",
+          "attribute": "filename",
+          "description": "A file name shown in a header above the code (`.fd-codeblock-file`)."
+        },
+        {
+          "name": "highlight",
+          "type": "string | undefined",
+          "attribute": "highlight",
+          "description": "Lines to highlight, `3,5-7` (`data-highlight`)."
+        },
+        {
+          "name": "language",
+          "type": "string | undefined",
+          "attribute": "language",
+          "description": "Language for highlighting (the markup form's `data-lang` on `<code>`; `lang` is HTML's own attribute)."
+        },
+        {
+          "name": "lines",
+          "type": "boolean",
+          "attribute": "lines",
+          "description": "Show line numbers (`data-lines`)."
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "attribute": "wrap",
+          "description": "Soft-wrap long lines (`data-wrap`)."
+        }
+      ],
+      "events": []
+    },
+    {
+      "tagName": "fd-icon",
+      "description": "One of Fire's icons (a Lucide subset). The element is the icon's root, as `svg.fd-icon` is for the markup form:\nit carries `class=\"fd-icon\"`, `data-icon`, `data-size` and `aria-hidden=\"true\"`, so every `.fd-icon` rule applies\nto it, direct-child rules such as `.fd-btn > .fd-icon` included. Inside it, an SVG drawn from Fire's sprite fills\nit (fire/base.css). Use it in framework code, where an `<i data-icon>` that replaces itself would break the\nframework's reconciliation. The icon is decorative: name the control that holds it.\n\nAn unknown name draws nothing and logs a warning, as the markup form does.",
+      "attributes": [
+        {
+          "name": "icon",
+          "type": "IconName | undefined",
+          "default": "",
+          "description": "Icon name from Fire's set, for example `search` (the markup form's `data-icon`)."
+        },
+        {
+          "name": "size",
+          "type": "'12' | '14' | '16' | '20' | '24' | '32' | undefined",
+          "default": "",
+          "description": "Size in px: 12, 14, 16 (the default), 20, 24 or 32 (the markup form's `data-size`)."
+        }
+      ],
+      "properties": [
+        {
+          "name": "icon",
+          "type": "IconName | undefined",
+          "attribute": "icon",
+          "description": "Icon name from Fire's set, for example `search` (the markup form's `data-icon`)."
+        },
+        {
+          "name": "size",
+          "type": "'12' | '14' | '16' | '20' | '24' | '32' | undefined",
+          "attribute": "size",
+          "description": "Size in px: 12, 14, 16 (the default), 20, 24 or 32 (the markup form's `data-size`)."
+        }
+      ],
+      "events": []
+    },
+    {
+      "tagName": "fd-texture",
+      "description": "A Fire generative character field: terrain, waves, orbit, rain, grid, flame, halftone or spark. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
+      "attributes": [
+        {
+          "name": "animated",
+          "type": "'true' | 'false' | undefined",
+          "default": "",
+          "description": "`true` or `false`; waves, orbit, rain and flame animate by default (`data-animate`; `animate` is a DOM method)."
+        },
+        {
+          "name": "cell",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Cell size in px, `7x12` (default) or `8` for square (`data-cell`)."
+        },
+        {
+          "name": "fade",
+          "type": "'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial' | undefined",
+          "default": "",
+          "description": "Fade out toward an edge: `left`, `right`, `top`, `bottom`, `x`, `y` or `radial` (`data-fade`)."
+        },
+        {
+          "name": "inline",
+          "type": "boolean",
+          "default": "false",
+          "description": "Flow in the page at the field height instead of filling the positioned ancestor (`data-inline`)."
+        },
+        {
+          "name": "intensity",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Luminance multiplier, default 1 (`data-intensity`)."
+        },
+        {
+          "name": "interactive",
+          "type": "boolean",
+          "default": "false",
+          "description": "Characters near the pointer step up the ramp (`data-interactive`)."
+        },
+        {
+          "name": "marks",
+          "type": "'chars' | 'dots' | undefined",
+          "default": "",
+          "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`)."
+        },
+        {
+          "name": "origin",
+          "type": "string | undefined",
+          "default": "",
+          "description": "`x,y` in 0..1, the centre for orbit, flame, halftone and spark (`data-origin`)."
+        },
+        {
+          "name": "pattern",
+          "type": "string",
+          "default": "'terrain'",
+          "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`)."
+        },
+        {
+          "name": "ramp",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Character ramp: `default`, `soft`, `dense`, `glyph`, `rain`, or a literal ramp such as ` .:-=+*#` (`data-ramp`)."
+        },
+        {
+          "name": "seed",
+          "type": "string | undefined",
+          "default": "",
+          "description": "Seed, a number or a string; defaults to the pattern name, so a page always looks the same (`data-seed`)."
+        },
+        {
+          "name": "shape",
+          "type": "'blob' | undefined",
+          "default": "",
+          "description": "`blob` clips the field to a soft, noisy disc (`data-shape`)."
+        },
+        {
+          "name": "side",
+          "type": "'left' | 'right' | undefined",
+          "default": "",
+          "description": "Terrain: the side that rises, `right` (default) or `left` (`data-side`)."
+        },
+        {
+          "name": "speed",
+          "type": "number | undefined",
+          "default": "",
+          "description": "Time multiplier, default 1 (`data-speed`)."
+        },
+        {
+          "name": "tone",
+          "type": "'neutral' | 'accent' | 'contrast' | 'strong' | undefined",
+          "default": "",
+          "description": "Ink: `neutral` (default), `accent`, `contrast` or `strong` (`data-tone`)."
+        },
+        {
+          "name": "variant",
+          "type": "'flat' | 'perspective' | undefined",
+          "default": "",
+          "description": "Grid: `flat` (default) or `perspective` (`data-variant`)."
+        }
+      ],
+      "properties": [
+        {
+          "name": "animated",
+          "type": "'true' | 'false' | undefined",
+          "attribute": "animated",
+          "description": "`true` or `false`; waves, orbit, rain and flame animate by default (`data-animate`; `animate` is a DOM method)."
+        },
+        {
+          "name": "cell",
+          "type": "string | undefined",
+          "attribute": "cell",
+          "description": "Cell size in px, `7x12` (default) or `8` for square (`data-cell`)."
+        },
+        {
+          "name": "fade",
+          "type": "'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial' | undefined",
+          "attribute": "fade",
+          "description": "Fade out toward an edge: `left`, `right`, `top`, `bottom`, `x`, `y` or `radial` (`data-fade`)."
+        },
+        {
+          "name": "inline",
+          "type": "boolean",
+          "attribute": "inline",
+          "description": "Flow in the page at the field height instead of filling the positioned ancestor (`data-inline`)."
+        },
+        {
+          "name": "intensity",
+          "type": "number | undefined",
+          "attribute": "intensity",
+          "description": "Luminance multiplier, default 1 (`data-intensity`)."
+        },
+        {
+          "name": "interactive",
+          "type": "boolean",
+          "attribute": "interactive",
+          "description": "Characters near the pointer step up the ramp (`data-interactive`)."
+        },
+        {
+          "name": "marks",
+          "type": "'chars' | 'dots' | undefined",
+          "attribute": "marks",
+          "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`)."
+        },
+        {
+          "name": "origin",
+          "type": "string | undefined",
+          "attribute": "origin",
+          "description": "`x,y` in 0..1, the centre for orbit, flame, halftone and spark (`data-origin`)."
+        },
+        {
+          "name": "pattern",
+          "type": "string",
+          "attribute": "pattern",
+          "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`)."
+        },
+        {
+          "name": "ramp",
+          "type": "string | undefined",
+          "attribute": "ramp",
+          "description": "Character ramp: `default`, `soft`, `dense`, `glyph`, `rain`, or a literal ramp such as ` .:-=+*#` (`data-ramp`)."
+        },
+        {
+          "name": "seed",
+          "type": "string | undefined",
+          "attribute": "seed",
+          "description": "Seed, a number or a string; defaults to the pattern name, so a page always looks the same (`data-seed`)."
+        },
+        {
+          "name": "shape",
+          "type": "'blob' | undefined",
+          "attribute": "shape",
+          "description": "`blob` clips the field to a soft, noisy disc (`data-shape`)."
+        },
+        {
+          "name": "side",
+          "type": "'left' | 'right' | undefined",
+          "attribute": "side",
+          "description": "Terrain: the side that rises, `right` (default) or `left` (`data-side`)."
+        },
+        {
+          "name": "speed",
+          "type": "number | undefined",
+          "attribute": "speed",
+          "description": "Time multiplier, default 1 (`data-speed`)."
+        },
+        {
+          "name": "tone",
+          "type": "'neutral' | 'accent' | 'contrast' | 'strong' | undefined",
+          "attribute": "tone",
+          "description": "Ink: `neutral` (default), `accent`, `contrast` or `strong` (`data-tone`)."
+        },
+        {
+          "name": "variant",
+          "type": "'flat' | 'perspective' | undefined",
+          "attribute": "variant",
+          "description": "Grid: `flat` (default) or `perspective` (`data-variant`)."
+        }
+      ],
+      "events": []
+    }
+  ],
   "events": {
     "fd:accent": {
       "detail": "",

@@ -128,7 +128,7 @@ export const EVENT_EXTRA = {
 export const LISTENED_EVENTS = new Set(['fd:theme', 'fd:accent']);
 
 /** Element tag name -> component id, where the tag is not one of the component's classes. */
-export const ELEMENT_COMPONENT = { 'fd-texture': 'texture' };
+export const ELEMENT_COMPONENT = { 'fd-texture': 'texture', 'fd-code': 'codeblock', 'fd-chart': 'chart', 'fd-icon': 'icon' };
 
 /**
  * What a person or an agent picks as a whole. `root` is the component's main class (it must exist in the CSS); every

@@ -231,7 +231,8 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   const elements = readElements();
   const tags = new Set(elements.map((e) => e.tagName));
   for (const c of byRoot.values()) {
-    const tag = c.classes.find((cls) => tags.has(cls)) || [...tags].find((t) => ELEMENT_COMPONENT[t] === c.id);
+    // The explicit map wins: a class can share an element's name without being its component (fd-code is inline code).
+    const tag = [...tags].find((t) => ELEMENT_COMPONENT[t] === c.id) || c.classes.find((cls) => tags.has(cls) && !ELEMENT_COMPONENT[cls]);
     c.element = tag || null;
     c.events = [...compEvents.get(c.id)].sort();
   }

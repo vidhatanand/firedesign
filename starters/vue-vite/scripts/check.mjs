@@ -10,7 +10,7 @@
 //      Chromium, WebKit and Firefox)
 //   4. loads each screen in Chromium and fails on any Content Security Policy violation or console error, after using
 //      the shell (Tweaks panel, phone menu) and a row menu
-//   5. runs scripts/lint-markup.mjs over the starter's source
+//   5. runs scripts/lint-markup.mjs and scripts/lint-css.mjs over the starter's source
 // Every server is closed before the script exits.
 // Options for debugging one screen: --screen <name>, --engines chromium,webkit,firefox, --no-build (reuse dist/, which must
 // be an ember build), --serve (only start the servers and print their ports), --diff-dir <dir> (render-equal writes the pixel diffs there), --json <dir> (and its JSON reports).
@@ -159,6 +159,9 @@ try {
   const lint = run(process.execPath, [path.join(fireRoot, 'scripts/lint-markup.mjs'), 'src', 'index.html']);
   console.log(`\nlint-markup: ${lint.stdout.trim().split('\n').pop()}`);
   if (lint.status !== 0) { console.error(lint.stdout); fail('lint-markup'); }
+  const lintCss = run(process.execPath, [path.join(fireRoot, 'scripts/lint-css.mjs'), 'src', 'index.html']);
+  console.log(`lint-css: ${lintCss.stdout.trim().split('\n').pop()}`);
+  if (lintCss.status !== 0) { console.error(lintCss.stdout); fail('lint-css'); }
 } catch (error) {
   fail(error.message);
 } finally {

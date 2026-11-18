@@ -70,7 +70,7 @@ that its screens render the same as Fire's templates.
    to its terminal); two mismatches planted in the server HTML must be reported, which proves it would catch one;
 5. runs `render-equal.mjs` for each screen against `templates/<name>.html` (`.fd-page`), at 1440 and 375 wide,
    light and dark, in the three engines (36 runs);
-6. runs `lint-markup.mjs` over `app/`.
+6. runs `lint-markup.mjs` and `lint-css.mjs` over `app/`.
 
 Every server is closed before it exits; reports and pixel diffs go to `.check/`. Options: `--engines`, `--widths`,
 `--themes`, `--screens`, `--skip-build`, `--skip-dev`, `--skip-render`.

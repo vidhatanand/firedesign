@@ -8,7 +8,7 @@
 //      at 1440 and 375 wide, light and dark, in Chromium, WebKit and Firefox
 //   4. a browser run visits every route (by URL and by clicking the navigation) and fails on a console error, an
 //      uncaught error, a failed request or a Content Security Policy violation, and tries the Fire behaviours
-//   5. lint-markup over src
+//   5. lint-markup over src, and lint-css over the starter's own CSS
 // Everything it starts is closed before it exits.
 //
 //   npm run check -- [--only overview,logs] [--engines chromium] [--widths 1440] [--themes light] [--skip-build]
@@ -224,6 +224,8 @@ try {
   /* ---------------------------------------------------------------- 5. lint */
   console.log('\n== lint-markup');
   if (run('node', ['scripts/lint.mjs']).status) fail('lint-markup reported errors');
+  console.log('\n== lint-css');
+  if (run('node', ['scripts/lint.mjs', '--css']).status) fail('lint-css reported errors');
 } finally {
   await app.close();
   await compare.close();

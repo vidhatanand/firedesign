@@ -14,7 +14,7 @@
 //      flight) must be reported, or the check fails: it proves the check catches one.
 //   5. render-equal on each screen: templates/<name>.html (.fd-page) against the route (.fd-page), widths 1440 and 375,
 //      light and dark, Chromium, WebKit and Firefox: no structural or style difference, pixels under its default limit.
-//   6. lint-markup over the starter's source.
+//   6. lint-markup over the starter's source, and lint-css over its own CSS.
 // Every server is closed before exit. Exit code 1 on any failure.
 //
 // Options: --engines chromium,webkit,firefox  --widths 1440,375  --themes light,dark  --screens logs,settings,overview
@@ -363,6 +363,10 @@ try {
     if (findings.length) fail(`lint-markup app: ${findings.length} error(s)\n${findings.map((f) => `       ${f.file}:${f.line}:${f.col} ${f.rule} ${f.message}`).join('\n')}`);
     else ok('lint-markup app: 0 errors');
   }
+  // lint-css over app/: the starter's own CSS and tokens against Fire's token contract (errors fail; warnings are printed)
+  const css = spawnSync(process.execPath, [path.join(REPO, 'scripts/lint-css.mjs'), 'app'], { cwd: HERE, encoding: 'utf8' });
+  if (css.status) fail(`lint-css app: errors\n${css.stdout}${css.stderr}`);
+  else ok(`lint-css app: ${css.stdout.trim().split('\n').pop()}`);
 
   if (summary.length) {
     const bad = summary.filter((s) => !s.good).length;

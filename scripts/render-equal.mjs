@@ -33,6 +33,7 @@
  *        data-server-rendered, data-allow-mismatch, data-svelte-h, data-astro-cid-*, data-nextjs-*, data-lit-*,
  *        data-hk, defer-hydration, ng-version, ng-reflect-*, ng-server-context, _ngcontent-*, _nghost-*,
  *        vt-* (React's view-transition bookkeeping: vt-name, vt-update, vt-enter, vt-exit, vt-share; R14).
+ *      The pixel shot is of the root alone: elements outside it that are not its ancestors are hidden for the shot (R15).
  *      Generated ids are renamed to ~gen1, ~gen2… in document order of the elements that carry them (then ids that
  *      are only referenced, in order of first use), in id and in every reference to them: for, aria-labelledby,
  *      -describedby, -controls, -owns, -activedescendant, -errormessage, -details, -flowto, list, form,
@@ -440,6 +441,29 @@ export function compareTrees(refNodes, candNodes) {
   return out;
 }
 
+/** R15: the pixel shot is of the root alone. Everything that is neither the root, inside it, nor one of its ancestors
+ *  (a fixed tab bar, a support button, a toast) is made visibility:hidden for the shot (no layout change), then restored. */
+const HIDE_ATTR = 'data-re-hide';
+async function shootRoot(page, root) {
+  await page.evaluate(({ sel, attr }) => {
+    const r = document.querySelector(sel);
+    if (!r) return;
+    const st = document.createElement('style');
+    st.id = 're-hide-style';
+    st.textContent = `[${attr}]{visibility:hidden!important}`;
+    document.head.append(st);
+    for (const el of document.body.querySelectorAll('*')) if (!r.contains(el) && !el.contains(r)) el.setAttribute(attr, '');
+  }, { sel: root, attr: HIDE_ATTR });
+  try {
+    return await page.locator(root).first().screenshot({ animations: 'disabled', caret: 'hide' });
+  } finally {
+    await page.evaluate((attr) => {
+      document.getElementById('re-hide-style')?.remove();
+      document.querySelectorAll(`[${attr}]`).forEach((el) => el.removeAttribute(attr));
+    }, HIDE_ATTR);
+  }
+}
+
 const countNodes = (list) => list.reduce((s, n) => s + (n.t === 'el' ? 1 + countNodes(n.children) : 0), 0);
 
 /* ------------------------------------------------------------------ runner */
@@ -453,7 +477,7 @@ async function load(deps, ctxOptions, url, root, theme, readyTimeout, wantShot, 
     const settle = await preparePage(page, theme, readyTimeout, root);
     const tree = await page.evaluate(extractInPage, { sel: root, props: PROPS, transparent });
     let shot = null;
-    if (!tree.error && wantShot) shot = await page.locator(root).first().screenshot({ animations: 'disabled', caret: 'hide' });
+    if (!tree.error && wantShot) shot = await shootRoot(page, root);
     return { tree, shot, settle };
   } finally { await context.close(); }
 }

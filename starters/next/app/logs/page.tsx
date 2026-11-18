@@ -2,13 +2,20 @@
 // component: plain Fire markup, no Fire script). LogsScreen renders the <main class="fd-page"> and runs the screen's
 // behaviour in the browser once Fire has loaded.
 import type { Metadata } from 'next';
+import { askedState } from '../page-state';
 import { LogsScreen } from './logs-screen';
+import { LOGS_STATES, type LogsState } from './logs-state';
 
 export const metadata: Metadata = { title: 'Activity logs · Ember' };
 
-export default function LogsPage() {
+// ?state= picks the table's first paint: loading (skeleton rows, then the data: the default), loaded, empty, error, or
+// no-results (the data, with a search that matches nothing). The blocks the server renders follow it; the behaviour
+// (logs-behaviour.ts) fills the empty and error rows, which Fire draws from markup it inserts.
+export default async function LogsPage({ searchParams }: { searchParams: Promise<{ state?: string | string[] }> }) {
+  const asked = askedState((await searchParams).state, LOGS_STATES);
+  const state: LogsState = asked === 'no-results' ? 'loaded' : asked ?? 'loading';
   return (
-    <LogsScreen>
+    <LogsScreen asked={asked}>
       <div className="fd-frame">
         <section className="fd-band fd-page-hero fd-rise">
           <div className="fd-page-hero-art" aria-hidden="true">
@@ -69,7 +76,7 @@ export default function LogsPage() {
         <section className="fd-band" data-pad="none" data-surface="surface" aria-label="Requests">
           <div className="fd-table-wrap" data-variant="plain">
             <div className="fd-table-scroll">
-              <table className="fd-table" id="logs-table" data-stack="" aria-label="Activity log" aria-busy="true">
+              <table className="fd-table" id="logs-table" data-stack="" aria-label="Activity log" aria-busy={state === 'loading'}>
                 <thead>
                   <tr>
                     <th data-select="">
@@ -96,7 +103,7 @@ export default function LogsPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody id="logs-body" hidden>
+                <tbody id="logs-body" hidden={state !== 'loaded'}>
                   <tr data-value="req_8f3a21" data-href="#req_8f3a21" data-key="Production crawler" data-status="success" data-code="200">
                     <td data-select="">
                       <input type="checkbox" className="fd-table-check" data-select-row="" aria-label="Select req_8f3a21" />
@@ -378,7 +385,7 @@ export default function LogsPage() {
                     </td>
                   </tr>
                 </tbody>
-                <tbody id="logs-skeleton" aria-hidden="true">
+                <tbody id="logs-skeleton" aria-hidden="true" hidden={state !== 'loading'}>
                   <tr data-skeleton="">
                     <td data-select=""></td>
                     <td>
@@ -499,6 +506,116 @@ export default function LogsPage() {
                     </td>
                     <td>
                       <span className="fd-table-skeleton" data-size="xl"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-shape="pill" data-size="sm"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="2xs"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td data-actions=""></td>
+                  </tr>
+                  <tr data-skeleton="">
+                    <td data-select=""></td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="md"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="xl"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-shape="pill" data-size="sm"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="2xs"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td data-actions=""></td>
+                  </tr>
+                  <tr data-skeleton="">
+                    <td data-select=""></td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="md"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="sm"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="lg"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-shape="pill" data-size="sm"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="2xs"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td data-actions=""></td>
+                  </tr>
+                  <tr data-skeleton="">
+                    <td data-select=""></td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="md"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="xl"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-shape="pill" data-size="sm"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="2xs"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td data-actions=""></td>
+                  </tr>
+                  <tr data-skeleton="">
+                    <td data-select=""></td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="md"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="sm"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="xl"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-shape="pill" data-size="sm"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="2xs"></span>
+                    </td>
+                    <td data-num="">
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td data-actions=""></td>
+                  </tr>
+                  <tr data-skeleton="">
+                    <td data-select=""></td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="md"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="xs"></span>
+                    </td>
+                    <td>
+                      <span className="fd-table-skeleton" data-size="lg"></span>
                     </td>
                     <td>
                       <span className="fd-table-skeleton" data-shape="pill" data-size="sm"></span>
@@ -512,7 +629,7 @@ export default function LogsPage() {
                     <td data-actions=""></td>
                   </tr>
                 </tbody>
-                <tbody id="logs-state" hidden></tbody>
+                <tbody id="logs-state" hidden={state === 'loaded' || state === 'loading'}></tbody>
               </table>
             </div>
             <div className="fd-table-foot">

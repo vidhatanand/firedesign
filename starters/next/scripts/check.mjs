@@ -228,6 +228,49 @@ async function browserPass(base) {
   }
 }
 
+/* ---------------------------------------------------------------- 3b. ?state= */
+// ?state= reaches the server page (searchParams) and the behaviour: the block asked for is the one shown. Chromium only,
+// one page per state: browserPass counts the WebKit <select> CSP reports per page load, so it stays on the first visit.
+async function statesPass(base) {
+  const browser = await chromium.launch();
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await context.addInitScript(() => { try { localStorage.setItem('ember-whats-new-seen', '1'); } catch { /* storage blocked */ } });
+    const visible = (page, selector) => page.locator(selector).first().waitFor({ state: 'visible', timeout: 5000 });
+    const cases = {
+      '/overview?state=empty': async (page) => { for (const id of ['ov-chart', 'ov-stats', 'ov-activity']) await visible(page, `#${id} [data-when="empty"]`); },
+      '/overview?state=error': async (page) => {
+        await visible(page, '#ov-activity [data-when="error"]');
+        await visible(page, '#ov-chart .fd-chart svg');
+        await page.locator('#ov-activity-retry').click();
+        await visible(page, '#ov-activity [data-when="ready"]');
+      },
+      '/logs?state=empty': async (page) => { await visible(page, '#logs-state .fd-table-empty-title'); },
+      '/logs?state=error': async (page) => {
+        await visible(page, '#logs-state [data-state="error"]');
+        await page.locator('#logs-state [data-action="reload"]').click();
+        await visible(page, '#logs-body');
+      },
+      '/logs?state=no-results': async (page) => {
+        await visible(page, '#logs-state [data-action="clear-filters"]');
+        if (await page.locator('#logs-body > tr:not([hidden])').count()) throw new Error('a row matches the no-results search');
+      },
+    };
+    for (const [route, expectState] of Object.entries(cases)) {
+      const page = await context.newPage();
+      const problems = watch(page);
+      try {
+        await page.goto(base + route, { waitUntil: 'load' });
+        await fireReady(page);
+        await pause(900);
+        await expectState(page);
+      } catch (e) { problems.push(`behaviour: ${String(e.message || e).split('\n')[0]}`); }
+      await page.close();
+      if (problems.length) fail(`${route}: ${problems.join(' | ')}`); else ok(`${route}: the state asked for is the one shown`);
+    }
+  } finally { await browser.close(); }
+}
+
 /* ---------------------------------------------------------------- 4. hydration on next dev */
 // React's development build reports an attribute mismatch with console.error; Next 16's dev server reports a text or
 // structure mismatch in its overlay and forwards it to the terminal as a "[browser] …" line, not to the browser console.
@@ -336,6 +379,7 @@ try {
 
   await checkServedHtml(appBase);
   await browserPass(appBase);
+  await statesPass(appBase);
   let summary = [];
   if (!flag('skip-render')) {
     summary = await renderEqual(appBase, fireBase);

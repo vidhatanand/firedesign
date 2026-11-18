@@ -151,6 +151,37 @@ try {
       if (problems.length) fail(`${name}: ${problems.length} problem(s)`);
       await page.close();
     }
+
+    // ?state= on overview and logs: the block asked for is the one shown. The build is static (no first-load timers), so
+    // this asks whether each block is hidden, not whether the skeleton has gone.
+    const page = await browser.newPage();
+    const problems = [];
+    page.on('pageerror', (e) => problems.push(`page error: ${e.message}`));
+    const shown = (selector) => page.locator(selector).first().evaluate((el) => !el.hidden);
+    const expect = async (label, selector, want) => { if (await shown(selector) !== want) problems.push(`${label}: ${selector} should be ${want ? 'shown' : 'hidden'}`); };
+    const open = async (route) => { await page.goto(`http://127.0.0.1:${appPort}${route}`); await page.waitForFunction(() => document.documentElement.hasAttribute('data-fd-ready')); };
+    await open('/overview?state=empty');
+    for (const id of ['ov-chart', 'ov-stats', 'ov-activity']) { await expect('overview empty', `#${id} > [data-when="empty"]`, true); await expect('overview empty', `#${id} > [data-when="ready"]`, false); }
+    await open('/overview?state=error');
+    await expect('overview error', '#ov-activity > [data-when="error"]', true);
+    await expect('overview error', '#ov-activity > [data-when="ready"]', false);
+    await expect('overview error', '#ov-chart > [data-when="ready"]', true);
+    await open('/overview?state=nonsense');
+    await expect('overview default', '#ov-activity > [data-when="ready"]', true);
+    await open('/logs?state=empty');
+    await expect('logs empty', '#logs-state', true);
+    await open('/logs?state=error');
+    await expect('logs error', '#logs-state [data-state="error"]', true);
+    await page.locator('#logs-state [data-action="reload"]').click();
+    await page.waitForFunction(() => !document.getElementById('logs-body').hidden, null, { timeout: 4000 });
+    await open('/logs?state=no-results');
+    await expect('logs no-results', '#logs-body', true);
+    if (await page.locator('#logs-body > tr:not([hidden])').count()) problems.push('logs no-results: a row matches the search');
+    await expect('logs no-results', '#logs-state [data-action="clear-filters"]', true);
+    console.log(`  ?state=: ${problems.length ? 'FAIL' : 'ok'}`);
+    for (const p of problems) console.log(`    ${p}`);
+    if (problems.length) fail(`?state=: ${problems.length} problem(s)`);
+    await page.close();
   } finally {
     await browser.close();
   }

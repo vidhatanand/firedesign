@@ -16,6 +16,9 @@ checks that prove they match Fire's own templates.
 The three screens are the `.fd-page` of Fire's `templates/overview.html`, `logs.html` and `settings.html`, converted
 to Lit. The shell is `templates/shell-static.html` (go-to keys, the running-now pill, the service status, the shortcut sheet and the command palette; the starter has no Decisions page). The sample data is Ember's, kept as it is.
 
+States: `?state=` on `/overview` (`loading`, `empty`, `error`) and `/logs` (`loaded`, `loading`, `empty`, `error`, `no-results`) opens the screen in that state; any other value is ignored. A screen reads it with `askedState()` (`src/lib/page-state.ts`, through the router) and renders its blocks from a typed `PageState`.
+Retry on the error state is wired: the overview shows the skeleton and then the data, the logs reload.
+
 A route change is one view transition: `AppShell.onRoute` wraps it in Fire's `transition()`, so the sidebar and top bar hold
 still and the screen fades. A browser without View Transitions, or a visitor who asks for reduced motion, sees the screen swap at once.
 

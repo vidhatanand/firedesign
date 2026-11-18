@@ -2,6 +2,7 @@
 // and fd:change handlers are not added here: the screen's component binds them with useFireEvent (onSelect, onChange).
 import type { FireEventMap } from 'fire-design';
 import { $, $$, $maybe, esc, type Kit } from '../screen-kit';
+import type { AskedLogsState } from './logs-state';
 
 type State = 'loaded' | 'loading' | 'empty' | 'error';
 interface Range { preset: string; start?: string; end?: string }
@@ -15,7 +16,7 @@ export interface LogsBehaviour {
   onChange(event: FireEventMap['fd:change']): void;
 }
 
-export function startLogs({ fire, on, later }: Kit): LogsBehaviour {
+export function startLogs({ fire, on, later }: Kit, asked?: AskedLogsState): LogsBehaviour {
   const { init, overlays, data, nav, code, copyText } = fire;
   const { toast, openDialog, closeDialog } = overlays;
   const { renderJSON } = code;
@@ -360,9 +361,18 @@ export function startLogs({ fire, on, later }: Kit): LogsBehaviour {
     });
   });
 
-  /* ---------- First paint: skeleton rows for ~600 ms, then the data ---------- */
-  setState('loading');
-  later(() => { if (state === 'loading') setState('loaded'); }, 600);
+  /* ---------- First paint: ?state= picks loaded, loading, empty, error or no-results (a search that matches nothing);
+     otherwise skeleton rows for ~600 ms, then the data ---------- */
+  if (asked === 'no-results') {
+    setState('loaded');
+    searchInput.value = 'invoice-export.pdf';
+    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+  } else if (asked) {
+    setState(asked);
+  } else {
+    setState('loading');
+    later(() => { if (state === 'loading') setState('loaded'); }, 600);
+  }
 
   return { onSelect, onChange };
 }

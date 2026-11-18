@@ -1,7 +1,8 @@
 import { html } from 'lit';
+import type { ScreenOverview } from './screen';
 
 /** The overview screen's markup: the .fd-page content of templates/overview.html, as Lit. */
-export const overviewView = () => html`
+export const overviewView = (s: Pick<ScreenOverview, 'region' | 'onRetry'>) => html`
     <main class="fd-page">
       <div class="fd-frame">
 
@@ -30,7 +31,7 @@ export const overviewView = () => html`
             <div class="fd-split-main">
               <div id="ov-chart" data-fd-loading="true">
                 <div class="fd-skeleton-chart"></div>
-                <div class="fd-stack" data-gap="4">
+                <div class="fd-stack" data-gap="4" data-when="ready" ?hidden=${s.region('chart') !== 'ready'}>
                   <div class="fd-row" data-justify="between" data-align="start">
                     <div>
                       <h2 class="fd-title">Credits used · Last 7 days</h2>
@@ -48,6 +49,12 @@ export const overviewView = () => html`
                     }
                     </script>
                   </div>
+                </div>
+                <div class="fd-empty" data-when="empty" aria-label="Credits used" ?hidden=${s.region('chart') !== 'empty'}>
+                  <span class="fd-empty-icon"><svg class="fd-icon" data-icon="chart-column" aria-hidden="true"><use href="#i-chart-column"></use></svg></span>
+                  <h3 class="fd-empty-title">No credits used yet</h3>
+                  <p class="fd-empty-text">Credits used per day appear here after your first request. A test request in the playground costs 1 credit.</p>
+                  <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><svg class="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play"></use></svg><span>Send a test request</span></a></div>
                 </div>
               </div>
             </div>
@@ -103,7 +110,7 @@ export const overviewView = () => html`
         <section class="fd-band fd-rise" data-pad="sm" aria-label="Last 24 hours" data-fd-vars="--fd-i: 2">
           <div id="ov-stats" data-fd-loading="true">
             <div class="fd-skeleton-stat" data-count="4"></div>
-            <div class="fd-stats">
+            <div class="fd-stats" data-when="ready" ?hidden=${s.region('stats') !== 'ready'}>
               <div class="fd-stat-tile">
                 <span class="fd-stat-label">Requests · 24h</span>
                 <div class="fd-stat-row"><span class="fd-stat">4,812</span><span class="fd-stat-delta" data-tone="success" data-dir="up">12.4%</span></div>
@@ -125,6 +132,11 @@ export const overviewView = () => html`
                 <div class="fd-stat-row"><span class="fd-stat">12</span><span class="fd-stat-delta" data-tone="success" data-dir="up">2</span></div>
                 <span class="fd-stat-sub">9 checked in the last hour</span>
               </div>
+            </div>
+            <div class="fd-empty" data-size="sm" data-when="empty" aria-label="Last 24 hours" ?hidden=${s.region('stats') !== 'empty'}>
+              <span class="fd-empty-icon"><svg class="fd-icon" data-icon="activity" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+              <h3 class="fd-empty-title">Nothing in the last 24 hours</h3>
+              <p class="fd-empty-text">Requests, success rate, latency and active monitors show here once Quarry Labs sends traffic.</p>
             </div>
           </div>
         </section>
@@ -174,7 +186,7 @@ export const overviewView = () => html`
         <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Recent requests">
           <div id="ov-activity" data-fd-loading="true">
             <div class="fd-skeleton-table" data-rows="6" data-cols="5"></div>
-            <div class="fd-table-wrap">
+            <div class="fd-table-wrap" data-when="ready" ?hidden=${s.region('activity') !== 'ready'}>
               <div class="fd-table-scroll">
                 <table class="fd-table" data-stack aria-label="Recent requests">
                   <thead>
@@ -232,6 +244,18 @@ export const overviewView = () => html`
                   </tbody>
                 </table>
               </div>
+            </div>
+            <div class="fd-empty" data-when="empty" aria-label="Recent requests" ?hidden=${s.region('activity') !== 'empty'}>
+              <span class="fd-empty-icon"><svg class="fd-icon" data-icon="list" aria-hidden="true"><use href="#i-list"></use></svg></span>
+              <h3 class="fd-empty-title">No requests yet</h3>
+              <p class="fd-empty-text">Your last six requests appear here a few seconds after they finish. Send one from the playground or with your API key.</p>
+              <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><svg class="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play"></use></svg><span>Open the playground</span></a></div>
+            </div>
+            <div class="fd-empty" data-tone="danger" data-when="error" role="alert" aria-label="Recent requests" ?hidden=${s.region('activity') !== 'error'}>
+              <span class="fd-empty-icon"><svg class="fd-icon" data-icon="triangle-alert" aria-hidden="true"><use href="#i-triangle-alert"></use></svg></span>
+              <h3 class="fd-empty-title">Couldn’t load recent requests</h3>
+              <p class="fd-empty-text">The activity service did not answer within 10 seconds. Credits, key and monitors above are up to date.</p>
+              <div class="fd-empty-actions"><button class="fd-btn" type="button" id="ov-activity-retry" @click=${s.onRetry}><svg class="fd-icon" data-icon="refresh-cw" aria-hidden="true"><use href="#i-refresh-cw"></use></svg><span>Retry</span></button></div>
             </div>
           </div>
         </section>

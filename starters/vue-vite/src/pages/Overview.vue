@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { texture } from 'fire-design';
 import { jsonForScript } from '../fire-export';
 import { LOAD_MS, SIMULATE_LOAD } from '../demo';
+import { askedState, type PageState } from '../page-state';
 
 // The data of the credits chart (M2: JSON for a <script> goes through jsonForScript, in a <component is="script">).
 const data1 = jsonForScript({
@@ -41,16 +43,34 @@ const data1 = jsonForScript({
   ]
 });
 
+// The state comes from the route's `?state=`: `loading` keeps the skeletons, `empty` is a team with no traffic yet,
+// `error` is the recent-requests section failing alone, with Retry, while the rest of the screen is up to date.
+// Anything else (or nothing) is the default: skeletons for a moment, then the data.
+type Region = 'chart' | 'stats' | 'activity';
+const state = ref<PageState>(askedState(useRoute().query.state, ['loading', 'empty', 'error']) ?? 'ready');
+/** What a region shows. While `loading` the data blocks stay under the skeletons, as the markup is written. */
+function region(name: Region): PageState {
+  if (state.value === 'empty') return 'empty';
+  if (state.value === 'error' && name === 'activity') return 'error';
+  return 'ready';
+}
+
 // The regions start as skeletons (data-fd-loading="true"); after a short first load they show their content.
 // Fire owns `data-fd-loading` and `aria-busy` once it runs, so they are changed with Fire's API, never bound.
-let timer = 0;
+const regionEl = (id: string) => document.getElementById(id);
+const timers: number[] = [];
 onMounted(() => {
-  if (!SIMULATE_LOAD) return;
-  timer = window.setTimeout(() => {
-    for (const id of ['ov-chart', 'ov-stats', 'ov-activity']) texture.setLoading(document.getElementById(id), false);
-  }, LOAD_MS);
+  if (!SIMULATE_LOAD || state.value === 'loading') return;
+  timers.push(window.setTimeout(() => {
+    for (const id of ['ov-chart', 'ov-stats', 'ov-activity']) texture.setLoading(regionEl(id), false);
+  }, LOAD_MS));
 });
-onBeforeUnmount(() => window.clearTimeout(timer));
+/** Retry: the skeleton again, then the data. */
+function onRetry() {
+  texture.setLoading(regionEl('ov-activity'), true);
+  timers.push(window.setTimeout(() => { state.value = 'ready'; void nextTick(() => texture.setLoading(regionEl('ov-activity'), false)); }, 900));
+}
+onBeforeUnmount(() => timers.forEach((t) => window.clearTimeout(t)));
 </script>
 
 <template>
@@ -81,7 +101,7 @@ onBeforeUnmount(() => window.clearTimeout(timer));
         <div class="fd-split-main">
           <div id="ov-chart" data-fd-loading="true">
             <div class="fd-skeleton-chart"></div>
-            <div class="fd-stack" data-gap="4">
+            <div :hidden="region('chart') !== 'ready'" class="fd-stack" data-gap="4" data-when="ready">
               <div class="fd-row" data-justify="between" data-align="start">
                 <div>
                   <h2 class="fd-title">Credits used · Last 7 days</h2>
@@ -92,6 +112,12 @@ onBeforeUnmount(() => window.clearTimeout(timer));
               <div class="fd-chart" data-fd-chart="area" data-height="264" data-label="Credits used per day, Nov 8 to Nov 14">
                 <component is="script" type="application/json" v-text="data1"></component>
               </div>
+            </div>
+            <div :hidden="region('chart') !== 'empty'" class="fd-empty" data-when="empty" aria-label="Credits used">
+              <span class="fd-empty-icon"><svg class="fd-icon" data-icon="chart-column" aria-hidden="true"><use href="#i-chart-column"></use></svg></span>
+              <h3 class="fd-empty-title">No credits used yet</h3>
+              <p class="fd-empty-text">Credits used per day appear here after your first request. A test request in the playground costs 1 credit.</p>
+              <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><svg class="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play"></use></svg><span>Send a test request</span></a></div>
             </div>
           </div>
         </div>
@@ -147,7 +173,7 @@ onBeforeUnmount(() => window.clearTimeout(timer));
     <section class="fd-band fd-rise" data-pad="sm" aria-label="Last 24 hours" data-fd-vars="--fd-i: 2">
       <div id="ov-stats" data-fd-loading="true">
         <div class="fd-skeleton-stat" data-count="4"></div>
-        <div class="fd-stats">
+        <div :hidden="region('stats') !== 'ready'" class="fd-stats" data-when="ready">
           <div class="fd-stat-tile">
             <span class="fd-stat-label">Requests · 24h</span>
             <div class="fd-stat-row"><span class="fd-stat">4,812</span><span class="fd-stat-delta" data-tone="success" data-dir="up">12.4%</span></div>
@@ -169,6 +195,11 @@ onBeforeUnmount(() => window.clearTimeout(timer));
             <div class="fd-stat-row"><span class="fd-stat">12</span><span class="fd-stat-delta" data-tone="success" data-dir="up">2</span></div>
             <span class="fd-stat-sub">9 checked in the last hour</span>
           </div>
+        </div>
+        <div :hidden="region('stats') !== 'empty'" class="fd-empty" data-size="sm" data-when="empty" aria-label="Last 24 hours">
+          <span class="fd-empty-icon"><svg class="fd-icon" data-icon="activity" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+          <h3 class="fd-empty-title">Nothing in the last 24 hours</h3>
+          <p class="fd-empty-text">Requests, success rate, latency and active monitors show here once Quarry Labs sends traffic.</p>
         </div>
       </div>
     </section>
@@ -218,7 +249,7 @@ onBeforeUnmount(() => window.clearTimeout(timer));
     <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Recent requests">
       <div id="ov-activity" data-fd-loading="true">
         <div class="fd-skeleton-table" data-rows="6" data-cols="5"></div>
-        <div class="fd-table-wrap">
+        <div :hidden="region('activity') !== 'ready'" class="fd-table-wrap" data-when="ready">
           <div class="fd-table-scroll">
             <table class="fd-table" data-stack aria-label="Recent requests">
               <thead>
@@ -276,6 +307,18 @@ onBeforeUnmount(() => window.clearTimeout(timer));
               </tbody>
             </table>
           </div>
+        </div>
+        <div :hidden="region('activity') !== 'empty'" class="fd-empty" data-when="empty" aria-label="Recent requests">
+          <span class="fd-empty-icon"><svg class="fd-icon" data-icon="list" aria-hidden="true"><use href="#i-list"></use></svg></span>
+          <h3 class="fd-empty-title">No requests yet</h3>
+          <p class="fd-empty-text">Your last six requests appear here a few seconds after they finish. Send one from the playground or with your API key.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><svg class="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play"></use></svg><span>Open the playground</span></a></div>
+        </div>
+        <div :hidden="region('activity') !== 'error'" class="fd-empty" data-tone="danger" data-when="error" role="alert" aria-label="Recent requests">
+          <span class="fd-empty-icon"><svg class="fd-icon" data-icon="triangle-alert" aria-hidden="true"><use href="#i-triangle-alert"></use></svg></span>
+          <h3 class="fd-empty-title">Couldn’t load recent requests</h3>
+          <p class="fd-empty-text">The activity service did not answer within 10 seconds. Credits, key and monitors above are up to date.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" id="ov-activity-retry" @click="onRetry"><svg class="fd-icon" data-icon="refresh-cw" aria-hidden="true"><use href="#i-refresh-cw"></use></svg><span>Retry</span></button></div>
         </div>
       </div>
     </section>

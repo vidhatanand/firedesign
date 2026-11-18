@@ -143,3 +143,16 @@ test('settle and CSP: a page that changes 600 ms after load and runs an animatio
   const { cand } = r.report.runs[0].settle;
   assert.ok(cand.quiet && cand.ms >= 400, JSON.stringify(cand));
 });
+
+test('pixels: chrome painted over the root from outside is not part of the shot, a different root still fails (R15)', () => {
+  const root = ['--ref-root', '.fd-page', '--cand-root', '.fd-page', '--widths', '375', '--themes', 'light'];
+  const bar = (cand) => spawnSync(process.execPath, [script, '--ref', page('bar.html'), '--cand', cand, '--engines', 'chromium', '--json', path.join(tmp, `${path.basename(cand)}.json`), ...root], { encoding: 'utf8' });
+  const same = bar(page('bar2.html'));
+  const rep = JSON.parse(fs.readFileSync(path.join(tmp, 'bar2.html.json'), 'utf8'));
+  assert.equal(same.status, 0, same.stdout);
+  assert.equal(rep.runs[0].pixels.ratio, 0);
+  const other = bar(page('bar-root.html'));
+  assert.notEqual(other.status, 0);
+  const rep2 = JSON.parse(fs.readFileSync(path.join(tmp, 'bar-root.html.json'), 'utf8'));
+  assert.ok(rep2.runs[0].pixels.ratio > 0);
+});

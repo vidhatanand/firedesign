@@ -180,6 +180,25 @@ try {
     await page.locator('#logs-state .fd-table-empty-title').waitFor({ timeout: 3000 });
     await page.locator('#logs-state-switch [data-value="loaded"]').click();
   });
+  await step('?state= on overview and logs shows the state asked for', async () => {
+    const visible = (selector) => page.locator(selector).first().waitFor({ state: 'visible', timeout: 4000 });
+    await page.goto(`${app.origin}/overview?state=empty`);
+    await visible('#ov-chart .fd-empty[data-when="empty"]');
+    await visible('#ov-stats .fd-empty[data-when="empty"]');
+    await visible('#ov-activity .fd-empty[data-when="empty"]');
+    await page.goto(`${app.origin}/overview?state=error`);
+    await visible('#ov-activity .fd-empty[data-when="error"]');
+    await visible('#ov-chart .fd-chart svg');
+    await page.locator('#ov-activity-retry').click();
+    await visible('#ov-activity .fd-table-wrap[data-when="ready"]');
+    await page.goto(`${app.origin}/logs?state=empty`);
+    await visible('#logs-state .fd-table-empty-title');
+    await page.goto(`${app.origin}/logs?state=error`);
+    await visible('#logs-state [data-state="error"]');
+    await page.goto(`${app.origin}/logs?state=no-results`);
+    await visible('#logs-state .fd-table-empty [data-action="clear-filters"]');
+    if (await page.locator('#logs-body > tr:not([hidden])').count()) throw new Error('a row matches the no-results search');
+  });
   await step('navigate to /settings; tabs, segmented control, confirm dialog', async () => {
     await page.locator('.fd-nav a[href="/settings"]').click();
     await page.locator('#panel-team:not([hidden])').waitFor({ timeout: 4000 });

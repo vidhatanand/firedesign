@@ -6,6 +6,7 @@ import { icon, upgradeIcons } from '../fire/js/icons.js';
 const PAGES = [
   ['Start', [
     ['index', 'Overview', 'flame'],
+    ['catalogue', 'Catalogue', 'search'],
     ['foundations', 'Foundations', 'swatch-book'],
     ['signature', 'Texture & frame', 'grid-3x3'],
     ['tweaks', 'Theming & tweaks', 'sliders-horizontal'],
@@ -127,6 +128,37 @@ function buildToc() {
   hero.append(toc);
 }
 
+// Surface tags next to each section heading: where the part the section teaches is used. Read from contract/index.json (the
+// cards' own `surfaces`), so they cannot drift. The tags sit beside the h2, not in it, so the "On this page" list and the
+// anchors are unchanged. A section that teaches several parts shows the surfaces any of them has.
+const SURFACE_ORDER = ['app', 'website', 'phone', 'email'];
+const SURFACE_LABEL = { app: 'App', website: 'Website', phone: 'Phone', email: 'Email' };
+async function buildSurfaceTags() {
+  const page = `${document.body.dataset.page || 'index'}.html`;
+  let entries;
+  try {
+    const res = await fetch(new URL('../contract/index.json', import.meta.url));
+    if (!res.ok) return;
+    entries = (await res.json()).entries;
+  } catch { return; }          // opened from a file, or offline: the pages read fine without tags
+  const bySection = new Map();
+  for (const e of entries) {
+    if (e.kind === 'template' || !e.docs.startsWith(`docs/${page}#`)) continue;
+    const id = e.docs.slice(e.docs.indexOf('#') + 1);
+    bySection.set(id, new Set([...(bySection.get(id) || []), ...e.surfaces]));
+  }
+  for (const [id, set] of bySection) {
+    const head = document.getElementById(id)?.querySelector(':scope > .doc-section-head');
+    if (!head || head.querySelector('.doc-surfaces')) continue;
+    const tags = document.createElement('span');
+    tags.className = 'doc-surfaces';
+    tags.setAttribute('role', 'group');
+    tags.setAttribute('aria-label', 'Surfaces');
+    tags.innerHTML = SURFACE_ORDER.filter((x) => set.has(x)).map((x) => `<span class="fd-badge">${SURFACE_LABEL[x]}</span>`).join('');
+    head.querySelector('h2, h3')?.after(tags);
+  }
+}
+
 // Capture specimen source before Fire's behaviours mutate the DOM.
 document.querySelectorAll('.doc-specimen[data-code]').forEach((spec) => { if (!spec.querySelector(':scope > template[data-source]')) spec.dataset.source = spec.innerHTML; });
-ready(() => { buildChrome(); buildCode(); buildToc(); upgradeIcons(); });
+ready(() => { buildChrome(); buildCode(); buildToc(); upgradeIcons(); buildSurfaceTags(); });

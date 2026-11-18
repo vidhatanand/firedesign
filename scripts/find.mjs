@@ -2,6 +2,8 @@
 // fire find: search Fire by what a part is for.
 //   node scripts/find.mjs "approve a request" [--surface app|website|phone|email] [--data record|list|series|form|text]
 //                         [--kind component|pattern|template|module] [--json] [--limit 5]
+// Each result prints its surfaces. With --surface, a line says when parts for other surfaces match the query clearly
+// better (to stderr with --json, so stdout stays the array; each JSON result carries `surfaces`).
 // Reads contract/index.json (node scripts/build-index.mjs builds it). No dependencies, no network.
 //
 // Score, per entry, summed over the query's words (stemmed, stop words dropped). A word counts at full weight; a word
@@ -81,6 +83,9 @@ const SYNONYMS = [
   ['hero', 'banner', 'masthead'],
   ['login', 'sign-in'],
 ];
+
+const SURFACE_ORDER = ['app', 'website', 'phone', 'email'];
+const surfaceList = (list) => [...list].sort((a, b) => SURFACE_ORDER.indexOf(a) - SURFACE_ORDER.indexOf(b));
 
 const KIND_RANK = { template: 0, pattern: 1, component: 2, layout: 3, module: 4 };
 const WEIGHT = { id: 10, aka: 5, akaPhrase: 12, name: 6, job: 3, use: 2, family: 1, phrase: 6, syn: 0.6 };
@@ -190,6 +195,20 @@ export function search(db, query, opts = {}) {
   return out.slice(0, limit);
 }
 
+// With --surface: parts that match the query clearly better than anything on that surface but belong to other surfaces.
+// "Better" is a score a fifth above the best match on the surface (any match at all when the surface has none).
+// Returns at most `max` entries, best first; [] without --surface or when the surface already has the best answer.
+export function betterElsewhere(db, query, opts = {}, onSurface = null, max = 3) {
+  if (!opts.surface) return [];
+  const here = onSurface || search(db, query, { ...opts, limit: 5 });
+  const floor = here.length ? here[0].score * 1.2 : 0;
+  const all = search(db, query, { ...opts, surface: undefined, limit: db.n });
+  return all.filter((r) => !r.surfaces.includes(opts.surface) && r.score > floor).slice(0, max);
+}
+export const betterNote = (surface, list, hasHere = true) => list.length
+  ? `${list.length} ${hasHere ? 'better ' : ''}match${list.length === 1 ? '' : 'es'} ${list.length === 1 ? 'exists' : 'exist'} for other surfaces: ${list.map((r) => `${r.id} [${r.kind}] (${surfaceList(r.surfaces).join(', ')})`).join('; ')}. Drop --surface ${surface} to see them.`
+  : '';
+
 function main(argv) {
   const args = { _: [] };
   for (let i = 0; i < argv.length; i++) {
@@ -210,16 +229,26 @@ function main(argv) {
   const limit = args.limit === undefined ? 5 : Number(args.limit);
   if (!Number.isInteger(limit) || limit < 1) { console.error('fire find: --limit is a positive whole number'); return 2; }
   if (!fs.existsSync(INDEX)) { console.error('fire find: contract/index.json is missing; run node scripts/build-index.mjs'); return 2; }
-  const res = search(load(), query, { surface: args.surface, data: args.data, kind: args.kind, limit });
-  if (args.json) { console.log(JSON.stringify(res.map(({ id, kind, family, score, why, job, use, not, docs }) => ({ id, kind, family, score, why, job, use, instead: not, docs })), null, 2)); return 0; }
-  if (!res.length) { console.log(`No match for "${query}". Try other words (what it does, not what it is called), or drop a filter.`); return 1; }
+  const db = load();
+  const opts = { surface: args.surface, data: args.data, kind: args.kind };
+  const res = search(db, query, { ...opts, limit });
+  // The note needs the unfiltered ranking against the best match on the surface (not only the first `limit`).
+  const elsewhere = betterElsewhere(db, query, opts, res.length ? res : []);
+  const note = betterNote(args.surface, elsewhere, res.length > 0);
+  if (args.json) {
+    console.log(JSON.stringify(res.map(({ id, kind, family, surfaces, score, why, job, use, not, docs }) => ({ id, kind, family, surfaces: surfaceList(surfaces), score, why, job, use, instead: not, docs })), null, 2));
+    if (note) console.error(note);   // stdout stays the plain array
+    return 0;
+  }
+  if (!res.length) { console.log(`No match for "${query}". Try other words (what it does, not what it is called), or drop a filter.`); if (note) console.log(note); return 1; }
   for (const r of res) {
-    console.log(`${r.id}  [${r.kind}]  ${r.score}`);
+    console.log(`${r.id}  [${r.kind}]  ${surfaceList(r.surfaces).join(' · ')}  ${r.score}`);
     console.log(`  matched: ${r.why}`);
     console.log(`  use when: ${r.use}`);
     if (r.not.length) console.log(`  instead of: see ${r.not.join(', ')} when it does not fit`);
     console.log(`  docs: ${r.docs}`);
   }
+  if (note) console.log(note);
   return 0;
 }
 

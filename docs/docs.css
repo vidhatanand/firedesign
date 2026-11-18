@@ -36,6 +36,19 @@
 .doc-section { padding: 40px 0 8px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; scroll-margin-top: 72px; }
 .doc-section-head { display: grid; gap: 4px; }
 .doc-section-head p { color: var(--fd-text-3); max-width: 68ch; }
+/* Surface tags beside a section heading (docs.js): one row with the heading, so they take no height of their own. */
+.doc-section-head:has(> .doc-surfaces) { grid-template-columns: max-content minmax(0, 1fr); column-gap: 12px; row-gap: 4px; align-items: center; }
+.doc-section-head:has(> .doc-surfaces) > p { grid-column: 1 / -1; }
+@media (max-width: 600px) { .doc-section-head:has(> .doc-surfaces) { display: flex; flex-wrap: wrap; } .doc-section-head:has(> .doc-surfaces) > p { flex-basis: 100%; } }
+.doc-surfaces { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+/* The catalogue page (catalogue.html, catalogue.js) */
+.doc-cat-bar { display: grid; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--fd-line-faint); }
+.doc-cat-facets { display: flex; flex-wrap: wrap; gap: 4px 32px; }
+.doc-cat-facet { display: grid; gap: 2px; min-width: 0; max-width: 100%; }
+.doc-cat-facet > .fd-chip-nav { overflow-x: auto; scrollbar-width: none; }
+.doc-cat-count { font-size: var(--fd-text-sm); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+#cat-list[hidden], #cat-empty[hidden], #cat-error[hidden] { display: none; }
+@media (max-width: 600px) { #cat-list .fd-list-trail { grid-column: 2; grid-row: 3; justify-self: start; margin: var(--fd-space-1-5) 0 0; } }
 .doc-sub { margin-top: 12px; font-size: var(--fd-text-md); font-weight: var(--fd-weight-label); }
 
 .doc-specimen {

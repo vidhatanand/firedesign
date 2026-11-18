@@ -21,6 +21,8 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Build or change any screen | `GUIDE.md` |
 | Write any text that appears on a screen | `WRITING.md` |
 | Use a class or an attribute | `VOCABULARY.md` (if it is not listed there, it does not exist) |
+| Pick a component, pattern or template | `contract/catalog.json` in the Fire package: search the cards by `job` and `aka` (other names) first, filter by `surfaces` and `data`, read `useWhen` and `avoidWhen`, then open only the chosen entry's `example` |
+| Write Fire markup in Lit, React, Next.js or Vue | `spec/EXPORT.md` in the Fire package, and the matching starter in `starters/` |
 | Add to Fire itself | `DESIGN.md`, in the Fire repository |
 
 Copy markup from the Fire docs pages or the nearest template. Do not write components from memory.
@@ -55,7 +57,7 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 1. Open every screen you touched in a browser. Check light and dark, 1440px and 375px wide, and keyboard use.
 2. Ask: does it look like a product, or like a database form? If the second, it is not done.
 3. Run the checklist in `WRITING.md` section 9 on each screen.
-4. If the project has Fire's `scripts/audit.mjs`, run it. It must report no errors and nothing under `literals`, `inline` or `attrs`.
+4. Run Fire's markup lint on every file you changed (`node node_modules/fire-design/scripts/lint-markup.mjs <files>`, or `scripts/lint-markup.mjs` inside the Fire repository) and fix every finding; never silence one with a `style` attribute. In the Fire repository, also run `scripts/audit.mjs`: no errors and nothing under `literals`, `inline` or `attrs`.
 5. Say plainly what you checked and what you did not.
 
 ## 6. When Fire does not have what you need

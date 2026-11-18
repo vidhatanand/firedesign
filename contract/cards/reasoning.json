@@ -1,0 +1,96 @@
+{
+  "id": "reasoning",
+  "job": "Fold away the plan behind an answer for the person who wants to check it.",
+  "purpose": "A collapsed row, \"Thought for 6s\", that opens to the agent's plan in muted text. While the agent is still working it reads \"Thinking…\" with a shimmer. It is folded by default so the answer stays the main thing on the page.",
+  "useWhen": [
+    "The agent's approach is worth showing but most people will skip it.",
+    "The agent is working and has not produced the answer yet."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The steps are actions with arguments, time and cost.",
+      "instead": "toolcall"
+    },
+    {
+      "when": "A long run needs a plan the person can follow and see ticked off.",
+      "instead": "run-steps"
+    },
+    {
+      "when": "Optional detail in a doc or a form.",
+      "instead": "accordion"
+    }
+  ],
+  "aka": [
+    "thinking",
+    "chain of thought",
+    "thought process",
+    "show reasoning",
+    "scratchpad"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [
+    {
+      "name": "thinking",
+      "how": "data-state=\"thinking\" or \"running\"; label shimmers"
+    },
+    {
+      "name": "done",
+      "how": "data-state=\"done\"; label shows the time"
+    },
+    {
+      "name": "open",
+      "how": "aria-expanded=\"true\" on the toggle"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-reasoning",
+      "role": "The block."
+    },
+    {
+      "class": "fd-reasoning-toggle",
+      "role": "The button that folds the panel."
+    },
+    {
+      "class": "fd-reasoning-label",
+      "role": "The label: \"Thought for 6s\" or \"Thinking…\"."
+    },
+    {
+      "class": "fd-reasoning-panel",
+      "role": "The folding region."
+    },
+    {
+      "class": "fd-reasoning-body",
+      "role": "Inner wrapper for the text."
+    },
+    {
+      "class": "fd-reasoning-text",
+      "role": "The reasoning in muted text."
+    }
+  ],
+  "related": [
+    "toolcall",
+    "run-steps",
+    "message"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "Opens or closes the panel."
+    }
+  ],
+  "example": "docs/agent.html#reasoning",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

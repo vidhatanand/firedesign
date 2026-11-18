@@ -1,0 +1,201 @@
+{
+  "id": "doc",
+  "job": "Build a documentation site in the product's own look: nav, article, contents and footer.",
+  "purpose": "The docs shell: a two-row top bar (tools and section tabs), a neutral nav, a reading column of 720px or less with an On this page rail, and an article footer with Was this helpful, the pager and the site footer. Declare the page with data-docs-shell on body; the page supplies only its article. It also holds search, the changelog and the home page.",
+  "useWhen": [
+    "The product has guides, SDK pages and an API reference that should read like the product.",
+    "A page needs the docs header, nav and contents column around an article."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The signed-in app shell with a sidebar and top bar.",
+      "instead": "app"
+    },
+    {
+      "when": "A single help article inside a chat.",
+      "instead": "chat"
+    },
+    {
+      "when": "One long page of text without navigation.",
+      "instead": "prose"
+    }
+  ],
+  "aka": [
+    "docs site",
+    "documentation layout",
+    "developer docs",
+    "knowledge base",
+    "help center",
+    "docs shell",
+    "reference"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "text",
+    "list"
+  ],
+  "states": [
+    {
+      "name": "contained",
+      "how": "data-contained; the shell scrolls inside a box of height --h"
+    },
+    {
+      "name": "no contents column",
+      "how": "data-toc=\"false\" on the body, for reference pages"
+    },
+    {
+      "name": "no footer",
+      "how": "data-foot=\"false\" on the body, for landing pages"
+    },
+    {
+      "name": "nav group open",
+      "how": "aria-expanded=\"true\"; remembered in fd-doc-nav-open"
+    },
+    {
+      "name": "voted",
+      "how": "data-state=\"voted\" on .fd-doc-helpful"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-contained",
+      "value": "",
+      "useWhen": "The shell is a box that scrolls inside itself, as in previews."
+    },
+    {
+      "attribute": "data-width",
+      "value": "wide",
+      "useWhen": "An article that needs more than the 720px reading column, such as a reference table."
+    },
+    {
+      "attribute": "data-row",
+      "value": "tools",
+      "useWhen": "The top bar's first row: brand, search, repository, theme, sign up."
+    },
+    {
+      "attribute": "data-row",
+      "value": "sections",
+      "useWhen": "The top bar's second row: section tabs in ink."
+    },
+    {
+      "attribute": "data-row",
+      "value": "crumbs",
+      "useWhen": "The breadcrumb bar that opens the nav sheet under 900px."
+    },
+    {
+      "attribute": "data-method",
+      "value": "get",
+      "useWhen": "A GET tag in the nav or an endpoint bar."
+    },
+    {
+      "attribute": "data-method",
+      "value": "post",
+      "useWhen": "A POST tag."
+    },
+    {
+      "attribute": "data-method",
+      "value": "put",
+      "useWhen": "A PUT tag."
+    },
+    {
+      "attribute": "data-method",
+      "value": "patch",
+      "useWhen": "A PATCH tag."
+    },
+    {
+      "attribute": "data-method",
+      "value": "delete",
+      "useWhen": "A DELETE tag, labelled DEL to keep the column narrow."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-doc",
+      "role": "The shell; a size container named fd-doc."
+    },
+    {
+      "class": "fd-doc-top",
+      "role": "The sticky two-row top bar."
+    },
+    {
+      "class": "fd-doc-search",
+      "role": "The search pill that opens the command palette."
+    },
+    {
+      "class": "fd-doc-nav",
+      "role": "The neutral nav; the current page is an 8% ink pill."
+    },
+    {
+      "class": "fd-doc-main",
+      "role": "Holds the content and aside."
+    },
+    {
+      "class": "fd-doc-article",
+      "role": "The reading column."
+    },
+    {
+      "class": "fd-doc-aside",
+      "role": "The 264px On this page column."
+    },
+    {
+      "class": "fd-doc-head",
+      "role": "Eyebrow, 36px title, lead and the Copy page split button."
+    },
+    {
+      "class": "fd-doc-method",
+      "role": "A method tag."
+    },
+    {
+      "class": "fd-doc-helpful",
+      "role": "Was this helpful, with a form that opens on No."
+    },
+    {
+      "class": "fd-doc-pager",
+      "role": "Previous and next links."
+    },
+    {
+      "class": "fd-doc-footer",
+      "role": "The site footer."
+    },
+    {
+      "class": "fd-doc-hero",
+      "role": "The docs home: big search and ways in."
+    },
+    {
+      "class": "fd-doc-guide",
+      "role": "A guide card with a time to read."
+    }
+  ],
+  "related": [
+    "prose",
+    "doc-cards",
+    "doc-endpoint",
+    "doc-setup",
+    "doc-changelog",
+    "command"
+  ],
+  "keyboard": [
+    {
+      "keys": "Ctrl/Cmd+K",
+      "does": "Opens the docs search palette."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Opens a nav group or follows a link."
+    },
+    {
+      "keys": "Tab",
+      "does": "Moves through the top bar, nav and article."
+    }
+  ],
+  "example": "docs/documentation.html#shell",
+  "provenance": [
+    "docs/documentation.html",
+    "fire/components/docsite.css",
+    "fire/js/docsite.js",
+    "templates/docs-guide.html"
+  ],
+  "since": "0.1.0"
+}

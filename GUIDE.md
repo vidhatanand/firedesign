@@ -30,7 +30,15 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 3. Serve over HTTP. ES modules do not load from `file://`.
 4. Copy `GUIDE.md`, `WRITING.md`, `AGENT-RULES.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
 
-**With a framework (React, Vue, Svelte, server templates).** Fire is class names and data attributes, so it works in any of them. Render the same markup the docs show. Two things to know:
+**With a framework.** Fire's markup is the same in every framework; what changes is how a framework writes some attributes, owns some elements, and hears Fire's events. Start from a starter, which is already wired and proven to render exactly like Fire's own templates:
+
+| Framework | Starter | Package entry |
+|---|---|---|
+| Lit (the default for a new app) | `starters/lit-vite` | `fire-design/elements` |
+| React and Next.js | `starters/next` | `fire-design/react`: `FireIcon`, `FireChart`, `FireCode`, `FireTexture`, `useFire`, `useFireEvent` |
+| Vue | `starters/vue-vite` | `fire-design/vue`: the plugin, the `v-fire` directive, `fireVueOptions()` for `vite.config` |
+
+Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.6.0"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
 
 - Behaviour attaches through `data-fd-*` attributes with listeners on `document`, so most components work on markup inserted later. After rendering new markup that contains icons, charts, textures or sliders, call `init(root)`:
 
@@ -144,6 +152,11 @@ Never give a card title `fd-h3` and put `fd-setting` rows inside it at their pag
 - **Contrast is built in.** Every text step that carries information reaches 4.5:1 in every palette, light and dark, and the label on the accent and on status fills does too. Use `fd-muted` / `--fd-text-3` or stronger for anything someone reads; `--fd-text-4` is for placeholders and disabled text only. Make quiet things quiet with size, weight and case, not a fainter colour.
 - **Translated pages.** Fire's scripts write a few interface labels themselves (show and hide on a secret field, the sidebar and phone menu buttons, Copied, calendar months). Translate them with `data-label-<key>` on the component or any ancestor, or one dictionary for the page: `<script type="application/json" data-fd-labels>{"menu.open": "Menü öffnen"}</script>`. The keys are listed on `docs/writing.html`.
 - The Tweaks panel lets you try palettes, tone, typefaces, density, corners and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
+
+**Checks a project can run.** Both ship in the package and read only the catalogue:
+
+- `node node_modules/fire-design/scripts/lint-markup.mjs "src/**/*.{html,tsx,jsx,vue,ts}"` reports unknown `fd-` classes, elements and icons, `data-*` values a component does not define, `style` attributes and props, raw colours and pixel sizes in markup, icon-only buttons without a name, and `<i data-icon>` in React or Vue code. It exits 1 on any error.
+- `node node_modules/fire-design/scripts/render-equal.mjs --ref <reference page> --cand <your page> --cand-root ".fd-page"` proves a screen renders like its reference (a Fire template, a Facet board): Fire nodes, computed styles and pixels, at 1440 and 375 wide, light and dark, in Chromium, WebKit and Firefox. It needs `playwright-core`, `pixelmatch` and `pngjs`.
 
 **Checks before you call a screen done.**
 

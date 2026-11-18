@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom elements · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="../fire/elements.js"></script>
+</head>
+<body class="doc" data-page="elements">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Custom elements</h1>
+    <p class="doc-lede">Four components build their own DOM from data: icons, charts, code and texture fields. Each has an element that renders the same markup inside itself and lets the same Fire module draw it, so the two forms look and behave alike.</p>
+  </header>
+
+  <section class="doc-section" id="when">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Element or markup</h2>
+      <p>Load <code class="fd-code">fire/elements.js</code> (or import <code class="fd-code">fire-design/elements</code>) to register <code class="fd-code">fd-icon</code>, <code class="fd-code">fd-chart</code>, <code class="fd-code">fd-code</code> and <code class="fd-code">fd-texture</code>. It shares Fire's modules with <code class="fd-code">fire/fire.js</code>, so a page loads each module once.</p>
+    </div>
+    <div class="doc-do">
+      <div data-do><strong>Use the element</strong><p>Inside Lit, React, Next.js or Vue, where a framework owns the DOM: an <code class="fd-code">&lt;i data-icon&gt;</code> that replaces itself, or a chart that rewrites its children, fights the framework's rendering. Pass data as a property (<code class="fd-code">.data</code> for charts, <code class="fd-code">.code</code> for code) and the element redraws when it changes.</p></div>
+      <div data-do><strong>Use the markup</strong><p>On plain pages, in templates and in server-rendered HTML: the markup needs no element registry, reads its data from a <code class="fd-code">&lt;script type="application/json"&gt;</code> and is drawn by <code class="fd-code">fire/fire.js</code> like every other component.</p></div>
+    </div>
+    <ul class="doc-notes">
+      <li>Every attribute of an element is the markup form's <code class="fd-code">data-*</code> attribute without the prefix: <code class="fd-code">data-height</code> is <code class="fd-code">height</code>. The exceptions are names HTML already uses: <code class="fd-code">language</code> (for <code class="fd-code">data-lang</code>), <code class="fd-code">marks</code> (<code class="fd-code">data-style</code>), <code class="fd-code">animated</code> (<code class="fd-code">data-animate</code>), and <code class="fd-code">type</code>, which also names the chart (<code class="fd-code">sparkline</code>, <code class="fd-code">donut</code>, <code class="fd-code">heatgrid</code>).</li>
+      <li>Each element is its component's root: it carries the root class (<code class="fd-code">fd-icon</code>, <code class="fd-code">fd-chart</code>, <code class="fd-code">fd-codeblock</code>, <code class="fd-code">fd-ascii</code>…) and the markup form's <code class="fd-code">data-*</code> attributes, and holds the component's internals. Every Fire rule applies to it, direct-child rules such as <code class="fd-code">.fd-btn &gt; .fd-icon</code> included. Classes you add are kept, and the element puts its own class back if a framework replaces <code class="fd-code">class</code>.</li>
+      <li>On this page the element sits on the left and its markup twin on the right; the test suite checks, in Chromium, Firefox and WebKit, that both have the same classes, attributes and internals and render to the same pixels.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="icon">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">fd-icon</h2>
+      <p><code class="fd-code">icon</code> names the icon and <code class="fd-code">size</code> picks 12, 14, 16, 20, 24 or 32. The icon is decorative: name the control that holds it. Inside a component it takes the component's icon rules, as the SVG does.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-twin="icon" data-form="element">
+        <fd-icon icon="settings" size="12"></fd-icon>
+        <fd-icon icon="search" size="14"></fd-icon>
+        <fd-icon icon="bell"></fd-icon>
+        <fd-icon icon="rocket" size="20"></fd-icon>
+        <fd-icon icon="circle-check" size="24"></fd-icon>
+        <fd-icon icon="sparkles" size="32"></fd-icon>
+      </div>
+      <div class="doc-specimen" data-code data-twin="icon" data-form="markup">
+        <i data-icon="settings" data-size="12"></i>
+        <i data-icon="search" data-size="14"></i>
+        <i data-icon="bell"></i>
+        <i data-icon="rocket" data-size="20"></i>
+        <i data-icon="circle-check" data-size="24"></i>
+        <i data-icon="sparkles" data-size="32"></i>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="icon-components" data-form="element">
+        <div class="fd-row" data-gap="3">
+          <button class="fd-btn" data-variant="primary"><fd-icon icon="plus"></fd-icon><span>New monitor</span></button>
+          <button class="fd-btn" data-icon-only data-variant="ghost" aria-label="Copy"><fd-icon icon="copy"></fd-icon></button>
+          <button class="fd-btn" data-size="sm"><span>Explore</span><fd-icon icon="arrow-right" data-nudge></fd-icon></button>
+          <span class="fd-badge" data-tone="success"><fd-icon icon="check"></fd-icon>Verified</span>
+        </div>
+        <nav class="fd-nav" aria-label="Example">
+          <a class="fd-nav-item" href="#icon" aria-current="page"><fd-icon icon="home"></fd-icon><span class="fd-nav-text">Overview</span></a>
+          <a class="fd-nav-item" href="#icon"><fd-icon icon="bot"></fd-icon><span class="fd-nav-text">Agents</span></a>
+        </nav>
+        <div class="fd-menu" data-static-demo role="menu" aria-label="Team">
+          <button class="fd-menu-item" role="menuitem"><fd-icon icon="settings"></fd-icon><span class="fd-menu-item-label">Team settings</span></button>
+          <button class="fd-menu-item" role="menuitem"><fd-icon icon="user-plus"></fd-icon><span class="fd-menu-item-label">Invite members</span></button>
+        </div>
+        <div class="fd-input-group">
+          <span class="fd-input-affix"><fd-icon icon="at-sign"></fd-icon></span>
+          <input class="fd-input" type="email" aria-label="Email" placeholder="you@company.com" autocomplete="off">
+        </div>
+        <div class="fd-tabs" role="tablist" aria-label="Output">
+          <button class="fd-tab" role="tab" aria-selected="true"><fd-icon icon="file-text"></fd-icon>Markdown</button>
+          <button class="fd-tab" role="tab" aria-selected="false"><fd-icon icon="braces"></fd-icon>JSON</button>
+        </div>
+        <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Chart">
+          <button class="fd-segmented-item" role="radio" aria-checked="true"><fd-icon icon="chart-line"></fd-icon>Line</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false"><fd-icon icon="chart-column"></fd-icon>Bars</button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="icon-components" data-form="markup">
+        <div class="fd-row" data-gap="3">
+          <button class="fd-btn" data-variant="primary"><i data-icon="plus"></i><span>New monitor</span></button>
+          <button class="fd-btn" data-icon-only data-variant="ghost" aria-label="Copy"><i data-icon="copy"></i></button>
+          <button class="fd-btn" data-size="sm"><span>Explore</span><i data-icon="arrow-right" data-nudge></i></button>
+          <span class="fd-badge" data-tone="success"><i data-icon="check"></i>Verified</span>
+        </div>
+        <nav class="fd-nav" aria-label="Example">
+          <a class="fd-nav-item" href="#icon" aria-current="page"><i data-icon="home"></i><span class="fd-nav-text">Overview</span></a>
+          <a class="fd-nav-item" href="#icon"><i data-icon="bot"></i><span class="fd-nav-text">Agents</span></a>
+        </nav>
+        <div class="fd-menu" data-static-demo role="menu" aria-label="Team">
+          <button class="fd-menu-item" role="menuitem"><i data-icon="settings"></i><span class="fd-menu-item-label">Team settings</span></button>
+          <button class="fd-menu-item" role="menuitem"><i data-icon="user-plus"></i><span class="fd-menu-item-label">Invite members</span></button>
+        </div>
+        <div class="fd-input-group">
+          <span class="fd-input-affix"><i data-icon="at-sign"></i></span>
+          <input class="fd-input" type="email" aria-label="Email" placeholder="you@company.com" autocomplete="off">
+        </div>
+        <div class="fd-tabs" role="tablist" aria-label="Output">
+          <button class="fd-tab" role="tab" aria-selected="true"><i data-icon="file-text"></i>Markdown</button>
+          <button class="fd-tab" role="tab" aria-selected="false"><i data-icon="braces"></i>JSON</button>
+        </div>
+        <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Chart">
+          <button class="fd-segmented-item" role="radio" aria-checked="true"><i data-icon="chart-line"></i>Line</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false"><i data-icon="chart-column"></i>Bars</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="chart">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">fd-chart</h2>
+      <p><code class="fd-code">type</code> picks the chart: <code class="fd-code">line</code>, <code class="fd-code">area</code>, <code class="fd-code">bar</code>, <code class="fd-code">stacked</code>, <code class="fd-code">sparkline</code>, <code class="fd-code">donut</code> or <code class="fd-code">heatgrid</code>. The data is the JSON the markup form carries; on a plain page it can go in the <code class="fd-code">data</code> attribute.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="line" data-form="element">
+        <fd-chart type="line" height="200" legend data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"yFormat":"ms","series":[{"name":"p50","values":[182,178,195,220,228,201,186]},{"name":"p95","values":[604,586,701,802,910,755,620]}]}'></fd-chart>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="line" data-form="markup">
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"yFormat":"ms","series":[{"name":"p50","values":[182,178,195,220,228,201,186]},{"name":"p95","values":[604,586,701,802,910,755,620]}]}</script>
+        </div>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="bar" data-form="element">
+        <fd-chart type="bar" height="200" label="Requests per day, last week" data='{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"yFormat":"compact","series":[{"name":"Requests","values":[12480,13020,11960,14410,15230,8020,7410]}]}'></fd-chart>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="bar" data-form="markup">
+        <div class="fd-chart" data-fd-chart="bar" data-height="200" data-label="Requests per day, last week">
+          <script type="application/json">{"labels":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"yFormat":"compact","series":[{"name":"Requests","values":[12480,13020,11960,14410,15230,8020,7410]}]}</script>
+        </div>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="sparkline" data-form="element">
+        <p>Credits per day <fd-chart type="sparkline" area dot data='[3100,3400,3050,3900,4200,4100,4800,5200,4900,5600]'></fd-chart></p>
+        <p>p95 latency <fd-chart type="sparkline" invert dot values="212,220,208,231,244,238,260,281,270,296"></fd-chart></p>
+        <p>Accent bars <fd-chart type="sparkline" variant="bars" tone="accent" values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600"></fd-chart></p>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="sparkline" data-form="markup">
+        <p>Credits per day <span class="fd-sparkline" data-values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600" data-area data-dot></span></p>
+        <p>p95 latency <span class="fd-sparkline" data-values="212,220,208,231,244,238,260,281,270,296" data-invert data-dot></span></p>
+        <p>Accent bars <span class="fd-sparkline" data-values="3100,3400,3050,3900,4200,4100,4800,5200,4900,5600" data-type="bars" data-tone="accent"></span></p>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-surface="surface" data-twin="donut" data-form="element">
+        <fd-chart type="donut" size="128" data='{"caption":"Jobs","segments":[{"label":"Succeeded","value":18420},{"label":"Failed","value":612,"tone":"danger"}]}'></fd-chart>
+        <fd-chart type="donut" variant="progress" value="72" label="Success" size="96"></fd-chart>
+      </div>
+      <div class="doc-specimen" data-code data-surface="surface" data-twin="donut" data-form="markup">
+        <div class="fd-donut" data-size="128">
+          <script type="application/json">{"caption":"Jobs","segments":[{"label":"Succeeded","value":18420},{"label":"Failed","value":612,"tone":"danger"}]}</script>
+        </div>
+        <div class="fd-donut" data-type="progress" data-value="72" data-label="Success" data-size="96"></div>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="heatgrid" data-form="element">
+        <fd-chart type="heatgrid" size="sm" data='{"start":"2026-08-03","unit":"requests","values":[35,53,21,60,0,6,14,25,47,0,32,80,42,14,54,85,50,0,50,41,45,89,21,43,130,78,61,48,99,93,142,125,0,0,59,47,103,75,0,178,72,45,27,186,0,213,110,11,66,133,48,249,77,168,28,0,145,172,82,107,225,58,41]}'></fd-chart>
+        <fd-chart type="heatgrid" variant="strip" data='{"start":"2026-10-18","tones":["success","success","success","danger","success","success",null,"success","warning","success","success","success","success","danger"],"legend":{"success":"No problem found","warning":"Slow","danger":"Problem found"}}'></fd-chart>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface" data-twin="heatgrid" data-form="markup">
+        <div class="fd-heatgrid" data-size="sm">
+          <script type="application/json">{"start":"2026-08-03","unit":"requests","values":[35,53,21,60,0,6,14,25,47,0,32,80,42,14,54,85,50,0,50,41,45,89,21,43,130,78,61,48,99,93,142,125,0,0,59,47,103,75,0,178,72,45,27,186,0,213,110,11,66,133,48,249,77,168,28,0,145,172,82,107,225,58,41]}</script>
+        </div>
+        <div class="fd-heatgrid" data-variant="strip">
+          <script type="application/json">{"start":"2026-10-18","tones":["success","success","success","danger","success","success",null,"success","warning","success","success","success","success","danger"],"legend":{"success":"No problem found","warning":"Slow","danger":"Problem found"}}</script>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The element fires the chart's own events, which bubble from inside it: <code class="fd-code">fd:hover</code> and <code class="fd-code">fd:select</code> with the point, <code class="fd-code">fd:change</code> when a legend item toggles a series.</li>
+      <li>A cartesian chart keeps a custom <code class="fd-code">yFormat</code> function given in <code class="fd-code">.data</code>; donuts and heat grids are drawn from their JSON, so their formats are names.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="code">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">fd-code</h2>
+      <p>Give the text in <code class="fd-code">code</code> and the language in <code class="fd-code">language</code>. <code class="fd-code">lines</code>, <code class="fd-code">highlight</code>, <code class="fd-code">collapse</code> and <code class="fd-code">wrap</code> are the code block's own options; <code class="fd-code">filename</code> adds the header and <code class="fd-code">copy</code> the copy button.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-twin="code" data-form="element">
+        <fd-code language="typescript" lines highlight="3" filename="scrape.ts" copy code='import Ember from "@ember/sdk";
+const ember = new Ember({ apiKey: process.env.EMBER_API_KEY });
+const page = await ember.scrape("https://example.com", { formats: ["markdown"] });
+console.log(page.markdown);'></fd-code>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-twin="code" data-form="markup">
+        <figure class="fd-codeblock" data-lines data-highlight="3">
+          <div class="fd-codeblock-head">
+            <span class="fd-codeblock-file"><i data-icon="file-code"></i>scrape.ts</span>
+            <div class="fd-codeblock-actions">
+              <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+            </div>
+          </div>
+          <pre class="fd-codeblock-body"><code data-lang="typescript">import Ember from "@ember/sdk";
+const ember = new Ember({ apiKey: process.env.EMBER_API_KEY });
+const page = await ember.scrape("https://example.com", { formats: ["markdown"] });
+console.log(page.markdown);</code></pre>
+        </figure>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-twin="snippet" data-form="element">
+        <fd-code language="bash" copy code='curl -X POST https://api.ember.dev/v2/scrape \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -d &apos;{"url": "https://example.com"}&apos;'></fd-code>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-twin="snippet" data-form="markup">
+        <figure class="fd-codeblock">
+          <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+          <pre class="fd-codeblock-body"><code data-lang="bash">curl -X POST https://api.ember.dev/v2/scrape \
+  -H "Authorization: Bearer $EMBER_API_KEY" \
+  -d '{"url": "https://example.com"}'</code></pre>
+        </figure>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The text is set as text, never parsed as HTML. Changing it renders the block afresh, so Fire never rewrites a text node your framework owns.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="texture">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">fd-texture</h2>
+      <p><code class="fd-code">pattern</code> picks the field; the field fills its nearest positioned ancestor, or flows at the field height with <code class="fd-code">inline</code>. The element is the field: it takes the markup form's class and attributes, and the module draws, sizes, colours and animates its canvas, and stops when it leaves the page.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code data-twin="field" data-form="element">
+        <fd-texture pattern="terrain"></fd-texture>
+      </div>
+      <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code data-twin="field" data-form="markup">
+        <div class="fd-ascii" data-fd-ascii="terrain" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-layout="stack" data-code data-twin="inline-field" data-form="element">
+        <fd-texture pattern="halftone" inline fade="x" tone="accent"></fd-texture>
+      </div>
+      <div class="doc-specimen" data-layout="stack" data-code data-twin="inline-field" data-form="markup">
+        <div class="fd-ascii" data-fd-ascii="halftone" data-inline data-fade="x" data-tone="accent" aria-hidden="true"></div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Because the element is the field, its container layers it as it layers the markup form: above the container's background, below its content. Leave the element's <code class="fd-code">class</code> alone; style the container instead.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="frameworks">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">In a framework</h2>
+      <p>Import the elements once, in client code, then bind data as a property. Fire's events have a colon in their names: Lit binds them as <code class="fd-code">@fd:select</code>; React needs a listener on a ref.</p>
+    </div>
+    <div class="doc-specimen" data-layout="stack" data-surface="sunken">
+      <figure class="fd-codeblock">
+        <pre class="fd-codeblock-body"><code data-lang="typescript">import 'fire-design/elements';
+
+// Lit
+html`&lt;fd-chart type="area" height="240" .data=${usage} @fd:select=${(e) =&gt; open(e.detail.index)}&gt;&lt;/fd-chart&gt;
+     &lt;fd-code language="bash" copy .code=${command}&gt;&lt;/fd-code&gt;`;
+
+// Any framework, or none
+const chart = document.querySelector('fd-chart');
+chart.data = { labels: days, series: [{ name: 'Requests', values: counts }] };
+chart.addEventListener('fd:select', (e) =&gt; console.log(e.detail.label));</code></pre>
+      </figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

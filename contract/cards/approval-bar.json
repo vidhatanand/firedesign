@@ -1,0 +1,64 @@
+{
+  "id": "approval-bar",
+  "job": "Ask whether the agent may run an action, with allow once, always allow and deny.",
+  "purpose": "A one-line strip with an icon, the action in plain words (what, where, how much it costs) and up to three choices. It is the small form of the approval state of a tool call; use it when the permission is asked outside a tool call row.",
+  "useWhen": [
+    "The agent wants to do something that costs credits or touches data and a person must say yes first.",
+    "A permission sits between turns, not inside a tool call row."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The pending step is already a row in a run.",
+      "instead": "toolcall"
+    },
+    {
+      "when": "The action deletes or changes access and needs a typed or explicit confirmation.",
+      "instead": "confirm"
+    },
+    {
+      "when": "The message is a notice with no choice to make.",
+      "instead": "banner"
+    }
+  ],
+  "aka": [
+    "permission prompt",
+    "consent bar",
+    "allow once",
+    "tool approval",
+    "human in the loop"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-approval-bar",
+      "role": "The strip; takes an icon first."
+    },
+    {
+      "class": "fd-approval-bar-text",
+      "role": "The question; bold the action and the cost."
+    },
+    {
+      "class": "fd-approval-bar-actions",
+      "role": "The choices, usually Allow once, Always allow and Deny."
+    }
+  ],
+  "related": [
+    "toolcall",
+    "confirm",
+    "banner"
+  ],
+  "keyboard": [],
+  "example": "docs/agent.html#parts",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css"
+  ],
+  "since": "0.1.0"
+}

@@ -28,6 +28,26 @@ Then open http://127.0.0.1:4747/docs/index.html.
 | Updating a product to a newer Fire | [CHANGELOG.md](CHANGELOG.md): what changed in each release and what to check |
 | Asking for a component or an extension | GUIDE.md section 7, then the "Component or extension request" issue template |
 
+## What Fire ships (0.6)
+
+Fire's HTML and CSS are the contract. Everything else is built on them, generated from one source, and checked in CI (`npm run check`).
+
+| Part | Where | What it is for |
+|---|---|---|
+| Styles and behaviour | `fire/` | Copy it, or depend on `fire-design`. Plain CSS and ES modules, no build needed to use them. |
+| Theme record | `fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/` | A product's whole look as one JSON object; `paletteFrom()` makes a palette from an accent or brand colours that passes every contrast rule. |
+| Contract | `contract/fire-contract.json` | Every global token with its type, tier (input, scale, derived), default and Facet role. |
+| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 142 components with their classes, allowed values, events and a card each: job, when to use, when not, other names. What agents search. |
+| Custom elements | `fire/elements.js` (Lit), `fire/elements.d.ts` | `fd-icon`, `fd-chart`, `fd-code`, `fd-texture` for frameworks; each is its component's root. |
+| Types | `fire/fire.d.ts` | Every export of `fire.js`, the `fd:*` events, the theme record. |
+| Framework packages | `wrappers/react`, `wrappers/vue` | `fire-design/react` and `fire-design/vue`. |
+| Starters | `starters/lit-vite`, `starters/next`, `starters/vue-vite` | Wired apps, each proven to render like Fire's templates in three engines. |
+| Export rules | `spec/EXPORT.md`, `spec/export-map.json` | How Fire markup is written in each framework; what an exporter implements. |
+| Checks | `scripts/lint-markup.mjs`, `scripts/render-equal.mjs` | Run in any project: lint markup against the catalogue; prove a screen renders like its reference. |
+| Facet | `facet/` | Fire as a Facet design system: content, the files to carry, the theme record. |
+
+`spec/ARCHITECTURE.md` explains how the parts fit; [CHANGELOG.md](CHANGELOG.md) says what changed.
+
 ## Use it
 
 ```html
@@ -95,7 +115,7 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/base.css` | Reset, type roles, links, focus, icons, layout and motion primitives. |
 | `fire/components/*.css` | One file per family. Each declares its own `--fd-<component>-*` values at the top; rules contain no raw sizes or timings. |
 | `fire/layout.css` | Layout attributes: `data-gap`, `data-min`, `data-cols`, `data-span`. |
-| `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (272 Lucide icons), `palettes.js` (palette data and the tone engine) and `tweaks.js` (the Tweaks panel). |
+| `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (272 Lucide icons), `palettes.js` (palette data and the tone engine), `palette-rules.js` (the contrast rules every palette meets), `theme.js` (the theme record) and `tweaks.js` (the Tweaks panel). |
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site: 18 pages. Start at `docs/index.html`. |

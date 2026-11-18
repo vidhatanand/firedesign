@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fire.example/contract/cards/card.schema.json",
+  "title": "Fire component card",
+  "description": "The judgement about one component that cannot be generated from the source: when to use it, when not to, and what it is called elsewhere. One file per component, contract/cards/<component id>.json. Every field is required; a list with nothing to say is [].",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "job", "purpose", "useWhen", "avoidWhen", "aka", "surfaces", "data", "states", "variants", "parts", "related", "keyboard", "example", "provenance", "since"],
+  "properties": {
+    "id": { "description": "The component id in contract/catalog.json, equal to the file name without .json.", "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "job": { "description": "One sentence, starting with a verb a user would say: what the component lets someone do.", "type": "string", "minLength": 8, "maxLength": 140, "pattern": "^[A-Z][^\\n]*\\.$" },
+    "purpose": { "description": "What it is and how it behaves, in plain prose. At most 500 characters.", "type": "string", "minLength": 20, "maxLength": 500 },
+    "useWhen": { "description": "Situations that call for it, each one sentence.", "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 8, "maxLength": 200 } },
+    "avoidWhen": {
+      "description": "Situations that look like a fit and are not, with what to use instead.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["when", "instead"],
+        "properties": {
+          "when": { "type": "string", "minLength": 8, "maxLength": 200 },
+          "instead": { "description": "A component id, or a short instruction when no component fits.", "type": "string", "minLength": 2, "maxLength": 200 }
+        }
+      }
+    },
+    "aka": { "description": "Other names people and other design systems use for it (search terms).", "type": "array", "items": { "type": "string", "minLength": 2, "maxLength": 40 }, "uniqueItems": true },
+    "surfaces": { "description": "Where it is used.", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["app", "website", "phone", "email"] } },
+    "data": { "description": "The shape of data it shows or collects.", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["record", "list", "series", "form", "text", "none"] } },
+    "states": {
+      "description": "Conditions it can be in, and how markup expresses each.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "how"],
+        "properties": {
+          "name": { "type": "string", "minLength": 2, "maxLength": 40 },
+          "how": { "description": "The attribute, class or call that sets it, written as it appears in markup.", "type": "string", "minLength": 2, "maxLength": 120 }
+        }
+      }
+    },
+    "variants": {
+      "description": "Attribute values that change the look or role. attribute and value must be ones catalog.json lists for the component.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["attribute", "value", "useWhen"],
+        "properties": {
+          "attribute": { "type": "string", "pattern": "^data-[a-z0-9-]+$" },
+          "value": { "description": "The attribute value; an empty string for an attribute that is set with no value (data-icon-only).", "type": "string" },
+          "useWhen": { "type": "string", "minLength": 8, "maxLength": 200 }
+        }
+      }
+    },
+    "parts": {
+      "description": "The classes that make up the component, each with its role. Every class must belong to the component in catalog.json.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["class", "role"],
+        "properties": {
+          "class": { "type": "string", "pattern": "^fd-[a-z0-9-]+$" },
+          "role": { "type": "string", "minLength": 4, "maxLength": 160 }
+        }
+      }
+    },
+    "related": { "description": "Ids of components often used with it or mistaken for it.", "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" } },
+    "keyboard": {
+      "description": "Keys the component handles.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["keys", "does"],
+        "properties": {
+          "keys": { "type": "string", "minLength": 1, "maxLength": 40 },
+          "does": { "type": "string", "minLength": 4, "maxLength": 120 }
+        }
+      }
+    },
+    "example": { "description": "The docs section whose specimen shows it: docs/<page>.html#<section id>. The build checks it exists.", "type": "string", "pattern": "^docs/[a-z0-9-]+\\.html#[A-Za-z0-9_-]+$" },
+    "provenance": { "description": "Repository paths the card was written from (docs pages, component CSS, module headers).", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } },
+    "since": { "description": "The Fire version that introduced the component.", "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+  }
+}

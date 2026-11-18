@@ -1,0 +1,1445 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "elements/src/chart.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
+          "name": "FdChart",
+          "members": [
+            {
+              "kind": "field",
+              "name": "type",
+              "type": {
+                "text": "FdChartType"
+              },
+              "default": "'line'",
+              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
+              "attribute": "type",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "'bars' | 'progress' | 'strip' | undefined"
+              },
+              "description": "Variant of a type: `bars` for a sparkline (`data-type=\"bars\"`), `progress` for a donut (a progress ring, `data-type=\"progress\"`), `strip` for a heat grid (`data-variant=\"strip\"`).",
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "data",
+              "type": {
+                "text": "FdChartData | undefined"
+              },
+              "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
+              "attribute": "data"
+            },
+            {
+              "kind": "field",
+              "name": "height",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24).",
+              "attribute": "height"
+            },
+            {
+              "kind": "field",
+              "name": "width",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Sparkline: width in px (default from CSS, 80).",
+              "attribute": "width"
+            },
+            {
+              "kind": "field",
+              "name": "legend",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Cartesian: show the built-in legend, whose items toggle series.",
+              "attribute": "legend"
+            },
+            {
+              "kind": "field",
+              "name": "grid",
+              "type": {
+                "text": "'dashed' | 'solid' | 'none' | undefined"
+              },
+              "description": "Cartesian: grid lines, `dashed` (default), `solid` or `none`.",
+              "attribute": "grid"
+            },
+            {
+              "kind": "field",
+              "name": "state",
+              "type": {
+                "text": "'loading' | 'empty' | undefined"
+              },
+              "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
+              "attribute": "state"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name override (all types); a progress ring also shows it as its caption.",
+              "attribute": "label"
+            },
+            {
+              "kind": "field",
+              "name": "yFormat",
+              "type": {
+                "text": "ChartFormat | undefined"
+              },
+              "description": "Cartesian: value format when the data gives none, `number`, `compact`, `percent`, `ms` or `credits`.",
+              "attribute": "y-format"
+            },
+            {
+              "kind": "field",
+              "name": "values",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Sparkline: values as text, `3,5,4,8`, when `data` is not set.",
+              "attribute": "values"
+            },
+            {
+              "kind": "field",
+              "name": "area",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: fill the area under the line.",
+              "attribute": "area"
+            },
+            {
+              "kind": "field",
+              "name": "dot",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: mark the last point.",
+              "attribute": "dot"
+            },
+            {
+              "kind": "field",
+              "name": "invert",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: lower is better, so a falling trend is coloured as good.",
+              "attribute": "invert"
+            },
+            {
+              "kind": "field",
+              "name": "fluid",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: take the width of its container and redraw when it changes.",
+              "attribute": "fluid"
+            },
+            {
+              "kind": "field",
+              "name": "tone",
+              "type": {
+                "text": "ChartTone | undefined"
+              },
+              "description": "Sparkline and progress ring: a fixed tone instead of the trend colour or the accent.",
+              "attribute": "tone"
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Donut: diameter in px (default 144, progress 96). Heat grid: cell size, `sm`, `md` (default) or `lg`.",
+              "attribute": "size"
+            },
+            {
+              "kind": "field",
+              "name": "thickness",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Donut: ring thickness in px.",
+              "attribute": "thickness"
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Progress ring: the value.",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Progress ring: the maximum (default 100).",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "format",
+              "type": {
+                "text": "ChartFormat | undefined"
+              },
+              "description": "Donut: value format when the data gives none (a name, as in `yFormat`).",
+              "attribute": "format"
+            },
+            {
+              "kind": "field",
+              "name": "#drawn",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Whether this element has drawn a chart yet."
+            },
+            {
+              "kind": "field",
+              "name": "#family",
+              "privacy": "private",
+              "type": {
+                "text": "'cartesian' | 'sparkline' | 'donut' | 'heatgrid'"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "#scripted",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "Whether the chart reads its data from a JSON script (a sparkline and a progress ring read attributes).",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "#structure",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#fresh",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#addedClass",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The root class this element added itself (a class the page set is never taken away).",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#written",
+              "privacy": "private",
+              "default": "new Set<string>()",
+              "description": "Root attributes this element wrote, so it removes only those.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#root",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Make the element its component's root: the class, then the attributes.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            }
+          ],
+          "events": [
+            {
+              "description": "The active point changed (pointer or keyboard). Cartesian and strip: `{ index, label, values }` or `{ index, label, tone, name, href }`; heat grid: `{ index, date, value }`.",
+              "name": "fd:hover"
+            },
+            {
+              "description": "A point was clicked, tapped or chosen with Enter. Cartesian: `{ index, label, values }`; strip: `{ index, label, tone, name, href }`.",
+              "name": "fd:select"
+            },
+            {
+              "description": "A legend item toggled a series: `{ value: seriesName, index, visible }`.",
+              "name": "fd:change"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "type",
+              "type": {
+                "text": "FdChartType"
+              },
+              "default": "'line'",
+              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
+              "fieldName": "type"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'bars' | 'progress' | 'strip' | undefined"
+              },
+              "description": "Variant of a type: `bars` for a sparkline (`data-type=\"bars\"`), `progress` for a donut (a progress ring, `data-type=\"progress\"`), `strip` for a heat grid (`data-variant=\"strip\"`).",
+              "fieldName": "variant"
+            },
+            {
+              "name": "data",
+              "type": {
+                "text": "FdChartData | undefined"
+              },
+              "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
+              "fieldName": "data"
+            },
+            {
+              "name": "height",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24).",
+              "fieldName": "height"
+            },
+            {
+              "name": "width",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Sparkline: width in px (default from CSS, 80).",
+              "fieldName": "width"
+            },
+            {
+              "name": "legend",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Cartesian: show the built-in legend, whose items toggle series.",
+              "fieldName": "legend"
+            },
+            {
+              "name": "grid",
+              "type": {
+                "text": "'dashed' | 'solid' | 'none' | undefined"
+              },
+              "description": "Cartesian: grid lines, `dashed` (default), `solid` or `none`.",
+              "fieldName": "grid"
+            },
+            {
+              "name": "state",
+              "type": {
+                "text": "'loading' | 'empty' | undefined"
+              },
+              "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
+              "fieldName": "state"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name override (all types); a progress ring also shows it as its caption.",
+              "fieldName": "label"
+            },
+            {
+              "name": "y-format",
+              "type": {
+                "text": "ChartFormat | undefined"
+              },
+              "description": "Cartesian: value format when the data gives none, `number`, `compact`, `percent`, `ms` or `credits`.",
+              "fieldName": "yFormat"
+            },
+            {
+              "name": "values",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Sparkline: values as text, `3,5,4,8`, when `data` is not set.",
+              "fieldName": "values"
+            },
+            {
+              "name": "area",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: fill the area under the line.",
+              "fieldName": "area"
+            },
+            {
+              "name": "dot",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: mark the last point.",
+              "fieldName": "dot"
+            },
+            {
+              "name": "invert",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: lower is better, so a falling trend is coloured as good.",
+              "fieldName": "invert"
+            },
+            {
+              "name": "fluid",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Sparkline: take the width of its container and redraw when it changes.",
+              "fieldName": "fluid"
+            },
+            {
+              "name": "tone",
+              "type": {
+                "text": "ChartTone | undefined"
+              },
+              "description": "Sparkline and progress ring: a fixed tone instead of the trend colour or the accent.",
+              "fieldName": "tone"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Donut: diameter in px (default 144, progress 96). Heat grid: cell size, `sm`, `md` (default) or `lg`.",
+              "fieldName": "size"
+            },
+            {
+              "name": "thickness",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Donut: ring thickness in px.",
+              "fieldName": "thickness"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Progress ring: the value.",
+              "fieldName": "value"
+            },
+            {
+              "name": "max",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Progress ring: the maximum (default 100).",
+              "fieldName": "max"
+            },
+            {
+              "name": "format",
+              "type": {
+                "text": "ChartFormat | undefined"
+              },
+              "description": "Donut: value format when the data gives none (a name, as in `yFormat`).",
+              "fieldName": "format"
+            }
+          ],
+          "superclass": {
+            "name": "FireElement",
+            "module": "/elements/src/fire-element.js"
+          },
+          "tagName": "fd-chart",
+          "customElement": true,
+          "summary": "A chart drawn from data, safe to render from a framework."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FdChart",
+          "declaration": {
+            "name": "FdChart",
+            "module": "elements/src/chart.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "fd-chart",
+          "declaration": {
+            "name": "FdChart",
+            "module": "elements/src/chart.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/src/code.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A Fire code block that highlights the text it is given. The element is the block's root: it carries\n`class=\"fd-codeblock\"` and the markup form's data-* attributes, renders the block's internals (an optional header\nor copy button, then `<pre class=\"fd-codeblock-body\"><code data-lang=\"…\">`), puts `code` in it as text and lets\nFire's code module tokenise it into lines, so it looks and behaves exactly like the markup form. Unlike the markup\nform inside a framework, Fire never rewrites text nodes the framework owns: changing `code` (or any attribute)\nrenders the internals afresh.\n\nLanguages: `json`, `bash`, `javascript`, `typescript`, `python` and their aliases (`sh`, `curl`, `js`, `ts`, `py`, …);\nany other name shows plain text.",
+          "name": "FdCode",
+          "members": [
+            {
+              "kind": "field",
+              "name": "code",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The code, as text (never HTML). As an attribute, the text itself.",
+              "attribute": "code"
+            },
+            {
+              "kind": "field",
+              "name": "language",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Language for highlighting (the markup form's `data-lang` on `<code>`; `lang` is HTML's own attribute).",
+              "attribute": "language"
+            },
+            {
+              "kind": "field",
+              "name": "lines",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Show line numbers (`data-lines`).",
+              "attribute": "lines"
+            },
+            {
+              "kind": "field",
+              "name": "highlight",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Lines to highlight, `3,5-7` (`data-highlight`).",
+              "attribute": "highlight"
+            },
+            {
+              "kind": "field",
+              "name": "collapse",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Collapse to this height in px with a \"Show all N lines\" button when the code is taller (`data-collapse`).",
+              "attribute": "collapse"
+            },
+            {
+              "kind": "field",
+              "name": "wrap",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Soft-wrap long lines (`data-wrap`).",
+              "attribute": "wrap"
+            },
+            {
+              "kind": "field",
+              "name": "filename",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A file name shown in a header above the code (`.fd-codeblock-file`).",
+              "attribute": "filename"
+            },
+            {
+              "kind": "field",
+              "name": "copy",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Add a copy button: in the header when there is a file name, otherwise floating in the corner.",
+              "attribute": "copy"
+            },
+            {
+              "kind": "field",
+              "name": "#structure",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#fresh",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#addedClass",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The root class this element added itself (a class the page set is never taken away).",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#written",
+              "privacy": "private",
+              "default": "new Set<string>()",
+              "description": "Root attributes this element wrote, so it removes only those.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#root",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Make the element its component's root: the class, then the attributes.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "code",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "The code, as text (never HTML). As an attribute, the text itself.",
+              "fieldName": "code"
+            },
+            {
+              "name": "language",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Language for highlighting (the markup form's `data-lang` on `<code>`; `lang` is HTML's own attribute).",
+              "fieldName": "language"
+            },
+            {
+              "name": "lines",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Show line numbers (`data-lines`).",
+              "fieldName": "lines"
+            },
+            {
+              "name": "highlight",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Lines to highlight, `3,5-7` (`data-highlight`).",
+              "fieldName": "highlight"
+            },
+            {
+              "name": "collapse",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Collapse to this height in px with a \"Show all N lines\" button when the code is taller (`data-collapse`).",
+              "fieldName": "collapse"
+            },
+            {
+              "name": "wrap",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Soft-wrap long lines (`data-wrap`).",
+              "fieldName": "wrap"
+            },
+            {
+              "name": "filename",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "A file name shown in a header above the code (`.fd-codeblock-file`).",
+              "fieldName": "filename"
+            },
+            {
+              "name": "copy",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Add a copy button: in the header when there is a file name, otherwise floating in the corner.",
+              "fieldName": "copy"
+            }
+          ],
+          "superclass": {
+            "name": "FireElement",
+            "module": "/elements/src/fire-element.js"
+          },
+          "tagName": "fd-code",
+          "customElement": true,
+          "summary": "A highlighted code block, safe to render from a framework."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FdCode",
+          "declaration": {
+            "name": "FdCode",
+            "module": "elements/src/code.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "fd-code",
+          "declaration": {
+            "name": "FdCode",
+            "module": "elements/src/code.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/src/fire-element.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "Base class of Fire's custom elements. The element is its component's root: it adds the root class (never removing\na class the page set, and adding it back after each update if a framework replaced `class`), writes the markup\nform's data-* attributes from its properties, renders the internals the markup form would hold, runs Fire's\nbehaviour modules on itself, and redraws when a property changes.\n\nA subclass gives `rootClass()`, `rootAttributes()`, the internals (`markup()`, optional), the Fire modules that\nenhance it (`static fire`), a `structure()` string (when it changes, the internals are rendered afresh and\nenhanced again), `prepare()` to fill what the template does not carry, and `refresh()` to redraw in place.",
+          "name": "FireElement",
+          "members": [
+            {
+              "kind": "field",
+              "name": "#structure",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#fresh",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true"
+            },
+            {
+              "kind": "field",
+              "name": "#addedClass",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The root class this element added itself (a class the page set is never taken away)."
+            },
+            {
+              "kind": "field",
+              "name": "#written",
+              "privacy": "private",
+              "default": "new Set<string>()",
+              "description": "Root attributes this element wrote, so it removes only those."
+            },
+            {
+              "kind": "method",
+              "name": "#root",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Make the element its component's root: the class, then the attributes."
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FireElement",
+          "declaration": {
+            "name": "FireElement",
+            "module": "elements/src/fire-element.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/src/icon.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "One of Fire's icons (a Lucide subset). The element is the icon's root, as `svg.fd-icon` is for the markup form:\nit carries `class=\"fd-icon\"`, `data-icon`, `data-size` and `aria-hidden=\"true\"`, so every `.fd-icon` rule applies\nto it, direct-child rules such as `.fd-btn > .fd-icon` included. Inside it, an SVG drawn from Fire's sprite fills\nit (fire/base.css). Use it in framework code, where an `<i data-icon>` that replaces itself would break the\nframework's reconciliation. The icon is decorative: name the control that holds it.\n\nAn unknown name draws nothing and logs a warning, as the markup form does.",
+          "name": "FdIcon",
+          "members": [
+            {
+              "kind": "field",
+              "name": "icon",
+              "type": {
+                "text": "IconName | undefined"
+              },
+              "description": "Icon name from Fire's set, for example `search` (the markup form's `data-icon`).",
+              "attribute": "icon",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "'12' | '14' | '16' | '20' | '24' | '32' | undefined"
+              },
+              "description": "Size in px: 12, 14, 16 (the default), 20, 24 or 32 (the markup form's `data-size`).",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "#structure",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#fresh",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#addedClass",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The root class this element added itself (a class the page set is never taken away).",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#written",
+              "privacy": "private",
+              "default": "new Set<string>()",
+              "description": "Root attributes this element wrote, so it removes only those.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#root",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Make the element its component's root: the class, then the attributes.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "icon",
+              "type": {
+                "text": "IconName | undefined"
+              },
+              "description": "Icon name from Fire's set, for example `search` (the markup form's `data-icon`).",
+              "fieldName": "icon"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "'12' | '14' | '16' | '20' | '24' | '32' | undefined"
+              },
+              "description": "Size in px: 12, 14, 16 (the default), 20, 24 or 32 (the markup form's `data-size`).",
+              "fieldName": "size"
+            }
+          ],
+          "superclass": {
+            "name": "FireElement",
+            "module": "/elements/src/fire-element.js"
+          },
+          "tagName": "fd-icon",
+          "customElement": true,
+          "summary": "An icon from Fire's set, safe to render from a framework."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FdIcon",
+          "declaration": {
+            "name": "FdIcon",
+            "module": "elements/src/icon.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "fd-icon",
+          "declaration": {
+            "name": "FdIcon",
+            "module": "elements/src/icon.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/src/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FireElement",
+          "declaration": {
+            "name": "FireElement",
+            "module": "./fire-element.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FireInit",
+          "declaration": {
+            "name": "FireInit",
+            "module": "./fire-element.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "RootAttribute",
+          "declaration": {
+            "name": "RootAttribute",
+            "module": "./fire-element.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FdIcon",
+          "declaration": {
+            "name": "FdIcon",
+            "module": "./icon.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FdChart",
+          "declaration": {
+            "name": "FdChart",
+            "module": "./chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FdChartType",
+          "declaration": {
+            "name": "FdChartType",
+            "module": "./chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FdChartData",
+          "declaration": {
+            "name": "FdChartData",
+            "module": "./chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FdCode",
+          "declaration": {
+            "name": "FdCode",
+            "module": "./code.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FdTexture",
+          "declaration": {
+            "name": "FdTexture",
+            "module": "./texture.js"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "elements/src/texture.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A Fire generative character field: terrain, waves, orbit, rain, grid, flame, halftone or spark. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
+          "name": "FdTexture",
+          "members": [
+            {
+              "kind": "field",
+              "name": "pattern",
+              "type": {
+                "text": "string"
+              },
+              "default": "'terrain'",
+              "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`).",
+              "attribute": "pattern"
+            },
+            {
+              "kind": "field",
+              "name": "tone",
+              "type": {
+                "text": "'neutral' | 'accent' | 'contrast' | 'strong' | undefined"
+              },
+              "description": "Ink: `neutral` (default), `accent`, `contrast` or `strong` (`data-tone`).",
+              "attribute": "tone"
+            },
+            {
+              "kind": "field",
+              "name": "fade",
+              "type": {
+                "text": "'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial' | undefined"
+              },
+              "description": "Fade out toward an edge: `left`, `right`, `top`, `bottom`, `x`, `y` or `radial` (`data-fade`).",
+              "attribute": "fade"
+            },
+            {
+              "kind": "field",
+              "name": "marks",
+              "type": {
+                "text": "'chars' | 'dots' | undefined"
+              },
+              "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`).",
+              "attribute": "marks"
+            },
+            {
+              "kind": "field",
+              "name": "ramp",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Character ramp: `default`, `soft`, `dense`, `glyph`, `rain`, or a literal ramp such as ` .:-=+*#` (`data-ramp`).",
+              "attribute": "ramp"
+            },
+            {
+              "kind": "field",
+              "name": "cell",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Cell size in px, `7x12` (default) or `8` for square (`data-cell`).",
+              "attribute": "cell"
+            },
+            {
+              "kind": "field",
+              "name": "seed",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Seed, a number or a string; defaults to the pattern name, so a page always looks the same (`data-seed`).",
+              "attribute": "seed"
+            },
+            {
+              "kind": "field",
+              "name": "animated",
+              "type": {
+                "text": "'true' | 'false' | undefined"
+              },
+              "description": "`true` or `false`; waves, orbit, rain and flame animate by default (`data-animate`; `animate` is a DOM method).",
+              "attribute": "animated"
+            },
+            {
+              "kind": "field",
+              "name": "speed",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Time multiplier, default 1 (`data-speed`).",
+              "attribute": "speed"
+            },
+            {
+              "kind": "field",
+              "name": "intensity",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Luminance multiplier, default 1 (`data-intensity`).",
+              "attribute": "intensity"
+            },
+            {
+              "kind": "field",
+              "name": "interactive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Characters near the pointer step up the ramp (`data-interactive`).",
+              "attribute": "interactive"
+            },
+            {
+              "kind": "field",
+              "name": "origin",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "`x,y` in 0..1, the centre for orbit, flame, halftone and spark (`data-origin`).",
+              "attribute": "origin"
+            },
+            {
+              "kind": "field",
+              "name": "side",
+              "type": {
+                "text": "'left' | 'right' | undefined"
+              },
+              "description": "Terrain: the side that rises, `right` (default) or `left` (`data-side`).",
+              "attribute": "side"
+            },
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "'flat' | 'perspective' | undefined"
+              },
+              "description": "Grid: `flat` (default) or `perspective` (`data-variant`).",
+              "attribute": "variant"
+            },
+            {
+              "kind": "field",
+              "name": "shape",
+              "type": {
+                "text": "'blob' | undefined"
+              },
+              "description": "`blob` clips the field to a soft, noisy disc (`data-shape`).",
+              "attribute": "shape"
+            },
+            {
+              "kind": "field",
+              "name": "inline",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Flow in the page at the field height instead of filling the positioned ancestor (`data-inline`).",
+              "attribute": "inline"
+            },
+            {
+              "kind": "field",
+              "name": "#structure",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#fresh",
+              "privacy": "private",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#addedClass",
+              "privacy": "private",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "The root class this element added itself (a class the page set is never taken away).",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "#written",
+              "privacy": "private",
+              "default": "new Set<string>()",
+              "description": "Root attributes this element wrote, so it removes only those.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "#root",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Make the element its component's root: the class, then the attributes.",
+              "inheritedFrom": {
+                "name": "FireElement",
+                "module": "elements/src/fire-element.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "pattern",
+              "type": {
+                "text": "string"
+              },
+              "default": "'terrain'",
+              "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`).",
+              "fieldName": "pattern"
+            },
+            {
+              "name": "tone",
+              "type": {
+                "text": "'neutral' | 'accent' | 'contrast' | 'strong' | undefined"
+              },
+              "description": "Ink: `neutral` (default), `accent`, `contrast` or `strong` (`data-tone`).",
+              "fieldName": "tone"
+            },
+            {
+              "name": "fade",
+              "type": {
+                "text": "'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial' | undefined"
+              },
+              "description": "Fade out toward an edge: `left`, `right`, `top`, `bottom`, `x`, `y` or `radial` (`data-fade`).",
+              "fieldName": "fade"
+            },
+            {
+              "name": "marks",
+              "type": {
+                "text": "'chars' | 'dots' | undefined"
+              },
+              "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`).",
+              "fieldName": "marks"
+            },
+            {
+              "name": "ramp",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Character ramp: `default`, `soft`, `dense`, `glyph`, `rain`, or a literal ramp such as ` .:-=+*#` (`data-ramp`).",
+              "fieldName": "ramp"
+            },
+            {
+              "name": "cell",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Cell size in px, `7x12` (default) or `8` for square (`data-cell`).",
+              "fieldName": "cell"
+            },
+            {
+              "name": "seed",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Seed, a number or a string; defaults to the pattern name, so a page always looks the same (`data-seed`).",
+              "fieldName": "seed"
+            },
+            {
+              "name": "animated",
+              "type": {
+                "text": "'true' | 'false' | undefined"
+              },
+              "description": "`true` or `false`; waves, orbit, rain and flame animate by default (`data-animate`; `animate` is a DOM method).",
+              "fieldName": "animated"
+            },
+            {
+              "name": "speed",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Time multiplier, default 1 (`data-speed`).",
+              "fieldName": "speed"
+            },
+            {
+              "name": "intensity",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Luminance multiplier, default 1 (`data-intensity`).",
+              "fieldName": "intensity"
+            },
+            {
+              "name": "interactive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Characters near the pointer step up the ramp (`data-interactive`).",
+              "fieldName": "interactive"
+            },
+            {
+              "name": "origin",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "`x,y` in 0..1, the centre for orbit, flame, halftone and spark (`data-origin`).",
+              "fieldName": "origin"
+            },
+            {
+              "name": "side",
+              "type": {
+                "text": "'left' | 'right' | undefined"
+              },
+              "description": "Terrain: the side that rises, `right` (default) or `left` (`data-side`).",
+              "fieldName": "side"
+            },
+            {
+              "name": "variant",
+              "type": {
+                "text": "'flat' | 'perspective' | undefined"
+              },
+              "description": "Grid: `flat` (default) or `perspective` (`data-variant`).",
+              "fieldName": "variant"
+            },
+            {
+              "name": "shape",
+              "type": {
+                "text": "'blob' | undefined"
+              },
+              "description": "`blob` clips the field to a soft, noisy disc (`data-shape`).",
+              "fieldName": "shape"
+            },
+            {
+              "name": "inline",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Flow in the page at the field height instead of filling the positioned ancestor (`data-inline`).",
+              "fieldName": "inline"
+            }
+          ],
+          "superclass": {
+            "name": "FireElement",
+            "module": "/elements/src/fire-element.js"
+          },
+          "tagName": "fd-texture",
+          "customElement": true,
+          "summary": "A generative texture field, safe to render from a framework."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "FdTexture",
+          "declaration": {
+            "name": "FdTexture",
+            "module": "elements/src/texture.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "fd-texture",
+          "declaration": {
+            "name": "FdTexture",
+            "module": "elements/src/texture.ts"
+          }
+        }
+      ]
+    }
+  ]
+}

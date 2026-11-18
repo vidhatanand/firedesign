@@ -1,0 +1,110 @@
+{
+  "id": "number",
+  "job": "Enter a number and nudge it up or down.",
+  "purpose": "A number input with steppers inside the field. Hold a stepper to repeat; steppers disable at min and max. Arrow keys and typing still work. fd:change fires with the new value.",
+  "useWhen": [
+    "The value is a count or an amount with limits: retries, page depth, seats.",
+    "People change it by small steps more than they type it."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The value sits on a scale and exact digits matter less than position.",
+      "instead": "slider"
+    },
+    {
+      "when": "The number has a unit that should show beside it.",
+      "instead": "input-group"
+    },
+    {
+      "when": "The value is an ID, a phone number or a code of digits.",
+      "instead": "input"
+    },
+    {
+      "when": "The code is sent to the person and entered once.",
+      "instead": "otp"
+    }
+  ],
+  "aka": [
+    "stepper",
+    "spinner",
+    "quantity input",
+    "numeric input"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "at limit",
+      "how": "a stepper is disabled when the value reaches min or max"
+    },
+    {
+      "name": "invalid",
+      "how": "aria-invalid=\"true\" on the input"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A dense row (28px)."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "A larger field."
+    },
+    {
+      "attribute": "data-block",
+      "value": "",
+      "useWhen": "The control fills its row."
+    },
+    {
+      "attribute": "data-fit",
+      "value": "",
+      "useWhen": "A short number; the width follows the input."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-number",
+      "role": "The wrapper."
+    },
+    {
+      "class": "fd-number-input",
+      "role": "The native number input."
+    },
+    {
+      "class": "fd-number-step",
+      "role": "The minus and plus buttons (data-fd-step=\"-1\" or \"1\")."
+    }
+  ],
+  "related": [
+    "slider",
+    "input",
+    "input-group",
+    "field"
+  ],
+  "keyboard": [
+    {
+      "keys": "ArrowUp, ArrowDown",
+      "does": "Native: raise or lower the value by step."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "On a stepper: changes the value; holding repeats."
+    }
+  ],
+  "example": "docs/forms.html#number",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

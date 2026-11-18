@@ -1,0 +1,197 @@
+{
+  "id": "table",
+  "job": "Compare, sort and act on records laid out in rows and columns.",
+  "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
+  "useWhen": [
+    "People compare the same fields across many records: logs, keys, invoices, runs.",
+    "Rows need sorting, selection, bulk actions or an actions cell.",
+    "The same records must stay readable on a phone (add data-stack)."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Records are few and each needs a title, a description and several controls.",
+      "instead": "list"
+    },
+    {
+      "when": "The data is a handful of label and value pairs for one record.",
+      "instead": "kv"
+    },
+    {
+      "when": "The table is a grid of switches with a category column.",
+      "instead": "matrix"
+    },
+    {
+      "when": "The numbers are a trend over time.",
+      "instead": "chart"
+    }
+  ],
+  "aka": [
+    "data grid",
+    "datagrid",
+    "list view",
+    "activity log"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "loading",
+      "how": "aria-busy=\"true\" on the table, with tr[data-skeleton] rows holding fd-table-skeleton bars"
+    },
+    {
+      "name": "empty",
+      "how": "a tr.fd-table-state row with fd-table-empty, naming what will appear and the next step"
+    },
+    {
+      "name": "error",
+      "how": "a tr.fd-table-state row with fd-table-empty and a retry button"
+    },
+    {
+      "name": "selected",
+      "how": "data-select checkboxes; the bulk bar fd-table-bulk shows the count"
+    },
+    {
+      "name": "sorted",
+      "how": "aria-sort=\"ascending|descending\" on the th that holds fd-th-sort"
+    },
+    {
+      "name": "expanded",
+      "how": "tr[data-expanded] followed by a tr.fd-table-detail row"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-sticky",
+      "value": "",
+      "useWhen": "The header stays while rows scroll inside a height set with --fd-table-max."
+    },
+    {
+      "attribute": "data-stack",
+      "value": "hide",
+      "useWhen": "On a td or th: drop this column when the table stacks into cards."
+    },
+    {
+      "attribute": "data-col",
+      "value": "fit",
+      "useWhen": "On a th: the column shrinks to its content."
+    },
+    {
+      "attribute": "data-col",
+      "value": "fill",
+      "useWhen": "On a th: the column takes the remaining width."
+    },
+    {
+      "attribute": "data-num",
+      "value": "",
+      "useWhen": "On a td or th: a numeric column, right-aligned with tabular figures."
+    },
+    {
+      "attribute": "data-mono",
+      "value": "",
+      "useWhen": "On a td: an identifier or endpoint in the mono face."
+    },
+    {
+      "attribute": "data-actions",
+      "value": "",
+      "useWhen": "On the last td and th: row actions, quiet until the row is hovered or focused."
+    },
+    {
+      "attribute": "data-href",
+      "value": "",
+      "useWhen": "On a tr: the whole row opens a page; keep a real link in the row for keyboard and middle-click."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-table",
+      "role": "The table element."
+    },
+    {
+      "class": "fd-table-wrap",
+      "role": "Frame around the scroller and the foot; holds the bulk bar and the border."
+    },
+    {
+      "class": "fd-table-scroll",
+      "role": "Owns horizontal scrolling; edge fades show on the sides with more content."
+    },
+    {
+      "class": "fd-th-sort",
+      "role": "The button inside a sortable th; its arrow shows direction."
+    },
+    {
+      "class": "fd-table-cell",
+      "role": "Flex row inside a td: a leading tile and a two-line name."
+    },
+    {
+      "class": "fd-table-lead",
+      "role": "The leading tile of a cell."
+    },
+    {
+      "class": "fd-table-two",
+      "role": "A title and a muted line stacked in one cell."
+    },
+    {
+      "class": "fd-table-trunc",
+      "role": "Truncates a long string such as a URL to a width set with --w."
+    },
+    {
+      "class": "fd-table-check",
+      "role": "The row and select-all checkbox."
+    },
+    {
+      "class": "fd-table-expand",
+      "role": "The disclosure button of an expandable row."
+    },
+    {
+      "class": "fd-table-detail",
+      "role": "The row that holds an expanded row's detail."
+    },
+    {
+      "class": "fd-table-state",
+      "role": "The single row that holds a loading, empty or error message."
+    },
+    {
+      "class": "fd-table-bulk",
+      "role": "The bar that slides up over the foot with the selection count and actions."
+    },
+    {
+      "class": "fd-table-foot",
+      "role": "The foot under the table: count or summary on the left, pagination and actions on the right."
+    }
+  ],
+  "related": [
+    "filter",
+    "pagination",
+    "empty",
+    "skeleton",
+    "list",
+    "kv"
+  ],
+  "keyboard": [
+    {
+      "keys": "Shift+click",
+      "does": "Selects a range of rows."
+    },
+    {
+      "keys": "Escape",
+      "does": "Clears the selection."
+    },
+    {
+      "keys": "Enter",
+      "does": "Opens a row that carries data-href, or sorts the focused header."
+    }
+  ],
+  "example": "docs/data.html#activity",
+  "provenance": [
+    "docs/data.html",
+    "fire/components/data.css",
+    "fire/js/data.js"
+  ],
+  "since": "0.1.0"
+}

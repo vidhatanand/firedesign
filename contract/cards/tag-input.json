@@ -1,0 +1,114 @@
+{
+  "id": "tag-input",
+  "job": "Enter a free-form list of values, one token each.",
+  "purpose": "A field that turns typed values into removable tokens. Enter or a comma adds one, Backspace on an empty field removes the last, and pasted lists split on commas and new lines. Without script it is a text area with one value per line; with it, one hidden input posts the same lines, or a JSON array with data-format=\"json\". data-pattern flags bad values, data-max caps the count.",
+  "useWhen": [
+    "The list is free text: domains, IP ranges, emails, keywords, redirect URIs.",
+    "The server stores a list, and nobody should type JSON."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The values come from a fixed list.",
+      "instead": "combobox"
+    },
+    {
+      "when": "Each entry has a name and a value.",
+      "instead": "pairs"
+    },
+    {
+      "when": "There is one value.",
+      "instead": "input"
+    },
+    {
+      "when": "The text is a paragraph.",
+      "instead": "textarea"
+    }
+  ],
+  "aka": [
+    "chips input",
+    "token field",
+    "multi-value input",
+    "tags field",
+    "email list"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "form",
+    "list"
+  ],
+  "states": [
+    {
+      "name": "invalid value",
+      "how": "a token with data-invalid; data-pattern sets the rule"
+    },
+    {
+      "name": "full",
+      "how": "data-max stops adding past a count"
+    },
+    {
+      "name": "new token",
+      "how": "data-new on a token as it is added"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A dense row (28px)."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "A larger field."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-tag-input",
+      "role": "The field box; carries data-fd-tag-input."
+    },
+    {
+      "class": "fd-tag-input-field",
+      "role": "The typing input."
+    },
+    {
+      "class": "fd-token",
+      "role": "One value."
+    },
+    {
+      "class": "fd-token-label",
+      "role": "The value text."
+    },
+    {
+      "class": "fd-token-remove",
+      "role": "The remove button on a token."
+    }
+  ],
+  "related": [
+    "pairs",
+    "combobox",
+    "textarea",
+    "field"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, comma",
+      "does": "Adds the typed value as a token."
+    },
+    {
+      "keys": "Backspace",
+      "does": "On an empty field: removes the last token."
+    }
+  ],
+  "example": "docs/forms.html#tags",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

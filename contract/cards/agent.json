@@ -1,0 +1,97 @@
+{
+  "id": "agent",
+  "job": "Lay out a whole agent screen: past sessions, the thread and a docked composer.",
+  "purpose": "The page layout for an AI agent. A session list sits in a side column, the thread scrolls in the middle at reading measure, and the composer docks at the bottom with the thread fading under it. With data-fill it takes the viewport height under the top bar. Below 760px the side column leaves and the thread takes the width.",
+  "useWhen": [
+    "The product is a conversation with an agent and the screen is the agent: ask, watch it work, read the answer.",
+    "People return to earlier runs and need the session list beside the thread."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The conversation is help or support inside another product screen.",
+      "instead": "chat"
+    },
+    {
+      "when": "One endpoint with options is tried through a request form and a response panel.",
+      "instead": "playground"
+    },
+    {
+      "when": "A page needs only a prompt box, not the whole screen.",
+      "instead": "composer"
+    }
+  ],
+  "aka": [
+    "agent screen",
+    "assistant page",
+    "chat page",
+    "AI workspace",
+    "copilot layout"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [
+    {
+      "name": "fills the viewport",
+      "how": "data-fill on .fd-agent"
+    },
+    {
+      "name": "no session column",
+      "how": "omit .fd-agent-side; the grid collapses to one column"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-fill",
+      "value": "",
+      "useWhen": "The agent is the whole page: height is the viewport minus the top bar, and the thread scrolls inside."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-agent",
+      "role": "The grid: optional side column plus the main column."
+    },
+    {
+      "class": "fd-agent-side",
+      "role": "Holds the session list, with a hairline on its end edge."
+    },
+    {
+      "class": "fd-agent-main",
+      "role": "The column with the top row, scroll area and dock."
+    },
+    {
+      "class": "fd-agent-top",
+      "role": "A slim row for the title and page-level actions."
+    },
+    {
+      "class": "fd-agent-scroll",
+      "role": "The scrolling thread, or the hero prompt when empty."
+    },
+    {
+      "class": "fd-agent-dock",
+      "role": "Pinned bottom area for the composer."
+    },
+    {
+      "class": "fd-agent-dock-note",
+      "role": "One muted line under the composer, such as \"can be wrong\"."
+    }
+  ],
+  "related": [
+    "session-list",
+    "thread",
+    "composer",
+    "split"
+  ],
+  "keyboard": [],
+  "example": "docs/agent.html#screen",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "templates/agent.html"
+  ],
+  "since": "0.1.0"
+}

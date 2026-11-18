@@ -1,0 +1,141 @@
+{
+  "id": "sources",
+  "job": "Show where an answer came from, with numbered citations and a list of sources.",
+  "purpose": "Citation chips (18px mono pills) sit in the text; hovering or focusing one opens a card with the title, domain and snippet from its data attributes. A Sources list follows the answer in the same order, with a letter tile for each site. Never use a site's real logo.",
+  "useWhen": [
+    "An agent's claims come from pages and the person should be able to check each one.",
+    "A chat answer needs a compact scrolling row of sources under it."
+  ],
+  "avoidWhen": [
+    {
+      "when": "An article footnote with no hover card.",
+      "instead": "prose"
+    },
+    {
+      "when": "Links to related reading.",
+      "instead": "doc-cards"
+    },
+    {
+      "when": "Attribution for a quote or an author.",
+      "instead": "text"
+    }
+  ],
+  "aka": [
+    "citations",
+    "references",
+    "footnotes",
+    "links used",
+    "grounding",
+    "bibliography"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "card open",
+      "how": "hover or focus on .fd-citation; Escape closes"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-layout",
+      "value": "row",
+      "useWhen": "One scrolling row of compact items, as under a chat answer."
+    },
+    {
+      "attribute": "data-side",
+      "value": "bottom",
+      "useWhen": "The citation card opens below the chip when there is no room above."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "neutral",
+      "useWhen": "The default letter tile."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "info",
+      "useWhen": "A tile that groups sources by kind, such as docs."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "success",
+      "useWhen": "A tile for a verified or first-party source."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "violet",
+      "useWhen": "A tile for a distinct fourth group, such as catalog data."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-citation",
+      "role": "The numbered chip in the text; needs aria-label and data-title, data-domain and data-snippet."
+    },
+    {
+      "class": "fd-citation-card",
+      "role": "The hover card, built by agent.js."
+    },
+    {
+      "class": "fd-sources",
+      "role": "The list block."
+    },
+    {
+      "class": "fd-sources-head",
+      "role": "Heading with a count."
+    },
+    {
+      "class": "fd-sources-list",
+      "role": "The items."
+    },
+    {
+      "class": "fd-sources-item",
+      "role": "One source."
+    },
+    {
+      "class": "fd-sources-tile",
+      "role": "The letter tile."
+    },
+    {
+      "class": "fd-sources-num",
+      "role": "The number that matches the chip."
+    },
+    {
+      "class": "fd-sources-title",
+      "role": "The page title."
+    },
+    {
+      "class": "fd-sources-domain",
+      "role": "The domain."
+    }
+  ],
+  "related": [
+    "message",
+    "chat-message",
+    "hovercard",
+    "toolcall"
+  ],
+  "keyboard": [
+    {
+      "keys": "Escape",
+      "does": "Closes an open citation card."
+    },
+    {
+      "keys": "Tab",
+      "does": "Focuses a chip and shows its card."
+    }
+  ],
+  "example": "docs/agent.html#sources",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

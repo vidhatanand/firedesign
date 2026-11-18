@@ -1,0 +1,151 @@
+{
+  "id": "timeline",
+  "job": "Read the history of one thing as a list of events in time order.",
+  "purpose": "A vertical rail with 8px dots for ordinary events and 20px icon nodes for the ones that matter. Each item has a title, a time and optional detail or a card. The live item pulses until it finishes. A group item folds similar events into one \"×12\" row.",
+  "useWhen": [
+    "A run, a key or a deployment needs its history shown newest first or oldest first.",
+    "Events have a tone: failed, rate limited, started by someone.",
+    "Many similar events should fold into one group row."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Parallel staged work with a graph of what ran after what.",
+      "instead": "pipeline"
+    },
+    {
+      "when": "Steps of an agent run with tool calls.",
+      "instead": "run-steps"
+    },
+    {
+      "when": "A log with levels, search and follow.",
+      "instead": "log"
+    },
+    {
+      "when": "Rows with columns that sort.",
+      "instead": "table"
+    }
+  ],
+  "aka": [
+    "activity feed",
+    "history",
+    "audit log",
+    "event stream",
+    "changelog",
+    "stepper",
+    "activity"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "live",
+      "how": "data-live on an item; its dot pulses until it is removed"
+    },
+    {
+      "name": "group",
+      "how": "data-kind=\"group\" on an item; a fd-timeline-more button expands it"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-kind",
+      "value": "group",
+      "useWhen": "A row that stands for many similar events."
+    },
+    {
+      "attribute": "data-live",
+      "value": "",
+      "useWhen": "The event is happening now."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "success",
+      "useWhen": "Event: something finished or is healthy."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "warning",
+      "useWhen": "Event: something needs attention soon but is not broken."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "Event: something failed or is destructive."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "info",
+      "useWhen": "Event: neutral news or guidance."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "accent",
+      "useWhen": "Event: one thing to notice, in the brand colour."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "violet",
+      "useWhen": "Event: output from an agent or another special category."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-timeline",
+      "role": "The list."
+    },
+    {
+      "class": "fd-timeline-item",
+      "role": "One event."
+    },
+    {
+      "class": "fd-timeline-node",
+      "role": "The dot or icon on the rail."
+    },
+    {
+      "class": "fd-timeline-main",
+      "role": "The text column."
+    },
+    {
+      "class": "fd-timeline-head",
+      "role": "Title and time row."
+    },
+    {
+      "class": "fd-timeline-title",
+      "role": "What happened."
+    },
+    {
+      "class": "fd-timeline-time",
+      "role": "When it happened."
+    },
+    {
+      "class": "fd-timeline-body",
+      "role": "Detail under the title."
+    },
+    {
+      "class": "fd-timeline-card",
+      "role": "A framed detail such as an error trace."
+    },
+    {
+      "class": "fd-timeline-more",
+      "role": "The button of a group item."
+    }
+  ],
+  "related": [
+    "status",
+    "pipeline",
+    "run-steps",
+    "log"
+  ],
+  "keyboard": [],
+  "example": "docs/content.html#timeline",
+  "provenance": [
+    "docs/content.html",
+    "fire/components/content.css"
+  ],
+  "since": "0.1.0"
+}

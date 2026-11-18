@@ -1,0 +1,101 @@
+{
+  "id": "run-steps",
+  "job": "Show the plan of a long run and tick it off as it goes.",
+  "purpose": "A numbered plan for runs that take minutes. The current step is in ink, finished steps fall back, failed steps show the error, and a footer keeps the clock and the credits counting. Each step can carry a detail line and a time.",
+  "useWhen": [
+    "A run takes minutes and the person wants to see the plan and where it is.",
+    "A run stopped and the person needs to see which step failed and what it cost."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Each step needs arguments, a result and an approval.",
+      "instead": "toolcall"
+    },
+    {
+      "when": "A flow with fixed stages the person fills in themselves.",
+      "instead": "steps"
+    },
+    {
+      "when": "A background job shown as one percentage.",
+      "instead": "progress"
+    }
+  ],
+  "aka": [
+    "plan",
+    "task list",
+    "progress steps",
+    "agent plan",
+    "checklist",
+    "stepper"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "active",
+      "how": "data-state=\"active\" or \"running\" on an item"
+    },
+    {
+      "name": "done",
+      "how": "data-state=\"done\""
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\""
+    },
+    {
+      "name": "pending",
+      "how": "data-state=\"pending\" or \"queued\""
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-run-steps",
+      "role": "The list."
+    },
+    {
+      "class": "fd-run-steps-item",
+      "role": "One step."
+    },
+    {
+      "class": "fd-run-steps-icon",
+      "role": "The state icon: ring, spinner, check or cross."
+    },
+    {
+      "class": "fd-run-steps-label",
+      "role": "What the step does."
+    },
+    {
+      "class": "fd-run-steps-detail",
+      "role": "A muted line such as \"18 of 41 pages\"."
+    },
+    {
+      "class": "fd-run-steps-time",
+      "role": "The step's time in mono."
+    },
+    {
+      "class": "fd-run-steps-foot",
+      "role": "Elapsed time and credits so far."
+    }
+  ],
+  "related": [
+    "toolcall",
+    "steps",
+    "reasoning",
+    "progress",
+    "checklist"
+  ],
+  "keyboard": [],
+  "example": "docs/agent.html#run-steps",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

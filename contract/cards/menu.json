@@ -1,0 +1,184 @@
+{
+  "id": "menu",
+  "job": "Pick an action or a choice from a short list that belongs to one trigger.",
+  "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or sub-menus. Arrow keys move, typing jumps to an item, Escape returns focus to the trigger. Selecting fires a cancelable fd:select; checkbox and radio items fire fd:change. Danger items sit last, below a separator.",
+  "useWhen": [
+    "A row or a header has a set of actions behind a \"more\" button.",
+    "Switching team, workspace or environment: use the switcher variant.",
+    "Choosing columns or one sort order from a short list."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The content is richer than a list: a summary, a small form, a picker.",
+      "instead": "popover"
+    },
+    {
+      "when": "A long list with search and counts.",
+      "instead": "checklist"
+    },
+    {
+      "when": "Navigating the site.",
+      "instead": "sidebar"
+    },
+    {
+      "when": "A form field with a value.",
+      "instead": "select"
+    },
+    {
+      "when": "A destructive action with no confirmation step.",
+      "instead": "dialog"
+    }
+  ],
+  "aka": [
+    "dropdown",
+    "dropdown menu",
+    "context menu",
+    "action menu",
+    "overflow menu",
+    "kebab menu",
+    "popup menu",
+    "actions menu"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\"; written by script on the menu"
+    },
+    {
+      "name": "highlighted",
+      "how": "data-highlighted on the item with focus"
+    },
+    {
+      "name": "checked",
+      "how": "aria-checked on a menuitemcheckbox or menuitemradio"
+    },
+    {
+      "name": "keep open",
+      "how": "data-keep-open on an item or the menu"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-variant",
+      "value": "switcher",
+      "useWhen": "Choosing the current team or workspace; marks it with an accent wash and a dot."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "A destructive item; place it last, after a separator."
+    },
+    {
+      "attribute": "data-fd-submenu",
+      "value": "*",
+      "useWhen": "The item opens a sub-menu by id; add the chevron."
+    },
+    {
+      "attribute": "data-icon",
+      "value": "",
+      "useWhen": "An item with a leading icon."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-menu",
+      "role": "The floating list."
+    },
+    {
+      "class": "fd-menu-head",
+      "role": "Title and close button row."
+    },
+    {
+      "class": "fd-menu-title",
+      "role": "The menu heading."
+    },
+    {
+      "class": "fd-menu-close",
+      "role": "The close button in the menu head."
+    },
+    {
+      "class": "fd-menu-group",
+      "role": "A group of items."
+    },
+    {
+      "class": "fd-menu-label",
+      "role": "A group heading."
+    },
+    {
+      "class": "fd-menu-item",
+      "role": "One item."
+    },
+    {
+      "class": "fd-menu-item-label",
+      "role": "The item name."
+    },
+    {
+      "class": "fd-menu-item-desc",
+      "role": "A muted second line."
+    },
+    {
+      "class": "fd-menu-item-hint",
+      "role": "A shortcut at the end."
+    },
+    {
+      "class": "fd-menu-sep",
+      "role": "A separator."
+    }
+  ],
+  "related": [
+    "popover",
+    "dialog",
+    "select",
+    "checklist",
+    "button"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow Down, Arrow Up",
+      "does": "Move between items; they wrap."
+    },
+    {
+      "keys": "Home, Page Up",
+      "does": "Go to the first item."
+    },
+    {
+      "keys": "End, Page Down",
+      "does": "Go to the last item."
+    },
+    {
+      "keys": "Arrow Right",
+      "does": "Opens a sub-menu."
+    },
+    {
+      "keys": "Arrow Left",
+      "does": "Closes a sub-menu."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Selects the item."
+    },
+    {
+      "keys": "Any letter",
+      "does": "Jumps to the next item that starts with it."
+    },
+    {
+      "keys": "Escape",
+      "does": "Closes and returns focus to the trigger."
+    }
+  ],
+  "example": "docs/overlays.html#menus",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.1.0"
+}

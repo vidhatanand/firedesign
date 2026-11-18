@@ -1,0 +1,80 @@
+{
+  "id": "pagebar",
+  "job": "Show that a page is navigating or reloading with a thin bar at the top.",
+  "purpose": "A 2px accent bar fixed at the top of the page. start() trickles it toward 94%, set(0 to 1) moves it, and done() completes it and fades it out. createPagebar(host) makes one scoped to a positioned element. Use it for navigation and full reloads, never for work inside a panel.",
+  "useWhen": [
+    "A route change or a full reload takes a moment and the page has nothing of its own to show yet.",
+    "One region fetches new content and the bar is scoped to that region."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Work inside a panel or a control.",
+      "instead": "loader"
+    },
+    {
+      "when": "A known amount of progress with a label.",
+      "instead": "progress"
+    },
+    {
+      "when": "A region whose layout is known.",
+      "instead": "skeleton"
+    }
+  ],
+  "aka": [
+    "top loader",
+    "nprogress",
+    "route progress",
+    "loading bar",
+    "navigation progress",
+    "progress line"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "idle",
+      "how": "data-state=\"idle\""
+    },
+    {
+      "name": "running",
+      "how": "data-state=\"running\"; trickles to 94%"
+    },
+    {
+      "name": "done",
+      "how": "data-state=\"done\"; completes and fades"
+    },
+    {
+      "name": "closed",
+      "how": "data-state=\"closed\""
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-pagebar",
+      "role": "The bar."
+    },
+    {
+      "class": "fd-pagebar-fill",
+      "role": "The moving fill with the accent glow."
+    }
+  ],
+  "related": [
+    "loader",
+    "progress",
+    "skeleton"
+  ],
+  "keyboard": [],
+  "example": "docs/skeletons.html#pending",
+  "provenance": [
+    "docs/skeletons.html",
+    "fire/components/skeleton.css",
+    "fire/js/texture.js"
+  ],
+  "since": "0.1.0"
+}

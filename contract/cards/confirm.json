@@ -1,0 +1,91 @@
+{
+  "id": "confirm",
+  "job": "Make someone type a name before a destructive action runs.",
+  "purpose": "A dialog for actions that destroy something with history in it: a team, a project, all logs. A phrase (the slug, in mono) is shown, and the danger button stays disabled until the field matches it exactly after trimming spaces. Submitting fires a cancelable fd:confirm; cancel it to run async work, then closeDialog(id, \"confirm\").",
+  "useWhen": [
+    "Deleting a team, project or workspace along with its keys, monitors and logs.",
+    "A mistake cannot be undone and has a wide blast radius."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A simple yes or no with no history lost.",
+      "instead": "dialog"
+    },
+    {
+      "when": "Undoable actions.",
+      "instead": "toast"
+    },
+    {
+      "when": "A single record in a row.",
+      "instead": "dialog"
+    },
+    {
+      "when": "Revoking a key with an inline confirmation button.",
+      "instead": "button"
+    }
+  ],
+  "aka": [
+    "type to confirm",
+    "delete confirmation",
+    "destructive confirmation",
+    "are you sure",
+    "danger dialog",
+    "typed confirmation"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "armed",
+      "how": "the submit button is enabled once the input matches data-confirm"
+    },
+    {
+      "name": "busy",
+      "how": "aria-busy on the button while async work runs after fd:confirm"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-fd-confirm-input",
+      "value": "",
+      "useWhen": "The field whose value must match the phrase."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-confirm",
+      "role": "The dialog (also carries fd-dialog); data-confirm holds the phrase."
+    },
+    {
+      "class": "fd-confirm-phrase",
+      "role": "The phrase shown in mono, selectable in one click."
+    }
+  ],
+  "related": [
+    "dialog",
+    "button",
+    "toast",
+    "sheet"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "Submits when the field matches."
+    },
+    {
+      "keys": "Escape",
+      "does": "Closes the dialog."
+    }
+  ],
+  "example": "docs/overlays.html#confirm",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.1.0"
+}

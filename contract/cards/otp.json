@@ -1,0 +1,105 @@
+{
+  "id": "otp",
+  "job": "Enter a short code from a message or an app.",
+  "purpose": "Six single-character boxes that behave as one field. Typing advances, Backspace steps back, arrow keys move, and pasting fills every box; SMS autofill lands in the first. fd:change fires on every edit with { value, complete }: verify when complete is true. In a posted form it keeps one named input and a hidden input carries the whole code.",
+  "useWhen": [
+    "A verification code arrives by SMS, email or an authenticator app.",
+    "A code of fixed length is typed or pasted once (data-length, data-type)."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The value is a number people adjust.",
+      "instead": "number"
+    },
+    {
+      "when": "The value is a long key or token.",
+      "instead": "secret"
+    },
+    {
+      "when": "The text has variable length.",
+      "instead": "input"
+    }
+  ],
+  "aka": [
+    "verification code",
+    "PIN input",
+    "one-time password",
+    "2FA code",
+    "code input"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "invalid",
+      "how": "aria-invalid=\"true\" on the boxes; set by your app after a wrong code"
+    },
+    {
+      "name": "complete",
+      "how": "fd:change detail.complete is true"
+    },
+    {
+      "name": "disabled",
+      "how": "disabled on the inputs"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A compact code field."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "A sign-in or checkout step where the code is the one task."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-otp",
+      "role": "The wrapper; carries data-fd-otp and data-length."
+    },
+    {
+      "class": "fd-otp-sep",
+      "role": "A separator between groups of boxes."
+    }
+  ],
+  "related": [
+    "secret",
+    "number",
+    "input",
+    "field"
+  ],
+  "keyboard": [
+    {
+      "keys": "Backspace",
+      "does": "Clears the box, or steps back to the previous one."
+    },
+    {
+      "keys": "Delete",
+      "does": "Clears the box."
+    },
+    {
+      "keys": "ArrowLeft, ArrowRight",
+      "does": "Move between boxes."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Jump to the first or last box."
+    }
+  ],
+  "example": "docs/forms.html#otp",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

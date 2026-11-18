@@ -25,6 +25,9 @@ that its screens render the same as Fire's templates.
   `app/fire-theme.css` with `themeToCss` and its `<html>` attributes into `app/fire-look.ts`. Pick another look with
   `FIRE_LOOK=<name>`. It also copies `boot.js` to `public/fire/`. It runs before `dev`, `build` and the check.
 
+- **States through `?state=`**: `/overview` (`loading`, `empty`, `error`) and `/logs` (`loading`, `loaded`, `empty`, `error`,
+  `no-results`) open in that state; anything else is ignored. The page reads `searchParams` (`askedState()` in
+  `app/page-state.ts`) into a typed `PageState`, renders its blocks from it on the server, and Retry goes to loading, then the data.
 - **A page transition**: each screen's `<main>` sits in React 19.3's `<ViewTransition>` (stable in the App Router, no flag) and
   `<html>` carries `data-fd-transition="fade"`, so the sidebar and top bar hold still and the page fades on a route
   change. React writes `vt-*` attributes into the server HTML; `render-equal` ignores them (R14).

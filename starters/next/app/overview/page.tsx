@@ -3,6 +3,7 @@
 // behaviour in the browser once Fire has loaded.
 import type { Metadata } from 'next';
 import { jsonForScript } from 'fire-design/react';
+import { askedState, type PageState } from '../page-state';
 import { OverviewScreen } from './overview-screen';
 
 export const metadata: Metadata = { title: 'Overview · Ember' };
@@ -43,9 +44,16 @@ const DATA_1 = {
   ]
 };
 
-export default function OverviewPage() {
+type Region = 'chart' | 'stats' | 'activity';
+
+// ?state= picks the state of the first paint: `loading` keeps the skeletons, `empty` is a team with no traffic yet,
+// `error` is the recent-requests section failing alone, with Retry, while the rest of the screen is up to date.
+export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ state?: string | string[] }> }) {
+  const state: PageState = askedState((await searchParams).state, ['loading', 'empty', 'error'] as const) ?? 'ready';
+  /** What a region shows. While `loading` the data blocks stay under the skeletons, as the markup is written. */
+  const region = (name: Region): PageState => (state === 'empty' ? 'empty' : state === 'error' && name === 'activity' ? 'error' : 'ready');
   return (
-    <OverviewScreen>
+    <OverviewScreen state={state}>
       <div className="fd-frame">
         {/* 1 · Announcement */}
         <section className="fd-band fd-rise" data-pad="sm" aria-label="Announcement" data-fd-vars="--fd-i: 0" suppressHydrationWarning>
@@ -80,7 +88,7 @@ export default function OverviewPage() {
             <div className="fd-split-main">
               <div id="ov-chart" data-fd-loading="true">
                 <div className="fd-skeleton-chart"></div>
-                <div className="fd-stack" data-gap="4">
+                <div className="fd-stack" data-gap="4" data-when="ready" hidden={region('chart') !== 'ready'}>
                   <div className="fd-row" data-justify="between" data-align="start">
                     <div>
                       <h2 className="fd-title">Credits used · Last 7 days</h2>
@@ -91,6 +99,12 @@ export default function OverviewPage() {
                   <div className="fd-chart" data-fd-chart="area" data-height="264" data-label="Credits used per day, Nov 8 to Nov 14">
                     <script type="application/json" dangerouslySetInnerHTML={{ __html: jsonForScript(DATA_1) }} />
                   </div>
+                </div>
+                <div className="fd-empty" data-when="empty" aria-label="Credits used" hidden={region('chart') !== 'empty'}>
+                  <span className="fd-empty-icon"><svg className="fd-icon" data-icon="chart-column" aria-hidden="true"><use href="#i-chart-column" /></svg></span>
+                  <h3 className="fd-empty-title">No credits used yet</h3>
+                  <p className="fd-empty-text">Credits used per day appear here after your first request. A test request in the playground costs 1 credit.</p>
+                  <div className="fd-empty-actions"><a className="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><svg className="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play" /></svg><span>Send a test request</span></a></div>
                 </div>
               </div>
             </div>
@@ -160,7 +174,7 @@ export default function OverviewPage() {
         <section className="fd-band fd-rise" data-pad="sm" aria-label="Last 24 hours" data-fd-vars="--fd-i: 2" suppressHydrationWarning>
           <div id="ov-stats" data-fd-loading="true">
             <div className="fd-skeleton-stat" data-count="4"></div>
-            <div className="fd-stats">
+            <div className="fd-stats" data-when="ready" hidden={region('stats') !== 'ready'}>
               <div className="fd-stat-tile">
                 <span className="fd-stat-label">Requests · 24h</span>
                 <div className="fd-stat-row">
@@ -196,6 +210,11 @@ export default function OverviewPage() {
                 </div>
                 <span className="fd-stat-sub">9 checked in the last hour</span>
               </div>
+            </div>
+            <div className="fd-empty" data-size="sm" data-when="empty" aria-label="Last 24 hours" hidden={region('stats') !== 'empty'}>
+              <span className="fd-empty-icon"><svg className="fd-icon" data-icon="activity" aria-hidden="true"><use href="#i-activity" /></svg></span>
+              <h3 className="fd-empty-title">Nothing in the last 24 hours</h3>
+              <p className="fd-empty-text">Requests, success rate, latency and active monitors show here once Quarry Labs sends traffic.</p>
             </div>
           </div>
         </section>
@@ -267,7 +286,7 @@ export default function OverviewPage() {
         <section className="fd-band" data-pad="none" data-surface="surface" aria-label="Recent requests">
           <div id="ov-activity" data-fd-loading="true">
             <div className="fd-skeleton-table" data-rows="6" data-cols="5"></div>
-            <div className="fd-table-wrap">
+            <div className="fd-table-wrap" data-when="ready" hidden={region('activity') !== 'ready'}>
               <div className="fd-table-scroll">
                 <table className="fd-table" data-stack="" aria-label="Recent requests">
                   <thead>
@@ -349,6 +368,18 @@ export default function OverviewPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
+            <div className="fd-empty" data-when="empty" aria-label="Recent requests" hidden={region('activity') !== 'empty'}>
+              <span className="fd-empty-icon"><svg className="fd-icon" data-icon="list" aria-hidden="true"><use href="#i-list" /></svg></span>
+              <h3 className="fd-empty-title">No requests yet</h3>
+              <p className="fd-empty-text">Your last six requests appear here a few seconds after they finish. Send one from the playground or with your API key.</p>
+              <div className="fd-empty-actions"><a className="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><svg className="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play" /></svg><span>Open the playground</span></a></div>
+            </div>
+            <div className="fd-empty" data-tone="danger" data-when="error" role="alert" aria-label="Recent requests" hidden={region('activity') !== 'error'}>
+              <span className="fd-empty-icon"><svg className="fd-icon" data-icon="triangle-alert" aria-hidden="true"><use href="#i-triangle-alert" /></svg></span>
+              <h3 className="fd-empty-title">Couldn’t load recent requests</h3>
+              <p className="fd-empty-text">The activity service did not answer within 10 seconds. Credits, key and monitors above are up to date.</p>
+              <div className="fd-empty-actions"><button className="fd-btn" type="button" id="ov-activity-retry"><svg className="fd-icon" data-icon="refresh-cw" aria-hidden="true"><use href="#i-refresh-cw" /></svg><span>Retry</span></button></div>
             </div>
           </div>
         </section>

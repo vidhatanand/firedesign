@@ -2,6 +2,7 @@ import { html, nothing, type PropertyValues } from 'lit';
 import { keyed } from 'lit/directives/keyed.js';
 import { code, copyText, data, nav, overlays } from 'fire-design';
 import { FireLight } from '../../lib/fire-light';
+import { askedState } from '../../lib/page-state';
 import { logOf, requestBody, responseBody, type LogRow } from './detail';
 import { emptyRow, errorRow } from './states';
 import { logsView } from './view';
@@ -9,6 +10,9 @@ import { logsView } from './view';
 const { toast, openDialog, closeDialog } = overlays;
 
 type TableState = 'loading' | 'loaded' | 'empty' | 'error';
+/** `?state=`: the four table states, plus `no-results` (the data, with a search that matches nothing). */
+type AskedState = TableState | 'no-results';
+const ASKED: readonly AskedState[] = ['loading', 'loaded', 'empty', 'error', 'no-results'];
 type Range = { preset: string; start?: string; end?: string };
 type Filters = { endpoint: string[]; key: string[]; status: string[]; range: Range };
 type Select = HTMLElementEventMap['fd:select'];
@@ -45,6 +49,7 @@ export class ScreenLogs extends FireLight {
   declare detail: LogRow | null;
   /** How many rows pass the search and filters; set before each render. */
   shown = 0;
+  private timer = 0;
 
   constructor() {
     super();
@@ -58,8 +63,31 @@ export class ScreenLogs extends FireLight {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    // First paint: skeleton rows for a moment, then the data.
-    setTimeout(() => this.tableState === 'loading' && this.setTableState('loaded'), 600);
+    // First paint: `?state=` picks the state; otherwise skeleton rows for a moment, then the data.
+    const asked = askedState(ASKED);
+    if (asked === 'no-results') {
+      this.tableState = 'loaded';
+      this.query = 'invoice-export.pdf';
+    } else if (asked) {
+      this.tableState = asked;
+    } else {
+      this.timer = window.setTimeout(() => this.tableState === 'loading' && this.setTableState('loaded'), 600);
+    }
+  }
+
+  override disconnectedCallback(): void {
+    clearTimeout(this.timer);
+    super.disconnectedCallback();
+  }
+
+  protected override firstUpdated(): void {
+    // A search from the URL (no-results) is also in the search box.
+    const search = this.querySelector<HTMLInputElement>('#logs-search');
+    if (search && this.query) {
+      search.value = this.query;
+      // The rows exist now: show and hide them for the search (willUpdate ran before they were rendered).
+      this.requestUpdate();
+    }
   }
 
   /* ------------------------------------------------------------------ derived values */

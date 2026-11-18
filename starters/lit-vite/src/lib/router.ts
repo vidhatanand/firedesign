@@ -51,3 +51,8 @@ export function startRouter(): void {
     navigate(link.pathname + link.search + link.hash);
   });
 }
+
+/** The current URL's query, for example `routeQuery().get('state')`. Screens read it when they are created. */
+export function routeQuery(): URLSearchParams {
+  return new URLSearchParams(location.search);
+}

@@ -403,6 +403,7 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
 | R12 | `--transparent <selector>` (repeatable) treats matching elements as wrappers, inside Fire nodes too: a component's host element. | L6 |
 | R13 | Capture a settled page: wait until there has been no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms (up to the ready timeout), so a chart redrawn after load or a skeleton swapped at 600 ms is captured in its final state on both sides. Wait only for Fire's own (`fd-`) elements to be defined: a framework's (Next's `next-route-announcer`) may never be. The page's Content Security Policy is bypassed for the capture (the freeze stylesheet is inline); the policy is checked by the starters' own browser pass. | starters |
 | R14 | Ignore React's view-transition bookkeeping attributes (`vt-*`: `vt-name`, `vt-update`, `vt-enter`, `vt-exit`, `vt-share`). React 19.3's `<ViewTransition>` writes them into the server HTML and adds no element; they are not Fire markup. | Next starter |
+| R15 | The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors (the fixed phone tab bar, the support button, a toast) is made `visibility: hidden` and restored afterwards; layout is untouched and the root's own fixed or sticky descendants stay. The comparison is of the root; the shell around it belongs to the product. Structure and computed style are unchanged. | starters |
 
 ## 17. Verified, and left to the starters
 

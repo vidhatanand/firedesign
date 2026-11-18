@@ -1,21 +1,74 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { overlays } from 'fire-design';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { nav, overlays } from 'fire-design';
 import type { FireEventMap } from 'fire-design';
 import { LOAD_MS, SIMULATE_LOAD } from '../demo';
+import { askedState } from '../page-state';
 
-// The table starts in its loading state (skeleton rows), as the markup is written, and shows the rows after a first load.
-// `hidden` and `aria-busy` on these three elements belong to this page, not to Fire, so they are bound.
-const loading = ref(true);
-let timer = 0;
-onMounted(() => { if (SIMULATE_LOAD) timer = window.setTimeout(() => { loading.value = false; }, LOAD_MS); });
-onBeforeUnmount(() => window.clearTimeout(timer));
+// The table is in one of four states, the route's `?state=` picks it, and the Demo state band switches it:
+//   loading: skeleton rows (the default, then the data after a first load)   loaded: the rows
+//   empty: no logs yet   error: the request failed, with Retry   no-results: the rows, with a search that matches none
+// `hidden` and `aria-busy` on the three table bodies belong to this page, not to Fire, so they are bound. The rows stay
+// plain markup (Fire sorts and selects them in place), so the search shows and hides them rather than rendering them.
+type TableState = 'loading' | 'loaded' | 'empty' | 'error';
+const ASKED = ['loading', 'loaded', 'empty', 'error', 'no-results'] as const;
+const asked = askedState(useRoute().query.state, ASKED);
+const state = ref<TableState>(asked === 'no-results' ? 'loaded' : asked ?? 'loading');
+const query = ref(asked === 'no-results' ? 'invoice-export.pdf' : '');
+const shown = ref(14);
+const filtered = computed(() => query.value.trim() !== '');
+/** The state body shows the empty or error row; with data it shows the "no matches" row when the search hides every row. */
+const stateHidden = computed(() => (state.value === 'loaded' ? shown.value > 0 : state.value === 'loading'));
+const timers: number[] = [];
+const root = ref<HTMLElement>();
+
+function applySearch() {
+  const q = query.value.trim().toLowerCase();
+  const rows = [...(root.value?.querySelectorAll<HTMLTableRowElement>('#logs-body > tr') ?? [])];
+  for (const tr of rows) tr.hidden = !!q && !((tr.textContent ?? '').toLowerCase().includes(q) || (tr.dataset.key ?? '').toLowerCase().includes(q));
+  shown.value = rows.filter((tr) => !tr.hidden).length;
+}
+/** The Demo state band follows the state (Fire's `selectSegment`, silent: it must not send the change back). */
+function syncSwitch() {
+  const item = [...(root.value?.querySelectorAll<HTMLElement>('#logs-state-switch .fd-segmented-item') ?? [])].find((el) => el.dataset.value === state.value);
+  if (item) nav.selectSegment(item, { silent: true });
+}
+function setState(next: TableState) {
+  state.value = next;
+  void nextTick(() => { syncSwitch(); applySearch(); });
+}
+function onSearch(event: Event) {
+  query.value = (event.target as HTMLInputElement).value;
+  applySearch();
+}
+function onStateSwitch(event: FireEventMap['fd:change']) {
+  if (event.target === event.currentTarget && 'value' in event.detail && event.detail.value !== state.value) setState(String(event.detail.value) as TableState);
+}
+onMounted(() => {
+  const search = root.value?.querySelector<HTMLInputElement>('#logs-search');
+  if (search) search.value = query.value;
+  // Under VITE_FIRE_STATIC the screen stays as the markup is written, so the band is left as Fire enhanced it.
+  if (SIMULATE_LOAD) syncSwitch();
+  applySearch();
+  // The first paint: skeletons, then the rows (under VITE_FIRE_STATIC the screen stays as written).
+  if (SIMULATE_LOAD && !asked) timers.push(window.setTimeout(() => state.value === 'loading' && setState('loaded'), LOAD_MS));
+});
+onBeforeUnmount(() => timers.forEach((t) => window.clearTimeout(t)));
 
 // Fire's events are listened to on an element with `@fd:select` (EXPORT V1, V5); `event.detail` is typed by fire-design.
 // Row actions, bulk actions and the row menu all arrive here.
 function onSelect(event: FireEventMap['fd:select']) {
   const { action, value, item, trigger } = event.detail;
   const ids = Array.isArray(value) ? value : value ? [value] : [];
+  if (action === 'reload') { setState('loading'); timers.push(window.setTimeout(() => setState('loaded'), 900)); return; }
+  if (action === 'clear-filters') {
+    query.value = '';
+    const search = root.value?.querySelector<HTMLInputElement>('#logs-search');
+    if (search) search.value = '';
+    applySearch();
+    return;
+  }
   const noun = (n: number) => `${n} request${n === 1 ? '' : 's'}`;
   if (action === 'delete') overlays.toast({ title: ids.length > 1 ? `${ids.length} logs deleted` : 'Log deleted', tone: 'neutral' });
   else if (action === 'retry') overlays.toast.success(`${noun(ids.length)} re-queued`);
@@ -28,7 +81,7 @@ function onSelect(event: FireEventMap['fd:select']) {
 </script>
 
 <template>
-  <div class="fd-frame" @fd:select="onSelect">
+  <div class="fd-frame" ref="root" @fd:select="onSelect">
 
     <section class="fd-band fd-page-hero fd-rise">
       <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
@@ -41,7 +94,7 @@ function onSelect(event: FireEventMap['fd:select']) {
         <div class="fd-toolbar">
           <div class="fd-search fd-toolbar-search" data-variant="soft">
             <svg class="fd-icon" data-icon="search" aria-hidden="true"><use href="#i-search"></use></svg>
-            <input class="fd-search-input" id="logs-search" type="search" placeholder="Search requests" aria-label="Search requests" autocomplete="off" data-fd-search-hotkey>
+            <input class="fd-search-input" id="logs-search" type="search" placeholder="Search requests" aria-label="Search requests" autocomplete="off" data-fd-search-hotkey @input="onSearch">
             <button type="button" class="fd-search-clear" aria-label="Clear search"><svg class="fd-icon" data-icon="x" aria-hidden="true"><use href="#i-x"></use></svg></button>
             <kbd class="fd-kbd">/</kbd>
           </div>
@@ -68,7 +121,7 @@ function onSelect(event: FireEventMap['fd:select']) {
     <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Requests">
       <div class="fd-table-wrap" data-variant="plain">
         <div class="fd-table-scroll">
-          <table class="fd-table" id="logs-table" data-stack aria-label="Activity log" :aria-busy="loading">
+          <table class="fd-table" id="logs-table" data-stack aria-label="Activity log" :aria-busy="state === 'loading'">
             <thead>
               <tr>
                 <th data-select><input type="checkbox" class="fd-table-check" data-select-all aria-label="Select all rows"></th>
@@ -81,7 +134,7 @@ function onSelect(event: FireEventMap['fd:select']) {
                 <th data-actions><span class="fd-sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody id="logs-body" :hidden="loading">
+            <tbody id="logs-body" :hidden="state !== 'loaded'">
               <tr data-value="req_8f3a21" data-href="#req_8f3a21" data-key="Production crawler" data-status="success" data-code="200">
                 <td data-select><input type="checkbox" class="fd-table-check" data-select-row aria-label="Select req_8f3a21"></td>
                 <td data-sort-value="2026-11-14T16:29">Nov 14, 4:29 PM</td>
@@ -223,19 +276,45 @@ function onSelect(event: FireEventMap['fd:select']) {
                 <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for req_b83d19" data-fd-menu="menu-log-row" data-placement="bottom-end"><svg class="fd-icon" data-icon="ellipsis" aria-hidden="true"><use href="#i-ellipsis"></use></svg></button></td>
               </tr>
             </tbody>
-            <tbody id="logs-skeleton" aria-hidden="true" :hidden="!loading">
+            <tbody id="logs-skeleton" aria-hidden="true" :hidden="state !== 'loading'">
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
             </tbody>
-            <tbody id="logs-state" hidden></tbody>
+            <tbody id="logs-state" :hidden="stateHidden">
+              <tr v-if="state === 'error'" class="fd-table-state" data-state="error"><td colspan="8"><div class="fd-table-empty" data-tone="danger" role="alert">
+                <span class="fd-table-empty-icon"><svg class="fd-icon" data-icon="triangle-alert" aria-hidden="true"><use href="#i-triangle-alert"></use></svg></span>
+                <p class="fd-table-empty-title">Couldn’t load activity logs</p>
+                <p class="fd-table-empty-text">The request timed out after 10 seconds. Check your connection, then try again.</p>
+                <button class="fd-btn" type="button" data-action="reload"><svg class="fd-icon" data-icon="refresh-cw" aria-hidden="true"><use href="#i-refresh-cw"></use></svg><span>Retry</span></button>
+              </div></td></tr>
+              <tr v-else-if="state === 'empty' || (state === 'loaded' && shown === 0)" class="fd-table-state"><td colspan="8"><div class="fd-table-empty">
+                <div class="fd-ascii" data-fd-ascii="waves" data-fade="x" aria-hidden="true"></div>
+                <span class="fd-table-empty-icon"><svg class="fd-icon" data-icon="clock" aria-hidden="true"><use href="#i-clock"></use></svg></span>
+                <p class="fd-table-empty-title">No activity logs found</p>
+                <p class="fd-table-empty-text">{{ filtered ? 'Nothing matches these filters. Try a wider date range or clear them.' : 'Requests to the Ember API appear here a few seconds after they finish.' }}</p>
+                <button v-if="filtered" class="fd-btn" type="button" data-action="clear-filters"><span>Clear filters</span></button>
+                <a v-else class="fd-btn" href="playground.html?endpoint=scrape"><svg class="fd-icon" data-icon="play" aria-hidden="true"><use href="#i-play"></use></svg><span>Send a test request</span></a>
+              </div></td></tr>
+            </tbody>
           </table>
         </div>
         <div class="fd-table-foot">
-          <span class="fd-table-foot-info" id="logs-info" aria-live="polite">Loading requests</span>
+          <span class="fd-table-foot-info" id="logs-info" aria-live="polite">
+            <template v-if="state === 'loading'">Loading requests</template>
+            <template v-else-if="state === 'error'">Results unavailable</template>
+            <template v-else-if="state === 'empty'">Page <b>1</b> of 1 · 0 results</template>
+            <template v-else-if="filtered">Page <b>1</b> of 1 · {{ shown.toLocaleString('en-US') }} results</template>
+            <template v-else>Page <b>1</b> of 12 · 1,204 results</template>
+          </span>
           <div class="fd-table-foot-actions">
             <label class="fd-table-rows"><span>Rows per page</span>
               <select aria-label="Rows per page"><option>10</option><option selected>25</option><option>50</option><option>100</option></select>
@@ -261,7 +340,7 @@ function onSelect(event: FireEventMap['fd:select']) {
     <section class="fd-band" data-pad="sm" data-grow aria-label="Demo state">
       <div class="fd-row" data-wrap data-justify="between">
         <span class="fd-eyebrow">Demo state</span>
-        <div class="fd-segmented" data-size="sm" id="logs-state-switch" role="radiogroup" aria-label="Table state">
+        <div class="fd-segmented" data-size="sm" id="logs-state-switch" role="radiogroup" aria-label="Table state" @fd:change="onStateSwitch">
           <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loaded">Loaded</button>
           <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
           <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="empty">Empty</button>

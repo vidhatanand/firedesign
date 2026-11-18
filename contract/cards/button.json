@@ -1,0 +1,168 @@
+{
+  "id": "button",
+  "job": "Start an action or confirm a choice with one press.",
+  "purpose": "The native button in Fire's soft style: a quiet fill that darkens on hover, with one primary per view. Variants and sizes are data attributes; loading, held and disabled come from aria-busy, aria-pressed, aria-expanded and disabled. On touch devices every size grows to a 40px target.",
+  "useWhen": [
+    "An action runs on this page and nothing navigates: save, create, send, copy, retry.",
+    "A dialog, sheet or confirmation needs its confirm and cancel actions.",
+    "A toolbar needs icon-only actions (add data-icon-only and an aria-label)."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The action is a link to another page, or sits inside a sentence.",
+      "instead": "The text button (fd-btn-text), part of this component."
+    },
+    {
+      "when": "Several related actions belong together as one control.",
+      "instead": "The button group (fd-btn-group), part of this component."
+    },
+    {
+      "when": "One floating action stays visible while the page scrolls.",
+      "instead": "fab"
+    },
+    {
+      "when": "The user picks one option of several, or switches a setting on and off.",
+      "instead": "segmented"
+    },
+    {
+      "when": "Delete or revoke runs without a confirmation step.",
+      "instead": "Put it behind a dialog or confirm; use the danger variant on the confirming button."
+    }
+  ],
+  "aka": [
+    "action",
+    "CTA",
+    "icon button",
+    "submit"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "loading",
+      "how": "aria-busy=\"true\"; keeps the width and shows a spinner"
+    },
+    {
+      "name": "held",
+      "how": "aria-pressed=\"true\" or aria-expanded=\"true\"; uses the pressed fill"
+    },
+    {
+      "name": "disabled",
+      "how": "disabled"
+    },
+    {
+      "name": "copied",
+      "how": "data-state=\"done\" on a fd-btn-swap child, set by fire.js for 1.4s after a copy"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-variant",
+      "value": "primary",
+      "useWhen": "The one action the view exists for; at most one per view."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "outline",
+      "useWhen": "On a filled or busy surface where the default wash would disappear."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "ghost",
+      "useWhen": "Dismissals and toolbar actions that should stay quiet."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "inverse",
+      "useWhen": "A single upsell or confirm on a quiet panel; never beside a primary."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "accent-soft",
+      "useWhen": "An accent-tinted action that is not the primary."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "danger",
+      "useWhen": "The confirming button of a destructive action, inside a confirmation."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "danger-soft",
+      "useWhen": "A destructive action shown before any confirmation, such as Revoke in a row."
+    },
+    {
+      "attribute": "data-size",
+      "value": "xs",
+      "useWhen": "Inside dense rows and chips."
+    },
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "In toolbars and table rows."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "Forms and dialogs that want a larger target."
+    },
+    {
+      "attribute": "data-size",
+      "value": "xl",
+      "useWhen": "A hero or a landing page call to action."
+    },
+    {
+      "attribute": "data-icon-only",
+      "value": "",
+      "useWhen": "The button holds only an icon; it needs aria-label or data-fd-tooltip."
+    },
+    {
+      "attribute": "data-block",
+      "value": "",
+      "useWhen": "The button fills its row, as in a phone dialog footer."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-btn",
+      "role": "The button; a button, a or input element."
+    },
+    {
+      "class": "fd-btn-swap",
+      "role": "Wraps two children that swap in place, as a copy button's label and its Copied confirmation."
+    },
+    {
+      "class": "fd-btn-group",
+      "role": "Joins related buttons into one control."
+    },
+    {
+      "class": "fd-btn-text",
+      "role": "An action written as text inside a sentence or a card footer."
+    }
+  ],
+  "related": [
+    "dialog",
+    "confirm",
+    "menu",
+    "fab",
+    "loader"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "Activates the button."
+    }
+  ],
+  "example": "docs/buttons.html#variants",
+  "provenance": [
+    "docs/buttons.html",
+    "fire/components/button.css"
+  ],
+  "since": "0.1.0"
+}

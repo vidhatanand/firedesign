@@ -132,7 +132,9 @@ State (defaults in brackets), stored as JSON in `localStorage['fd-tweaks']`, onl
   so changes can be watched. `Escape` closes it when focus is inside; focus returns to the trigger. The header is a
   drag handle on desktop (pointer events, clamped to the viewport; position kept for the session).
 - "Copy CSS" copies a ready-to-paste block: a comment with the attributes to set on `<html>`, then `:root { … }` with
-  every overridden custom property (toned palette colours included). "Reset" returns everything to default.
+  every overridden custom property (toned palette colours included). "Copy theme" copies the same look as a theme
+  record (JSON, `contract/theme.schema.json`; `toTheme()`, from `fire/js/theme.js` `toThemeRecord`). "Reset" returns
+  everything to default.
 - Follow `core.js` conventions (`on`, `once`, `emit`, `copyText`, `icon` from `./icons.js`). No dependencies. Check
   icon names exist in `fire/js/icons.js` (`ICONS`).
 
@@ -166,7 +168,8 @@ mono labels, instant.
      S · M · L. High contrast: switch.
   6. **Motion and texture** — Motion: segmented Off · Default · Slow. Texture: slider `0%…150%`.
 - **Footer**: "Copy CSS" (default button, small, copy icon, swaps to "Copied" for 1.4s using the system's
-  `data-fd-copy`-style done state) and a one-line mono summary of the state (`ember · comfortable · 1×`).
+  `data-fd-copy`-style done state), "Copy theme" beside it (the same pattern, `braces` icon, copies the theme record)
+  and a one-line mono summary of the state (`ember · comfortable · 1×`).
 - Controls inside the panel are small (`data-size="sm"` where the system has it) and reuse the system's own
   components: `fd-segmented`, `fd-slider`, `fd-switch`, `fd-btn`. Read their markup contracts in the forms / nav /
   button CSS and JS headers; build the same markup so the existing modules drive them, and call the family `init` on the

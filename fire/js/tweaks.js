@@ -24,7 +24,8 @@
  *                  .fd-slider[data-tweak] > input[type=range]   tone.hue, tone.vivid, tone.light, tone.warmth, corners, texture
  *                  .fd-tweaks-value[data-tweak-reset]  the value readout; click (or double-click the slider) to reset
  *                  .fd-switch > input[data-tweak="contrast"]
- *                <footer class="fd-tweaks-foot"> Copy CSS (data-tweaks-action="copy", data-state="done" for 1.4s) + summary
+ *                <footer class="fd-tweaks-foot"> Copy CSS (data-tweaks-action="copy") and Copy theme (data-tweaks-action="copy-theme",
+ *                  the theme record as JSON), each data-state="done" for 1.4s, + summary
  *              Escape closes it while focus is inside and returns focus to the trigger.
  *
  * Defaults  the page's own look: a data-palette / data-type the page declares on <html> is the default palette and
@@ -44,7 +45,8 @@
  *  motion    off · default · slow           --fd-motion 0 · 1 · 1.75
  *  texture   0…1.5 (step .05)               --fd-texture
  *
- * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial), reset(), toCss()
+ * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial), reset(), toCss(), toTheme()
+ *      toTheme() is the state as a theme record (fire/js/theme.js): set(fromThemeRecord(record)) applies one.
  * Events: fd:change on <html> with detail { name: 'tweaks', value: state } after every change; fd:open / fd:close on the panel.
  */
 import { $, $$, on, once, emit, copyText, ready, setTheme, getTheme, setDensity, clamp } from './core.js';
@@ -56,6 +58,7 @@ import {
   getPalette, paletteTokens, toneTokens, cssValue, oklch,
 } from './palettes.js';
 import { TYPEFACES, DEFAULT_TYPEFACE, getTypeface } from './typefaces.js';
+import { toThemeRecord } from './theme.js';
 
 /* ==========================================================================
    State
@@ -265,6 +268,11 @@ export function toCss(s = state) {
   ].join('\n');
 }
 
+/** The state as a theme record (contract/theme.schema.json): what Copy theme copies. */
+export function toTheme(s = state) {
+  return toThemeRecord(s);
+}
+
 /* ==========================================================================
    Panel markup
    ========================================================================== */
@@ -372,6 +380,7 @@ function markup() {
   </div>
   <footer class="fd-tweaks-foot">
     <button class="fd-btn" type="button" data-size="sm" data-tweaks-action="copy">${icon('copy')}<span class="fd-btn-swap"><span>Copy CSS</span><span>Copied</span></span></button>
+    <button class="fd-btn" type="button" data-size="sm" data-tweaks-action="copy-theme">${icon('braces')}<span class="fd-btn-swap"><span>Copy theme</span><span>Copied</span></span></button>
     <p class="fd-tweaks-summary"></p>
     <span class="fd-sr-only" role="status" data-tweaks-status></span>
   </footer>`;
@@ -521,6 +530,7 @@ function bindPanel(el) {
     if (action === 'close') close();
     else if (action === 'reset') { reset(); $('.fd-segmented[data-tweak="theme"] [aria-checked="true"]', el)?.focus({ preventScroll: true }); }
     else if (action === 'copy') copyCss(target.closest('[data-tweaks-action]'));
+    else if (action === 'copy-theme') copyTheme(target.closest('[data-tweaks-action]'));
   });
   el.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') { event.preventDefault(); close(); return; }
@@ -552,15 +562,17 @@ function gridKeys(event) {
   set({ [grid.dataset.tweak]: items[j].dataset.value });
 }
 
-async function copyCss(button) {
-  if (!(await copyText(toCss()))) return;
+async function copyOut(button, text, done) {
+  if (!(await copyText(text))) return;
   button.dataset.state = 'done';
   const status = $('[data-tweaks-status]', panel);
-  if (status) status.textContent = 'CSS copied';
+  if (status) status.textContent = done;
   clearTimeout(button.fdCopyTimer);
   button.fdCopyTimer = setTimeout(() => { delete button.dataset.state; if (status) status.textContent = ''; }, 1400);
-  emit(button, 'fd:copy', { value: toCss() });
+  emit(button, 'fd:copy', { value: text });
 }
+const copyCss = (button) => copyOut(button, toCss(), 'CSS copied');
+const copyTheme = (button) => copyOut(button, `${JSON.stringify(toTheme(), null, 2)}\n`, 'Theme copied');
 
 /* ---------- Dragging (desktop): the header is the handle; the position is kept for the session ---------- */
 const EDGE = 8;

@@ -66,7 +66,7 @@ scripts/
 `package.json` becomes a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css`
 (fire/fire.css), `./boot` (fire/boot.js), `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./contract`, `./catalog`, and `./fire/*` for direct file access. Development dependencies are pinned to exact
-versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.7.0`); the
+versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.8.0`); the
 starters in this repository use `file:../..`.
 
 ## 3. The theme record (the source of a Fire design system)

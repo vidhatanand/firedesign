@@ -242,11 +242,12 @@
   --fd-site-mono-veil: 10%;            /*   and a little of the page colour over it */
   --fd-site-duo-contrast: 1.4;         /* duotone: the grey picture's tones spread before they are mapped */
   --fd-site-duo-bright: 0.96;
-  --fd-site-duo-accent: 55%;           /*   the lights' ink: this much accent, the rest page (light) or ink (dark), in OKLCH */
+  --fd-site-duo-accent: 55%;           /*   the lights' ink: this much accent, the rest page (light) or ink (dark), in OKLab */
   --fd-site-duo-l: 0.86;               /*   its lightness and chroma capped, so a picture never outshines the page */
   --fd-site-duo-l-dark: 0.74;
   --fd-site-duo-c: 0.1;
-  --fd-site-duo-scrim-saturate: 1.5;   /*   and keeps its colour under the image ground's scrim */
+  --fd-site-duo-ground-accent: 80%;    /*   as an image ground's backdrop, a stronger light ink, so the accent keeps its */
+  --fd-site-duo-ground-c: 0.16;        /*   colour under the scrim instead of darkening toward mud */
   --fd-site-wash-saturate: 0.5;        /* wash: the picture's own colour turned down */
   --fd-site-wash: 26%;                 /*   under this much accent */
 }
@@ -1158,6 +1159,7 @@ sup:has(> .fd-site-notes-ref) { vertical-align: baseline; position: relative; in
   --_site-tr-filter: none;
   --_site-tr-a: transparent; --_site-tr-a-mode: normal;
   --_site-tr-b: transparent; --_site-tr-b-mode: normal;
+  --_site-duo-share: var(--fd-site-duo-accent); --_site-duo-c: var(--fd-site-duo-c);
 }
 .fd-site-media {
   --_site-radius: var(--fd-radius-lg);
@@ -1208,14 +1210,14 @@ sup:has(> .fd-site-notes-ref) { vertical-align: baseline; position: relative; in
   --_site-tr-b: color-mix(in srgb, var(--fd-bg) var(--fd-site-mono-veil), transparent);
 }
 /* duotone: a two-ink print. The grey picture is multiplied by the lights' ink, a tint of the accent (the accent mixed
-   toward the page in OKLCH, its lightness and chroma capped so a picture never outshines the page), then screened
+   toward the page in OKLab, its lightness and chroma capped so a picture never outshines the page), then screened
    with the shadows' ink: the theme's ink in the light scheme, the page in the dark one, so dark stays dark in both. */
 :is([data-imagery="duotone"] .fd-site-media:not([data-treatment]), .fd-site-media[data-treatment="duotone"]),
 :is([data-imagery="duotone"] .fd-site-section[data-ground="image"]:not([data-treatment]), .fd-site-section[data-ground="image"][data-treatment="duotone"]) > .fd-site-backdrop {
   --_site-tr-filter: grayscale(1) contrast(var(--fd-site-duo-contrast)) brightness(var(--fd-site-duo-bright));
   --_site-tr-a: light-dark(
-    oklch(from color-mix(in oklch, var(--fd-accent) var(--fd-site-duo-accent), var(--fd-bg)) min(l, var(--fd-site-duo-l)) min(c, var(--fd-site-duo-c)) h),
-    oklch(from color-mix(in oklch, var(--fd-accent) var(--fd-site-duo-accent), var(--fd-ink)) min(l, var(--fd-site-duo-l-dark)) min(c, var(--fd-site-duo-c)) h));
+    oklch(from color-mix(in oklab, var(--fd-accent) var(--_site-duo-share), var(--fd-bg)) min(l, var(--fd-site-duo-l)) min(c, var(--_site-duo-c)) h),
+    oklch(from color-mix(in oklab, var(--fd-accent) var(--_site-duo-share), var(--fd-ink)) min(l, var(--fd-site-duo-l-dark)) min(c, var(--_site-duo-c)) h));
   --_site-tr-a-mode: multiply;
   --_site-tr-b: light-dark(var(--fd-ink), var(--fd-bg)); --_site-tr-b-mode: screen;
 }
@@ -1235,7 +1237,10 @@ sup:has(> .fd-site-notes-ref) { vertical-align: baseline; position: relative; in
 }
 .fd-site-section[data-ground="image"][data-scrim="dark"] { color-scheme: dark; }
 .fd-site-section[data-ground="image"][data-scrim="light"] { --_site-scrim: var(--fd-site-image-scrim-light); color-scheme: light; }
-.fd-site-backdrop { position: absolute; inset: 0; z-index: -2; overflow: clip; pointer-events: none; background: var(--fd-bg-sunken); }
+.fd-site-backdrop {
+  --_site-duo-share: var(--fd-site-duo-ground-accent); --_site-duo-c: var(--fd-site-duo-ground-c);
+  position: absolute; inset: 0; z-index: -2; overflow: clip; pointer-events: none; background: var(--fd-bg-sunken);
+}
 .fd-site-backdrop > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--_site-pos); filter: var(--_site-tr-filter); }
 .fd-site-backdrop::before, .fd-site-backdrop::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
 .fd-site-backdrop::before { z-index: 1; background: var(--_site-tr-a); mix-blend-mode: var(--_site-tr-a-mode); }
@@ -1254,10 +1259,6 @@ sup:has(> .fd-site-notes-ref) { vertical-align: baseline; position: relative; in
 .fd-site-section[data-ground="image"]:is(.fd-site-hero[data-layout="center"], :has(> .fd-site-container > .fd-site-head[data-align="center"]))::after {
   --_site-half: calc(var(--fd-site-image-measure) / 2 + var(--fd-site-image-pad));
   background: linear-gradient(to right, var(--_site-thin) calc(50% - var(--_site-half) - var(--fd-site-image-fade)), var(--_site-solid) calc(50% - var(--_site-half)), var(--_site-solid) calc(50% + var(--_site-half)), var(--_site-thin) calc(50% + var(--_site-half) + var(--fd-site-image-fade)));
-}
-/* under the scrim a duotone keeps its colour: darkening alone would turn the accent toward mud */
-:is([data-imagery="duotone"] .fd-site-section[data-ground="image"]:not([data-treatment]), .fd-site-section[data-ground="image"][data-treatment="duotone"])::after {
-  -webkit-backdrop-filter: saturate(var(--fd-site-duo-scrim-saturate)); backdrop-filter: saturate(var(--fd-site-duo-scrim-saturate));
 }
 /* the head and its actions keep to the column the scrim covers */
 .fd-site-section[data-ground="image"] > .fd-site-container > :is(.fd-site-head, .fd-site-head-actions) { max-inline-size: var(--fd-site-image-measure); }

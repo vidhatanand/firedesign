@@ -463,7 +463,7 @@ export interface ThemeBrand {
 /** A product's look as one JSON record, version 1. Every field is optional (missing = Fire's default); unknown fields are an error. */
 export interface ThemeRecord {
   contract?: 'fire/1';
-  /** The Fire release the record was written against, such as "0.7.0". */
+  /** The Fire release the record was written against, such as "0.8.0". */
   fire?: string;
   palette?: PaletteName | PaletteSpec;
   tone?: ThemeTone;

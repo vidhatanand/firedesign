@@ -2,7 +2,7 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
-## 0.8.0 — unreleased
+## 0.8.0 — 19 Nov 2026
 
 Fire now covers public websites and phone apps as well as app screens. A site is built from a layout foundation and
 fifteen section types, including an article page and a filtered listing, and its pictures follow the look. A table with many

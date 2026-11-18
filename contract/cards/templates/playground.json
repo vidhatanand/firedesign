@@ -1,0 +1,66 @@
+{
+  "id": "playground",
+  "job": "Send one request to an endpoint, watch it run, and read the result.",
+  "purpose": "An endpoint switcher, a composer with the target, options in a sheet, the code for the same request and a list of recent runs. A run shows its steps and elapsed time; a crawl shows a progress bar and a log. The result opens as tabs for the content, the JSON and the links, with copy and download. A failed step says what was refused and offers Retry.",
+  "useWhen": [
+    "A person tries an endpoint with real input before writing code.",
+    "The request, its cost and the code for it must be visible together."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The person describes the data in words and lets an agent choose the calls.",
+      "instead": "agent"
+    },
+    {
+      "when": "The input is a file.",
+      "instead": "parse"
+    }
+  ],
+  "aka": [
+    "sandbox",
+    "try it",
+    "API explorer",
+    "console",
+    "REST client",
+    "scrape"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form",
+    "record",
+    "list"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "the default: the scrape endpoint with its composer and recent runs"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: skeleton rows in recent runs"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: No runs yet, with the next step"
+    },
+    {
+      "name": "running",
+      "how": "?state=running: the second step is active; the run button is busy"
+    },
+    {
+      "name": "done",
+      "how": "?state=done: a finished run with its result tabs"
+    },
+    {
+      "name": "failed",
+      "how": "?state=failed: the second step is data-state=\"failed\" with a danger callout and Retry"
+    }
+  ],
+  "example": "templates/playground.html",
+  "provenance": [
+    "templates/playground.html"
+  ],
+  "since": "0.8.0"
+}

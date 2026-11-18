@@ -188,6 +188,22 @@ console.log(page.markdown.slice(0, 280));</code></pre>
               <li class="fd-run-steps-item" data-state="pending"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Call <span class="fd-mono">/scrape</span><span class="fd-run-steps-detail">docs.quarry.dev</span></span><span class="fd-run-steps-time"></span></li>
               <li class="fd-run-steps-item" data-state="pending"><span class="fd-run-steps-icon"></span><span class="fd-run-steps-label">Read the response<span class="fd-run-steps-detail">Expect 200 and markdown</span></span><span class="fd-run-steps-time"></span></li>
             </ol>
+            <div class="fd-callout" data-tone="danger" role="alert" id="check-failed" hidden>
+              <i class="fd-callout-icon" data-icon="circle-x"></i>
+              <div class="fd-callout-content">
+                <p class="fd-callout-title">Ember did not accept the key</p>
+                <p class="fd-callout-body"><span class="fd-code">/scrape</span> answered 401 Unauthorized. The key em-227c…0f16 was revoked on Nov 12. Create a new key, save it as <span class="fd-code">EMBER_API_KEY</span>, then run the check again.</p>
+                <div class="fd-callout-actions"><a class="fd-btn" data-size="sm" href="api-keys.html"><span>Open API keys</span></a></div>
+              </div>
+            </div>
+            <div class="fd-callout" data-tone="info" role="note" id="check-nokey" hidden>
+              <i class="fd-callout-icon" data-icon="key-round"></i>
+              <div class="fd-callout-content">
+                <p class="fd-callout-title">There is no API key to check</p>
+                <p class="fd-callout-body">Quarry Labs has no active key. Create one, then come back and run the check.</p>
+                <div class="fd-callout-actions"><a class="fd-btn" data-size="sm" data-variant="primary" href="api-keys.html"><span>Create an API key</span></a></div>
+              </div>
+            </div>
             <div class="fd-callout" data-tone="success" role="status" id="check-result" hidden>
               <i class="fd-callout-icon" data-icon="circle-check"></i>
               <div class="fd-callout-content">
@@ -351,10 +367,29 @@ console.log(page.markdown.slice(0, 280));</code></pre>
   const pause = (ms) => new Promise((resolve) => setTimeout(resolve, reducedMotion() ? 120 : ms));
   const label = button.querySelector('span');
 
+  /* ?state= shows the check mid-run (checking), finished (connected), refused (failed), or a team with no key (no-key).
+     Without it the check waits for Run check. */
+  const failedNote = document.getElementById('check-failed');
+  const mark = (states) => steps.forEach((step, i) => {
+    step.dataset.state = states[i];
+    step.querySelector('.fd-run-steps-time').textContent = states[i] === 'done' ? times[i] : '';
+  });
+  const asked = new URLSearchParams(location.search).get('state');
+  if (asked === 'checking') { mark(['done', 'active', 'pending']); button.setAttribute('aria-busy', 'true'); }
+  if (asked === 'connected') { mark(['done', 'done', 'done']); result.hidden = false; label.textContent = 'Run again'; }
+  if (asked === 'failed') { mark(['done', 'failed', 'pending']); failedNote.hidden = false; label.textContent = 'Run again'; }
+  if (asked === 'no-key') {
+    document.querySelector('[data-noun="API key"]').closest('.fd-field').hidden = true;
+    document.getElementById('check-nokey').hidden = false;
+    steps[0].querySelector('.fd-run-steps-detail').textContent = 'No active key';
+    button.disabled = true;
+  }
+
   button.addEventListener('click', async () => {
     if (button.getAttribute('aria-busy') === 'true') return;
     button.setAttribute('aria-busy', 'true');
     result.hidden = true;
+    failedNote.hidden = true;
     steps.forEach((step) => { step.dataset.state = 'pending'; step.querySelector('.fd-run-steps-time').textContent = ''; });
     for (const [index, step] of steps.entries()) {
       step.dataset.state = 'active';

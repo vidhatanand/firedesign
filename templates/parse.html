@@ -70,6 +70,13 @@
             <p class="fd-empty-text">Parsed markdown, JSON and page details appear here. Drop a file above or start with a sample.</p>
             <div class="fd-empty-actions"><button class="fd-btn" type="button" data-sample><i data-icon="sparkles"></i><span>Try a sample</span></button></div>
           </div>
+          <div id="parse-loading" hidden aria-busy="true" aria-label="Loading documents">
+            <div class="fd-stack" data-gap="5">
+              <div class="fd-row" data-gap="3"><span class="fd-skeleton-avatar"></span><div class="fd-stack fd-grow" data-gap="1"><span class="fd-skeleton-title" data-size="h3" data-fd-vars="--_sk-w: 40%"></span><span class="fd-skeleton-text" data-fd-vars="--_sk-w: 60%"></span></div></div>
+              <div class="fd-skeleton-text" data-lines="4"></div>
+              <div class="fd-skeleton-text" data-lines="3"></div>
+            </div>
+          </div>
           <div id="parse-doc" hidden></div>
         </div>
       </div>
@@ -168,7 +175,7 @@ function renderList() {
     body.innerHTML = `<div class="fd-session-list-empty" role="status">${q ? `No documents match “${esc($('#parse-search').value.trim())}”.` : 'The latest parse requests for this team will appear here.'}</div>`;
   } else {
     body.innerHTML = `<nav class="fd-session-list" aria-label="Documents"><div class="fd-session-list-body"><p class="fd-session-list-label fd-eyebrow">Today</p>${shown.map((d) => {
-      const trail = d.state === 'parsing' ? '<span class="fd-session-list-live" role="img" aria-label="Parsing"></span>' : `<span class="fd-session-list-time">${d.pages} pp</span>`;
+      const trail = d.state === 'parsing' ? '<span class="fd-session-list-live" role="img" aria-label="Parsing"></span>' : d.state === 'failed' ? '<span class="fd-session-list-time">Failed</span>' : `<span class="fd-session-list-time">${d.pages} pp</span>`;
       return `<div class="fd-session-list-item"><a class="fd-session-list-link" href="#${d.id}" data-doc="${d.id}"${d.id === selected ? ' aria-current="page"' : ''}>${esc(d.name)}</a>${trail}<button type="button" class="fd-session-list-more" data-remove="${d.id}" aria-label="Remove ${esc(d.name)}">${ico('x')}</button></div>`;
     }).join('')}</div></nav>`;
   }
@@ -184,6 +191,16 @@ function renderViewer() {
   empty.hidden = !!d;
   host.hidden = !d;
   if (!d) { host.replaceChildren(); return; }
+  if (d.state === 'failed') {
+    host.innerHTML = `<div class="fd-empty" data-size="lg" data-tone="danger" role="alert">
+      <span class="fd-empty-icon">${ico('circle-x')}</span>
+      <h2 class="fd-empty-title">Couldn’t parse ${esc(d.name)}</h2>
+      <p class="fd-empty-text">The file is password-protected, so Ember could not read its pages. No credits were used. Remove the password and drop the file again, or retry if it has none.</p>
+      <div class="fd-empty-actions"><button class="fd-btn" type="button" data-retry-doc="${d.id}">${ico('refresh-cw')}<span>Retry</span></button><button class="fd-btn" type="button" data-variant="ghost" data-remove-doc="${d.id}"><span>Remove</span></button></div>
+    </div>`;
+    init(host);
+    return;
+  }
   const c = contentFor(d);
   const pages = pagesOf(d);
   const json = { id: d.id, file: d.name, pages: d.pages, words: c.words, tables: c.tables, markdown: c.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140) + '…', creditsUsed: d.pages };
@@ -226,7 +243,7 @@ function renderViewer() {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
   const my = viewToken;
-  setTimeout(() => { if (my === viewToken) texture.setLoading($(`#${uid}-body`), false); }, 600);
+  setTimeout(() => { if (my !== viewToken) return; const body = $(`#${uid}-body`); texture.setLoading(body, false); body.firstElementChild.hidden = true; }, 600);
 }
 
 function select(id) { selected = id; renderList(); renderViewer(); }
@@ -313,9 +330,41 @@ $('#parse-code-btn').addEventListener('click', () => {
   init($('#parse-code-host'));
 });
 
-/* ---------- first paint ---------- */
+/* ---------- failed documents: retry or remove ---------- */
+$('#parse-viewer').addEventListener('click', async (e) => {
+  const retry = e.target.closest('[data-retry-doc]');
+  const drop = e.target.closest('[data-remove-doc]');
+  if (drop) {
+    docs.splice(docs.findIndex((x) => x.id === drop.dataset.removeDoc), 1);
+    selected = null;
+    renderList(); renderViewer();
+  }
+  if (retry) {
+    const d = docs.find((x) => x.id === retry.dataset.retryDoc);
+    d.state = 'parsing';
+    renderList(); renderViewer();
+    await wait(1400);
+    d.state = 'parsed'; d.when = when();
+    renderList();
+    if (selected === d.id) renderViewer();
+  }
+});
+
+/* ---------- first paint: ?state= picks loading (skeletons in the list and the viewer), parsing (a file is being read),
+   parsed (a document is open) or failed (a file could not be read). Without it: no documents yet, the empty viewer. ---------- */
+const asked = new URLSearchParams(location.search).get('state');
+const demo = (state, sample) => {
+  const s = SAMPLES[sample];
+  docs.push({ id: `parse_demo${sample}`, name: s.name, size: s.size, kind: s.kind, state, pages: s.pages, when: when() });
+  selected = docs[0].id;
+};
+if (asked === 'parsing') demo('parsing', 0);
+if (asked === 'parsed') demo('parsed', 0);
+if (asked === 'failed') demo('failed', 1);
 renderList();
-setTimeout(() => texture.setLoading($('#parse-list'), false), 650);
+if (asked === 'parsing' || asked === 'parsed' || asked === 'failed') renderViewer();
+if (asked === 'loading') { $('#parse-empty').hidden = true; $('#parse-loading').hidden = false; }
+else setTimeout(() => texture.setLoading($('#parse-list'), false), 650);
 </script>
 </body>
 </html>

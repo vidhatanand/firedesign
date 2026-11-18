@@ -698,6 +698,9 @@ const STEPS = {
 };
 let running = false;
 let runId = 0;
+// ?state= opens the screen in one of its own states: loading (recent runs still loading), empty (no runs yet),
+// running (a run held at its second step), done (a finished run) or failed (the second step is refused).
+let demoState = new URLSearchParams(location.search).get('state');
 
 function recentRow(r) {
   const m = MODES[r.mode];
@@ -777,8 +780,26 @@ async function run() {
     for (let i = 0; i < steps.length; i += 1) {
       if (my !== runId) return;
       items[i].dataset.state = 'active';
+      if (demoState === 'running' && i === 1) return;
       await wait(steps[i][1]);
       if (my !== runId) return;
+      if (demoState === 'failed' && i === 1) {
+        items[i].dataset.state = 'failed';
+        $('.fd-run-steps', out).insertAdjacentHTML('afterend', `<div class="fd-callout" data-tone="danger" role="alert">
+          ${ico('circle-x', ' class="fd-callout-icon"')}
+          <div class="fd-callout-content">
+            <p class="fd-callout-title">Couldn’t scrape ${esc(t.label)}</p>
+            <p class="fd-callout-body">The site answered 403 Blocked after 2 retries through different proxies. No credits were charged. Try again, or open the options and give the page more time to settle.</p>
+            <div class="fd-callout-actions"><button class="fd-btn" type="button" data-size="sm" id="pg-retry">${ico('refresh-cw')}<span>Retry</span></button></div>
+          </div>
+        </div>`);
+        init(out);
+        recents.unshift({ mode, target: t.label, status: 'Failed', tone: 'danger', when: 'Just now', credits: 0 });
+        renderRecents();
+        running = false;
+        runBtn.removeAttribute('aria-busy');
+        return;
+      }
       items[i].dataset.state = 'done';
       $('.fd-run-steps-time', items[i]).textContent = `${(steps[i][1] / 1000).toFixed(1)}s`;
     }
@@ -818,8 +839,11 @@ document.addEventListener('click', (e) => {
 });
 
 setMode(mode, { replace: false });
+if (demoState === 'empty') recents.length = 0;
 renderRecents();
-setTimeout(() => texture.setLoading($('#pg-recents'), false), 650);
+if (demoState !== 'loading') setTimeout(() => texture.setLoading($('#pg-recents'), false), 650);
+if (['running', 'done', 'failed'].includes(demoState) && mode !== 'crawl') run();
+document.addEventListener('click', (e) => { if (e.target.closest('#pg-retry')) { demoState = 'done'; run(); } });
 </script>
 </body>
 </html>

@@ -34,6 +34,14 @@
           <div class="fd-card fd-skeleton-card" data-fd-vars="--fd-i: 2"></div>
         </div>
         <div class="fd-stack" id="keys-list" data-gap="3"></div>
+        <div class="fd-card" id="keys-error" data-flush hidden>
+          <div class="fd-empty" data-size="lg" data-tone="danger" role="alert">
+            <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+            <h3 class="fd-empty-title">Couldn’t load your API keys</h3>
+            <p class="fd-empty-text">The keys service did not answer within 10 seconds. Your keys still work; they are only hidden here. Usage by key below is not affected.</p>
+            <div class="fd-empty-actions"><button class="fd-btn" type="button" id="keys-retry"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
+          </div>
+        </div>
         <div class="fd-card" id="keys-empty" data-flush hidden>
           <div class="fd-empty" data-size="lg">
             <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="waves"></div></div>
@@ -447,9 +455,20 @@
     pending = null;
   }
 
-  /* ---------- First paint: skeleton for ~600 ms, then the keys ---------- */
+  /* ---------- First paint: ?state= picks loading, empty or error; otherwise a skeleton for ~600 ms, then the keys ---------- */
+  const asked = new URLSearchParams(location.search).get('state');
+  const failed = $('#keys-error');
+  const showError = (on) => { failed.hidden = !on; if (on) { list.hidden = true; empty.hidden = true; } else syncPage(); };
+  if (asked === 'empty') keys.length = 0;
   renderAll();
-  setTimeout(() => setLoading(wrap, false), 600);
+  if (asked === 'error') { setLoading(wrap, false); showError(true); }
+  else if (asked !== 'loading') setTimeout(() => setLoading(wrap, false), 600);
+  // Retry: back to the skeleton, then the keys.
+  $('#keys-retry').addEventListener('click', () => {
+    showError(false);
+    setLoading(wrap, true);
+    setTimeout(() => setLoading(wrap, false), 900);
+  });
 </script>
 </body>
 </html>

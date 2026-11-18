@@ -1,0 +1,62 @@
+{
+  "id": "parse",
+  "job": "Drop documents, read what was parsed from each, and copy it as markdown or JSON.",
+  "purpose": "A drop zone with a progress row per file, a list of documents beside a viewer. The viewer has the markdown, the JSON and the pages of the open document, with copy and download. Parsing shows its progress in the list; a file that cannot be read says why, costs nothing and offers Retry or Remove. Parsed output stays in the browser.",
+  "useWhen": [
+    "A person has files to turn into text or data and checks the result before using it.",
+    "The cost is per page and is shown before and after."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The input is a web page, a search or a crawl.",
+      "instead": "playground"
+    },
+    {
+      "when": "The person asks in words and does not name a file.",
+      "instead": "agent"
+    }
+  ],
+  "aka": [
+    "upload",
+    "documents",
+    "PDF",
+    "OCR",
+    "file to markdown",
+    "convert"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list",
+    "text",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "empty",
+      "how": "the default: no documents yet; fd-empty with Try a sample"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: skeletons in the list and the viewer"
+    },
+    {
+      "name": "parsing",
+      "how": "?state=parsing: a document is being read; the list row is live"
+    },
+    {
+      "name": "parsed",
+      "how": "?state=parsed: a document is open with markdown, JSON and pages"
+    },
+    {
+      "name": "failed",
+      "how": "?state=failed: the file could not be read; fd-empty danger with Retry and Remove"
+    }
+  ],
+  "example": "templates/parse.html",
+  "provenance": [
+    "templates/parse.html"
+  ],
+  "since": "0.8.0"
+}

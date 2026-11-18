@@ -103,6 +103,12 @@
               <tr data-skeleton><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-actions></td></tr>
             </tbody>
             <tbody id="mon-state" hidden></tbody>
           </table>
@@ -409,6 +415,10 @@
     $('#st-unread').textContent = alerts.length ? `${alerts.filter((m) => m.unread).length} unread` : 'all quiet';
     $('#st-last').textContent = latest ? agoShort(latest.changedMin) : 'never';
     $('#st-last-sub').textContent = latest ? `${latest.url.split('/')[0]} changed` : 'no changes yet';
+    if (state === 'error') {
+      ['#st-monitors', '#st-alerts', '#st-last'].forEach((id) => { $(id).textContent = '–'; });
+      ['#st-active', '#st-unread', '#st-last-sub'].forEach((id) => { $(id).textContent = 'unavailable'; });
+    }
     setLoading(statsBox, state === 'loading');
 
     // Rows
@@ -655,9 +665,18 @@
     toast.success(created.length > 1 ? `${created.length} monitors created` : 'Monitor created', { description: 'The first check is running now and sets the baseline.' });
   });
 
-  /* ---------- First paint: skeleton for ~600 ms, then the data ---------- */
-  render();
-  setTimeout(() => state === 'loading' && setState('loaded'), 600);
+  /* ---------- First paint: ?state= picks loaded, loading, empty, error or no-results (a search that matches nothing);
+     otherwise a skeleton for ~600 ms, then the data ---------- */
+  const asked = new URLSearchParams(location.search).get('state');
+  if (['loaded', 'loading', 'empty', 'error'].includes(asked)) setState(asked);
+  else if (asked === 'no-results') {
+    state = 'loaded';
+    search.value = 'staging.northwind.io';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+    render();
+    setTimeout(() => state === 'loading' && setState('loaded'), 600);
+  }
 </script>
 </body>
 </html>

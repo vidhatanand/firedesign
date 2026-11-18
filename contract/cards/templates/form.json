@@ -1,0 +1,55 @@
+{
+  "id": "form",
+  "job": "Fill in a long form in sections and register something, with every problem named next to its field.",
+  "purpose": "A sectioned form for one create action: label and description on the left, fields on the right. It mixes text, choices, tag lists, key and value pairs, switches and a JSON field. Validation runs on blur and on submit and fills each field error. A refused submit shows a banner above the form and the field it concerns; submitting holds the form still behind a busy button.",
+  "useWhen": [
+    "One create or edit action needs many grouped settings and the person reviews them before saving.",
+    "Errors must say what to change in the field, not in a toast."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The form edits something that exists and shows a save bar only when changed.",
+      "instead": "settings"
+    },
+    {
+      "when": "The form is the first run of a new account in steps.",
+      "instead": "onboarding"
+    }
+  ],
+  "aka": [
+    "create form",
+    "register",
+    "new app",
+    "settings form",
+    "wizard-less form"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "the default: filled in with sample values"
+    },
+    {
+      "name": "invalid",
+      "how": "?state=invalid: a submit with a missing name, a bad ID, no redirect URL and a bad URL; the first error has focus"
+    },
+    {
+      "name": "submitting",
+      "how": "?state=submitting: the primary button has aria-busy=\"true\" and the controls are disabled"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: a danger fd-callout above the form and the App ID field error"
+    }
+  ],
+  "example": "templates/form.html",
+  "provenance": [
+    "templates/form.html"
+  ],
+  "since": "0.8.0"
+}

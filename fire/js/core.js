@@ -244,6 +244,7 @@ export async function copyText(text) {
  *   draft.used "The draft is in the reason now. Edit it before you commit."
  *   hold.note "Nothing is sent until the countdown ends." · hold.undo "Undo" · hold.action "Sending"
  *   hold.start "{action} in {seconds} seconds. Undo or Escape stops it." · hold.undone "Stopped. Nothing was sent."
+ *   frame.empty "No picture" · frame.refused "This address isn't allowed" · frame.failed "The picture didn't load"
  */
 let dictionary;
 export function label(el, key, fallback, vars) {

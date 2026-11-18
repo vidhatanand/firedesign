@@ -7,6 +7,8 @@ export interface EmailBrand {
   name: string;
   /** https only: the one remote image the email loads. */
   logoUrl?: string;
+  /** The theme record's name for it: an alias of logoUrl (logoUrl wins). A theme record's brand fits here as it is. */
+  logo?: string;
 }
 /** A run of text: a string, or a link. */
 export type EmailRun = string | { text: string; href: string };

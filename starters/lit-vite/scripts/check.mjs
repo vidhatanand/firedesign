@@ -215,7 +215,7 @@ try {
   });
   await step('phone width: the menu opens', async () => {
     await page.setViewportSize({ width: 375, height: 800 });
-    await page.locator('[data-fd-mobile-nav]').click();
+    await page.locator('.fd-tabbar [data-fd-mobile-nav]').click();   // at phone width the tab bar's More opens the menu (the top bar's button is hidden)
     await page.locator('#ember-mobile-nav:not([hidden])').waitFor();
     await page.setViewportSize({ width: 1440, height: 900 });
   });

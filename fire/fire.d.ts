@@ -445,6 +445,18 @@ export interface ThemeDials {
   headings?: HeadingsSetting;
 }
 
+/** The brand of a theme record: the shell's setBrand() input, as strings (fire/js/theme.js). */
+export interface ThemeBrand {
+  name?: string;
+  /** A picture address for the 24px mark slot. */
+  mark?: string;
+  /** A wide picture that stands in for the mark and the name. */
+  logo?: string;
+  /** The logo for the dark scheme. */
+  logoDark?: string;
+  href?: string;
+}
+
 /** A product's look as one JSON record, version 1. Every field is optional (missing = Fire's default); unknown fields are an error. */
 export interface ThemeRecord {
   contract?: 'fire/1';
@@ -455,6 +467,7 @@ export interface ThemeRecord {
   type?: TypeSetName | TypeSpec;
   dials?: ThemeDials;
   signature?: ThemeSignature;
+  brand?: ThemeBrand;
 }
 
 /** expandTheme() result. */
@@ -467,6 +480,8 @@ export interface ExpandedTheme {
   faces: string[];
   /** What the engine adjusted. */
   notes: string[];
+  /** The record's brand, untouched (a brand is not CSS; tweaks.set() hands it to setBrand()). */
+  brand?: ThemeBrand;
 }
 
 /** validateTheme() result. */
@@ -514,6 +529,8 @@ export interface TweaksPatch {
   controls?: ControlsSetting;
   headings?: HeadingsSetting;
   signature?: ThemeSignature;
+  /** A record's brand: tweaks.set() calls setBrand() with it and does not keep it in the state. */
+  brand?: ThemeBrand;
 }
 
 /** The API of fire/js/theme.js ("fire-design/theme"); fire.js does not export it. */

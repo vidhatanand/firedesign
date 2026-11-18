@@ -128,6 +128,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         ))}
       </div>
+      <nav className="fd-tabbar" aria-label="Primary">
+        {NAV.flatMap(({ items }) => items).map((item) => (
+          <NavLink className="fd-tabbar-item" href={item.href} key={item.href}>
+            <Icon name={item.icon} />
+            <span className="fd-tabbar-label">{item.href === '/logs' ? 'Logs' : item.label}</span>
+          </NavLink>
+        ))}
+        <button className="fd-tabbar-item" type="button" data-fd-mobile-nav="" aria-controls="ember-mobile-nav" aria-expanded="false">
+          <Icon name="ellipsis" />
+          <span className="fd-tabbar-label">More</span>
+        </button>
+      </nav>
       <div className="fd-popover" id="ember-running" popover="" data-size="lg" aria-label="Running now">
         <div className="fd-popover-head">
           <p className="fd-popover-title">Running now</p>

@@ -222,6 +222,34 @@ test('validateTheme and theme.schema.json agree on every record', () => {
   }
 });
 
+test('a theme record carries an optional brand: validated like the schema, returned untouched, never CSS', () => {
+  const brand = { name: 'Ember', mark: '/brand/mark.svg', logo: 'https://cdn.example.com/logo.svg', logoDark: 'data:image/svg+xml;utf8,<svg/>', href: '/' };
+  for (const r of [{ brand }, { brand: {} }, { palette: 'volt', brand: { name: 'Ember' } }]) {
+    assert.ok(validateTheme(r).ok, JSON.stringify(validateTheme(r).errors));
+    assert.ok(schemaValid(r), JSON.stringify(schemaValid.errors));
+  }
+  const bad = [
+    { brand: 'Ember' }, { brand: [] }, { brand: { name: 3 } }, { brand: { colour: 'red' } },
+    { brand: { logo: 'javascript:alert(1)' } }, { brand: { logo: 'data:text/html,<p>' } }, { brand: { mark: 'ftp://x.test/a.png' } },
+    { brand: { logoDark: 'https://user:pw@x.test/a.png' } }, { brand: { logo: '' } }, { brand: { logo: 'a\u0001b.png' } },
+  ];
+  for (const r of bad) assert.ok(!validateTheme(r).ok, `validateTheme accepts ${JSON.stringify(r)}`);
+  for (const r of bad.slice(0, 4).concat(bad.slice(8, 9))) assert.ok(!schemaValid(r), `schema accepts ${JSON.stringify(r)}`);
+  assert.match(validateTheme({ brand: { colour: 'red' } }).errors[0], /^\/brand\/colour: unknown field/);
+  assert.match(validateTheme({ brand: { logo: 'javascript:alert(1)' } }).errors[0], /^\/brand\/logo: must be a safe picture address/);
+  // Not CSS: the same stylesheet with and without it; the expansion hands it back as its own field.
+  assert.equal(themeToCss({ palette: 'volt', brand }), themeToCss({ palette: 'volt' }));
+  assert.deepEqual(expandTheme({ brand }).brand, brand);
+  assert.notEqual(expandTheme({ brand }).brand, brand);
+  assert.equal('brand' in expandTheme({ palette: 'volt' }), false);
+  // The Tweaks side: a record's brand rides in the patch and back out into the record.
+  assert.deepEqual(fromThemeRecord({ brand }).brand, brand);
+  assert.equal('brand' in fromThemeRecord({ palette: 'volt' }), false);
+  assert.deepEqual(toThemeRecord({ brand }).brand, brand);
+  assert.equal('brand' in toThemeRecord({}), false);
+  assert.equal(DEFAULT_RECORD.brand, undefined);   // no named look carries a brand
+});
+
 test('validateTheme names the field, lists the choices, and notes the fonts a page must load', () => {
   assert.match(validateTheme({ palette: 'neon' }).errors[0], /^\/palette: unknown palette "neon" \(one of ember, volt/);
   assert.match(validateTheme({ type: 'comic' }).errors[0], /^\/type: unknown type set "comic" \(one of geist/);

@@ -36,8 +36,9 @@
  *                  every state but "loaded", a .fd-doc-frame-placeholder tile (icon and one line). The frame reserves its
  *                  space with an aspect ratio (16:9; data-ratio) and states itself in data-state="empty | loading | loaded
  *                  | failed | refused" (aria-busy while loading), firing fd:change { value: state } on the figure. Words
- *                  of the tile: data-label-frame-empty "No picture", -refused "This address isn't allowed", -failed
- *                  "The picture didn't load" (on the figure or an ancestor). setPicture(frame, url) points it at another
+ *                  of the tile are Fire's labels frame.empty "No picture", frame.refused "This address isn't allowed" and
+ *                  frame.failed "The picture didn't load" (the page dictionary, or data-label-frame-empty, -refused
+ *                  and -failed on the figure or an ancestor). setPicture(frame, url) points it at another
  *                  address ("" or null: empty).
  *  Try it          dialog.fd-doc-try[data-params="#selector"] > form[data-fd-doc-try-form] with an empty
  *                  [data-fd-doc-try-fields] (generated from the .fd-doc-params[data-in="body|query|path"] rows
@@ -52,7 +53,7 @@
  * API: init(root), buildToc(scope), toMarkdown(article), setNavGroup(button, open), openNavSheet(trigger),
  *      selectSetup(tile), setPanelLang(panel, lang), setPanelExample(panel, example), setPicture(frame, url)
  */
-import { $, $$, once, emit, copyText, ensureId, position, reducedMotion } from './core.js';
+import { $, $$, once, emit, copyText, ensureId, position, reducedMotion, label } from './core.js';
 import { icon } from './icons.js';
 import { openDialog, closeDialog, toast } from './overlays.js';
 import { selectTab, renderJSON } from './code.js';
@@ -716,7 +717,11 @@ function syncZoom(frame) {
 }
 
 /* ---------- Picture: an address that passed the allow-list, a tile when it did not ---------- */
-const PICTURE_TEXT = { empty: 'No picture', refused: "This address isn't allowed", failed: "The picture didn't load" };
+const PICTURE_TEXT = {
+  empty: (frame) => label(frame, 'frame.empty', 'No picture'),
+  refused: (frame) => label(frame, 'frame.refused', "This address isn't allowed"),
+  failed: (frame) => label(frame, 'frame.failed', "The picture didn't load"),
+};
 const PICTURE_ICON = { empty: 'image', refused: 'shield-alert', failed: 'image' };
 function pictureState(frame, state) {
   frame.dataset.state = state;
@@ -728,8 +733,7 @@ function pictureTile(frame, state) {
   const media = $('.fd-doc-frame-media', frame);
   $('.fd-doc-frame-placeholder', media)?.remove();
   if (!PICTURE_TEXT[state]) return;
-  const attr = `data-label-frame-${state}`;
-  const text = frame.closest(`[${attr}]`)?.getAttribute(attr) ?? PICTURE_TEXT[state];
+  const text = PICTURE_TEXT[state](frame);
   media.insertAdjacentHTML('beforeend', `<div class="fd-doc-frame-placeholder" role="img" aria-label="${esc(`${frame.dataset.fdAlt || ''} ${text}`.trim())}">${icon(PICTURE_ICON[state])}<span>${esc(text)}</span></div>`);
 }
 /** Point a picture frame at an address. It is checked first; "" or null shows the empty tile. */

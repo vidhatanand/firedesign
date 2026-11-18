@@ -14,6 +14,11 @@ const nav: NavGroup[] = [
   { label: 'Account', items: [{ label: 'Usage', icon: 'chart-column', keys: 'g u' }, { label: 'Settings', icon: 'settings', keys: 'g s', to: '/settings' }] },
 ];
 
+// The phone tab bar of templates/shell.js (renderTabbar): the four destinations people use most, and More, which opens the menu.
+const destinations = nav.flatMap((group) => group.items);
+const tab = (label: string, as = label): NavItem => ({ ...destinations.find((item) => item.label === label)!, label: as });
+const tabbar = [tab('Overview'), tab('Activity logs', 'Logs'), tab('Decisions'), tab('Usage')];
+
 const route = useRoute();
 </script>
 
@@ -79,6 +84,13 @@ const route = useRoute();
         </component>
       </div>
     </div>
+
+    <nav class="fd-tabbar" aria-label="Primary">
+      <component :is="item.to ? 'RouterLink' : 'a'" v-for="item in tabbar" :key="item.label" class="fd-tabbar-item" v-bind="item.to ? { to: item.to } : { href: '#' }">
+        <fd-icon :icon="item.icon"></fd-icon><span class="fd-tabbar-label">{{ item.label }}</span>
+      </component>
+      <button class="fd-tabbar-item" type="button" data-fd-mobile-nav aria-controls="ember-mobile-nav" aria-expanded="false"><fd-icon icon="ellipsis"></fd-icon><span class="fd-tabbar-label">More</span></button>
+    </nav>
 
     <div class="fd-popover" id="ember-running" popover data-size="lg" aria-label="Running now">
       <div class="fd-popover-head"><p class="fd-popover-title">Running now</p></div>

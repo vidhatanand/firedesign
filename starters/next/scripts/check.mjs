@@ -354,7 +354,7 @@ try {
   // lint-markup over app/. Its report goes to a file: a large report written to a pipe is cut short when the lint exits.
   const lintFile = path.join(OUT, 'lint-markup.json');
   const fd = openSync(lintFile, 'w');
-  const lint = spawnSync(process.execPath, [path.join(REPO, 'scripts/lint-markup.mjs'), '--json', 'app'], { cwd: HERE, stdio: ['ignore', fd, 'pipe'], encoding: 'utf8' });
+  const lint = spawnSync(process.execPath, [path.join(REPO, 'scripts/lint-markup.mjs'), '--surface', 'app', '--json', 'app'], { cwd: HERE, stdio: ['ignore', fd, 'pipe'], encoding: 'utf8' });
   closeSync(fd);
   let findings;
   try { findings = JSON.parse(readFileSync(lintFile, 'utf8')).findings; } catch { findings = null; }

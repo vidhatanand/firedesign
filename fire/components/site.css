@@ -616,7 +616,15 @@ body[data-site-shell=""] { visibility: hidden; animation: fd-site-reveal 0s var(
 .fd-site-pricing-includes { min-width: 0; }
 .fd-site-pricing [data-period][hidden] { display: none; }
 /* columns: plans side by side, each opened by a rule; the featured one by a stronger rule and a label */
-.fd-site-pricing[data-layout="columns"] .fd-site-pricing-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--fd-site-plan-min)), 1fr)); column-gap: clamp(var(--fd-space-6), 3cqi, var(--fd-space-10)); row-gap: var(--fd-space-12); }
+.fd-site-pricing[data-layout="columns"] .fd-site-pricing-plans { --_st-gap: clamp(var(--fd-space-6), 3cqi, var(--fd-space-10)); display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--fd-site-plan-min)), 1fr)); column-gap: var(--_st-gap); row-gap: var(--fd-space-12); }
+/* Four plans never leave one alone on a second row: they sit four across, then two by two, then one column.
+   The column's floor is a quarter of the row while a quarter is at least the plan's minimum, else a half, else the row. */
+.fd-site-pricing[data-layout="columns"] .fd-site-pricing-plans:has(> .fd-site-pricing-plan:nth-child(4):last-child) {
+  --_st-q: calc((100% - 3 * var(--_st-gap)) / 4);
+  --_st-h: calc((100% - var(--_st-gap)) / 2);
+  --_st-col: clamp(clamp(var(--_st-q), (var(--fd-site-plan-min) - var(--_st-q)) * 9999, var(--_st-h)), (var(--fd-site-plan-min) - var(--_st-h)) * 9999, 100%);
+  grid-template-columns: repeat(auto-fit, minmax(var(--_st-col), 1fr));
+}
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-plan { padding-block-start: var(--fd-space-6); border-top: var(--fd-hairline) solid var(--fd-line); }
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-includes { padding-block-start: var(--fd-space-5); border-top: var(--fd-hairline) solid var(--fd-line-faint); }
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-action > .fd-btn { flex: 1 1 auto; }

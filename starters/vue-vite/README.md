@@ -25,7 +25,7 @@ written as Vue single-file components from Fire's own templates, and proves the 
 ## Start a new project from it
 
 1. Copy this folder.
-2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.6.1"`.
+2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.6.2"`.
 3. `npm install`, then `npm run dev` (it runs `npm run theme` first), or `npm run build`.
 4. Remove `scripts/check.mjs` and the `check` script if you do not compare against Fire's templates. Keep
    `npm run lint:markup`.

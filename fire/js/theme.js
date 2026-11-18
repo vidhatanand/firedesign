@@ -8,7 +8,7 @@
  * The record, version 1 (every field optional; a missing field is Fire's default; an unknown field is an error):
  *   {
  *     "contract": "fire/1",
- *     "fire": "0.6.1",                          the Fire release the record was written against (optional; pins the expander)
+ *     "fire": "0.6.2",                          the Fire release the record was written against (optional; pins the expander)
  *     "palette": "ember",                       a palette name, or a spec (below)
  *     "tone": { "hue": 0, "vivid": 100, "light": 0, "warmth": 0 },
  *     "type": "geist",                          a type set name, or { "display", "sans", "mono" } families the page loads
@@ -76,7 +76,7 @@ export const INPUT_TOKENS = Object.freeze([
 ]);
 export const NEUTRALS = Object.freeze(['pure', 'cool', 'warm', 'tinted']);
 export const LABELS = Object.freeze(['white', 'dark']);
-export const FIRE_VERSION = '0.6.1';
+export const FIRE_VERSION = '0.6.2';
 
 export const DEFAULT_RECORD = Object.freeze({
   contract: CONTRACT, palette: DEFAULT_PALETTE, tone: TONE_DEFAULT, type: DEFAULT_TYPEFACE, dials: DIAL_DEFAULTS,

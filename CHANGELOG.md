@@ -2,6 +2,189 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.8.0 — unreleased
+
+Fire now covers public websites and phone apps as well as app screens. A site is built from a layout foundation and
+fourteen section types, a phone gets a tab bar, a page can move to the next without redrawing its chrome, and every
+part says which surface it belongs to (app, website, phone or email), so a search, a lint and the Catalogue page can
+keep a part out of a page it does not suit. A product's own CSS and tokens get a check, status and chart colours
+follow each palette, and a picture of every part is searchable. No class, attribute value, token, event or export was
+removed or renamed: every class and attribute value in 0.7.0's catalogue is still there, and a product that copies
+`fire/` keeps working. A few things look or behave differently on purpose; read "Changed" before you refresh.
+
+### Added
+
+**Websites** (`docs/site.html`, `docs/site-sections.html`; CSS `fire/components/site.css`, behaviour `fire/js/site.js`)
+
+- The foundation: `fd-site` (a size container that every section measures, so a site renders the same inside a board
+  or a docs specimen as on its own page), `fd-site-section`, `fd-site-container` (`data-width="narrow|full"`) and one
+  section head, `fd-site-head` with `fd-site-eyebrow`, `fd-site-title`, `fd-site-lead` and `fd-site-head-actions`.
+- Four named breakpoints, also in the contract as `breakpoints` in `contract/fire-contract.json`: phone below 640px,
+  tablet 640 to 899px, desktop from 900px, wide from 1200px.
+- Fluid type that grows with the container (`fd-site-display`, `-title`, `-heading`, `-lead`; tokens `--fd-fluid-*`). It
+  follows the type set and `data-text-size`.
+- Section rhythm (`data-rhythm="tight|loose"`, `data-rule`) and six grounds (`data-ground="page|sunken|raised|inverse|accent|texture"`),
+  each with text at 4.5:1.
+- Fourteen section types, each with variants that differ in structure: `fd-site-header`, `-hero`, `-logos`, `-features`,
+  `-split`, `-stats`, `-steps`, `-quote`, `-pricing`, `-compare`, `-faq`, `-cta`, `-footer` and `-posts`. They are the
+  new catalogue kind `section`. Fire ships no block library: a section brings layout and rhythm, and every control,
+  table and card inside it is an existing Fire component.
+- `fire/js/site.js` runs the header's menu sheet below desktop, the logo strip's pause button, the pricing period switch
+  and the compare table's plan tabs. Nothing on a site animates on scroll: no entrance effects, no parallax.
+- The rule that keeps a site from looking generated is on `docs/site.html#generated`: vary a site by its look
+  (palette, type set, signature, dials) and by how its sections are composed, never by a decorative variant.
+- Four website templates, `site-home`, `site-pricing`, `site-customers` and `site-changelog`, with their shared header
+  and footer in `templates/site-shell.js` (`mountSite()`, `renderHeader()`, `renderFooter()`). `templates/index.html` now
+  groups the 36 screens by surface: in the app, signed-out and system pages, public pages read from a link, website,
+  documentation site.
+
+<!-- 0.8: publishing goes here -->
+
+**Phone** (`docs/shell.html#tabbar`)
+
+- `fd-tabbar`: three to five destinations at the bottom of the screen, as a direct child of `fd-app`. Items are
+  `fd-tabbar-item` with `fd-tabbar-label`; `fd-tabbar-badge` shows a count and `data-dot` a new mark. An item
+  with `data-fd-mobile-nav` is "More" and opens the menu sheet. It shows only below 640px.
+- `--fd-tabbar-space` is the room the bar takes. The page, the support button, chat, toasts, the keys hint and the
+  Tweaks button already leave it free.
+
+**Page transitions, opt in** (`docs/transitions.html`; `fire/components/transitions.css`, `fire/transitions.css`, `fire/js/transitions.js`)
+
+- The sidebar, top bar, tab bar, documentation bars, site header and support button hold still, and only the page
+  changes: `fade`, `slide` (a phone drill-down that reverses on back and mirrors in right-to-left) or `none`.
+- A multi-page site opts in with three steps: link `fire/transitions.css` after `fire.css` (it is exported as
+  `fire-design/transitions.css`), put `data-fd-transition="fade"` on `<html>`, and mark the module scripts that build
+  the page `blocking="render"`. A single-page app calls `transition(update, { kind, direction })` and needs none of the three.
+  One link can choose its own kind with `data-fd-transition` on the `<a>`.
+- A page that does not ask gets no names and no transition. Reduced motion and the motion dial at "none" turn it off.
+  All 36 templates and the three starters opt in.
+
+**Tagging by surface** (`docs/catalogue.html`)
+
+- `data-fd-surface="app|website|phone|email"` on `<html>` or any element says where a page is used. The lint reports
+  `surface-mismatch` (a warning) for a part whose card does not include that surface; `--surface <name>` sets it for
+  files that declare none and `--no-surface` turns the rule off. A phone page accepts app parts.
+- `npx fire find` lists each result's surfaces, and `--surface` also says when a clearly better match belongs to another surface.
+- The Catalogue page (`docs/catalogue.html`) filters every part, pattern and template by surface, kind, data shape and words (the
+  filters are in the address, so a link can be shared), and can show a picture of each. Each docs section carries its surface tags. The Facet export carries surfaces.
+
+**Checks**
+
+- `fire lint-css` (`scripts/lint-css.mjs`, `npm run lint:css`) checks a product's CSS and tokens against
+  `contract/fire-contract.json`: unknown or reserved `--fd-` tokens, a product token that repeats a Fire token,
+  raw colours, sizes and durations, and restyling of an `fd-` class. A product declares its prefix with `--prefix` or
+  `"fire": { "prefix": "acme" }` in `package.json`. The rules are in `docs/frameworks.html#own-css`. The three starters run it.
+- lint-markup's JSON output gains a `warnings` count and findings can have severity `warning`.
+
+**Templates**
+
+- Every one of the 36 templates has a card in `contract/cards/templates/`. The 32 that have states open each from `?state=`
+  or from the screen's Demo state band; the card lists them with how to set each one. `blank`, `docs-home`,
+  `site-home` and `site-customers` have none.
+
+**Colours** (`docs/foundations.html`)
+
+- Every palette derives its own success, warning, danger and info and its six chart series from its accent, ink and
+  page. Tones keep their meaning and keep a distance from the accent; chart series are checked for 3:1 contrast, for
+  distance in normal vision and under simulated protanopia, deuteranopia and tritanopia, and for no olive in the light
+  scheme. `node scripts/build-palettes.mjs --check` holds every palette and toned palette to the rules.
+- `data-marks="dash"` on `fd-chart` gives line series 2 to 6 a dash each, so colour is not the only cue. The legend
+  and the tooltip show the same dash.
+
+**Small parts**
+
+- `fd-screen-foot`: the legal row of a centred screen (copyright, Terms, Privacy, language).
+- A picture frame for a picture a person supplied: `fd-doc-frame` with `data-fd-src`, `data-fd-alt`, `data-fd-hosts`
+  (hosts besides the page's own that may serve it), `data-fd-data` and `data-ratio="wide|photo|square"`. The address is
+  checked with `safeImageUrl()` first; `setPicture(frame, url)` points a frame at another. It keeps its shape while the
+  picture loads and shows a tile for no address, a refused address and a failed load. The three tile texts are the
+  label keys `frame.empty`, `frame.refused` and `frame.failed`.
+- `data-fd-brand` (JSON in a `<script type="application/json">`, or as an attribute) and `setBrand({ name, mark, logo,
+  logoDark, href })` set the product's brand once and fill every `fd-brand` on the page.
+- A logo field: `fd-dropzone` with `data-layout="logo"`: a preview, a hint, Upload and Remove, a size and type check,
+  and `fd:files` to run your own upload and `setFileProgress()` to show it.
+- One menu for every row: put `data-fd-flags="paused admin"` on a row or its opener, and mark menu items
+  `data-fd-when`, `data-fd-unless` and `data-fd-else="disable"`. Items that do not apply are hidden when the menu
+  opens, and a menu with nothing left stays shut with `aria-disabled="true"` on its opener.
+- Icons `wrench` and `calendar-check` (274 in all).
+- The theme record takes `brand: { name, mark, logo, logoDark, href }`, and `renderEmail()` accepts `brand.logo` (the
+  older `logoUrl` still works and wins when both are given), so an app, a site and an email carry one brand.
+
+**For agents**
+
+- Every entry of the search index except the modules has a picture, `contract/pictures/<kind>/<id>.png` (217 files,
+  about 8 MB). `contract/index.json` names the rule in `pictures`, `npx fire find --json` returns each result's
+  `picture`, and `npm run build:pictures` renders them again. `node scripts/build.mjs --check` fails when an entry has
+  no picture or a picture has no entry.
+- The catalogue lists 181 components, patterns, layouts and sections (152, 10, 5 and 14), up from 163, and 4 modules, up
+  from 3 (`transitions` is new). `contract/index.json` has 221 entries.
+- **Starters**: each has the tab bar, `data-fd-surface="app"` on `<html>`, lint-css beside the markup lint in its check
+  (and `--surface app` on the markup lint), and the page transition (Lit and Vue call `transition()`, Next wraps each
+  screen in React's `<ViewTransition>`; rule R14 in `spec/EXPORT.md` ignores the `vt-*` attributes React writes). Fire's
+  typings now cover what they call, so they cast less. They render like the templates.
+
+### Changed
+
+- **Ember's chart series 3 to 6** are now teal, magenta, green and blue (they were blue, violet, green and amber), so
+  they stay apart for every reader. Series 1 and 2 and every Ember status colour are unchanged. A product that drew the
+  four colours by hand to match a chart should read them from `--fd-chart-3` to `--fd-chart-6`.
+- **Every other palette now has its own status and chart colours.** Until 0.7 only Ember's were defined and the other
+  fourteen palettes inherited them. Under volt, forest, midnight and the rest, `fd-badge`, `fd-status`, `fd-callout`,
+  `fd-banner`, toasts and charts change colour a little, in the direction of the palette.
+- **`fd-frame` and `fd-crosshair` belong to the `page` component** in the catalogue; they were listed under the app
+  shell. The classes are the same.
+- **Card `surfaces` changed on 23 cards** (19 of them in which surfaces they list), so `fire find --surface` and the
+  `surface-mismatch` warning answer differently. The visible changes: `decision`, `delta`, `icon`, `initial`,
+  `inline-code`, `prose`, `text` and `type` no longer list `email` (an email is written by `renderEmail()`, not by
+  those classes; only the email, initial-helpers and theme-record modules list it now); `doc-frame` is now app, website and phone; `commit`, `decision`, `log`, `panel`, `split`, `sheet` and
+  `toolbar` add `website`; `doc`, `form-section` and `table` add `phone`; `mobile-nav` adds `app`.
+- **lint-markup's JSON** output has a `warnings` count beside `errors`, and a finding's `severity` can be `"warning"`
+  (it was always `"error"`). Warnings never change the exit code.
+- **The index** has a `pictures` field and the kind `section`. The theme record's schema has `brand`; `validateTheme()`
+  rejects an unsafe picture address in it. The contract has `breakpoints`. The `fire` command has `lint-css`, and the
+  package exports `fire-design/transitions.css`. `scripts/lint-css.mjs` is in the package files.
+- **The top bar's menu button** is hidden below 640px when a tab bar has a "More" item, because the sheet opens from the bar.
+- **`fd:select`** from a menu also carries `row`, the opener's row.
+- **Phone screens**: parts that sit at the bottom of the screen (the support button, chat, toasts, the keys hint) rise
+  by `--fd-tabbar-space`, which is 0 on a page without a tab bar.
+
+### Not verified
+
+- Page transitions are verified in Chromium. Firefox has no cross-document transitions, so pages there load as before;
+  `transition()` in Firefox was not tried. Safari was not verified: in WebKit's test build the incoming page did not
+  paint during a transition, so treat Safari as unsupported until you have tried it.
+- The tab bar's spacing for the home indicator (`env(safe-area-inset-bottom)`) was checked in a narrow browser, not on
+  a real iPhone.
+- Nothing new was tried with a screen reader: the tab bar, the site header's menu sheet, the logo strip's pause
+  button, the pricing period switch and the logo field follow the ARIA patterns, and that is all that is claimed.
+- As before, the rest of Fire was reviewed in Chromium only; Safari and Firefox are untested.
+
+### Decided against
+
+- Thin wrappers for React 18 and older. The React package needs React 19, which `peerDependencies` says.
+
+### For products refreshing from 0.7
+
+Check the screens in "Changed", then:
+
+- **Status and chart colours.** Look at charts, badges and banners under any palette but Ember. If you had set status
+  colours to match the old values, remove them; they now follow the palette.
+- **Tab bar.** A product that built its own bottom bar for phones replaces it with `fd-tabbar` and drops its own
+  padding for the page and the floating parts.
+- **Icons and menus.** The stopgaps for the icons `wrench` and `calendar-check` and for per-row menu items (Assay R10)
+  can go: use the icons and `data-fd-flags` with `data-fd-when` and `data-fd-unless`.
+- **Brand.** Replace the brand code that swaps a logo in the shell with `data-fd-brand` or `setBrand()`, and give
+  `renderEmail()` the same `brand`.
+- **Surface.** Put `data-fd-surface` on `<html>` and run the markup lint; fix each `surface-mismatch` or leave the part
+  out of that page. If you read card `surfaces` yourself, read them again.
+- **Your own CSS.** Run `npx fire lint-css src --prefix <yours>`. Errors are a token of yours that repeats a Fire token,
+  a `--fd-` name Fire does not define, a raw colour. Warnings are the rest; none fails a run.
+- **Page transitions.** Opt in with the three steps if you want them. A page that does not is unchanged.
+- **Websites.** A product site built by hand should compare its header, hero, pricing and footer with the sections
+  before it adds another variant.
+- If your code reads lint-markup's JSON, read `warnings` and `severity`. If you copy `templates/`, take
+  `data-fd-surface` and `data-fd-transition` on `<html>` and `blocking="render"` on the module scripts with it.
+
 ## 0.7.0 — 19 Nov 2026
 
 Fire gains what products built beside it: decisions with an Undo, grouped and live data, forms for dates, colours and

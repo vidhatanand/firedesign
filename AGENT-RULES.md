@@ -21,7 +21,9 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Build or change any screen | `GUIDE.md` |
 | Write any text that appears on a screen | `WRITING.md` |
 | Use a class or an attribute | `VOCABULARY.md` (if it is not listed there, it does not exist) |
-| Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example` |
+| Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Search with `--surface` set to where the page is used. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example`; `--json` gives the path of its picture, which you can open |
+| Build a public website | `GUIDE.md` section 5, "A public website", then `docs/site.html` and `docs/site-sections.html` |
+| Add your own CSS or tokens | `GUIDE.md` section 7, "Your own CSS and tokens" |
 | Write Fire markup in Lit, React, Next.js or Vue | `spec/EXPORT.md` in the Fire package, and the matching starter in `starters/` |
 | Add to Fire itself | `DESIGN.md`, in the Fire repository |
 
@@ -35,6 +37,12 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 4. Build every state: empty, loading, error, disabled.
 5. A button that does something dangerous or irreversible goes on its own page or section with `fd-confirm-inline`; a decision someone can take back waits a few seconds with Undo (`GUIDE.md` section 5, "Decisions"). A control that is off says why (`fd-reason`).
 6. One primary button per view. One step between heading levels: page, section, card, field (`GUIDE.md` section 5, "Heading levels").
+7. Declare the surface: `data-fd-surface="app|website|phone|email"` on `<html>`. A part whose card does not include it gets a `surface-mismatch` warning; use the part the warning names, or leave it out. Search with `fire find --surface`.
+8. A public site is composed from Fire's section types inside `fd-site`. Never write or ask for a section variant that only changes how it is painted, and never a block of your own: vary a site by its look and by which sections you compose.
+9. On a phone, main destinations are an `fd-tabbar`, three to five items. Do not add padding or offsets for it; `--fd-tabbar-space` does that.
+10. Your own tokens carry your prefix, never `--fd-`. Never add a token that repeats a Fire token (a colour, length, duration or weight Fire has): use Fire's. Never restyle an `fd-` class; ask for a variant.
+11. Page transitions are opt in. Add them only when asked, with the three steps in `GUIDE.md` section 2, or `transition()` in a single-page app.
+12. Start a screen from its template. A template with states opens each from `?state=` (its card lists them): copy that state's markup instead of drawing it again.
 
 ## 3. Forms
 
@@ -58,7 +66,7 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 1. Open every screen you touched in a browser. Check light and dark, 1440px and 375px wide, and keyboard use.
 2. Ask: does it look like a product, or like a database form? If the second, it is not done.
 3. Run the checklist in `WRITING.md` section 9 on each screen.
-4. Run Fire's markup lint on every file you changed (`node node_modules/fire-design/scripts/lint-markup.mjs <files>`, or `scripts/lint-markup.mjs` inside the Fire repository) and fix every finding; never silence one with a `style` attribute. In the Fire repository, also run `scripts/audit.mjs`: no errors and nothing under `literals`, `inline` or `attrs`.
+4. Run Fire's markup lint on every file you changed (`node node_modules/fire-design/scripts/lint-markup.mjs <files>`, or `scripts/lint-markup.mjs` inside the Fire repository) and fix every finding, warnings included; never silence one with a `style` attribute. If you wrote CSS or tokens, run `lint-css` too (`npx fire lint-css <files> --prefix <yours>`) and fix every error. In the Fire repository, also run `scripts/audit.mjs`: no errors and nothing under `literals`, `inline` or `attrs`.
 5. Say plainly what you checked and what you did not.
 
 ## 6. When Fire does not have what you need

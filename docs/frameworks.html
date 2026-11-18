@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frameworks and checks · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="frameworks">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Start</p>
+    <h1 class="fd-display">Frameworks and checks</h1>
+    <p class="doc-lede">Fire 0.6 works in plain pages, Lit, React and Next.js, and Vue. Start from a starter, follow a short list of rules, and let two checks prove the result. This page covers what 0.6 added.</p>
+  </header>
+
+  <section class="doc-section" id="starters">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Start from a starter</h2>
+      <p>Fire 0.6 ships three wired apps. Each shows Ember's shell and three screens, and each renders the same as Fire's own templates in three browser engines. Copy one folder and you have an app.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Framework</th><th>Starter</th><th>Package entry</th></tr></thead><tbody><tr><td>Lit (the default for a new app)</td><td><code class="fd-code">starters/lit-vite</code></td><td><code class="fd-code">fire-design/elements</code></td></tr><tr><td>React and Next.js</td><td><code class="fd-code">starters/next</code></td><td><code class="fd-code">fire-design/react</code></td></tr><tr><td>Vue</td><td><code class="fd-code">starters/vue-vite</code></td><td><code class="fd-code">fire-design/vue</code></td></tr></tbody></table></div>
+    <h3 class="doc-sub">Make it yours</h3>
+    <ul class="doc-notes">
+      <li>Copy the starter folder out of the Fire repository.</li>
+      <li>In <code class="fd-code">package.json</code>, change <code class="fd-code">"fire-design": "file:../.."</code> to the tagged release below.</li>
+      <li>Run <code class="fd-code">npm install</code>, then <code class="fd-code">npm run dev</code>.</li>
+      <li>Choose your look by editing the theme record (Lit: <code class="fd-code">theme.json</code>; Vue: <code class="fd-code">look.json</code>; Next.js: set <code class="fd-code">FIRE_LOOK</code>). The starter turns it into a stylesheet before every run.</li>
+      <li>Delete the <code class="fd-code">check</code> script. It compares against templates that only exist in Fire's repository.</li>
+    </ul>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">package.json</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="json">"dependencies": {
+  "fire-design": "github:vidhatanand/firedesign#v0.6.1"
+}</code></pre></div>
+    <div class="fd-callout" data-tone="info" role="note"><i class="fd-callout-icon" data-icon="info"></i><div class="fd-callout-content"><p class="fd-callout-title">Pin the tag</p><p class="fd-callout-body">A tag names one release. Move to a new release by changing the tag, never by pointing at a branch.</p></div></div>
+  </section>
+
+  <section class="doc-section" id="packages">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Packages and elements</h2>
+      <p>The markup is the same in every framework. The packages and elements remove the few places where a framework and Fire would fight over the DOM.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Import</th><th>What it gives you</th></tr></thead><tbody><tr><td><code class="fd-code">fire-design/css</code></td><td>The whole stylesheet. Load your theme file after it.</td></tr><tr><td><code class="fd-code">fire-design/boot</code></td><td>The script for <code class="fd-code">&lt;head&gt;</code> that restores the saved look before the first paint.</td></tr><tr><td><code class="fd-code">fire-design/elements</code></td><td>The custom elements <code class="fd-code">fd-icon</code>, <code class="fd-code">fd-chart</code>, <code class="fd-code">fd-code</code> and <code class="fd-code">fd-texture</code> (Lit).</td></tr><tr><td><code class="fd-code">fire-design/react</code></td><td><code class="fd-code">FireIcon</code>, <code class="fd-code">FireChart</code>, <code class="fd-code">FireCode</code>, <code class="fd-code">FireTexture</code>, <code class="fd-code">useFire</code> and <code class="fd-code">useFireEvent</code>.</td></tr><tr><td><code class="fd-code">fire-design/vue</code></td><td>A plugin, the <code class="fd-code">v-fire</code> directive and <code class="fd-code">fireVueOptions()</code> for <code class="fd-code">vite.config</code>.</td></tr><tr><td><code class="fd-code">fire-design/theme</code></td><td><code class="fd-code">expandTheme</code>, <code class="fd-code">themeToCss</code>, <code class="fd-code">paletteFrom</code> and <code class="fd-code">validateTheme</code> for the theme record.</td></tr><tr><td><code class="fd-code">fire-design/catalog</code>, <code class="fd-code">fire-design/contract</code></td><td>The catalogue and the token contract as JSON.</td></tr></tbody></table></div>
+    <ul class="doc-notes">
+      <li>Use an element where a framework owns the DOM and the data changes: an icon whose name comes from data, a chart that gets new points, a code block that gets new text. See <a class="fd-link" href="elements.html">Custom elements</a>.</li>
+      <li>Each element is its component's root, so Fire's CSS applies unchanged.</li>
+      <li>Never import <code class="fd-code">fire-design/elements</code> in a server component. It needs <code class="fd-code">customElements</code> and <code class="fd-code">document</code>.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="rules">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Rules to remember</h2>
+      <p>The full list, with a rule id each, is <code class="fd-code">spec/EXPORT.md</code>. These are the ones that break a screen when forgotten.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Topic</th><th>Rule</th></tr></thead><tbody><tr><td>Presence attributes</td><td>In JSX write <code class="fd-code">data-block=""</code>, never bare <code class="fd-code">data-block</code>, which renders "true". In Lit and Vue the bare form is fine (A7).</td></tr><tr><td>Booleans</td><td>In JSX write <code class="fd-code">hidden</code>, <code class="fd-code">disabled</code> and <code class="fd-code">open</code> with no value. <code class="fd-code">hidden=""</code> is dropped (A3).</td></tr><tr><td>JSON data</td><td>Row templates and chart data are <code class="fd-code">&lt;template&gt;</code> and <code class="fd-code">&lt;script type="application/json"&gt;</code> elements. Fill them with <code class="fd-code">innerHTML</code> or <code class="fd-code">dangerouslySetInnerHTML</code> through <code class="fd-code">jsonForScript</code>, which escapes <code class="fd-code">&lt;</code> (M1, M2).</td></tr><tr><td>Icons</td><td>Never <code class="fd-code">&lt;i data-icon&gt;</code> in framework code. Fire replaces it, and the framework then crashes on it. Write <code class="fd-code">&lt;fd-icon icon="search"&gt;</code> or the static SVG (I1, I2).</td></tr><tr><td>Events</td><td>Listen for <code class="fd-code">fd:select</code>, <code class="fd-code">fd:change</code> and the rest on an element: <code class="fd-code">@fd:select</code> in Lit and Vue, <code class="fd-code">useFireEvent</code> in React. Next.js does not compile <code class="fd-code">onfd:select</code> (V1, V2).</td></tr><tr><td>Init</td><td>Fire runs once at load. Call <code class="fd-code">init(root)</code> after you render new markup: <code class="fd-code">useFire(ref)</code> in React, <code class="fd-code">v-fire</code> in Vue, <code class="fd-code">updated()</code> in Lit. Never before hydration (L1, L5).</td></tr><tr><td>Fire owns what it writes</td><td>After <code class="fd-code">init</code>, never bind <code class="fd-code">aria-expanded</code>, <code class="fd-code">data-state</code>, <code class="fd-code">role</code>, <code class="fd-code">id</code> or the children of a chart, secret or code block to state. Change them through Fire's API, or change the element's <code class="fd-code">key</code> (O1, O2).</td></tr><tr><td>Fields</td><td>Do not control a field that Fire writes (search, number, slider, OTP, combobox). Use <code class="fd-code">defaultValue</code> and read <code class="fd-code">fd:change</code> (F7, O3).</td></tr><tr><td>No style</td><td>No <code class="fd-code">style</code> attribute, prop or <code class="fd-code">v-show</code>. Custom properties go in <code class="fd-code">data-fd-vars</code> (A14, A17).</td></tr><tr><td>Server rendering</td><td>Render plain Fire markup on the server. Load Fire in the browser after hydration. Put <code class="fd-code">suppressHydrationWarning</code> on <code class="fd-code">&lt;html&gt;</code> and on elements that carry <code class="fd-code">data-fd-vars</code> (N1, N3, N4).</td></tr><tr><td>Strict CSP</td><td>Fire works with <code class="fd-code">script-src 'self'; style-src 'self'</code>. The Vite dev server needs <code class="fd-code">'unsafe-inline'</code> for styles. A production build does not (P1, P2).</td></tr><tr><td>The CSS target</td><td>Set <code class="fd-code">build.cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5']</code> in <code class="fd-code">vite.config</code>. Vite's default target lowers <code class="fd-code">light-dark()</code>, and a forced <code class="fd-code">color-scheme</code> stops working (P5).</td></tr></tbody></table></div>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">TypeScript</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="ts">// vite.config.ts
+export default defineConfig({
+  build: { cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5'] },
+});</code></pre></div>
+  </section>
+
+  <section class="doc-section" id="catalogue">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Catalogue and cards</h2>
+      <p>Fire describes itself in <code class="fd-code">contract/catalog.json</code>: 142 components, patterns and layouts, with their classes, allowed values, states and events. Each has a card that says what it is for, when to use it, when not to, and what else people call it.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Card field</th><th>Use it to</th></tr></thead><tbody><tr><td><code class="fd-code">job</code></td><td>Match a request. One sentence that starts with a verb.</td></tr><tr><td><code class="fd-code">aka</code></td><td>Match other names: "modal" finds the dialog.</td></tr><tr><td><code class="fd-code">surfaces</code>, <code class="fd-code">data</code></td><td>Filter: app or website, a list or a record.</td></tr><tr><td><code class="fd-code">useWhen</code>, <code class="fd-code">avoidWhen</code></td><td>Confirm the fit. Each <code class="fd-code">avoidWhen</code> names what to use instead.</td></tr><tr><td><code class="fd-code">example</code></td><td>Open the one docs section that shows it. Copy its markup.</td></tr></tbody></table></div>
+    <h3 class="doc-sub">How an agent searches</h3>
+    <p class="fd-muted">Search the cards by <code class="fd-code">job</code> and <code class="fd-code">aka</code> first. Filter by <code class="fd-code">surfaces</code> and <code class="fd-code">data</code>. Read <code class="fd-code">useWhen</code> and <code class="fd-code">avoidWhen</code>. Then open only the chosen entry's <code class="fd-code">example</code>.</p>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">Shell</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="bash">node -e "
+const c = require('fire-design/catalog');
+const q = 'data grid';
+for (const x of c.components) {
+  const k = x.card;
+  if (k &amp;&amp; [k.job, ...k.aka].join(' ').toLowerCase().includes(q)) console.log(x.id, '-', k.job, '-&gt;', k.example);
+}
+"</code></pre></div>
+    <p class="fd-muted">That prints <code class="fd-code">table - Compare, sort and act on records laid out in rows and columns. -&gt; docs/data.html#activity</code>. A class or attribute value that is not in the catalogue does not exist.</p>
+  </section>
+
+  <section class="doc-section" id="checks">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Two checks</h2>
+      <p>Both run in your project, from the package. They need Node. The second needs a browser too.</p>
+    </div>
+    <h3 class="doc-sub">lint-markup</h3>
+    <p class="fd-muted">Reads your markup and the catalogue. It reports unknown <code class="fd-code">fd-</code> classes, elements and icons, <code class="fd-code">data-*</code> values a component does not define, <code class="fd-code">style</code> attributes and props, raw colours and pixel sizes, icon-only buttons without a name, and <code class="fd-code">&lt;i data-icon&gt;</code> in React or Vue code. It exits 1 on any error.</p>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">Shell</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="bash">node node_modules/fire-design/scripts/lint-markup.mjs "src/**/*.{html,tsx,jsx,vue,ts}"</code></pre></div>
+    <h3 class="doc-sub">render-equal</h3>
+    <p class="fd-muted">Proves a screen renders like its reference: a Fire template or a Facet board. It compares Fire nodes, computed styles and pixels at 1440 and 375 wide, in light and dark, in Chromium, WebKit and Firefox. It needs <code class="fd-code">playwright-core</code>, <code class="fd-code">pixelmatch</code> and <code class="fd-code">pngjs</code>.</p>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">Shell</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="bash">node node_modules/fire-design/scripts/render-equal.mjs \
+  --ref templates/logs.html --cand http://127.0.0.1:5173/logs \
+  --ref-root ".fd-page" --cand-root ".fd-page"</code></pre></div>
+    <div class="fd-callout" data-tone="info" role="note"><i class="fd-callout-icon" data-icon="info"></i><div class="fd-callout-content"><p class="fd-callout-title">Both run in each starter</p><p class="fd-callout-body">Run <code class="fd-code">npm run lint:markup</code> for the first. Run <code class="fd-code">npm run check</code> for the second, inside Fire's repository, where the reference templates are.</p></div></div>
+  </section>
+
+  <section class="doc-section" id="facet">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Facet export</h2>
+      <p>Facet is the canvas where a team designs boards. The <code class="fd-code">facet/</code> folder makes Fire a Facet design system: the content Facet shows, the files it carries, and the theme record. Facet's exporter writes the same markup as these rules, and Facet runs the two checks on what it exports.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>File</th><th>What it is</th></tr></thead><tbody><tr><td><code class="fd-code">facet/content.json</code></td><td>Fire's default look (Ember, Geist) as Facet design system content, with a card for each component.</td></tr><tr><td><code class="fd-code">facet/extras.json</code></td><td>The files Facet carries beside it, each with size and SHA-256, and the variant that was written.</td></tr><tr><td><code class="fd-code">facet/theme.json</code></td><td>The theme record the content came from. It names the Fire release.</td></tr><tr><td><code class="fd-code">facet/README.md</code></td><td>How Facet consumes all of it, and every place Fire did not fit.</td></tr></tbody></table></div>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">Shell</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="bash">node scripts/build-facet.mjs           # write facet/
+node scripts/build-facet.mjs --check   # fail when a file is stale</code></pre></div>
+    <ul class="doc-notes">
+      <li>The build asks the installed Facet. It writes the full variant when Facet accepts it: all components, and a <code class="fd-code">contract</code> field that holds the theme record. Otherwise it writes the fallback: 100 components, with shorter cards.</li>
+      <li><code class="fd-code">extras.json</code> and <code class="fd-code">facet/README.md</code> say which variant was written and which Facet build validated it.</li>
+      <li>Point at another Facet with <code class="fd-code">FACET_CLI=/path/to/dist/cli.js</code>. With none found, the build writes the fallback and says so.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

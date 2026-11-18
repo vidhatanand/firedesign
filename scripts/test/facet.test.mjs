@@ -244,9 +244,12 @@ test('extras.json lists files that exist, with their size and SHA-256', () => {
   for (const role of Object.keys(content.tokens.color)) if (role !== 'accent') assert.ok(`--color-${role}` in extras.aliases, `no alias for role ${role}`);
 });
 
-test('theme.json is Fire\'s default record and is valid', () => {
+test('theme.json is Fire\'s default record, names the release, and is valid', async () => {
   const rec = readJson('facet/theme.json');
-  assert.deepEqual(rec, JSON.parse(JSON.stringify(DEFAULT_RECORD)));
+  const { FIRE_VERSION } = await import('../../fire/js/theme.js');
+  const { fire, ...rest } = rec;
+  assert.equal(fire, FIRE_VERSION);
+  assert.deepEqual(rest, JSON.parse(JSON.stringify(DEFAULT_RECORD)));
   assert.equal(validateTheme(rec).ok, true);
 });
 

@@ -23,7 +23,7 @@ const CHECK = process.argv.includes('--check');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const json = (rel) => JSON.parse(read(rel));
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
-const { DEFAULT_RECORD, validateTheme } = await import(pathToFileURL(path.join(ROOT, 'fire/js/theme.js')).href);
+const { DEFAULT_RECORD, FIRE_VERSION, validateTheme } = await import(pathToFileURL(path.join(ROOT, 'fire/js/theme.js')).href);
 
 const contract = json('contract/fire-contract.json');
 const catalog = json('contract/catalog.json');
@@ -554,7 +554,9 @@ const contentBytes = Buffer.byteLength(JSON.stringify(content));
 /* ==========================================================================
    theme.json
    ========================================================================== */
-const themeRecord = JSON.parse(JSON.stringify(DEFAULT_RECORD));
+// The record names the Fire release it was written against, so Facet pins the expander by it.
+const { contract: recordContract, ...recordRest } = JSON.parse(JSON.stringify(DEFAULT_RECORD));
+const themeRecord = { contract: recordContract, fire: FIRE_VERSION, ...recordRest };
 { const v = validateTheme(themeRecord); if (!v.ok) throw new Error(`default theme record invalid: ${v.errors.join('; ')}`); }
 
 /* ==========================================================================
@@ -628,7 +630,7 @@ w('| File | What it is |');
 w('|---|---|');
 w(`| \`content.json\` | Fire's default look (Ember, Geist) as a Facet \`DesignSystemContent\`: ${ROLE_ORDER.length} colour roles, ${Object.keys(palette).length} palette entries, ${Object.keys(typography).length} type steps, space, radius, shadow, breakpoint, duration, easing, zIndex, iconSize, ${Object.keys(size).length} sizes, focus ring, state, ${pairings.length} pairings, motion, voice and ${components.length} components with \`api\` cards. It passes Facet's \`validateContent\` (checked by \`scripts/test/facet.test.mjs\`, with \`facet system check\` when the CLI is present). |`);
 w(`| \`extras.json\` | The ${files.length} files Facet carries beside the generated ones, each with its purpose, size and SHA-256, plus \`roleMap\` (Facet role to Fire token) and \`aliases\` (Facet's generated custom property to the Fire token holding the same value). |`);
-w('| `theme.json` | The theme record `content.json` was generated from: Fire\'s default record (`contract` "fire/1", palette ember, type geist, default dials). |');
+w('| `theme.json` | The theme record `content.json` was generated from: Fire\'s default record (`contract` "fire/1", `fire` the release, palette ember, type geist, default dials). |');
 w('| `README.md` | This file. |');
 w();
 w('## How Facet should consume it');

@@ -1663,3 +1663,30 @@ export declare namespace tweaks {
   /** The named look the state equals, or null (Custom). */
   export function look(state?: TweaksState): LookName | null;
 }
+
+/** The page-transition kinds (data-fd-transition). */
+export type TransitionKind = 'fade' | 'slide' | 'none';
+/** Which way a transition moves (data-fd-direction). */
+export type TransitionDirection = 'forward' | 'back';
+/** Options of transition(). */
+export interface TransitionOptions {
+  /** The kind for this one change; the page's data-fd-transition (default fade) when absent. */
+  kind?: TransitionKind;
+  /** "back" reverses a slide; "forward" (the default) slides in from the inline end. */
+  direction?: TransitionDirection;
+}
+/** Run `update` (may return a promise) inside a view transition when the browser has them and motion is allowed,
+ *  otherwise just call it. Resolves when the DOM update is done, not when the motion ends; rejects when `update` does. */
+export declare function transition(update: () => unknown | Promise<unknown>, options?: TransitionOptions): Promise<void>;
+
+/** Page transitions: the chrome holds still and the content changes (fire/js/transitions.js, components/transitions.css). */
+export declare namespace transitions {
+  /** Listen for the browser's page events once (done on import too): a link's override, the direction, "none". */
+  export function init(scope?: ParentNode): void;
+  /** The same function fire.js exports as `transition`. */
+  export function transition(update: () => unknown | Promise<unknown>, options?: TransitionOptions): Promise<void>;
+  /** True when the visitor has not asked for reduced motion and the motion dial is not at "none". */
+  export function motionAllowed(): boolean;
+  /** The kinds, in order. */
+  export const TRANSITION_KINDS: readonly TransitionKind[];
+}

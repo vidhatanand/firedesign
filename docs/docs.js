@@ -28,6 +28,7 @@ const PAGES = [
     ['documentation', 'Documentation', 'book-open'],
     ['chat', 'Chat', 'message-circle'],
     ['email', 'Email', 'mail'],
+    ['transitions', 'Page transitions', 'route'],
     ['skeletons', 'Skeletons & loading', 'loader'],
     ['elements', 'Custom elements', 'blocks'],
   ]],

@@ -376,4 +376,5 @@ export const MODULES = [
   { id: 'email', name: 'Email', module: 'fire/email/email.js' },
   { id: 'initial-helpers', name: 'Initial mark helpers', module: 'fire/js/initial.js' },
   { id: 'theme-record', name: 'Theme record', module: 'fire/js/theme.js' },
+  { id: 'transitions', name: 'Page transitions', module: 'fire/js/transitions.js' },
 ];

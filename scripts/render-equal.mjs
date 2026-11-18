@@ -31,7 +31,8 @@
  *      Ignored: comments, `class` (only `fd-` classes are compared), `style`, and framework attributes:
  *        data-reactroot, data-reactid, data-react-checksum, data-v-* (Vue scoped styles, data-v-app),
  *        data-server-rendered, data-allow-mismatch, data-svelte-h, data-astro-cid-*, data-nextjs-*, data-lit-*,
- *        data-hk, defer-hydration, ng-version, ng-reflect-*, ng-server-context, _ngcontent-*, _nghost-*.
+ *        data-hk, defer-hydration, ng-version, ng-reflect-*, ng-server-context, _ngcontent-*, _nghost-*,
+ *        vt-* (React's view-transition bookkeeping: vt-name, vt-update, vt-enter, vt-exit, vt-share; R14).
  *      Generated ids are renamed to ~gen1, ~gen2… in document order of the elements that carry them (then ids that
  *      are only referenced, in order of first use), in id and in every reference to them: for, aria-labelledby,
  *      -describedby, -controls, -owns, -activedescendant, -errormessage, -details, -flowto, list, form,
@@ -84,7 +85,7 @@ export const PROPS = [
 
 const IGNORED_ATTRS = [/^data-reactroot$/, /^data-reactid$/, /^data-react-checksum$/, /^data-v-/, /^data-server-rendered$/,
   /^data-allow-mismatch$/, /^data-svelte-h$/, /^data-astro-cid-/, /^data-nextjs-/, /^data-lit-/, /^data-hk$/,
-  /^defer-hydration$/, /^ng-version$/, /^ng-reflect-/, /^ng-server-context$/, /^_ngcontent-/, /^_nghost-/, /^style$/, /^class$/];
+  /^defer-hydration$/, /^ng-version$/, /^ng-reflect-/, /^ng-server-context$/, /^_ngcontent-/, /^_nghost-/, /^vt-/, /^style$/, /^class$/];
 const ID_ATTRS = new Set(['id', 'for', 'aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'aria-activedescendant',
   'aria-errormessage', 'aria-details', 'aria-flowto', 'list', 'form', 'popovertarget', 'headers']);
 const GENERATED_ID = [/^:r[0-9a-z]+:$/, /^«[0-9a-z]+»$/, /^_r_[0-9a-z]+_$/, /^v-\d+$/, /^radix-/, /^headlessui-/, /^react-aria/,

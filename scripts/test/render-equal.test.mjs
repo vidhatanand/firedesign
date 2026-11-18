@@ -31,7 +31,7 @@ for (const engine of ['chromium', 'webkit']) {
     assert.ok(report.runs.every((r) => r.nodes.ref === 14 && r.pixels.ratio === 0));
   });
 
-  test(`${engine}: framework wrappers, comments, framework attributes and generated ids are ignored`, () => {
+  test(`${engine}: framework wrappers, comments, framework attributes (data-v-*, vt-*: R14) and generated ids are ignored`, () => {
     const { status, report, stdout } = run(engine, page('wrapped.html'));
     assert.equal(status, 0, stdout);
     assert.equal(report.summary.structuralDifferences, 0);

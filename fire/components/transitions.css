@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Page transitions — moving from one page to the next feels like one product.
+   The chrome holds still and the content changes. Progressive enhancement: a browser without View Transitions
+   navigates as it always did, and so does a visitor who asks for reduced motion.
+
+   Nothing here is active until a page asks. The names below are given only under <html data-fd-transition="fade|slide">
+   (not "none"), so a page without the attribute has no named regions, no extra stacking contexts and no transition.
+   Two ways to ask:
+     - a single-page app calls transition() (fire/js/transitions.js), which sets the attribute while it runs;
+     - a multi-page site opts in with three things: link fire/transitions.css after fire.css (it holds the one
+       cross-document `@view-transition` rule), put data-fd-transition="fade" on <html>, and mark the module scripts that
+       build the page blocking="render" (see below).
+
+   WHAT HOLDS STILL (each is a named group whose old image is hidden, so the new one simply replaces it):
+     .fd-sidebar            fd-sidebar        the app sidebar
+     .fd-topbar             fd-topbar         the app top bar
+     .fd-tabbar             fd-tabbar         the tab bar (phone)
+     .fd-doc-top            fd-doc-top        the documentation top bar
+     .fd-doc-nav            fd-doc-nav        the documentation navigation
+     .fd-site-header        fd-site-header    the site header
+     .fd-app-fab            fd-fab            the floating support button
+   WHAT MOVES (one region, named fd-content):
+     .fd-main > .fd-page    the page of an app screen (not the sidebar, not the top bar)
+     .fd-doc-main           the documentation page
+     .fd-site main          the page of a site
+     body > .fd-page        a page of its own (sign in)
+   The root snapshot does not animate. Specimens (.fd-app[data-contained], .doc-specimen, [inert]) are never named.
+
+   KINDS, chosen with data-fd-transition on <html> (default fade) and, for one link, on the <a>:
+     data-fd-transition="fade"    old content fades out (--fd-dur-3); new content fades in and rises (--fd-dur-4)
+     data-fd-transition="slide"   phone drill-down: forward slides the new content in from the inline end, back reverses
+                                   it, and a right-to-left page mirrors both
+     data-fd-transition="none"    no transition
+   DIRECTION: data-fd-direction="forward|back" on <html> while a transition runs. fire/js/transitions.js sets it from
+   the Navigation API (a traverse to an earlier entry is back) and from transition(update, { direction }), and removes
+   it when the transition ends. The attribute and a link's override are written by the module, never by hand.
+
+   TOKENS (in the :root block; the motion dial scales every duration, and motion "none" makes them instant):
+     --fd-transition-out / -in           durations of the old and the new content (--fd-dur-3 / --fd-dur-4)
+     --fd-transition-ease-out / -in      the easing of each (--fd-ease-out / --fd-ease-emphasized)
+     --fd-transition-rise                how far fade lifts the new content
+     --fd-transition-slide / -slide-out  how far slide carries the new content in, and the old content out
+
+   Names are only given while motion is allowed (and, in Firefox, not at all: it has no cross-document transitions). There are no events: fire/js/transitions.js exports transition().
+
+   CHROMIUM NEEDS A RENDER-BLOCKING MODULE (multi-page sites). When a page paints before its deferred scripts have run,
+   Chromium drops the cross-document transition, logs "Transition was aborted because of invalid state" and navigates as
+   usual. Mark the module scripts that build the page render-blocking, so the first paint waits for them:
+     <script type="module" src="fire/fire.js" blocking="render"></script>
+   The Ember templates do (fire.js and shell.js). A single-page app has no such wait.
+   ========================================================================== */
+
+/* ---------- Tokens ---------- */
+:root {
+  --fd-transition-out: var(--fd-dur-3);
+  --fd-transition-in: var(--fd-dur-4);
+  --fd-transition-ease-out: var(--fd-ease-out);
+  --fd-transition-ease-in: var(--fd-ease-emphasized);
+  --fd-transition-rise: 8px;          /* fade: the new content starts this far below */
+  --fd-transition-slide: 32px;        /* slide: the new content starts this far along the inline end */
+  --fd-transition-slide-out: 12px;    /* slide: the old content leaves this far the other way */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports not (-moz-appearance: none) {   /* Firefox has no cross-document transitions, and naming the page there shifted a scrolled tab strip by 2px */
+    /* ---------- Names ----------
+       .fd-tabbar, .fd-site and .fd-site-header come from other parts of Fire; they are written as attribute selectors so
+       this file names them without being the one that defines them. */
+    :root[data-fd-transition]:not([data-fd-transition="none"]) .fd-sidebar:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-sidebar; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) .fd-topbar:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-topbar; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) [class~="fd-tabbar"]:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-tabbar; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) .fd-doc-top:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-doc-top; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) .fd-doc-nav:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-doc-nav; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) [class~="fd-site-header"]:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-site-header; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) .fd-app-fab:not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) { view-transition-name: fd-fab; }
+    :root[data-fd-transition]:not([data-fd-transition="none"]) :is(.fd-main > .fd-page, .fd-doc-main, [class~="fd-site"] main, body > .fd-page):not(:is(.fd-app[data-contained], .doc-specimen, [inert]) *) {
+      view-transition-name: fd-content !important;   /* beats the name a framework such as React sets on the element */
+    }
+  }
+
+  /* ---------- Direction and kind (read by the animations below) ---------- */
+  :root { --_tr-dir: 1; --_tr-flip: 1; }
+  :root:dir(rtl) { --_tr-flip: -1; }
+  :root[data-fd-direction="back"] { --_tr-dir: -1; }
+
+  /* ---------- The root does not animate ---------- */
+  ::view-transition-group(root) { animation-duration: 0s; }
+  ::view-transition-old(root) { display: none; }
+  ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+  /* ---------- Chrome holds still: the new image replaces the old at once ---------- */
+  ::view-transition-group(fd-sidebar), ::view-transition-group(fd-topbar), ::view-transition-group(fd-tabbar),
+  ::view-transition-group(fd-doc-top), ::view-transition-group(fd-doc-nav), ::view-transition-group(fd-site-header), ::view-transition-group(fd-fab) {
+    animation-duration: 0s;           /* not "none": WebKit then gives the group no size */
+    z-index: 1;                       /* the bars and the support button stay above the content, as on the page */
+  }
+  ::view-transition-old(fd-sidebar), ::view-transition-old(fd-topbar), ::view-transition-old(fd-tabbar),
+  ::view-transition-old(fd-doc-top), ::view-transition-old(fd-doc-nav), ::view-transition-old(fd-site-header), ::view-transition-old(fd-fab) { display: none; }
+  ::view-transition-new(fd-sidebar), ::view-transition-new(fd-topbar), ::view-transition-new(fd-tabbar),
+  ::view-transition-new(fd-doc-top), ::view-transition-new(fd-doc-nav), ::view-transition-new(fd-site-header), ::view-transition-new(fd-fab) {
+    animation: none; mix-blend-mode: normal;
+  }
+
+  /* ---------- Content: fade (the default) ---------- */
+  ::view-transition-group(fd-content) { animation-duration: 0s; }
+  ::view-transition-old(fd-content) {
+    animation: fd-vt-fade-out var(--fd-transition-out) var(--fd-transition-ease-out) both;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-new(fd-content) {
+    animation: fd-vt-fade-in var(--fd-transition-in) var(--fd-transition-ease-in) both;
+    mix-blend-mode: normal;
+  }
+
+  /* ---------- Content: slide ---------- */
+  :root[data-fd-transition="slide"] {
+    --_tr-in: calc(var(--fd-transition-slide) * var(--_tr-dir) * var(--_tr-flip));
+    --_tr-out: calc(var(--fd-transition-slide-out) * var(--_tr-dir) * var(--_tr-flip) * -1);
+  }
+  :root[data-fd-transition="slide"]::view-transition-old(fd-content) {
+    animation: fd-vt-slide-out var(--fd-transition-out) var(--fd-transition-ease-out) both;
+  }
+  :root[data-fd-transition="slide"]::view-transition-new(fd-content) {
+    animation: fd-vt-slide-in var(--fd-transition-in) var(--fd-transition-ease-in) both;
+  }
+
+  /* ---------- Content: none ---------- */
+  :root[data-fd-transition="none"]::view-transition-old(fd-content) { display: none; }
+  :root[data-fd-transition="none"]::view-transition-new(fd-content) { animation: none; }
+}
+
+@keyframes fd-vt-fade-out { to { opacity: 0; } }
+@keyframes fd-vt-fade-in { from { opacity: 0; translate: 0 var(--fd-transition-rise); } }
+@keyframes fd-vt-slide-out { to { opacity: 0; translate: var(--_tr-out) 0; } }
+@keyframes fd-vt-slide-in { from { opacity: 0; translate: var(--_tr-in) 0; } }

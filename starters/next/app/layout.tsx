@@ -16,8 +16,9 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
+    // data-fd-transition="fade" turns on Fire's page transition: React's <ViewTransition> (in each screen) runs it, and Fire names the page and chrome only under this attribute.
     // boot.js rewrites <html>'s attributes before React hydrates (saved theme, density, tweaks): N3.
-    <html lang="en" {...theme} suppressHydrationWarning>
+    <html lang="en" data-fd-transition="fade" {...theme} suppressHydrationWarning>
       <head>
         {/* Classic and blocking, so the saved look is on <html> in the first paint (N2). Not next/script. */}
         <script src="/fire/boot.js" nonce={nonce} />

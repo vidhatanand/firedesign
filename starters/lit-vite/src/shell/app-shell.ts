@@ -1,4 +1,5 @@
 import { html, nothing } from 'lit';
+import { transition } from 'fire-design';
 import { FireLight } from '../lib/fire-light';
 import { currentRoute, routes, type Route } from '../lib/router';
 
@@ -32,9 +33,14 @@ export class AppShell extends FireLight {
     super.disconnectedCallback();
   }
 
+  /** A route change is one view transition: the sidebar and top bar hold still, the screen fades (Fire's transition()). */
   private onRoute = (): void => {
     const next = currentRoute();
-    if (next !== this.route) this.route = next;
+    if (next === this.route) return;
+    void transition(async () => {
+      this.route = next;
+      await this.updateComplete;
+    });
   };
 
   /** One element per screen: a new route makes a new element, so the old screen's state goes with it. */

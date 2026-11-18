@@ -1,0 +1,21 @@
+/* ==========================================================================
+   Fire — cross-document page transitions. NOT imported by fire.css: a multi-page site opts in.
+
+   One rule: every page that links this file asks the browser for a view transition when a link to another page that
+   also links it is followed (same origin). Nothing moves until the page also carries data-fd-transition on <html>, which
+   gives the chrome and the content their names (components/transitions.css, part of fire.css).
+
+   To opt in, all three:
+     1. link this file after fire.css:      <link rel="stylesheet" href="fire/transitions.css">
+     2. choose a kind on <html>:            <html lang="en" data-fd-transition="fade">      (or "slide")
+     3. mark the module scripts that build the page render-blocking:
+                                            <script type="module" src="fire/fire.js" blocking="render"></script>
+   Without 3, Chromium drops the transition with a console error when the page paints before its scripts have run.
+
+   Reduced motion: the rule sits inside prefers-reduced-motion: no-preference, so a visitor who asks for less motion
+   navigates as usual. A browser without cross-document transitions (Firefox) also navigates as usual.
+   A single-page app does not need this file: transition() in fire/js/transitions.js runs a route change in one.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}

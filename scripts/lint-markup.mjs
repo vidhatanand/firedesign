@@ -31,7 +31,7 @@
  *
  * An attribute whose catalogue values are ["*"] takes any value.
  *
- * Catalogue fields read: components[].{id, classes, attributes, element}, classes, icons, and the tag names of
+ * Catalogue fields read: components[].{id, classes, attributes, partAttributes, stateAttributes, element}, classes, icons, and the tag names of
  * components[].element and elements[].{tagName|tag|name}.
  */
 import fs from 'node:fs';
@@ -459,8 +459,10 @@ export function lintText(file, text, rawCatalog, kind) {
       if (a.key === 'data-size' && attrs.some((x) => x.key === 'data-icon')) continue;   // icons.js: a drawn icon takes 12|14|16|20|24 whatever class it carries
       let listed = null;
       for (const id of comps) {
-        const def = cat.byId.get(id)?.attributes?.[a.key];
-        if (Array.isArray(def)) listed = (listed || []).concat(def);
+        const c = cat.byId.get(id);
+        // The component's own values, the state its scripts set, and the values of the parts this element carries.
+        const defs = [c?.attributes?.[a.key], c?.stateAttributes?.[a.key], ...classTokens.map(({ t }) => c?.partAttributes?.[t]?.[a.key])];
+        for (const def of defs) if (Array.isArray(def)) listed = (listed || []).concat(def);
       }
       if (listed && !listed.includes('*') && !listed.includes(a.value)) {   // "*" in the catalogue: any value
         const s = nearest(a.value, listed);

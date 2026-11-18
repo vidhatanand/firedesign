@@ -11,17 +11,19 @@ export function parseVocabulary(file = path.join(ROOT, 'docs/_ref/VOCABULARY.md'
   const roots = new Map();   // root class -> { family, order }
   const parts = new Map();   // part class -> root class
   const families = [];
-  const attrValues = [];   // { root, attr, values }: data-x="a|b|c" written next to a component root
+  const attrValues = [];   // { root, attr, values }: data-x="a|b|c" written next to an fd- name (a root or a part), in its clause
   for (const line of read(file).split('\n').filter((l) => /^- \*\*/.test(l))) {
     const family = line.match(/^- \*\*([^*]+?)\*\*/)[1].replace(/\s*\(done\)\s*$/, '').trim();
     families.push(family);
     const body = line.slice(line.indexOf(':', line.indexOf('**', 4)) + 1);
-    let depth = 0, current = null;
-    for (const m of body.matchAll(/`([^`]*)`|([()])/g)) {
+    let depth = 0, current = null, nearest = null;
+    for (const m of body.matchAll(/`([^`]*)`|([();])/g)) {
+      if (m[2] === ';') { if (depth === 0) nearest = null; continue; }   // a new clause at the top level: values after it name no component
       if (m[2]) { depth += m[2] === '(' ? 1 : -1; continue; }
       const av = m[1].match(/^(data-[a-z0-9-]+)="([a-z0-9|*-]+\|[a-z0-9|*-]+)"$/);
-      if (av && current) attrValues.push({ root: current, attr: av[1], values: av[2].split('|') });
+      if (av && nearest) attrValues.push({ root: nearest, attr: av[1], values: av[2].split('|') });   // the name it is written next to
       const names = m[1].split(/\s+/).filter((t) => /^fd-[a-z0-9-]+$/.test(t));
+      if (names.length) nearest = names[names.length - 1];
       for (const name of names) {
         if (depth > 0) { if (current && !parts.has(name)) parts.set(name, current); continue; }
         const slashed = body[m.index - 1] === '/' && body[m.index - 2] === '`';

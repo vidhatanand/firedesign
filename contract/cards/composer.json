@@ -1,0 +1,175 @@
+{
+  "id": "composer",
+  "job": "Ask the agent for something and attach context, sources and a model.",
+  "purpose": "The prompt form for an agent. A textarea grows to 240px, then scrolls. A row of tools holds the model chip, attachments, source toggles and the send button. The send button is a grey dot with no text, the accent with text, and a stop square while the agent runs. Sending fires fd:submit.",
+  "useWhen": [
+    "The person writes a prompt for an agent and may choose a model, sources or files.",
+    "A hero prompt needs example suggestions that fill the field.",
+    "A playground endpoint needs one card of rows (input, sources, actions)."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A short free-text answer inside a form.",
+      "instead": "textarea"
+    },
+    {
+      "when": "A conversation with a person or support, with a reply strip and file drop.",
+      "instead": "chat"
+    },
+    {
+      "when": "A single-line query that filters a list or jumps to a page.",
+      "instead": "search"
+    }
+  ],
+  "aka": [
+    "prompt box",
+    "prompt input",
+    "message input",
+    "chat input",
+    "ask bar",
+    "command input"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "text",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "data-ready, set by agent.js while the field has text"
+    },
+    {
+      "name": "running",
+      "how": "data-state=\"running\"; send becomes a stop square"
+    },
+    {
+      "name": "focused",
+      "how": "data-focus; the accent halo, shown statically"
+    },
+    {
+      "name": "uploading",
+      "how": "data-upload=\"uploading\" on an attachment"
+    },
+    {
+      "name": "upload failed",
+      "how": "data-upload=\"failed\" on an attachment"
+    },
+    {
+      "name": "disabled",
+      "how": "disabled on the input and buttons"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-variant",
+      "value": "playground",
+      "useWhen": "One card of rows for a single endpoint: input, source chips and a footer with the actions."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "bare",
+      "useWhen": "The composer sits inside a surface that already has an edge, so it draws none."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "ghost",
+      "useWhen": "A quiet composer in a dense panel, without the raised card."
+    },
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A compact composer inside a chat or a narrow panel."
+    },
+    {
+      "attribute": "data-side",
+      "value": "top",
+      "useWhen": "The model menu opens upward because the composer sits at the bottom of the screen."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-composer",
+      "role": "The form."
+    },
+    {
+      "class": "fd-composer-input",
+      "role": "The textarea; grows to 240px."
+    },
+    {
+      "class": "fd-composer-tools",
+      "role": "The row under the input."
+    },
+    {
+      "class": "fd-composer-tool",
+      "role": "A toggle or action button; aria-pressed marks a source that is on."
+    },
+    {
+      "class": "fd-composer-send",
+      "role": "The round send button; the stop square while running."
+    },
+    {
+      "class": "fd-composer-attachments",
+      "role": "Chips for files above the input, each with progress and a remove button."
+    },
+    {
+      "class": "fd-composer-hero",
+      "role": "The empty-state wrapper that holds a heading, the composer and suggestions."
+    },
+    {
+      "class": "fd-model-chip",
+      "role": "The button that opens the model menu (a native popover)."
+    },
+    {
+      "class": "fd-model-menu",
+      "role": "The menu of models, one radio item each."
+    },
+    {
+      "class": "fd-context-meter",
+      "role": "A ring and percentage for how full the context is."
+    },
+    {
+      "class": "fd-usage-chip",
+      "role": "A mono line of credits, tokens and pages used."
+    },
+    {
+      "class": "fd-stop-btn",
+      "role": "A \"Stop generating\" button outside the composer."
+    }
+  ],
+  "related": [
+    "suggestions",
+    "message",
+    "thread",
+    "chat",
+    "textarea"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "Sends; cancel fd:submit to keep the text."
+    },
+    {
+      "keys": "Shift+Enter",
+      "does": "Adds a new line."
+    },
+    {
+      "keys": "Ctrl/Cmd+Enter",
+      "does": "Sends."
+    },
+    {
+      "keys": "Ctrl/Cmd+Enter",
+      "does": "In a playground form, runs the request."
+    }
+  ],
+  "example": "docs/agent.html#composer",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

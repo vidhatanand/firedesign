@@ -1,0 +1,109 @@
+{
+  "id": "result",
+  "job": "Show the data an agent returned as a table, with a JSON view and a cost line.",
+  "purpose": "A result card under the prose of an answer: a title with a row count, a Table / JSON switch, the rows, and one mono line saying what the run cost. Copy and download act on the JSON and CSV. New rows rise in one after another.",
+  "useWhen": [
+    "The agent's answer is rows of data the person may copy, export or inspect.",
+    "A run should state its cost next to its output."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A static table of records that is not an agent output.",
+      "instead": "table"
+    },
+    {
+      "when": "A single JSON value or request body.",
+      "instead": "json"
+    },
+    {
+      "when": "A short fact answered in prose.",
+      "instead": "message"
+    }
+  ],
+  "aka": [
+    "output",
+    "results table",
+    "data result",
+    "answer table",
+    "artifact"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "new rows",
+      "how": "data-new on a row; the staggered rise"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-mono",
+      "value": "",
+      "useWhen": "A cell holds an id, a path or a date; set in mono at a muted tone."
+    },
+    {
+      "attribute": "data-num",
+      "value": "",
+      "useWhen": "A cell holds a number; right-aligned in mono."
+    },
+    {
+      "attribute": "data-new",
+      "value": "",
+      "useWhen": "The row was just added."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-result",
+      "role": "The card."
+    },
+    {
+      "class": "fd-result-head",
+      "role": "Title, row count and tools."
+    },
+    {
+      "class": "fd-result-title",
+      "role": "What the data is."
+    },
+    {
+      "class": "fd-result-count",
+      "role": "The row count."
+    },
+    {
+      "class": "fd-result-tools",
+      "role": "The Table / JSON view switch and copy or download buttons."
+    },
+    {
+      "class": "fd-result-body",
+      "role": "Holds the table or the JSON tree."
+    },
+    {
+      "class": "fd-result-table",
+      "role": "The table in compact form."
+    },
+    {
+      "class": "fd-result-foot",
+      "role": "The file name and the cost line."
+    }
+  ],
+  "related": [
+    "table",
+    "json",
+    "viewswitch",
+    "message",
+    "playground"
+  ],
+  "keyboard": [],
+  "example": "docs/agent.html#result",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

@@ -6,6 +6,9 @@
 //     ../codecrystal/vendor/facet/dist/cli.js; without it that test is skipped and the reimplementation stands.
 //   - every required pairing is AA in both modes, computed here independently of the build
 //   - extras.json lists files that exist with the right size and SHA-256; theme.json is Fire's default record
+//   - the build writes the richest variant the installed Facet accepts: the full one (all components, a `contract`
+//     field, Facet's raised limits) when its checker accepts it, else the 100-component fallback; both are built here
+//     against stub checkers, and the committed files are valid under whichever variant they record
 //   - the build is deterministic and the committed files are current.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -43,13 +46,18 @@ const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 
 const lum = (h) => { const n = parseInt(h.slice(1, 7), 16); return 0.2126 * lin(n >> 16) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255); };
 const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
 
-function checkContent(c) {
-  only(c, ['name', 'platform', 'source', 'basis_revision_id', 'summary', 'tokens', 'pairings', 'motion', 'components', 'voice', 'responsive', 'component', 'component_bundle'], 'content');
+// full: Facet's raised limits (200 components; 128 KiB without the components, 768 KiB for them) and the `contract` field.
+function checkContent(c, { full = false } = {}) {
+  only(c, ['name', 'platform', 'source', 'basis_revision_id', 'summary', 'tokens', 'pairings', 'motion', 'components', 'voice', 'responsive', 'component', 'component_bundle', ...(full ? ['contract'] : [])], 'content');
   assert.ok(c.name.length >= 1 && c.name.length <= 120);
   assert.ok(['website', 'web_app', 'both'].includes(c.platform));
   assert.ok(['extracted', 'proposed', 'edited'].includes(c.source));
   assert.ok((c.summary || '').length <= 2000);
-  assert.ok(Buffer.byteLength(JSON.stringify(c)) <= 128 * 1024, 'content exceeds 128 KiB');
+  if (full) {
+    const { components: comps, ...rest } = c;
+    assert.ok(Buffer.byteLength(JSON.stringify(rest)) <= 128 * 1024, 'the document without components exceeds 128 KiB');
+    assert.ok(Buffer.byteLength(JSON.stringify(comps)) <= 768 * 1024, 'the components exceed 768 KiB');
+  } else assert.ok(Buffer.byteLength(JSON.stringify(c)) <= 128 * 1024, 'content exceeds 128 KiB');
   const t = c.tokens;
   only(t, ['color', 'palette', 'font', 'typography', 'space', 'radius', 'shadow', 'breakpoint', 'duration', 'easing', 'zIndex', 'opacity', 'borderWidth', 'iconSize', 'container', 'size', 'grid', 'focusRing', 'state'], 'tokens');
   // colour roles: all required, opaque light value, dark extension, nothing else
@@ -135,7 +143,7 @@ function checkContent(c) {
   assert.ok(c.voice.tone.length >= 1 && c.voice.tone.length <= 1000);
   for (const k of ['do', 'dont']) { assert.ok(c.voice[k].length <= 12); for (const s of c.voice[k]) assert.ok(s.length >= 1 && s.length <= 300); }
   // components
-  assert.ok(c.components.length <= 100);
+  assert.ok(c.components.length <= (full ? 200 : 100));
   const names = c.components.map((x) => x.name);
   assert.equal(new Set(names).size, names.length, 'component names are unique');
   const covered = new Set();
@@ -177,10 +185,11 @@ function checkContent(c) {
   }
 }
 
-test('content.json is valid under Facet\'s rules (reimplemented from models.ts and validation.ts)', () => checkContent(content));
+const FULL = extras.facet.variant === 'full';
+test('content.json is valid under Facet\'s rules (reimplemented from models.ts and validation.ts)', () => checkContent(content, { full: FULL }));
 
 test('the reimplementation rejects what Facet rejects', () => {
-  const bad = (mutate) => { const c = structuredClone(content); mutate(c); assert.throws(() => checkContent(c)); };
+  const bad = (mutate) => { const c = structuredClone(content); mutate(c); assert.throws(() => checkContent(c, { full: FULL })); };
   bad((c) => { c.tokens.color.text.$value = '#fafafa'; });
   bad((c) => { delete c.tokens.color.focus; });
   bad((c) => { c.tokens.color.muted.$extensions[DARK] = '#0b0b0b'; });
@@ -258,17 +267,17 @@ test('the voice comes from WRITING.md and the 100 components are chosen by the s
   assert.match(writing, /Words to delete on sight/);
   assert.ok(content.voice.dont.some((d) => /simply, just, easily/.test(d)));
   const catalog = readJson('contract/catalog.json');
-  assert.equal(content.components.length, Math.min(100, catalog.components.length));
+  assert.equal(content.components.length, FULL ? catalog.components.length : Math.min(100, catalog.components.length));
   const readme = readText('facet/README.md');
   const carried = new Set(content.components.map((c) => c.name));
   const excluded = catalog.components.filter((c) => !carried.has(c.id.split('-').map((p) => p[0].toUpperCase() + p.slice(1)).join('')));
   assert.equal(excluded.length, catalog.components.length - content.components.length);
-  for (const c of excluded) assert.ok(readme.includes(`- \`${c.id}\` (`), `${c.id} is not listed as excluded`);
+  if (!FULL) for (const c of excluded) assert.ok(readme.includes(`- \`${c.id}\` (`), `${c.id} is not listed as excluded`);
   // the foundations are always carried, and nothing from the leave-out-first list is carried while a component
   // outside it is excluded
   const protectedFamilies = ['Layout', 'Forms', 'Buttons', 'Base', 'Navigation', 'Overlays', 'Data', 'Charts'];
   for (const c of catalog.components) if (protectedFamilies.includes(c.family)) assert.ok(!excluded.includes(c), `${c.id} (${c.family}) is a foundation and must be carried`);
-  for (const id of ['doc', 'chat', 'tweaks', 'playground']) assert.ok(excluded.some((c) => c.id === id), `${id} is specialised and is left out first`);
+  if (!FULL) for (const id of ['doc', 'chat', 'tweaks', 'playground']) assert.ok(excluded.some((c) => c.id === id), `${id} is specialised and is left out first`);
 });
 
 test('the build is deterministic and the committed files are current', () => {
@@ -285,4 +294,79 @@ test('the build is deterministic and the committed files are current', () => {
   assert.equal(once, before);
   // no style attributes or raw script in anything written
   for (const f of ['README.md', 'content.json', 'extras.json', 'theme.json']) assert.doesNotMatch(readText(`facet/${f}`), /\sstyle="/);
+});
+
+/* ---------- the two variants, against stub checkers ---------- */
+const BUILD = path.join(ROOT, 'scripts/build-facet.mjs');
+const stub = (dir, name, body) => { const f = path.join(dir, name); fs.writeFileSync(f, body); return f; };
+const buildInto = (out, cli, ...args) => spawnSync(process.execPath, [BUILD, '--out', out, ...args], { encoding: 'utf8', env: { ...process.env, FACET_CLI: cli } });
+
+test('the extras record which variant was written and which Facet build validated it', () => {
+  assert.ok(['full', 'fallback'].includes(extras.facet.variant));
+  assert.equal(extras.facet.components, content.components.length);
+  assert.equal(extras.facet.contract, 'contract' in content);
+  assert.ok(extras.facet.validatedBy === null || /^facet /.test(extras.facet.validatedBy));
+  assert.match(readText('facet/README.md'), extras.facet.variant === 'full' ? /\*\*Full\.\*\*/ : /\*\*Fallback\.\*\*/);
+});
+
+test('a Facet that accepts the full variant gets all components and the contract field', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-facet-variant-'));
+  try {
+    const accept = stub(dir, 'accept.mjs', "console.log('ok: Fire is a valid design system');\n");
+    const out = path.join(dir, 'out');
+    const r = buildInto(out, accept);
+    assert.equal(r.status, 0, r.stderr);
+    const c = JSON.parse(fs.readFileSync(path.join(out, 'content.json'), 'utf8'));
+    const x = JSON.parse(fs.readFileSync(path.join(out, 'extras.json'), 'utf8'));
+    const theme = JSON.parse(fs.readFileSync(path.join(out, 'theme.json'), 'utf8'));
+    assert.equal(c.components.length, readJson('contract/catalog.json').components.length);
+    assert.deepEqual(c.contract, theme);
+    assert.equal(c.contract.fire, readJson('facet/theme.json').fire);
+    assert.equal(validateTheme(c.contract).ok, true);
+    checkContent(c, { full: true });
+    assert.equal(x.facet.variant, 'full');
+    assert.equal(x.facet.contract, true);
+    assert.match(x.facet.validatedBy, /^facet /);
+    assert.match(fs.readFileSync(path.join(out, 'README.md'), 'utf8'), /\*\*Full\.\*\*/);
+    // the same Facet build gives the same bytes, and --check agrees
+    const again = path.join(dir, 'again');
+    assert.equal(buildInto(again, accept).status, 0);
+    for (const f of ['content.json', 'extras.json', 'theme.json', 'README.md']) assert.equal(fs.readFileSync(path.join(again, f), 'utf8'), fs.readFileSync(path.join(out, f), 'utf8'), f);
+    assert.equal(buildInto(out, accept, '--check').status, 0);
+    // with no Facet to ask, --check rebuilds the variant the files record
+    assert.equal(buildInto(out, path.join(dir, 'missing.js'), '--check').status, 0);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('a Facet that rejects the full variant gets the 100-component fallback with no contract field', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-facet-variant-'));
+  try {
+    // accepts a document only when it has no contract field and at most 100 components: the Facet of today
+    const strict = stub(dir, 'strict.mjs', "import fs from 'node:fs';\nconst c = JSON.parse(fs.readFileSync(process.argv[4], 'utf8'));\nif ('contract' in c || c.components.length > 100) { console.error('INVALID: stub'); process.exit(1); }\nconsole.log('ok: Fire is a valid design system');\n");
+    const out = path.join(dir, 'out');
+    assert.equal(buildInto(out, strict).status, 0);
+    const c = JSON.parse(fs.readFileSync(path.join(out, 'content.json'), 'utf8'));
+    const x = JSON.parse(fs.readFileSync(path.join(out, 'extras.json'), 'utf8'));
+    assert.equal(c.components.length, 100);
+    assert.ok(!('contract' in c));
+    checkContent(c);
+    assert.equal(x.facet.variant, 'fallback');
+    assert.equal(x.facet.contract, false);
+    assert.match(x.facet.validatedBy, /^facet /);
+    assert.match(fs.readFileSync(path.join(out, 'README.md'), 'utf8'), /full variant was rejected/);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('with no Facet CLI the fallback is written and the build says so', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-facet-variant-'));
+  try {
+    const out = path.join(dir, 'out');
+    const r = buildInto(out, path.join(dir, 'missing.js'));
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stderr, /no Facet CLI found/);
+    const x = JSON.parse(fs.readFileSync(path.join(out, 'extras.json'), 'utf8'));
+    assert.equal(x.facet.variant, 'fallback');
+    assert.equal(x.facet.validatedBy, null);
+    assert.match(fs.readFileSync(path.join(out, 'README.md'), 'utf8'), /No Facet build validated it/);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });

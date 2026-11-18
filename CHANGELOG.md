@@ -2,6 +2,21 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.6.1 — 18 Nov 2026
+
+- **Docs**: a Frameworks & checks page: the three starters and how to start from one, the React and Vue packages
+  and custom elements, the rules from `spec/EXPORT.md` a developer must remember, the catalogue and cards and how an
+  agent searches them, the markup lint and render-equal with real command lines, and the Facet export.
+- **Theme record**: an optional `"fire"` field names the Fire release a record was written against; Facet stores a
+  contract system's record as its `contract` field and pins the expander by it. `FIRE_VERSION` is exported from
+  `fire/js/theme.js`; Copy theme, the looks and `facet/theme.json` write it.
+- **Facet export**: `scripts/build-facet.mjs` builds the richest export the installed Facet accepts: all components
+  with full cards and the `contract` field first, else the 100-component fallback. `facet/extras.json` and the README
+  record which variant was written and which Facet build validated it. Today's Facet accepts the fallback; the full
+  export follows by rebuilding once Facet's new schema lands.
+- `spec/EXPORT.md`: Facet confirmed the board rules B6 and B8–B13.
+- Starters, docs and GUIDE depend on `github:vidhatanand/firedesign#v0.6.1`.
+
 ## 0.6.0 — 18 Nov 2026
 
 Fire becomes one system for plain pages, Lit, React and Next.js, Vue, and Facet. Its HTML and CSS stay the

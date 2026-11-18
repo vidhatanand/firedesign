@@ -1681,6 +1681,11 @@
           "xl",
           "xs"
         ],
+        "data-state": [
+          "match.",
+          "mismatch",
+          "partial"
+        ],
         "data-variant": [
           "accent-soft",
           "danger",
@@ -4682,6 +4687,268 @@
       }
     },
     {
+      "id": "codes",
+      "name": "Codes",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-codes",
+      "classes": [
+        "fd-codes",
+        "fd-codes-actions",
+        "fd-codes-head",
+        "fd-codes-item",
+        "fd-codes-list",
+        "fd-codes-note",
+        "fd-codes-title"
+      ],
+      "attributes": {
+        "data-filename": [
+          "*"
+        ]
+      },
+      "partAttributes": {
+        "fd-codes-item": {
+          "data-used": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:copy",
+        "fd:download"
+      ],
+      "docs": "docs/forms.html#recovery-codes",
+      "card": {
+        "id": "codes",
+        "job": "Show one-time recovery codes once, with copy and download.",
+        "purpose": "A sunken card holding a two-column grid of codes, a title with Copy all and Download buttons, and a warning line. Copy all and Download use the codes not marked data-used, one per line; Download makes a text file through a Blob URL. Without script the buttons are hidden and the codes stay selectable text.",
+        "useWhen": [
+          "Two-step sign-in has just been set up and the person must save backup codes.",
+          "A set of codes is shown with some already used."
+        ],
+        "avoidWhen": [
+          {
+            "when": "One secret that is shown and hidden.",
+            "instead": "secret"
+          },
+          {
+            "when": "Entering a code.",
+            "instead": "otp"
+          },
+          {
+            "when": "A single value to copy.",
+            "instead": "copy-field"
+          }
+        ],
+        "aka": [
+          "backup codes",
+          "recovery codes",
+          "2FA codes",
+          "one-time codes",
+          "emergency codes"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "used",
+            "how": "data-used on the fd-codes-item; struck through and left out of copy and download"
+          },
+          {
+            "name": "ready",
+            "how": "data-ready on the root once the script has run; the buttons show then"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-filename",
+            "value": "*",
+            "useWhen": "The name of the downloaded file."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-codes",
+            "role": "The sunken card; carries data-fd-codes."
+          },
+          {
+            "class": "fd-codes-head",
+            "role": "The title and actions row."
+          },
+          {
+            "class": "fd-codes-title",
+            "role": "The card's heading."
+          },
+          {
+            "class": "fd-codes-actions",
+            "role": "Holds the copy and download buttons."
+          },
+          {
+            "class": "fd-codes-list",
+            "role": "The ordered list of codes."
+          },
+          {
+            "class": "fd-codes-item",
+            "role": "One code, in a code element."
+          },
+          {
+            "class": "fd-codes-note",
+            "role": "The warning line."
+          }
+        ],
+        "related": [
+          "otp",
+          "secret",
+          "copy-field",
+          "callout"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On Copy all or Download, runs it."
+          }
+        ],
+        "example": "docs/forms.html#recovery-codes",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "color",
+      "name": "Color",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-color",
+      "classes": [
+        "fd-color",
+        "fd-color-check",
+        "fd-color-check-name",
+        "fd-color-check-ratio",
+        "fd-color-check-verdict",
+        "fd-color-checks",
+        "fd-color-picker"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-color-check": {
+          "data-level": [
+            "fail",
+            "pass",
+            "warn"
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/forms.html#color",
+      "card": {
+        "id": "color",
+        "job": "Enter a colour with a picker or a hex code and see how it reads on the page.",
+        "purpose": "A native colour input beside a hex box. The box carries the name and posts #rrggbb as a plain field; the picker is inert until script runs. With script the two stay in step, short hex codes are completed, and a list shows the colour's contrast on the page and against the accent, measured live and worded as well as marked with an icon.",
+        "useWhen": [
+          "A brand or accent colour is entered by a person, as in branding or theme settings.",
+          "The chosen colour will sit on the page, so its legibility matters."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Choosing from a few preset colours.",
+            "instead": "swatch"
+          },
+          {
+            "when": "Showing a colour that cannot be edited.",
+            "instead": "swatch"
+          },
+          {
+            "when": "A whole palette of tokens.",
+            "instead": "tweaks"
+          }
+        ],
+        "aka": [
+          "colour picker",
+          "color picker",
+          "hex input",
+          "brand colour field"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the hex box, with a .fd-field-error"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the hex box and the picker"
+          },
+          {
+            "name": "contrast level",
+            "how": "data-level=\"pass|warn|fail\" on each fd-color-check"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-color",
+            "role": "The root; carries data-fd-color."
+          },
+          {
+            "class": "fd-color-picker",
+            "role": "The native colour input, with no name."
+          },
+          {
+            "class": "fd-color-checks",
+            "role": "The contrast list; carries data-fd-color-feedback."
+          },
+          {
+            "class": "fd-color-check",
+            "role": "One row: icon, name, ratio, verdict."
+          }
+        ],
+        "related": [
+          "swatch",
+          "input-group",
+          "field",
+          "tweaks"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between the picker and the hex box."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On the picker, opens the browser's colour dialog."
+          }
+        ],
+        "example": "docs/forms.html#color",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js",
+          "fire/js/palette-rules.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "column",
       "name": "Column",
       "family": "Layout",
@@ -5419,6 +5686,10 @@
           {
             "when": "Revoking a key with an inline confirmation button.",
             "instead": "button"
+          },
+          {
+            "when": "The action has its own page, or must work without script.",
+            "instead": "confirm-inline"
           }
         ],
         "aka": [
@@ -5463,10 +5734,11 @@
           }
         ],
         "related": [
-          "dialog",
           "button",
-          "toast",
-          "sheet"
+          "confirm-inline",
+          "dialog",
+          "sheet",
+          "toast"
         ],
         "keyboard": [
           {
@@ -5485,6 +5757,127 @@
           "fire/js/overlays.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "confirm-inline",
+      "name": "Confirm Inline",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-confirm-inline",
+      "classes": [
+        "fd-confirm-inline",
+        "fd-confirm-inline-rule"
+      ],
+      "attributes": {
+        "data-confirm": [
+          "*"
+        ],
+        "data-fd-confirm-input": [
+          ""
+        ],
+        "data-state": [
+          "match",
+          "mismatch",
+          "partial"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/forms.html#confirm-inline",
+      "card": {
+        "id": "confirm-inline",
+        "job": "Make someone type a name on the page before a destructive button works.",
+        "purpose": "A plain form with a field, the phrase to type (fd-confirm-phrase) and a danger button. Without script the button is enabled and the server checks the posted text. With script the button stays disabled until the trimmed text equals the phrase, and a line under the field says it matches so far, differs at character n, or matches.",
+        "useWhen": [
+          "A destructive action has its own page: delete a workspace, approve a restore.",
+          "The action must also work, and be checked, with no script."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action starts from a row or a menu and a dialog is natural.",
+            "instead": "confirm"
+          },
+          {
+            "when": "A yes or no with nothing lost.",
+            "instead": "dialog"
+          },
+          {
+            "when": "The action can be undone.",
+            "instead": "toast"
+          }
+        ],
+        "aka": [
+          "type to confirm",
+          "typed confirmation",
+          "delete confirmation",
+          "danger zone",
+          "are you sure"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "idle",
+            "how": "data-state=\"idle\" on the form; nothing typed"
+          },
+          {
+            "name": "partial",
+            "how": "data-state=\"partial\"; the text so far is the start of the phrase"
+          },
+          {
+            "name": "mismatch",
+            "how": "data-state=\"mismatch\"; the rule line names the first wrong character"
+          },
+          {
+            "name": "match",
+            "how": "data-state=\"match\"; the button is enabled"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-confirm",
+            "value": "*",
+            "useWhen": "The phrase to type, on the form; an input may carry data-match instead."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-confirm-inline",
+            "role": "The form; carries data-fd-confirm-inline and data-confirm."
+          },
+          {
+            "class": "fd-confirm-inline-rule",
+            "role": "The line that says where the typed text stands; carries data-fd-confirm-rule."
+          }
+        ],
+        "related": [
+          "confirm",
+          "button",
+          "field",
+          "callout"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Sends the form when the text matches."
+          }
+        ],
+        "example": "docs/forms.html#confirm-inline",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -5782,6 +6175,9 @@
         "fd-calendar-title",
         "fd-calendar-weekday",
         "fd-daterange",
+        "fd-daterange-compare",
+        "fd-daterange-compare-dates",
+        "fd-daterange-compare-label",
         "fd-daterange-foot",
         "fd-daterange-main",
         "fd-daterange-preset",
@@ -5795,7 +6191,11 @@
         "fd-pick-name",
         "fd-pick-text"
       ],
-      "attributes": {},
+      "attributes": {
+        "data-compare": [
+          "*"
+        ]
+      },
       "partAttributes": {
         "fd-daterange-preset": {
           "data-preset": [
@@ -5803,7 +6203,10 @@
             "30d",
             "7d",
             "custom",
-            "month"
+            "lastmonth",
+            "month",
+            "quarter",
+            "year"
           ]
         }
       },
@@ -5836,7 +6239,7 @@
       "card": {
         "id": "date-picker",
         "job": "Choose a start and an end date, with presets for the usual ranges.",
-        "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs.",
+        "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs. With a compare band it becomes a period (see period).",
         "useWhen": [
           "A log, a chart or a report is filtered by a time range.",
           "People mostly want the same few ranges but sometimes a custom one."
@@ -5844,7 +6247,7 @@
         "avoidWhen": [
           {
             "when": "A single date in a form.",
-            "instead": "input"
+            "instead": "datefield"
           },
           {
             "when": "A time of day or a number.",
@@ -5887,7 +6290,13 @@
             "how": "data-today on today's cell, shown with an accent dot"
           }
         ],
-        "variants": [],
+        "variants": [
+          {
+            "attribute": "data-compare",
+            "value": "*",
+            "useWhen": "Starts a period on previous or year instead of none."
+          }
+        ],
         "parts": [
           {
             "class": "fd-daterange",
@@ -5924,13 +6333,27 @@
           {
             "class": "fd-daterange-foot",
             "role": "Cancel and Apply."
+          },
+          {
+            "class": "fd-daterange-compare",
+            "role": "The band under the calendar: Compared with radios and the comparison dates."
+          },
+          {
+            "class": "fd-daterange-compare-label",
+            "role": "The band's label."
+          },
+          {
+            "class": "fd-daterange-compare-dates",
+            "role": "The comparison dates as text."
           }
         ],
         "related": [
-          "popover",
+          "chart",
+          "datefield",
           "filter",
-          "segmented",
-          "chart"
+          "period",
+          "popover",
+          "segmented"
         ],
         "keyboard": [
           {
@@ -5957,6 +6380,148 @@
           "fire/js/overlays.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "datefield",
+      "name": "Datefield",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-datefield",
+      "classes": [
+        "fd-datefield",
+        "fd-datefield-foot",
+        "fd-datefield-panel"
+      ],
+      "attributes": {
+        "data-max-date": [
+          "*"
+        ],
+        "data-min-date": [
+          "*"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/forms.html#datefield",
+      "card": {
+        "id": "datefield",
+        "job": "Enter one date by typing it or picking it from a calendar.",
+        "purpose": "A text box that holds a date as YYYY-MM-DD, with a calendar button that opens the date range's month grid. The box posts the ISO date with no script; with script it reads other typed forms, checks data-min-date and data-max-date through setCustomValidity, and writes the ISO date back. Arrow keys open the calendar and move by day, week and month.",
+        "useWhen": [
+          "A form needs one date: pause until, expires on, start on.",
+          "The date must stay inside a range, such as no earlier than today."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A period with a start and an end.",
+            "instead": "date-picker"
+          },
+          {
+            "when": "A time of day, or a duration.",
+            "instead": "input"
+          },
+          {
+            "when": "A choice among a few named dates, such as tomorrow or next week.",
+            "instead": "segmented"
+          }
+        ],
+        "aka": [
+          "date input",
+          "date picker",
+          "datepicker",
+          "calendar field",
+          "date of",
+          "due date"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the input, with a .fd-field-error"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the input and the button"
+          },
+          {
+            "name": "ready",
+            "how": "data-ready on the root once the script has run; the calendar button is hidden until then"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-min-date",
+            "value": "*",
+            "useWhen": "No earlier date is allowed: an ISO date or today."
+          },
+          {
+            "attribute": "data-max-date",
+            "value": "*",
+            "useWhen": "No later date is allowed: an ISO date or today."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-datefield",
+            "role": "The root; carries data-fd-datefield and wraps an input group and the calendar popover."
+          },
+          {
+            "class": "fd-datefield-panel",
+            "role": "The calendar inside the popover; carries data-fd-datepanel."
+          },
+          {
+            "class": "fd-datefield-foot",
+            "role": "The Today and Clear buttons under the calendar."
+          }
+        ],
+        "related": [
+          "date-picker",
+          "input-group",
+          "popover",
+          "field",
+          "number"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow Down",
+            "does": "In the box, opens the calendar on the chosen day."
+          },
+          {
+            "keys": "Arrow keys",
+            "does": "In the calendar, move by day and week."
+          },
+          {
+            "keys": "Page Up, Page Down",
+            "does": "Move by month; with Shift, by year."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Pick the day and return to the box."
+          },
+          {
+            "keys": "Escape",
+            "does": "Close the calendar."
+          }
+        ],
+        "example": "docs/forms.html#datefield",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js",
+          "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -14113,6 +14678,113 @@
       }
     },
     {
+      "id": "period",
+      "name": "Period",
+      "family": "Overlays",
+      "kind": "component",
+      "root": "fd-period",
+      "classes": [
+        "fd-period",
+        "fd-period-compare"
+      ],
+      "attributes": {},
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/overlays.html#period",
+      "card": {
+        "id": "period",
+        "job": "Choose a reporting period and what to compare it with.",
+        "purpose": "The trigger of a date range that has a compare band: presets and a calendar, then Compared with Nothing, Previous period or Same period last year. The trigger shows the range and, muted, the comparison dates. Apply fires fd:change with { start, end, preset, compare }, where compare is null or { mode, start, end }.",
+        "useWhen": [
+          "A report, chart or stats row shows a figure and how it changed against an earlier period.",
+          "Several screens share one period control."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Only the period matters, with no comparison.",
+            "instead": "date-picker"
+          },
+          {
+            "when": "One date.",
+            "instead": "datefield"
+          },
+          {
+            "when": "A fixed set of ranges and nothing custom.",
+            "instead": "segmented"
+          }
+        ],
+        "aka": [
+          "period picker",
+          "compare to",
+          "date range with comparison",
+          "previous period",
+          "comparison range",
+          "vs last period"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form",
+          "series"
+        ],
+        "states": [
+          {
+            "name": "no comparison",
+            "how": "data-compare=\"none\" or the Nothing radio; the trigger's compare label is empty and hidden"
+          },
+          {
+            "name": "pending",
+            "how": "data-pending in the calendar after the first click of a custom range"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-period",
+            "role": "On the fd-filter that triggers the popover."
+          },
+          {
+            "class": "fd-period-compare",
+            "role": "The muted \"vs\" part of the trigger; carries data-fd-daterange-compare-label."
+          }
+        ],
+        "related": [
+          "date-picker",
+          "filter",
+          "stats",
+          "chart"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys",
+            "does": "In the calendar, move by day and week."
+          },
+          {
+            "keys": "Page Up, Page Down",
+            "does": "Move by month; with Shift, by year."
+          },
+          {
+            "keys": "Arrow keys",
+            "does": "In the Compared with radios, move between modes."
+          },
+          {
+            "keys": "Escape",
+            "does": "Close without applying."
+          }
+        ],
+        "example": "docs/overlays.html#period",
+        "provenance": [
+          "docs/overlays.html",
+          "fire/components/overlays.css",
+          "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "pipeline",
       "name": "Pipeline",
       "family": "Data",
@@ -15471,6 +16143,115 @@
           "fire/components/forms.css"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "reason",
+      "name": "Reason",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-reason",
+      "classes": [
+        "fd-reason",
+        "fd-reason-text",
+        "fd-reason-who",
+        "fd-reason-why"
+      ],
+      "attributes": {
+        "data-layout": [
+          "inline"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/forms.html#reason",
+      "card": {
+        "id": "reason",
+        "job": "Show why a control is off and who can turn it on.",
+        "purpose": "A control with a visible line under it (or beside it) giving the reason and the person or role who can change it, linked with aria-describedby. It works for buttons, switches and links made into buttons. Use aria-disabled=\"true\" instead of disabled to keep the control focusable; the script then stops its click.",
+        "useWhen": [
+          "A permission, plan or state turns a control off and the person needs to know what to do.",
+          "Keyboard users must hear the reason where they meet the control."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The reason only needs a hint on hover.",
+            "instead": "tooltip"
+          },
+          {
+            "when": "The whole section is unavailable.",
+            "instead": "callout"
+          },
+          {
+            "when": "A field is not editable but readable.",
+            "instead": "input"
+          }
+        ],
+        "aka": [
+          "disabled reason",
+          "locked control",
+          "why disabled",
+          "permission message",
+          "gated action"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "disabled",
+            "how": "disabled, or aria-disabled=\"true\" to stay focusable"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "inline",
+            "useWhen": "The reason sits beside the control."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-reason",
+            "role": "The wrapper around the control and its reason."
+          },
+          {
+            "class": "fd-reason-text",
+            "role": "The reason line; its id is the control's aria-describedby."
+          },
+          {
+            "class": "fd-reason-why",
+            "role": "The cause, in one sentence."
+          },
+          {
+            "class": "fd-reason-who",
+            "role": "Who can change it, by name or role."
+          }
+        ],
+        "related": [
+          "button",
+          "switch",
+          "tooltip",
+          "callout"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Reaches an aria-disabled control and reads its reason."
+          }
+        ],
+        "example": "docs/forms.html#reason",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -19704,6 +20485,142 @@
       }
     },
     {
+      "id": "swatch",
+      "name": "Swatch",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-swatch",
+      "classes": [
+        "fd-swatch"
+      ],
+      "attributes": {
+        "data-empty": [
+          ""
+        ],
+        "data-shape": [
+          "round"
+        ],
+        "data-size": [
+          "lg",
+          "sm",
+          "xl",
+          "xs"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/forms.html#color",
+      "card": {
+        "id": "swatch",
+        "job": "Show a colour that is content, such as a brand colour or a series colour.",
+        "purpose": "A small square of a colour that belongs to the product's data, not to the theme. The colour comes from --fd-swatch-color, passed with data-fd-vars so no style attribute is needed. A checkerboard shows through translucent colours, data-empty marks no colour, and a button swatch with aria-pressed chooses one.",
+        "useWhen": [
+          "A brand, series or tag colour appears beside its name or hex value.",
+          "People choose one colour from a short list."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A status or a theme tone.",
+            "instead": "status"
+          },
+          {
+            "when": "The person must enter a colour.",
+            "instead": "color"
+          },
+          {
+            "when": "A chart series key.",
+            "instead": "legend"
+          }
+        ],
+        "aka": [
+          "colour chip",
+          "color chip",
+          "color swatch",
+          "color dot",
+          "brand colour"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "aria-pressed=\"true\" on a button swatch"
+          },
+          {
+            "name": "empty",
+            "how": "data-empty"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on a button swatch"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "xs",
+            "useWhen": "Inline with small text."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "Beside a label in a list."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A choice list of colours."
+          },
+          {
+            "attribute": "data-size",
+            "value": "xl",
+            "useWhen": "A preview of the brand colour."
+          },
+          {
+            "attribute": "data-shape",
+            "value": "round",
+            "useWhen": "A dot rather than a square."
+          },
+          {
+            "attribute": "data-empty",
+            "value": "",
+            "useWhen": "No colour is set."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-swatch",
+            "role": "The colour; a span, or a button when it can be chosen."
+          }
+        ],
+        "related": [
+          "color",
+          "status",
+          "legend",
+          "badge"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a button swatch, choose it."
+          }
+        ],
+        "example": "docs/forms.html#color",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "switch",
       "name": "Switch",
       "family": "Forms",
@@ -23664,6 +24581,20 @@
     "fd-codefield-head": "codefield",
     "fd-codefield-input": "codefield",
     "fd-codefield-lang": "codefield",
+    "fd-codes": "codes",
+    "fd-codes-actions": "codes",
+    "fd-codes-head": "codes",
+    "fd-codes-item": "codes",
+    "fd-codes-list": "codes",
+    "fd-codes-note": "codes",
+    "fd-codes-title": "codes",
+    "fd-color": "color",
+    "fd-color-check": "color",
+    "fd-color-check-name": "color",
+    "fd-color-check-ratio": "color",
+    "fd-color-check-verdict": "color",
+    "fd-color-checks": "color",
+    "fd-color-picker": "color",
     "fd-column": "column",
     "fd-combobox": "combobox",
     "fd-command": "command",
@@ -23700,6 +24631,8 @@
     "fd-composer-tool": "composer",
     "fd-composer-tools": "composer",
     "fd-confirm": "confirm",
+    "fd-confirm-inline": "confirm-inline",
+    "fd-confirm-inline-rule": "confirm-inline",
     "fd-confirm-phrase": "confirm",
     "fd-context-meter": "composer",
     "fd-context-meter-ring": "composer",
@@ -23724,7 +24657,13 @@
     "fd-data-card-title": "data-card",
     "fd-data-card-toggle": "data-card",
     "fd-data-card-unit": "data-card",
+    "fd-datefield": "datefield",
+    "fd-datefield-foot": "datefield",
+    "fd-datefield-panel": "datefield",
     "fd-daterange": "date-picker",
+    "fd-daterange-compare": "date-picker",
+    "fd-daterange-compare-dates": "date-picker",
+    "fd-daterange-compare-label": "date-picker",
     "fd-daterange-foot": "date-picker",
     "fd-daterange-main": "date-picker",
     "fd-daterange-preset": "date-picker",
@@ -24232,6 +25171,8 @@
     "fd-panel-head": "panel",
     "fd-panel-title": "panel",
     "fd-pending": "loader",
+    "fd-period": "period",
+    "fd-period-compare": "period",
     "fd-pick": "date-picker",
     "fd-pick-check": "date-picker",
     "fd-pick-foot": "date-picker",
@@ -24316,6 +25257,10 @@
     "fd-radio-text": "radio",
     "fd-rail-tip": "sidebar",
     "fd-rail-tip-hint": "sidebar",
+    "fd-reason": "reason",
+    "fd-reason-text": "reason",
+    "fd-reason-who": "reason",
+    "fd-reason-why": "reason",
     "fd-reasoning": "reasoning",
     "fd-reasoning-body": "reasoning",
     "fd-reasoning-label": "reasoning",
@@ -24519,6 +25464,7 @@
     "fd-suggestions": "suggestions",
     "fd-suggestions-item": "suggestions",
     "fd-suggestions-text": "suggestions",
+    "fd-swatch": "swatch",
     "fd-switch": "switch",
     "fd-switch-desc": "switch",
     "fd-switch-label": "switch",
@@ -25340,7 +26286,9 @@
           "{ value: status }"
         ],
         "forms": [
-          "{ value }"
+          "{ value }",
+          "{ value, valid }",
+          "{ value, matched }"
         ],
         "nav": [
           "{ value, item }"
@@ -25391,6 +26339,14 @@
       "shapes": {
         "forms": [
           "{ dirty }"
+        ]
+      }
+    },
+    "fd:download": {
+      "detail": "{ filename, value }",
+      "shapes": {
+        "forms": [
+          "{ filename, value }"
         ]
       }
     },

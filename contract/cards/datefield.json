@@ -1,0 +1,115 @@
+{
+  "id": "datefield",
+  "job": "Enter one date by typing it or picking it from a calendar.",
+  "purpose": "A text box that holds a date as YYYY-MM-DD, with a calendar button that opens the date range's month grid. The box posts the ISO date with no script; with script it reads other typed forms, checks data-min-date and data-max-date through setCustomValidity, and writes the ISO date back. Arrow keys open the calendar and move by day, week and month.",
+  "useWhen": [
+    "A form needs one date: pause until, expires on, start on.",
+    "The date must stay inside a range, such as no earlier than today."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A period with a start and an end.",
+      "instead": "date-picker"
+    },
+    {
+      "when": "A time of day, or a duration.",
+      "instead": "input"
+    },
+    {
+      "when": "A choice among a few named dates, such as tomorrow or next week.",
+      "instead": "segmented"
+    }
+  ],
+  "aka": [
+    "date input",
+    "date picker",
+    "datepicker",
+    "calendar field",
+    "date of",
+    "due date"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "invalid",
+      "how": "aria-invalid=\"true\" on the input, with a .fd-field-error"
+    },
+    {
+      "name": "disabled",
+      "how": "disabled on the input and the button"
+    },
+    {
+      "name": "ready",
+      "how": "data-ready on the root once the script has run; the calendar button is hidden until then"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-min-date",
+      "value": "*",
+      "useWhen": "No earlier date is allowed: an ISO date or today."
+    },
+    {
+      "attribute": "data-max-date",
+      "value": "*",
+      "useWhen": "No later date is allowed: an ISO date or today."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-datefield",
+      "role": "The root; carries data-fd-datefield and wraps an input group and the calendar popover."
+    },
+    {
+      "class": "fd-datefield-panel",
+      "role": "The calendar inside the popover; carries data-fd-datepanel."
+    },
+    {
+      "class": "fd-datefield-foot",
+      "role": "The Today and Clear buttons under the calendar."
+    }
+  ],
+  "related": [
+    "date-picker",
+    "input-group",
+    "popover",
+    "field",
+    "number"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow Down",
+      "does": "In the box, opens the calendar on the chosen day."
+    },
+    {
+      "keys": "Arrow keys",
+      "does": "In the calendar, move by day and week."
+    },
+    {
+      "keys": "Page Up, Page Down",
+      "does": "Move by month; with Shift, by year."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Pick the day and return to the box."
+    },
+    {
+      "keys": "Escape",
+      "does": "Close the calendar."
+    }
+  ],
+  "example": "docs/forms.html#datefield",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.7.0"
+}

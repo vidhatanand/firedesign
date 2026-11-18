@@ -1418,7 +1418,7 @@
   "components": [
     {
       "name": "Button",
-      "purpose": "The native button in Fire's soft style: a quiet fill that darkens on hover, with one primary per view. Variants and…",
+      "purpose": "The native button in Fire's soft style: a quiet fill that darkens on hover, with one primary per view. Variants and sizes are data attributes; loading, held…",
       "variants": [
         "primary",
         "outline",
@@ -1447,10 +1447,12 @@
         "fire/components/button.css"
       ],
       "do": [
-        "An action runs on this page and nothing navigates: save, create, send, copy, retry."
+        "An action runs on this page and nothing navigates: save, create, send, copy, retry.",
+        "A dialog, sheet or confirmation needs its confirm and cancel actions."
       ],
       "dont": [
-        "The action is a link to another page, or sits inside a sentence. The text button (fd-btn-text)…"
+        "The action is a link to another page, or sits inside a sentence. The text button (fd-btn-text)…",
+        "Several related actions belong together as one control. The button group (fd-btn-group), part of…"
       ],
       "api": {
         "props": [
@@ -1505,15 +1507,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "btn",
-            "description": "The button; a button, a or…"
+            "description": "The button; a button, a or input…"
           },
           {
             "name": "btn-swap",
-            "description": "Wraps two children that swap…"
+            "description": "Wraps two children that swap in place…"
+          },
+          {
+            "name": "btn-group",
+            "description": "Joins related buttons into one control."
           }
         ],
         "example": "<cc-component name=\"Button\" variant=\"primary\" size=\"xs\">Content</cc-component>"
@@ -1521,7 +1527,7 @@
     },
     {
       "name": "Type",
-      "purpose": "The type scale in Geist and Geist Mono: display, h1 to h3, title, label, body, small, caption, mono and eyebrow. 450…",
+      "purpose": "The type scale in Geist and Geist Mono: display, h1 to h3, title, label, body, small, caption, mono and eyebrow. 450 is the house weight. A page has one…",
       "variants": [
         "tone-accent"
       ],
@@ -1530,17 +1536,19 @@
         "fire/base.css"
       ],
       "do": [
-        "Any heading, label or paragraph needs a step on the scale."
+        "Any heading, label or paragraph needs a step on the scale.",
+        "A number must not jitter in a column or counter (fd-num)."
       ],
       "dont": [
-        "Only the colour or length changes. Use Text."
+        "Only the colour or length changes. Use Text.",
+        "A key or command sits inside a sentence. Use InlineCode."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "display",
@@ -1549,6 +1557,10 @@
           {
             "name": "h1",
             "description": "Level 1 heading."
+          },
+          {
+            "name": "h2",
+            "description": "Level 2 heading; a section of the page."
           }
         ],
         "example": "<cc-component name=\"Type\">Content</cc-component>"
@@ -1556,32 +1568,38 @@
     },
     {
       "name": "Utilities",
-      "purpose": "Four helpers: fd-sr-only hides content visually and keeps it for assistive technology; fd-fade and fd-rise play a…",
+      "purpose": "Four helpers: fd-sr-only hides content visually and keeps it for assistive technology; fd-fade and fd-rise play a short entrance (reduced-motion safe); fd-cq…",
       "variants": [],
       "states": [],
       "paths": [
         "fire/base.css"
       ],
       "do": [
-        "A control or heading needs a name that sighted users read from context (fd-sr-only)."
+        "A control or heading needs a name that sighted users read from context (fd-sr-only).",
+        "Content that loads in should fade or rise into place (fd-fade, fd-rise)."
       ],
       "dont": [
-        "A tooltip should show a label to everyone. Use Tooltip."
+        "A tooltip should show a label to everyone. Use Tooltip.",
+        "A visible hidden-until-needed region is needed. Use Accordion."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "sr-only",
-            "description": "Visually hidden, read by…"
+            "description": "Visually hidden, read by screen readers."
           },
           {
             "name": "fade",
             "description": "Fades in."
+          },
+          {
+            "name": "rise",
+            "description": "Rises into place while fading in."
           }
         ],
         "example": "<cc-component name=\"Utilities\">Content</cc-component>"
@@ -1589,7 +1607,7 @@
     },
     {
       "name": "Row",
-      "purpose": "A horizontal flex box. data-gap sets the space, data-wrap lets children wrap, data-justify spreads them (between…",
+      "purpose": "A horizontal flex box. data-gap sets the space, data-wrap lets children wrap, data-justify spreads them (between, center, end) and data-align lines them up…",
       "variants": [
         "align-start",
         "align-end",
@@ -1605,10 +1623,12 @@
         "fire/base.css"
       ],
       "do": [
-        "Children sit on one line: a title and its actions, a field and a button."
+        "Children sit on one line: a title and its actions, a field and a button.",
+        "A toolbar or a footer lines up controls with a gap."
       ],
       "dont": [
-        "Children stack vertically. Use Stack."
+        "Children stack vertically. Use Stack.",
+        "Children form equal columns that reflow. Use Grid."
       ],
       "api": {
         "props": [
@@ -1690,7 +1710,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "row",
@@ -1702,7 +1722,7 @@
     },
     {
       "name": "Stack",
-      "purpose": "A vertical flex box. Space comes from data-gap on the parent (steps 0 to 24); data-align sets how children line up…",
+      "purpose": "A vertical flex box. Space comes from data-gap on the parent (steps 0 to 24); data-align sets how children line up across it. It sets no width or height…",
       "variants": [
         "align-start",
         "align-center",
@@ -1713,10 +1733,12 @@
         "fire/base.css"
       ],
       "do": [
-        "Children sit one above another: a heading, text and a button."
+        "Children sit one above another: a heading, text and a button.",
+        "Fields or cards in a column need one consistent gap."
       ],
       "dont": [
-        "Children sit side by side. Use Row."
+        "Children sit side by side. Use Row.",
+        "Children form equal columns that fill the width. Use Grid."
       ],
       "api": {
         "props": [
@@ -1758,7 +1780,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "stack",
@@ -1770,7 +1792,7 @@
     },
     {
       "name": "Text",
-      "purpose": "Small text helpers: muted, faint and second-step colours (fd-muted, fd-faint, fd-text-2), status text colours, a link…",
+      "purpose": "Small text helpers: muted, faint and second-step colours (fd-muted, fd-faint, fd-text-2), status text colours, a link style (fd-link; data-quiet hides its…",
       "variants": [
         "tone-neutral",
         "quiet"
@@ -1782,17 +1804,19 @@
         "fire/base.css"
       ],
       "do": [
-        "A line is secondary: a hint, a timestamp, a caption."
+        "A line is secondary: a hint, a timestamp, a caption.",
+        "A name must truncate with an ellipsis, or a description clamps to two or three lines."
       ],
       "dont": [
-        "The text needs a size or weight. Use Type."
+        "The text needs a size or weight. Use Type.",
+        "A status needs a dot and a label. Use Status."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "muted",
@@ -1800,7 +1824,11 @@
           },
           {
             "name": "faint",
-            "description": "The third-step colour for…"
+            "description": "The third-step colour for placeholders…"
+          },
+          {
+            "name": "text-2",
+            "description": "The second ink step."
           }
         ],
         "example": "<cc-component name=\"Text\">Content</cc-component>"
@@ -1808,7 +1836,7 @@
     },
     {
       "name": "Dialog",
-      "purpose": "A native dialog opened with showModal(): the page behind is washed out and blurred, focus moves into it and returns to…",
+      "purpose": "A native dialog opened with showModal(): the page behind is washed out and blurred, focus moves into it and returns to the trigger. Escape, a close button and…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -1824,10 +1852,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "The task must finish or be dismissed before the page makes sense again: create a key, choose…"
+        "The task must finish or be dismissed before the page makes sense again: create a key, choose…",
+        "A short form needs its own focus, with confirm and cancel at the foot."
       ],
       "dont": [
-        "A destructive action needs the person to type a name before it runs. Use Confirm."
+        "A destructive action needs the person to type a name before it runs. Use Confirm.",
+        "The content is a side panel the person may leave open while working. Use Sheet."
       ],
       "api": {
         "props": [
@@ -1851,7 +1881,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "dialog",
@@ -1860,6 +1890,10 @@
           {
             "name": "dialog-head",
             "description": "Title and description."
+          },
+          {
+            "name": "dialog-title",
+            "description": "The heading; focus lands here when the…"
           }
         ],
         "example": "<cc-component name=\"Dialog\" size=\"sm\">Content</cc-component>"
@@ -1867,7 +1901,7 @@
     },
     {
       "name": "Field",
-      "purpose": "The wrapper around one control: a label row, the control, a hint and an error slot. The hint gives way to the error…",
+      "purpose": "The wrapper around one control: a label row, the control, a hint and an error slot. The hint gives way to the error when it appears, so a field never grows…",
       "variants": [
         "schema"
       ],
@@ -1880,10 +1914,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "Any input, textarea, select or custom control that needs a visible label."
+        "Any input, textarea, select or custom control that needs a visible label.",
+        "A control needs help text, a character counter or an error message under it."
       ],
       "dont": [
-        "Several fields make one titled group in a long create or edit form. Use FormSection."
+        "Several fields make one titled group in a long create or edit form. Use FormSection.",
+        "A setting is a label and a control on one row. Use Setting."
       ],
       "api": {
         "props": [
@@ -1899,7 +1935,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "field",
@@ -1907,7 +1943,11 @@
           },
           {
             "name": "field-head",
-            "description": "Row holding the label, the…"
+            "description": "Row holding the label, the optional…"
+          },
+          {
+            "name": "field-label",
+            "description": "The label; carries data-required."
           }
         ],
         "example": "<cc-component name=\"Field\" variant=\"schema\">Content</cc-component>"
@@ -1915,7 +1955,7 @@
     },
     {
       "name": "InlineCode",
-      "purpose": "Inline code in the mono face on a faint fill (fd-code), with a tone for status words, and a keyboard key cap (fd-kbd)…",
+      "purpose": "Inline code in the mono face on a faint fill (fd-code), with a tone for status words, and a keyboard key cap (fd-kbd). Use it for identifiers, flags, file…",
       "variants": [
         "tone-accent"
       ],
@@ -1924,10 +1964,12 @@
         "fire/base.css"
       ],
       "do": [
-        "A sentence names a file, a flag, an endpoint or a value."
+        "A sentence names a file, a flag, an endpoint or a value.",
+        "A shortcut is shown as a key cap (fd-kbd), as in a search hint."
       ],
       "dont": [
-        "The code is several lines or needs copying. Use Codeblock."
+        "The code is several lines or needs copying. Use Codeblock.",
+        "A command is shown to run. Use Snippet."
       ],
       "api": {
         "props": [
@@ -1943,7 +1985,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "code",
@@ -1959,7 +2001,7 @@
     },
     {
       "name": "Input",
-      "purpose": "The native input in Fire's field skin: a white surface, a 1px line drawn inside the box so nothing shifts between…",
+      "purpose": "The native input in Fire's field skin: a white surface, a 1px line drawn inside the box so nothing shifts between states, 36px tall. Hover darkens the line…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -1974,10 +2016,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The value is a short line of free text: a name, an email, a URL, a slug."
+        "The value is a short line of free text: a name, an email, a URL, a slug.",
+        "People paste or compare characters, so a mono face helps (data-mono): keys, paths, regular…"
       ],
       "dont": [
-        "The value is a number people nudge up or down. Use Number."
+        "The value is a number people nudge up or down. Use Number.",
+        "The value is a long answer over several lines. Use Textarea."
       ],
       "api": {
         "props": [
@@ -2004,11 +2048,11 @@
         "parts": [
           {
             "name": "input",
-            "description": "The input, or a span or…"
+            "description": "The input, or a span or output in its…"
           },
           {
             "name": "input-pair",
-            "description": "A field and a button side by…"
+            "description": "A field and a button side by side…"
           }
         ],
         "example": "<cc-component name=\"Input\" size=\"sm\"></cc-component>"
@@ -2016,7 +2060,7 @@
     },
     {
       "name": "Menu",
-      "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or…",
+      "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or sub-menus. Arrow keys move, typing jumps to an…",
       "variants": [
         "switcher",
         "tone-danger",
@@ -2034,10 +2078,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "A row or a header has a set of actions behind a \"more\" button."
+        "A row or a header has a set of actions behind a \"more\" button.",
+        "Switching team, workspace or environment: use the switcher variant."
       ],
       "dont": [
-        "The content is richer than a list: a summary, a small form, a picker. Use Popover."
+        "The content is richer than a list: a summary, a small form, a picker. Use Popover.",
+        "A long list with search and counts. Use Checklist."
       ],
       "api": {
         "props": [
@@ -2067,7 +2113,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "menu",
@@ -2076,6 +2122,10 @@
           {
             "name": "menu-head",
             "description": "Title and close button row."
+          },
+          {
+            "name": "menu-title",
+            "description": "The menu heading."
           }
         ],
         "example": "<cc-component name=\"Menu\" variant=\"switcher\" docPicker=\"example\">Content</cc-component>"
@@ -2083,7 +2133,7 @@
     },
     {
       "name": "Table",
-      "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and…",
+      "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, sticky headers, and…",
       "variants": [
         "sticky",
         "stack-hide",
@@ -2108,10 +2158,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "People compare the same fields across many records: logs, keys, invoices, runs."
+        "People compare the same fields across many records: logs, keys, invoices, runs.",
+        "Rows need sorting, selection, bulk actions or an actions cell."
       ],
       "dont": [
-        "Records are few and each needs a title, a description and several controls. Use List."
+        "Records are few and each needs a title, a description and several controls. Use List.",
+        "The data is a handful of label and value pairs for one record. Use Kv."
       ],
       "api": {
         "props": [
@@ -2209,7 +2261,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "table",
@@ -2217,7 +2269,11 @@
           },
           {
             "name": "table-wrap",
-            "description": "Frame around the scroller…"
+            "description": "Frame around the scroller and the…"
+          },
+          {
+            "name": "table-scroll",
+            "description": "Owns horizontal scrolling; edge fades…"
           }
         ],
         "example": "<cc-component name=\"Table\" col=\"fit\" stack=\"hide\">Content</cc-component>"
@@ -2225,7 +2281,7 @@
     },
     {
       "name": "Segmented",
-      "purpose": "A radio group drawn as a track with a white thumb that slides to the chosen option: audience, state filter, theme…",
+      "purpose": "A radio group drawn as a track with a white thumb that slides to the chosen option: audience, state filter, theme. Items may be buttons with role=\"radio\"…",
       "variants": [
         "size-sm",
         "icon-only",
@@ -2245,10 +2301,12 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "Two to five mutually exclusive options change the view in place: All, Mine, Archived."
+        "Two to five mutually exclusive options change the view in place: All, Mine, Archived.",
+        "A mode or theme is set, and each option is short."
       ],
       "dont": [
-        "There are more than five options, or an option goes to another page. Use Tabs."
+        "There are more than five options, or an option goes to another page. Use Tabs.",
+        "The options are categories to browse. Use ChipNav."
       ],
       "api": {
         "props": [
@@ -2298,7 +2356,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "segmented",
@@ -2307,6 +2365,10 @@
           {
             "name": "segmented-item",
             "description": "One option."
+          },
+          {
+            "name": "segmented-thumb",
+            "description": "The sliding white thumb; added by…"
           }
         ],
         "example": "<cc-component name=\"Segmented\" variant=\"grouped\" size=\"sm\">Content</cc-component>"
@@ -2314,7 +2376,7 @@
     },
     {
       "name": "Checkbox",
-      "purpose": "16px box with a 4px radius and one hairline. Checked fills with the accent and draws a tick; indeterminate draws a…",
+      "purpose": "16px box with a 4px radius and one hairline. Checked fills with the accent and draws a tick; indeterminate draws a dash. The label is part of the control, so…",
       "variants": [],
       "states": [
         "error",
@@ -2327,25 +2389,31 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "Several options may be chosen from a fixed set."
+        "Several options may be chosen from a fixed set.",
+        "A yes or no is saved with the rest of the form, not at once."
       ],
       "dont": [
-        "A setting takes effect the moment it changes. Use Switch."
+        "A setting takes effect the moment it changes. Use Switch.",
+        "Exactly one of a few options is chosen. Use Radio."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "checkbox",
-            "description": "The label that wraps the…"
+            "description": "The label that wraps the input."
           },
           {
             "name": "checkbox-box",
-            "description": "The drawn box; forms.js adds…"
+            "description": "The drawn box; forms.js adds the tick…"
           },
           {
             "name": "checkbox-text",
-            "description": "Wraps the label and…"
+            "description": "Wraps the label and description."
+          },
+          {
+            "name": "checkbox-label",
+            "description": "The visible label."
           }
         ],
         "example": "<cc-component name=\"Checkbox\"></cc-component>"
@@ -2353,17 +2421,19 @@
     },
     {
       "name": "Grid",
-      "purpose": "An auto-filling grid. data-min sets the narrowest column (a size token from 4xs to 6xl, or full), data-cols the most…",
+      "purpose": "An auto-filling grid. data-min sets the narrowest column (a size token from 4xs to 6xl, or full), data-cols the most columns, and data-span on a child covers…",
       "variants": [],
       "states": [],
       "paths": [
         "fire/base.css"
       ],
       "do": [
-        "Cards, stats or fields sit in equal columns that should reflow on phones."
+        "Cards, stats or fields sit in equal columns that should reflow on phones.",
+        "One child needs to span several columns (data-span)."
       ],
       "dont": [
-        "Children are in one line or one column. Use Row."
+        "Children are in one line or one column. Use Row.",
+        "Children are a list of cards that wrap with their own sizes. The card grid class fd-card-grid in…"
       ],
       "api": {
         "props": [
@@ -2453,7 +2523,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "grid",
@@ -2465,7 +2535,7 @@
     },
     {
       "name": "List",
-      "purpose": "Rows that share one grid, so metadata and trailing actions align down the list however long the titles are. Each row…",
+      "purpose": "Rows that share one grid, so metadata and trailing actions align down the list however long the titles are. Each row has a lead (avatar, tile or icon), a…",
       "variants": [
         "divided",
         "card",
@@ -2485,10 +2555,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "Members, integrations or files with a name, a line of detail and one action."
+        "Members, integrations or files with a name, a line of detail and one action.",
+        "An inbox where unread rows carry a dot."
       ],
       "dont": [
-        "Numbers that line up in columns and sort. Use Table."
+        "Numbers that line up in columns and sort. Use Table.",
+        "A set of cards for browsing. Use Card."
       ],
       "api": {
         "props": [
@@ -2511,7 +2583,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "list",
@@ -2520,6 +2592,10 @@
           {
             "name": "list-row",
             "description": "One row."
+          },
+          {
+            "name": "list-lead",
+            "description": "The leading mark."
           }
         ],
         "example": "<cc-component name=\"List\">Content</cc-component>"
@@ -2527,7 +2603,7 @@
     },
     {
       "name": "Select",
-      "purpose": "A native select in Fire's skin, so the picker, typeahead and the mobile wheel all keep working. The wrapper carries…",
+      "purpose": "A native select in Fire's skin, so the picker, typeahead and the mobile wheel all keep working. The wrapper carries the size and variant; the select inside is…",
       "variants": [
         "outline",
         "size-sm",
@@ -2543,10 +2619,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "One value comes from a list of roughly 5 to 15 plain labels: country, region, time zone."
+        "One value comes from a list of roughly 5 to 15 plain labels: country, region, time zone.",
+        "The control must use the platform picker, such as on phones."
       ],
       "dont": [
-        "The list is long enough that people need to type to find an item, or each option needs an icon or…"
+        "The list is long enough that people need to type to find an item, or each option needs an icon or…",
+        "There are two to four options that fit side by side. Use Segmented."
       ],
       "api": {
         "props": [
@@ -2581,11 +2659,11 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "select",
-            "description": "The wrapper; holds the…"
+            "description": "The wrapper; holds the native select."
           }
         ],
         "example": "<cc-component name=\"Select\" variant=\"outline\" size=\"sm\">Content</cc-component>"
@@ -2593,7 +2671,7 @@
     },
     {
       "name": "Sheet",
-      "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and…",
+      "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones…",
       "variants": [
         "side-right",
         "side-left",
@@ -2611,10 +2689,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "A row in a table or a log opens its full detail beside the list."
+        "A row in a table or a log opens its full detail beside the list.",
+        "A filter or navigation panel slides in from the left on a small screen."
       ],
       "dont": [
-        "A short question that needs a yes or no. Use Dialog."
+        "A short question that needs a yes or no. Use Dialog.",
+        "A panel anchored to a button. Use Popover."
       ],
       "api": {
         "props": [
@@ -2646,7 +2726,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "sheet",
@@ -2654,7 +2734,11 @@
           },
           {
             "name": "sheet-bar",
-            "description": "A compact title row with the…"
+            "description": "A compact title row with the title and…"
+          },
+          {
+            "name": "sheet-head",
+            "description": "Title and close row."
           }
         ],
         "example": "<cc-component name=\"Sheet\" size=\"lg\" side=\"right\">Content</cc-component>"
@@ -2662,7 +2746,7 @@
     },
     {
       "name": "Switch",
-      "purpose": "A real checkbox with role=\"switch\": off is a faint ink track, on is the accent. The thumb slides with a slight spring…",
+      "purpose": "A real checkbox with role=\"switch\": off is a faint ink track, on is the accent. The thumb slides with a slight spring and stretches while pressed. A switch…",
       "variants": [
         "size-sm",
         "label-start",
@@ -2678,10 +2762,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "A setting takes effect the moment it flips: notifications, a feature flag, a preference."
+        "A setting takes effect the moment it flips: notifications, a feature flag, a preference.",
+        "The label reads as a state: \"Email me when a run fails\"."
       ],
       "dont": [
-        "The change needs confirming or saves with a form. Use Checkbox."
+        "The change needs confirming or saves with a form. Use Checkbox.",
+        "There are three or more states. Use Segmented."
       ],
       "api": {
         "props": [
@@ -2710,7 +2796,7 @@
         "parts": [
           {
             "name": "switch",
-            "description": "The label that wraps the…"
+            "description": "The label that wraps the input."
           },
           {
             "name": "switch-track",
@@ -2719,6 +2805,10 @@
           {
             "name": "switch-text",
             "description": "Wraps label and description."
+          },
+          {
+            "name": "switch-label",
+            "description": "The visible label."
           }
         ],
         "example": "<cc-component name=\"Switch\" size=\"sm\" label=\"start\"></cc-component>"
@@ -2726,7 +2816,7 @@
     },
     {
       "name": "TagInput",
-      "purpose": "A field that turns typed values into removable tokens. Enter or a comma adds one, Backspace on an empty field removes…",
+      "purpose": "A field that turns typed values into removable tokens. Enter or a comma adds one, Backspace on an empty field removes the last, and pasted lists split on…",
       "variants": [
         "size-sm",
         "size-lg"
@@ -2741,10 +2831,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The list is free text: domains, IP ranges, emails, keywords, redirect URIs."
+        "The list is free text: domains, IP ranges, emails, keywords, redirect URIs.",
+        "The server stores a list, and nobody should type JSON."
       ],
       "dont": [
-        "The values come from a fixed list. Use Combobox."
+        "The values come from a fixed list. Use Combobox.",
+        "Each entry has a name and a value. Use Pairs."
       ],
       "api": {
         "props": [
@@ -2774,7 +2866,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "tag-input",
@@ -2783,6 +2875,10 @@
           {
             "name": "tag-input-field",
             "description": "The typing input."
+          },
+          {
+            "name": "token",
+            "description": "One value."
           }
         ],
         "example": "<cc-component name=\"TagInput\" size=\"sm\" format=\"json\">Content</cc-component>"
@@ -2790,7 +2886,7 @@
     },
     {
       "name": "Choice",
-      "purpose": "A selectable card over a real radio or checkbox. Selected is one accent hairline, a faint accent wash and a check. Put…",
+      "purpose": "A selectable card over a real radio or checkbox. Selected is one accent hairline, a faint accent wash and a check. Put the whole decision in the card: a…",
       "variants": [
         "layout-grid"
       ],
@@ -2803,17 +2899,19 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "Plans, permission levels or modes where each option needs explaining."
+        "Plans, permission levels or modes where each option needs explaining.",
+        "Each option has a price or one key figure."
       ],
       "dont": [
-        "The options are plain labels. Use Radio."
+        "The options are plain labels. Use Radio.",
+        "The options are plain labels and several may be ticked. Use Checkbox."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "choice-group",
@@ -2821,7 +2919,11 @@
           },
           {
             "name": "choice",
-            "description": "The label that wraps the…"
+            "description": "The label that wraps the input."
+          },
+          {
+            "name": "choice-mark",
+            "description": "The check mark."
           }
         ],
         "example": "<cc-component name=\"Choice\">Content</cc-component>"
@@ -2829,7 +2931,7 @@
     },
     {
       "name": "Divider",
-      "purpose": "A one-pixel rule in the faint line colour. data-vertical makes it a vertical rule that stretches to the height of a…",
+      "purpose": "A one-pixel rule in the faint line colour. data-vertical makes it a vertical rule that stretches to the height of a row. With fd-grow it fills a row on either…",
       "variants": [
         "vertical"
       ],
@@ -2838,10 +2940,12 @@
         "fire/base.css"
       ],
       "do": [
-        "Two groups in a toolbar or a menu need a quiet break."
+        "Two groups in a toolbar or a menu need a quiet break.",
+        "A row reads \"or\" between two rules."
       ],
       "dont": [
-        "Rows in a list need lines between them. Use List."
+        "Rows in a list need lines between them. Use List.",
+        "A card needs a boundary. Use Card."
       ],
       "api": {
         "props": [
@@ -2862,7 +2966,7 @@
     },
     {
       "name": "InputGroup",
-      "purpose": "One field with affixes: the group carries the single hairline and focus halo, and a bare fd-input lives inside it…",
+      "purpose": "One field with affixes: the group carries the single hairline and focus halo, and a bare fd-input lives inside it. Affixes are an icon, a text prefix, a unit…",
       "variants": [
         "kind-tag",
         "kind-text",
@@ -2880,10 +2984,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "A fixed part of a URL, a currency or a unit sits beside the value (https://, USD, ms)."
+        "A fixed part of a URL, a currency or a unit sits beside the value (https://, USD, ms).",
+        "A button belongs to the value inside the field: copy, show, apply."
       ],
       "dont": [
-        "The field and a button are two separate actions side by side. Use Input."
+        "The field and a button are two separate actions side by side. Use Input.",
+        "The field is a search with a clear button. Use Search."
       ],
       "api": {
         "props": [
@@ -2910,7 +3016,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "input-group",
@@ -2918,7 +3024,7 @@
           },
           {
             "name": "input-affix",
-            "description": "An icon, text, unit, chevron…"
+            "description": "An icon, text, unit, chevron or button…"
           }
         ],
         "example": "<cc-component name=\"InputGroup\" size=\"sm\">Content</cc-component>"
@@ -2926,7 +3032,7 @@
     },
     {
       "name": "Kv",
-      "purpose": "A grid of key and value pairs for detail panels: what a request was, who owns a key, when a run started. Columns step…",
+      "purpose": "A grid of key and value pairs for detail panels: what a request was, who owns a key, when a run started. Columns step down by themselves as the panel narrows…",
       "variants": [
         "cols-1",
         "cols-2",
@@ -2947,10 +3053,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "A detail panel, sheet or card shows the facts of one record."
+        "A detail panel, sheet or card shows the facts of one record.",
+        "Values such as IDs and URLs should be copyable."
       ],
       "dont": [
-        "Many records with the same fields. Use Table."
+        "Many records with the same fields. Use Table.",
+        "Rows that people edit. Use Setting."
       ],
       "api": {
         "props": [
@@ -2989,7 +3097,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "kv",
@@ -2998,6 +3106,10 @@
           {
             "name": "kv-item",
             "description": "One key and value pair."
+          },
+          {
+            "name": "kv-key",
+            "description": "The label."
           }
         ],
         "example": "<cc-component name=\"Kv\" cols=\"1\" keys=\"plain\">Content</cc-component>"
@@ -3005,7 +3117,7 @@
     },
     {
       "name": "Secret",
-      "purpose": "Keys and signing secrets stay masked until someone asks. Reveal swaps in the real value, copy confirms with a check…",
+      "purpose": "Keys and signing secrets stay masked until someone asks. Reveal swaps in the real value, copy confirms with a check, and rotate hands the decision to your app…",
       "variants": [
         "mask-partial",
         "mask-full",
@@ -3024,10 +3136,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "An API key or signing secret is shown with reveal and copy."
+        "An API key or signing secret is shown with reveal and copy.",
+        "A person types a new password or key (data-mode=\"entry\")."
       ],
       "dont": [
-        "The value is not sensitive and only needs copying. Use CopyField."
+        "The value is not sensitive and only needs copying. Use CopyField.",
+        "A command or snippet is copied from a code block. Use Snippet."
       ],
       "api": {
         "props": [
@@ -3058,15 +3172,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "secret",
-            "description": "The wrapper; carries…"
+            "description": "The wrapper; carries data-fd-secret…"
           },
           {
             "name": "secret-value",
             "description": "The drawn value."
+          },
+          {
+            "name": "secret-start",
+            "description": "The part that shortens with an ellipsis."
           }
         ],
         "example": "<cc-component name=\"Secret\" mask=\"partial\" mode=\"entry\">Content</cc-component>"
@@ -3074,7 +3192,7 @@
     },
     {
       "name": "Stats",
-      "purpose": "A row of figures joined into one bordered group and divided by hairlines. Each tile is an eyebrow, a figure and a…",
+      "purpose": "A row of figures joined into one bordered group and divided by hairlines. Each tile is an eyebrow, a figure and a muted line; add a delta, a meter or…",
       "variants": [
         "cards",
         "card",
@@ -3092,10 +3210,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "The top of a page shows three to six numbers: credits, requests, success rate."
+        "The top of a page shows three to six numbers: credits, requests, success rate.",
+        "A billing summary pairs a figure with a meter and a link."
       ],
       "dont": [
-        "One figure with detail behind a click. Use DataCard."
+        "One figure with detail behind a click. Use DataCard.",
+        "A trend over time. Use Chart."
       ],
       "api": {
         "props": [
@@ -3111,7 +3231,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "stats",
@@ -3120,6 +3240,10 @@
           {
             "name": "stat-tile",
             "description": "One tile."
+          },
+          {
+            "name": "stat-label",
+            "description": "The eyebrow."
           }
         ],
         "example": "<cc-component name=\"Stats\" variant=\"cards\">Content</cc-component>"
@@ -3127,7 +3251,7 @@
     },
     {
       "name": "Steps",
-      "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set…",
+      "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set the position with data-current (0-based)…",
       "variants": [
         "orientation-vertical"
       ],
@@ -3140,10 +3264,12 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A setup or create flow has a fixed order: choose pages, schedule, notify, review."
+        "A setup or create flow has a fixed order: choose pages, schedule, notify, review.",
+        "A vertical list of tasks shows what is done and what comes next."
       ],
       "dont": [
-        "Views can be visited in any order. Use Tabs."
+        "Views can be visited in any order. Use Tabs.",
+        "A flow lives in a dialog and needs dots only. Use Dialog."
       ],
       "api": {
         "props": [
@@ -3164,7 +3290,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "steps",
@@ -3173,6 +3299,10 @@
           {
             "name": "step",
             "description": "One step; carries data-state."
+          },
+          {
+            "name": "step-marker",
+            "description": "The number, check or warning mark."
           }
         ],
         "example": "<cc-component name=\"Steps\" orientation=\"vertical\">Content</cc-component>"
@@ -3180,7 +3310,7 @@
     },
     {
       "name": "Tabs",
-      "purpose": "Underline tabs on a hairline; the accent underline slides between them. Buttons with role=\"tab\" and aria-controls get…",
+      "purpose": "Underline tabs on a hairline; the accent underline slides between them. Buttons with role=\"tab\" and aria-controls get the full pattern: arrow keys move and…",
       "variants": [
         "size-sm"
       ],
@@ -3194,10 +3324,12 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "One object has several views: the output formats of a run, the sections of a record."
+        "One object has several views: the output formats of a run, the sections of a record.",
+        "Each view is a panel on this page, or a route under the same object (route tabs)."
       ],
       "dont": [
-        "Options filter or toggle what is shown and there are two to five of them. Use Segmented."
+        "Options filter or toggle what is shown and there are two to five of them. Use Segmented.",
+        "The items are categories to browse in a catalogue. Use ChipNav."
       ],
       "api": {
         "props": [
@@ -3213,7 +3345,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "tabs",
@@ -3222,6 +3354,10 @@
           {
             "name": "tab",
             "description": "One tab; a button or a link."
+          },
+          {
+            "name": "tab-count",
+            "description": "A count pill after the label."
           }
         ],
         "example": "<cc-component name=\"Tabs\" size=\"sm\">Content</cc-component>"
@@ -3229,7 +3365,7 @@
     },
     {
       "name": "ChipNav",
-      "purpose": "A category strip, lighter than tabs: no underline, just ink. The selected chip turns weight 450 and its width is…",
+      "purpose": "A category strip, lighter than tabs: no underline, just ink. The selected chip turns weight 450 and its width is reserved up front so neighbours never shift…",
       "variants": [],
       "states": [
         "disabled",
@@ -3242,17 +3378,19 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A catalogue, gallery or template list is narrowed by category."
+        "A catalogue, gallery or template list is narrowed by category.",
+        "There are more categories than a segmented control holds."
       ],
       "dont": [
-        "The items switch views of one object. Use Tabs."
+        "The items switch views of one object. Use Tabs.",
+        "There are two to five exclusive options. Use Segmented."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "chip-nav",
@@ -3260,7 +3398,11 @@
           },
           {
             "name": "chip",
-            "description": "One category; a link or a…"
+            "description": "One category; a link or a button."
+          },
+          {
+            "name": "chip-count",
+            "description": "A count after the label."
           }
         ],
         "example": "<cc-component name=\"ChipNav\">Content</cc-component>"
@@ -3268,7 +3410,7 @@
     },
     {
       "name": "Column",
-      "purpose": "A bounded column with a maximum width (data-size xs, sm, md, lg or xl) that stays centred when data-align=\"center\"…",
+      "purpose": "A bounded column with a maximum width (data-size xs, sm, md, lg or xl) that stays centred when data-align=\"center\". Use it so text and forms stop at a…",
       "variants": [
         "size-xs",
         "size-sm",
@@ -3282,10 +3424,12 @@
         "fire/base.css"
       ],
       "do": [
-        "A form, an article or an empty state sits on a wide page and should not stretch."
+        "A form, an article or an empty state sits on a wide page and should not stretch.",
+        "A page has one main column in the middle."
       ],
       "dont": [
-        "A form should set its own width. Use Form."
+        "A form should set its own width. Use Form.",
+        "A main area has a side panel. Use Split."
       ],
       "api": {
         "props": [
@@ -3313,7 +3457,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "column",
@@ -3325,28 +3469,30 @@
     },
     {
       "name": "Grow",
-      "purpose": "A flex-grow helper: put it on the child of a row or stack that should absorb the remaining space, pushing its siblings…",
+      "purpose": "A flex-grow helper: put it on the child of a row or stack that should absorb the remaining space, pushing its siblings to the ends. On an fd-divider it makes…",
       "variants": [],
       "states": [],
       "paths": [
         "fire/base.css"
       ],
       "do": [
-        "A title should push its actions to the far end of a row."
+        "A title should push its actions to the far end of a row.",
+        "A rule must fill the space on either side of an \"or\"."
       ],
       "dont": [
-        "Children should spread evenly. Use Row."
+        "Children should spread evenly. Use Row.",
+        "Children are equal columns. Use Grid."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "grow",
-            "description": "The class on the child that…"
+            "description": "The class on the child that grows."
           }
         ],
         "example": "<cc-component name=\"Grow\">Content</cc-component>"
@@ -3354,7 +3500,7 @@
     },
     {
       "name": "Otp",
-      "purpose": "Six single-character boxes that behave as one field. Typing advances, Backspace steps back, arrow keys move, and…",
+      "purpose": "Six single-character boxes that behave as one field. Typing advances, Backspace steps back, arrow keys move, and pasting fills every box; SMS autofill lands…",
       "variants": [
         "size-sm",
         "size-lg"
@@ -3367,10 +3513,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "A verification code arrives by SMS, email or an authenticator app."
+        "A verification code arrives by SMS, email or an authenticator app.",
+        "A code of fixed length is typed or pasted once (data-length, data-type)."
       ],
       "dont": [
-        "The value is a number people adjust. Use Number."
+        "The value is a number people adjust. Use Number.",
+        "The value is a long key or token. Use Secret."
       ],
       "api": {
         "props": [
@@ -3396,11 +3544,11 @@
         "parts": [
           {
             "name": "otp",
-            "description": "The wrapper; carries…"
+            "description": "The wrapper; carries data-fd-otp and…"
           },
           {
             "name": "otp-sep",
-            "description": "A separator between groups…"
+            "description": "A separator between groups of boxes."
           }
         ],
         "example": "<cc-component name=\"Otp\" size=\"sm\" type=\"alphanumeric\"></cc-component>"
@@ -3408,7 +3556,7 @@
     },
     {
       "name": "Popover",
-      "purpose": "A floating panel built on the native Popover API. It closes on outside click, Escape or when focus leaves. Focus moves…",
+      "purpose": "A floating panel built on the native Popover API. It closes on outside click, Escape or when focus leaves. Focus moves in when it opens and back to the…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -3425,10 +3573,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "A trigger opens a summary, a few fields or a picker that does not warrant a dialog."
+        "A trigger opens a summary, a few fields or a picker that does not warrant a dialog.",
+        "A usage figure with a note and a link sits behind a small chip."
       ],
       "dont": [
-        "A short list of actions or choices. Use Menu."
+        "A short list of actions or choices. Use Menu.",
+        "Text that names a control. Use Tooltip."
       ],
       "api": {
         "props": [
@@ -3457,7 +3607,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "popover",
@@ -3466,6 +3616,10 @@
           {
             "name": "popover-head",
             "description": "The header row."
+          },
+          {
+            "name": "popover-title",
+            "description": "The panel title."
           }
         ],
         "example": "<cc-component name=\"Popover\" size=\"sm\">Content</cc-component>"
@@ -3473,7 +3627,7 @@
     },
     {
       "name": "Progress",
-      "purpose": "A bar, ring or step strip filled from data-value and data-max. It shows a percentage or a count. Use…",
+      "purpose": "A bar, ring or step strip filled from data-value and data-max. It shows a percentage or a count. Use data-indeterminate only while the total is unknown, and…",
       "variants": [
         "ring",
         "size-16",
@@ -3495,10 +3649,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "A job runs and the reader should see how far it has got."
+        "A job runs and the reader should see how far it has got.",
+        "A multi-step flow shows which step is current."
       ],
       "dont": [
-        "Use against a quota or limit. Use Meter."
+        "Use against a quota or limit. Use Meter.",
+        "The wait is short and the total is unknown. Use Loader."
       ],
       "api": {
         "props": [
@@ -3551,6 +3707,10 @@
           {
             "name": "progress-label",
             "description": "What is progressing."
+          },
+          {
+            "name": "progress-value",
+            "description": "The percentage or count."
           }
         ],
         "example": "<cc-component name=\"Progress\" variant=\"ring\" size=\"16\"></cc-component>"
@@ -3558,7 +3718,7 @@
     },
     {
       "name": "Search",
-      "purpose": "An input with a leading icon. The clear button appears as soon as there is text and the key hint steps aside…",
+      "purpose": "An input with a leading icon. The clear button appears as soon as there is text and the key hint steps aside. data-fd-search-hotkey focuses the first visible…",
       "variants": [
         "soft",
         "size-sm",
@@ -3573,10 +3733,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "People filter or find items in a list, table or document."
+        "People filter or find items in a list, table or document.",
+        "A page has one main search that a keyboard shortcut should reach."
       ],
       "dont": [
-        "The search runs commands or jumps between pages from anywhere. Use Command."
+        "The search runs commands or jumps between pages from anywhere. Use Command.",
+        "The value is any other kind of text. Use Input."
       ],
       "api": {
         "props": [
@@ -3611,7 +3773,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "search",
@@ -3620,6 +3782,10 @@
           {
             "name": "search-input",
             "description": "The native search input."
+          },
+          {
+            "name": "search-clear",
+            "description": "The clear button; shows when there is…"
           }
         ],
         "example": "<cc-component name=\"Search\" variant=\"soft\" size=\"sm\">Content</cc-component>"
@@ -3627,7 +3793,7 @@
     },
     {
       "name": "Back",
-      "purpose": "A link with a left arrow and a label such as \"Back to dashboard\". The arrow travels a few pixels on hover. Use it when…",
+      "purpose": "A link with a left arrow and a label such as \"Back to dashboard\". The arrow travels a few pixels on hover. Use it when there is one place to return to, not a…",
       "variants": [],
       "states": [
         "hover"
@@ -3636,17 +3802,19 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A detail or a result screen has one parent to return to."
+        "A detail or a result screen has one parent to return to.",
+        "A phone screen needs a way back to its list."
       ],
       "dont": [
-        "The screen is several levels deep. Use Breadcrumb."
+        "The screen is several levels deep. Use Breadcrumb.",
+        "The action cancels or dismisses a task in a dialog. Use Button."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "back",
@@ -3658,7 +3826,7 @@
     },
     {
       "name": "Chart",
-      "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold…",
+      "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in…",
       "variants": [
         "chart-line",
         "chart-area",
@@ -3682,10 +3850,12 @@
         "fire/components/charts.css"
       ],
       "do": [
-        "A value moves continuously over time: use line, or area for volume."
+        "A value moves continuously over time: use line, or area for volume.",
+        "Discrete periods are compared: use bar, or stacked for a total and its parts."
       ],
       "dont": [
-        "A ranking of items. Use Bars."
+        "A ranking of items. Use Bars.",
+        "A direction beside a figure, without axes. Use Sparkline."
       ],
       "api": {
         "props": [
@@ -3742,15 +3912,19 @@
         "parts": [
           {
             "name": "chart",
-            "description": "The chart; data-fd-chart…"
+            "description": "The chart; data-fd-chart names the type."
           },
           {
             "name": "chart-card",
-            "description": "A card that holds a chart…"
+            "description": "A card that holds a chart with a title…"
           },
           {
             "name": "chart-card-head",
             "description": "The title row of a chart card."
+          },
+          {
+            "name": "chart-stat",
+            "description": "A headline figure above the chart."
           }
         ],
         "example": "<cc-component name=\"Chart\" tone=\"danger\" chart=\"line\"></cc-component>"
@@ -3758,7 +3932,7 @@
     },
     {
       "name": "Confirm",
-      "purpose": "A dialog for actions that destroy something with history in it: a team, a project, all logs. A phrase (the slug, in…",
+      "purpose": "A dialog for actions that destroy something with history in it: a team, a project, all logs. A phrase (the slug, in mono) is shown, and the danger button…",
       "variants": [
         "confirm-input"
       ],
@@ -3769,10 +3943,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "Deleting a team, project or workspace along with its keys, monitors and logs."
+        "Deleting a team, project or workspace along with its keys, monitors and logs.",
+        "A mistake cannot be undone and has a wide blast radius."
       ],
       "dont": [
-        "A simple yes or no with no history lost. Use Dialog."
+        "A simple yes or no with no history lost. Use Dialog.",
+        "Undoable actions. Use Toast."
       ],
       "api": {
         "props": [
@@ -3785,15 +3961,15 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "confirm",
-            "description": "The dialog (also carries…"
+            "description": "The dialog (also carries fd-dialog)…"
           },
           {
             "name": "confirm-phrase",
-            "description": "The phrase shown in mono…"
+            "description": "The phrase shown in mono, selectable…"
           }
         ],
         "example": "<cc-component name=\"Confirm\">Content</cc-component>"
@@ -3801,7 +3977,7 @@
     },
     {
       "name": "CopyField",
-      "purpose": "A read-only value with a copy button, in the same field shape. Copy always copies the whole data-value, and a check…",
+      "purpose": "A read-only value with a copy button, in the same field shape. Copy always copies the whole data-value, and a check shows for a moment (fd:copy)…",
       "variants": [
         "mask-end",
         "mask-partial",
@@ -3814,10 +3990,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "A webhook URL, endpoint, ID or an invite link is shown for copying."
+        "A webhook URL, endpoint, ID or an invite link is shown for copying.",
+        "An address is recognised by its last characters (data-mask=\"end\")."
       ],
       "dont": [
-        "The value is secret and may be revealed or rotated. Use Secret."
+        "The value is secret and may be revealed or rotated. Use Secret.",
+        "The value is a command or code with several lines. Use Snippet."
       ],
       "api": {
         "props": [
@@ -3835,15 +4013,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "copy-field",
-            "description": "The wrapper; carries…"
+            "description": "The wrapper; carries data-fd-secret…"
           },
           {
             "name": "copy-field-label",
-            "description": "An optional label inside the…"
+            "description": "An optional label inside the field."
+          },
+          {
+            "name": "copy-field-value",
+            "description": "The drawn value."
           }
         ],
         "example": "<cc-component name=\"CopyField\" mask=\"end\">Content</cc-component>"
@@ -3851,8 +4033,10 @@
     },
     {
       "name": "DatePicker",
-      "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end…",
-      "variants": [],
+      "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then…",
+      "variants": [
+        "compare-*"
+      ],
       "states": [
         "loading",
         "disabled",
@@ -3865,25 +4049,37 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "A log, a chart or a report is filtered by a time range."
+        "A log, a chart or a report is filtered by a time range.",
+        "People mostly want the same few ranges but sometimes a custom one."
       ],
       "dont": [
-        "A single date in a form. Use Input."
+        "A single date in a form. Use Datefield.",
+        "A time of day or a number. Use Number."
       ],
       "api": {
-        "props": [],
+        "props": [
+          {
+            "name": "compare",
+            "type": "string",
+            "required": false
+          }
+        ],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "daterange",
-            "description": "The panel; carries…"
+            "description": "The panel; carries data-fd-daterange."
           },
           {
             "name": "daterange-presets",
             "description": "The preset column."
+          },
+          {
+            "name": "daterange-preset",
+            "description": "One preset button."
           }
         ],
         "example": "<cc-component name=\"DatePicker\">Content</cc-component>"
@@ -3891,7 +4087,7 @@
     },
     {
       "name": "Filter",
-      "purpose": "A soft chip that reads like a button at rest. With a value chosen it turns white, the value goes to full ink and a…",
+      "purpose": "A soft chip that reads like a button at rest. With a value chosen it turns white, the value goes to full ink and a small x clears it. A filter bar lays out…",
       "variants": [
         "size-sm"
       ],
@@ -3906,10 +4102,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "A table or log has a few filterable columns: status, endpoint, key."
+        "A table or log has a few filterable columns: status, endpoint, key.",
+        "Filters set by a link or with several values need to show as removable tokens."
       ],
       "dont": [
-        "Picking several values from a long list. Use Checklist."
+        "Picking several values from a long list. Use Checklist.",
+        "A date range. Use DatePicker."
       ],
       "api": {
         "props": [
@@ -3925,7 +4123,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "filter",
@@ -3933,7 +4131,11 @@
           },
           {
             "name": "filter-trigger",
-            "description": "The button that opens the…"
+            "description": "The button that opens the menu."
+          },
+          {
+            "name": "filter-label",
+            "description": "The filter name."
           }
         ],
         "example": "<cc-component name=\"Filter\" size=\"sm\">Content</cc-component>"
@@ -3941,7 +4143,7 @@
     },
     {
       "name": "Form",
-      "purpose": "The form container: it stops at a readable width on its own (data-size sm, lg or full) and holds rows, columns and an…",
+      "purpose": "The form container: it stops at a readable width on its own (data-size sm, lg or full) and holds rows, columns and an actions bar. fd-form-row puts a label…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -3957,10 +4159,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "A settings or create page holds several fields with a Save action."
+        "A settings or create page holds several fields with a Save action.",
+        "Changes should trigger an unsaved-changes bar (data-fd-dirty, data-variant=\"sticky\")."
       ],
       "dont": [
-        "A long form has titled groups that people scan. Use FormSection."
+        "A long form has titled groups that people scan. Use FormSection.",
+        "One setting is a label and a control on a row of a list. Use Setting."
       ],
       "api": {
         "props": [
@@ -3978,7 +4182,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "form",
@@ -3986,7 +4190,11 @@
           },
           {
             "name": "form-row",
-            "description": "One setting: text left…"
+            "description": "One setting: text left, control right."
+          },
+          {
+            "name": "form-row-text",
+            "description": "Holds label and description."
           }
         ],
         "example": "<cc-component name=\"Form\" size=\"sm\">Content</cc-component>"
@@ -3994,7 +4202,7 @@
     },
     {
       "name": "Meter",
-      "purpose": "A thin bar that shows use against a limit. Set data-value and data-max; the fill, the colour and the ARIA meter role…",
+      "purpose": "A thin bar that shows use against a limit. Set data-value and data-max; the fill, the colour and the ARIA meter role follow. It turns warning from 80% and…",
       "variants": [
         "inline",
         "segmented",
@@ -4014,10 +4222,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "A quota, a credit balance or a rate limit has a cap."
+        "A quota, a credit balance or a rate limit has a cap.",
+        "A table cell shows use next to the number: use the inline variant."
       ],
       "dont": [
-        "Work moving toward done. Use Progress."
+        "Work moving toward done. Use Progress.",
+        "A share of a whole with two to five parts. Use Donut."
       ],
       "api": {
         "props": [
@@ -4086,6 +4296,10 @@
           {
             "name": "meter-label",
             "description": "What is measured."
+          },
+          {
+            "name": "meter-figure",
+            "description": "The \"1,520 of 3,000\" text."
           }
         ],
         "example": "<cc-component name=\"Meter\" variant=\"inline\" size=\"sm\"></cc-component>"
@@ -4093,7 +4307,7 @@
     },
     {
       "name": "Slider",
-      "purpose": "A styled native range input, so touch, arrow keys, Home/End and Page keys work. The accent fills to the thumb and a…",
+      "purpose": "A styled native range input, so touch, arrow keys, Home/End and Page keys work. The accent fills to the thumb and a value bubble shows while dragging or when…",
       "variants": [
         "steps"
       ],
@@ -4104,10 +4318,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The value is a position on a scale and a rough setting is enough: effort, volume, depth."
+        "The value is a position on a scale and a rough setting is enough: effort, volume, depth.",
+        "Named stops such as Low, Medium, High suit the choice (data-variant=\"steps\")."
       ],
       "dont": [
-        "The exact number matters. Use Number."
+        "The exact number matters. Use Number.",
+        "There are two to four named options with no scale. Use Segmented."
       ],
       "api": {
         "props": [
@@ -4135,11 +4351,15 @@
           },
           {
             "name": "slider-bubble",
-            "description": "The value shown above the…"
+            "description": "The value shown above the thumb while…"
           },
           {
             "name": "slider-ticks",
-            "description": "Clickable stop labels under…"
+            "description": "Clickable stop labels under the track."
+          },
+          {
+            "name": "slider-value",
+            "description": "A visible value mirrored from the input."
           }
         ],
         "example": "<cc-component name=\"Slider\" variant=\"steps\" bubble=\"off\"></cc-component>"
@@ -4147,7 +4367,7 @@
     },
     {
       "name": "Toast",
-      "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with…",
+      "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action…",
       "variants": [
         "tone-neutral",
         "tone-success",
@@ -4166,10 +4386,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "An action finished and needs a quiet receipt: key copied, saved, deleted."
+        "An action finished and needs a quiet receipt: key copied, saved, deleted.",
+        "Something finished elsewhere: a crawl completed, a webhook failed."
       ],
       "dont": [
-        "The reader must choose or confirm something. Use Dialog."
+        "The reader must choose or confirm something. Use Dialog.",
+        "A persistent warning next to content. Use Callout."
       ],
       "api": {
         "props": [
@@ -4196,15 +4418,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "toaster",
-            "description": "The stack, a manual popover…"
+            "description": "The stack, a manual popover and live…"
           },
           {
             "name": "toast",
             "description": "One toast."
+          },
+          {
+            "name": "toast-icon",
+            "description": "The tone icon."
           }
         ],
         "example": "<cc-component name=\"Toast\" tone=\"neutral\">Content</cc-component>"
@@ -4212,7 +4438,7 @@
     },
     {
       "name": "Bars",
-      "purpose": "A list for a ranking: label left, a thin bar, the figure right in mono. It is plain CSS driven by one custom property…",
+      "purpose": "A list for a ranking: label left, a thin bar, the figure right in mono. It is plain CSS driven by one custom property per row, --value, a fraction from 0 to 1…",
       "variants": [
         "tone-accent",
         "tone-neutral"
@@ -4224,10 +4450,12 @@
         "fire/components/charts.css"
       ],
       "do": [
-        "A ranking of a few to a dozen items with exact figures."
+        "A ranking of a few to a dozen items with exact figures.",
+        "Parts of a total where order matters more than proportion."
       ],
       "dont": [
-        "Values over time. Use Chart."
+        "Values over time. Use Chart.",
+        "Parts of a whole with two to five segments. Use Donut."
       ],
       "api": {
         "props": [
@@ -4254,11 +4482,15 @@
           },
           {
             "name": "bars-row",
-            "description": "One item; set --value from 0…"
+            "description": "One item; set --value from 0 to 1."
           },
           {
             "name": "bars-label",
             "description": "The name."
+          },
+          {
+            "name": "bars-track",
+            "description": "The groove."
           }
         ],
         "example": "<cc-component name=\"Bars\" tone=\"accent\"></cc-component>"
@@ -4266,7 +4498,7 @@
     },
     {
       "name": "Checklist",
-      "purpose": "The body of a filter popover: a search row, checkable rows with counts, a summary and Clear. The trigger label…",
+      "purpose": "The body of a filter popover: a search row, checkable rows with counts, a summary and Clear. The trigger label summarises the choice. Each change fires…",
       "variants": [
         "highlighted"
       ],
@@ -4280,17 +4512,19 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "People filter by several values out of a long list: endpoints, keys, statuses."
+        "People filter by several values out of a long list: endpoints, keys, statuses.",
+        "Each option has a count worth showing."
       ],
       "dont": [
-        "One choice from a short list. Use Menu."
+        "One choice from a short list. Use Menu.",
+        "A short set of options that all fit on the page. Use Choice."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "checklist",
@@ -4299,6 +4533,10 @@
           {
             "name": "checklist-item",
             "description": "One row with a checkbox."
+          },
+          {
+            "name": "checklist-label",
+            "description": "The option name."
           }
         ],
         "example": "<cc-component name=\"Checklist\">Content</cc-component>"
@@ -4306,7 +4544,7 @@
     },
     {
       "name": "Codefield",
-      "purpose": "A text area in the code face with a head showing the language and an optional Format button. Tab inserts two spaces…",
+      "purpose": "A text area in the code face with a head showing the language and an optional Format button. Tab inserts two spaces. data-fd-json checks the value on blur and…",
       "variants": [],
       "states": [
         "error",
@@ -4317,10 +4555,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "An expert overrides configuration by hand and the value is JSON."
+        "An expert overrides configuration by hand and the value is JSON.",
+        "The input is code and needs checking: a template, a schema, a config override."
       ],
       "dont": [
-        "The value is a list, a map or a choice that a control fits. Use TagInput."
+        "The value is a list, a map or a choice that a control fits. Use TagInput.",
+        "The value is a map of names to values. Use Pairs."
       ],
       "api": {
         "props": [
@@ -4333,7 +4573,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "codefield",
@@ -4341,7 +4581,11 @@
           },
           {
             "name": "codefield-head",
-            "description": "Row with the language and…"
+            "description": "Row with the language and the Format…"
+          },
+          {
+            "name": "codefield-lang",
+            "description": "The language label."
           }
         ],
         "example": "<cc-component name=\"Codefield\">Content</cc-component>"
@@ -4349,7 +4593,7 @@
     },
     {
       "name": "DataCard",
-      "purpose": "A framed block: a heading and description on the left, the figure and its unit opposite, and a toggle that reveals…",
+      "purpose": "A framed block: a heading and description on the left, the figure and its unit opposite, and a toggle that reveals more (a table, a breakdown). It is the…",
       "variants": [],
       "states": [
         "hover",
@@ -4360,17 +4604,19 @@
         "fire/components/data.css"
       ],
       "do": [
-        "One number matters most and its breakdown belongs behind a click: credits left, balance, quota."
+        "One number matters most and its breakdown belongs behind a click: credits left, balance, quota.",
+        "The detail is a small table or list that explains the figure."
       ],
       "dont": [
-        "Several headline numbers side by side. Use Stats."
+        "Several headline numbers side by side. Use Stats.",
+        "A figure that is use against a limit. Use Meter."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "data-card",
@@ -4378,7 +4624,11 @@
           },
           {
             "name": "data-card-head",
-            "description": "Title, description and…"
+            "description": "Title, description and figure row."
+          },
+          {
+            "name": "data-card-title",
+            "description": "What the figure is."
           }
         ],
         "example": "<cc-component name=\"DataCard\">Content</cc-component>"
@@ -4386,7 +4636,7 @@
     },
     {
       "name": "FileUpload",
-      "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Dragging over it turns the…",
+      "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Dragging over it turns the line accent. Accepted files appear as…",
       "variants": [
         "layout-inline"
       ],
@@ -4401,10 +4651,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "People attach one or several files, such as a sitemap, a CSV or a document."
+        "People attach one or several files, such as a sitemap, a CSV or a document.",
+        "Upload progress and per-file errors should show as rows."
       ],
       "dont": [
-        "One small file is chosen as part of a plain form and no progress is needed. Use Input."
+        "One small file is chosen as part of a plain form and no progress is needed. Use Input.",
+        "The upload is an image avatar. Use Avatar."
       ],
       "api": {
         "props": [
@@ -4420,15 +4672,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "dropzone",
-            "description": "The drop area; a label…"
+            "description": "The drop area; a label around the file…"
           },
           {
             "name": "dropzone-icon",
             "description": "The icon that lifts on drag."
+          },
+          {
+            "name": "dropzone-text",
+            "description": "Wraps title and hint."
           }
         ],
         "example": "<cc-component name=\"FileUpload\" layout=\"inline\">Content</cc-component>"
@@ -4436,7 +4692,7 @@
     },
     {
       "name": "FormSection",
-      "purpose": "One titled group in a long create or edit form: a narrow head with a title and one line on the left (it stays in view…",
+      "purpose": "One titled group in a long create or edit form: a narrow head with a title and one line on the left (it stays in view while the body scrolls) and the fields…",
       "variants": [
         "layout-stack"
       ],
@@ -4445,10 +4701,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "A create or edit form has more than one group: Basics, Callbacks, Access, Advanced."
+        "A create or edit form has more than one group: Basics, Callbacks, Access, Advanced.",
+        "People should scan titles and skip what they do not need."
       ],
       "dont": [
-        "The form is short. Use Form."
+        "The form is short. Use Form.",
+        "A card holds a single setting with a control. Use Setting."
       ],
       "api": {
         "props": [
@@ -4464,7 +4722,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "form-section",
@@ -4473,6 +4731,10 @@
           {
             "name": "form-section-head",
             "description": "Holds title and description."
+          },
+          {
+            "name": "form-section-title",
+            "description": "The title."
           }
         ],
         "example": "<cc-component name=\"FormSection\" layout=\"stack\">Content</cc-component>"
@@ -4480,7 +4742,7 @@
     },
     {
       "name": "Heatgrid",
-      "purpose": "A grid of day cells: weeks run in columns, Monday to Sunday in rows. Five steps run from a faint ink wash to the full…",
+      "purpose": "A grid of day cells: weeks run in columns, Monday to Sunday in rows. Five steps run from a faint ink wash to the full accent, cut at the quartiles of the busy…",
       "variants": [
         "strip",
         "size-sm",
@@ -4500,10 +4762,12 @@
         "fire/components/charts.css"
       ],
       "do": [
-        "Activity over weeks or months: requests, commits, runs per day."
+        "Activity over weeks or months: requests, commits, runs per day.",
+        "Each day has an outcome, not an amount: use the strip with a legend."
       ],
       "dont": [
-        "A value that changes by the hour or the minute. Use Chart."
+        "A value that changes by the hour or the minute. Use Chart.",
+        "A single day or week. Use Bars."
       ],
       "api": {
         "props": [
@@ -4553,6 +4817,10 @@
           {
             "name": "heatgrid-grid",
             "description": "The cells."
+          },
+          {
+            "name": "heatgrid-cell",
+            "description": "One day."
           }
         ],
         "example": "<cc-component name=\"Heatgrid\" variant=\"strip\" size=\"sm\"></cc-component>"
@@ -4560,7 +4828,7 @@
     },
     {
       "name": "Listbox",
-      "purpose": "The option list a combobox opens, and the list inside any picker: fd-option rows with a check for the selected one, an…",
+      "purpose": "The option list a combobox opens, and the list inside any picker: fd-option rows with a check for the selected one, an optional description and mono meta…",
       "variants": [
         "side-top"
       ],
@@ -4573,10 +4841,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "Building a picker or menu whose rows are choices with state (selected, active)."
+        "Building a picker or menu whose rows are choices with state (selected, active).",
+        "Rows need a description, an icon or a mono meta beside the label."
       ],
       "dont": [
-        "A user needs a ready-made field with typing and filtering. Use Combobox."
+        "A user needs a ready-made field with typing and filtering. Use Combobox.",
+        "The rows are actions, not choices. Use Menu."
       ],
       "api": {
         "props": [
@@ -4592,7 +4862,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "listbox",
@@ -4601,6 +4871,10 @@
           {
             "name": "listbox-label",
             "description": "A group heading."
+          },
+          {
+            "name": "options",
+            "description": "The list of rows, also used for…"
           }
         ],
         "example": "<cc-component name=\"Listbox\" side=\"top\">Content</cc-component>"
@@ -4608,7 +4882,7 @@
     },
     {
       "name": "Number",
-      "purpose": "A number input with steppers inside the field. Hold a stepper to repeat; steppers disable at min and max. Arrow keys…",
+      "purpose": "A number input with steppers inside the field. Hold a stepper to repeat; steppers disable at min and max. Arrow keys and typing still work. fd:change fires…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -4626,10 +4900,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The value is a count or an amount with limits: retries, page depth, seats."
+        "The value is a count or an amount with limits: retries, page depth, seats.",
+        "People change it by small steps more than they type it."
       ],
       "dont": [
-        "The value sits on a scale and exact digits matter less than position. Use Slider."
+        "The value sits on a scale and exact digits matter less than position. Use Slider.",
+        "The number has a unit that should show beside it. Use InputGroup."
       ],
       "api": {
         "props": [
@@ -4677,7 +4953,7 @@
     },
     {
       "name": "Pairs",
-      "purpose": "For OAuth scopes and their labels, request headers, environment variables. Each pair is a row with its own remove…",
+      "purpose": "For OAuth scopes and their labels, request headers, environment variables. Each pair is a row with its own remove button. Without script it is a text area of…",
       "variants": [
         "mono-key",
         "mono-value",
@@ -4692,10 +4968,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The value is a map: scopes, headers, labels, environment variables."
+        "The value is a map: scopes, headers, labels, environment variables.",
+        "The server stores an object and nobody should type JSON."
       ],
       "dont": [
-        "The value is a flat list. Use TagInput."
+        "The value is a flat list. Use TagInput.",
+        "The value is one setting with a fixed name. Use Field."
       ],
       "api": {
         "props": [
@@ -4730,15 +5008,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "pairs",
-            "description": "The wrapper; carries…"
+            "description": "The wrapper; carries data-fd-pairs."
           },
           {
             "name": "pairs-head",
             "description": "The column headings."
+          },
+          {
+            "name": "pairs-row",
+            "description": "One pair."
           }
         ],
         "example": "<cc-component name=\"Pairs\" size=\"sm\" format=\"json\">Content</cc-component>"
@@ -4746,7 +5028,7 @@
     },
     {
       "name": "Sparkline",
-      "purpose": "A tiny line or bar shape drawn from data-values. It is a shape, not a reading: put it beside a figure. With no…",
+      "purpose": "A tiny line or bar shape drawn from data-values. It is a shape, not a reading: put it beside a figure. With no data-tone it colours itself by trend, up as…",
       "variants": [
         "fluid",
         "last",
@@ -4761,10 +5043,12 @@
         "fire/components/charts.css"
       ],
       "do": [
-        "A stat tile, table cell or list row shows a number and its recent trend."
+        "A stat tile, table cell or list row shows a number and its recent trend.",
+        "There is no room for axes or a tooltip."
       ],
       "dont": [
-        "Readers need exact values or a time axis. Use Chart."
+        "Readers need exact values or a time axis. Use Chart.",
+        "A ranking. Use Bars."
       ],
       "api": {
         "props": [
@@ -4810,7 +5094,7 @@
         "parts": [
           {
             "name": "sparkline",
-            "description": "The inline shape; takes…"
+            "description": "The inline shape; takes data-values."
           },
           {
             "name": "sparkline-svg",
@@ -4819,6 +5103,10 @@
           {
             "name": "sparkline-line",
             "description": "The line."
+          },
+          {
+            "name": "sparkline-bar",
+            "description": "One bar of the bar type."
           }
         ],
         "example": "<cc-component name=\"Sparkline\" tone=\"accent\" trend=\"good\"></cc-component>"
@@ -4826,7 +5114,7 @@
     },
     {
       "name": "Subnav",
-      "purpose": "The side navigation inside settings: a 280px column of 40px rows. When it cannot sit beside the content (a container…",
+      "purpose": "The side navigation inside settings: a 280px column of 40px rows. When it cannot sit beside the content (a container under 760px) it turns into a row of pills…",
       "variants": [],
       "states": [
         "disabled",
@@ -4839,17 +5127,19 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A settings or account area has four or more pages and a column beside them."
+        "A settings or account area has four or more pages and a column beside them.",
+        "The list stays visible while the page content changes."
       ],
       "dont": [
-        "The whole app needs navigation. Use Sidebar."
+        "The whole app needs navigation. Use Sidebar.",
+        "The items are views of one object. Use Tabs."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "subnav",
@@ -4858,6 +5148,10 @@
           {
             "name": "subnav-item",
             "description": "One page; a link or a button."
+          },
+          {
+            "name": "subnav-meta",
+            "description": "A small count or badge at the end of…"
           }
         ],
         "example": "<cc-component name=\"Subnav\">Content</cc-component>"
@@ -4865,7 +5159,7 @@
     },
     {
       "name": "Textarea",
-      "purpose": "The input's skin on a native textarea. rows sets the starting height; data-fd-autogrow makes it grow with the text up…",
+      "purpose": "The input's skin on a native textarea. rows sets the starting height; data-fd-autogrow makes it grow with the text up to eight lines (data-max-rows changes…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -4880,10 +5174,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The answer is a sentence or more: a description, a prompt, a note."
+        "The answer is a sentence or more: a description, a prompt, a note.",
+        "The text length varies a lot and the field should grow with it (data-fd-autogrow)."
       ],
       "dont": [
-        "The value is one line. Use Input."
+        "The value is one line. Use Input.",
+        "The text is code or JSON that needs checking. Use Codefield."
       ],
       "api": {
         "props": [
@@ -4926,7 +5222,7 @@
     },
     {
       "name": "Tooltip",
-      "purpose": "One tooltip element serves the whole page. It waits 350ms the first time, then follows the pointer from one control to…",
+      "purpose": "One tooltip element serves the whole page. It waits 350ms the first time, then follows the pointer from one control to the next with no delay, and disappears…",
       "variants": [],
       "states": [
         "open"
@@ -4935,10 +5231,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "An icon-only button needs a name."
+        "An icon-only button needs a name.",
+        "A control has a keyboard shortcut to show (data-shortcut)."
       ],
       "dont": [
-        "The content has links or actions. Use Popover."
+        "The content has links or actions. Use Popover.",
+        "A preview of the thing a link points to. Use Hovercard."
       ],
       "api": {
         "props": [
@@ -4951,7 +5249,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "tooltip",
@@ -4967,7 +5265,7 @@
     },
     {
       "name": "Command",
-      "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters…",
+      "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from…",
       "variants": [
         "icon"
       ],
@@ -4981,10 +5279,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "An app has many pages and actions and power users want the keyboard."
+        "An app has many pages and actions and power users want the keyboard.",
+        "People should reach a recent run, a doc or a setting without navigating."
       ],
       "dont": [
-        "Searching one list on one page. Use Search."
+        "Searching one list on one page. Use Search.",
+        "Choosing a value in a form. Use Combobox."
       ],
       "api": {
         "props": [
@@ -4997,7 +5297,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "command",
@@ -5006,6 +5306,10 @@
           {
             "name": "command-search",
             "description": "The search row."
+          },
+          {
+            "name": "command-input",
+            "description": "The search field."
           }
         ],
         "example": "<cc-component name=\"Command\">Content</cc-component>"
@@ -5013,7 +5317,7 @@
     },
     {
       "name": "Icon",
-      "purpose": "A 16px line icon from Fire's sprite, written as <i data-icon=\"name\"> and drawn once at start (or as the fd-icon…",
+      "purpose": "A 16px line icon from Fire's sprite, written as <i data-icon=\"name\"> and drawn once at start (or as the fd-icon element with icon=\"name\"). Sizes are 12, 14…",
       "variants": [
         "size-12",
         "size-14",
@@ -5029,10 +5333,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A button, menu item or status needs a symbol to scan faster."
+        "A button, menu item or status needs a symbol to scan faster.",
+        "An empty state or a tile needs one glyph."
       ],
       "dont": [
-        "The symbol is the only content and no label exists. Add an aria-label or data-fd-tooltip to the…"
+        "The symbol is the only content and no label exists. Add an aria-label or data-fd-tooltip to the…",
+        "A person's image is needed. Use Avatar."
       ],
       "api": {
         "props": [
@@ -5087,7 +5393,7 @@
     },
     {
       "name": "Legend",
-      "purpose": "A row of small swatches and muted labels. In a chart with data-legend it is a set of toggles: click a series to hide…",
+      "purpose": "A row of small swatches and muted labels. In a chart with data-legend it is a set of toggles: click a series to hide it and the scale adjusts; the last…",
       "variants": [
         "shape-square",
         "shape-soft",
@@ -5100,10 +5406,12 @@
         "fire/components/charts.css"
       ],
       "do": [
-        "A chart has two or more series and readers need to know which is which."
+        "A chart has two or more series and readers need to know which is which.",
+        "A custom layout needs the legend away from the chart."
       ],
       "dont": [
-        "A donut: its legend is part of it. Use Donut."
+        "A donut: its legend is part of it. Use Donut.",
+        "A single series. Name the series in the card title instead."
       ],
       "api": {
         "props": [
@@ -5126,7 +5434,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "legend",
@@ -5134,7 +5442,11 @@
           },
           {
             "name": "legend-item",
-            "description": "One series; a button when it…"
+            "description": "One series; a button when it toggles."
+          },
+          {
+            "name": "legend-swatch",
+            "description": "The colour key."
           }
         ],
         "example": "<cc-component name=\"Legend\" tone=\"danger\">Content</cc-component>"
@@ -5142,7 +5454,7 @@
     },
     {
       "name": "Matrix",
-      "purpose": "A category by channel grid: a mono header row, one row per category and a fixed-width column per channel (data-cols 1…",
+      "purpose": "A category by channel grid: a mono header row, one row per category and a fixed-width column per channel (data-cols 1 to 6). Each cell holds a switch or…",
       "variants": [
         "cols-1",
         "cols-2",
@@ -5154,10 +5466,12 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "Notification settings: events down the side, email, browser and phone across the top."
+        "Notification settings: events down the side, email, browser and phone across the top.",
+        "Permissions by role or by resource where every cell is on or off."
       ],
       "dont": [
-        "There is one column of independent settings. Use Setting."
+        "There is one column of independent settings. Use Setting.",
+        "The grid shows data, not controls. Use Table."
       ],
       "api": {
         "props": [
@@ -5176,7 +5490,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "matrix",
@@ -5184,7 +5498,11 @@
           },
           {
             "name": "matrix-head",
-            "description": "The header row with channel…"
+            "description": "The header row with channel names."
+          },
+          {
+            "name": "matrix-row",
+            "description": "One category row."
           }
         ],
         "example": "<cc-component name=\"Matrix\" cols=\"1\">Content</cc-component>"
@@ -5192,7 +5510,7 @@
     },
     {
       "name": "Pipeline",
-      "purpose": "Staged work read left to right: stages in order, jobs in a stage run in parallel, and every job shows a status icon…",
+      "purpose": "Staged work read left to right: stages in order, jobs in a stage run in parallel, and every job shows a status icon and a word for screen readers. It turns…",
       "variants": [
         "orientation-vertical",
         "orientation-horizontal",
@@ -5219,10 +5537,12 @@
         "fire/components/data.css"
       ],
       "do": [
-        "A crawl, deploy, data job or agent plan has stages and parallel jobs."
+        "A crawl, deploy, data job or agent plan has stages and parallel jobs.",
+        "A run page lets people pick a failed job and read it beside the graph."
       ],
       "dont": [
-        "Steps that run one after another. Use RunSteps."
+        "Steps that run one after another. Use RunSteps.",
+        "The history of one thing. Use Timeline."
       ],
       "api": {
         "props": [
@@ -5255,15 +5575,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "pipeline",
-            "description": "The block and its own…"
+            "description": "The block and its own container."
           },
           {
             "name": "pipeline-stages",
             "description": "The ordered list of stages."
+          },
+          {
+            "name": "pipeline-stage",
+            "description": "One stage."
           }
         ],
         "example": "<cc-component name=\"Pipeline\" size=\"sm\" orientation=\"vertical\">Content</cc-component>"
@@ -5271,7 +5595,7 @@
     },
     {
       "name": "Breadcrumb",
-      "purpose": "A list of links ending in the current page. Use it when a screen is several levels deep, such as a run inside a…",
+      "purpose": "A list of links ending in the current page. Use it when a screen is several levels deep, such as a run inside a monitor. The last item is a span with…",
       "variants": [],
       "states": [
         "selected"
@@ -5280,29 +5604,121 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A screen is three or more levels deep and people need to go up to any parent."
+        "A screen is three or more levels deep and people need to go up to any parent.",
+        "The hierarchy is fixed: workspace, project, item."
       ],
       "dont": [
-        "There is one obvious place to return to. Use Back."
+        "There is one obvious place to return to. Use Back.",
+        "The path is a flow in a set order. Use Steps."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "breadcrumb",
-            "description": "The nav; holds an ol of li…"
+            "description": "The nav; holds an ol of li items."
           }
         ],
         "example": "<cc-component name=\"Breadcrumb\">Content</cc-component>"
       }
     },
     {
+      "name": "Codes",
+      "purpose": "A sunken card holding a two-column grid of codes, a title with Copy all and Download buttons, and a warning line. Copy all and Download use the codes not…",
+      "variants": [
+        "filename-*"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/forms.css"
+      ],
+      "do": [
+        "Two-step sign-in has just been set up and the person must save backup codes.",
+        "A set of codes is shown with some already used."
+      ],
+      "dont": [
+        "One secret that is shown and hidden. Use Secret.",
+        "Entering a code. Use Otp."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "filename",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "codes",
+            "description": "The sunken card; carries data-fd-codes."
+          },
+          {
+            "name": "codes-head",
+            "description": "The title and actions row."
+          },
+          {
+            "name": "codes-title",
+            "description": "The card's heading."
+          }
+        ],
+        "example": "<cc-component name=\"Codes\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Color",
+      "purpose": "A native colour input beside a hex box. The box carries the name and posts #rrggbb as a plain field; the picker is inert until script runs. With script the…",
+      "variants": [],
+      "states": [
+        "error",
+        "disabled",
+        "focus"
+      ],
+      "paths": [
+        "fire/components/forms.css"
+      ],
+      "do": [
+        "A brand or accent colour is entered by a person, as in branding or theme settings.",
+        "The chosen colour will sit on the page, so its legibility matters."
+      ],
+      "dont": [
+        "Choosing from a few preset colours. Use Swatch.",
+        "Showing a colour that cannot be edited. Use Swatch."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "color",
+            "description": "The root; carries data-fd-color."
+          },
+          {
+            "name": "color-picker",
+            "description": "The native colour input, with no name."
+          },
+          {
+            "name": "color-checks",
+            "description": "The contrast list; carries…"
+          }
+        ],
+        "example": "<cc-component name=\"Color\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Combobox",
-      "purpose": "A text field with a listbox that uses the Popover API, so it layers above everything and closes on outside clicks…",
+      "purpose": "A text field with a listbox that uses the Popover API, so it layers above everything and closes on outside clicks. Type to filter, arrow keys to move, Enter…",
       "variants": [],
       "states": [
         "hover",
@@ -5313,29 +5729,135 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "The list is long enough that people need to type to find an item."
+        "The list is long enough that people need to type to find an item.",
+        "Each option needs an icon, a description or a meta label (a model, a team member)."
       ],
       "dont": [
-        "The list is short and plain. Use Select."
+        "The list is short and plain. Use Select.",
+        "People may enter values that are not on a list. Use TagInput."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "combobox",
-            "description": "The wrapper; carries…"
+            "description": "The wrapper; carries data-fd-combobox…"
           }
         ],
         "example": "<cc-component name=\"Combobox\">Content</cc-component>"
       }
     },
     {
+      "name": "ConfirmInline",
+      "purpose": "A plain form with a field, the phrase to type (fd-confirm-phrase) and a danger button. Without script the button is enabled and the server checks the posted…",
+      "variants": [
+        "confirm-*"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/forms.css"
+      ],
+      "do": [
+        "A destructive action has its own page: delete a workspace, approve a restore.",
+        "The action must also work, and be checked, with no script."
+      ],
+      "dont": [
+        "The action starts from a row or a menu and a dialog is natural. Use Confirm.",
+        "A yes or no with nothing lost. Use Dialog."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "confirm",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "confirmInput",
+            "type": "boolean",
+            "required": false
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "confirm-inline",
+            "description": "The form; carries da…"
+          },
+          {
+            "name": "confirm-inline-rule",
+            "description": "The line that says where the typed…"
+          }
+        ],
+        "example": "<cc-component name=\"ConfirmInline\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Datefield",
+      "purpose": "A text box that holds a date as YYYY-MM-DD, with a calendar button that opens the date range's month grid. The box posts the ISO date with no script; with…",
+      "variants": [
+        "min-date-*",
+        "max-date-*"
+      ],
+      "states": [
+        "error",
+        "disabled"
+      ],
+      "paths": [
+        "fire/components/overlays.css"
+      ],
+      "do": [
+        "A form needs one date: pause until, expires on, start on.",
+        "The date must stay inside a range, such as no earlier than today."
+      ],
+      "dont": [
+        "A period with a start and an end. Use DatePicker.",
+        "A time of day, or a duration. Use Input."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "maxDate",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "minDate",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "datefield",
+            "description": "The root; carries data-fd-datefield…"
+          },
+          {
+            "name": "datefield-panel",
+            "description": "The calendar inside the popover…"
+          },
+          {
+            "name": "datefield-foot",
+            "description": "The Today and Clear buttons under the…"
+          }
+        ],
+        "example": "<cc-component name=\"Datefield\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Donut",
-      "purpose": "A thin ring for two to five segments with the total in the centre and a legend beside it. Hover a segment or a legend…",
+      "purpose": "A thin ring for two to five segments with the total in the centre and a legend beside it. Hover a segment or a legend row to read it in the centre. In…",
       "variants": [
         "type-progress",
         "compact",
@@ -5350,10 +5872,12 @@
         "fire/components/charts.css"
       ],
       "do": [
-        "A share of a whole has two to five parts: requests by endpoint, credits by team."
+        "A share of a whole has two to five parts: requests by endpoint, credits by team.",
+        "A single progress value needs a larger ring with a label in the middle."
       ],
       "dont": [
-        "Use against a quota or a limit. Use Meter."
+        "Use against a quota or a limit. Use Meter.",
+        "More than five parts, or parts that must be compared closely. Use Bars."
       ],
       "api": {
         "props": [
@@ -5398,6 +5922,10 @@
           {
             "name": "donut-svg",
             "description": "The drawing surface."
+          },
+          {
+            "name": "donut-track",
+            "description": "The groove."
           }
         ],
         "example": "<cc-component name=\"Donut\" tone=\"success\" type=\"progress\"></cc-component>"
@@ -5405,7 +5933,7 @@
     },
     {
       "name": "Fab",
-      "purpose": "A 48px round accent button with a soft shadow that floats at a screen corner: a support chat, scroll to bottom. It…",
+      "purpose": "A 48px round accent button with a soft shadow that floats at a screen corner: a support chat, scroll to bottom. It grows slightly on hover and shrinks on…",
       "variants": [],
       "states": [
         "disabled",
@@ -5417,10 +5945,12 @@
         "fire/components/button.css"
       ],
       "do": [
-        "One action is useful on every part of a long screen, such as opening support."
+        "One action is useful on every part of a long screen, such as opening support.",
+        "A phone screen has one main create action that must stay visible."
       ],
       "dont": [
-        "The action belongs in a toolbar or a footer. Use Button."
+        "The action belongs in a toolbar or a footer. Use Button.",
+        "The launcher opens a chat window. Use ChatLauncher."
       ],
       "api": {
         "props": [
@@ -5433,11 +5963,11 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "fab",
-            "description": "The round button; holds one…"
+            "description": "The round button; holds one icon."
           }
         ],
         "example": "<cc-component name=\"Fab\">Content</cc-component>"
@@ -5445,7 +5975,7 @@
     },
     {
       "name": "Hovercard",
-      "purpose": "A card that opens after half a second of hovering a link, stays open while the pointer travels into it, and closes a…",
+      "purpose": "A card that opens after half a second of hovering a link, stays open while the pointer travels into it, and closes a quarter second after leaving. It holds a…",
       "variants": [],
       "states": [
         "focus",
@@ -5455,10 +5985,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "A name in a table or sentence links to a person, provider or run and a quick look saves a click."
+        "A name in a table or sentence links to a person, provider or run and a quick look saves a click.",
+        "Preview facts are read-only: a role, counts, a date."
       ],
       "dont": [
-        "The content has actions, inputs or links people must click. Use Popover."
+        "The content has actions, inputs or links people must click. Use Popover.",
+        "Naming an icon button or a shortcut. Use Tooltip."
       ],
       "api": {
         "props": [
@@ -5471,7 +6003,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "hovercard",
@@ -5480,6 +6012,10 @@
           {
             "name": "hovercard-head",
             "description": "Leading mark and title."
+          },
+          {
+            "name": "hovercard-title",
+            "description": "The name."
           }
         ],
         "example": "<cc-component name=\"Hovercard\">Content</cc-component>"
@@ -5487,7 +6023,7 @@
     },
     {
       "name": "Notification",
-      "purpose": "A row in the notifications popover: a title, a line of text and a time, with an accent dot when unread. The popover…",
+      "purpose": "A row in the notifications popover: a title, a line of text and a time, with an accent dot when unread. The popover has Mark all read, an All / Unread switch…",
       "variants": [
         "unread"
       ],
@@ -5499,10 +6035,12 @@
         "fire/components/overlays.css"
       ],
       "do": [
-        "A bell opens a list of finished jobs, monitor changes and billing alerts."
+        "A bell opens a list of finished jobs, monitor changes and billing alerts.",
+        "Items must be marked read one by one or all at once."
       ],
       "dont": [
-        "A short confirmation that vanishes. Use Toast."
+        "A short confirmation that vanishes. Use Toast.",
+        "A message about the account on every page. Use Banner."
       ],
       "api": {
         "props": [
@@ -5515,7 +6053,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "notification",
@@ -5524,6 +6062,10 @@
           {
             "name": "notification-list",
             "description": "The list of rows."
+          },
+          {
+            "name": "notification-body",
+            "description": "Title and text."
           }
         ],
         "example": "<cc-component name=\"Notification\">Content</cc-component>"
@@ -5531,7 +6073,7 @@
     },
     {
       "name": "Pagination",
-      "purpose": "A count on the left and joined previous and next buttons on the right: \"Page 1 of 12\" or \"Showing 51-100 of 2,481\"…",
+      "purpose": "A count on the left and joined previous and next buttons on the right: \"Page 1 of 12\" or \"Showing 51-100 of 2,481\". The numbered variant adds page numbers and…",
       "variants": [
         "numbered"
       ],
@@ -5545,10 +6087,12 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A log, table or result list is split into pages of fixed size."
+        "A log, table or result list is split into pages of fixed size.",
+        "People move forward and back far more often than they jump."
       ],
       "dont": [
-        "Content loads as people scroll. Load more as the list ends; no component is needed."
+        "Content loads as people scroll. Load more as the list ends; no component is needed.",
+        "The items are steps in a flow. Use Steps."
       ],
       "api": {
         "props": [
@@ -5564,7 +6108,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "pagination",
@@ -5573,14 +6117,55 @@
           {
             "name": "pagination-info",
             "description": "The count text."
+          },
+          {
+            "name": "pagination-pages",
+            "description": "The numbered buttons."
           }
         ],
         "example": "<cc-component name=\"Pagination\" variant=\"numbered\">Content</cc-component>"
       }
     },
     {
+      "name": "Period",
+      "purpose": "The trigger of a date range that has a compare band: presets and a calendar, then Compared with Nothing, Previous period or Same period last year. The trigger…",
+      "variants": [],
+      "states": [
+        "loading"
+      ],
+      "paths": [
+        "fire/components/overlays.css"
+      ],
+      "do": [
+        "A report, chart or stats row shows a figure and how it changed against an earlier period.",
+        "Several screens share one period control."
+      ],
+      "dont": [
+        "Only the period matters, with no comparison. Use DatePicker.",
+        "One date. Use Datefield."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "period",
+            "description": "On the fd-filter that triggers the…"
+          },
+          {
+            "name": "period-compare",
+            "description": "The muted \"vs\" part of the trigger…"
+          }
+        ],
+        "example": "<cc-component name=\"Period\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Radio",
-      "purpose": "A native radio with an accent ring and a dot that scales in with a slight spring. Group the options in…",
+      "purpose": "A native radio with an accent ring and a dot that scales in with a slight spring. Group the options in role=\"radiogroup\" with a label. The label is part of…",
       "variants": [],
       "states": [
         "error",
@@ -5593,17 +6178,19 @@
         "fire/components/forms.css"
       ],
       "do": [
-        "One of 2 to 4 options is saved with the form and each has a short label."
+        "One of 2 to 4 options is saved with the form and each has a short label.",
+        "Options should all stay visible so people compare them."
       ],
       "dont": [
-        "Two options behave like on and off. Use Switch."
+        "Two options behave like on and off. Use Switch.",
+        "Each option needs a title, a sentence or a price. Use Choice."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "radio",
-            "description": "The label that wraps the…"
+            "description": "The label that wraps the input."
           },
           {
             "name": "radio-box",
@@ -5612,14 +6199,140 @@
           {
             "name": "radio-text",
             "description": "Wraps label and description."
+          },
+          {
+            "name": "radio-label",
+            "description": "The visible label."
           }
         ],
         "example": "<cc-component name=\"Radio\"></cc-component>"
       }
     },
     {
+      "name": "Reason",
+      "purpose": "A control with a visible line under it (or beside it) giving the reason and the person or role who can change it, linked with aria-describedby. It works for…",
+      "variants": [
+        "layout-inline"
+      ],
+      "states": [
+        "disabled"
+      ],
+      "paths": [
+        "fire/components/forms.css"
+      ],
+      "do": [
+        "A permission, plan or state turns a control off and the person needs to know what to do.",
+        "Keyboard users must hear the reason where they meet the control."
+      ],
+      "dont": [
+        "The reason only needs a hint on hover. Use Tooltip.",
+        "The whole section is unavailable. Use Callout."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "layout",
+            "type": "enum",
+            "values": [
+              "inline"
+            ],
+            "required": false
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "reason",
+            "description": "The wrapper around the control and its…"
+          },
+          {
+            "name": "reason-text",
+            "description": "The reason line; its id is the…"
+          },
+          {
+            "name": "reason-why",
+            "description": "The cause, in one sentence."
+          }
+        ],
+        "example": "<cc-component name=\"Reason\" layout=\"inline\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Swatch",
+      "purpose": "A small square of a colour that belongs to the product's data, not to the theme. The colour comes from --fd-swatch-color, passed with data-fd-vars so no style…",
+      "variants": [
+        "size-xs",
+        "size-sm",
+        "size-lg",
+        "size-xl",
+        "shape-round",
+        "empty"
+      ],
+      "states": [
+        "empty",
+        "disabled",
+        "hover",
+        "focus",
+        "pressed",
+        "selected"
+      ],
+      "paths": [
+        "fire/components/forms.css"
+      ],
+      "do": [
+        "A brand, series or tag colour appears beside its name or hex value.",
+        "People choose one colour from a short list."
+      ],
+      "dont": [
+        "A status or a theme tone. Use Status.",
+        "The person must enter a colour. Use Color."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "size",
+            "type": "enum",
+            "values": [
+              "lg",
+              "sm",
+              "xl",
+              "xs"
+            ],
+            "required": false
+          },
+          {
+            "name": "empty",
+            "type": "boolean",
+            "required": false
+          },
+          {
+            "name": "shape",
+            "type": "enum",
+            "values": [
+              "round"
+            ],
+            "required": false
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given…"
+          },
+          {
+            "name": "swatch",
+            "description": "The colour; a span, or a button when…"
+          }
+        ],
+        "example": "<cc-component name=\"Swatch\" size=\"xs\" shape=\"round\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Toc",
-      "purpose": "An \"On this page\" list beside long reference content. With data-fd-scrollspy a marker follows the scroll and the…",
+      "purpose": "An \"On this page\" list beside long reference content. With data-fd-scrollspy a marker follows the scroll and the current item gets aria-current=\"true\". Items…",
       "variants": [
         "level-2"
       ],
@@ -5632,17 +6345,19 @@
         "fire/components/nav.css"
       ],
       "do": [
-        "A long documentation or reference page has several sections."
+        "A long documentation or reference page has several sections.",
+        "People jump to a section and need to know where they are."
       ],
       "dont": [
-        "The links go to other pages. Use Subnav."
+        "The links go to other pages. Use Subnav.",
+        "The views replace each other. Use Tabs."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "toc",
@@ -5650,7 +6365,11 @@
           },
           {
             "name": "toc-title",
-            "description": "The heading, such as \"On…"
+            "description": "The heading, such as \"On this page\"."
+          },
+          {
+            "name": "toc-list",
+            "description": "Holds the items and the marker."
           }
         ],
         "example": "<cc-component name=\"Toc\">Content</cc-component>"
@@ -5658,7 +6377,7 @@
     },
     {
       "name": "Texture",
-      "purpose": "Fire's signature: letters and punctuation whose density follows a generated field, at very low contrast (under 1.6:1)…",
+      "purpose": "Fire's signature: letters and punctuation whose density follows a generated field, at very low contrast (under 1.6:1) and always decorative. A field fills its…",
       "variants": [
         "ascii-terrain",
         "ascii-waves",
@@ -5684,10 +6403,12 @@
         "fire/components/texture.css"
       ],
       "do": [
-        "A page hero, a launch banner or an empty state needs depth without adding anything to read."
+        "A page hero, a launch banner or an empty state needs depth without adding anything to read.",
+        "A single object needs the page frame's registration marks."
       ],
       "dont": [
-        "The decoration would sit behind paragraphs, tables, forms or code. Leave the surface plain."
+        "The decoration would sit behind paragraphs, tables, forms or code. Leave the surface plain.",
+        "A status that shows live work. Use Loader."
       ],
       "api": {
         "props": [
@@ -5788,15 +6509,19 @@
         "parts": [
           {
             "name": "ascii",
-            "description": "The field; set data-fd-ascii…"
+            "description": "The field; set data-fd-ascii to the…"
           },
           {
             "name": "ascii-canvas",
-            "description": "The canvas the script draws…"
+            "description": "The canvas the script draws into."
           },
           {
             "name": "glyph",
-            "description": "The small character glyph…"
+            "description": "The small character glyph for an empty…"
+          },
+          {
+            "name": "dotgrid",
+            "description": "A CSS dot lattice, no script."
           }
         ],
         "example": "<cc-component name=\"Texture\" variant=\"flat\" tone=\"accent\"></cc-component>"
@@ -5804,7 +6529,7 @@
     },
     {
       "name": "App",
-      "purpose": "The app shell: a sidebar on the left, a main column with the top bar and the page, and a mobile nav. The sidebar is…",
+      "purpose": "The app shell: a sidebar on the left, a main column with the top bar and the page, and a mobile nav. The sidebar is expanded or a 64px icon rail; the choice…",
       "variants": [
         "sidebar-expanded",
         "sidebar-collapsed",
@@ -5819,10 +6544,12 @@
         "fire/components/shell.css"
       ],
       "do": [
-        "The product has several screens that share navigation, an account and a top bar."
+        "The product has several screens that share navigation, an account and a top bar.",
+        "A screen is a working page inside the product, not a single task on its own page."
       ],
       "dont": [
-        "A single task on a page of its own: sign in, consent, a result. Use Screen."
+        "A single task on a page of its own: sign in, consent, a result. Use Screen.",
+        "A docs site with its own two-row top bar and contents column. Use Doc."
       ],
       "api": {
         "props": [
@@ -5853,15 +6580,19 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "app",
-            "description": "The root; a size container…"
+            "description": "The root; a size container named fd-app."
           },
           {
             "name": "main",
-            "description": "The column to the right of…"
+            "description": "The column to the right of the sidebar."
+          },
+          {
+            "name": "frame",
+            "description": "The drafted page column with 1px rails…"
           }
         ],
         "example": "<cc-component name=\"App\" only=\"desktop\" sidebar=\"expanded\">Content</cc-component>"
@@ -5869,7 +6600,7 @@
     },
     {
       "name": "Page",
-      "purpose": "The page holds a centred column with 1px rails; each fd-band is a horizontal strip, separated by hairlines that run…",
+      "purpose": "The page holds a centred column with 1px rails; each fd-band is a horizontal strip, separated by hairlines that run edge to edge, with a crosshair where a…",
       "variants": [
         "pad-none",
         "pad-sm",
@@ -5887,21 +6618,23 @@
         "fire/components/shell.css"
       ],
       "do": [
-        "Any screen in the app: one band for the title, one for the toolbar, one for the content."
+        "Any screen in the app: one band for the title, one for the toolbar, one for the content.",
+        "A band needs a white or sunken surface, a different padding, or to stick under the top bar."
       ],
       "dont": [
-        "Cards or groups inside one band. Use Card."
+        "Cards or groups inside one band. Use Card.",
+        "Two columns of content inside a band. Use Split."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "page",
-            "description": "The main element; a size…"
+            "description": "The main element; a size container…"
           },
           {
             "name": "band",
@@ -5913,7 +6646,7 @@
     },
     {
       "name": "Tile",
-      "purpose": "A square holder, 36px by default, that steps through 20, 28, 40, 44 and 56 with a growing radius. It holds an image…",
+      "purpose": "A square holder, 36px by default, that steps through 20, 28, 40, 44 and 56 with a growing radius. It holds an image, an icon or letters. Tone tints it…",
       "variants": [
         "size-20",
         "size-28",
@@ -5937,10 +6670,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A row or card needs a mark for what it is: a provider, an integration, a key type."
+        "A row or card needs a mark for what it is: a provider, an integration, a key type.",
+        "A feature list or empty state needs a leading icon holder."
       ],
       "dont": [
-        "The mark is a person. Use Avatar."
+        "The mark is a person. Use Avatar.",
+        "A label next to a word. Use Badge."
       ],
       "api": {
         "props": [
@@ -5995,7 +6730,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "tile",
@@ -6007,7 +6742,7 @@
     },
     {
       "name": "Card",
-      "purpose": "A white surface with a 1px faint edge and no shadow at rest. Head, body and foot are optional parts; the foot sticks…",
+      "purpose": "A white surface with a 1px faint edge and no shadow at rest. Head, body and foot are optional parts; the foot sticks to the bottom when cards share a row…",
       "variants": [
         "quiet",
         "sunken",
@@ -6026,10 +6761,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "One object (a key, a team, a plan, a provider) has a title, some facts and an action."
+        "One object (a key, a team, a plan, a provider) has a title, some facts and an action.",
+        "A catalogue shows many similar things in a grid: use fd-card-grid."
       ],
       "dont": [
-        "A figure with a disclosure of detail, such as credits remaining. Use DataCard."
+        "A figure with a disclosure of detail, such as credits remaining. Use DataCard.",
+        "A set of headline numbers in a row. Use Stats."
       ],
       "api": {
         "props": [
@@ -6066,7 +6803,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "card",
@@ -6075,6 +6812,10 @@
           {
             "name": "card-head",
             "description": "Title and meta row."
+          },
+          {
+            "name": "card-name",
+            "description": "The card name."
           }
         ],
         "example": "<cc-component name=\"Card\" variant=\"quiet\" size=\"lg\">Content</cc-component>"
@@ -6082,7 +6823,7 @@
     },
     {
       "name": "Callout",
-      "purpose": "A tinted message with an icon, a title, a short body and usually one action. It belongs to the content around it. Tone…",
+      "purpose": "A tinted message with an icon, a title, a short body and usually one action. It belongs to the content around it. Tone sets the meaning: neutral, accent…",
       "variants": [
         "tone-info",
         "tone-success",
@@ -6100,10 +6841,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A form or section needs a warning, a tip or a result right beside it."
+        "A form or section needs a warning, a tip or a result right beside it.",
+        "An error has a cause and a next step the reader can take."
       ],
       "dont": [
-        "The message affects the whole account and fits in one line. Use Banner."
+        "The message affects the whole account and fits in one line. Use Banner.",
+        "The message confirms something that just happened and should fade away. Use Toast."
       ],
       "api": {
         "props": [
@@ -6133,7 +6876,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "callout",
@@ -6142,6 +6885,10 @@
           {
             "name": "callout-icon",
             "description": "The leading icon."
+          },
+          {
+            "name": "callout-content",
+            "description": "Wraps title and body."
           }
         ],
         "example": "<cc-component name=\"Callout\" size=\"sm\" tone=\"info\">Content</cc-component>"
@@ -6149,7 +6896,7 @@
     },
     {
       "name": "Codeblock",
-      "purpose": "A framed block on a sunken well with a header and a pre. Fire tokenises JSON, shell and cURL, JavaScript and…",
+      "purpose": "A framed block on a sunken well with a header and a pre. Fire tokenises JSON, shell and cURL, JavaScript and TypeScript, and Python; unknown text stays plain…",
       "variants": [
         "segmented",
         "lines",
@@ -6168,10 +6915,12 @@
         "fire/components/code.css"
       ],
       "do": [
-        "A request, a config or a response is shown in docs or a detail panel."
+        "A request, a config or a response is shown in docs or a detail panel.",
+        "The same request is offered in several languages: use tabs; the choice syncs across the page."
       ],
       "dont": [
-        "One command or one value to copy. Use Snippet."
+        "One command or one value to copy. Use Snippet.",
+        "A response people explore and fold. Use Json."
       ],
       "api": {
         "props": [
@@ -6207,7 +6956,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "codeblock",
@@ -6216,6 +6965,10 @@
           {
             "name": "codeblock-head",
             "description": "The header row."
+          },
+          {
+            "name": "codeblock-file",
+            "description": "The file name with an icon."
           }
         ],
         "example": "<cc-component name=\"Codeblock\" variant=\"framed\">Content</cc-component>"
@@ -6223,24 +6976,26 @@
     },
     {
       "name": "PageHero",
-      "purpose": "A tall title band for the screens people reach from the sidebar: an eyebrow, the screen name, one line of what it is…",
+      "purpose": "A tall title band for the screens people reach from the sidebar: an eyebrow, the screen name, one line of what it is for, and an art slot that fades toward…",
       "variants": [],
       "states": [],
       "paths": [
         "fire/components/shell.css"
       ],
       "do": [
-        "A top-level screen, such as Monitoring or Settings, opens a section of the product."
+        "A top-level screen, such as Monitoring or Settings, opens a section of the product.",
+        "The page has an action for the whole page: connect, get the code, export everything."
       ],
       "dont": [
-        "A working page under a section, where space matters. Use PageHead."
+        "A working page under a section, where space matters. Use PageHead.",
+        "A create button that belongs to one list. Use Toolbar."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "page-hero",
@@ -6248,7 +7003,11 @@
           },
           {
             "name": "page-hero-text",
-            "description": "Wraps the eyebrow, title and…"
+            "description": "Wraps the eyebrow, title and line so…"
+          },
+          {
+            "name": "page-hero-desc",
+            "description": "The one-line description."
           }
         ],
         "example": "<cc-component name=\"PageHero\">Content</cc-component>"
@@ -6256,7 +7015,7 @@
     },
     {
       "name": "Status",
-      "purpose": "A dot and a word. Only a running item pulses, and only while it is running (data-live). The icon variant swaps the dot…",
+      "purpose": "A dot and a word. Only a running item pulses, and only while it is running (data-live). The icon variant swaps the dot for a status icon that spins while…",
       "variants": [
         "icon",
         "pill",
@@ -6274,10 +7033,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A row needs the state of a thing: Running, Passed, Failed, Paused."
+        "A row needs the state of a thing: Running, Passed, Failed, Paused.",
+        "A header shows the state of the page object as a tinted pill."
       ],
       "dont": [
-        "A label that is not a state: a plan, a role, a count. Use Badge."
+        "A label that is not a state: a plan, a role, a count. Use Badge.",
+        "Several jobs with durations in a graph. Use Pipeline."
       ],
       "api": {
         "props": [
@@ -6326,7 +7087,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "status",
@@ -6338,7 +7099,7 @@
     },
     {
       "name": "Skeleton",
-      "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line…",
+      "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type…",
       "variants": [
         "bars",
         "square",
@@ -6361,10 +7122,12 @@
         "fire/components/skeleton.css"
       ],
       "do": [
-        "A region has a known layout and its data is on the way."
+        "A region has a known layout and its data is on the way.",
+        "A route paints for the first time and the page needs rail, top bar and table in place."
       ],
       "dont": [
-        "A small control or one line of text. Use Loader."
+        "A small control or one line of text. Use Loader.",
+        "Navigation between pages. Use Pagebar."
       ],
       "api": {
         "props": [],
@@ -6375,11 +7138,15 @@
           },
           {
             "name": "skeleton-text",
-            "description": "Text lines of varied widths…"
+            "description": "Text lines of varied widths that end…"
           },
           {
             "name": "skeleton-title",
             "description": "A title bar at a type role."
+          },
+          {
+            "name": "skeleton-avatar",
+            "description": "A round block; data-size sets the…"
           }
         ],
         "example": "<cc-component name=\"Skeleton\"></cc-component>"
@@ -6387,7 +7154,7 @@
     },
     {
       "name": "Snippet",
-      "purpose": "A one-line well with a mono value and a copy button: an install line, a skill URL, a key. The $ prompt is decoration…",
+      "purpose": "A one-line well with a mono value and a copy button: an install line, a skill URL, a key. The $ prompt is decoration and is never copied. fd-snippet-em marks…",
       "variants": [
         "accent",
         "size-sm"
@@ -6402,10 +7169,12 @@
         "fire/components/code.css"
       ],
       "do": [
-        "A reader leaves with one command: install, login, run."
+        "A reader leaves with one command: install, login, run.",
+        "Setup takes several commands that should be numbered."
       ],
       "dont": [
-        "Several lines of code or a file. Use Codeblock."
+        "Several lines of code or a file. Use Codeblock.",
+        "A secret that stays hidden until revealed. Use Secret."
       ],
       "api": {
         "props": [
@@ -6429,7 +7198,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "snippet",
@@ -6437,7 +7206,11 @@
           },
           {
             "name": "snippet-prompt",
-            "description": "The $ prompt; not…"
+            "description": "The $ prompt; not selectable, never…"
+          },
+          {
+            "name": "snippet-text",
+            "description": "The value that is copied."
           }
         ],
         "example": "<cc-component name=\"Snippet\" variant=\"accent\" size=\"sm\">Content</cc-component>"
@@ -6445,7 +7218,7 @@
     },
     {
       "name": "Json",
-      "purpose": "A tree rendered from data-json or a child script of type application/json. Nodes fold and show a count when folded…",
+      "purpose": "A tree rendered from data-json or a child script of type application/json. Nodes fold and show a count when folded; long strings are trimmed with a \"+N chars\"…",
       "variants": [
         "bare",
         "container"
@@ -6461,10 +7234,12 @@
         "fire/components/code.css"
       ],
       "do": [
-        "A response is explored rather than copied whole."
+        "A response is explored rather than copied whole.",
+        "People need the path to a nested value."
       ],
       "dont": [
-        "A short request or a config to copy. Use Codeblock."
+        "A short request or a config to copy. Use Codeblock.",
+        "Records with the same fields. Use Table."
       ],
       "api": {
         "props": [
@@ -6485,7 +7260,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "json",
@@ -6494,6 +7269,10 @@
           {
             "name": "json-bar",
             "description": "The toolbar."
+          },
+          {
+            "name": "json-label",
+            "description": "The toolbar label."
           }
         ],
         "example": "<cc-component name=\"Json\" variant=\"bare\">Content</cc-component>"
@@ -6501,7 +7280,7 @@
     },
     {
       "name": "Badge",
-      "purpose": "A 20px label that sits next to a name or a number. Neutral is the default; use a tone only when the word carries…",
+      "purpose": "A 20px label that sits next to a name or a number. Neutral is the default; use a tone only when the word carries meaning. It can lead with a dot or an icon…",
       "variants": [
         "solid",
         "outline",
@@ -6522,10 +7301,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A name or a number needs a short qualifier: plan, role, count, \"New\", \"Beta\"."
+        "A name or a number needs a short qualifier: plan, role, count, \"New\", \"Beta\".",
+        "A value is a state in a table cell: Success, Failed, Queued."
       ],
       "dont": [
-        "The label is a category people can filter by or toggle. Use Tag."
+        "The label is a category people can filter by or toggle. Use Tag.",
+        "The state is the point of the row and a dot and word read better. Use Status."
       ],
       "api": {
         "props": [
@@ -6576,7 +7357,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "badge",
@@ -6584,7 +7365,7 @@
           },
           {
             "name": "badge-remove",
-            "description": "The button that removes a…"
+            "description": "The button that removes a removable…"
           }
         ],
         "example": "<cc-component name=\"Badge\" variant=\"solid\" size=\"lg\">Content</cc-component>"
@@ -6592,7 +7373,7 @@
     },
     {
       "name": "Empty",
-      "purpose": "A centred block with an icon or texture, a title, one sentence and one or two actions. It covers a first-use empty…",
+      "purpose": "A centred block with an icon or texture, a title, one sentence and one or two actions. It covers a first-use empty state, a search with no match, an error…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -6607,10 +7388,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A list, table or page has no items yet and the next step is clear."
+        "A list, table or page has no items yet and the next step is clear.",
+        "A search or filter matches nothing; say what to change."
       ],
       "dont": [
-        "The message is a warning above content that exists. Use Callout."
+        "The message is a warning above content that exists. Use Callout.",
+        "Data is on its way. Use Skeleton."
       ],
       "api": {
         "props": [
@@ -6641,7 +7424,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "empty",
@@ -6650,6 +7433,10 @@
           {
             "name": "empty-icon",
             "description": "The icon tile."
+          },
+          {
+            "name": "empty-art",
+            "description": "A texture slot behind the text that…"
           }
         ],
         "example": "<cc-component name=\"Empty\" size=\"sm\" tone=\"danger\">Content</cc-component>"
@@ -6657,7 +7444,7 @@
     },
     {
       "name": "Panel",
-      "purpose": "A bordered box with a head and a body, used as the side panel of a split. With data-variant=\"pane\" it becomes a 320px…",
+      "purpose": "A bordered box with a head and a body, used as the side panel of a split. With data-variant=\"pane\" it becomes a 320px pane between the rail and the content…",
       "variants": [
         "pane"
       ],
@@ -6666,10 +7453,12 @@
         "fire/components/shell.css"
       ],
       "do": [
-        "Details sit beside the thing they describe and need a head."
+        "Details sit beside the thing they describe and need a head.",
+        "A screen is built around a list of sessions or items in its own column."
       ],
       "dont": [
-        "The content is an object in a grid or list. Use Card."
+        "The content is an object in a grid or list. Use Card.",
+        "A temporary surface that opens over the page. Use Sheet."
       ],
       "api": {
         "props": [
@@ -6685,7 +7474,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "panel",
@@ -6694,6 +7483,10 @@
           {
             "name": "panel-head",
             "description": "The head row."
+          },
+          {
+            "name": "panel-title",
+            "description": "The title."
           }
         ],
         "example": "<cc-component name=\"Panel\" variant=\"pane\">Content</cc-component>"
@@ -6701,7 +7494,7 @@
     },
     {
       "name": "Split",
-      "purpose": "A main area with a 320px panel at its end, or a nav at its start. Below 760px of page width the panel stacks under, or…",
+      "purpose": "A main area with a 320px panel at its end, or a nav at its start. Below 760px of page width the panel stacks under, or above, the content. With data-grow, a…",
       "variants": [
         "side-start"
       ],
@@ -6710,10 +7503,12 @@
         "fire/components/shell.css"
       ],
       "do": [
-        "A list or run needs a details panel beside it."
+        "A list or run needs a details panel beside it.",
+        "Settings pages have a section nav at the start and a form beside it."
       ],
       "dont": [
-        "Equal columns of cards or tiles. Use Grid."
+        "Equal columns of cards or tiles. Use Grid.",
+        "Rows that align across columns. Use Row."
       ],
       "api": {
         "props": [
@@ -6729,7 +7524,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "split",
@@ -6745,7 +7540,7 @@
     },
     {
       "name": "Sidebar",
-      "purpose": "The left column of the app shell: brand and a collapse button on top, a scrolling nav in the middle, and a foot with a…",
+      "purpose": "The left column of the app shell: brand and a collapse button on top, a scrolling nav in the middle, and a foot with a usage card and the account row. One nav…",
       "variants": [],
       "states": [
         "disabled",
@@ -6759,17 +7554,19 @@
         "fire/components/shell.css"
       ],
       "do": [
-        "The app has more than three destinations people move between all day."
+        "The app has more than three destinations people move between all day.",
+        "The foot should answer \"how much do I have left\" and offer the one upsell."
       ],
       "dont": [
-        "Moving between views of one page. Use Tabs."
+        "Moving between views of one page. Use Tabs.",
+        "A section's own links inside the page. Use Subnav."
       ],
       "api": {
         "props": [],
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "sidebar",
@@ -6778,6 +7575,10 @@
           {
             "name": "sidebar-head",
             "description": "Brand and the collapse button."
+          },
+          {
+            "name": "sidebar-toggle",
+            "description": "The collapse button; takes…"
           }
         ],
         "example": "<cc-component name=\"Sidebar\">Content</cc-component>"
@@ -6785,7 +7586,7 @@
     },
     {
       "name": "FeatureList",
-      "purpose": "Rows of an icon and text. Comfortable by default; data-size=\"sm\" for dense cards. Excluded items stay in the list…",
+      "purpose": "Rows of an icon and text. Comfortable by default; data-size=\"sm\" for dense cards. Excluded items stay in the list, muted, so plans compare line by line. Each…",
       "variants": [
         "size-sm",
         "size-lg",
@@ -6797,10 +7598,12 @@
         "fire/components/content.css"
       ],
       "do": [
-        "A pricing card or plan lists what is included and what is not."
+        "A pricing card or plan lists what is included and what is not.",
+        "A product card or checklist-style summary needs scannable points."
       ],
       "dont": [
-        "Items are ordered steps that someone checks off. Use Steps."
+        "Items are ordered steps that someone checks off. Use Steps.",
+        "Rows are people, files or records with metadata. Use List."
       ],
       "api": {
         "props": [
@@ -6835,7 +7638,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "feature-list",
@@ -6844,6 +7647,10 @@
           {
             "name": "feature-row",
             "description": "A row with a leading icon."
+          },
+          {
+            "name": "feature-row-text",
+            "description": "Title and description stack."
           }
         ],
         "example": "<cc-component name=\"FeatureList\" size=\"sm\" tone=\"accent\">Content</cc-component>"
@@ -6851,7 +7658,7 @@
     },
     {
       "name": "Log",
-      "purpose": "A viewer on a sunken well with search, level chips (debug, info, warn, error), Follow, wrap and download. It follows…",
+      "purpose": "A viewer on a sunken well with search, level chips (debug, info, warn, error), Follow, wrap and download. It follows new lines and stops the moment the reader…",
       "variants": [
         "terminal",
         "fit",
@@ -6874,10 +7681,12 @@
         "fire/components/code.css"
       ],
       "do": [
-        "A job, a crawl or a deployment writes lines as it runs."
+        "A job, a crawl or a deployment writes lines as it runs.",
+        "One run's lines sit on its page: use data-fit."
       ],
       "dont": [
-        "A short block of code or output to copy. Use Codeblock."
+        "A short block of code or output to copy. Use Codeblock.",
+        "The history of one thing in events. Use Timeline."
       ],
       "api": {
         "props": [
@@ -6925,7 +7734,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "log",
@@ -6934,6 +7743,10 @@
           {
             "name": "log-bar",
             "description": "The toolbar."
+          },
+          {
+            "name": "log-search",
+            "description": "The search field."
           }
         ],
         "example": "<cc-component name=\"Log\" variant=\"terminal\" level=\"info\">Content</cc-component>"
@@ -6941,7 +7754,7 @@
     },
     {
       "name": "Prose",
-      "purpose": "A reading container. Plain elements inside it are styled: 16/28 body text, 24/32 and 20/28 headings, ink links with a…",
+      "purpose": "A reading container. Plain elements inside it are styled: 16/28 body text, 24/32 and 20/28 headings, ink links with a quiet underline, inline code on a 6%…",
       "variants": [
         "size-sm",
         "footnotes"
@@ -6951,10 +7764,12 @@
         "fire/components/docsite.css"
       ],
       "do": [
-        "The content is Markdown or CMS output that you do not control the markup of."
+        "The content is Markdown or CMS output that you do not control the markup of.",
+        "A guide or article should read at 16/28 within the reading measure."
       ],
       "dont": [
-        "Interface text, labels and short captions. Use Text."
+        "Interface text, labels and short captions. Use Text.",
+        "A note that should stand out in the article. Use Callout."
       ],
       "api": {
         "props": [
@@ -6975,7 +7790,7 @@
         "parts": [
           {
             "name": "children",
-            "description": "Slot: the component's…"
+            "description": "Slot: the component's content, given…"
           },
           {
             "name": "prose",
@@ -6983,349 +7798,6 @@
           }
         ],
         "example": "<cc-component name=\"Prose\" size=\"sm\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Toolbar",
-      "purpose": "A row for the controls above a list: search, filters and view controls at the start, export and create at the end. It…",
-      "variants": [
-        "size-full"
-      ],
-      "states": [],
-      "paths": [
-        "fire/components/shell.css"
-      ],
-      "do": [
-        "A table, list or grid needs search, filters and one create action."
-      ],
-      "dont": [
-        "The title row of a page. Use PageHead."
-      ],
-      "api": {
-        "props": [],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "toolbar",
-            "description": "The wrapping row."
-          },
-          {
-            "name": "toolbar-search",
-            "description": "The search field; grows to…"
-          }
-        ],
-        "example": "<cc-component name=\"Toolbar\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Brand",
-      "purpose": "The brand is a mark and a name, set in a 40px row. A customer logo can replace the mark as an image of 24px, or a wide…",
-      "variants": [
-        "size-sm",
-        "tone-accent"
-      ],
-      "states": [
-        "hover"
-      ],
-      "paths": [
-        "fire/components/shell.css"
-      ],
-      "do": [
-        "The top of the sidebar or a centred screen needs the product identity."
-      ],
-      "dont": [
-        "A person or a team needs an avatar. Use Avatar."
-      ],
-      "api": {
-        "props": [],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "brand",
-            "description": "The link row."
-          },
-          {
-            "name": "brand-mark",
-            "description": "The 36px mark, an inline SVG…"
-          }
-        ],
-        "example": "<cc-component name=\"Brand\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Composer",
-      "purpose": "The prompt form for an agent. A textarea grows to 240px, then scrolls. A row of tools holds the model chip…",
-      "variants": [
-        "playground",
-        "size-sm",
-        "side-top"
-      ],
-      "states": [
-        "loading",
-        "disabled",
-        "hover",
-        "focus",
-        "pressed",
-        "open"
-      ],
-      "paths": [
-        "fire/components/agent.css"
-      ],
-      "do": [
-        "The person writes a prompt for an agent and may choose a model, sources or files."
-      ],
-      "dont": [
-        "A short free-text answer inside a form. Use Textarea."
-      ],
-      "api": {
-        "props": [
-          {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "playground"
-            ],
-            "required": false
-          },
-          {
-            "name": "focus",
-            "type": "boolean",
-            "required": false
-          }
-        ],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "composer",
-            "description": "The form."
-          },
-          {
-            "name": "composer-input",
-            "description": "The textarea; grows to 240px."
-          }
-        ],
-        "example": "<cc-component name=\"Composer\" variant=\"playground\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Message",
-      "purpose": "One message in a thread. The person's turn is a grey bubble on the right, at most 70% wide. The agent's turn is…",
-      "variants": [
-        "role-user",
-        "role-assistant",
-        "actions-visible"
-      ],
-      "states": [
-        "error",
-        "success",
-        "hover",
-        "focus",
-        "pressed"
-      ],
-      "paths": [
-        "fire/components/agent.css"
-      ],
-      "do": [
-        "A thread shows what the person asked and what the agent answered."
-      ],
-      "dont": [
-        "The conversation is with support and carries blocks, delivery state and avatars. Use ChatMessage."
-      ],
-      "api": {
-        "props": [
-          {
-            "name": "actions",
-            "type": "enum",
-            "values": [
-              "visible"
-            ],
-            "required": false
-          },
-          {
-            "name": "role",
-            "type": "enum",
-            "values": [
-              "assistant",
-              "user"
-            ],
-            "required": false
-          }
-        ],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "message",
-            "description": "One turn."
-          },
-          {
-            "name": "message-body",
-            "description": "The text; headings, lists…"
-          }
-        ],
-        "example": "<cc-component name=\"Message\" actions=\"visible\" role=\"user\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "MobileNav",
-      "purpose": "On phones the menu button opens a full-height sheet under the top bar: the upgrade first, then the account, then every…",
-      "variants": [
-        "level-2",
-        "only-mobile",
-        "only-desktop"
-      ],
-      "states": [
-        "hover",
-        "focus",
-        "pressed",
-        "selected",
-        "open"
-      ],
-      "paths": [
-        "fire/components/shell.css"
-      ],
-      "do": [
-        "The sidebar is hidden below 900px and people still need every destination."
-      ],
-      "dont": [
-        "The same nav on a desktop width. Use Sidebar."
-      ],
-      "api": {
-        "props": [
-          {
-            "name": "only",
-            "type": "enum",
-            "values": [
-              "desktop",
-              "mobile"
-            ],
-            "required": false
-          }
-        ],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "mobile-nav",
-            "description": "The sheet; trigger it with…"
-          },
-          {
-            "name": "mobile-nav-scrim",
-            "description": "The dimmed backdrop."
-          }
-        ],
-        "example": "<cc-component name=\"MobileNav\" only=\"mobile\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Timeline",
-      "purpose": "A vertical rail with 8px dots for ordinary events and 20px icon nodes for the ones that matter. Each item has a title…",
-      "variants": [
-        "kind-group",
-        "live",
-        "tone-success",
-        "tone-warning",
-        "tone-danger",
-        "tone-info",
-        "tone-accent",
-        "tone-violet"
-      ],
-      "states": [
-        "hover"
-      ],
-      "paths": [
-        "fire/components/content.css"
-      ],
-      "do": [
-        "A run, a key or a deployment needs its history shown newest first or oldest first."
-      ],
-      "dont": [
-        "Parallel staged work with a graph of what ran after what. Use Pipeline."
-      ],
-      "api": {
-        "props": [],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "timeline",
-            "description": "The list."
-          },
-          {
-            "name": "timeline-item",
-            "description": "One event."
-          }
-        ],
-        "example": "<cc-component name=\"Timeline\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Accordion",
-      "purpose": "A list of native details elements. Each item has a trigger row and a panel; Fire animates the height. It works without…",
-      "variants": [
-        "card",
-        "icon-lead"
-      ],
-      "states": [
-        "hover",
-        "focus",
-        "open"
-      ],
-      "paths": [
-        "fire/components/content.css"
-      ],
-      "do": [
-        "A page answers several questions and most readers need only one: FAQs, request headers, response…"
-      ],
-      "dont": [
-        "The sections are peers that people switch between and compare. Use Tabs."
-      ],
-      "api": {
-        "props": [
-          {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "card"
-            ],
-            "required": false
-          },
-          {
-            "name": "single",
-            "type": "boolean",
-            "required": false
-          }
-        ],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "accordion",
-            "description": "The group of items."
-          },
-          {
-            "name": "accordion-item",
-            "description": "One details element."
-          }
-        ],
-        "example": "<cc-component name=\"Accordion\" variant=\"card\">Content</cc-component>"
       }
     }
   ],

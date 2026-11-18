@@ -2,6 +2,15 @@
    Overlays — everything that floats above the page.
    fd-menu · fd-popover · fd-tooltip · fd-hovercard · fd-dialog · fd-confirm
    fd-sheet · fd-toast · fd-command
+   Date (markup in fire/js/overlays.js):
+     fd-daterange                       presets, calendar and Apply
+     fd-daterange-compare               a band in a fd-daterange: "Compared with" radios (none, previous period, same
+       > fd-daterange-compare-label       period last year) and the comparison dates
+       > fd-daterange-compare-dates
+     fd-period                          on the fd-filter that triggers a fd-daterange with a compare band; the range and,
+       > fd-period-compare                muted, "vs <comparison dates>" (empty and hidden when there is none)
+     fd-datefield-panel                 the calendar popover of a fd-datefield (forms.css), with fd-datefield-foot
+                                        (Today and Clear)
    Behaviour lives in fire/js/overlays.js; its header documents the markup.
 
    Floating surfaces (menu, popover, tooltip, hovercard) use the native
@@ -357,11 +366,11 @@
 .fd-popover[data-size="sm"] { --_o-w: var(--fd-popover-w-sm); }
 .fd-popover[data-size="lg"] { --_o-w: var(--fd-popover-w-lg); }
 .fd-popover[data-size="auto"] { --_o-w: calc(100vw - var(--fd-overlay-inset)); }
-.fd-popover:has(> :is(.fd-popover-head, .fd-popover-body, .fd-popover-foot, .fd-popover-search, .fd-daterange)) {
+.fd-popover:has(> :is(.fd-popover-head, .fd-popover-body, .fd-popover-foot, .fd-popover-search, .fd-daterange, .fd-datefield-panel)) {
   --_o-pad: 0px;
   width: min(var(--_o-w), calc(100vw - var(--fd-overlay-inset)));
 }
-.fd-popover[data-size="auto"]:has(> .fd-daterange) { width: max-content; }
+.fd-popover[data-size="auto"]:has(> :is(.fd-daterange, .fd-datefield-panel)) { width: max-content; }
 .fd-popover[data-static-demo], .fd-hovercard[data-static-demo] { display: block; width: min(var(--_o-w), 100%); }
 .fd-popover[data-static-demo][data-size="auto"] { width: max-content; max-width: 100%; }
 
@@ -532,8 +541,33 @@
 }
 .fd-calendar-day[data-today][aria-selected="true"]::after { background: var(--fd-accent-contrast); }
 
+/* ---------- Period with comparison: a .fd-daterange with a compare band, and its trigger ---------- */
+.fd-daterange:has(> .fd-daterange-compare) { grid-template-areas: "presets main" "compare compare" "foot foot"; }
+.fd-daterange:has(> .fd-daterange-compare) > .fd-daterange-main { display: grid; justify-content: center; }
+.fd-daterange-compare {
+  grid-area: compare; display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1-5) var(--fd-space-4);
+  padding: var(--fd-space-2-5) var(--fd-space-4);
+  border-top: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-daterange-compare-label { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label); color: var(--fd-text-2); }
+.fd-daterange-compare .fd-options { display: flex; flex-wrap: wrap; gap: var(--fd-space-1) var(--fd-space-4); }
+.fd-daterange-compare-dates { margin-inline-start: auto; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); font-variant-numeric: tabular-nums; }
+.fd-period .fd-filter-value { display: inline-flex; align-items: baseline; gap: var(--fd-space-2); max-inline-size: none; }
+.fd-period-compare { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fd-text-3); font-weight: var(--fd-weight-regular); font-variant-numeric: tabular-nums; }
+.fd-period-compare:empty { display: none; }
+.fd-period-compare::before { content: "·"; margin-inline-end: var(--fd-space-2); }
+
+/* ---------- Date field panel: the calendar under a .fd-datefield ---------- */
+.fd-datefield-panel { padding: var(--fd-space-3) var(--fd-space-4) var(--fd-space-2); }
+.fd-datefield-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  margin-block-start: var(--fd-space-2); margin-inline: calc(var(--fd-space-1) * -1);
+}
+
 @media (max-width: 640px) {
   .fd-daterange { grid-template-columns: minmax(0, 1fr); grid-template-areas: "presets" "main" "foot"; }
+  .fd-daterange:has(> .fd-daterange-compare) { grid-template-areas: "presets" "main" "compare" "foot"; }
+  .fd-daterange-compare-dates { margin-inline-start: 0; inline-size: 100%; }
   .fd-daterange-presets { flex-direction: row; overflow-x: auto; border-inline-end: 0; border-bottom: var(--fd-hairline) solid var(--fd-line-faint); scrollbar-width: none; }
   .fd-daterange-preset { flex: none; }
   .fd-daterange-main { display: grid; justify-content: center; }

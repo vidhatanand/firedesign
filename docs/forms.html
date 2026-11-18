@@ -92,6 +92,8 @@
       <thead><tr><th>The value is</th><th>Use</th><th>Never</th></tr></thead>
       <tbody>
         <tr><td>Yes or no</td><td><code class="fd-code">fd-switch</code> (applies at once) or <code class="fd-code">fd-checkbox</code> (saved with the form)</td><td>A text box holding <span class="fd-mono">0</span> or <span class="fd-mono">1</span>, <span class="fd-mono">on</span> or <span class="fd-mono">off</span></td></tr>
+        <tr><td>One date</td><td><code class="fd-code">fd-datefield</code>: typed or picked, posted as <span class="fd-mono">YYYY-MM-DD</span></td><td>A native date input (its look and format are the browser's), or three selects</td></tr>
+        <tr><td>A colour that is content</td><td><code class="fd-code">fd-color</code> (a hex box with a picker); <code class="fd-code">fd-swatch</code> to show it</td><td>A text box that wants <span class="fd-mono">rgb(20, 52, 43)</span>, or a style attribute to paint it</td></tr>
         <tr><td>One of 2 to 4 options</td><td><code class="fd-code">fd-segmented</code> or <code class="fd-code">fd-radio</code></td><td>A text box with the options listed in its hint</td></tr>
         <tr><td>One of many options</td><td><code class="fd-code">fd-select</code>, or <code class="fd-code">fd-combobox</code> when the list is long</td><td>The same</td></tr>
         <tr><td>Several of a fixed set</td><td>An <code class="fd-code">fd-checkbox</code> group or <code class="fd-code">fd-choice</code> cards</td><td>A comma-separated text box</td></tr>
@@ -556,6 +558,100 @@ Ignore cookie banners and chat widgets.</textarea>
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- ===================================================================== Date field -->
+  <section class="doc-section" id="datefield">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Date field</h2>
+      <p>One date, typed or picked. The box holds the date as <span class="fd-mono">YYYY-MM-DD</span>, so what people see is what the form posts; the calendar is the date range's, opened from the button.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <label class="fd-field-label" for="df-pause">Pause until</label>
+        <div class="fd-datefield" data-fd-datefield data-min-date="today">
+          <div class="fd-input-group">
+            <input class="fd-input" id="df-pause" name="pause_until" type="text" inputmode="numeric" autocomplete="off" placeholder="2026-12-01" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" title="A date like 2026-12-01" aria-describedby="df-pause-hint">
+            <span class="fd-input-affix" data-kind="action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Choose a date" data-fd-popover="df-pause-cal" data-placement="bottom-end"><i data-icon="calendar"></i></button></span>
+          </div>
+          <div class="fd-popover" id="df-pause-cal" popover data-size="auto" aria-label="Choose a date">
+            <div class="fd-datefield-panel" data-fd-datepanel>
+              <div class="fd-calendar"></div>
+              <div class="fd-datefield-foot">
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-today>Today</button>
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-clear>Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="fd-field-hint" id="df-pause-hint">Monitors resume at 00:00 UTC that day.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="df-keep">Keep results until</label>
+        <div class="fd-datefield" data-fd-datefield data-min-date="2026-11-01" data-max-date="2027-11-30">
+          <div class="fd-input-group">
+            <input class="fd-input" id="df-keep" name="keep_until" type="text" inputmode="numeric" autocomplete="off" value="2027-03-31" placeholder="2027-03-31" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" aria-describedby="df-keep-hint">
+            <span class="fd-input-affix" data-kind="action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Choose a date" data-fd-popover="df-keep-cal" data-placement="bottom-end"><i data-icon="calendar"></i></button></span>
+          </div>
+          <div class="fd-popover" id="df-keep-cal" popover data-size="auto" aria-label="Choose a date">
+            <div class="fd-datefield-panel" data-fd-datepanel>
+              <div class="fd-calendar"></div>
+              <div class="fd-datefield-foot">
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-today>Today</button>
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-clear>Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="fd-field-hint" id="df-keep-hint">Between Nov 1, 2026 and Nov 30, 2027.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="df-bad">Run on</label>
+        <div class="fd-datefield" data-fd-datefield>
+          <div class="fd-input-group">
+            <input class="fd-input" id="df-bad" name="run_on" type="text" inputmode="numeric" autocomplete="off" value="2026-02-30" aria-invalid="true" aria-describedby="df-bad-error" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">
+            <span class="fd-input-affix" data-kind="action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Choose a date" data-fd-popover="df-bad-cal" data-placement="bottom-end"><i data-icon="calendar"></i></button></span>
+          </div>
+          <div class="fd-popover" id="df-bad-cal" popover data-size="auto" aria-label="Choose a date">
+            <div class="fd-datefield-panel" data-fd-datepanel>
+              <div class="fd-calendar"></div>
+              <div class="fd-datefield-foot">
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-today>Today</button>
+                <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-clear>Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="fd-field-error" id="df-bad-error"><i data-icon="circle-alert" data-size="14"></i><span>Enter a real date, like 2026-12-01.</span></p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="df-off">Archive on</label>
+        <div class="fd-datefield" data-fd-datefield>
+          <div class="fd-input-group">
+            <input class="fd-input" id="df-off" name="archive_on" type="text" value="2026-12-31" disabled aria-describedby="df-off-hint">
+            <span class="fd-input-affix" data-kind="action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Choose a date" disabled><i data-icon="calendar"></i></button></span>
+          </div>
+        </div>
+        <p class="fd-field-hint" id="df-off-hint">Set by your plan. Upgrade to change it.</p>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <div class="fd-popover" data-static-demo data-size="auto" role="dialog" aria-label="Choose a date (example)">
+        <div class="fd-datefield-panel" data-fd-datepanel data-value="2026-11-24" data-min-date="2026-11-10">
+          <div class="fd-calendar"></div>
+          <div class="fd-datefield-foot">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-today>Today</button>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-clear>Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Without script the field is a text box with a <code class="fd-code">pattern</code>, it posts the ISO date, and the calendar button stays hidden. With script it reads <span class="fd-mono">2026-11-18</span>, <span class="fd-mono">2026/11/18</span>, <span class="fd-mono">Nov 18, 2026</span> and <span class="fd-mono">18 Nov 2026</span>, and writes the ISO date back when the field is left or the form is sent. Check the range again on the server.</li>
+      <li><code class="fd-code">data-min-date</code> and <code class="fd-code">data-max-date</code> take an ISO date or <span class="fd-mono">today</span>. Days outside them are disabled in the calendar and the typed text is checked with <code class="fd-code">setCustomValidity</code>, so <code class="fd-code">required</code> and <code class="fd-code">data-fd-validate</code> see the same error. Say the limits in the hint.</li>
+      <li>Keys: <span class="fd-kbd">↓</span> in the field opens the calendar and puts focus on the chosen day; arrows move by day and week, <span class="fd-kbd">PgUp</span> <span class="fd-kbd">PgDn</span> by month (with <span class="fd-kbd">Shift</span>, by year), <span class="fd-kbd">Home</span> <span class="fd-kbd">End</span> to the week's ends, <span class="fd-kbd">Enter</span> picks, <span class="fd-kbd">Esc</span> closes. Picking writes the date, fires <code class="fd-code">input</code> and <code class="fd-code">change</code> on the box, and returns focus to it. Clear is hidden when the box is <code class="fd-code">required</code>.</li>
+      <li>Use the <a class="fd-link" href="overlays.html#date-range">date range</a> to filter by a period. A time of day is a separate <code class="fd-code">fd-select</code> or <code class="fd-code">fd-input</code>.</li>
+    </ul>
   </section>
 
   <!-- ===================================================================== Checkbox and radio -->
@@ -1291,6 +1387,236 @@ team = growth</textarea>
     </ul>
   </section>
 
+  <!-- ===================================================================== Colour -->
+  <section class="doc-section" id="color">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Colour: swatch and control</h2>
+      <p>A swatch shows a colour that is content (a brand colour, a series colour), so it is not a theme token: the value comes in through <code class="fd-code">data-fd-vars</code>, never a style attribute. The control pairs a native colour picker with a hex box and tells people what the colour does on this page.</p>
+    </div>
+    <h3 class="doc-sub">Swatch</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-row" data-gap="3">
+        <span class="fd-swatch" data-size="xs" data-fd-vars="--fd-swatch-color: #14342b" role="img" aria-label="Forest, #14342b"></span>
+        <span class="fd-swatch" data-size="sm" data-fd-vars="--fd-swatch-color: #14342b" role="img" aria-label="Forest, #14342b"></span>
+        <span class="fd-swatch" data-fd-vars="--fd-swatch-color: #14342b" role="img" aria-label="Forest, #14342b"></span>
+        <span class="fd-swatch" data-size="lg" data-fd-vars="--fd-swatch-color: #14342b" role="img" aria-label="Forest, #14342b"></span>
+        <span class="fd-swatch" data-size="xl" data-fd-vars="--fd-swatch-color: #14342b" role="img" aria-label="Forest, #14342b"></span>
+      </div>
+      <div class="fd-row" data-gap="3">
+        <span class="fd-swatch" data-shape="round" data-size="lg" data-fd-vars="--fd-swatch-color: #f2c14e" role="img" aria-label="Saffron, #f2c14e"></span>
+        <span class="fd-swatch" data-size="lg" data-fd-vars="--fd-swatch-color: #ffffff" role="img" aria-label="White, #ffffff"></span>
+        <span class="fd-swatch" data-size="lg" data-fd-vars="--fd-swatch-color: #000000" role="img" aria-label="Black, #000000"></span>
+        <span class="fd-swatch" data-size="lg" data-fd-vars="--fd-swatch-color: #14342b59" role="img" aria-label="Forest at 35% opacity"></span>
+        <span class="fd-swatch" data-size="lg" data-empty role="img" aria-label="No colour set"></span>
+      </div>
+      <div class="fd-row" data-gap="2" role="group" aria-label="Brand colour">
+        <button class="fd-swatch" type="button" aria-pressed="true" aria-label="Forest, #14342b" data-fd-vars="--fd-swatch-color: #14342b"></button>
+        <button class="fd-swatch" type="button" aria-pressed="false" aria-label="Saffron, #f2c14e" data-fd-vars="--fd-swatch-color: #f2c14e"></button>
+        <button class="fd-swatch" type="button" aria-pressed="false" aria-label="Clay, #b5523b" data-fd-vars="--fd-swatch-color: #b5523b"></button>
+        <button class="fd-swatch" type="button" aria-label="Slate, #3d4f66 (unavailable)" disabled data-fd-vars="--fd-swatch-color: #3d4f66"></button>
+      </div>
+      <div class="fd-row" data-gap="2">
+        <span class="fd-swatch" data-size="sm" data-fd-vars="--fd-swatch-color: #14342b" aria-hidden="true"></span>
+        <span class="fd-mono">#14342b</span>
+        <span class="fd-muted">Forest</span>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The colour is the custom property <code class="fd-code">--fd-swatch-color</code>; set it with <code class="fd-code">data-fd-vars="--fd-swatch-color: #14342b"</code>. A swatch with no value, or <code class="fd-code">data-empty</code>, shows the checkerboard that also sits under a translucent colour.</li>
+      <li>Name it: <code class="fd-code">role="img"</code> with the colour's name and hex, or <code class="fd-code">aria-hidden="true"</code> when the hex sits beside it as text. Colour alone never carries meaning. A <code class="fd-code">&lt;button class="fd-swatch"&gt;</code> chooses a colour and takes <code class="fd-code">aria-pressed</code>.</li>
+    </ul>
+
+    <h3 class="doc-sub">Colour control</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-field">
+        <label class="fd-field-label" for="co-brand">Brand colour</label>
+        <div class="fd-color" data-fd-color>
+          <div class="fd-input-group">
+            <span class="fd-input-affix" data-kind="action"><input class="fd-color-picker" type="color" inert value="#14342b" aria-label="Pick the brand colour" data-fd-color-picker></span>
+            <input class="fd-input" id="co-brand" name="brand_color" type="text" value="#14342b" maxlength="7" spellcheck="false" autocomplete="off" autocapitalize="off" pattern="#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})" aria-describedby="co-brand-hint" data-fd-color-hex>
+          </div>
+          <ul class="fd-color-checks" aria-label="Contrast of this colour" data-fd-color-feedback></ul>
+        </div>
+        <p class="fd-field-hint" id="co-brand-hint">Used for buttons and links on your status page.</p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="co-pale">Highlight colour</label>
+        <div class="fd-color" data-fd-color>
+          <div class="fd-input-group">
+            <span class="fd-input-affix" data-kind="action"><input class="fd-color-picker" type="color" inert value="#f3efe6" aria-label="Pick the highlight colour" data-fd-color-picker></span>
+            <input class="fd-input" id="co-pale" name="highlight_color" type="text" value="#f3efe6" maxlength="7" spellcheck="false" autocomplete="off" autocapitalize="off" pattern="#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})" data-fd-color-hex>
+          </div>
+          <ul class="fd-color-checks" aria-label="Contrast of this colour" data-fd-color-feedback></ul>
+        </div>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="co-bad">Link colour</label>
+        <div class="fd-color" data-fd-color>
+          <div class="fd-input-group">
+            <span class="fd-input-affix" data-kind="action"><input class="fd-color-picker" type="color" inert value="#1f6feb" aria-label="Pick the link colour" data-fd-color-picker></span>
+            <input class="fd-input" id="co-bad" name="link_color" type="text" value="1f6fe" maxlength="7" spellcheck="false" autocomplete="off" autocapitalize="off" aria-invalid="true" aria-describedby="co-bad-error" pattern="#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})" data-fd-color-hex>
+          </div>
+          <ul class="fd-color-checks" aria-label="Contrast of this colour" data-fd-color-feedback></ul>
+        </div>
+        <p class="fd-field-error" id="co-bad-error"><i data-icon="circle-alert" data-size="14"></i><span>Enter a hex colour, like #1f6feb.</span></p>
+      </div>
+      <div class="fd-field">
+        <label class="fd-field-label" for="co-off">Accent colour</label>
+        <div class="fd-color" data-fd-color>
+          <div class="fd-input-group">
+            <span class="fd-input-affix" data-kind="action"><input class="fd-color-picker" type="color" value="#14342b" aria-label="Pick the accent colour" disabled data-fd-color-picker></span>
+            <input class="fd-input" id="co-off" name="accent_color" type="text" value="#14342b" disabled data-fd-color-hex>
+          </div>
+        </div>
+        <p class="fd-field-hint">Locked while your brand theme is applied.</p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The hex box carries the name and posts <span class="fd-mono">#rrggbb</span>, lower case, as a plain field. The native picker has no name and is <code class="fd-code">inert</code> until the script runs, so without it the box still works on its own. With script the two stay in step, <span class="fd-mono">1f6feb</span> and <span class="fd-mono">#1f6</span> are completed, and a value that is not a colour marks the field invalid.</li>
+      <li>The checks measure the colour against the live page background and the live accent, so they change with the theme, palette and accent. 4.5:1 reads as text; 3:1 is enough for icons, borders and large text; below that the colour is hard to see. Each row says it in words as well as an icon. The accent row only asks that the two can be told apart. <code class="fd-code">fd:change</code> fires with <code class="fd-code">{ value, valid }</code>.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Confirm on the page -->
+  <section class="doc-section" id="confirm-inline">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Confirm on the page</h2>
+      <p>For a destructive action that lives on its own page, not in a dialog: the button stays off until the name is typed. It is a plain form, so the server checks the text whether or not the script ran.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <form class="fd-confirm-inline" method="dialog" data-fd-confirm-inline data-confirm="ember-prod">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ci-idle">Type <span class="fd-confirm-phrase">ember-prod</span> to confirm</label>
+          <input class="fd-input" id="ci-idle" name="confirm" autocomplete="off" autocapitalize="off" spellcheck="false" required data-fd-confirm-input aria-describedby="ci-idle-rule">
+          <p class="fd-confirm-inline-rule" id="ci-idle-rule" data-fd-confirm-rule>Type it exactly as shown. Case counts.</p>
+        </div>
+        <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="danger" data-fd-confirm-submit>Delete team</button></div>
+      </form>
+      <form class="fd-confirm-inline" method="dialog" data-fd-confirm-inline data-confirm="ember-prod">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ci-part">Type <span class="fd-confirm-phrase">ember-prod</span> to confirm</label>
+          <input class="fd-input" id="ci-part" name="confirm" value="ember-p" autocomplete="off" autocapitalize="off" spellcheck="false" required data-fd-confirm-input aria-describedby="ci-part-rule">
+          <p class="fd-confirm-inline-rule" id="ci-part-rule" data-fd-confirm-rule>Type it exactly as shown. Case counts.</p>
+        </div>
+        <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="danger" data-fd-confirm-submit>Delete team</button></div>
+      </form>
+      <form class="fd-confirm-inline" method="dialog" data-fd-confirm-inline data-confirm="ember-prod">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ci-bad">Type <span class="fd-confirm-phrase">ember-prod</span> to confirm</label>
+          <input class="fd-input" id="ci-bad" name="confirm" value="ember_prod" autocomplete="off" autocapitalize="off" spellcheck="false" required data-fd-confirm-input aria-describedby="ci-bad-rule">
+          <p class="fd-confirm-inline-rule" id="ci-bad-rule" data-fd-confirm-rule>Type it exactly as shown. Case counts.</p>
+        </div>
+        <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="danger" data-fd-confirm-submit>Delete team</button></div>
+      </form>
+      <form class="fd-confirm-inline" method="dialog" data-fd-confirm-inline data-confirm="ember-prod">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ci-ok">Type <span class="fd-confirm-phrase">ember-prod</span> to confirm</label>
+          <input class="fd-input" id="ci-ok" name="confirm" value="ember-prod" autocomplete="off" autocapitalize="off" spellcheck="false" required data-fd-confirm-input aria-describedby="ci-ok-rule">
+          <p class="fd-confirm-inline-rule" id="ci-ok-rule" data-fd-confirm-rule>Type it exactly as shown. Case counts.</p>
+        </div>
+        <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="danger" data-fd-confirm-submit>Delete team</button></div>
+      </form>
+    </div>
+    <ul class="doc-notes">
+      <li>The specimens use <code class="fd-code">method="dialog"</code> so nothing is sent. In your page the form posts to your server (<code class="fd-code">method="post"</code>), which compares <code class="fd-code">confirm</code> with the name and refuses on a mismatch. Without script the button is enabled and the browser still asks for the field (<code class="fd-code">required</code>).</li>
+      <li>With script the button is disabled until the trimmed text equals <code class="fd-code">data-confirm</code> on the form (or <code class="fd-code">data-match</code> on the input), and the line under the field says where it stands: matches so far, differs at character <em>n</em>, or matches. The form is not sent while it does not match. <code class="fd-code">data-state</code> on the form is <span class="fd-mono">idle</span>, <span class="fd-mono">partial</span>, <span class="fd-mono">mismatch</span> or <span class="fd-mono">match</span>, and <code class="fd-code">fd:change</code> fires with <code class="fd-code">{ value, matched }</code>.</li>
+      <li>The phrase is the dialog confirm's <code class="fd-code">fd-confirm-phrase</code>, one click selects it. Use the <a class="fd-link" href="overlays.html#confirm">confirm dialog</a> when the action starts from a list or a menu.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Disabled with a reason -->
+  <section class="doc-section" id="reason">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Disabled with a reason</h2>
+      <p>A control that is off says why and who can turn it on, in text that stays on the page, and the control points at it with <code class="fd-code">aria-describedby</code>.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface">
+      <div class="fd-reason">
+        <button class="fd-btn" type="button" disabled aria-describedby="rs-key">Rotate key</button>
+        <p class="fd-reason-text" id="rs-key"><i data-icon="lock"></i><span><span class="fd-reason-why">Only owners can rotate this key.</span> <span class="fd-reason-who">Ask Maya Chen or Dev Patel.</span></span></p>
+      </div>
+      <div class="fd-reason">
+        <button class="fd-btn" type="button" data-variant="danger" aria-disabled="true" aria-describedby="rs-delete">Delete workspace</button>
+        <p class="fd-reason-text" id="rs-delete"><i data-icon="lock"></i><span><span class="fd-reason-why">2 monitors are still running.</span> <span class="fd-reason-who">Pause them first, or ask an admin.</span></span></p>
+      </div>
+      <div class="fd-reason">
+        <label class="fd-switch">
+          <input type="checkbox" role="switch" disabled aria-describedby="rs-sso">
+          <span class="fd-switch-track"></span>
+          <span class="fd-switch-text"><span class="fd-switch-label">Require single sign-on</span></span>
+        </label>
+        <p class="fd-reason-text" id="rs-sso"><i data-icon="lock"></i><span><span class="fd-reason-why">Single sign-on is on the Scale plan.</span> <span class="fd-reason-who">Billing admins can upgrade.</span></span></p>
+      </div>
+      <div class="fd-reason">
+        <a class="fd-btn" role="button" tabindex="0" aria-disabled="true" aria-describedby="rs-invoice">Download invoice</a>
+        <p class="fd-reason-text" id="rs-invoice"><i data-icon="lock"></i><span><span class="fd-reason-why">No invoice yet, your first one is issued on Dec 1.</span></span></p>
+      </div>
+      <div class="fd-reason" data-layout="inline">
+        <button class="fd-btn" type="button" data-variant="primary" disabled aria-describedby="rs-export">Export runs</button>
+        <p class="fd-reason-text" id="rs-export"><i data-icon="lock"></i><span><span class="fd-reason-why">Viewers cannot export.</span> <span class="fd-reason-who">Ask a member.</span></span></p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>A <code class="fd-code">disabled</code> button or switch is safe with no script, but it leaves the tab order, so keyboard users never meet the reason. Where they should hear it, use <code class="fd-code">aria-disabled="true"</code> instead: the control stays focusable, looks the same, and the script stops its click (also for a submit button). Fire's button already styles both.</li>
+      <li>A link that cannot be followed becomes a <code class="fd-code">&lt;a&gt;</code> with no <code class="fd-code">href</code>, <code class="fd-code">role="button"</code>, <code class="fd-code">tabindex="0"</code> and <code class="fd-code">aria-disabled="true"</code>. Never leave the <code class="fd-code">href</code> on a link that looks off.</li>
+      <li>Say why in one sentence (<code class="fd-code">fd-reason-why</code>), then who can change it (<code class="fd-code">fd-reason-who</code>), by name or role. Not a tooltip: hover and focus hide it from touch. <code class="fd-code">data-layout="inline"</code> puts the line beside the control.</li>
+    </ul>
+  </section>
+
+  <!-- ===================================================================== Recovery codes -->
+  <section class="doc-section" id="recovery-codes">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Recovery codes</h2>
+      <p>One-time codes shown once, after two-step sign-in is set up. A sunken card keeps them apart from the page; copy-all and download save them before the person leaves.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <section class="fd-codes" data-fd-codes data-filename="ember-recovery-codes.txt" aria-labelledby="rc-title">
+        <header class="fd-codes-head">
+          <h3 class="fd-codes-title" id="rc-title">Recovery codes</h3>
+          <div class="fd-codes-actions">
+            <button class="fd-btn" type="button" data-size="sm" data-fd-codes-copy><i data-icon="copy"></i><span>Copy all</span></button>
+            <button class="fd-btn" type="button" data-size="sm" data-fd-codes-download><i data-icon="download"></i><span>Download</span></button>
+          </div>
+        </header>
+        <ol class="fd-codes-list">
+          <li class="fd-codes-item"><code>k7qd-4m2x</code></li>
+          <li class="fd-codes-item"><code>9tbn-wr3e</code></li>
+          <li class="fd-codes-item"><code>h5xa-p8vc</code></li>
+          <li class="fd-codes-item"><code>2fjm-6ydz</code></li>
+          <li class="fd-codes-item"><code>r4ug-n9kq</code></li>
+          <li class="fd-codes-item"><code>c8sl-3ehw</code></li>
+          <li class="fd-codes-item"><code>v6ot-j2pa</code></li>
+          <li class="fd-codes-item"><code>m3zy-x7bd</code></li>
+          <li class="fd-codes-item"><code>a9ik-5fqt</code></li>
+          <li class="fd-codes-item"><code>e2wn-u4gr</code></li>
+        </ol>
+        <p class="fd-codes-note"><i data-icon="triangle-alert"></i><span>Each code works once. Keep them somewhere safe: we cannot show them again.</span></p>
+      </section>
+      <section class="fd-codes" data-fd-codes data-filename="ember-recovery-codes.txt" aria-labelledby="rc2-title">
+        <header class="fd-codes-head">
+          <h3 class="fd-codes-title" id="rc2-title">2 of 6 codes used</h3>
+          <div class="fd-codes-actions">
+            <button class="fd-btn" type="button" data-size="sm" data-fd-codes-copy><i data-icon="copy"></i><span>Copy all</span></button>
+            <button class="fd-btn" type="button" data-size="sm" data-fd-codes-download><i data-icon="download"></i><span>Download</span></button>
+          </div>
+        </header>
+        <ol class="fd-codes-list">
+          <li class="fd-codes-item" data-used><code>k7qd-4m2x</code><span class="fd-sr-only"> (used)</span></li>
+          <li class="fd-codes-item"><code>9tbn-wr3e</code></li>
+          <li class="fd-codes-item"><code>h5xa-p8vc</code></li>
+          <li class="fd-codes-item" data-used><code>2fjm-6ydz</code><span class="fd-sr-only"> (used)</span></li>
+          <li class="fd-codes-item"><code>r4ug-n9kq</code></li>
+          <li class="fd-codes-item"><code>c8sl-3ehw</code></li>
+        </ol>
+        <p class="fd-codes-note"><i data-icon="triangle-alert"></i><span>Make a new set before you run out. A new set replaces these.</span></p>
+      </section>
+    </div>
+    <ul class="doc-notes">
+      <li>Copy all copies the codes not marked <code class="fd-code">data-used</code>, one per line, and fires <code class="fd-code">fd:copy</code>. Download makes a text file through a Blob URL (the name comes from <code class="fd-code">data-filename</code>) and fires <code class="fd-code">fd:download</code> with <code class="fd-code">{ filename, value }</code>. Both buttons stay hidden until the script runs; without it the codes are plain text, and one click on a code selects it.</li>
+      <li>Keep the warning line: it is the only place that says the codes will not be shown again. Print the codes from your page's own print styles.</li>
+    </ul>
+  </section>
+
   <!-- ===================================================================== Rows and actions -->
   <section class="doc-section" id="rows">
     <div class="doc-section-head">
@@ -1529,7 +1855,10 @@ read:usage = See credit usage</textarea>
         <tr><td>fd:change</td><td>{ value }</td><td>pairs (an object of name → value); read it any time with <span class="fd-mono">pairsValue(el)</span>, replace it with <span class="fd-mono">setPairs(el, object)</span></td></tr>
         <tr><td>fd:select</td><td>{ value, item }</td><td>combobox, when an option is chosen</td></tr>
         <tr><td>fd:open · fd:close</td><td>none</td><td>combobox listbox</td></tr>
-        <tr><td>fd:copy</td><td>{ value }</td><td>secret, copy field</td></tr>
+        <tr><td>fd:copy</td><td>{ value }</td><td>secret, copy field, recovery codes (all unused codes)</td></tr>
+        <tr><td>fd:download</td><td>{ filename, value }</td><td>recovery codes, after Download</td></tr>
+        <tr><td>fd:change</td><td>{ value, valid }</td><td>date field (the ISO date, or an empty string), colour control (<span class="fd-mono">#rrggbb</span>)</td></tr>
+        <tr><td>fd:change</td><td>{ value, matched }</td><td>confirm on the page, on its form</td></tr>
         <tr><td>fd:rotate</td><td>none</td><td>secret rotate button; answer with <span class="fd-mono">setSecret(el, value)</span></td></tr>
         <tr><td>fd:files</td><td>{ files, rows }</td><td>dropzone; cancelable, so you can run the upload yourself</td></tr>
         <tr><td>fd:invalid · fd:valid</td><td>{ fields }</td><td>form[data-fd-validate] on submit</td></tr>

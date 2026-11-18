@@ -20,7 +20,7 @@ const QUERIES = [
   ['show trend', ['chart', 'sparkline']],
   ['sign in page', ['auth', 'auth-centered']],
   ['type the name to delete', ['confirm']],
-  ['approve a request', ['approval-bar']],
+  ['approve a request', ['approval-bar', 'decision', 'decisions', 'answer']],
   ['modal', ['dialog']],
   ['dropdown menu of actions', ['menu']],
   ['choose a country from a long list', ['combobox', 'select']],

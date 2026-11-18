@@ -1,0 +1,78 @@
+{
+  "id": "answer",
+  "job": "Approve or decline one request from an email or chat link, without signing in.",
+  "purpose": "A page outside the app shell: the brand in a header band, then a reading column in a band (data-column) with the brief condensed to two parts, the reason and two commits named for their effect. The send is held for 10 seconds inline; then a done view says what is now true, with the audit ID and Undo for 15 minutes. Already answered keeps the brief and says who decided; an expired link says when it ran out and where to go.",
+  "useWhen": [
+    "A decision is sent to someone by email or chat and one tap should settle it.",
+    "The person may not have a session on this device."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The person is signed in and has several decisions waiting.",
+      "instead": "decisions"
+    },
+    {
+      "when": "The decision needs a preview of its reach or the full evidence.",
+      "instead": "decision-case"
+    },
+    {
+      "when": "The page signs someone in or confirms an account.",
+      "instead": "auth-centered"
+    }
+  ],
+  "aka": [
+    "magic link",
+    "email approval",
+    "one-click approve",
+    "signed-out decision",
+    "approve from email"
+  ],
+  "surfaces": [
+    "website",
+    "phone"
+  ],
+  "data": [
+    "record",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "ask",
+      "how": "the default view"
+    },
+    {
+      "name": "held",
+      "how": "fd-commit data-fd-hold=\"10\" counts down inline"
+    },
+    {
+      "name": "done",
+      "how": "?state=done or ?state=declined: the done view with Undo"
+    },
+    {
+      "name": "undone",
+      "how": "Undo: back to the ask with an info callout"
+    },
+    {
+      "name": "already answered",
+      "how": "?state=answered: fd-decision-outcome data-tone=\"info\""
+    },
+    {
+      "name": "expired",
+      "how": "?state=expired: fd-states data-state=\"expired\""
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading"
+    },
+    {
+      "name": "error",
+      "how": "?state=error"
+    }
+  ],
+  "example": "templates/answer.html",
+  "provenance": [
+    "Fragmatic prototype: message.html",
+    "Fragmatic prototype: client.html"
+  ],
+  "since": "0.7.0"
+}

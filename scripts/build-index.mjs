@@ -3,8 +3,9 @@
 // agent to read whole. Reads contract/catalog.json (run build-catalog first); writes nothing else. Deterministic.
 // Entry: id, kind, name, family, job, aka[], surfaces[], data[], use (first use-when), not [{when-less ids}] (the
 // "instead" ids of avoid-when that name a component or template), docs (docs/<page>.html#<section>, or a template path).
-// A template has no card, so its aka, surfaces and data come from TEMPLATE_META below (the judgement a template card
-// would hold), its job from templates/index.html, its use from its job, and its docs from its path.
+// A template's job comes from templates/index.html and its docs from its path. Its aka, surfaces, data, use and not come
+// from its card, contract/cards/templates/<slug>.json, when it has one (useWhen[0] is the use, avoidWhen insteads that
+// name a component or template are the not); otherwise from TEMPLATE_META below, with its job as the use.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -41,6 +42,12 @@ export const TEMPLATE_META = {
   usage: { aka: ['credits', 'quota', 'consumption', 'metrics page', 'analytics', 'billing usage'], surfaces: ['app'], data: ['series', 'list'] },
 };
 
+/** A template's card, contract/cards/templates/<slug>.json, or null. */
+function templateCard(id) {
+  const file = path.join(ROOT, 'contract/cards/templates', `${id}.json`);
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+}
+
 const clean = (s) => String(s || '').replace(/\s+/g, ' ').trim();
 
 export function buildIndex(catalog) {
@@ -58,11 +65,13 @@ export function buildIndex(catalog) {
   }
   for (const t of catalog.templates) {
     const id = path.basename(t.path, '.html');
-    const m = TEMPLATE_META[id];
-    if (!m) throw new Error(`template ${id} has no TEMPLATE_META entry in scripts/build-index.mjs`);
+    const card = templateCard(id);
+    const m = card || TEMPLATE_META[id];
+    if (!m) throw new Error(`template ${id} has no card (contract/cards/templates/${id}.json) and no TEMPLATE_META entry in scripts/build-index.mjs`);
+    const not = card ? [...new Set(card.avoidWhen.map((a) => a.instead).filter((i) => ids.has(i) || tpl.has(i)))] : [];
     entries.push({
       id, kind: 'template', name: t.title, family: 'Templates', job: clean(t.job), aka: m.aka,
-      surfaces: m.surfaces, data: m.data, use: clean(t.job), not: [], docs: t.path,
+      surfaces: m.surfaces, data: m.data, use: clean(card ? card.useWhen[0] : t.job), not, docs: t.path,
     });
   }
   // A template and a component may share an id (form): keep the kind in the sort so output is stable.

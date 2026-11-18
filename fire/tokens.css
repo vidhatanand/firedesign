@@ -307,6 +307,8 @@
    --fd-accent-contrast  text/icon on the solid fill: white or a near-black tinted to the accent, whichever
                          reaches 4.5:1 (white when both do and the accent asks for it)
    --fd-accent-text      accent used AS text: 4.5:1 on the page, on surfaces and on the 8% accent wash over them
+   --fd-focus            the focus ring: the accent where it reaches 3:1 on the page, the well and the surfaces,
+                         else the accent text (fire/js/palettes.js focusOf; build-palettes.mjs --check holds it)
    -------------------------------------------------------------------------- */
 :root,
 [data-accent="ember"] {
@@ -315,6 +317,7 @@
   --fd-accent-contrast: #20120e;   /* white reaches only 3.2:1 on this orange; the brown-black reaches 5.8 */
   --fd-accent-text: light-dark(#be4000, #fb6a2a);   /* the orange itself is 3:1 on the light page */
   --fd-accent-glow: light-dark(rgb(250 60 25 / 0.28), rgb(250 60 25 / 0.36)); /* warm inner shade of the primary button */
+  --fd-focus: light-dark(#be4000, #fb6a2a);   /* the orange is 2.9:1 on the light well: the ring takes the accent text */
 }
 [data-accent="volt"] {
   --fd-accent: light-dark(#b8f02c, #c6f63f);
@@ -322,6 +325,7 @@
   --fd-accent-contrast: #141412;
   --fd-accent-text: light-dark(#4d6b00, #c6f63f);
   --fd-accent-glow: light-dark(rgb(120 170 0 / 0.3), rgb(120 170 0 / 0.3));
+  --fd-focus: light-dark(#4d6b00, #c6f63f);   /* lime is 1.3:1 on a light page: the ring takes the accent text */
 }
 [data-accent="iris"] {
   --fd-accent: light-dark(#6a5cff, #8478ff);
@@ -329,6 +333,7 @@
   --fd-accent-contrast: light-dark(#ffffff, #151521);
   --fd-accent-text: light-dark(#5140e6, #a79eff);
   --fd-accent-glow: light-dark(rgb(70 40 230 / 0.3), rgb(70 40 230 / 0.4));
+  --fd-focus: light-dark(#6a5cff, #8478ff);
 }
 [data-accent="ocean"] {
   --fd-accent: light-dark(#1f6feb, #4b8ff5);
@@ -336,6 +341,7 @@
   --fd-accent-contrast: light-dark(#ffffff, #0f1621);
   --fd-accent-text: light-dark(#1a5bc4, #7fb0fa);
   --fd-accent-glow: light-dark(rgb(10 60 200 / 0.3), rgb(10 60 200 / 0.4));
+  --fd-focus: light-dark(#1f6feb, #4b8ff5);
 }
 [data-accent="forest"] {
   --fd-accent: light-dark(#1f9d55, #3cc47a);
@@ -343,6 +349,7 @@
   --fd-accent-contrast: light-dark(#0f1911, #0e1912);
   --fd-accent-text: light-dark(#167a41, #5fd896);
   --fd-accent-glow: light-dark(rgb(0 110 50 / 0.3), rgb(0 110 50 / 0.4));
+  --fd-focus: light-dark(#167a41, #3cc47a);   /* the green is 2.8:1 on a light well's fill: the ring takes the accent text */
 }
 [data-accent="ink"] {
   --fd-accent: light-dark(#262626, #f5f5f5);
@@ -350,6 +357,7 @@
   --fd-accent-contrast: light-dark(#ffffff, #0a0a0a);
   --fd-accent-text: light-dark(#262626, #f5f5f5);
   --fd-accent-glow: light-dark(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.1));
+  --fd-focus: light-dark(#262626, #f5f5f5);
 }
 :root,
 [data-accent],
@@ -361,8 +369,8 @@
   --fd-accent-16: color-mix(in srgb, var(--fd-accent) 16%, transparent);
   --fd-accent-24: color-mix(in srgb, var(--fd-accent) 24%, transparent);
   --fd-accent-40: color-mix(in srgb, var(--fd-accent) 40%, transparent);
-  --fd-focus: var(--fd-accent);
-  /* Focus ring: a gap in the surface colour, then the accent. */
+  /* Focus ring: a gap in the page colour, then --fd-focus (each palette sets it: the accent where it reaches 3:1 on
+     the page, the well and the surfaces, else the accent text). */
   --fd-ring: 0 0 0 2px var(--fd-bg), 0 0 0 4px var(--fd-focus);
   --fd-ring-inset: inset 0 0 0 2px var(--fd-focus);
   /* The primary button: inner shade + a short stack of tinted contact shadows. */

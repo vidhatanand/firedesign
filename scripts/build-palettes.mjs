@@ -16,6 +16,9 @@
 //                                         tokens.css declares them
 //   --fd-accent-text                      4.5:1 on --fd-bg, --fd-surface and --fd-accent-8 over each, here and in
 //                                         every [data-accent] block (against every palette's page and surface)
+//   --fd-focus                            3:1 on the page, the well, the surfaces, the fill on each and the accent wash, in
+//                                         every palette, toned map and [data-accent] block (against every palette),
+//                                         and equal to focusOf(): the accent when it reaches 3:1, else the accent text
 // The text steps are read from tokens.css and mixed exactly as the browser does: ink-wash at the step's alpha,
 // composited in sRGB over the background.
 
@@ -152,13 +155,16 @@ function check() {
   }
 
   // 3. The table.
-  const head = 'palette    mode   bg       accent   text     label    text/bg text/sf /wash  label  /hover ink   hover';
+  const head = 'palette    mode   bg       accent   text     label    focus    text/bg text/sf /wash  label  /hover ink   focus hover';
   console.log(`\n${head}\n${'-'.repeat(head.length)}`);
   for (const p of PALETTES) {
     const rows = measure(p.tokens, p.name, '');
     rows.forEach((row, m) => {
       const v = (k) => p.tokens[k][m];
-      console.log(`${(m ? '' : p.name).padEnd(10)} ${row.mode.padEnd(6)} ${v('--fd-bg')}  ${v('--fd-accent')}  ${v('--fd-accent-text')}  ${v('--fd-accent-contrast')}  ${r2(row.textBg)}  ${r2(row.textSurface)}  ${r2(row.textWash)}  ${r2(row.label)}  ${r2(row.labelHover)} ${r2(row.ink)}  ${row.hoverDL >= 0 ? '+' : ''}${row.hoverDL.toFixed(3)}`);
+      console.log(`${(m ? '' : p.name).padEnd(10)} ${row.mode.padEnd(6)} ${v('--fd-bg')}  ${v('--fd-accent')}  ${v('--fd-accent-text')}  ${v('--fd-accent-contrast')}  ${v('--fd-focus')}  ${r2(row.textBg)}  ${r2(row.textSurface)}  ${r2(row.textWash)}  ${r2(row.label)}  ${r2(row.labelHover)} ${r2(row.ink)} ${r2(row.focus)}  ${row.hoverDL >= 0 ? '+' : ''}${row.hoverDL.toFixed(3)}`);
+      // The ring is the accent wherever the accent reaches 3:1, and falls back only when it does not.
+      const want = engine.focusOf(v('--fd-accent'), v('--fd-accent-text'), v('--fd-ink'), engine.focusGrounds(p.tokens, m));
+      if (v('--fd-focus') !== want) fail(`${p.name} ${row.mode}: --fd-focus ${v('--fd-focus')} is not focusOf() ${want}`);
     });
     // Neutral chroma, so "tinted, not grey" is visible at a glance.
     const chroma = (k, m) => toOklch(parse(p.tokens[k][m]).rgb)[1].toFixed(3);
@@ -190,6 +196,8 @@ function check() {
     const hover = pairOf(d['--fd-accent-hover']);
     const label = pairOf(d['--fd-accent-contrast']);
     const text = pairOf(d['--fd-accent-text']);
+    if (!d['--fd-focus']) fail(`[data-accent="${mm[1]}"]: --fd-focus must be declared (the ring follows the accent)`);
+    const focus = pairOf(d['--fd-focus'] ?? d['--fd-accent']);
     const cells = [];
     for (const m of [0, 1]) {
       const mode = m === 0 ? 'light' : 'dark';
@@ -206,7 +214,9 @@ function check() {
         }
       }
       if (worst < TEXT_MIN) fail(`[data-accent="${mm[1]}"] ${mode}: accent-text ${worst.toFixed(2)} on a palette's page or surface (or the accent wash on it) < ${TEXT_MIN}`);
-      cells.push(`${mode} label ${lc.toFixed(2)}/${lh.toFixed(2)} text ${worst.toFixed(2)}`);
+      const ring = Math.min(...PALETTES.flatMap((p) => engine.focusGrounds({ ...p.tokens, '--fd-accent': accent }, m).map((g) => contrast(focus[m], g))));
+      if (ring < rules.FOCUS_MIN) fail(`[data-accent="${mm[1]}"] ${mode}: --fd-focus ${ring.toFixed(2)} on a palette's page, well or surface < ${rules.FOCUS_MIN}`);
+      cells.push(`${mode} label ${lc.toFixed(2)}/${lh.toFixed(2)} text ${worst.toFixed(2)} ring ${ring.toFixed(2)}`);
     }
     accentRows.push(`${mm[1]}: ${cells.join(', ')}`);
   }
@@ -281,6 +291,7 @@ function check() {
   console.log(`\ntone sweep: ${swept} toned maps checked (${tones.length - 1} tones × ${PALETTES.length} palettes × 2 contrast levels)`);
 
   checkStructure();
+  checkLooks();
 
   if (errors.length) {
     console.error(`\nFAILED: ${errors.length} violation(s)\n${errors.slice(0, 60).map((e) => `  ✗ ${e}`).join('\n')}${errors.length > 60 ? `\n  … and ${errors.length - 60} more` : ''}`);
@@ -329,21 +340,29 @@ function layerOf(value, m, tokens, table) {
 }
 const onto = (layer, ground) => (layer === null ? ground : layer.hex ?? rules.over(layer.base, layer.alpha, ground));
 
-function checkStructure() {
-  const SURFACES = ['objects', 'flat', 'outlined'];
-  const CONTROLS = ['soft', 'outlined', 'filled'];
+const SURFACES = ['objects', 'flat', 'outlined'];
+const CONTROLS = ['soft', 'outlined', 'filled'];
+/** Every palette × contrast level × surfaces × controls, or the cases given: [{ p: { name }, level, base, surfaces, controls }]. */
+function structureCases() {
+  const out = [];
+  for (const p of PALETTES) {
+    for (const level of ['default', 'high']) {
+      const base = engine.paletteTokens(p.name, { contrast: level });
+      for (const surfaces of SURFACES) for (const controls of CONTROLS) out.push({ p, level, base, surfaces, controls });
+    }
+  }
+  return out;
+}
+function checkStructure(cases = structureCases(), title = `${PALETTES.length} palettes × 2 modes × 2 contrast levels × ${SURFACES.length} surfaces × ${CONTROLS.length} controls`) {
   const worst = {};
   const note = (key, value, where) => { if (!worst[key] || value < worst[key].value) worst[key] = { value, where }; };
   let maps = 0;
-  for (const p of PALETTES) {
-    for (const level of ['default', 'high']) {
+  for (const { p, level, base, surfaces, controls } of cases) {
+    {
       const ladder = level === 'high' ? { ...LADDER, ...HIGH } : LADDER;
-      const base = engine.paletteTokens(p.name, { contrast: level });
-      // The default surfaces' focus ring, per mode: the floor for the other values.
-      const floor = [];
-      for (const surfaces of SURFACES) {
+      {
         const sTable = { ...ladder, ...blockOr(STRUCTURE_SELECTORS.surfaces(surfaces)) };
-        for (const controls of CONTROLS) {
+        {
           const table = { ...sTable, ...blockOr(STRUCTURE_SELECTORS.controls(controls)) };
           // The surface pair the value makes, as the browser resolves it on <html>.
           const tokens = { ...base };
@@ -397,13 +416,12 @@ function checkStructure() {
                 if (c < NONTEXT_MIN) fail(`${where}: ${name} ${c.toFixed(2)} on ${label} < ${NONTEXT_MIN}`);
               }
             }
-            // Focus: the accent band against the page-coloured gap and the surface the control sits on.
+            // Focus: the ring's band (--fd-focus) against the page-coloured gap and the surface the control sits on,
+            // at 3:1 under every surfaces value.
             if (controls === 'soft') {
-              const ring = Math.min(contrast(v('--fd-accent'), v('--fd-bg')), contrast(v('--fd-accent'), v('--fd-surface')));
-              if (surfaces === 'objects') floor[m] = ring;
-              note('focus ring', ring, where);
-              const want = Math.min(floor[m], NONTEXT_MIN);
-              if (ring < want - 0.005) fail(`${where}: the focus ring reaches ${ring.toFixed(2)}:1 on the page or a surface, under the default's ${floor[m].toFixed(2)}`);
+              const ring = Math.min(contrast(v('--fd-focus'), v('--fd-bg')), contrast(v('--fd-focus'), v('--fd-surface')));
+              note('focus ring (3:1)', ring, where);
+              if (ring < NONTEXT_MIN) fail(`${where}: the focus ring reaches ${ring.toFixed(2)}:1 on the page or a surface < ${NONTEXT_MIN}`);
             }
             maps++;
           }
@@ -411,10 +429,38 @@ function checkStructure() {
       }
     }
   }
-  console.log(`\nstructural dials: ${maps} maps (${PALETTES.length} palettes × 2 modes × 2 contrast levels × ${SURFACES.length} surfaces × ${CONTROLS.length} controls); worst ratio per rule:`);
+  console.log(`\nstructural dials: ${maps} maps (${title}); worst ratio per rule:`);
   for (const [key, { value, where }] of Object.entries(worst)) console.log(`  ${key.padEnd(34)} ${value.toFixed(2)}  ${where}`);
 }
 const NONTEXT_MIN = 3;
+
+/* ---------- 9. The named looks (contract/looks/named) ----------
+   Each look's palette, toned as the look tones it and at its own contrast level, through every palette rule, then
+   through the structural check under the look's own surfaces and controls. */
+function checkLooks() {
+  const dir = path.join(ROOT, 'contract/looks/named');
+  const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort() : [];
+  const cases = [];
+  const rows = [];
+  for (const f of files) {
+    const { name, record } = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    if (typeof record.palette !== 'string') { fail(`look ${name}: the palette must be a preset name (the Tweaks panel holds it whole)`); continue; }
+    const level = record.dials?.contrast === 'high' ? 'high' : 'default';
+    const tokens = toneTokens(engine.paletteTokens(record.palette, { contrast: level }), { ...TONE_DEFAULT, ...(record.tone || {}) });
+    const label = `look ${name} (${record.palette})`;
+    const before = errors.length;
+    measure(tokens, label, 'look');
+    checkText(tokens, label, 'look');
+    const surfaces = record.dials?.surfaces ?? 'objects';
+    const controls = record.dials?.controls ?? 'soft';
+    // The structural check measures the ring under the soft controls only; a look's ring is the same token.
+    cases.push({ p: { name: label }, level, base: tokens, surfaces, controls });
+    if (controls !== 'soft') cases.push({ p: { name: `${label} ring` }, level, base: tokens, surfaces, controls: 'soft' });
+    rows.push(`${name} ${record.palette}${level === 'high' ? ' high' : ''} ${surfaces}/${controls}${errors.length > before ? ' FAILS' : ''}`);
+  }
+  console.log(`\nnamed looks: ${rows.join(' · ')}`);
+  checkStructure(cases, `${files.length} named looks under their own surfaces and controls`);
+}
 
 function labOf(hex) {
   const [Lv, C, h] = toOklch(parse(hex).rgb);

@@ -8,6 +8,11 @@
      .fd-tweaks-head  (.fd-tweaks-grab, icon, .fd-tweaks-title, .fd-tweaks-reset, close)
      .fd-tweaks-body > .fd-tweaks-section > .fd-tweaks-eyebrow + .fd-tweaks-row…
      .fd-tweaks-foot  (Copy CSS, .fd-tweaks-summary)
+   .fd-tweaks-looks > .fd-tweaks-look[role=radio][data-value]   a named look (fire/js/looks.js), first in the panel:
+       .fd-tweaks-look-tile     its page, with --_tw-look-bg, -ink, -accent and -radius (the corners dial) set by JS
+       .fd-tweaks-look-sample[data-type]   "Ag" in its headings face, in its ink
+       .fd-tweaks-look-mark[data-mark]     its signature mark, three glyphs in its accent
+       .fd-tweaks-look-name     the label; the section's eyebrow carries .fd-tweaks-readout (the active look, or Custom)
    .fd-tweaks-swatch[data-palette][role=radio]   a palette in miniature: page, ink, accent
    .fd-tweaks-face[data-value][role=radio]       a type set: "Ag" set in its headings face (.fd-tweaks-face-sample[data-type]) and its name
    .fd-tweaks-readout                            the selected type set's faces, beside the Typeface label
@@ -34,6 +39,10 @@
   --fd-tweaks-ring: 1.5px;           /* the selected ring, in the swatch's own accent */
   --fd-tweaks-ring-gap: 2px;         /* the gap between tile and ring */
   --fd-tweaks-chip-h: 28px;          /* a signature chip */
+  --fd-tweaks-look-h: 48px;          /* a look tile */
+  --fd-tweaks-look-face: 1.125rem;   /* its "Ag" */
+  --fd-tweaks-look-mark: 0.625rem;   /* its mark glyphs */
+  --fd-tweaks-look-radius: 6px;      /* its corner at corners 1×; the look's own corners scale it */
   /* sliders */
   --fd-tweaks-track: 6px;            /* tone tracks: tall enough to show their sweep */
   --fd-tweaks-thumb: 16px;           /* the system thumb, re-centred on the taller track */
@@ -203,6 +212,64 @@
 .fd-tweaks-chip:active { scale: var(--fd-press-scale); }
 .fd-tweaks-chip[aria-checked="true"] { color: var(--fd-text); box-shadow: inset 0 0 0 var(--fd-tweaks-ring) var(--fd-accent); }
 .fd-tweaks-chip:focus-visible { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line), 0 0 0 var(--fd-tweaks-ring-gap) var(--_tw-panel), 0 0 0 calc(var(--fd-tweaks-ring-gap) * 2) var(--_tw-focus); }
+
+/* ---------- Looks: a strip of eight, four to a row ----------
+   The tile is the look in miniature: its page, ink and accent (as the look tones its palette), its corners, its
+   headings face and its signature mark. The ring is the page's own accent and focus colour, as for the swatches. */
+.fd-tweaks-looks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--fd-space-2-5) var(--fd-space-1-5); }
+.fd-tweaks-eyebrow > .fd-tweaks-readout { text-transform: none; letter-spacing: normal; font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); }
+.fd-tweaks-look {
+  display: grid; gap: var(--fd-space-1); min-inline-size: 0;
+  border-radius: var(--fd-radius-md);
+  color: var(--fd-text-3);
+  font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  transition: color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-tweaks-look:hover { color: var(--fd-text-2); }
+.fd-tweaks-look:active { scale: var(--fd-press-scale); }
+.fd-tweaks-look:focus-visible { box-shadow: none; }
+.fd-tweaks-look[aria-checked="true"] { color: var(--fd-text); }
+.fd-tweaks-look-tile {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  block-size: var(--fd-tweaks-look-h);
+  padding: var(--fd-space-1-5) var(--fd-space-2);
+  border-radius: calc(var(--fd-tweaks-look-radius) * var(--_tw-look-radius, 1));
+  background: var(--_tw-look-bg, var(--fd-bg));
+  box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out);
+}
+/* The accent as a bar along the tile's foot. */
+.fd-tweaks-look-tile::after {
+  content: ""; position: absolute; inset: auto 0 0;
+  block-size: var(--fd-space-1);
+  background: var(--_tw-look-accent, var(--fd-accent));
+}
+.fd-tweaks-look:hover > .fd-tweaks-look-tile { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong); }
+.fd-tweaks-look[aria-checked="true"] > .fd-tweaks-look-tile {
+  box-shadow:
+    inset 0 0 0 var(--fd-hairline) var(--fd-line),
+    0 0 0 var(--fd-tweaks-ring-gap) var(--_tw-panel),
+    0 0 0 calc(var(--fd-tweaks-ring-gap) + var(--fd-tweaks-ring)) var(--fd-accent);
+}
+.fd-tweaks-look:focus-visible > .fd-tweaks-look-tile {
+  box-shadow:
+    inset 0 0 0 var(--fd-hairline) var(--fd-line),
+    0 0 0 var(--fd-tweaks-ring-gap) var(--_tw-panel),
+    0 0 0 calc(var(--fd-tweaks-ring-gap) * 2) var(--_tw-focus);
+}
+.fd-tweaks-look-sample {
+  color: var(--_tw-look-ink, var(--fd-ink));
+  font-family: var(--fd-font-display); font-size: var(--fd-tweaks-look-face); line-height: 1;
+  font-weight: var(--fd-weight-display); letter-spacing: var(--fd-ls-display);
+  text-align: start;
+}
+.fd-tweaks-look-mark {
+  align-self: flex-end;
+  color: var(--_tw-look-accent, var(--fd-accent));
+  font-family: var(--fd-font-mono); font-size: var(--fd-tweaks-look-mark); line-height: 1; letter-spacing: var(--fd-ls-caps);
+}
+.fd-tweaks-look-name { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Palette swatches and typeface tiles ----------
    Two radio grids built the same way: a button (the radio), a 40px tile that carries the selection ring, a name. */

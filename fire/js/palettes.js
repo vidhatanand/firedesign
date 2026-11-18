@@ -5,8 +5,9 @@
  *
  * A palette is a full map of the colour tokens a palette owns, each as [light, dark]:
  *   { '--fd-bg': ['#f9f9f9', '#0a0a0a'], … }
- * Everything else (the ink ladder --fd-a*, text steps, fills, accent washes, focus ring, the primary button's shadow)
- * re-derives from these on [data-palette] in tokens.css.
+ * Everything else (the ink ladder --fd-a*, text steps, fills, accent washes, the ring's shadow, the primary button's
+ * shadow) re-derives from these on [data-palette] in tokens.css. --fd-focus, the focus ring's colour, is the accent
+ * where it reaches 3:1 on everything a control sits on (focusGrounds), else the accent text (focusOf).
  *
  * `ember` is the default and is exactly the literals in tokens.css. The others are written as a compact spec
  * (neutral hue and tint, ink, accent, label) and expanded at module load against ember's lightness structure,
@@ -27,6 +28,9 @@
  *   expandSpec(spec)         a compact spec (the SPECS form below) → a palette object, on ember's lightness structure
  *   shift(hex, dL)           the colour with its OKLCH L moved by dL (chroma and hue kept, gamut-mapped)
  *   nearBlack(accent)        the near-black label tinted toward an accent's hue that reaches 4.5:1 on it
+ *   focusOf(accent, accentText, ink, grounds)   the focus ring colour: the first of the three at 3:1 on every ground
+ *   focusGrounds(tokens, m)  those grounds: page, well, surfaces, the neutral fill on each, the accent wash on page and surface
+ *   FOCUS_MIN                3 (WCAG 1.4.11, non-text contrast)
  *   (fire/js/theme.js builds palettes from an accent or brand colours with these; palette-rules.js checks them)
  */
 
@@ -147,10 +151,11 @@ export const PALETTE_TOKENS = [
   '--fd-ink', '--fd-ink-inverse', '--fd-wash', '--fd-ink-wash', '--fd-bg', '--fd-bg-sunken', '--fd-surface',
   '--fd-surface-raised', '--fd-surface-inverse', '--fd-scrim', '--fd-thumb', '--fd-line-faint', '--fd-line',
   '--fd-line-strong', '--fd-accent', '--fd-accent-hover', '--fd-accent-contrast', '--fd-accent-text', '--fd-accent-glow',
+  '--fd-focus',
 ];
 export const CONTRAST_TOKENS = ['--fd-line-faint', '--fd-line', '--fd-line-strong'];
 const ACCENT_GROUP = new Set(['--fd-accent', '--fd-accent-hover', '--fd-accent-text', '--fd-accent-glow']);
-const NEUTRAL_GROUP = new Set(PALETTE_TOKENS.filter((t) => !ACCENT_GROUP.has(t) && t !== '--fd-accent-contrast'));
+const NEUTRAL_GROUP = new Set(PALETTE_TOKENS.filter((t) => !ACCENT_GROUP.has(t) && t !== '--fd-accent-contrast' && t !== '--fd-focus'));
 
 /* The default, byte for byte the literals in tokens.css (scripts/build-palettes.mjs --check asserts it). */
 const EMBER = {
@@ -173,6 +178,7 @@ const EMBER = {
   '--fd-accent-contrast': ['#20120e', '#20120e'],  // white is 3.2:1 on this orange; this brown-black is 5.8
   '--fd-accent-text': ['#be4000', '#fb6a2a'],       // the orange is 3:1 as text on the light page
   '--fd-accent-glow': ['rgb(250 60 25 / 0.28)', 'rgb(250 60 25 / 0.36)'],
+  '--fd-focus': ['#be4000', '#fb6a2a'],             // the orange is 2.9:1 on the light well, so the ring is the accent text
 };
 /* [data-contrast="high"] lines in tokens.css. */
 const EMBER_CONTRAST = {
@@ -253,6 +259,25 @@ function glowOf(accent, mode) {
   if (C < 0.02) return format([0, 0, 0], mode === 0 ? 0.3 : 0.1);
   return format(fit([Math.max(0.32, L - 0.16), C * 1.2, h]), mode === 0 ? 0.3 : 0.38);
 }
+/* The focus ring's colour: the accent while it reaches 3:1 (WCAG 1.4.11) on the page, the well, the surface and the
+   raised surface, so the ring reads wherever a control sits; otherwise the accent text (4.5:1 on the page and the
+   surface by its own rule), and the ink when even that misses on the well or the raised surface. */
+export const FOCUS_MIN = 3;
+const FOCUS_TARGET = 3.02; // a hair over 3 so the rounded hex still passes
+export function focusOf(accent, accentText, ink, grounds) {
+  return [accent, accentText, ink].find((c) => grounds.every((g) => contrast(c, g) >= FOCUS_TARGET)) ?? ink;
+}
+/* What a focused control sits on: the page, the well, the surfaces, the neutral fill on each (--fd-fill: the wash at
+   4% light, 5.5% dark, as tokens.css mixes it) and the accent wash on the page and the surface (a selected row, an
+   accent snippet). */
+const FILL_ALPHA = [0.04, 0.055];
+export function focusGrounds(t, m) {
+  const bases = ['--fd-bg', '--fd-bg-sunken', '--fd-surface', '--fd-surface-raised'].map((k) => t[k][m]);
+  const wash = parse(t['--fd-wash'][m]).rgb;
+  const fills = bases.map((b) => format(wash.map((c, i) => c * FILL_ALPHA[m] + parse(b).rgb[i] * (1 - FILL_ALPHA[m]))));
+  return [...bases, ...fills, washOver(t['--fd-accent'][m], t['--fd-bg'][m]), washOver(t['--fd-accent'][m], t['--fd-surface'][m])];
+}
+
 export const shift = (hex, dL) => {
   const [L, C, h] = toOklch(hex);
   return oklch(Math.min(0.999, Math.max(0.02, L + dL)), C, h);
@@ -364,6 +389,7 @@ function expand(spec) {
   t['--fd-accent-hover'] = pair((m) => hoverOf(accent[m], t['--fd-accent-contrast'][m]));
   t['--fd-accent-text'] = pair((m) => ensureContrast(accent[m], accentGrounds(accent[m], t['--fd-bg'][m], t['--fd-surface'][m]), m));
   t['--fd-accent-glow'] = pair((m) => glowOf(accent[m], m));
+  t['--fd-focus'] = pair((m) => focusOf(accent[m], t['--fd-accent-text'][m], t['--fd-ink'][m], focusGrounds(t, m)));
 
   // High-contrast lines: tokens.css's [data-contrast="high"] steps, in this palette's hue.
   const hc = {};
@@ -460,6 +486,8 @@ function enforce(t, labels) {
     t['--fd-accent-contrast'][m] = pickLabel(t['--fd-accent'][m], labels[m]);
     // The bent hover follows the label the bent accent ended up with.
     if (t['--fd-accent-hover']) t['--fd-accent-hover'][m] = hoverOf(t['--fd-accent'][m], t['--fd-accent-contrast'][m]);
+    // The ring follows the bent accent and the warmed neutrals.
+    if (t['--fd-focus'] && t['--fd-ink'] && t['--fd-bg-sunken'] && t['--fd-surface-raised'] && t['--fd-wash']) t['--fd-focus'][m] = focusOf(t['--fd-accent'][m], t['--fd-accent-text'][m], t['--fd-ink'][m], focusGrounds(t, m));
   }
   return t;
 }

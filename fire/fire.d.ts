@@ -262,12 +262,15 @@ export type TypeSetName =
   | 'geist' | 'grotesk' | 'editorial' | 'book' | 'atelier' | 'poster' | 'terminal' | 'pixel' | 'matrix' | 'cyber'
   | 'loud' | 'gallery';
 
+/** The named looks (LOOKS in fire/js/looks.js, from contract/looks/named). */
+export type LookName = 'steady' | 'operator' | 'folio' | 'hearth' | 'instrument' | 'marquee' | 'gentle' | 'clear';
+
 /** The colour tokens a palette sets (PALETTE_TOKENS). */
 export type PaletteToken =
   | '--fd-ink' | '--fd-ink-inverse' | '--fd-wash' | '--fd-ink-wash' | '--fd-bg' | '--fd-bg-sunken' | '--fd-surface'
   | '--fd-surface-raised' | '--fd-surface-inverse' | '--fd-scrim' | '--fd-thumb' | '--fd-line-faint' | '--fd-line'
   | '--fd-line-strong' | '--fd-accent' | '--fd-accent-hover' | '--fd-accent-contrast' | '--fd-accent-text'
-  | '--fd-accent-glow';
+  | '--fd-accent-glow' | '--fd-focus';
 /** The lines high contrast replaces (CONTRAST_TOKENS). */
 export type ContrastToken = '--fd-line-faint' | '--fd-line' | '--fd-line-strong';
 /** A colour in light and dark mode. */
@@ -1382,4 +1385,8 @@ export declare namespace tweaks {
   export function close(): void;
   /** Open or close the panel. */
   export function toggle(trigger?: Element | null): void;
+  /** Apply a named look whole (fire/js/looks.js; the theme stays the viewer's). An unknown name changes nothing. */
+  export function applyLook(name: LookName): TweaksState;
+  /** The named look the state equals, or null (Custom). */
+  export function look(state?: TweaksState): LookName | null;
 }

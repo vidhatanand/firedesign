@@ -15,6 +15,15 @@
  *                  <button class="fd-btn-text fd-tweaks-reset" data-tweaks-action="reset">Reset</button>
  *                  <button class="fd-btn" data-icon-only data-tweaks-action="close" aria-label="Close tweaks">
  *                <div class="fd-tweaks-body"> sections of .fd-tweaks-row; every control carries data-tweak="<key>":
+ *                  .fd-tweaks-looks[role=radiogroup][data-tweak=look] > .fd-tweaks-look[role=radio][data-value]   the named looks
+ *                      (fire/js/looks.js), first in the panel: one click applies a whole theme record
+ *                      .fd-tweaks-look-tile         the look in miniature: its page, ink and accent (--_tw-look-bg, -ink,
+ *                                                   -accent, written by JS), its corners (--_tw-look-radius)
+ *                      .fd-tweaks-look-sample[data-type]   "Ag" in the look's headings face
+ *                      .fd-tweaks-look-mark[data-mark]     its signature mark, three glyphs in its accent
+ *                      .fd-tweaks-look-name         the label
+ *                    the section's eyebrow carries .fd-tweaks-readout[data-tweaks-look]: the active look's name,
+ *                    "Fire default" or "Custom" (any change after a look was applied)
  *                  .fd-segmented[data-tweak]           theme, density, lines, textSize, motion, surfaces, elevation, controls,
  *                                                      headings (nav.js drives them)
  *                  .fd-tweaks-palettes[role=radiogroup][data-tweak=palette] > .fd-tweaks-swatch[role=radio][data-palette][data-value]
@@ -56,7 +65,15 @@
  *            texture.js, shell.css): the panel sets field, mark, marks and intensity; cell and ramp ride along from a theme record.
  *            A data-signature-* a page declares on <html> is the default, as for the palette.
  *
- * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial), reset(), toCss(), toTheme()
+ * Looks     applyLook(name) sets the whole state from a named look (fire/js/looks.js; the theme stays the viewer's);
+ *            look() is the name of the look the state equals, or null. Copy CSS names the look in its comment; Copy
+ *            theme copies the look's record exactly.
+ *            ?look=<name> in the page's address (fire/boot.js puts it on <html> before the first paint, with
+ *            data-fd-look): the state starts as that look and nothing is saved, so a framed preview (docs/looks.html)
+ *            neither reads nor changes the viewer's own tweaks. A name that is not a look is ignored.
+ *
+ * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial), reset(), toCss(), toTheme(),
+ *      applyLook(name), look()
  *      toTheme() is the state as a theme record (fire/js/theme.js): set(fromThemeRecord(record)) applies one.
  * Events: fd:change on <html> with detail { name: 'tweaks', value: state } after every change; fd:open / fd:close on the panel.
  */
@@ -69,6 +86,7 @@ import {
   getPalette, paletteTokens, toneTokens, cssValue, oklch,
 } from './palettes.js';
 import { TYPEFACES, DEFAULT_TYPEFACE, getTypeface } from './typefaces.js';
+import { LOOKS, getLook } from './looks.js';
 import {
   toThemeRecord, SIGNATURE_DEFAULT, SIGNATURE_CHOICES, SIGNATURE_RANGES, SIGNATURE_ATTRIBUTES,
   DIAL_DEFAULTS, STRUCTURE_CHOICES, STRUCTURE_ATTRIBUTES,
@@ -98,6 +116,10 @@ const snap = (v, [min, max, step]) => clamp(Math.round(v / step) * step, min, ma
 const OWNED = [...PALETTE_TOKENS, '--fd-radius-scale', '--fd-hairline', '--fd-motion', '--fd-texture'];
 
 const root = document.documentElement;
+/* ?look=<name>: a preview of a named look, held but never saved. */
+const PREVIEW = (() => {
+  try { return getLook(new URLSearchParams(location.search).get('look') || '') ?? null; } catch { return null; }
+})();
 
 /* One signature dial from a stored value or an attribute: the value, or undefined when it is not one the dial accepts. */
 function cleanSignature(key, input) {
@@ -185,6 +207,7 @@ function sanitize(input = {}) {
 }
 
 function load() {
+  if (PREVIEW) return sanitize({ ...PREVIEW.state, theme: getTheme() });
   let saved = {};
   try { saved = JSON.parse(store.get(KEY) || '{}') || {}; } catch { saved = {}; }
   return sanitize({ ...saved, theme: getTheme(), density: root.getAttribute('data-density') || 'comfortable' });
@@ -237,7 +260,9 @@ function apply(s) {
   const structAttrs = structureAttrs(s);
   for (const name of Object.values(STRUCTURE_ATTRIBUTES)) attr(name, structAttrs[name] ?? null);
   if (getTheme() !== s.theme) setTheme(s.theme);
-  if ((root.getAttribute('data-density') || 'comfortable') !== s.density) setDensity(s.density);
+  // A preview writes density straight to <html>: setDensity would save it as the viewer's own.
+  if (PREVIEW) { attr('data-density', s.density === 'comfortable' ? null : s.density); attr('data-accent', null); }
+  else if ((root.getAttribute('data-density') || 'comfortable') !== s.density) setDensity(s.density);
   const props = inlineProps(s);
   for (const name of OWNED) if (!(name in props) && root.style.getPropertyValue(name)) root.style.removeProperty(name);
   for (const [name, value] of Object.entries(props)) if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
@@ -250,6 +275,7 @@ function flush() {
   if (!persistTimer) return;
   clearTimeout(persistTimer);
   persistTimer = 0;
+  if (PREVIEW) return;
   const out = {};
   for (const k of differs(state, DEFAULTS)) if (k !== 'theme' && k !== 'density') out[k] = k === 'tone' || k === 'signature' ? { ...state[k] } : state[k];
   store.set(KEY, Object.keys(out).length ? JSON.stringify(out) : null);
@@ -305,6 +331,21 @@ export function set(partial = {}) {
   return get();
 }
 
+/* ---------- Looks ---------- */
+const lookKeys = Object.keys(DEFAULTS).filter((k) => k !== 'theme');
+/** The named look the state equals (every key but the theme), or null. */
+export function look(s = state) {
+  const found = LOOKS.find((l) => !differs(sanitize({ ...l.state, theme: s.theme }), s).length);
+  return found ? found.name : null;
+}
+/** Apply a named look whole (the theme stays the viewer's). Returns the full state; an unknown name changes nothing. */
+export function applyLook(name) {
+  const l = getLook(name);
+  if (l) commit(sanitize({ ...Object.fromEntries(lookKeys.map((k) => [k, l.state[k]])), theme: state.theme }));
+  return get();
+}
+const lookLabel = (s = state) => { const n = look(s); return n ? getLook(n).label : isDefault(s) ? 'Fire default' : 'Custom'; };
+
 /** Everything back to the page's own look (its declared palette and type set, else Ember and Geist): no inline
  *  properties, and no attribute the page did not declare. */
 export function reset() {
@@ -321,7 +362,8 @@ const fmtX = (v) => `${Number(v.toFixed(3))}×`;
 
 function summary(s = state) {
   const structure = STRUCTURE.filter((k) => s[k] !== DIAL_DEFAULTS[k]).map((k) => ` · ${s[k]} ${k}`).join('');
-  return `${s.palette}${isDefaultTone(s.tone) ? '' : ' (toned)'} · ${s.type === DEFAULT_TYPEFACE ? '' : `${s.type} · `}${s.density} · ${fmtX(s.corners)}${structure}`;
+  const named = look(s);
+  return `${named ? `${getLook(named).label} look · ` : ''}${s.palette}${isDefaultTone(s.tone) ? '' : ' (toned)'} · ${s.type === DEFAULT_TYPEFACE ? '' : `${s.type} · `}${s.density} · ${fmtX(s.corners)}${structure}`;
 }
 
 /** A ready-to-paste block: the attributes to set on <html>, then :root with every overridden custom property. */
@@ -337,6 +379,8 @@ export function toCss(s = state) {
   for (const [name, value] of Object.entries(signatureAttrs(s.signature))) attrs.push(`${name}="${value}"`);
   for (const [name, value] of Object.entries(structureAttrs(s))) attrs.push(`${name}="${value}"`);
   const notes = [`On <html>: ${attrs.length ? attrs.join(' ') : 'nothing (default attributes)'}`];
+  const named = look(s);
+  if (named) notes.unshift(`The ${getLook(named).label} look (contract/looks/named/${named}.json).`);
   if (s.palette !== DEFAULT_PALETTE && !toned) notes.push('data-palette needs fire/palettes.css.');
   if (s.type !== DEFAULT_TYPEFACE) notes.push('Type sets need fire/typefaces.css (part of fire.css).');
   if (Object.keys(signatureAttrs(s.signature)).length) notes.push('The data-signature-* attributes restyle every texture and frame that does not set its own.');
@@ -387,7 +431,7 @@ function spokenText(key, v) {
     default: return valueText(key, v);
   }
 }
-const readKey = (s, key) => (key.startsWith('tone.') ? s.tone[key.slice(5)] : key.startsWith('signature.') ? s.signature[key.slice(10)] : s[key]);
+const readKey = (s, key) => (key === 'look' ? look(s) ?? '' : key.startsWith('tone.') ? s.tone[key.slice(5)] : key.startsWith('signature.') ? s.signature[key.slice(10)] : s[key]);
 const defaultOf = (key) => readKey(DEFAULTS, key);
 
 function segmented(key, options, labelledby = `fd-tw-${key}-label`) {
@@ -415,6 +459,28 @@ function swatches() {
     const on = p.name === state.palette;
     return `<button class="fd-tweaks-swatch" type="button" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" data-palette="${p.name}" data-value="${p.name}" title="${esc(p.note)}"><span class="fd-tweaks-swatch-tile" aria-hidden="true"><span class="fd-tweaks-swatch-dot"></span><span class="fd-tweaks-swatch-ink"></span></span><span class="fd-tweaks-swatch-name">${esc(p.label)}</span></button>`;
   }).join('')}</div>`;
+}
+
+/* The named looks: a tile each, in the look's own page, ink, accent, corners, headings face and mark. The colours and
+   corners are custom properties written by build() (no style attribute in the markup). */
+const MARK_GLYPHS = { auto: '···', chars: '#%&', dots: '•••', squares: '▪▪▪', plus: '+++', dashes: '———' };
+function looks() {
+  const current = look();
+  return `<div class="fd-tweaks-looks" role="radiogroup" aria-label="Looks" data-tweak="look">${LOOKS.map((l, i) => {
+    const on = l.name === current;
+    const reachable = on || (!current && i === 0);
+    return `<button class="fd-tweaks-look" type="button" role="radio" aria-checked="${on}" tabindex="${reachable ? 0 : -1}" data-value="${l.name}" title="${esc(l.note)}"><span class="fd-tweaks-look-tile" aria-hidden="true"><span class="fd-tweaks-look-sample" data-type="${l.state.type}">Ag</span><span class="fd-tweaks-look-mark" data-mark="${l.state.signature.mark}">${MARK_GLYPHS[l.state.signature.mark] ?? MARK_GLYPHS.auto}</span></span><span class="fd-tweaks-look-name">${esc(l.label)}</span></button>`;
+  }).join('')}</div>`;
+}
+function paintLooks() {
+  for (const tile of $$('.fd-tweaks-look', panel)) {
+    const l = getLook(tile.dataset.value);
+    const el = $('.fd-tweaks-look-tile', tile);
+    el.style.setProperty('--_tw-look-bg', l.swatch.bg);
+    el.style.setProperty('--_tw-look-ink', l.swatch.ink);
+    el.style.setProperty('--_tw-look-accent', l.swatch.accent);
+    el.style.setProperty('--_tw-look-radius', String(l.state.corners));
+  }
 }
 
 /* The type sets: a tile each. The sample carries data-type, so the set's tokens resolve on it by themselves;
@@ -454,6 +520,7 @@ function markup() {
     <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close tweaks" data-tweaks-action="close">${icon('x')}</button>
   </header>
   <div class="fd-tweaks-body">
+    ${section('looks', `Looks <span class="fd-tweaks-readout" data-tweaks-look>${esc(lookLabel())}</span>`, looks())}
     ${section('theme', 'Theme', segmented('theme', [
       ['light', `${icon('sun', { size: 14 })}<span>Light</span>`],
       ['dark', `${icon('moon', { size: 14 })}<span>Dark</span>`],
@@ -503,7 +570,7 @@ function markup() {
 let panel = null;
 let lastTrigger = null;
 const desktop = typeof matchMedia === 'function' ? matchMedia('(min-width: 641px)') : { matches: true };
-const GRIDS = '.fd-tweaks-palettes, .fd-tweaks-faces, .fd-tweaks-chips'; // the radio grids; data-tweak names the state key
+const GRIDS = '.fd-tweaks-looks, .fd-tweaks-palettes, .fd-tweaks-faces, .fd-tweaks-chips'; // the radio grids; data-tweak names the state key
 const triggers = () => $$('[data-fd-tweaks-open]');
 const isOpen = () => panel?.dataset.state === 'open';
 
@@ -520,6 +587,7 @@ function build() {
   initNav(panel);
   initForms(panel);
   bindPanel(panel);
+  paintLooks();
   restorePosition();
   sync();
   panel.getBoundingClientRect(); // commit the closed state so the first open animates
@@ -565,12 +633,18 @@ function sync() {
     if (item && item.getAttribute('aria-checked') !== 'true') selectSegment(item, { silent: true });
   }
   for (const grid of $$(GRIDS, panel)) {
-    for (const item of $$('[role="radio"]', grid)) {
-      const on = item.dataset.value === String(readKey(state, grid.dataset.tweak));
+    const items = $$('[role="radio"]', grid);
+    const value = String(readKey(state, grid.dataset.tweak));
+    for (const item of items) {
+      const on = item.dataset.value === value;
       item.setAttribute('aria-checked', String(on));
       item.tabIndex = on ? 0 : -1;
     }
+    // No look selected (Custom): the first tile keeps the group reachable by Tab.
+    if (items.length && !items.some((i) => i.tabIndex === 0)) items[0].tabIndex = 0;
   }
+  const lookReadout = $('[data-tweaks-look]', panel);
+  if (lookReadout) lookReadout.textContent = lookLabel();
   const faceReadout = $('[data-tweaks-typeface]', panel);
   if (faceReadout) faceReadout.textContent = typeFaces(getTypeface(state.type));
   for (const el of $$('.fd-slider[data-tweak]', panel)) {
@@ -598,7 +672,8 @@ function sync() {
 
 const parseValue = (key, raw) => (key === 'lines' ? Number(raw) : raw);
 function setKey(key, value) {
-  if (key.startsWith('tone.')) set({ tone: { [key.slice(5)]: value } });
+  if (key === 'look') applyLook(value);
+  else if (key.startsWith('tone.')) set({ tone: { [key.slice(5)]: value } });
   else if (key.startsWith('signature.')) set({ signature: { [key.slice(10)]: value } });
   else set({ [key]: value });
 }
@@ -635,7 +710,7 @@ function bindPanel(el) {
       }
       return;
     }
-    const choice = target.closest('.fd-tweaks-swatch, .fd-tweaks-face, .fd-tweaks-chip');
+    const choice = target.closest('.fd-tweaks-look, .fd-tweaks-swatch, .fd-tweaks-face, .fd-tweaks-chip');
     if (choice) { setKey(choice.closest(GRIDS).dataset.tweak, choice.dataset.value); return; }
     const action = target.closest('[data-tweaks-action]')?.dataset.tweaksAction;
     if (action === 'close') close();
@@ -645,7 +720,7 @@ function bindPanel(el) {
   });
   el.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') { event.preventDefault(); close(); return; }
-    if (event.target.matches?.('.fd-tweaks-swatch, .fd-tweaks-face, .fd-tweaks-chip')) gridKeys(event);
+    if (event.target.matches?.('.fd-tweaks-look, .fd-tweaks-swatch, .fd-tweaks-face, .fd-tweaks-chip')) gridKeys(event);
   });
   bindDrag(el);
 }

@@ -8,10 +8,12 @@
  *   drawn into a <canvas> at devicePixelRatio, sized by a ResizeObserver, and coloured by
  *   the element's CSS `color` (so tone, theme and accent all come from CSS).
  *
- *   data-fd-ascii     terrain | waves | orbit | rain | grid | flame | halftone | spark | any registered name
+ *   data-fd-ascii     terrain | waves | orbit | rain | grid | flame | halftone | spark | contour | stipple | bars | auto
+ *                     or a field you registered; absent or "auto" takes the page's signature field (below)
  *   data-tone         neutral (default) | accent | contrast            (CSS only)
  *   data-fade         left | right | top | bottom | x | y | radial     (CSS mask; "left" fades out toward the left)
- *   data-style        chars (default) | dots                           (dots: halftone discs instead of characters)
+ *   data-style        chars (default) | dots | squares | plus | dashes   (the mark: dots are halftone discs; squares, plus
+ *                     signs and dashes are drawn shapes whose size follows the ramp, all in the element's colour)
  *   data-ramp         default | soft | dense | glyph | rain, or a literal ramp such as " .:-=+*#"
  *   data-cell         cell size in px, "7x12" (default), "8" for square; dots default to "8x8"
  *   data-seed         number or string; defaults to the pattern name, so a page always looks the same
@@ -23,10 +25,23 @@
  *   data-side         terrain: which side rises, "right" (default) | "left"
  *   data-variant      grid: "flat" (default) | "perspective"
  *   data-shape        "blob": clip any field to a soft, noisy disc
+ *   data-signature    "own": pin the instance to its own field, mark, cell, ramp and intensity, whatever the page's dials say
  *
  *   Animation runs at ~12 fps on a shared requestAnimationFrame loop, pauses off-screen
  *   (IntersectionObserver) and in background tabs, and is a single static frame under
  *   prefers-reduced-motion. Colours are re-read on `fd:theme`, `fd:accent` and OS scheme changes.
+ *
+ * The page's signature
+ *   Five attributes on <html> restyle every instance at once. Per option: an instance pinned with data-signature="own"
+ *   keeps all its own options; otherwise a page dial that is set (not "auto") wins over the instance's own option;
+ *   otherwise the instance's own option; otherwise Fire's default. With every dial on auto nothing changes. Fire's theme record writes them (fire/js/theme.js, "signature"),
+ *   and so does the Tweaks panel. Changing one restyles every mounted field, glyph and loader at once.
+ *     data-signature-field      a field name | auto (default: each instance keeps its own)   → data-fd-ascii
+ *     data-signature-mark       chars | dots | squares | plus | dashes | auto                 → data-style
+ *     data-signature-cell       cell width in px, 4 to 24 (height follows: 1.7× for characters, square for marks) → data-cell
+ *     data-signature-ramp       default | soft | dense | glyph | rain | auto                  → data-ramp
+ *     data-signature-intensity  luminance multiplier, 0.4 to 1.6 (default 1)                 → data-intensity
+ *   The fifth dial, data-signature-marks (crosses | dots | corners | none), is the frame's: shell.css reads it.
  *
  * Glyph (empty states)
  *   <span class="fd-glyph" aria-hidden="true"></span>      data-size 40|48|56|64, data-tone, data-fd-ascii
@@ -52,7 +67,7 @@
  * Page bar
  *   pagebar.start(), pagebar.set(0..1), pagebar.done(); createPagebar(host) for a bar scoped to `host`.
  *
- * Exports: init, render, fields, registerField, ramps, renderText, setLoading, pagebar, createPagebar
+ * Exports: init, render, fields, registerField, ramps, renderText, setLoading, pagebar, createPagebar, MARKS, SIGNATURE_ATTRIBUTES
  * ------------------------------------------------------------------------- */
 
 import { emit, reducedMotion, clamp } from './core.js';
@@ -133,7 +148,8 @@ const instances = new Set();
  * `env` carries: w, h, A (aspect w/h), cols, rows, cw, ch, t (seconds), noise(x,y,z), fbm(x,y,z,octaves),
  * rand(a,b,c), origin ([x,y] | null), side, variant, state (persistent per element).
  * Options: prepare(env) once per frame, animate (default false), ramp, style, chars (extra
- * glyphs `env.char` may use), cell ([w,h] default), speed.
+ * glyphs `env.char` may use), charRamp (the ramp when a field whose own style is dots is drawn as characters),
+ * cell ([w,h] default), speed.
  */
 export function registerField(name, sample, options = {}) {
   const field = {
@@ -142,6 +158,7 @@ export function registerField(name, sample, options = {}) {
     prepare: options.prepare || null,
     animate: Boolean(options.animate),
     ramp: options.ramp || 'default',
+    charRamp: options.charRamp || 'default',
     style: options.style || 'chars',
     chars: options.chars || '',
     cell: options.cell || null,
@@ -409,7 +426,7 @@ registerField('halftone', (x, y, env) => {
   }
   const d = Math.sqrt(d2) - 1;
   return 0.36 * Math.exp(-d * 5) * (0.6 + 0.4 * smooth(0.2, 0.8, x));
-}, { style: 'dots', ramp: ' 12345678' });
+}, { style: 'dots', ramp: ' 12345678', charRamp: 'default' });
 
 /* ---------- spark: the empty-state glyph, a small ember of characters with a dotted halo ---------- */
 registerField('spark', (x, y, env, c, r) => {
@@ -423,6 +440,77 @@ registerField('spark', (x, y, env, c, r) => {
   const flicker = env.noise(c * 0.9, r * 0.9 - env.t * 1.4, env.t * 0.5);
   return Math.pow(1 - Math.min(d, 1), 0.7) * (0.8 + 0.34 * flicker) + 0.14;
 }, { ramp: 'glyph', cell: [7, 10] });
+
+/* ---------- contour: iso-lines of a slow height field, every third line a little stronger ---------- */
+const CONTOUR_LEVELS = 6;
+registerField('contour', (x, y, env, c, r) => {
+  const s = env.state;
+  const cols = env.cols;
+  const here = s.level[r * cols + c];
+  const across = here !== s.level[r * cols + Math.min(c + 1, cols - 1)];
+  const down = here !== s.level[Math.min(r + 1, env.rows - 1) * cols + c];
+  if (!across && !down) return 0;
+  env.char = across && down ? '+' : across ? '|' : '-';
+  const side = env.side === 'left' ? 1 - x : x;
+  const major = here % 3 === 0 ? 1 : 0.7;
+  return (0.5 + 0.5 * major) * (0.35 + 0.65 * smooth(0, 0.8, side)) * (0.75 + 0.25 * smooth(0.1, 0.7, y));
+}, {
+  animate: false,
+  ramp: 'soft',
+  chars: '+-|',
+  prepare(env) {
+    const s = env.state;
+    const size = env.cols * env.rows;
+    if (!s.level || s.level.length !== size) s.level = new Int16Array(size);
+    const drift = env.t * 0.02;
+    for (let r = 0; r < env.rows; r++) {
+      const y = env.cy(r);
+      for (let c = 0; c < env.cols; c++) {
+        const x = env.cx(c);
+        const n = env.fbm(x * env.A * 1.1 + 3.7, y * 1.1 + drift, drift, 3);
+        // fBm sits near the middle: stretch it so the lines spread over the whole box.
+        s.level[r * env.cols + c] = Math.floor(((n - 0.5) * 2 + 0.5) * CONTOUR_LEVELS);
+      }
+    }
+  },
+});
+
+/* ---------- stipple: random points whose density follows a soft lit form ---------- */
+registerField('stipple', (x, y, env, c, r) => {
+  const side = env.side === 'left' ? 1 - x : x;
+  const lit = smooth(0.25, 0.62, env.fbm(x * env.A * 1.5 + 2.2, y * 1.5 + 5.1, 1.3, 3));
+  const d = lit * (0.25 + 0.75 * smooth(0, 0.95, side)) * (0.55 + 0.45 * smooth(0, 1, y));
+  if (env.rand(c, r, 11) >= d * 1.25) return 0;
+  return 0.3 + 0.7 * Math.pow(d, 0.7) * (0.6 + 0.4 * env.rand(c, r, 12));
+}, { animate: false, ramp: 'soft' });
+
+/* ---------- bars: a skyline of columns, three cells wide with a one-cell gap, brightest at the cap ---------- */
+const BAR_WIDTH = 3;
+registerField('bars', (x, y, env, c) => {
+  if (c % BAR_WIDTH === BAR_WIDTH - 1) return 0;
+  const height = env.state.height[(c / BAR_WIDTH) | 0];
+  const top = 1 - height;
+  if (y < top) return 0;
+  const depth = (y - top) / height;
+  const cap = y - top < env.ch / env.h ? 0.28 : 0;
+  return Math.min(1, (0.95 - 0.55 * depth) * (0.55 + 0.45 * height) + cap);
+}, {
+  animate: true,
+  ramp: 'soft',
+  speed: 0.7,
+  prepare(env) {
+    const s = env.state;
+    const lanes = Math.ceil(env.cols / BAR_WIDTH);
+    if (!s.height || s.height.length !== lanes) s.height = new Float32Array(lanes);
+    for (let i = 0; i < lanes; i++) {
+      const x = (env.offX + (i * BAR_WIDTH + 1.5) * env.cw) / env.w;
+      const side = env.side === 'left' ? 1 - x : x;
+      const n = env.fbm(i * 0.23 + env.t * 0.05, 4.4, 0, 3);
+      const breathe = 0.05 * Math.sin(env.t * 0.6 + env.rand(i, 5) * TAU);
+      s.height[i] = clamp(0.1 + 0.8 * smooth(0.12, 0.7, n) * (0.4 + 0.6 * smooth(0, 1, side)) + breathe, 0.06, 0.94);
+    }
+  },
+});
 
 /* ======================================================================
    Frame computation (shared by the canvas renderer and renderText)
@@ -443,7 +531,7 @@ function blobMask(x, y, env) {
 }
 
 function glyphsFor(ramp, style, field) {
-  if (style === 'dots') return [...ramp.slice(1)];
+  if (style !== 'chars') return [...ramp.slice(1)];
   const list = [...ramp.slice(1)];
   for (const ch of field.chars) if (!list.includes(ch)) list.push(ch);
   return list;
@@ -518,8 +606,9 @@ function makeJitter(rand, cols, rows) {
   return jitter;
 }
 
-function resolveRamp(value, field) {
-  const key = value || field.ramp;
+/** The ramp for an option value and a style: a field whose own style is dots has a character ramp for when it is drawn as characters. */
+function resolveRamp(value, field, style = field.style) {
+  const key = value || (style === 'chars' && field.style !== 'chars' ? field.charRamp : field.ramp);
   return ramps[key] ?? (key.startsWith(' ') ? key : ` ${key}`);
 }
 
@@ -544,7 +633,7 @@ export function renderText(name, options = {}) {
   const field = fields.get(name);
   if (!field) throw new Error(`[fire] unknown field "${name}"`);
   const style = 'chars';
-  const ramp = resolveRamp(options.ramp, field);
+  const ramp = resolveRamp(options.ramp, field, style);
   const [cw, ch] = parseCell(options.cell, field.cell || [7, 12]);
   const cols = options.cols ?? 80;
   const rows = options.rows ?? 20;
@@ -574,6 +663,14 @@ export function renderText(name, options = {}) {
    ====================================================================== */
 
 const FPS = 12;
+/** The mark shapes a field can be drawn in (data-style, and the page's data-signature-mark). */
+export const MARKS = Object.freeze(['chars', 'dots', 'squares', 'plus', 'dashes']);
+/** The attributes on <html> that carry the page's signature (see the header). `marks` belongs to the frame (shell.css). */
+export const SIGNATURE_ATTRIBUTES = Object.freeze({
+  field: 'data-signature-field', mark: 'data-signature-mark', cell: 'data-signature-cell',
+  ramp: 'data-signature-ramp', marks: 'data-signature-marks', intensity: 'data-signature-intensity',
+});
+const CHAR_CELL_RATIO = 12 / 7;
 const byEl = new WeakMap();
 const atlasCache = new Map();
 const pendingFonts = new Set();
@@ -604,14 +701,36 @@ function getAtlas(spec) {
   canvas.height = Math.max(1, spec.sh);
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = canvasColor(ctx, spec.color);
-  if (spec.style === 'dots') {
-    const max = Math.min(spec.sw, spec.sh) * 0.46;
+  if (spec.style !== 'chars') {
     const levels = spec.glyphs.length;
+    const cx = (i) => i * spec.sw + spec.sw / 2;
+    const cy = spec.sh / 2;
+    const stroke = Math.max(1, Math.round(spec.dpr));
+    const room = Math.min(spec.sw, spec.sh);
     for (let i = 0; i < levels; i++) {
-      const radius = Math.max(0.55 * spec.dpr, max * Math.sqrt((i + 1) / levels));
-      ctx.beginPath();
-      ctx.arc(i * spec.sw + spec.sw / 2, spec.sh / 2, radius, 0, TAU);
-      ctx.fill();
+      const level = (i + 1) / levels;
+      if (spec.style === 'dots') {
+        const radius = Math.max(0.55 * spec.dpr, room * 0.46 * Math.sqrt(level));
+        ctx.beginPath();
+        ctx.arc(cx(i), cy, radius, 0, TAU);
+        ctx.fill();
+      } else if (spec.style === 'squares') {
+        // Side grows with the square root of the level, so the ink grows with the level.
+        const side = Math.max(stroke, Math.round(room * 0.7 * Math.sqrt(level)));
+        ctx.fillRect(Math.round(cx(i) - side / 2), Math.round(cy - side / 2), side, side);
+      } else if (spec.style === 'plus') {
+        const arm = Math.max(stroke * 2 + 1, Math.round(room * 0.74 * level)) | 1;
+        const x = Math.round(cx(i) - arm / 2);
+        const y = Math.round(cy - arm / 2);
+        const t = Math.round(cx(i) - stroke / 2);
+        const u = Math.round(cy - stroke / 2);
+        ctx.fillRect(x, u, arm, stroke);
+        ctx.fillRect(t, y, stroke, arm);
+      } else {
+        const length = Math.max(stroke * 2, Math.round(spec.sw * 0.86 * level));
+        const thick = Math.max(stroke, Math.round(spec.dpr * 1.5));
+        ctx.fillRect(Math.round(cx(i) - length / 2), Math.round(cy - thick / 2), length, thick);
+      }
     }
   } else {
     ctx.font = spec.scaledFont;
@@ -623,6 +742,25 @@ function getAtlas(spec) {
   atlas = { canvas, sw: spec.sw, sh: spec.sh };
   atlasCache.set(key, atlas);
   return atlas;
+}
+
+/** The page's signature, read from <html>: each dial is a string, or null for "auto" (the instance decides). */
+function pageSignature() {
+  const root = document.documentElement;
+  const read = (key) => {
+    const value = root.getAttribute(SIGNATURE_ATTRIBUTES[key]);
+    return value && value !== 'auto' ? value : null;
+  };
+  const cell = parseFloat(read('cell'));
+  const intensity = parseFloat(read('intensity'));
+  const mark = read('mark');
+  return {
+    field: read('field'),
+    mark: MARKS.includes(mark) ? mark : null,
+    cell: Number.isFinite(cell) && cell > 0 ? clamp(cell, 3, 64) : null,
+    ramp: read('ramp'),
+    intensity: Number.isFinite(intensity) ? clamp(intensity, 0, 3) : null,
+  };
 }
 
 class AsciiField {
@@ -651,15 +789,27 @@ class AsciiField {
 
   configure() {
     const d = this.el.dataset;
-    const name = d.fdAscii || (this.isGlyph ? 'spark' : 'terrain');
-    this.field = fields.get(name) || fields.get(this.isGlyph ? 'spark' : 'terrain');
-    this.style = d.style === 'dots' || d.style === 'chars' ? d.style : this.field.style;
-    this.ramp = resolveRamp(d.ramp, this.field);
-    const fallbackCell = this.field.cell || (this.style === 'dots' ? [8, 8] : [7, 12]);
-    [this.cw, this.ch] = parseCell(d.cell, this.style === 'dots' && !this.field.cell ? [8, 8] : fallbackCell);
+    const page = pageSignature();
+    const fallback = this.isGlyph ? 'spark' : 'terrain';
+    // Precedence per option: data-signature="own" keeps the instance's options; else a set page dial; else the
+    // instance's own option; else Fire's default.
+    const own = d.signature === 'own';
+    const pick = (mine, theirs) => (own ? mine : theirs ?? mine);
+    const named = d.fdAscii && d.fdAscii !== 'auto' ? d.fdAscii : null;
+    this.field = fields.get(pick(named, page.field)) || fields.get(named || fallback);
+    const ownStyle = MARKS.includes(d.style) ? d.style : null;
+    this.style = pick(ownStyle, page.mark) || this.field.style;
+    const ownRamp = d.ramp || null;
+    this.ramp = resolveRamp(pick(ownRamp, page.ramp && ramps[page.ramp] ? page.ramp : null), this.field, this.style);
+    const mark = this.style !== 'chars';
+    const fallbackCell = this.field.cell || (mark ? [8, 8] : [7, 12]);
+    const pageCell = page.cell ? [page.cell, mark ? page.cell : Math.round(page.cell * CHAR_CELL_RATIO)] : null;
+    const ownCell = d.cell ? parseCell(d.cell, null) : null;
+    [this.cw, this.ch] = (own ? ownCell : pageCell || ownCell) || fallbackCell;
     this.animate = d.animate == null ? this.field.animate : d.animate !== 'false';
     this.speed = Number.isFinite(parseFloat(d.speed)) ? parseFloat(d.speed) : 1;
-    this.intensity = Number.isFinite(parseFloat(d.intensity)) ? parseFloat(d.intensity) : 1;
+    const ownIntensity = Number.isFinite(parseFloat(d.intensity)) ? parseFloat(d.intensity) : null;
+    this.intensity = pick(ownIntensity, page.intensity) ?? 1;
     this.shape = d.shape || null;
     this.seed = hashString(d.seed ?? this.field.name);
     this.noise = makeNoise(this.seed);
@@ -845,10 +995,11 @@ function loop(now) {
   if (awake.size) frameId = requestAnimationFrame(loop);
 }
 
-function refreshAll() {
+function refreshAll(reconfigure = false) {
   for (const inst of [...instances]) {
     if (!inst.el.isConnected) { inst.destroy(); continue; }
-    inst.refresh();
+    inst.refresh(reconfigure);
+    if (reconfigure) wake(inst);
   }
 }
 
@@ -1098,11 +1249,17 @@ function install() {
   }, { rootMargin: '96px' });
 
   const root = document.documentElement;
-  const restyle = () => requestAnimationFrame(refreshAll);
+  const restyle = () => requestAnimationFrame(() => refreshAll());
   root.addEventListener('fd:theme', restyle);
   root.addEventListener('fd:accent', restyle);
   matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', restyle);
   matchMedia('(prefers-reduced-motion: reduce)').addEventListener?.('change', () => { refreshAll(); wakeAll(); });
+  // The page's signature: any change to one of its attributes re-reads every instance, once per frame.
+  let signatureFrame = 0;
+  new MutationObserver(() => {
+    if (signatureFrame) return;
+    signatureFrame = requestAnimationFrame(() => { signatureFrame = 0; refreshAll(true); });
+  }).observe(root, { attributes: true, attributeFilter: Object.values(SIGNATURE_ATTRIBUTES) });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAll(); });
   document.fonts?.ready.then(() => { atlasCache.clear(); refreshAll(); });
 
@@ -1124,7 +1281,7 @@ function collect(root, selector) {
 
 function scan(root) {
   collect(root, SKELETON_SELECTOR).forEach(buildSkeleton);
-  collect(root, '[data-fd-ascii], .fd-glyph').forEach(mountField);
+  collect(root, '[data-fd-ascii], .fd-ascii, .fd-glyph').forEach(mountField);
   collect(root, '.fd-braille').forEach(mountBraille);
   collect(root, '.fd-dots, .fd-bars-loader').forEach(fillLoader);
   collect(root, '[data-fd-loading]').forEach((el) => el.setAttribute('aria-busy', String(el.dataset.fdLoading === 'true')));

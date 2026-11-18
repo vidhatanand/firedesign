@@ -21,7 +21,8 @@
  *                      .fd-tweaks-face-sample[data-type]  "Ag" set in that type set (the tokens resolve on the sample itself)
  *                      .fd-tweaks-face-name               the label, in the panel's own font
  *                  .fd-tweaks-readout                  the selected type set's faces, e.g. "Fraunces · Instrument Sans"
- *                  .fd-slider[data-tweak] > input[type=range]   tone.hue, tone.vivid, tone.light, tone.warmth, corners, texture
+ *                  .fd-tweaks-chips[role=radiogroup][data-tweak] > .fd-tweaks-chip[role=radio][data-value]   signature.field, signature.mark
+ *                  .fd-slider[data-tweak] > input[type=range]   tone.hue, tone.vivid, tone.light, tone.warmth, corners, texture, signature.intensity
  *                  .fd-tweaks-value[data-tweak-reset]  the value readout; click (or double-click the slider) to reset
  *                  .fd-switch > input[data-tweak="contrast"]
  *                <footer class="fd-tweaks-foot"> Copy CSS (data-tweaks-action="copy") and Copy theme (data-tweaks-action="copy-theme",
@@ -44,6 +45,9 @@
  *  contrast  default · high                 data-contrast="high"
  *  motion    off · default · slow           --fd-motion 0 · 1 · 1.75
  *  texture   0…1.5 (step .05)               --fd-texture
+ *  signature { field, mark, cell, ramp, marks, intensity }   data-signature-* on <html>, only where not the default (theme.js,
+ *            texture.js, shell.css): the panel sets field, mark, marks and intensity; cell and ramp ride along from a theme record.
+ *            A data-signature-* a page declares on <html> is the default, as for the palette.
  *
  * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial), reset(), toCss(), toTheme()
  *      toTheme() is the state as a theme record (fire/js/theme.js): set(fromThemeRecord(record)) applies one.
@@ -58,7 +62,7 @@ import {
   getPalette, paletteTokens, toneTokens, cssValue, oklch,
 } from './palettes.js';
 import { TYPEFACES, DEFAULT_TYPEFACE, getTypeface } from './typefaces.js';
-import { toThemeRecord } from './theme.js';
+import { toThemeRecord, SIGNATURE_DEFAULT, SIGNATURE_CHOICES, SIGNATURE_RANGES, SIGNATURE_ATTRIBUTES } from './theme.js';
 
 /* ==========================================================================
    State
@@ -76,11 +80,27 @@ const CHOICES = {
   contrast: ['default', 'high'],
   motion: ['off', 'default', 'slow'],
 };
-const RANGES = { corners: [0, 2, 0.125], texture: [0, 1.5, 0.05] };
+const RANGES = { corners: [0, 2, 0.125], texture: [0, 1.5, 0.05], 'signature.intensity': [...SIGNATURE_RANGES.intensity, 0.05] };
+const snap = (v, [min, max, step]) => clamp(Math.round(v / step) * step, min, max);
 /* Every inline custom property this module may write on <html>. */
 const OWNED = [...PALETTE_TOKENS, '--fd-radius-scale', '--fd-hairline', '--fd-motion', '--fd-texture'];
 
 const root = document.documentElement;
+
+/* One signature dial from a stored value or an attribute: the value, or undefined when it is not one the dial accepts. */
+function cleanSignature(key, input) {
+  if (input === undefined || input === null || input === '') return undefined;
+  if (key === 'cell') {
+    if (input === 'auto') return 'auto';
+    const v = Number(input);
+    return Number.isFinite(v) ? clamp(Math.round(v), ...SIGNATURE_RANGES.cell) : undefined;
+  }
+  if (key === 'intensity') {
+    const v = Number(input);
+    return Number.isFinite(v) ? Number(snap(v, RANGES['signature.intensity']).toFixed(3)) : undefined;
+  }
+  return SIGNATURE_CHOICES[key].includes(input) ? input : undefined;
+}
 
 /* The page's own look is the default. A page that declares data-palette or data-type on <html> keeps it: on load,
    after Reset, and as the base of what is saved. fire/boot.js may already have put a saved look on <html>; it keeps
@@ -90,21 +110,33 @@ function declared(name, list, fallback) {
   const value = root.hasAttribute(kept) ? root.getAttribute(kept) : root.getAttribute(`data-${name}`);
   return list.some((item) => item.name === value) ? value : fallback;
 }
+/* A data-signature-* the page declares on <html> is the default signature, kept by boot.js in data-fd-default-signature-* the
+   same way. Only a value the dials accept counts. */
+function declaredSignature() {
+  const out = { ...SIGNATURE_DEFAULT };
+  for (const [key, name] of Object.entries(SIGNATURE_ATTRIBUTES)) {
+    const kept = `data-fd-default-${name.slice(5)}`;
+    const raw = root.hasAttribute(kept) ? root.getAttribute(kept) : root.getAttribute(name);
+    const value = cleanSignature(key, raw);
+    if (value !== undefined) out[key] = value;
+  }
+  return out;
+}
 const PAGE = Object.freeze({
   palette: declared('palette', PALETTES, DEFAULT_PALETTE),
   type: declared('type', TYPEFACES, DEFAULT_TYPEFACE),
+  signature: Object.freeze(declaredSignature()),
 });
 const DEFAULTS = Object.freeze({
   palette: PAGE.palette, type: PAGE.type, tone: TONE_DEFAULT, theme: 'system', density: 'comfortable', corners: 1, lines: 1,
-  textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
+  textSize: 'md', contrast: 'default', motion: 'default', texture: 1, signature: PAGE.signature,
 });
 /* Storage can throw (private mode, sandboxed frames): every access stays inside the try. */
 const store = {
   get(k, area = 'localStorage') { try { return globalThis[area].getItem(k); } catch { return null; } },
   set(k, v, area = 'localStorage') { try { if (v == null) globalThis[area].removeItem(k); else globalThis[area].setItem(k, v); } catch { /* ignore */ } },
 };
-const snap = (v, [min, max, step]) => clamp(Math.round(v / step) * step, min, max);
-const fresh = () => ({ ...DEFAULTS, tone: { ...TONE_DEFAULT } });
+const fresh = () => ({ ...DEFAULTS, tone: { ...TONE_DEFAULT }, signature: { ...DEFAULTS.signature } });
 
 function sanitize(input = {}) {
   const s = fresh();
@@ -114,6 +146,12 @@ function sanitize(input = {}) {
     for (const k of Object.keys(TONE_DEFAULT)) {
       const v = Number(input.tone[k]);
       if (Number.isFinite(v)) s.tone[k] = clamp(Math.round(v), ...TONE_RANGE[k]);
+    }
+  }
+  if (input.signature && typeof input.signature === 'object') {
+    for (const k of Object.keys(SIGNATURE_DEFAULT)) {
+      const v = cleanSignature(k, input.signature[k]);
+      if (v !== undefined) s.signature[k] = v;
     }
   }
   for (const k of ['theme', 'density', 'textSize', 'contrast', 'motion']) if (CHOICES[k].includes(input[k])) s[k] = input[k];
@@ -132,7 +170,8 @@ function load() {
 }
 
 const sameTone = (a, b) => Object.keys(TONE_DEFAULT).every((k) => a[k] === b[k]);
-const differs = (a, b) => Object.keys(DEFAULTS).filter((k) => (k === 'tone' ? !sameTone(a.tone, b.tone) : a[k] !== b[k]));
+const sameSignature = (a, b) => Object.keys(SIGNATURE_DEFAULT).every((k) => a[k] === b[k]);
+const differs = (a, b) => Object.keys(DEFAULTS).filter((k) => (k === 'tone' ? !sameTone(a.tone, b.tone) : k === 'signature' ? !sameSignature(a.signature, b.signature) : a[k] !== b[k]));
 const isDefault = (s) => differs(s, DEFAULTS).length === 0;
 
 /** The inline custom properties a state needs on <html>. */
@@ -149,6 +188,13 @@ function inlineProps(s) {
   return out;
 }
 
+/** The signature as attributes on <html>: the dials that differ from Fire's own default (so "auto" leaves none). */
+function signatureAttrs(sig = SIGNATURE_DEFAULT) {
+  const out = {};
+  for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (sig[k] !== SIGNATURE_DEFAULT[k]) out[name] = String(sig[k]);
+  return out;
+}
+
 const attr = (name, value) => (value == null ? root.removeAttribute(name) : root.getAttribute(name) !== value && root.setAttribute(name, value));
 
 function apply(s) {
@@ -157,6 +203,8 @@ function apply(s) {
   attr('data-type', s.type === DEFAULT_TYPEFACE && PAGE.type === DEFAULT_TYPEFACE ? null : s.type);
   attr('data-text-size', s.textSize === 'md' ? null : s.textSize);
   attr('data-contrast', s.contrast === 'high' ? 'high' : null);
+  const sigAttrs = signatureAttrs(s.signature);
+  for (const name of Object.values(SIGNATURE_ATTRIBUTES)) attr(name, sigAttrs[name] ?? null);
   if (getTheme() !== s.theme) setTheme(s.theme);
   if ((root.getAttribute('data-density') || 'comfortable') !== s.density) setDensity(s.density);
   const props = inlineProps(s);
@@ -172,7 +220,7 @@ function flush() {
   clearTimeout(persistTimer);
   persistTimer = 0;
   const out = {};
-  for (const k of differs(state, DEFAULTS)) if (k !== 'theme' && k !== 'density') out[k] = k === 'tone' ? { ...state.tone } : state[k];
+  for (const k of differs(state, DEFAULTS)) if (k !== 'theme' && k !== 'density') out[k] = k === 'tone' || k === 'signature' ? { ...state[k] } : state[k];
   store.set(KEY, Object.keys(out).length ? JSON.stringify(out) : null);
   // What fire/boot.js puts back on <html> before the first paint of the next page.
   const attrs = {};
@@ -180,6 +228,8 @@ function flush() {
   if (state.type !== PAGE.type) attrs['data-type'] = state.type;
   if (state.textSize !== 'md') attrs['data-text-size'] = state.textSize;
   if (state.contrast === 'high') attrs['data-contrast'] = 'high';
+  // A dial the page declared and the state has moved (even back to auto) is written out, so boot.js can put it back.
+  for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (state.signature[k] !== PAGE.signature[k]) attrs[name] = String(state.signature[k]);
   const props = inlineProps(state);
   store.set(BOOT_KEY, Object.keys(attrs).length || Object.keys(props).length ? JSON.stringify({ attrs, props }) : null);
 }
@@ -219,7 +269,7 @@ function commit(next) {
 
 /** Merge a partial state (tone may be partial too) and apply it. Returns the full state. */
 export function set(partial = {}) {
-  commit(sanitize({ ...state, ...partial, tone: { ...state.tone, ...(partial.tone || {}) } }));
+  commit(sanitize({ ...state, ...partial, tone: { ...state.tone, ...(partial.tone || {}) }, signature: { ...state.signature, ...(partial.signature || {}) } }));
   return get();
 }
 
@@ -251,9 +301,11 @@ export function toCss(s = state) {
   if (s.density !== 'comfortable') attrs.push(`data-density="${s.density}"`);
   if (s.textSize !== 'md') attrs.push(`data-text-size="${s.textSize}"`);
   if (s.contrast === 'high') attrs.push('data-contrast="high"');
+  for (const [name, value] of Object.entries(signatureAttrs(s.signature))) attrs.push(`${name}="${value}"`);
   const notes = [`On <html>: ${attrs.length ? attrs.join(' ') : 'nothing (default attributes)'}`];
   if (s.palette !== DEFAULT_PALETTE && !toned) notes.push('data-palette needs fire/palettes.css.');
   if (s.type !== DEFAULT_TYPEFACE) notes.push('Type sets need fire/typefaces.css (part of fire.css).');
+  if (Object.keys(signatureAttrs(s.signature)).length) notes.push('The data-signature-* attributes restyle every texture and frame that does not set its own.');
   if (toned) notes.push(`The ${s.palette} palette, toned ${JSON.stringify(s.tone).replace(/"/g, '').replace(/,/g, ', ').replace(/:/g, ': ')}, is written out below.`);
   notes.push('Load this after fire.css.');
   const props = Object.entries(inlineProps(s));
@@ -288,24 +340,24 @@ function valueText(key, v) {
     case 'tone.light': return v > 0 ? `+${v}` : v < 0 ? `${MINUS}${-v}` : '0';
     case 'tone.warmth': return v > 0 ? `warm ${v}` : v < 0 ? `cool ${-v}` : '0';
     case 'corners': return fmtX(v);
-    case 'texture': return `${Math.round(v * 100)}%`;
+    case 'texture': case 'signature.intensity': return `${Math.round(v * 100)}%`;
     default: return String(v);
   }
 }
 function spokenText(key, v) {
   switch (key) {
     case 'tone.hue': return `${v} degrees`;
-    case 'tone.vivid': case 'texture': return valueText(key, v).replace('%', ' percent');
+    case 'tone.vivid': case 'texture': case 'signature.intensity': return valueText(key, v).replace('%', ' percent');
     case 'tone.light': return String(v);
     case 'corners': return `${Number(v.toFixed(3))} times`;
     default: return valueText(key, v);
   }
 }
-const readKey = (s, key) => (key.startsWith('tone.') ? s.tone[key.slice(5)] : s[key]);
+const readKey = (s, key) => (key.startsWith('tone.') ? s.tone[key.slice(5)] : key.startsWith('signature.') ? s.signature[key.slice(10)] : s[key]);
 const defaultOf = (key) => readKey(DEFAULTS, key);
 
 function segmented(key, options, labelledby = `fd-tw-${key}-label`) {
-  const current = String(state[key]);
+  const current = String(readKey(state, key));
   return `<div class="fd-segmented" data-size="sm" data-block role="radiogroup" aria-labelledby="${labelledby}" data-tweak="${key}">${options
     .map(([value, content, aria]) => `<button class="fd-segmented-item" type="button" role="radio" aria-checked="${String(value) === current}" data-value="${value}"${aria ? ` aria-label="${aria}"` : ''}>${content}</button>`)
     .join('')}</div>`;
@@ -339,6 +391,18 @@ function typefaces() {
     const on = t.name === state.type;
     return `<button class="fd-tweaks-face" type="button" role="radio" aria-checked="${on}" tabindex="${on ? 0 : -1}" data-value="${t.name}" title="${esc(t.note)}"><span class="fd-tweaks-face-sample" data-type="${t.name}" aria-hidden="true">Ag</span><span class="fd-tweaks-face-name">${esc(t.label)}</span></button>`;
   }).join('')}</div>`;
+}
+
+/* Signature choices as chips (a radio group like the swatches and faces): data-tweak is the dial, data-value the choice. */
+const SIGNATURE_LABELS = {
+  'signature.field': { auto: 'Auto', terrain: 'Terrain', waves: 'Waves', orbit: 'Orbit', rain: 'Rain', grid: 'Grid', flame: 'Flame', halftone: 'Halftone', spark: 'Spark', contour: 'Contour', stipple: 'Stipple', bars: 'Bars' },
+  'signature.mark': { auto: 'Auto', chars: 'Characters', dots: 'Dots', squares: 'Squares', plus: 'Plus signs', dashes: 'Dashes' },
+};
+function chips(key, label) {
+  const current = String(readKey(state, key));
+  return `<div class="fd-tweaks-row"><span class="fd-tweaks-label" id="fd-tw-${key.replace('.', '-')}-label">${label}</span><div class="fd-tweaks-chips" role="radiogroup" aria-labelledby="fd-tw-${key.replace('.', '-')}-label" data-tweak="${key}">${Object.entries(SIGNATURE_LABELS[key])
+    .map(([value, text]) => `<button class="fd-tweaks-chip" type="button" role="radio" aria-checked="${value === current}" tabindex="${value === current ? 0 : -1}" data-value="${value}">${text}</button>`)
+    .join('')}</div></div>`;
 }
 
 const section = (id, title, body) =>
@@ -377,6 +441,12 @@ function markup() {
       inlineRow('motion', 'Motion', segmented('motion', [['off', 'Off'], ['default', 'Default'], ['slow', 'Slow']])),
       sliderRow('texture', 'Texture', RANGES.texture),
     ].join(''))}
+    ${section('signature', 'Signature', [
+      chips('signature.field', 'Field'),
+      chips('signature.mark', 'Mark'),
+      inlineRow('signature-marks', 'Frame', segmented('signature.marks', [['crosses', 'Crosses'], ['dots', 'Dots'], ['corners', 'Corners'], ['none', 'None']], 'fd-tw-signature-marks-label')),
+      sliderRow('signature.intensity', 'Intensity', RANGES['signature.intensity']),
+    ].join(''))}
   </div>
   <footer class="fd-tweaks-foot">
     <button class="fd-btn" type="button" data-size="sm" data-tweaks-action="copy">${icon('copy')}<span class="fd-btn-swap"><span>Copy CSS</span><span>Copied</span></span></button>
@@ -393,7 +463,7 @@ function markup() {
 let panel = null;
 let lastTrigger = null;
 const desktop = typeof matchMedia === 'function' ? matchMedia('(min-width: 641px)') : { matches: true };
-const GRIDS = '.fd-tweaks-palettes, .fd-tweaks-faces'; // the radio grids; data-tweak names the state key
+const GRIDS = '.fd-tweaks-palettes, .fd-tweaks-faces, .fd-tweaks-chips'; // the radio grids; data-tweak names the state key
 const triggers = () => $$('[data-fd-tweaks-open]');
 const isOpen = () => panel?.dataset.state === 'open';
 
@@ -456,7 +526,7 @@ function sync() {
   }
   for (const grid of $$(GRIDS, panel)) {
     for (const item of $$('[role="radio"]', grid)) {
-      const on = item.dataset.value === state[grid.dataset.tweak];
+      const on = item.dataset.value === String(readKey(state, grid.dataset.tweak));
       item.setAttribute('aria-checked', String(on));
       item.tabIndex = on ? 0 : -1;
     }
@@ -489,6 +559,7 @@ function sync() {
 const parseValue = (key, raw) => (key === 'lines' ? Number(raw) : raw);
 function setKey(key, value) {
   if (key.startsWith('tone.')) set({ tone: { [key.slice(5)]: value } });
+  else if (key.startsWith('signature.')) set({ signature: { [key.slice(10)]: value } });
   else set({ [key]: value });
 }
 
@@ -524,8 +595,8 @@ function bindPanel(el) {
       }
       return;
     }
-    const choice = target.closest('.fd-tweaks-swatch, .fd-tweaks-face');
-    if (choice) { set({ [choice.closest(GRIDS).dataset.tweak]: choice.dataset.value }); return; }
+    const choice = target.closest('.fd-tweaks-swatch, .fd-tweaks-face, .fd-tweaks-chip');
+    if (choice) { setKey(choice.closest(GRIDS).dataset.tweak, choice.dataset.value); return; }
     const action = target.closest('[data-tweaks-action]')?.dataset.tweaksAction;
     if (action === 'close') close();
     else if (action === 'reset') { reset(); $('.fd-segmented[data-tweak="theme"] [aria-checked="true"]', el)?.focus({ preventScroll: true }); }
@@ -534,7 +605,7 @@ function bindPanel(el) {
   });
   el.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') { event.preventDefault(); close(); return; }
-    if (event.target.matches?.('.fd-tweaks-swatch, .fd-tweaks-face')) gridKeys(event);
+    if (event.target.matches?.('.fd-tweaks-swatch, .fd-tweaks-face, .fd-tweaks-chip')) gridKeys(event);
   });
   bindDrag(el);
 }
@@ -559,7 +630,7 @@ function gridKeys(event) {
   if (j === null) return;
   event.preventDefault();
   items[j].focus();
-  set({ [grid.dataset.tweak]: items[j].dataset.value });
+  setKey(grid.dataset.tweak, items[j].dataset.value);
 }
 
 async function copyOut(button, text, done) {

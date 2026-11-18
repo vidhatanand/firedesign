@@ -13,12 +13,23 @@
  *     "tone": { "hue": 0, "vivid": 100, "light": 0, "warmth": 0 },
  *     "type": "geist",                          a type set name, or { "display", "sans", "mono" } families the page loads
  *     "dials": { "corners": 1, "density": "comfortable", "lines": 1, "textSize": "md",
- *                "contrast": "default", "motion": "default", "texture": 1 }
+ *                "contrast": "default", "motion": "default", "texture": 1 },
+ *     "signature": { "field": "auto", "mark": "auto", "cell": "auto", "ramp": "auto", "marks": "crosses", "intensity": 1 }
  *   }
  *   Palette specs:
  *     { "from": "accent", "accent": "#1f6feb", "neutral"?: "pure" | "cool" | "warm" | "tinted" | <hue°>, "on"?: "white" | "dark" }
  *     { "from": "brand", "colors": ["#14342b", "#f2c14e"] }            1–3 colours
  *     { "hue", "tint", "ink", "accent", "on", "L"?, "surfaceTint"? }   the spec form fire/js/palettes.js uses
+ *
+ * The signature is one set of dials for Fire's generated texture and the marks on its frames (fire/js/texture.js,
+ * shell.css). Every field, mark, cell and ramp is "auto" by default (each instance keeps its own); a value that is set takes effect on
+ * every texture not pinned with data-signature="own", over the instance's own option. Written as attributes on <html>, only where not the default:
+ *   field      auto · terrain · waves · orbit · rain · grid · flame · halftone · spark · contour · stipple · bars   data-signature-field
+ *   mark       auto · chars · dots · squares · plus · dashes                                                         data-signature-mark
+ *   cell       auto · 4…24 (px, the cell's width)                                                                    data-signature-cell
+ *   ramp       auto · default · soft · dense · glyph · rain                                                          data-signature-ramp
+ *   marks      crosses · dots · corners · none (the marks where frame bands meet the rails)                           data-signature-marks
+ *   intensity  0.4…1.6 (default 1)                                                                                   data-signature-intensity
  *
  * The dials map to exactly what the Tweaks panel sets (fire/js/tweaks.js inlineProps and apply):
  *   corners   0…2     --fd-radius-scale          lines     1 · 1.5 · 2      --fd-hairline (px)
@@ -39,7 +50,7 @@
  *   themeToCss(record, { selector = ':root' })   → a stylesheet string (with the attributes to set, in its comment)
  *   paletteFrom(spec)            → { name, label, note, tokens, contrast, spec, notes }, the same form as the presets
  *   validateTheme(record)        → { ok, errors, notes }
- *   toThemeRecord(tweaksState)   → a full record (the theme choice is dropped)
+ *   toThemeRecord(tweaksState)   → a full record (the theme choice is dropped; "signature" only when it is not the default)
  *   fromThemeRecord(record)      → a Tweaks state for tweaks.set() (named palettes and type sets only)
  */
 import {
@@ -65,6 +76,19 @@ export const DIAL_CHOICES = Object.freeze({
   motion: ['off', 'default', 'slow'],
 });
 export const DIAL_RANGES = Object.freeze({ corners: [0, 2], texture: [0, 1.5] });
+/* The signature: Fire's generated texture and frame marks as one set of dials. */
+export const SIGNATURE_DEFAULT = Object.freeze({ field: 'auto', mark: 'auto', cell: 'auto', ramp: 'auto', marks: 'crosses', intensity: 1 });
+export const SIGNATURE_CHOICES = Object.freeze({
+  field: ['auto', 'terrain', 'waves', 'orbit', 'rain', 'grid', 'flame', 'halftone', 'spark', 'contour', 'stipple', 'bars'],
+  mark: ['auto', 'chars', 'dots', 'squares', 'plus', 'dashes'],
+  ramp: ['auto', 'default', 'soft', 'dense', 'glyph', 'rain'],
+  marks: ['crosses', 'dots', 'corners', 'none'],
+});
+export const SIGNATURE_RANGES = Object.freeze({ cell: [4, 24], intensity: [0.4, 1.6] });
+export const SIGNATURE_ATTRIBUTES = Object.freeze({
+  field: 'data-signature-field', mark: 'data-signature-mark', cell: 'data-signature-cell',
+  ramp: 'data-signature-ramp', marks: 'data-signature-marks', intensity: 'data-signature-intensity',
+});
 export const MOTION = Object.freeze({ off: 0, default: 1, slow: 1.75 });
 export const FONT_TOKENS = Object.freeze({ display: '--fd-font-display', sans: '--fd-font-sans', mono: '--fd-font-mono' });
 export const DIAL_TOKENS = Object.freeze({ corners: '--fd-radius-scale', lines: '--fd-hairline', motion: '--fd-motion', texture: '--fd-texture' });
@@ -172,7 +196,7 @@ export function validateTheme(record) {
   const errors = [];
   const notes = [];
   if (!isObj(record)) return { ok: false, errors: ['(record): must be an object'], notes };
-  only(record, ['contract', 'fire', 'palette', 'tone', 'type', 'dials'], '', errors);
+  only(record, ['contract', 'fire', 'palette', 'tone', 'type', 'dials', 'signature'], '', errors);
   if (record.contract !== undefined && record.contract !== CONTRACT) errors.push(`/contract: must be ${JSON.stringify(CONTRACT)}`);
   if (record.fire !== undefined && !(typeof record.fire === 'string' && /^\d+\.\d+\.\d+$/.test(record.fire))) errors.push('/fire: must be a Fire release, such as "0.6.0"');
   if (record.palette !== undefined) checkPalette(record.palette, errors);
@@ -201,7 +225,19 @@ export function validateTheme(record) {
       }
     }
   }
+  if (record.signature !== undefined) checkSignature(record.signature, errors);
   return { ok: errors.length === 0, errors, notes };
+}
+
+function checkSignature(sig, errors) {
+  if (!isObj(sig)) { errors.push('/signature: must be an object'); return; }
+  only(sig, Object.keys(SIGNATURE_DEFAULT), '/signature', errors);
+  for (const [k, choices] of Object.entries(SIGNATURE_CHOICES)) {
+    if (sig[k] !== undefined && !choices.includes(sig[k])) errors.push(`/signature/${k}: must be one of ${list(choices)}`);
+  }
+  const cell = sig.cell;
+  if (cell !== undefined && cell !== 'auto' && !inRange(cell, SIGNATURE_RANGES.cell)) errors.push(`/signature/cell: must be "auto" or a number from ${SIGNATURE_RANGES.cell[0]} to ${SIGNATURE_RANGES.cell[1]}`);
+  if (sig.intensity !== undefined && !inRange(sig.intensity, SIGNATURE_RANGES.intensity)) errors.push(`/signature/intensity: must be a number from ${SIGNATURE_RANGES.intensity[0]} to ${SIGNATURE_RANGES.intensity[1]}`);
 }
 
 function assertValid(record) {
@@ -218,6 +254,7 @@ function complete(record) {
     tone: { ...TONE_DEFAULT, ...(record.tone || {}) },
     type: record.type ?? DEFAULT_TYPEFACE,
     dials: { ...DIAL_DEFAULTS, ...(record.dials || {}) },
+    signature: { ...SIGNATURE_DEFAULT, ...(record.signature || {}) },
   };
 }
 
@@ -457,6 +494,7 @@ export function expandTheme(record = {}) {
   if (d.density !== 'comfortable') attributes['data-density'] = d.density;
   if (d.textSize !== 'md') attributes['data-text-size'] = d.textSize;
   if (d.contrast === 'high') attributes['data-contrast'] = 'high';
+  for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (r.signature[k] !== SIGNATURE_DEFAULT[k]) attributes[name] = String(r.signature[k]);
   return { tokens, attributes, notes };
 }
 
@@ -501,7 +539,11 @@ export function toThemeRecord(state = {}) {
   for (const k of Object.keys(TONE_DEFAULT)) tone[k] = state.tone?.[k] ?? TONE_DEFAULT[k];
   const dials = {};
   for (const k of Object.keys(DIAL_DEFAULTS)) dials[k] = state[k] ?? DIAL_DEFAULTS[k];
-  return { contract: CONTRACT, fire: FIRE_VERSION, palette: state.palette ?? DEFAULT_PALETTE, tone, type: state.type ?? DEFAULT_TYPEFACE, dials };
+  const record = { contract: CONTRACT, fire: FIRE_VERSION, palette: state.palette ?? DEFAULT_PALETTE, tone, type: state.type ?? DEFAULT_TYPEFACE, dials };
+  // The signature is written only when it differs from the default, so a record without one stays as it was.
+  const signature = { ...SIGNATURE_DEFAULT, ...(state.signature || {}) };
+  if (Object.keys(SIGNATURE_DEFAULT).some((k) => signature[k] !== SIGNATURE_DEFAULT[k])) record.signature = signature;
+  return record;
 }
 
 /** A record → the Tweaks state it describes (for tweaks.set()). Tweaks holds named palettes and type sets only;
@@ -511,5 +553,5 @@ export function fromThemeRecord(record = {}) {
   if (record.palette !== undefined && typeof record.palette !== 'string') throw new TypeError('[theme] the Tweaks panel holds a named palette only; apply a palette spec with themeToCss()');
   if (record.type !== undefined && typeof record.type !== 'string') throw new TypeError('[theme] the Tweaks panel holds a named type set only; apply font families with themeToCss()');
   const r = complete(record);
-  return { palette: r.palette, type: r.type, tone: { ...r.tone }, ...r.dials };
+  return { palette: r.palette, type: r.type, tone: { ...r.tone }, ...r.dials, signature: { ...r.signature } };
 }

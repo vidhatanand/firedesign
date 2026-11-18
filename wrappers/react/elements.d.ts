@@ -95,14 +95,14 @@ export declare const FireIcon: React.ForwardRefExoticComponent<FireIconProps & R
 
 /** Props of FireTexture (<fd-texture>). */
 export interface FireTextureProps extends FireHostProps<FdTexture, never> {
-  /** The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`). */
+  /** The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`. */
   pattern?: string;
   /** Ink: `neutral` (default), `accent`, `contrast` or `strong` (`data-tone`). */
   tone?: 'neutral' | 'accent' | 'contrast' | 'strong';
   /** Fade out toward an edge: `left`, `right`, `top`, `bottom`, `x`, `y` or `radial` (`data-fade`). */
   fade?: 'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial';
-  /** Draw `chars` (default) or `dots`, halftone discs (`data-style`). */
-  marks?: 'chars' | 'dots';
+  /** The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`. */
+  marks?: 'chars' | 'dots' | 'squares' | 'plus' | 'dashes';
   /** Character ramp: `default`, `soft`, `dense`, `glyph`, `rain`, or a literal ramp such as ` .:-=+*#` (`data-ramp`). */
   ramp?: string;
   /** Cell size in px, `7x12` (default) or `8` for square (`data-cell`). */
@@ -113,7 +113,7 @@ export interface FireTextureProps extends FireHostProps<FdTexture, never> {
   animated?: 'true' | 'false';
   /** Time multiplier, default 1 (`data-speed`). */
   speed?: number;
-  /** Luminance multiplier, default 1 (`data-intensity`). */
+  /** Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`. */
   intensity?: number;
   /** Characters near the pointer step up the ramp (`data-interactive`). */
   interactive?: boolean;
@@ -125,6 +125,8 @@ export interface FireTextureProps extends FireHostProps<FdTexture, never> {
   variant?: 'flat' | 'perspective';
   /** `blob` clips the field to a soft, noisy disc (`data-shape`). */
   shape?: 'blob';
+  /** `own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`). */
+  signature?: 'own';
   /** Flow in the page at the field height instead of filling the positioned ancestor (`data-inline`). */
   inline?: boolean;
 }
@@ -183,7 +185,7 @@ export interface FdTextureAttributes extends Omit<React.HTMLAttributes<FdTexture
   pattern?: string;
   tone?: 'neutral' | 'accent' | 'contrast' | 'strong';
   fade?: 'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial';
-  marks?: 'chars' | 'dots';
+  marks?: 'chars' | 'dots' | 'squares' | 'plus' | 'dashes';
   ramp?: string;
   cell?: string;
   seed?: string;
@@ -195,6 +197,7 @@ export interface FdTextureAttributes extends Omit<React.HTMLAttributes<FdTexture
   side?: 'left' | 'right';
   variant?: 'flat' | 'perspective';
   shape?: 'blob';
+  signature?: 'own';
   inline?: boolean;
 }
 declare module 'react' {

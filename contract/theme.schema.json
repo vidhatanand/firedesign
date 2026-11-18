@@ -58,6 +58,19 @@
         "motion": { "description": "--fd-motion: 0, 1 or 1.75.", "enum": ["off", "default", "slow"] },
         "texture": { "description": "--fd-texture: the strength of the generative textures. Tweaks steps by 0.05.", "type": "number", "minimum": 0, "maximum": 1.5 }
       }
+    },
+    "signature": {
+      "description": "The signature: Fire's generated texture and frame marks as one set of dials. Written as data-signature-* attributes on <html>, only where not the default; every texture not pinned with data-signature=\"own\" takes the page's value over its own option.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": { "description": "data-signature-field: the field of every unpinned texture. \"auto\" leaves each instance its own.", "enum": ["auto", "terrain", "waves", "orbit", "rain", "grid", "flame", "halftone", "spark", "contour", "stipple", "bars"] },
+        "mark": { "description": "data-signature-mark: the mark a field is drawn in (data-style): characters, halftone discs, squares, plus signs or dashes. \"auto\" leaves each field its own.", "enum": ["auto", "chars", "dots", "squares", "plus", "dashes"] },
+        "cell": { "description": "data-signature-cell: the cell width in px (the height follows). \"auto\" leaves each instance its own.", "oneOf": [{ "const": "auto" }, { "type": "number", "minimum": 4, "maximum": 24 }] },
+        "ramp": { "description": "data-signature-ramp: a named character ramp, for the density levels of every mark. \"auto\" leaves each field its own.", "enum": ["auto", "default", "soft", "dense", "glyph", "rain"] },
+        "marks": { "description": "data-signature-marks: the marks where a frame's bands meet its rails (default \"crosses\"). A frame or band's own data-marks wins.", "enum": ["crosses", "dots", "corners", "none"] },
+        "intensity": { "description": "data-signature-intensity: the luminance multiplier of every texture without its own data-intensity. Tweaks steps by 0.05.", "type": "number", "minimum": 0.4, "maximum": 1.6 }
+      }
     }
   },
   "$defs": {

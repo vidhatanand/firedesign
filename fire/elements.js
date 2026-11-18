@@ -1041,7 +1041,6 @@ if (typeof customElements !== "undefined" && !customElements.get("fd-code")) cus
 var FdTexture = class extends FireElement {
   constructor() {
     super(...arguments);
-    this.pattern = "terrain";
     this.interactive = false;
     this.inline = false;
   }
@@ -1072,6 +1071,7 @@ var FdTexture = class extends FireElement {
       "data-side": this.side,
       "data-variant": this.variant,
       "data-shape": this.shape,
+      "data-signature": this.signature,
       "data-inline": this.inline
     };
   }
@@ -1125,6 +1125,9 @@ __decorateClass([
 __decorateClass([
   n4()
 ], FdTexture.prototype, "shape", 2);
+__decorateClass([
+  n4()
+], FdTexture.prototype, "signature", 2);
 __decorateClass([
   n4({ type: Boolean })
 ], FdTexture.prototype, "inline", 2);

@@ -248,10 +248,12 @@ const STATES = [
   { palette: 'honey', type: 'poster', density: 'spacious', corners: 1.625, lines: 1.5, textSize: 'lg', motion: 'slow', texture: 1.45, contrast: 'high' },
   { palette: 'ember', tone: { hue: 180, vivid: 150, light: 12, warmth: 100 }, corners: 0.125 },
   { palette: 'iris', tone: { hue: 45, vivid: 0, light: 0, warmth: 0 }, type: 'gallery', contrast: 'high', texture: 0.35 },
+  { palette: 'volt', signature: { field: 'contour', mark: 'squares', cell: 9, ramp: 'soft', marks: 'corners', intensity: 1.3 } },
 ];
 const full = (s) => ({
   palette: 'ember', type: 'geist', tone: { hue: 0, vivid: 100, light: 0, warmth: 0 }, theme: 'system', density: 'comfortable',
-  corners: 1, lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1, ...s,
+  corners: 1, lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
+  signature: { field: 'auto', mark: 'auto', cell: 'auto', ramp: 'auto', marks: 'crosses', intensity: 1 }, ...s,
 });
 
 test('toThemeRecord and fromThemeRecord round-trip every Tweaks state', () => {

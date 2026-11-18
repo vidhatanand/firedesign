@@ -1065,17 +1065,16 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "A Fire generative character field: terrain, waves, orbit, rain, grid, flame, halftone or spark. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
+          "description": "A Fire generative field: terrain, waves, orbit, rain, grid, flame, halftone, spark, contour, stipple or bars, drawn in characters, dots, squares, plus signs or dashes. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
           "name": "FdTexture",
           "members": [
             {
               "kind": "field",
               "name": "pattern",
               "type": {
-                "text": "string"
+                "text": "string | undefined"
               },
-              "default": "'terrain'",
-              "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`).",
+              "description": "The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`.",
               "attribute": "pattern"
             },
             {
@@ -1100,9 +1099,9 @@
               "kind": "field",
               "name": "marks",
               "type": {
-                "text": "'chars' | 'dots' | undefined"
+                "text": "'chars' | 'dots' | 'squares' | 'plus' | 'dashes' | undefined"
               },
-              "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`).",
+              "description": "The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`.",
               "attribute": "marks"
             },
             {
@@ -1156,7 +1155,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Luminance multiplier, default 1 (`data-intensity`).",
+              "description": "Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`.",
               "attribute": "intensity"
             },
             {
@@ -1204,6 +1203,15 @@
               },
               "description": "`blob` clips the field to a soft, noisy disc (`data-shape`).",
               "attribute": "shape"
+            },
+            {
+              "kind": "field",
+              "name": "signature",
+              "type": {
+                "text": "'own' | undefined"
+              },
+              "description": "`own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`).",
+              "attribute": "signature"
             },
             {
               "kind": "field",
@@ -1284,10 +1292,9 @@
             {
               "name": "pattern",
               "type": {
-                "text": "string"
+                "text": "string | undefined"
               },
-              "default": "'terrain'",
-              "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`).",
+              "description": "The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`.",
               "fieldName": "pattern"
             },
             {
@@ -1309,9 +1316,9 @@
             {
               "name": "marks",
               "type": {
-                "text": "'chars' | 'dots' | undefined"
+                "text": "'chars' | 'dots' | 'squares' | 'plus' | 'dashes' | undefined"
               },
-              "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`).",
+              "description": "The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`.",
               "fieldName": "marks"
             },
             {
@@ -1359,7 +1366,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Luminance multiplier, default 1 (`data-intensity`).",
+              "description": "Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`.",
               "fieldName": "intensity"
             },
             {
@@ -1402,6 +1409,14 @@
               },
               "description": "`blob` clips the field to a soft, noisy disc (`data-shape`).",
               "fieldName": "shape"
+            },
+            {
+              "name": "signature",
+              "type": {
+                "text": "'own' | undefined"
+              },
+              "description": "`own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`).",
+              "fieldName": "signature"
             },
             {
               "name": "inline",

@@ -2,6 +2,14 @@
 // Writes facet/: Fire as a Facet design system (ARCHITECTURE.md sections 4 and 8).
 //   node scripts/build-facet.mjs           write the files
 //   node scripts/build-facet.mjs --check   write nothing; exit 1 when a committed file differs from a fresh build
+//   --out <dir>                             write to (or check) <dir> instead of facet/ (used by the tests)
+//
+// Two variants, and the build writes the richest the installed Facet accepts. It probes with Facet's own checker
+// (`node <cli.js> system check <file>`, read-only; the path is $FACET_CLI or ../codecrystal/vendor/facet/dist/cli.js):
+//   full      all components with full cards, plus a top-level `contract` field holding facet/theme.json exactly
+//   fallback  100 components chosen by the curated rule, cut to the richest detail level that fits 128 KiB, no `contract`
+// With no CLI found the fallback is written and said so. The variant and the Facet build that validated it go in
+// extras.json ("facet") and README.md. With --check and no CLI, the variant recorded in extras.json is rebuilt.
 //
 // Reads contract/fire-contract.json, contract/catalog.json (with its cards), contract/theme.schema.json,
 // fire/js/theme.js, WRITING.md, templates/*.html, the CSS under fire/ and the files listed in extras.json.
@@ -16,10 +24,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHECK = process.argv.includes('--check');
+const OUT_I = process.argv.indexOf('--out');
+const OUT = OUT_I > 0 ? path.resolve(process.argv[OUT_I + 1]) : path.join(ROOT, 'facet');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const json = (rel) => JSON.parse(read(rel));
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
@@ -363,10 +375,8 @@ for (const f of templateFiles) {
 const tier = (c) => (PROTECTED_FAMILIES.has(c.family) ? 0 : LEAVE_OUT_FIRST.has(c.id) ? 2 : 1);
 const ranked = [...catalog.components].sort((a, b) =>
   tier(a) - tier(b) || usage.get(b.id) - usage.get(a.id) || (a.id < b.id ? -1 : 1));
-const MAX_COMPONENTS = 100;
-const carried = ranked.slice(0, MAX_COMPONENTS);
-const excluded = ranked.slice(MAX_COMPONENTS);
-if (carried.filter((c) => tier(c) === 0).length !== catalog.components.filter((c) => tier(c) === 0).length) {
+const MAX_COMPONENTS = 100; // what Facet accepted when this rule was written; the full variant lifts it
+if (ranked.slice(0, MAX_COMPONENTS).filter((c) => tier(c) === 0).length !== catalog.components.filter((c) => tier(c) === 0).length) {
   throw new Error('build-facet: the protected families alone exceed the component cap');
 }
 const byId = new Map(catalog.components.map((c) => [c.id, c]));
@@ -431,9 +441,11 @@ const LEVELS = [
   { purpose: 100, usage: 0, items: 1, item: 80, parts: 2, part: 24, prop: 0, paths: 0, props: 8, variants: 8 },
   { purpose: 80, usage: 0, items: 1, item: 60, parts: 1, part: 20, prop: 0, paths: 0, props: 4, variants: 6 },
 ];
+// The full variant: every field at the length Facet allows it (models.ts), nothing cut but what overruns that.
+const FULL_LEVEL = { purpose: 500, usage: 1000, items: 8, item: 300, parts: 16, part: 300, prop: 300, paths: 8, props: 32, variants: 16 };
 const MAX_BYTES = 126 * 1024; // 2 KiB under Facet's limit, for the difference between JSON and Python's canonical form
 
-function buildComponents(L) {
+function buildComponents(L, carried) {
 const droppedStates = new Set();
 // Components that take no content: a `children` slot is not offered.
 const VOID = new Set(['icon', 'texture', 'divider', 'input', 'checkbox', 'radio', 'switch', 'slider', 'progress', 'meter', 'loader', 'qr', 'sparkline', 'bars', 'donut', 'heatgrid', 'chart', 'number', 'otp', 'textarea', 'skeleton']);
@@ -525,7 +537,7 @@ return { components, noCard, propNotes, droppedStates };
 /* ==========================================================================
    content.json
    ========================================================================== */
-const buildContent = (components) => ({
+const buildContent = (components, contractRecord) => ({
   name: 'Fire',
   platform: 'web_app',
   source: 'proposed',
@@ -540,16 +552,8 @@ const buildContent = (components) => ({
   },
   components,
   voice,
+  ...(contractRecord ? { contract: contractRecord } : {}),
 });
-let level = 0, built, content;
-for (; level < LEVELS.length; level++) {
-  built = buildComponents(LEVELS[level]);
-  content = buildContent(built.components);
-  if (Buffer.byteLength(JSON.stringify(content)) <= MAX_BYTES) break;
-}
-if (level === LEVELS.length) throw new Error('content.json does not fit 128 KiB even at the smallest level');
-const { components, noCard, propNotes, droppedStates } = built;
-const contentBytes = Buffer.byteLength(JSON.stringify(content));
 
 /* ==========================================================================
    theme.json
@@ -558,6 +562,64 @@ const contentBytes = Buffer.byteLength(JSON.stringify(content));
 const { contract: recordContract, ...recordRest } = JSON.parse(JSON.stringify(DEFAULT_RECORD));
 const themeRecord = { contract: recordContract, fire: FIRE_VERSION, ...recordRest };
 { const v = validateTheme(themeRecord); if (!v.ok) throw new Error(`default theme record invalid: ${v.errors.join('; ')}`); }
+
+/* ==========================================================================
+   Which variant: ask the installed Facet
+   ========================================================================== */
+const CLI = process.env.FACET_CLI || '../codecrystal/vendor/facet/dist/cli.js';
+const cliFound = fs.existsSync(CLI);
+// A name for the Facet build: its MANIFEST.json commit when the CLI sits in a vendored tree, else the CLI file's hash.
+function facetId() {
+  const manifest = path.join(path.dirname(path.dirname(CLI)), 'MANIFEST.json');
+  try { const m = JSON.parse(fs.readFileSync(manifest, 'utf8')); if (m.commit) return `facet ${String(m.commit).slice(0, 12)}`; } catch { /* no manifest */ }
+  return `facet cli sha256:${sha256(fs.readFileSync(CLI)).slice(0, 12)}`;
+}
+// Facet's own checker, read-only, on a copy in a temp folder.
+function facetAccepts(doc) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-facet-probe-'));
+  try {
+    const file = path.join(dir, 'content.json');
+    fs.writeFileSync(file, JSON.stringify(doc, null, 2) + '\n');
+    const r = spawnSync(process.execPath, [CLI, 'system', 'check', file], { encoding: 'utf8' });
+    return { ok: r.status === 0, why: String(r.stderr || r.stdout || '').trim().split('\n')[0] };
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}
+const buildFull = () => { const b = buildComponents(FULL_LEVEL, ranked); return { built: b, content: buildContent(b.components, themeRecord), level: FULL_LEVEL, levelNo: null }; };
+function buildFallback() {
+  const carried = ranked.slice(0, MAX_COMPONENTS);
+  for (let n = 0; n < LEVELS.length; n++) {
+    const b = buildComponents(LEVELS[n], carried);
+    const c = buildContent(b.components, null);
+    if (Buffer.byteLength(JSON.stringify(c)) <= MAX_BYTES) return { built: b, content: c, level: LEVELS[n], levelNo: n };
+  }
+  throw new Error('content.json does not fit 128 KiB even at the smallest level');
+}
+let variant, chosen, validatedBy = null, probeNote = '';
+const committedFacet = (() => { try { return JSON.parse(fs.readFileSync(path.join(OUT, 'extras.json'), 'utf8')).facet || null; } catch { return null; } })();
+if (cliFound) {
+  const full = buildFull();
+  const r = facetAccepts(full.content);
+  if (r.ok) { variant = 'full'; chosen = full; validatedBy = facetId(); }
+  else {
+    variant = 'fallback'; chosen = buildFallback();
+    probeNote = `the full variant was rejected: ${r.why}`;
+    validatedBy = facetAccepts(chosen.content).ok ? facetId() : null;
+  }
+} else if (CHECK && committedFacet) {
+  // Nothing to probe with: rebuild what the committed files say they are.
+  variant = committedFacet.variant; chosen = variant === 'full' ? buildFull() : buildFallback(); validatedBy = committedFacet.validatedBy;
+  probeNote = 'no Facet CLI on this machine; the committed variant is rebuilt as recorded';
+} else {
+  variant = 'fallback'; chosen = buildFallback();
+  probeNote = `no Facet CLI found (set FACET_CLI or install ${CLI}); the fallback is written and no Facet build validated it`;
+  console.warn(`build-facet: ${probeNote}`);
+}
+const { built, content, level: LV, levelNo } = chosen;
+const { components, noCard, propNotes, droppedStates } = built;
+const carriedIds = new Set(components.map((c) => c.name));
+const excluded = ranked.filter((c) => !carriedIds.has(pascal(c.id)));
+const contentBytes = Buffer.byteLength(JSON.stringify(content));
+const facetRecord = { variant, components: components.length, contract: variant === 'full', validatedBy, checker: 'facet system check' };
 
 /* ==========================================================================
    extras.json
@@ -609,6 +671,7 @@ const bundleSha256 = sha256(files.map((f) => `${f.sha256}  ${f.path}\n`).join(''
 const extras = {
   fire: catalog.fire, package: 'fire-design', tag: `v${catalog.fire}`,
   description: 'The files a Facet system carries beside the generated content: copy them as they are, under the same relative paths. fire/ stays copyable on its own (load boot.js, fire.css and fire.js); the contract files are for the lint and the exporter.',
+  facet: facetRecord,
   bundleSha256, totalBytes: files.reduce((n, f) => n + f.size, 0),
   roleMap: Object.fromEntries(ROLE_ORDER.filter((r) => roleSpec[r]).map((r) => [r, roleSpec[r].token])),
   aliases: Object.fromEntries(Object.entries(ALIASES).sort(([a], [b]) => (a < b ? -1 : 1))),
@@ -628,22 +691,34 @@ w('## Files');
 w();
 w('| File | What it is |');
 w('|---|---|');
-w(`| \`content.json\` | Fire's default look (Ember, Geist) as a Facet \`DesignSystemContent\`: ${ROLE_ORDER.length} colour roles, ${Object.keys(palette).length} palette entries, ${Object.keys(typography).length} type steps, space, radius, shadow, breakpoint, duration, easing, zIndex, iconSize, ${Object.keys(size).length} sizes, focus ring, state, ${pairings.length} pairings, motion, voice and ${components.length} components with \`api\` cards. It passes Facet's \`validateContent\` (checked by \`scripts/test/facet.test.mjs\`, with \`facet system check\` when the CLI is present). |`);
+w(`| \`content.json\` | Fire's default look (Ember, Geist) as a Facet \`DesignSystemContent\`: ${ROLE_ORDER.length} colour roles, ${Object.keys(palette).length} palette entries, ${Object.keys(typography).length} type steps, space, radius, shadow, breakpoint, duration, easing, zIndex, iconSize, ${Object.keys(size).length} sizes, focus ring, state, ${pairings.length} pairings, motion, voice and ${components.length} components with \`api\` cards${variant === 'full' ? ', and a top-level \`contract\` field that holds \`theme.json\`' : ''}. It passes Facet's \`validateContent\` (checked by \`scripts/test/facet.test.mjs\`, with \`facet system check\` when the CLI is present). |`);
 w(`| \`extras.json\` | The ${files.length} files Facet carries beside the generated ones, each with its purpose, size and SHA-256, plus \`roleMap\` (Facet role to Fire token) and \`aliases\` (Facet's generated custom property to the Fire token holding the same value). |`);
 w('| `theme.json` | The theme record `content.json` was generated from: Fire\'s default record (`contract` "fire/1", `fire` the release, palette ember, type geist, default dials). |');
 w('| `README.md` | This file. |');
 w();
+w('## Which variant was written');
+w();
+w(variant === 'full'
+  ? `**Full.** All ${components.length} components with full cards (each field at the length Facet allows), and a top-level \`contract\` field holding \`theme.json\` exactly as Fire writes it. The installed Facet accepted it (validated by ${validatedBy}).`
+  : `**Fallback.** ${components.length} components chosen by the rule below, cut to detail level ${levelNo}, and no \`contract\` field. ${probeNote ? `${probeNote.charAt(0).toUpperCase()}${probeNote.slice(1)}. ` : ''}${validatedBy ? `This variant was accepted by ${validatedBy}.` : 'No Facet build validated it.'}`);
+w();
+w('The build tries the full variant first and falls back only when Facet\'s own checker (`facet system check`) rejects it, so a Facet that raises its limits and adds `contract` needs no change here: run `node scripts/build-facet.mjs` again. The variant and the Facet build are recorded in `extras.json` under `facet`. Set `FACET_CLI` to a Facet `dist/cli.js` to choose the Facet to ask.');
+w();
 w('## How Facet should consume it');
 w();
-w('1. **Opt in with the contract field.** A Facet system that follows Fire stores `{ "contract": "fire/1", "record": <theme record> }` (as `theme.json`), not the generated tokens. Facet calls `expandTheme(record)` from `fire/js/theme.js` (pure ES module, runs in Node and the browser) for tokens, and `themeToCss(record)` for a stylesheet a strict CSP allows. `content.json` is what Facet shows and validates for the default record; for any other record Facet regenerates it the same way (palette, type set and dials change, the scales do not).');
+w(`1. **Opt in with the contract field.** A Facet system that follows Fire stores \`{ "contract": "fire/1", "record": <theme record> }\` (as \`theme.json\`), not the generated tokens. Facet calls \`expandTheme(record)\` from \`fire/js/theme.js\` (pure ES module, runs in Node and the browser) for tokens, and \`themeToCss(record)\` for a stylesheet a strict CSP allows. \`content.json\` is what Facet shows and validates for the default record${variant === 'full' ? ' (its \`contract\` field is that record, the same bytes as \`theme.json\`)' : ''}; for any other record Facet regenerates it the same way (palette, type set and dials change, the scales do not).`);
 w(`2. **Pin the release.** Fire ${catalog.fire}, git tag \`${extras.tag}\` (\`github:vidhatanand/firedesign#${extras.tag}\`). The extras bundle hash is \`${bundleSha256}\` (SHA-256 of the lines "sha256  path" of \`extras.json\` files, in order). A Facet system records the tag and the bundle hash, and verifies each file's hash before an export is offered.`);
 w('3. **Carry the extras.** Copy every `extras.json` file to the same relative path in the canvas or the export. Fonts marked `required: false` belong to the other type sets (`data-type`); a system on Geist needs only the required ones, and may drop the rest and the matching @font-face rules.');
 w('4. **Use the aliases.** `aliases` maps each custom property Facet generates (`--color-primary`, `--space-4`, `--shadow-md`, ...) to the Fire token with the same value, so a Facet-generated sheet can be written as `--color-primary: var(--fd-accent)` and follow the theme. Fire\'s tokens stay the source: Facet\'s `component` references should name Facet tokens only where an alias exists.');
 w('5. **Components.** Each component is `<cc-component name="Button" variant="primary">`; its props are the data attributes of the Fire markup (`variant` is `data-variant`, `iconOnly` is `data-icon-only`) and the exporter writes the Fire class (`root` in the catalogue) plus those attributes. A `children` part marks a component that takes content. Facet runs `scripts/lint-markup.mjs` on the export and `scripts/render-equal.mjs` against the board.');
 w();
-w('## Which 100 components, and the rest');
+w(variant === 'full' ? '## Components' : `## Which ${MAX_COMPONENTS} components, and the rest`);
 w();
-w(`Fire has ${catalog.components.length} components in the catalogue; Facet caps a system at ${MAX_COMPONENTS}. Rule: the foundation families (${[...PROTECTED_FAMILIES].join(', ')}) are always carried; specialised parts of Fire's docs site, chat widget, agent playground and Tweaks panel are left out first; any remaining slots go by the number of \`templates/*.html\` that use the component. Fire asks Facet to raise the cap so that all ${catalog.components.length} can travel.`);
+if (variant === 'full') {
+  w(`All ${catalog.components.length} components in the catalogue are carried, in this order: the foundation families first, then the rest by use in \`templates/*.html\`. ${noCard.length ? `Carried without a card (${noCard.length}): ${noCard.map((i) => `\`${i}\``).join(', ')}.` : 'Every one has a card.'} Text is cut at a word with an ellipsis only where it overruns the length Facet allows; the complete cards are in \`contract/catalog.json\`, carried in the extras.`);
+  w();
+} else {
+w(`Fire has ${catalog.components.length} components in the catalogue; Facet caps a system at ${MAX_COMPONENTS}. Rule: the foundation families (${[...PROTECTED_FAMILIES].join(', ')}) are always carried; specialised parts of Fire's docs site, chat widget, agent playground and Tweaks panel are left out first; any remaining slots go by the number of \`templates/*.html\` that use the component. Facet's cap is what the fallback works to; when the installed Facet accepts more, the full variant carries all ${catalog.components.length}.`);
 w();
 w(`Excluded (${excluded.length}, for the Facet session to decide; id, kind, templates that use it):`);
 w();
@@ -651,6 +726,7 @@ for (const c of excluded) w(`- \`${c.id}\` (${c.kind}, ${usage.get(c.id)})`);
 w();
 w(`Carried without a card (${noCard.length}; each has a minimal entry from the catalogue: purpose, classes as parts, attribute values as props, states from the CSS and the \`data-state\` values): ${noCard.length ? noCard.map((i) => `\`${i}\``).join(', ') : 'none'}.`);
 w();
+}
 w('## Where Fire\'s model did not fit Facet\'s');
 w();
 w(`- **Accent role.** Facet requires an \`accent\` colour; Fire has one accent. \`accent\` repeats \`primary\` and Facet may set another.`);
@@ -667,8 +743,8 @@ w('- **Dials and density.** Corners, density, line weight, text size, contrast, 
 w(`- **Component states.** Facet takes any lower-case state name, and a web app must cover empty, loading, error and disabled. Card states map to a short vocabulary (${STATE_ORDER.join(', ')}); names that no pattern takes are dropped (${droppedStates.size} of them, mostly transient or per-component states such as closing, dragover, masked or sending; for example ${[...droppedStates].sort().slice(0, 8).join(', ')}). States are also read from the CSS selectors that carry the component's class (:hover, :focus, [disabled], [aria-invalid], [aria-busy], [aria-pressed], :checked, [open]); that is a heuristic, not a card.`);
 w('- **Props.** Fire attributes with values are `enum` props; attributes with no value are `boolean`. `data-state`, `data-fill` and `data-fd-instant` are not props (state is set by the page; the others are layout toggles). Enums with more than 32 values would be strings; ' + (propNotes.length ? `affected: ${propNotes.join('; ')}.` : 'none are.') + ' `children` is Facet\'s own name, so no prop is called that; a `children` part says the component takes content. Components that take none are listed in the build script (`VOID`).');
 w('- **Examples.** Each `api.example` is a `<cc-component>` tag with the first value of the first two enums, not Fire markup: the docs sections that show the real markup are named in the card (`example`) and in `paths`.');
-const LV = LEVELS[level];
-w(`- **Size.** A Facet content document may not exceed 128 KiB, and ${MAX_COMPONENTS} full cards do not fit. The build takes the richest of ${LEVELS.length} levels whose document fits in ${MAX_BYTES / 1024} KiB: this one is level ${level} (${(contentBytes / 1024).toFixed(1)} KiB compact). At this level an entry keeps a purpose of up to ${LV.purpose} characters, ${LV.usage ? `usage up to ${LV.usage}` : 'no usage line'}, up to ${LV.items} do and ${LV.items} don't lines of up to ${LV.item} characters, up to ${LV.parts} parts (descriptions up to ${LV.part}), up to ${LV.props} props, up to ${LV.variants} variants, ${LV.prop ? `prop descriptions up to ${LV.prop}` : 'no prop descriptions'} and ${LV.paths} path${LV.paths === 1 ? '' : 's'}. Longer text is cut at a word and ends with an ellipsis; the complete cards are in \`contract/catalog.json\`, which is carried in the extras. Level 0 is the richest; the level moves when cards are written.`);
+if (variant === 'full') w(`- **Size.** ${(contentBytes / 1024).toFixed(1)} KiB compact for ${components.length} components, inside the limits the installed Facet accepts.`);
+else w(`- **Size.** A Facet content document may not exceed 128 KiB, and ${MAX_COMPONENTS} full cards do not fit. The build takes the richest of ${LEVELS.length} levels whose document fits in ${MAX_BYTES / 1024} KiB: this one is level ${levelNo} (${(contentBytes / 1024).toFixed(1)} KiB compact). At this level an entry keeps a purpose of up to ${LV.purpose} characters, ${LV.usage ? `usage up to ${LV.usage}` : 'no usage line'}, up to ${LV.items} do and ${LV.items} don't lines of up to ${LV.item} characters, up to ${LV.parts} parts (descriptions up to ${LV.part}), up to ${LV.props} props, up to ${LV.variants} variants, ${LV.prop ? `prop descriptions up to ${LV.prop}` : 'no prop descriptions'} and ${LV.paths} path${LV.paths === 1 ? '' : 's'}. Longer text is cut at a word and ends with an ellipsis; the complete cards are in \`contract/catalog.json\`, which is carried in the extras. Level 0 is the richest; the level moves when cards are written.`);
 w();
 const readme = md.join('\n') + '\n';
 
@@ -676,17 +752,17 @@ const readme = md.join('\n') + '\n';
    Write or check
    ========================================================================== */
 const out = {
-  'facet/content.json': JSON.stringify(content, null, 2) + '\n',
-  'facet/extras.json': JSON.stringify(extras, null, 2) + '\n',
-  'facet/theme.json': JSON.stringify(themeRecord, null, 2) + '\n',
-  'facet/README.md': readme,
+  'content.json': JSON.stringify(content, null, 2) + '\n',
+  'extras.json': JSON.stringify(extras, null, 2) + '\n',
+  'theme.json': JSON.stringify(themeRecord, null, 2) + '\n',
+  'README.md': readme,
 };
 let stale = 0;
 for (const [rel, text] of Object.entries(out)) {
-  const file = path.join(ROOT, rel);
+  const file = path.join(OUT, rel);
   if (CHECK) {
     const now = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
-    if (now !== text) { stale++; console.error(`stale: ${rel}`); }
+    if (now !== text) { stale++; console.error(`stale: facet/${rel}`); }
   } else {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, text);
@@ -694,5 +770,5 @@ for (const [rel, text] of Object.entries(out)) {
 }
 if (CHECK) {
   if (stale) { console.error('facet/ is out of date: run node scripts/build-facet.mjs'); process.exit(1); }
-  console.log(`facet/ is current (${components.length} components, ${files.length} extras)`);
-} else console.log(`wrote facet/ (${components.length} components, ${files.length} extras, ${noCard.length} without a card)`);
+  console.log(`facet/ is current (${variant} variant, ${components.length} components, ${files.length} extras)`);
+} else console.log(`wrote facet/ (${variant} variant, ${components.length} components, ${files.length} extras, ${noCard.length} without a card)`);

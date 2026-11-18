@@ -26,6 +26,14 @@
     <section class="fd-band" data-grow aria-label="Register an app">
       <form class="fd-form" data-size="full" id="register-app" method="post" data-fd-validate autocomplete="off">
 
+        <div class="fd-callout" data-tone="danger" role="alert" id="ra-error" hidden>
+          <i class="fd-callout-icon" data-icon="circle-alert"></i>
+          <div class="fd-callout-content">
+            <p class="fd-callout-title">Couldn’t register the app</p>
+            <p class="fd-callout-body">Another app in Quarry Labs already uses the ID <span class="fd-code">quarry-console</span>. Nothing was saved. Change the App ID and register again.</p>
+          </div>
+        </div>
+
         <!-- ===================================================== App -->
         <section class="fd-form-section" aria-labelledby="ra-app-title">
           <header class="fd-form-section-head">
@@ -230,14 +238,54 @@ monitors:read = See your monitors</textarea>
 </main>
 
 <script type="module">
-  import { overlays } from '../fire/fire.js';
+  import { overlays, forms } from '../fire/fire.js';
 
   const form = document.getElementById('register-app');
+  const submit = form.querySelector('[type="submit"]');
+  const appId = document.getElementById('ra-app-id');
+  const banner = document.getElementById('ra-error');
+
+  // Submitting: the button shows it is working, the rest of the form holds still until the answer comes back.
+  const setSubmitting = (on) => {
+    submit.toggleAttribute('aria-busy', on);
+    if (on) submit.setAttribute('aria-busy', 'true');
+    form.querySelectorAll('input, select, textarea, button, a.fd-btn').forEach((el) => {
+      if (el === submit) return;
+      if (el.matches('a')) el.toggleAttribute('aria-disabled', on); else el.disabled = on;
+    });
+  };
+
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!form.checkValidity() || form.querySelector('[aria-invalid="true"]')) return;
-    overlays.toast.success('App registered');
+    banner.hidden = true;
+    setSubmitting(true);
+    setTimeout(() => {
+      setSubmitting(false);
+      overlays.toast.success('App registered');
+    }, 900);
   });
+  appId.addEventListener('input', () => { appId.setCustomValidity(''); banner.hidden = true; });
+
+  /* ?state= shows a screen the form can be in: invalid (the first submit with problems), submitting (waiting for the
+     answer) or error (the server refused the app ID). Without it the form opens filled in, as it always has. */
+  const asked = new URLSearchParams(location.search).get('state');
+  const prepare = {
+    'invalid'() {
+      document.getElementById('ra-name').value = '';
+      appId.value = 'Quarry Console';
+      forms.setTags(document.getElementById('ra-redirects').closest('.fd-tag-input'), []);
+      document.getElementById('ra-backchannel').value = 'console.quarry.dev/hooks/ember';
+      form.requestSubmit();
+    },
+    'submitting'() { setSubmitting(true); },
+    'error'() {
+      banner.hidden = false;
+      appId.setCustomValidity('quarry-console is already used by another app.');
+      forms.validateControl(appId);
+    },
+  };
+  if (Object.hasOwn(prepare, asked)) setTimeout(prepare[asked], 150);
 </script>
 </body>
 </html>

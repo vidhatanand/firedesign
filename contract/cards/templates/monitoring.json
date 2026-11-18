@@ -1,0 +1,60 @@
+{
+  "id": "monitoring",
+  "job": "Watch pages for change and see which monitor changed, failed or is paused.",
+  "purpose": "A list of monitors with three summary tiles, search, an all, active or paused switch and a sort. Each row shows the schedule, what it watches, the last check, a 14-day change sparkline and its status. A row opens a sheet with the diff and timeline; New monitor opens a step dialog for pages, schedule and where to notify.",
+  "useWhen": [
+    "A team tracks changes to external pages and wants to know which ones changed or stopped working.",
+    "Each item has a schedule, a status and a history of changes."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The list is every request made, not watched targets.",
+      "instead": "logs"
+    },
+    {
+      "when": "The page tells the public whether the service is up.",
+      "instead": "status"
+    }
+  ],
+  "aka": [
+    "watchlist",
+    "change detection",
+    "alerts",
+    "trackers",
+    "page monitors"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list",
+    "series"
+  ],
+  "states": [
+    {
+      "name": "loaded",
+      "how": "the default after a short load; ?state=loaded opens it at once"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: skeleton tiles and rows"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: No monitors yet, with the stats at zero"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: Couldn't load monitors with Retry; the tiles show dashes"
+    },
+    {
+      "name": "no-results",
+      "how": "?state=no-results: a search with no match"
+    }
+  ],
+  "example": "templates/monitoring.html",
+  "provenance": [
+    "templates/monitoring.html"
+  ],
+  "since": "0.8.0"
+}

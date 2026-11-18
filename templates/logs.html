@@ -213,6 +213,11 @@
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
               <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="sm"></span></td><td><span class="fd-table-skeleton" data-size="xl"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
+              <tr data-skeleton><td data-select></td><td><span class="fd-table-skeleton" data-size="md"></span></td><td><span class="fd-table-skeleton" data-size="xs"></span></td><td><span class="fd-table-skeleton" data-size="lg"></span></td><td><span class="fd-table-skeleton" data-shape="pill" data-size="sm"></span></td><td data-num><span class="fd-table-skeleton" data-size="2xs"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td><td data-actions></td></tr>
             </tbody>
             <tbody id="logs-state" hidden></tbody>
           </table>
@@ -697,9 +702,18 @@
     });
   });
 
-  /* ---------- First paint: skeleton rows for ~600 ms, then the data ---------- */
-  setState('loading');
-  setTimeout(() => state === 'loading' && setState('loaded'), 600);
+  /* ---------- First paint: ?state= picks loaded, loading, empty, error or no-results (a search that matches nothing);
+     otherwise skeleton rows for ~600 ms, then the data ---------- */
+  const asked = new URLSearchParams(location.search).get('state');
+  if (['loaded', 'loading', 'empty', 'error'].includes(asked)) setState(asked);
+  else if (asked === 'no-results') {
+    setState('loaded');
+    searchInput.value = 'invoice-export.pdf';
+    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+    setState('loading');
+    setTimeout(() => state === 'loading' && setState('loaded'), 600);
+  }
 </script>
 </body>
 </html>

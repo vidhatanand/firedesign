@@ -534,8 +534,18 @@ $('#ag-history').addEventListener('click', (e) => {
 });
 
 /* ---------- start ---------- */
-renderSessions();
+/* ?state= opens the agent in one of its own states: running (a run in progress), approval (a tool call waits for a
+   go-ahead), error (a run stopped at its credit limit), answered (a finished run), out-of-runs (today's free runs
+   are used), empty (no sessions yet) or loading (the session list is loading). */
+const asked = new URLSearchParams(location.search).get('state');
+const SESSION_OF = { 'approval': 's2', 'error': 's5', 'answered': 's1' };
+if (asked === 'empty') sessions.length = 0;
+if (asked === 'loading') $$('[data-sessions]').forEach((el) => { el.innerHTML = '<div class="fd-skeleton-list" data-rows="6"></div>'; });
+else renderSessions();
 setView(false);
+if (SESSION_OF[asked]) openSession(SESSION_OF[asked]);
+if (asked === 'running') setTimeout(() => startRun('Pricing tiers across three web-data APIs'), 200);
+if (asked === 'out-of-runs') { freeRuns = 1; useFreeRun(); lockComposer(); }
 </script>
 </body>
 </html>

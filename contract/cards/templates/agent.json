@@ -1,0 +1,74 @@
+{
+  "id": "agent",
+  "job": "Ask for web data in plain words and watch an agent work through it, with its steps, sources and cost.",
+  "purpose": "A chat screen for an agent: a hero composer with suggested asks, then a thread of reasoning, tool calls, a result table and cited sources, with the session list beside it. A tool call that charges credits waits for Allow once, Always allow or Deny. A failed call or a run that hits its credit limit says so with Retry. Free runs are counted and lock the composer when spent.",
+  "useWhen": [
+    "A person describes a data task in words and wants to see each step, approve what costs credits and keep the result.",
+    "Sessions should be kept, reopened and retried."
+  ],
+  "avoidWhen": [
+    {
+      "when": "You already know the endpoint and its options and want to send one request.",
+      "instead": "playground"
+    },
+    {
+      "when": "The agent proposes changes that an owner decides later, one case at a time.",
+      "instead": "decisions"
+    }
+  ],
+  "aka": [
+    "chat",
+    "assistant",
+    "copilot",
+    "research agent",
+    "ask",
+    "prompt"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "text",
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "the default: the hero composer with suggestions and the session list"
+    },
+    {
+      "name": "running",
+      "how": "?state=running: sends a first ask and streams the reasoning, calls and answer"
+    },
+    {
+      "name": "approval",
+      "how": "?state=approval: a tool call in data-state=\"approval\" waits for Allow once, Always allow or Deny"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: a call in data-state=\"failed\" and a message error with Retry"
+    },
+    {
+      "name": "answered",
+      "how": "?state=answered: a finished run with its result and sources"
+    },
+    {
+      "name": "out-of-runs",
+      "how": "?state=out-of-runs: the composer is disabled and the counter reads 0 free runs left"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: the session list has no sessions"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: the session list shows a skeleton list"
+    }
+  ],
+  "example": "templates/agent.html",
+  "provenance": [
+    "templates/agent.html"
+  ],
+  "since": "0.8.0"
+}

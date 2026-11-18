@@ -1,0 +1,61 @@
+{
+  "id": "logs",
+  "job": "Find a request among many, filter it, and open its detail and timeline.",
+  "purpose": "A table of every request with search, endpoint, key, status and date filters shown as removable tokens, sortable columns, bulk selection, paging and CSV export. Opening a row shows its request, response, timeline and, for a crawl, its stages in a sheet. The table has its own loading, empty and error rows, and a filter that matches nothing offers Clear filters.",
+  "useWhen": [
+    "People look up what happened to individual requests or jobs over time.",
+    "The list is long enough to need filters, sorting and paging."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Everything about one entity belongs on one page with its actions.",
+      "instead": "record"
+    },
+    {
+      "when": "The list records who changed settings, not requests.",
+      "instead": "audit"
+    }
+  ],
+  "aka": [
+    "activity",
+    "history",
+    "requests",
+    "events",
+    "table",
+    "runs"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "loaded",
+      "how": "the default after a short load; ?state=loaded opens it at once"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: skeleton rows; the footer says Loading requests"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: no activity yet, with Send a test request"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: the request timed out, with Retry"
+    },
+    {
+      "name": "no-results",
+      "how": "?state=no-results: a search with no match; Clear filters"
+    }
+  ],
+  "example": "templates/logs.html",
+  "provenance": [
+    "templates/logs.html"
+  ],
+  "since": "0.8.0"
+}

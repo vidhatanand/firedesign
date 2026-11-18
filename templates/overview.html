@@ -38,7 +38,7 @@
         <div class="fd-split-main">
           <div id="ov-chart" data-fd-loading="true">
             <div class="fd-skeleton-chart"></div>
-            <div class="fd-stack" data-gap="4">
+            <div class="fd-stack" data-gap="4" data-when="ready">
               <div class="fd-row" data-justify="between" data-align="start">
                 <div>
                   <h2 class="fd-title">Credits used · Last 7 days</h2>
@@ -56,6 +56,12 @@
                 }
                 </script>
               </div>
+            </div>
+            <div class="fd-empty" data-when="empty" aria-label="Credits used" hidden>
+              <span class="fd-empty-icon"><i data-icon="chart-column"></i></span>
+              <h3 class="fd-empty-title">No credits used yet</h3>
+              <p class="fd-empty-text">Credits used per day appear here after your first request. A test request in the playground costs 1 credit.</p>
+              <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><i data-icon="play"></i><span>Send a test request</span></a></div>
             </div>
           </div>
         </div>
@@ -111,7 +117,7 @@
     <section class="fd-band fd-rise" data-pad="sm" aria-label="Last 24 hours" data-fd-vars="--fd-i: 2">
       <div id="ov-stats" data-fd-loading="true">
         <div class="fd-skeleton-stat" data-count="4"></div>
-        <div class="fd-stats">
+        <div class="fd-stats" data-when="ready">
           <div class="fd-stat-tile">
             <span class="fd-stat-label">Requests · 24h</span>
             <div class="fd-stat-row"><span class="fd-stat">4,812</span><span class="fd-stat-delta" data-tone="success" data-dir="up">12.4%</span></div>
@@ -133,6 +139,11 @@
             <div class="fd-stat-row"><span class="fd-stat">12</span><span class="fd-stat-delta" data-tone="success" data-dir="up">2</span></div>
             <span class="fd-stat-sub">9 checked in the last hour</span>
           </div>
+        </div>
+        <div class="fd-empty" data-size="sm" data-when="empty" aria-label="Last 24 hours" hidden>
+          <span class="fd-empty-icon"><i data-icon="activity"></i></span>
+          <h3 class="fd-empty-title">Nothing in the last 24 hours</h3>
+          <p class="fd-empty-text">Requests, success rate, latency and active monitors show here once Quarry Labs sends traffic.</p>
         </div>
       </div>
     </section>
@@ -182,7 +193,7 @@
     <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Recent requests">
       <div id="ov-activity" data-fd-loading="true">
         <div class="fd-skeleton-table" data-rows="6" data-cols="5"></div>
-        <div class="fd-table-wrap">
+        <div class="fd-table-wrap" data-when="ready">
           <div class="fd-table-scroll">
             <table class="fd-table" data-stack aria-label="Recent requests">
               <thead>
@@ -240,6 +251,18 @@
               </tbody>
             </table>
           </div>
+        </div>
+        <div class="fd-empty" data-when="empty" aria-label="Recent requests" hidden>
+          <span class="fd-empty-icon"><i data-icon="list"></i></span>
+          <h3 class="fd-empty-title">No requests yet</h3>
+          <p class="fd-empty-text">Your last six requests appear here a few seconds after they finish. Send one from the playground or with your API key.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="playground.html?endpoint=scrape"><i data-icon="play"></i><span>Open the playground</span></a></div>
+        </div>
+        <div class="fd-empty" data-tone="danger" data-when="error" role="alert" aria-label="Recent requests" hidden>
+          <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+          <h3 class="fd-empty-title">Couldn’t load recent requests</h3>
+          <p class="fd-empty-text">The activity service did not answer within 10 seconds. Credits, key and monitors above are up to date.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" id="ov-activity-retry"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
         </div>
       </div>
     </section>
@@ -340,8 +363,19 @@
   import { texture, overlays } from '../fire/fire.js';
 
   // Loading: skeletons swap to content after a short first paint.
+  // ?state= shows another state: loading keeps the skeletons; empty is a team with no traffic yet; error is the
+  // recent-requests section failing alone, with Retry, while the rest of the screen is up to date.
   const regions = ['ov-chart', 'ov-stats', 'ov-activity'].map((id) => document.getElementById(id));
-  setTimeout(() => regions.forEach((el) => texture.setLoading(el, false)), 600);
+  const asked = new URLSearchParams(location.search).get('state');
+  // A region shows the child whose data-when names the state; the others are hidden.
+  const set = (id, state) => document.getElementById(id).querySelectorAll(':scope > [data-when]').forEach((el) => { el.hidden = el.dataset.when !== state; });
+  if (asked === 'empty') { ['ov-chart', 'ov-stats', 'ov-activity'].forEach((id) => set(id, 'empty')); }
+  if (asked === 'error') set('ov-activity', 'error');
+  if (asked !== 'loading') setTimeout(() => regions.forEach((el) => texture.setLoading(el, false)), 600);
+  document.getElementById('ov-activity-retry').addEventListener('click', () => {
+    texture.setLoading(regions[2], true);
+    setTimeout(() => { set('ov-activity', 'ready'); texture.setLoading(regions[2], false); }, 900);
+  });
 
   // What's new: once per browser, 800ms after load. The band 6 button reopens it any time. Not in a look preview
   // (?look=, data-fd-look on <html>): the look gallery frames this page and wants the page, not the dialog.

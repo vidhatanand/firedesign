@@ -1,0 +1,61 @@
+{
+  "id": "provider",
+  "job": "Read what one provider offers, try a capability, and add a ready-made skill.",
+  "purpose": "A provider page: a header with its category and a suggested ask, a playground to try a capability with its fields, request and code, the list of capabilities with their price, ready-made skills to copy, and the pricing and terms. Capabilities and skills load and fail on their own; a provider whose terms are not accepted offers Review and accept, and an unknown one says so.",
+  "useWhen": [
+    "A person has picked a provider and needs to try it and decide whether to use it.",
+    "Terms and pricing are part of the decision."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The person is still comparing many providers.",
+      "instead": "catalog"
+    },
+    {
+      "when": "The person wants the agent to choose the calls.",
+      "instead": "agent"
+    }
+  ],
+  "aka": [
+    "integration page",
+    "data source",
+    "vendor",
+    "listing",
+    "app detail"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "record",
+    "list",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "the default after a short load"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: skeleton lists under Capabilities and Ready-made skills"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: capabilities and skills each show a danger fd-empty with Retry; the playground stays"
+    },
+    {
+      "name": "terms",
+      "how": "?state=terms: the playground is replaced by Accept the terms"
+    },
+    {
+      "name": "not-found",
+      "how": "?state=not-found: only the back link and Browse the catalog"
+    }
+  ],
+  "example": "templates/provider.html",
+  "provenance": [
+    "templates/provider.html"
+  ],
+  "since": "0.8.0"
+}

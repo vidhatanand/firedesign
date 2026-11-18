@@ -1,0 +1,62 @@
+{
+  "id": "install",
+  "job": "Connect the product to an agent, an MCP client or a script, then check that the connection works.",
+  "purpose": "A set of ways to connect: coding agents with an install dialog each, an MCP URL and the key, assistants with a connect button, a CLI that plays its first run, an SDK snippet in three languages, and a verify card that makes one real request in three steps and reports the result. The verify card shows what failed and the next step.",
+  "useWhen": [
+    "A person has just got an account and needs to put the product in front of an agent.",
+    "The result must be confirmed with a real request."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The person needs to create, scope or revoke a key.",
+      "instead": "api-keys"
+    },
+    {
+      "when": "The person is walking through first-run steps in order.",
+      "instead": "onboarding"
+    }
+  ],
+  "aka": [
+    "setup",
+    "connect",
+    "quickstart",
+    "MCP",
+    "integration",
+    "get started"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "text",
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "the default: the check has not run; every step is pending"
+    },
+    {
+      "name": "checking",
+      "how": "?state=checking: the second step is active and Run check is busy"
+    },
+    {
+      "name": "connected",
+      "how": "?state=connected: all steps done and a success callout"
+    },
+    {
+      "name": "failed",
+      "how": "?state=failed: the second step fails and a danger callout names the 401 and the next step"
+    },
+    {
+      "name": "no-key",
+      "how": "?state=no-key: the key field is replaced by a callout with Create an API key; Run check is disabled"
+    }
+  ],
+  "example": "templates/install.html",
+  "provenance": [
+    "templates/install.html"
+  ],
+  "since": "0.8.0"
+}

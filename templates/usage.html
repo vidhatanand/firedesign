@@ -33,6 +33,14 @@
             <div class="fd-meter-track"><div class="fd-meter-fill"></div></div>
           </div>
           <p class="fd-small">Manage your plan in <a class="fd-link" href="settings.html?tab=billing">billing settings</a>.</p>
+          <div class="fd-callout" data-tone="danger" role="alert" id="over-limit" hidden>
+            <i class="fd-callout-icon" data-icon="circle-alert"></i>
+            <div class="fd-callout-content">
+              <p class="fd-callout-title">You have used all 3,000 credits</p>
+              <p class="fd-callout-body">New requests fail with a 402 until Nov 23, when the plan refills, or until you add credits.</p>
+              <div class="fd-callout-actions"><a class="fd-btn" data-size="sm" data-variant="primary" href="settings.html?tab=billing"><span>Add credits</span></a></div>
+            </div>
+          </div>
         </div>
         <button class="fd-data-card-toggle" type="button" aria-expanded="false" aria-controls="balances"><i data-icon="chevron-down"></i><span>View all balances (3)</span></button>
         <div class="fd-data-card-more" id="balances" data-state="closed">
@@ -144,7 +152,16 @@
       </div>
     </section>
 
-    <section class="fd-band" data-pad="none" aria-label="Summary">
+    <section class="fd-band" data-pad="none" id="usage-error" hidden aria-label="Usage unavailable">
+      <div class="fd-empty" data-size="lg" data-tone="danger" role="alert">
+        <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+        <h2 class="fd-empty-title">Couldn’t load usage</h2>
+        <p class="fd-empty-text">The usage service did not answer within 10 seconds. Credits remaining above come from billing and are up to date.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" type="button" id="usage-retry"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
+      </div>
+    </section>
+
+    <section data-usage-data class="fd-band" data-pad="none" aria-label="Summary">
       <div id="wrap-stats" data-fd-loading="true">
         <div class="fd-skeleton-stat" data-count="4"></div>
         <div class="fd-stats">
@@ -172,7 +189,7 @@
       </div>
     </section>
 
-    <section class="fd-band" data-pad="none" aria-label="Credits over time">
+    <section data-usage-data class="fd-band" data-pad="none" aria-label="Credits over time">
       <div id="wrap-credits" data-fd-loading="true">
         <div class="fd-skeleton-chart" data-variant="bars"></div>
         <div class="fd-split">
@@ -212,7 +229,7 @@
       </div>
     </section>
 
-    <section class="fd-band" aria-label="Browser concurrency">
+    <section data-usage-data class="fd-band" aria-label="Browser concurrency">
       <div id="wrap-concurrency" data-fd-loading="true">
         <div class="fd-skeleton-chart"></div>
         <section class="fd-chart-card">
@@ -239,7 +256,7 @@
       </div>
     </section>
 
-    <section class="fd-band" aria-label="Activity">
+    <section data-usage-data class="fd-band" aria-label="Activity">
       <div id="wrap-activity" data-fd-loading="true">
         <div class="fd-skeleton-chart"></div>
         <section class="fd-chart-card">
@@ -266,7 +283,7 @@
   </div>
 </main>
 <script type="module">
-  import { charts, overlays, texture, copyText } from '../fire/fire.js';
+  import { charts, overlays, texture, copyText, data } from '../fire/fire.js';
 
   const $ = (sel) => document.querySelector(sel);
   const credits = $('#chart-credits');
@@ -284,7 +301,7 @@
   let concData = SETS.day;
 
   /* First paint: skeletons for ~600ms, then the swap. */
-  setTimeout(() => wraps.forEach((w) => texture.setLoading(w, false)), 600);
+  if (new URLSearchParams(location.search).get('state') !== 'loading') setTimeout(() => wraps.forEach((w) => texture.setLoading(w, false)), 600);
 
   /* Segmented switches */
   $('#credits-range').addEventListener('fd:change', (e) => {
@@ -314,6 +331,31 @@
     $('#bars-empty').hidden = !empty;
     $('#heat-activity').hidden = empty;
     $('#heat-empty').hidden = !empty;
+  });
+
+  /* ?state= shows loaded, loading, empty (the demo switch above), over-limit (no credits left) or error (the usage
+     service failed; credits remaining come from billing and stay). */
+  const asked = new URLSearchParams(location.search).get('state');
+  const usageBands = [...document.querySelectorAll('[data-usage-data]')];
+  const showError = (on) => { usageBands.forEach((b) => { b.hidden = on; }); $('#usage-error').hidden = !on; };
+  if (asked === 'loading' || asked === 'empty') {
+    const item = $(`#demo-state [data-value="${asked}"]`);
+    // The switch is upgraded after this script runs; wait for it.
+    setTimeout(() => item.click(), 100);
+  }
+  if (asked === 'over-limit') {
+    document.querySelector('.fd-data-card-desc').innerHTML = 'Hobby plan: all 3,000 credits used. Refreshing on <span class="fd-text-2">Nov 23, 2026</span>';
+    document.querySelector('.fd-data-card-figure .fd-stat').textContent = '0';
+    const meter = document.querySelector('.fd-meter[data-value]');
+    meter.dataset.tone = 'danger';
+    data.setMeter(meter, 0, 3000);
+    $('#over-limit').hidden = false;
+  }
+  if (asked === 'error') { showError(true); wraps.forEach((w) => texture.setLoading(w, false)); }
+  $('#usage-retry').addEventListener('click', () => {
+    showError(false);
+    wraps.forEach((w) => texture.setLoading(w, true));
+    setTimeout(() => wraps.forEach((w) => texture.setLoading(w, false)), 900);
   });
 
   /* Referral link */

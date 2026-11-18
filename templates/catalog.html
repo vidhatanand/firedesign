@@ -149,6 +149,16 @@
       </div>
     </section>
 
+    <!-- The catalog failed to load -->
+    <section class="fd-band" id="band-error" data-grow hidden aria-label="Catalog unavailable">
+      <div class="fd-empty" data-tone="danger" role="alert">
+        <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+        <h2 class="fd-empty-title">Couldn’t load the catalog</h2>
+        <p class="fd-empty-text">The catalog service did not answer within 10 seconds. Providers you already use keep working through the API.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" type="button" id="catalog-retry"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
+      </div>
+    </section>
+
     <!-- Empty results -->
     <section class="fd-band" id="band-empty" data-grow hidden aria-label="No results">
       <div class="fd-empty">
@@ -281,6 +291,7 @@ const PAGE = 12;
 const STEP = 4;
 const DEFAULTS = { q: '', cat: 'all', verified: false, free: false, maxPrice: 300 };
 const state = { ...DEFAULTS, view: 'human', shown: PAGE };
+let failed = false; // ?state=error: the catalog did not load
 
 const isActive = () => state.q !== '' || state.cat !== 'all' || state.verified || state.free || state.maxPrice < 300;
 const matches = (p) => (state.cat === 'all' || p.cat === state.cat)
@@ -303,11 +314,12 @@ function apply() {
   const none = ok.length === 0;
   const human = state.view === 'human';
   const anyIn = (sel) => $$(`${sel} .fd-card:not([hidden])`).length > 0;
-  $('#band-rec').hidden = !human || none || !anyIn('#rec-grid');
-  $('#band-feat').hidden = !human || none || !anyIn('#feat-track');
-  $('#band-all').hidden = !human || none;
-  $('#band-agent').hidden = human || none;
-  $('#band-empty').hidden = !none;
+  $('#band-rec').hidden = failed || !human || none || !anyIn('#rec-grid');
+  $('#band-feat').hidden = failed || !human || none || !anyIn('#feat-track');
+  $('#band-all').hidden = failed || !human || none;
+  $('#band-agent').hidden = failed || human || none;
+  $('#band-empty').hidden = failed || !none;
+  $('#band-error').hidden = !failed;
   $('#empty-title').textContent = state.q ? `No providers match “${state.q}”` : 'No providers match these filters';
 
   const shown = $$('#all-grid .fd-card:not([hidden])').length;
@@ -391,11 +403,25 @@ $('#pick-q').addEventListener('input', (e) => {
 });
 countPicks();
 
-/* ---------- First paint: skeleton for ~600ms, then swap ---------- */
+/* ---------- First paint: ?state= picks loading, error or no-results (a search that matches nothing);
+   otherwise a skeleton for ~600ms, then swap ---------- */
 init(document);
+const asked = new URLSearchParams(location.search).get('state');
+failed = asked === 'error';
 apply();
 const holds = $$('[data-fd-loading="true"]');
-setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 600);
+if (asked === 'no-results') {
+  const q = $('#catalog-q');
+  q.value = 'ledgerline-eu';
+  q.dispatchEvent(new Event('input', { bubbles: true }));
+}
+if (asked !== 'loading') setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 600);
+$('#catalog-retry').addEventListener('click', () => {
+  failed = false;
+  holds.forEach((el) => setLoading(el, true));
+  apply();
+  setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 900);
+});
 </script>
 </body>
 </html>

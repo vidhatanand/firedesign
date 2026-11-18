@@ -238,6 +238,26 @@ print(run.output)</code></pre>
       </section>
     </section>
 
+    <!-- Terms not accepted yet -->
+    <section class="fd-band" id="band-terms" data-pad="md" hidden aria-label="Terms">
+      <div class="fd-empty" data-size="lg">
+        <span class="fd-empty-icon"><i data-icon="file-text"></i></span>
+        <h2 class="fd-empty-title">Accept Northwind People’s terms to use it</h2>
+        <p class="fd-empty-text">Each provider sets its own terms. Version 1.2.0 takes effect Nov 3, 2026. Nothing is enabled and no credits are used until an owner accepts them.</p>
+        <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="primary" id="accept-terms"><span>Review and accept</span></button></div>
+      </div>
+    </section>
+
+    <!-- The provider does not exist -->
+    <section class="fd-band" id="band-missing" data-grow hidden aria-label="Provider not found">
+      <div class="fd-empty" data-size="lg">
+        <span class="fd-empty-icon"><i data-icon="search"></i></span>
+        <h2 class="fd-empty-title">This provider is not in the catalog</h2>
+        <p class="fd-empty-text">It may have been renamed or retired. Browse the catalog to find a provider that covers the same data.</p>
+        <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="catalog.html"><span>Browse the catalog</span></a></div>
+      </div>
+    </section>
+
     <!-- Capabilities -->
     <section class="fd-band" id="capabilities" aria-labelledby="h-caps">
       <div class="fd-stack">
@@ -245,7 +265,7 @@ print(run.output)</code></pre>
           <h2 class="fd-title" id="h-caps">Capabilities</h2>
           <span class="fd-small fd-muted fd-num">10</span>
         </div>
-        <div data-fd-loading="true">
+        <div id="caps-region" data-fd-loading="true">
           <div class="fd-skeleton-list" data-rows="10"></div>
           <ul class="fd-list" data-divided data-interactive aria-label="Capabilities">
             <li class="fd-list-row">
@@ -299,6 +319,12 @@ print(run.output)</code></pre>
               <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
             </li>
           </ul>
+          <div class="fd-empty" data-tone="danger" data-size="sm" role="alert" id="caps-error" hidden>
+            <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+            <h3 class="fd-empty-title">Couldn’t load the capabilities</h3>
+            <p class="fd-empty-text">The catalog did not answer within 10 seconds. The playground above still works.</p>
+            <div class="fd-empty-actions"><button class="fd-btn" type="button" data-retry-region="caps-region"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
+          </div>
         </div>
       </div>
     </section>
@@ -313,7 +339,7 @@ print(run.output)</code></pre>
           </div>
           <p class="fd-small fd-muted">Skills teach your agent a whole task that calls Northwind People. Copy one into your agent’s skills folder.</p>
         </div>
-        <div data-fd-loading="true">
+        <div id="skills-region" data-fd-loading="true">
           <div class="fd-skeleton-grid" data-count="3" data-min="lg"></div>
           <div class="fd-card-grid" data-min="lg">
             <article class="fd-card" data-interactive>
@@ -343,6 +369,12 @@ print(run.output)</code></pre>
               <code class="fd-mono-sm fd-muted fd-truncate">skills/northwind-hiring-signals/SKILL.md</code>
               <div class="fd-row"><button class="fd-btn" type="button" data-variant="accent-soft" data-size="sm" data-skill="northwind-people/hiring-signals"><i data-icon="copy"></i><span>Copy skill</span></button></div>
             </article>
+          </div>
+          <div class="fd-empty" data-tone="danger" data-size="sm" role="alert" id="skills-error" hidden>
+            <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+            <h3 class="fd-empty-title">Couldn’t load the skills</h3>
+            <p class="fd-empty-text">The skills index did not answer within 10 seconds. Try again in a moment.</p>
+            <div class="fd-empty-actions"><button class="fd-btn" type="button" data-retry-region="skills-region"><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
           </div>
         </div>
       </div>
@@ -460,10 +492,36 @@ $('#read-terms').addEventListener('click', () => {
   toast({ title: 'Northwind People terms v1.2.0', description: 'Accepted by Quarry Labs on Nov 3, 2026.', tone: 'info' });
 });
 
-/* First paint: skeletons for ~600ms, then swap */
+/* First paint: ?state= picks loading, error (capabilities and skills fail on their own), terms (not accepted yet) or
+   not-found; otherwise skeletons for ~600ms, then swap */
 init(document);
+const asked = new URLSearchParams(location.search).get('state');
 const holds = $$('[data-fd-loading="true"]');
-setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 600);
+const fail = (region, on) => {
+  const el = $(`#${region}`);
+  const list = [...el.children].find((c) => !c.className.includes('fd-skeleton') && !c.matches('[role="alert"]'));
+  list.hidden = on;
+  $(`#${region.replace('-region', '-error')}`).hidden = !on;
+};
+if (asked === 'error') { holds.forEach((el) => setLoading(el, false)); fail('caps-region', true); fail('skills-region', true); }
+if (asked === 'terms') { $('#pg').closest('.fd-band').hidden = true; $('#band-terms').hidden = false; }
+if (asked === 'not-found') {
+  ['#capabilities', '#skills', '#pricing'].forEach((sel) => { $(sel).hidden = true; });
+  $('#pg').closest('.fd-band').hidden = true;
+  $('[aria-label="Northwind People"]').hidden = true;
+  $('#band-missing').hidden = false;
+}
+if (asked !== 'loading') setTimeout(() => holds.forEach((el) => setLoading(el, false)), reducedMotion() ? 0 : 600);
+document.addEventListener('click', (e) => {
+  const retry = e.target.closest('[data-retry-region]');
+  if (retry) {
+    const id = retry.dataset.retryRegion;
+    fail(id, false);
+    setLoading($(`#${id}`), true);
+    setTimeout(() => setLoading($(`#${id}`), false), 900);
+  }
+  if (e.target.closest('#accept-terms')) toast({ title: 'Terms v1.2.0 accepted', description: 'Quarry Labs can now use Northwind People.', tone: 'success' });
+});
 </script>
 </body>
 </html>

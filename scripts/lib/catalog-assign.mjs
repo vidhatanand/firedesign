@@ -41,6 +41,7 @@ export const EXTRA_ROOTS = {
   'fd-service-status': 'Shell',        // the top bar's service status
   'fd-shortcuts': 'Shell',             // the shortcut sheet's list
   'fd-swatch': 'Forms',                // a colour that is content
+  'fd-tabbar': 'Shell',                // the phone tab bar
   'fd-tooltip': 'Overlays',            // the vocabulary lists it only as the part of data-fd-tooltip
   'fd-usage-chip': 'Agent',
   'fd-use-agent': 'Agent',

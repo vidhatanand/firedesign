@@ -9,6 +9,9 @@
  *                                                  expandable group; opens itself when a child is current.
  *  [data-fd-mobile-nav][aria-controls]             opens / closes a .fd-mobile-nav (defaults to the one in the
  *                                                  same .fd-app). Scrim, focus trap, Escape, scroll lock included.
+ *  .fd-tabbar-item[data-fd-mobile-nav][aria-controls]  the phone tab bar's "More" item (0.8): opens the same sheet, with the tab bar
+ *                                                  left in view under it. It keeps its own label and icon and carries aria-expanded
+ *                                                  while the sheet is open; the sheet closes if the shell grows to 640px.
  *  [data-fd-theme-toggle]                          cycles light → dark → system; icon and aria-label follow.
  *  Rail tooltips: in the collapsed sidebar, hovering or focusing an item shows its label (or its
  *  data-fd-tooltip) in a shared .fd-rail-tip, with the item's mono hint.
@@ -130,7 +133,7 @@ function setupApp(app) {
   // Close the phone menu if the shell grows past the breakpoint.
   if (typeof ResizeObserver !== 'undefined') {
     new ResizeObserver(() => {
-      if (openNav && openNav.app === app && app.clientWidth >= 900) closeMobileNav({ restoreFocus: false });
+      if (openNav && openNav.app === app && (app.clientWidth >= 900 || (app.clientWidth >= 640 && openNav.trigger?.classList.contains('fd-tabbar-item')))) closeMobileNav({ restoreFocus: false });
     }).observe(app);
   }
 }
@@ -246,6 +249,7 @@ function scrimFor(sheet) {
 function setTrigger(trigger, open) {
   if (!trigger) return;
   trigger.setAttribute('aria-expanded', String(open));
+  if (trigger.classList.contains('fd-tabbar-item')) return; // the tab bar's "More" keeps its own label and icon
   trigger.setAttribute('aria-label', open ? label(trigger, 'menu.close', 'Close menu') : label(trigger, 'menu.open', 'Open menu'));
   swapIcon(trigger, open ? 'x' : 'menu');
 }

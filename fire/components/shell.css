@@ -40,6 +40,19 @@
                        the popover lists fd-running-item (data-kind, fd-running-title, fd-running-meta, fd-running-bar, fd-running-time)
    fd-service-status   the service status control in the top bar: data-status="operational|degraded|outage|maintenance"; the label shows
                        unless the service is operational (fd-service-status-label)
+   Added in 0.8:
+   fd-tabbar           the phone tab bar: <nav class="fd-tabbar" aria-label="Primary"> as a direct child of .fd-app, holding three to
+                       five .fd-tabbar-item (an <a>, or a <button data-fd-mobile-nav aria-controls="sheet-id"> named "More" that opens
+                       the .fd-mobile-nav sheet and carries aria-expanded while it is open). Each holds an icon and
+                       <span class="fd-tabbar-label">. The current page is aria-current="page". It shows only while the shell is
+                       narrower than 640px; from 640px up the sidebar or the menu sheet serves.
+   fd-tabbar-badge     a count on an item, after the icon (the "New" tag's look); it is read with the label
+   data-dot            on an item: the "new" dot on its icon; give the item a .fd-sr-only line that says what is new
+   --fd-tabbar-space   the room the bar takes (its height plus the safe area): set on every child of .fd-app that has a tab bar while
+                       it shows, and on the root of a page whose shell is not contained; 0 otherwise. Parts that sit at the bottom of the
+                       screen add it: the page, the support button and chat, toasts, the keys hint, sticky action bars, the tweaks button.
+   With a "More" item the top bar's menu button is hidden under 640px (the sheet opens from the bar, which stays on screen).
+
    Responsive: the shell is a size container named `fd-app`; under 900px the sidebar
    hides and .fd-mobile-nav takes over. Page parts query the `fd-page` container.
    ========================================================================== */
@@ -128,6 +141,14 @@
   --fd-mobile-sheet-w: 400px;      /* tablet sheet */
   --fd-mobile-sheet-nudge: 16px;
   --fd-mobile-account-h: 52px;
+  /* tab bar */
+  --fd-tabbar-h: 56px;             /* the bar, without the safe area */
+  --fd-tabbar-space: 0px;          /* what the bar takes from the screen: set where a bar shows, 0 elsewhere */
+  --fd-tabbar-icon: var(--fd-icon-lg);
+  --fd-tabbar-icon-stroke: 1.5;
+  --fd-tabbar-icon-stroke-current: 1.9;
+  --fd-tabbar-gap: 2px;            /* icon to label */
+  --fd-tabbar-dot: var(--fd-nav-dot);
 }
 
 /* ---------- Root ---------- */
@@ -559,7 +580,7 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 
 /* Floating support button. */
 .fd-app-fab {
-  position: fixed; inset-inline-end: var(--fd-space-5); inset-block-end: var(--fd-space-5);
+  position: fixed; inset-inline-end: var(--fd-space-5); inset-block-end: calc(var(--fd-space-5) + var(--fd-tabbar-space));
   z-index: var(--fd-z-sticky);
 }
 .fd-app[data-contained] .fd-app-fab { position: absolute; }
@@ -887,6 +908,72 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-mobile-nav-item[aria-current="page"] > .fd-icon:last-child { color: var(--fd-accent-text); }
 .fd-mobile-nav-item[data-level="2"] { padding-inline-start: var(--fd-space-6); font-size: var(--fd-text-md); min-height: var(--fd-control-lg); }
 
+/* ---------- Tab bar ---------- */
+.fd-tabbar {
+  position: fixed; z-index: var(--fd-z-topbar);
+  inset-inline: 0; inset-block-end: 0;
+  display: none; align-items: stretch;
+  padding: 0 var(--fd-space-1) env(safe-area-inset-bottom, 0px);
+  box-shadow: inset 0 var(--fd-hairline) 0 0 var(--fd-line-faint);   /* the top hairline, drawn inside so the bar is exactly its token height */
+  background: color-mix(in srgb, var(--fd-bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(var(--fd-shell-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--fd-shell-blur)) saturate(1.4);
+}
+.fd-app[data-contained] > .fd-tabbar { position: absolute; }
+.fd-tabbar-item {
+  position: relative;
+  flex: 1 1 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--fd-tabbar-gap);
+  height: var(--fd-tabbar-h); min-width: var(--fd-control-xl);
+  padding: 0;
+  border: 0; border-radius: var(--fd-radius-lg); background: none;
+  color: var(--fd-text-3);
+  font: inherit; font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); font-weight: var(--fd-weight-label);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-tabbar-item > .fd-icon { flex: none; width: var(--fd-tabbar-icon); height: var(--fd-tabbar-icon); stroke-width: var(--fd-tabbar-icon-stroke); transition: stroke-width var(--fd-dur-2) var(--fd-ease-out); }
+.fd-tabbar-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-tabbar-item:hover { color: var(--fd-text); }
+.fd-tabbar-item:active { scale: var(--fd-press-scale); }
+.fd-tabbar-item:focus-visible { box-shadow: var(--fd-ring-inset); }
+.fd-tabbar-item:is([aria-current="page"], [aria-expanded="true"]) { color: var(--fd-accent-text); }
+.fd-tabbar-item:is([aria-current="page"], [aria-expanded="true"]) > .fd-icon { stroke-width: var(--fd-tabbar-icon-stroke-current); }
+.fd-tabbar:has([aria-expanded="true"]) > [aria-current="page"]:not([aria-expanded="true"]) { color: var(--fd-text-3); }
+.fd-tabbar:has([aria-expanded="true"]) > [aria-current="page"]:not([aria-expanded="true"]) > .fd-icon { stroke-width: var(--fd-tabbar-icon-stroke); }
+/* A count after the icon: the "New" tag's look. */
+.fd-tabbar-badge {
+  position: absolute; inset-block-start: var(--fd-space-1); inset-inline-start: calc(50% + var(--fd-space-1));
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--fd-nav-badge-h); height: var(--fd-nav-badge-h); padding-inline: var(--fd-space-1-5);
+  border-radius: var(--fd-radius-full);
+  background: var(--fd-accent); color: var(--fd-accent-contrast);
+  box-shadow: 0 0 0 var(--fd-shell-dot-ring) var(--fd-bg);
+  font-size: var(--fd-text-3xs); line-height: 1; font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums;
+}
+/* A dot on the icon: "something new here". */
+.fd-tabbar-item[data-dot]::after {
+  content: ""; position: absolute; inset-block-start: var(--fd-space-2); inset-inline-start: calc(50% + var(--fd-space-2));
+  width: var(--fd-tabbar-dot); height: var(--fd-tabbar-dot); border-radius: 50%;
+  background: var(--fd-accent); box-shadow: 0 0 0 var(--fd-shell-dot-ring) var(--fd-bg);
+}
+/* Room for the bar where things sit at the bottom of the screen. */
+@media (max-width: 639.98px) {
+  :root:has(.fd-app:not([data-contained]) > .fd-tabbar) { --fd-tabbar-space: calc(var(--fd-tabbar-h) + env(safe-area-inset-bottom, 0px)); }
+}
+@container fd-app (max-width: 639.98px) {
+  .fd-tabbar { display: flex; }
+  /* The container cannot style itself, so its children carry the room (and pass it on); a contained main column sets it to 0 for what sticks inside it. */
+  .fd-app:has(> .fd-tabbar) > * { --_s-tb: calc(var(--fd-tabbar-h) + env(safe-area-inset-bottom, 0px)); --fd-tabbar-space: var(--_s-tb); }
+  .fd-app:has(> .fd-tabbar) > .fd-main { padding-block-end: var(--_s-tb); }
+  /* A contained main column scrolls inside the app: it stops where the bar starts, so what sticks inside it needs no room. */
+  .fd-app[data-contained]:has(> .fd-tabbar) > .fd-main { padding-block-end: 0; margin-block-end: var(--_s-tb); --fd-tabbar-space: 0px; }
+  .fd-app:has(> .fd-tabbar) > :is(.fd-mobile-nav, .fd-mobile-nav-scrim) { inset-block-end: var(--fd-tabbar-space); }
+  .fd-app:has(> .fd-tabbar) > .fd-mobile-nav { padding-block-end: var(--fd-space-8); }
+  .fd-app:has(> .fd-tabbar .fd-tabbar-item[data-fd-mobile-nav]) .fd-topbar [data-fd-mobile-nav] { display: none; }
+}
+
 /* ---------- data-only outside the shell: the same 900px, measured on the viewport ---------- */
 @media (min-width: 900px) { [data-only="mobile"]:not(.fd-app [data-only]) { display: none !important; } }
 @media (max-width: 899.98px) { [data-only="desktop"]:not(.fd-app [data-only]) { display: none !important; } }
@@ -948,7 +1035,7 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-key { display: none; }
 
 .fd-keys-hint {
-  position: fixed; z-index: var(--fd-z-toast); inset-inline-start: var(--fd-keys-hint-gap); inset-block-end: var(--fd-keys-hint-gap);
+  position: fixed; z-index: var(--fd-z-toast); inset-inline-start: var(--fd-keys-hint-gap); inset-block-end: calc(var(--fd-keys-hint-gap) + var(--fd-tabbar-space));
   display: inline-flex; align-items: center; gap: var(--fd-space-2); padding: var(--fd-space-2) var(--fd-space-3);
   border-radius: var(--fd-radius-lg); background: var(--fd-surface-raised); color: var(--fd-text-2); box-shadow: var(--fd-shadow-lg);
   font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm);

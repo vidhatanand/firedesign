@@ -1,0 +1,109 @@
+{
+  "id": "tabbar",
+  "job": "Put three to five main destinations one thumb-press away at the bottom of a phone.",
+  "purpose": "A bar fixed to the bottom of the app shell with an icon and a short label for each destination. It shows only while the shell is under 640px wide; above that the sidebar or the menu sheet serves. A \"More\" item opens the menu sheet with the rest of the navigation. A count or a dot marks an item that has something new.",
+  "useWhen": [
+    "A phone product has three to five places people move between all day.",
+    "The menu sheet alone buries the main destinations behind a tap.",
+    "Something new on a destination should show without opening it."
+  ],
+  "avoidWhen": [
+    {
+      "when": "There are more than five destinations and no clear main few.",
+      "instead": "mobile-nav"
+    },
+    {
+      "when": "The app is for a desktop or a wide window.",
+      "instead": "sidebar"
+    },
+    {
+      "when": "The buttons run actions on the page rather than go to places.",
+      "instead": "toolbar"
+    },
+    {
+      "when": "The page is a website, not an app.",
+      "instead": "A site header with links, as on the docs pages."
+    }
+  ],
+  "aka": [
+    "bottom navigation",
+    "bottom nav",
+    "bottom bar",
+    "tab bar",
+    "navigation bar",
+    "thumb nav"
+  ],
+  "surfaces": [
+    "phone"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "current",
+      "how": "aria-current=\"page\" on the item for the page; the accent colour and a stronger icon"
+    },
+    {
+      "name": "menu open",
+      "how": "aria-expanded=\"true\" on the \"More\" item while the sheet is open; set by shell.js"
+    },
+    {
+      "name": "count",
+      "how": "a fd-tabbar-badge in the item, read with its label"
+    },
+    {
+      "name": "new",
+      "how": "data-dot on the item, with an fd-sr-only line that says what is new"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-dot",
+      "value": "",
+      "useWhen": "An item has something new but no number to show."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-tabbar",
+      "role": "The bar: a nav with aria-label=\"Primary\", a direct child of fd-app."
+    },
+    {
+      "class": "fd-tabbar-item",
+      "role": "One destination: a link, or a button with data-fd-mobile-nav and aria-controls for \"More\"; an icon and a label."
+    },
+    {
+      "class": "fd-tabbar-label",
+      "role": "The one-word label under the icon; it truncates, never wraps."
+    },
+    {
+      "class": "fd-tabbar-badge",
+      "role": "A count on an item."
+    }
+  ],
+  "related": [
+    "mobile-nav",
+    "topbar",
+    "sidebar",
+    "app"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Moves between the items; they are links and a button, not ARIA tabs."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Follows a link; on \"More\", opens or closes the menu sheet."
+    }
+  ],
+  "example": "docs/shell.html#tabbar",
+  "provenance": [
+    "docs/shell.html",
+    "fire/components/shell.css",
+    "fire/js/shell.js",
+    "templates/shell.js"
+  ],
+  "since": "0.8.0"
+}

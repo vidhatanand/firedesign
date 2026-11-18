@@ -25,6 +25,8 @@
    data-labels="none" hides the names beside the points. data-height sets the plot height (default 360).
 
    Blocks: fd-chart · fd-legend · fd-sparkline · fd-bars · fd-donut · fd-heatgrid
+           fd-bars-row[data-fd-vars="--value: 0.46; --was: 0.43"] with fd-bars-mark in the track and
+           <span class="fd-bars-was">was 401</span> in fd-bars-value: the previous value beside the current one
            fd-chart-tooltip · fd-chart-card · fd-chart-stat
    ========================================================================== */
 
@@ -63,6 +65,9 @@
   --fd-bars-value-w: 4.5rem;
   --fd-bars-row-h: 24px;
   --fd-bars-track-h: 4px;
+  --fd-bars-value-w-was: 9.5rem;        /* value column when rows show the previous value */
+  --fd-bars-mark-w: 2px;                /* the previous value's tick on the track */
+  --fd-bars-mark-h: 12px;
   /* donut */
   --fd-donut-size: 144px;
   --fd-donut-stroke: 8px;
@@ -284,6 +289,17 @@ button.fd-legend-item:hover { color: var(--fd-text); }
   animation: fd-grow-x var(--fd-dur-5) var(--fd-ease-emphasized) both; animation-delay: calc(var(--_ch-i, 0) * var(--fd-chart-stagger));
 }
 .fd-bars-value { text-align: end; font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-variant-numeric: tabular-nums; color: var(--fd-text); }
+/* The previous value: a tick on the track at --was (0 to 1, the same scale as --value) and "was 401" after the figure. */
+.fd-bars:has(.fd-bars-was) { --_ch-value: var(--fd-bars-value-w-was); }
+.fd-bars-track:has(> .fd-bars-mark) { overflow: visible; }
+.fd-bars-mark {
+  position: absolute; top: 50%; inset-inline-start: calc(clamp(0, var(--was, 0), 1) * 100%);
+  width: var(--fd-bars-mark-w); height: var(--fd-bars-mark-h);
+  margin-inline-start: calc(var(--fd-bars-mark-w) / -2); translate: 0 -50%;
+  border-radius: var(--fd-radius-full); background: var(--fd-text-2);
+  box-shadow: 0 0 0 var(--fd-hairline) var(--fd-surface);
+}
+.fd-bars-was { margin-inline-start: var(--fd-space-1-5); color: var(--fd-text-3); white-space: nowrap; }
 .fd-bars[data-enter="pending"] .fd-bars-fill { animation-play-state: paused; }
 .fd-bars[data-enter="done"] .fd-bars-fill { animation: none; }
 .fd-bars-row:nth-child(2) { --_ch-i: 1; } .fd-bars-row:nth-child(3) { --_ch-i: 2; } .fd-bars-row:nth-child(4) { --_ch-i: 3; }

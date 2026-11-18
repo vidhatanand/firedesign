@@ -365,14 +365,28 @@ function measureFocus() {
     ring = rgba(inner[0].color);
     against = background(el);
   } else {
-    // A control whose wrapper draws its ring (a filter's trigger: .fd-filter:has(> :focus-visible)).
+    // A control whose wrapper draws its ring (a filter's trigger: .fd-filter:has(> :focus-visible)), or its focus line
+    // (a search field: .fd-search:has(> input:focus) draws an inset line in --fd-focus and a transparent halo).
+    // Transparent bands are not a ring, so they are skipped; an outer band is read against what is behind the wrapper,
+    // an inset one against the wrapper's own ground.
     for (let n = el.parentElement, i = 0; n && i < 2; n = n.parentElement, i++) {
       const ps = getComputedStyle(n).boxShadow;
-      const m = ps !== 'none' && [...ps.matchAll(/(rgba?\([^)]*\)|color\([^)]*\)) 0px 0px 0px ([\d.]+)px(?! inset)/g)].sort((a, b) => Number(b[2]) - Number(a[2]));
-      if (m && m.length) {
-        ring = rgba(m[0][1]);
+      if (ps === 'none') continue;
+      const all = [...ps.matchAll(/(rgba?\([^)]*\)|color\([^)]*\)) 0px 0px 0px ([\d.]+)px( inset)?/g)]
+        .map((m) => ({ color: m[1], spread: Number(m[2]), inset: Boolean(m[3]) }))
+        .filter((b) => b.spread > 0 && rgba(b.color)[3] > 0.5)
+        .sort((a, b) => b.spread - a.spread);
+      const out = all.filter((b) => !b.inset);
+      const ins = all.filter((b) => b.inset);
+      if (out.length) {
+        ring = rgba(out[0].color);
         against = background(n.parentElement);
-        if (m[1]) gap = rgba(m[1][1]);
+        if (out[1]) gap = rgba(out[1].color);
+        break;
+      }
+      if (ins.length) {
+        ring = rgba(ins[0].color);
+        against = background(n);
         break;
       }
     }

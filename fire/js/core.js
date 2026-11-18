@@ -245,6 +245,10 @@ export async function copyText(text) {
  *   hold.note "Nothing is sent until the countdown ends." · hold.undo "Undo" · hold.action "Sending"
  *   hold.start "{action} in {seconds} seconds. Undo or Escape stops it." · hold.undone "Stopped. Nothing was sent."
  *   frame.empty "No picture" · frame.refused "This address isn't allowed" · frame.failed "The picture didn't load"
+ *   posts.pages "Pages" · posts.page "Page" · posts.previous "Previous" · posts.previous-page "Previous page"
+ *   posts.next "Next" · posts.next-page "Next page" · posts.of "of" · posts.noun "entries"
+ *   signup.required "Enter your email address." · signup.invalid "Use a full address, like dana@quarry.dev."
+ *   signup.failed "Couldn’t subscribe you just now. Try again in a minute."
  */
 let dictionary;
 export function label(el, key, fallback, vars) {

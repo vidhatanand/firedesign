@@ -119,6 +119,14 @@
   --fd-doc-search-hero-h: 52px;
   --fd-doc-focus-w: 1.25px;         /* accent edge of the home search when focused */
   --fd-doc-sdk-min: 220px;
+  /* prose at reading size, data-size="lg" (0.8): an article's text */
+  --fd-doc-prose-lg: 1.125rem;      /* 18 */
+  --fd-doc-prose-lg-lh: 1.875rem;   /* 30 */
+  --fd-doc-prose-lg-measure: 68ch;
+  --fd-doc-prose-lg-h2: 1.75rem;    --fd-doc-prose-lg-h2-lh: 2.25rem;   /* 28/36 */
+  --fd-doc-prose-lg-h3: 1.375rem;   --fd-doc-prose-lg-h3-lh: 1.875rem;  /* 22/30 */
+  --fd-doc-prose-lg-h2-gap: 56px;   /* space above an h2 */
+  --fd-doc-embed-h: 720px;          /* an iframe in a media frame */
 }
 
 /* ---------- Measures ----------
@@ -448,7 +456,8 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
    Prose — rendered Markdown. Type rules live in :where() so any component
    placed inside keeps its own type; only direct children get the reading
    rhythm (.fd-prose > * + *, which outranks the base reset of p, figure, pre).
-   <div class="fd-prose" [data-size="sm"]> h2 p ul ol table pre code a img blockquote hr kbd dl </div>
+   <div class="fd-prose" [data-size="sm|lg"]> h2 p ul ol table pre code a img blockquote hr kbd dl </div>
+   data-size="lg" (0.8): reading size for an article (18/30, a 68ch measure, headings a step larger in the display face)
    ========================================================================== */
 .fd-prose {
   --_doc-gap: var(--fd-space-5);
@@ -480,6 +489,17 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
 .fd-prose > h2 + h3 { margin-top: var(--fd-space-6); }
 :where(.fd-prose[data-size="sm"]) > h2 { font-size: var(--fd-text-h3); line-height: var(--fd-lh-h3); }
 :where(.fd-prose[data-size="sm"]) > h3 { font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); }
+.fd-prose[data-size="lg"] { --_doc-gap: var(--fd-space-6); font-size: var(--fd-doc-prose-lg); line-height: var(--fd-doc-prose-lg-lh); letter-spacing: var(--fd-ls-lg); }
+:where(.fd-prose[data-size="lg"]) > :is(p, ul, ol, dl, blockquote, h2, h3, h4, h5) { max-width: var(--fd-doc-prose-lg-measure); }
+:where(.fd-prose[data-size="lg"]) > :is(h2, h3) { font-family: var(--fd-font-display); font-weight: var(--fd-weight-display); }
+:where(.fd-prose[data-size="lg"]) > h2 { font-size: var(--fd-doc-prose-lg-h2); line-height: var(--fd-doc-prose-lg-h2-lh); letter-spacing: var(--fd-ls-h2); }
+:where(.fd-prose[data-size="lg"]) > h3 { font-size: var(--fd-doc-prose-lg-h3); line-height: var(--fd-doc-prose-lg-h3-lh); letter-spacing: var(--fd-ls-h3); }
+:where(.fd-prose[data-size="lg"]) > :is(h4, h5) { font-size: var(--fd-doc-prose-lg); line-height: var(--fd-doc-prose-lg-lh); }
+.fd-prose[data-size="lg"] > * + h2 { margin-top: var(--fd-doc-prose-lg-h2-gap); }
+.fd-prose[data-size="lg"] > * + h3 { margin-top: var(--fd-space-10); }
+.fd-prose[data-size="lg"] > h2 + * { margin-top: var(--fd-space-5); }
+:where(.fd-prose[data-size="lg"]) table { font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); }
+:where(.fd-prose[data-size="lg"]) :not(pre) > code:not([class]) { font-size: var(--fd-text-sm); }
 
 :where(.fd-prose) strong, :where(.fd-prose) b { font-weight: var(--fd-weight-semibold); }
 :where(.fd-prose) em { font-style: italic; }
@@ -604,7 +624,7 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
 /* ==========================================================================
    Media frame — images and video, zoomable through a dialog
    <figure class="fd-doc-frame" data-zoom>
-     <div class="fd-doc-frame-media"><img src alt></div>   (or .fd-doc-frame-placeholder)
+     <div class="fd-doc-frame-media"><img src alt></div>   (or .fd-doc-frame-placeholder, or an iframe: 0.8, --fd-doc-embed-h tall)
      <figcaption class="fd-doc-frame-caption">…</figcaption>
    </figure>
 
@@ -627,6 +647,7 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
 }
 .fd-doc-frame-media { position: relative; display: block; width: 100%; overflow: hidden; background: var(--fd-bg-sunken); }
 .fd-doc-frame-media > :is(img, video) { display: block; width: 100%; height: auto; }
+.fd-doc-frame-media > iframe { display: block; width: 100%; height: var(--fd-doc-embed-h); border: 0; background: var(--fd-bg); }   /* a framed page: an email, an embed (0.8) */
 .fd-doc-frame[data-zoom] .fd-doc-frame-media { cursor: zoom-in; }
 .fd-doc-frame[data-zoom] .fd-doc-frame-media:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 0; }
 .fd-doc-frame-caption {

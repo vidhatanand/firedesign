@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderEmail } from './email.js';
-import { THEMES, signIn } from './examples.mjs';
+import { THEMES, signIn, newsletter } from './examples.mjs';
 
 const OUT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../docs/assets/email');
 export function examples() {
@@ -16,6 +16,9 @@ export function examples() {
     files[`signin-${name}.html`] = html;
     files[`signin-${name}.txt`] = text;
   }
+  const issue = renderEmail({ theme: THEMES.ember, ...newsletter() });
+  files['newsletter-ember.html'] = issue.html;
+  files['newsletter-ember.txt'] = issue.text;
   return files;
 }
 

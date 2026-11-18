@@ -1714,7 +1714,8 @@ export declare namespace tweaks {
   export function look(state?: TweaksState): LookName | null;
 }
 
-/** Website family: the header's sheet and scrolled state, the logo marquee, the pricing period, the compare column. */
+/** Website family: the header's sheet and scrolled state, the logo marquee, the pricing period, the compare column,
+ *  and (0.8) the posts listing, the sign-up form, the article's rail, footnotes and Copy link. */
 export declare namespace site {
   export function init(root?: ParentNode): void;
   /** Open the header's sheet (below desktop): data-state="open", aria-expanded, fd:open. */
@@ -1725,6 +1726,11 @@ export declare namespace site {
   export function setPeriod(section: HTMLElement | null | undefined, period: string, options?: { silent?: boolean }): void;
   /** Show plan column n (1-based) of an .fd-site-compare on a phone (data-show); fd:change { value: n } unless silent. */
   export function showPlan(section: HTMLElement | null | undefined, n: number, options?: { silent?: boolean }): void;
+  /** Filter and page an .fd-site-posts listing (0.8). filters: { kind, q, <tag group>: value }; "" or "all" is no filter;
+   *  omitted names keep their controls' values. push/replace write the address (data-address). fd:change unless silent. */
+  export function filterPosts(section: HTMLElement | null | undefined, filters?: Record<string, string>, options?: { page?: number; push?: boolean; replace?: boolean; focus?: boolean | 'more'; silent?: boolean }): void;
+  /** Show a sign-up form (form.fd-site-cta-form) in one of its states (0.8); fd:change { value } unless silent. */
+  export function setSignup(form: HTMLFormElement | HTMLElement | null | undefined, state?: '' | 'invalid' | 'busy' | 'sent' | 'subscribed' | 'failed', options?: { silent?: boolean }): void;
 }
 
 /** The page-transition kinds (data-fd-transition). */

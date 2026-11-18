@@ -1,0 +1,83 @@
+{
+  "id": "site-post",
+  "job": "Read one blog post at reading length, with its figures, the author and related posts.",
+  "purpose": "One post on Ember's blog as an fd-site-article plain: breadcrumb, title, standfirst, the author and date, then the text at reading size with a short table, a code block, a chart figure and a pull quote breaking out of the measure; tags, Copy link, the author and the newsletter sign-up at the foot, then three related posts as dated rows.",
+  "useWhen": [
+    "One post published on the site.",
+    "A newsletter issue or announcement read on the web."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A customer story told with its evidence set across the page.",
+      "instead": "site-customers"
+    },
+    {
+      "when": "A report with key facts, findings and a download.",
+      "instead": "site-report"
+    },
+    {
+      "when": "Documentation of how to do a task.",
+      "instead": "docs-guide"
+    }
+  ],
+  "aka": [
+    "blog post",
+    "article"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "text",
+    "series",
+    "form"
+  ],
+  "sections": [
+    {
+      "section": "site-header",
+      "variant": "inline",
+      "why": "Shared with the blog index it belongs to; Blog is marked as the current section."
+    },
+    {
+      "section": "site-article",
+      "variant": "plain",
+      "why": "One centred reading column; the figure and the pull quote break out, the table and code stay in it, the foot carries tags, Copy link, the author and the sign-up."
+    },
+    {
+      "section": "site-posts",
+      "variant": "list, rule, narrow",
+      "why": "Three related posts as dated rows, the reading column's width."
+    },
+    {
+      "section": "site-footer",
+      "variant": "columns",
+      "why": "After an article the reader looks for somewhere to go next."
+    }
+  ],
+  "states": [
+    {
+      "name": "default",
+      "how": "the post as published"
+    },
+    {
+      "name": "link copied",
+      "how": "Copy link: the button shows Copied and the copy is announced"
+    },
+    {
+      "name": "sign-up invalid, busy, sent, subscribed",
+      "how": "submit the foot form: data-state invalid, then busy, then sent (dana@quarry.dev: subscribed)"
+    },
+    {
+      "name": "menu open",
+      "how": "below 900px wide, the header's menu button opens the links as a sheet (data-state=\"open\")"
+    }
+  ],
+  "example": "templates/site-post.html",
+  "provenance": [
+    "docs/site-sections.html",
+    "fire/components/site.css",
+    "fire/js/site.js",
+    "templates/site-shell.js"
+  ],
+  "since": "0.8.0"
+}

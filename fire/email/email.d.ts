@@ -21,7 +21,13 @@ export type EmailBlock =
   | { type: 'keyValue'; rows: Array<{ label: string; value: string | number; mono?: boolean }> }
   | { type: 'divider' }
   | { type: 'note'; text: string; title?: string }
-  | { type: 'footer'; lines?: string[]; links?: Array<{ label: string; href: string }> };
+  | { type: 'footer'; lines?: string[]; links?: Array<{ label: string; href: string }> }
+  /** A labelled rule that opens a group of stories (0.8). */
+  | { type: 'section'; title: string }
+  /** One item of a newsletter issue: a kind label, a linked title, one paragraph and a link line (0.8). */
+  | { type: 'story'; title: string; text: string; href: string; kind?: string; /** The link line; default "Read more". */ label?: string }
+  /** A short list; each item is a run or an array of runs (0.8). */
+  | { type: 'list'; items: Array<EmailRun | EmailRun[]>; ordered?: boolean };
 
 export interface EmailOptions {
   /** A theme record; omitted, Fire's default look. Invalid throws. */

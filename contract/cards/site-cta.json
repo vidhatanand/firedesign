@@ -1,10 +1,11 @@
 {
   "id": "site-cta",
   "job": "Ask for the one next step near the end of a page: a band, an inset panel, or a title beside a one-field form.",
-  "purpose": "band: a full-width ground with a title and actions, the home of the texture and inverse grounds. card: an inset panel inside the container. split: a title at the start and, at the end, actions or a one-field email form built from fd-field with its invalid, busy and sent states.",
+  "purpose": "band: a full-width ground with a title and actions, the home of the texture and inverse grounds. card: an inset panel inside the container. split: a title at the start and, at the end, actions or the one sign-up form (fd-field, a consent line, its states set by site.js). The same form also sits in the footer's sign-up column and at an article's foot.",
   "useWhen": [
     "The end of a landing page, before the footer.",
-    "A newsletter or waitlist sign-up (split with a form)."
+    "A newsletter or waitlist sign-up (split with a form).",
+    "The opening of a newsletter page, where signing up is the reason for the page."
   ],
   "avoidWhen": [
     {
@@ -33,15 +34,23 @@
   "states": [
     {
       "name": "invalid",
-      "how": "aria-invalid=\"true\" on the input and an fd-field-error"
+      "how": "data-state=\"invalid\": aria-invalid=\"true\" on the input and its fd-field-error"
     },
     {
       "name": "busy",
-      "how": "aria-busy=\"true\" on the button"
+      "how": "data-state=\"busy\": aria-busy=\"true\" on the button, the input read-only"
     },
     {
       "name": "sent",
-      "how": "the field replaced by .fd-site-cta-done with role=\"status\""
+      "how": "data-state=\"sent\": the field gives way to .fd-site-cta-done[data-state=\"sent\"] (role=\"status\")"
+    },
+    {
+      "name": "subscribed",
+      "how": "data-state=\"subscribed\": the address is already on the list; .fd-site-cta-done[data-state=\"subscribed\"]"
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\": the field stays and its error (role=\"alert\") holds data-error-failed"
     }
   ],
   "variants": [
@@ -77,6 +86,10 @@
     {
       "class": "fd-site-cta-done",
       "role": "The sent line."
+    },
+    {
+      "class": "fd-site-cta-consent",
+      "role": "One line on what the address is used for, with the privacy link."
     }
   ],
   "related": [
@@ -89,7 +102,9 @@
   "example": "docs/site-sections.html#cta",
   "provenance": [
     "docs/site-sections.html",
-    "fire/components/site.css"
+    "fire/components/site.css",
+    "fire/js/site.js",
+    "templates/site-newsletter.html"
   ],
   "since": "0.8.0"
 }

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" data-fd-surface="website" data-fd-transition="fade">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How we cut the median scrape to 842 ms · Ember blog</title>
+<link rel="canonical" href="https://ember.example/blog/median-842-ms">
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="../fire/transitions.css">
+<script type="module" blocking="render" src="../fire/fire.js"></script>
+<script type="module" blocking="render" src="./site-shell.js"></script>
+</head>
+<body data-site-shell data-active="post" data-header="inline" data-footer="columns">
+<main>
+  <!-- Article, plain: one reading column. The figure and the pull quote break out of the measure; the table and the code stay in it. -->
+  <article class="fd-site-section fd-site-article" data-layout="plain">
+    <header class="fd-site-article-head">
+      <nav class="fd-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="site-blog.html">Blog</a></li><li><a href="site-blog.html?kind=engineering">Engineering</a></li><li><span aria-current="page">The median scrape</span></li></ol></nav>
+      <p class="fd-site-eyebrow">Engineering · Crawl infrastructure</p>
+      <h1 class="fd-site-article-title">How we cut the median scrape to 842 ms</h1>
+      <p class="fd-site-article-standfirst">In August a scrape took 1,310 ms at the median. Three changes took it to 842 ms: browsers that wait warm, a smaller snapshot of the page, and one fewer network hop.</p>
+      <div class="fd-site-article-meta">
+        <ul class="fd-site-authors"><li class="fd-site-authors-item"><span class="fd-avatar" data-size="32" aria-hidden="true">JW</span><span class="fd-site-authors-name">Jonas Weber</span><span class="fd-site-authors-role">Staff engineer, crawl infrastructure</span></li></ul>
+        <time datetime="2026-11-04">Nov 4, 2026</time>
+        <span>8 min read</span>
+      </div>
+    </header>
+
+    <div class="fd-site-article-body">
+      <div class="fd-site-article-text fd-prose" data-size="lg">
+        <p>A scrape is one request to <code>/scrape</code>: Ember opens the page in a browser, waits for it to settle, and returns Markdown, HTML or JSON. For an agent that reads ten pages before it answers, the wait for each page is most of the wait for the answer.</p>
+        <p>Between August 3 and October 26 the median scrape went from 1,310 ms to 842 ms. The 95th percentile went from 4.8 s to 3.1 s. Nothing about the price changed: a scrape is still 1 credit.</p>
+
+        <h2>Where the time went</h2>
+        <p>We traced 200,000 scrapes in the first week of August and split each one into four stages. Starting a browser was the largest piece that did no useful work.</p>
+        <div class="fd-table-wrap"><table class="fd-table" data-stack aria-label="Median time per stage of a scrape, August and October 2026">
+          <thead><tr><th>Stage</th><th data-num>August</th><th data-num>October</th></tr></thead>
+          <tbody>
+            <tr><td data-stack-title>Wait in the queue</td><td data-num>120 ms</td><td data-num>110 ms</td></tr>
+            <tr><td data-stack-title>Start a browser</td><td data-num>340 ms</td><td data-num>35 ms</td></tr>
+            <tr><td data-stack-title>Fetch and render</td><td data-num>610 ms</td><td data-num>520 ms</td></tr>
+            <tr><td data-stack-title>Snapshot and convert</td><td data-num>240 ms</td><td data-num>177 ms</td></tr>
+            <tr><td data-stack-title><strong>Median scrape</strong></td><td data-num><strong>1,310 ms</strong></td><td data-num><strong>842 ms</strong></td></tr>
+          </tbody>
+        </table></div>
+
+        <h2>Browsers that wait warm</h2>
+        <p>Each region now keeps a pool of browsers started and idle, sized from the last hour of traffic. A request takes one that is ready; a new one starts behind it. The pool costs us memory, not you credits.</p>
+        <figure class="fd-codeblock"><pre class="fd-codeblock-body"><code data-lang="typescript">// The pool for one region, resized every minute
+const pool = new BrowserPool({
+  region: "eu-west-1",
+  min: 24,
+  target: (load) =&gt; Math.ceil(load.p95PerMinute * 1.2),
+  maxIdle: "10m",
+});</code></pre></figure>
+        <p>Starting a browser fell from 340 ms to 35 ms at the median, the time it takes to hand over one that is already running.</p>
+
+        <figure class="fd-doc-frame" data-breakout>
+          <div class="fd-doc-frame-media"><div class="fd-site-shot">
+            <div class="fd-chart" data-fd-chart="line" data-height="280" data-label="Median scrape time per week in milliseconds, August 3 to October 26, 2026: 1,310 falling to 842"><script type="application/json">{"labels":["Aug 3","","Aug 17","","Aug 31","","Sep 14","","Sep 28","","Oct 12","","Oct 26"],"titles":["Week of Aug 3","Week of Aug 10","Week of Aug 17","Week of Aug 24","Week of Aug 31: warm pools","Week of Sep 7","Week of Sep 14","Week of Sep 21: smaller snapshot","Week of Sep 28","Week of Oct 5","Week of Oct 12: one fewer hop","Week of Oct 19","Week of Oct 26"],"unit":"ms","yMin":0,"series":[{"name":"Median scrape","values":[1310,1302,1296,1288,1104,1090,1082,961,955,948,861,846,842]}]}</script></div>
+          </div></div>
+          <figcaption class="fd-doc-frame-caption">Figure 1. Median scrape time per week. Each step down is one change shipping: warm pools on Aug 31, the smaller snapshot on Sep 21, one fewer hop on Oct 12.<small>Source: Ember request traces, every <code>/scrape</code> call, Aug 3 to Oct 26, 2026.</small></figcaption>
+        </figure>
+
+        <h2>A smaller snapshot</h2>
+        <p>To turn a page into Markdown we used to copy the whole DOM out of the browser, styles included, and convert it outside. Now the browser drops scripts, styles and hidden nodes before the copy, so there is less to move and less to parse. Snapshot and convert fell from 240 ms to 177 ms.</p>
+
+        <div class="fd-site-quote" data-layout="single" data-breakout>
+          <figure class="fd-site-quote-item"><blockquote class="fd-site-quote-text"><p>“Our nightly crawl finished 41 minutes earlier the week the warm pools shipped. We changed nothing on our side.”</p></blockquote><figcaption class="fd-site-quote-cite"><span class="fd-site-quote-who"><cite class="fd-site-quote-name">Mara Okafor</cite><span class="fd-site-quote-role">Head of data, Quarry Labs</span></span></figcaption></figure>
+        </div>
+
+        <h2>One fewer hop</h2>
+        <p>A request used to pass through a proxy router before it reached the browser's region. The router now runs inside each region, beside the pool, so the page is fetched one hop closer. Fetch and render fell from 610 ms to 520 ms; most of the rest is the site itself.</p>
+
+        <h2>What it changes for you</h2>
+        <p>Nothing to switch on. Every plan gets the faster path, and a scrape that fails still costs nothing. If you set a timeout to cover the old median, you can lower it: 15 seconds covers 99.9% of scrapes today.</p>
+      </div>
+    </div>
+
+    <footer class="fd-site-article-foot">
+      <div class="fd-row" data-justify="between" data-wrap data-gap="4">
+        <div class="fd-row" data-wrap data-gap="2" role="list" aria-label="Topics"><a class="fd-tag" role="listitem" href="site-blog.html?topic=latency">Latency</a><a class="fd-tag" role="listitem" href="site-blog.html?topic=scraping">Scraping</a><a class="fd-tag" role="listitem" href="site-blog.html?topic=infrastructure">Infrastructure</a></div>
+        <button class="fd-btn" type="button" data-variant="outline" data-fd-copy-link><i data-icon="link"></i><span>Copy link</span></button>
+      </div>
+      <div class="fd-stack" data-gap="3">
+        <h2>About the author</h2>
+        <ul class="fd-site-authors"><li class="fd-site-authors-item"><span class="fd-avatar" data-size="40" aria-hidden="true">JW</span><span class="fd-site-authors-name">Jonas Weber</span><span class="fd-site-authors-role">Runs the browser pools and the proxy routers. Before Ember he built the crawler at a price-comparison site.</span></li></ul>
+      </div>
+      <div class="fd-stack" data-gap="4">
+        <h2 id="post-signup-title">Get posts like this by email</h2>
+        <form class="fd-site-cta-form" action="#" novalidate aria-labelledby="post-signup-title">
+          <div class="fd-field"><label class="fd-field-label" for="post-signup-email">Work email</label><div class="fd-row" data-gap="2"><input class="fd-input" id="post-signup-email" name="email" type="email" required autocomplete="email" placeholder="dana@quarry.dev" aria-describedby="post-signup-hint" data-error-type="Use a full address, like dana@quarry.dev."><button class="fd-btn" data-variant="primary" type="submit">Subscribe</button></div><p class="fd-field-hint" id="post-signup-hint">Ember Dispatch: one email on the first Tuesday of each month.</p><p class="fd-field-error" id="post-signup-error" hidden></p></div>
+          <p class="fd-site-cta-consent">We use your address only to send the newsletter. <a href="support.html">Privacy policy</a>.</p>
+          <p class="fd-site-cta-done" role="status" data-state="sent" hidden><i data-icon="circle-check"></i><span>Check your inbox to confirm. The next issue goes out Dec 1.</span></p>
+          <p class="fd-site-cta-done" role="status" data-state="subscribed" hidden><i data-icon="info"></i><span>That address is already subscribed. The next issue goes out Dec 1.</span></p>
+        </form>
+      </div>
+    </footer>
+  </article>
+
+  <!-- Posts, list: three related posts, dated rows. -->
+  <section class="fd-site-section fd-site-posts" data-layout="list" data-rule>
+    <div class="fd-site-container" data-width="narrow">
+      <div class="fd-site-head"><h2 class="fd-site-heading">Related posts</h2></div>
+      <div class="fd-site-posts-list">
+        <article class="fd-site-posts-item"><time class="fd-site-posts-date" datetime="2026-10-30">Oct 30, 2026</time><h3 class="fd-site-posts-title"><a href="site-customers.html">Fourteen scrapers became three API calls</a></h3><p class="fd-site-posts-summary">How Quarry Labs moved its price indexes to Ember and cut crawl spend by 34%.</p><span class="fd-badge">Customers</span></article>
+        <article class="fd-site-posts-item"><time class="fd-site-posts-date" datetime="2026-10-21">Oct 21, 2026</time><h3 class="fd-site-posts-title"><a href="site-changelog.html">Interact sessions and faster stealth proxies</a></h3><p class="fd-site-posts-summary">Stealth time to first byte fell from 2.1 s to 1.3 s.</p><span class="fd-badge">Release</span></article>
+        <article class="fd-site-posts-item"><time class="fd-site-posts-date" datetime="2026-09-24">Sep 24, 2026</time><h3 class="fd-site-posts-title"><a href="site-blog.html">Why a failed page costs nothing</a></h3><p class="fd-site-posts-summary">Two retries with a new browser, and a bill that only counts the pages that arrive.</p><span class="fd-badge">Engineering</span></article>
+      </div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  /* The sign-up at the foot is the one form of fire/js/site.js. Here the address is "sent" after a short wait, and an
+     address already on the list (dana@quarry.dev) gets the subscribed line. */
+  document.addEventListener('fd:submit', (e) => {
+    const form = e.target.closest('.fd-site-cta-form');
+    if (!form) return;
+    e.preventDefault();
+    import('../fire/js/site.js').then(({ setSignup }) => setTimeout(() => setSignup(form, e.detail.value === 'dana@quarry.dev' ? 'subscribed' : 'sent'), 900));
+  });
+</script>
+</body>
+</html>

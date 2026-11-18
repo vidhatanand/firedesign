@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-fd-surface="website" data-fd-transition="fade">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Most page changes are noise · Ember Research</title>
+<link rel="canonical" href="https://ember.example/research/monitor-noise">
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="../fire/transitions.css">
+<script type="module" blocking="render" src="../fire/fire.js"></script>
+<script type="module" blocking="render" src="./site-shell.js"></script>
+</head>
+<body data-site-shell data-active="research" data-header="centered" data-footer="compact">
+<main>
+  <!-- Article, aside: a paper. The rail holds the contents, the key facts and the download; below desktop it is a disclosure above the text. -->
+  <article class="fd-site-section fd-site-article" data-layout="aside" data-side="start">
+    <header class="fd-site-article-head">
+      <nav class="fd-breadcrumb" aria-label="Breadcrumb"><ol><li><a href="site-resources.html">Resources</a></li><li><a href="site-resources.html?kind=research">Research</a></li><li><span aria-current="page">Monitor noise</span></li></ol></nav>
+      <p class="fd-site-eyebrow">Research paper · Web monitoring</p>
+      <h1 class="fd-site-article-title">Most page changes are noise: alert precision across 2.1 million monitor checks</h1>
+      <div class="fd-site-article-meta">
+        <ul class="fd-site-authors">
+          <li class="fd-site-authors-item"><span class="fd-site-authors-name">Priya Raman</span><span class="fd-site-authors-role">Ember Research</span></li>
+          <li class="fd-site-authors-item"><span class="fd-site-authors-name">Tomás Ferreira</span><span class="fd-site-authors-role">Ember Research</span></li>
+          <li class="fd-site-authors-item"><span class="fd-site-authors-name">Mara Okafor</span><span class="fd-site-authors-role">Quarry Labs</span></li>
+        </ul>
+        <time datetime="2026-10-20">Oct 20, 2026</time>
+        <span>Working paper · 22 min read</span>
+      </div>
+      <div class="fd-site-article-actions">
+        <a class="fd-btn" data-variant="primary" href="#cite"><i data-icon="quote"></i><span>Cite this paper</span></a>
+        <a class="fd-btn" href="#data"><i data-icon="file-down"></i><span>Data and method</span></a>
+      </div>
+    </header>
+
+    <div class="fd-site-article-body">
+      <details class="fd-disclosure fd-site-article-aside" open>
+        <summary class="fd-disclosure-trigger"><i data-icon="align-left"></i><span>Contents and key facts</span><i data-icon="chevron-down"></i></summary>
+        <div class="fd-disclosure-panel"><div class="fd-disclosure-inner">
+          <nav class="fd-toc" aria-label="Contents" data-fd-scrollspy>
+            <p class="fd-toc-title">Contents</p>
+            <div class="fd-toc-list">
+              <a class="fd-toc-item" href="#abstract">Abstract</a>
+              <a class="fd-toc-item" href="#introduction">1. Introduction</a>
+              <a class="fd-toc-item" href="#data">2. Data</a>
+              <a class="fd-toc-item" href="#method">3. Method</a>
+              <a class="fd-toc-item" href="#results">4. Results</a>
+              <a class="fd-toc-item" href="#limits">5. Limitations</a>
+              <a class="fd-toc-item" href="#notes">Notes and references</a>
+            </div>
+          </nav>
+          <dl class="fd-kv" data-layout="split" data-divided>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Window</dt><dd class="fd-kv-value">Jul 1 – Sep 28, 2026</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Checks</dt><dd class="fd-kv-value">2,104,880</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Monitors</dt><dd class="fd-kv-value">3,912</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Labelled</dt><dd class="fd-kv-value">2,400 diffs</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Licence</dt><dd class="fd-kv-value">CC BY 4.0</dd></div>
+          </dl>
+          <a class="fd-btn" data-size="sm" href="#cite"><i data-icon="download"></i><span>PDF · 1.1 MB</span></a>
+        </div></div>
+      </details>
+
+      <div class="fd-site-article-text fd-prose" data-size="lg">
+        <h2 id="abstract">Abstract</h2>
+        <p>A monitor that alerts on every difference in a page’s HTML is mostly wrong. We studied 2,104,880 checks made by 3,912 Ember monitors over 90 days. 412,306 checks found a difference in the raw HTML; after removing timestamps, session tokens, ad slots, rotating content and test variants, 61,180 remained. Two reviewers labelled a random 2,400 of those, and 2,100 (87.5%) were changes a person would want to hear about. Alerting on the raw difference would have had a precision of 13.0%; alerting after normalisation, 87.5%.</p>
+
+        <h2 id="introduction">1. Introduction</h2>
+        <p>People watch pages to learn when something they care about moves: a competitor’s price, a changelog, a job posting, a clause in a policy. The simplest monitor fetches the page on a schedule and compares it with the last copy. The trouble is that most pages differ on every fetch for reasons nobody cares about.<sup><a class="fd-site-notes-ref" id="ref-1" href="#note-1" aria-describedby="notes-title">1</a></sup></p>
+        <p>This paper measures how much of that difference is noise, where it comes from, and how much of it a normalisation step removes before anyone is alerted.</p>
+
+        <h2 id="data">2. Data</h2>
+        <p>We used every scheduled check made by monitors on paid Ember teams between July 1 and September 28, 2026: 2,104,880 checks of 3,912 pages, made every 6 hours to every 7 days. Teams on the Free plan and teams with zero data retention on were left out, since we keep no page content for them.<sup><a class="fd-site-notes-ref" id="ref-2" href="#note-2" aria-describedby="notes-title">2</a></sup></p>
+        <div class="fd-callout" data-tone="info" role="note">
+          <i class="fd-callout-icon" data-icon="info"></i>
+          <div class="fd-callout-content"><p class="fd-callout-title">Data and method</p><p class="fd-callout-body">The labelled sample, the normalisation rules and the scripts that produce every figure here are published with the paper. Page content is not: we release hashes of each diff and its label.</p></div>
+        </div>
+
+        <h2 id="method">3. Method</h2>
+        <p>Each check that differed from the previous one went through five rules, in order, and we counted what each rule removed. A diff that survived every rule counted as a change. From the survivors we drew 2,400 at random, stratified by page type, and two reviewers labelled each as meaningful or not.<sup><a class="fd-site-notes-ref" id="ref-3" href="#note-3" aria-describedby="notes-title">3</a></sup></p>
+        <figure class="fd-doc-frame" data-breakout>
+          <div class="fd-table-wrap"><table class="fd-table" data-stack aria-label="Diffs removed by each normalisation rule">
+            <thead><tr><th>Rule</th><th data-num>Diffs removed</th><th data-num>Share</th></tr></thead>
+            <tbody>
+              <tr><td data-stack-title>Timestamps and dates</td><td data-num>144,664</td><td data-num>41.2%</td></tr>
+              <tr><td data-stack-title>Session and CSRF tokens</td><td data-num>79,354</td><td data-num>22.6%</td></tr>
+              <tr><td data-stack-title>Ad and tracking slots</td><td data-num>62,852</td><td data-num>17.9%</td></tr>
+              <tr><td data-stack-title>Rotating content: testimonials, carousels</td><td data-num>40,028</td><td data-num>11.4%</td></tr>
+              <tr><td data-stack-title>A/B test variants</td><td data-num>24,228</td><td data-num>6.9%</td></tr>
+              <tr><td data-stack-title><strong>All rules</strong></td><td data-num><strong>351,126</strong></td><td data-num><strong>100.0%</strong></td></tr>
+            </tbody>
+          </table></div>
+          <figcaption class="fd-doc-frame-caption">Table 1. What the normalisation removed, of the 412,306 checks whose raw HTML differed. 61,180 diffs survived every rule.<small>Source: Ember monitor checks, Jul 1 – Sep 28, 2026, paid teams.</small></figcaption>
+        </figure>
+
+        <h2 id="results">4. Results</h2>
+        <p>Of the 2,400 labelled diffs, 2,100 were meaningful: precision after normalisation is 87.5%. Applied to all 61,180 survivors, that is about 53,500 changes worth an alert, against 412,306 raw differences: a raw-diff monitor would have been right 13.0% of the time.</p>
+        <p>Pages that publish on purpose change most. A changelog had a meaningful change in 9.8% of its checks; a product page, in 2.6%.</p>
+        <figure class="fd-doc-frame" data-breakout>
+          <div class="fd-doc-frame-media"><div class="fd-site-shot">
+            <div class="fd-chart" data-fd-chart="bar" data-height="260" data-label="Share of checks with a meaningful change, by page type: changelog 9.8%, careers 6.4%, pricing 4.1%, docs 3.2%, product 2.6%"><script type="application/json">{"labels":["Changelog","Careers","Pricing","Docs","Product"],"unit":"%","yMin":0,"series":[{"name":"Checks with a meaningful change","values":[9.8,6.4,4.1,3.2,2.6]}]}</script></div>
+          </div></div>
+          <figcaption class="fd-doc-frame-caption">Figure 1. Share of checks with a meaningful change, by page type.<small>Source: the 2,400 labelled diffs, weighted to all 61,180 survivors.</small></figcaption>
+        </figure>
+        <p>The 300 survivors labelled noise were mostly reordered lists (41%) and prices shown in the visitor’s currency (27%).<sup><a class="fd-site-notes-ref" id="ref-4" href="#note-4" aria-describedby="notes-title">4</a></sup> Both are now rules in Ember’s <code>ignore</code> presets.</p>
+
+        <h2 id="limits">5. Limitations</h2>
+        <p>Monitors are chosen by people who expect a page to change, so these pages change more than a random page would. Reviewers judged meaning without knowing why each monitor was set up; a change one team ignores may be the one another team watches for.</p>
+      </div>
+    </div>
+
+    <footer class="fd-site-article-foot" id="notes">
+      <div>
+        <h2 id="notes-title">Notes</h2>
+        <ol class="fd-site-notes">
+          <li id="note-1">A check is one fetch of one URL by one monitor. A diff is a check whose content differs from the previous check of the same monitor. <a class="fd-site-notes-back" href="#ref-1" aria-label="Back to reference 1"><i data-icon="undo-2"></i></a></li>
+          <li id="note-2">Zero data retention keeps no request bodies or page content, so those checks cannot be compared after the fact. 418 monitors were left out for this reason. <a class="fd-site-notes-back" href="#ref-2" aria-label="Back to reference 2"><i data-icon="undo-2"></i></a></li>
+          <li id="note-3">The reviewers disagreed on 74 of 2,400 diffs (3.1%); a third reviewer decided those. <a class="fd-site-notes-back" href="#ref-3" aria-label="Back to reference 3"><i data-icon="undo-2"></i></a></li>
+          <li id="note-4">123 and 81 of the 300 diffs labelled noise. <a class="fd-site-notes-back" href="#ref-4" aria-label="Back to reference 4"><i data-icon="undo-2"></i></a></li>
+        </ol>
+      </div>
+      <div>
+        <h2>References</h2>
+        <ol class="fd-site-refs">
+          <li>Ember Research (2026). <em>The pricing page index, 2026.</em> Ember. <a href="site-report.html">ember.example/resources/pricing-page-index-2026</a></li>
+          <li>Okafor, M. (2026). <em>Fourteen scrapers became three API calls.</em> Ember customer stories. <a href="site-customers.html">ember.example/customers/quarry-labs</a></li>
+          <li>Ember (2026). <em>Monitors: what counts as a change.</em> Ember documentation, version 2.14. <a href="docs-guide.html">ember.example/docs/monitors</a></li>
+          <li>Weber, J. (2026). <em>How we cut the median scrape to 842 ms.</em> Ember blog. <a href="site-post.html">ember.example/blog/median-842-ms</a></li>
+        </ol>
+      </div>
+      <div class="fd-stack" data-gap="4" id="cite">
+        <h2>Cite this paper</h2>
+        <div class="fd-copy-field" data-value="Raman, P., Ferreira, T., &amp; Okafor, M. (2026). Most page changes are noise: alert precision across 2.1 million monitor checks. Ember Research working paper. https://ember.example/research/monitor-noise" data-noun="citation">
+          <span class="fd-copy-field-label">APA</span>
+          <div class="fd-copy-field-actions"><button type="button" class="fd-btn" data-variant="ghost" data-size="sm" data-icon-only data-fd-field-action="copy" aria-label="Copy citation"><i data-icon="copy"></i></button></div>
+          <code class="fd-copy-field-value"></code>
+        </div>
+      </div>
+      <div class="fd-row" data-justify="between" data-wrap data-gap="4">
+        <p class="fd-small fd-muted">© 2026 the authors. Text and figures under CC BY 4.0; reuse them with a citation.</p>
+        <button class="fd-btn" type="button" data-variant="outline" data-fd-copy-link><i data-icon="link"></i><span>Copy link</span></button>
+      </div>
+    </footer>
+  </article>
+</main>
+</body>
+</html>

@@ -1,27 +1,34 @@
 {
   "id": "site-posts",
-  "job": "Point to recent posts or releases as dated rows, a grid with media, or one large entry beside a list.",
-  "purpose": "list: dated ruled rows of date, title, summary and tag. grid: media, title and date. featured: one large entry beside a short list. The whole item is the link. For the changelog page itself fd-doc-changelog stays the component.",
+  "job": "List posts, releases or resources as rows, cards or one lead entry, filtered and paged.",
+  "purpose": "list: ruled rows (a date rail, or without one the kind, title, summary, authors and a small frame). grid: media, title, meta. featured: one large entry beside a short list. The whole item is the link. As a listing, entries carry data-kind and data-tags, a tools bar of existing controls filters them, a live count follows, and site.js pages them and can keep the filters in the address.",
   "useWhen": [
-    "A few recent posts or releases on a landing page, linking to the full list."
+    "A few recent posts or releases on a landing page, linking to the full list.",
+    "A blog index, a resources library or a news page: 10 to 60 entries filtered by kind and topic and paged.",
+    "Past issues of a newsletter with Show more."
   ],
   "avoidWhen": [
     {
-      "when": "The changelog page itself.",
+      "when": "The versioned release notes in the documentation.",
       "instead": "doc-changelog"
     },
     {
       "when": "A feed of activity in the app.",
       "instead": "timeline"
+    },
+    {
+      "when": "Reading one post.",
+      "instead": "site-article"
     }
   ],
   "aka": [
     "blog",
     "posts",
-    "news",
     "latest releases",
     "articles",
-    "changelog teaser"
+    "library",
+    "resources",
+    "blog index"
   ],
   "surfaces": [
     "website"
@@ -29,7 +36,28 @@
   "data": [
     "list"
   ],
-  "states": [],
+  "states": [
+    {
+      "name": "filtered",
+      "how": "a control with data-filter changed: non-matching entries get hidden and .fd-site-posts-count says \"12 of 30 resources\""
+    },
+    {
+      "name": "no results",
+      "how": "nothing matches: the .fd-empty after the list is shown, with a [data-clear] button"
+    },
+    {
+      "name": "paged",
+      "how": "data-page-size on the section: an empty .fd-pagination is filled, or a button[data-more] shows the next page"
+    },
+    {
+      "name": "in the address",
+      "how": "data-address: ?kind=&topic=&q=&page= follow the listing and Back restores it"
+    },
+    {
+      "name": "loading",
+      "how": "the page swaps the entries for skeletons and disables the tools; the count says what is loading"
+    }
+  ],
   "variants": [
     {
       "attribute": "data-layout",
@@ -75,17 +103,54 @@
     {
       "class": "fd-site-posts-media",
       "role": "Its frame: an image or the signature texture."
+    },
+    {
+      "class": "fd-site-posts-kind",
+      "role": "An entry's kind label (Report, Guide, Engineering)."
+    },
+    {
+      "class": "fd-site-posts-meta",
+      "role": "The format line: authors, date, reading time, \"PDF · 24 pages\"."
+    },
+    {
+      "class": "fd-site-posts-cover",
+      "role": "A document's cover drawn in type in the media frame; data-ground=\"inverse|raised\"."
+    },
+    {
+      "class": "fd-site-posts-cover-title",
+      "role": "The cover's title, set large."
+    },
+    {
+      "class": "fd-site-posts-tools",
+      "role": "The tools bar: chip nav or tabs, a select, a search, the count."
+    },
+    {
+      "class": "fd-site-posts-count",
+      "role": "The live count (role=status, data-noun)."
     }
   ],
   "related": [
     "doc-changelog",
-    "badge"
+    "badge",
+    "chip-nav",
+    "search",
+    "pagination",
+    "empty",
+    "site-article"
   ],
-  "keyboard": [],
+  "keyboard": [
+    {
+      "keys": "Tab, Enter, Space",
+      "does": "The tools are the existing chip nav, select and search; page buttons move focus to the first entry of the new page."
+    }
+  ],
   "example": "docs/site-sections.html#posts",
   "provenance": [
     "docs/site-sections.html",
-    "fire/components/site.css"
+    "fire/components/site.css",
+    "fire/js/site.js",
+    "templates/site-blog.html",
+    "templates/site-resources.html"
   ],
   "since": "0.8.0"
 }

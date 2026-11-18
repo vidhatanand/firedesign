@@ -23,7 +23,7 @@ test('catalog.json validates against catalog.schema.json', () => {
 
 test('website sections: every Website root is kind "section" except the foundation, which is a pattern', () => {
   const site = catalog.components.filter((c) => c.family === 'Website');
-  assert.equal(site.length, 17);
+  assert.equal(site.length, 18);   // 0.8: fd-site-article
   const foundation = ['site', 'site-container', 'site-head'];
   for (const c of site) assert.equal(c.kind, foundation.includes(c.id) ? 'pattern' : 'section', c.id);
   for (const c of site) assert.deepEqual(c.card.surfaces, ['website'], `${c.id} is tagged website only`);

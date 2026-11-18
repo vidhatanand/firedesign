@@ -74,6 +74,7 @@ export const EXTRA_ROOTS = {
   'fd-site-cta': 'Website',
   'fd-site-footer': 'Website',
   'fd-site-posts': 'Website',
+  'fd-site-article': 'Website',        // 0.8: the reading page of a post, a report or a research paper
 };
 
 /** Classes (and their dash-descendants) that are parts of another component: class -> root of the component.
@@ -114,6 +115,9 @@ export const PART_OF = {
   'fd-token': 'fd-tag-input',
   'fd-site-eyebrow': 'fd-site-head',  // the head's small label
   'fd-site-points': 'fd-site-split',  // the ruled points list that goes with a split
+  'fd-site-authors': 'fd-site-article',  // 0.8: an article's byline (also used in a posts entry's meta line)
+  'fd-site-notes': 'fd-site-article',    // 0.8: footnotes and their references in the text
+  'fd-site-refs': 'fd-site-article',     // 0.8: the reference list
 };
 
 /** Component ids that differ from the root class without its `fd-` (the vocabulary says Buttons, the class is btn). */
@@ -126,7 +130,7 @@ export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd
 export const SECTION_FAMILIES = new Set(['Website']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {

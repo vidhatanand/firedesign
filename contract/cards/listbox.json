@@ -1,0 +1,127 @@
+{
+  "id": "listbox",
+  "job": "Show a list of options a person can choose from.",
+  "purpose": "The option list a combobox opens, and the list inside any picker: fd-option rows with a check for the selected one, an optional description and mono meta, group labels and an empty message. The active row is marked with data-active. It is a popover that falls back to an absolute panel where the Popover API is missing.",
+  "useWhen": [
+    "Building a picker or menu whose rows are choices with state (selected, active).",
+    "Rows need a description, an icon or a mono meta beside the label."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A user needs a ready-made field with typing and filtering.",
+      "instead": "combobox"
+    },
+    {
+      "when": "The rows are actions, not choices.",
+      "instead": "menu"
+    },
+    {
+      "when": "The rows are plain choices from a short list.",
+      "instead": "select"
+    },
+    {
+      "when": "The rows are checkboxes or radios in a form.",
+      "instead": "checkbox"
+    }
+  ],
+  "aka": [
+    "option list",
+    "dropdown list",
+    "picker list",
+    "suggestions list"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "active row",
+      "how": "data-active on .fd-option"
+    },
+    {
+      "name": "selected",
+      "how": "aria-selected=\"true\" on .fd-option"
+    },
+    {
+      "name": "fallback position",
+      "how": "data-fallback where popover is unsupported"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-side",
+      "value": "top",
+      "useWhen": "The list opens above its field, when there is no room below."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-listbox",
+      "role": "The panel; a popover."
+    },
+    {
+      "class": "fd-listbox-label",
+      "role": "A group heading."
+    },
+    {
+      "class": "fd-options",
+      "role": "The list of rows, also used for checkbox groups."
+    },
+    {
+      "class": "fd-option",
+      "role": "One choice; carries data-value."
+    },
+    {
+      "class": "fd-option-main",
+      "role": "Holds label and description."
+    },
+    {
+      "class": "fd-option-label",
+      "role": "The option name."
+    },
+    {
+      "class": "fd-option-desc",
+      "role": "A sentence about it."
+    },
+    {
+      "class": "fd-option-meta",
+      "role": "Mono text at the end."
+    },
+    {
+      "class": "fd-option-check",
+      "role": "The check on the selected option."
+    },
+    {
+      "class": "fd-listbox-empty",
+      "role": "The message when no option matches."
+    }
+  ],
+  "related": [
+    "combobox",
+    "select",
+    "menu",
+    "command"
+  ],
+  "keyboard": [
+    {
+      "keys": "ArrowDown, ArrowUp",
+      "does": "Move the active option when it belongs to a combobox."
+    },
+    {
+      "keys": "Enter",
+      "does": "Chooses the active option."
+    }
+  ],
+  "example": "docs/forms.html#combobox",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

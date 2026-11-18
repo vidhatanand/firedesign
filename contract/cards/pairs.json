@@ -1,0 +1,128 @@
+{
+  "id": "pairs",
+  "job": "Edit a set of names with values as rows.",
+  "purpose": "For OAuth scopes and their labels, request headers, environment variables. Each pair is a row with its own remove button. Without script it is a text area of \"name = value\" lines; with it, rows and one hidden input post the same lines or a JSON object (data-format=\"json\"). A name used twice marks both invalid and stops the form posting.",
+  "useWhen": [
+    "The value is a map: scopes, headers, labels, environment variables.",
+    "The server stores an object and nobody should type JSON."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The value is a flat list.",
+      "instead": "tag-input"
+    },
+    {
+      "when": "The value is one setting with a fixed name.",
+      "instead": "field"
+    },
+    {
+      "when": "The data is a table people read and sort.",
+      "instead": "table"
+    },
+    {
+      "when": "Raw config is the actual input.",
+      "instead": "codefield"
+    }
+  ],
+  "aka": [
+    "key-value editor",
+    "key value input",
+    "headers editor",
+    "env vars editor",
+    "map editor"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "form",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "duplicate name",
+      "how": "aria-invalid=\"true\" on both names and data-invalid on the group"
+    },
+    {
+      "name": "read-only",
+      "how": "readonly on the source text area"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-mono",
+      "value": "key",
+      "useWhen": "Names are identifiers and values are prose, as in scopes."
+    },
+    {
+      "attribute": "data-mono",
+      "value": "value",
+      "useWhen": "Values are identifiers and names are prose."
+    },
+    {
+      "attribute": "data-mono",
+      "value": "both",
+      "useWhen": "Both columns are identifiers, as in headers."
+    },
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A compact editor."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "A larger editor."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-pairs",
+      "role": "The wrapper; carries data-fd-pairs."
+    },
+    {
+      "class": "fd-pairs-head",
+      "role": "The column headings."
+    },
+    {
+      "class": "fd-pairs-row",
+      "role": "One pair."
+    },
+    {
+      "class": "fd-pairs-key",
+      "role": "The name input."
+    },
+    {
+      "class": "fd-pairs-value",
+      "role": "The value input."
+    },
+    {
+      "class": "fd-pairs-add",
+      "role": "The add-row button."
+    }
+  ],
+  "related": [
+    "tag-input",
+    "field",
+    "codefield",
+    "kv"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "In a name: moves to its value. In a value: adds a row below."
+    },
+    {
+      "keys": "Backspace",
+      "does": "In an empty name and value: removes the row."
+    }
+  ],
+  "example": "docs/forms.html#pairs",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.4.0"
+}

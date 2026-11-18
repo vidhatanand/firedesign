@@ -1,0 +1,110 @@
+{
+  "id": "copy-field",
+  "job": "Show a value people copy, such as an address or an ID.",
+  "purpose": "A read-only value with a copy button, in the same field shape. Copy always copies the whole data-value, and a check shows for a moment (fd:copy). data-mask=\"end\" keeps the readable start and the last few characters with dots between; it stays masked with no reveal button, so leave the button out when nobody may see the value.",
+  "useWhen": [
+    "A webhook URL, endpoint, ID or an invite link is shown for copying.",
+    "An address is recognised by its last characters (data-mask=\"end\")."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The value is secret and may be revealed or rotated.",
+      "instead": "secret"
+    },
+    {
+      "when": "The value is a command or code with several lines.",
+      "instead": "snippet"
+    },
+    {
+      "when": "The value is editable.",
+      "instead": "input-group"
+    },
+    {
+      "when": "The copy button sits inside a field people also type in.",
+      "instead": "input-group"
+    }
+  ],
+  "aka": [
+    "copy to clipboard",
+    "copy input",
+    "read-only field",
+    "clipboard field"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "record",
+    "text"
+  ],
+  "states": [
+    {
+      "name": "copied",
+      "how": "data-state=\"copied\" for a moment after the copy"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-mask",
+      "value": "end",
+      "useWhen": "Show the start up to data-mask-from, eight dots and the last few characters."
+    },
+    {
+      "attribute": "data-mask",
+      "value": "partial",
+      "useWhen": "Keep the first and last eight characters."
+    },
+    {
+      "attribute": "data-mask",
+      "value": "full",
+      "useWhen": "Show only dots."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-copy-field",
+      "role": "The wrapper; carries data-fd-secret and data-value."
+    },
+    {
+      "class": "fd-copy-field-label",
+      "role": "An optional label inside the field."
+    },
+    {
+      "class": "fd-copy-field-value",
+      "role": "The drawn value."
+    },
+    {
+      "class": "fd-copy-field-start",
+      "role": "The part that shortens with an ellipsis."
+    },
+    {
+      "class": "fd-copy-field-end",
+      "role": "The part that is never cut off."
+    },
+    {
+      "class": "fd-copy-field-actions",
+      "role": "The copy button."
+    }
+  ],
+  "related": [
+    "secret",
+    "snippet",
+    "codeblock",
+    "input-group"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "On the copy button: copies the value."
+    }
+  ],
+  "example": "docs/forms.html#secret",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

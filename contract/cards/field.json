@@ -1,0 +1,125 @@
+{
+  "id": "field",
+  "job": "Give a control a label, a hint and room for one error.",
+  "purpose": "The wrapper around one control: a label row, the control, a hint and an error slot. The hint gives way to the error when it appears, so a field never grows two lines of small print. Mark required fields with data-required on the label, not a red star. Errors are announced because the control points at them with aria-describedby.",
+  "useWhen": [
+    "Any input, textarea, select or custom control that needs a visible label.",
+    "A control needs help text, a character counter or an error message under it.",
+    "An API parameter form is generated from a schema (data-variant=\"schema\")."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Several fields make one titled group in a long create or edit form.",
+      "instead": "form-section"
+    },
+    {
+      "when": "A setting is a label and a control on one row.",
+      "instead": "setting"
+    },
+    {
+      "when": "A switch or checkbox carries its own label text.",
+      "instead": "checkbox"
+    }
+  ],
+  "aka": [
+    "form group",
+    "form control",
+    "form item",
+    "label and input"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "required",
+      "how": "data-required on .fd-field-label"
+    },
+    {
+      "name": "invalid",
+      "how": "aria-invalid=\"true\" on the control, text in .fd-field-error, aria-describedby pointing at it"
+    },
+    {
+      "name": "over limit",
+      "how": "data-state=\"limit\" on the counter; \"near\" as it approaches maxlength"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-variant",
+      "value": "schema",
+      "useWhen": "A label that is a mono parameter name with a quiet type, generated from an API schema."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-field",
+      "role": "The wrapper."
+    },
+    {
+      "class": "fd-field-head",
+      "role": "Row holding the label, the optional tag and the info button."
+    },
+    {
+      "class": "fd-field-label",
+      "role": "The label; carries data-required."
+    },
+    {
+      "class": "fd-field-req",
+      "role": "The required marker beside a label."
+    },
+    {
+      "class": "fd-field-tag",
+      "role": "A muted word such as \"optional\"."
+    },
+    {
+      "class": "fd-field-info",
+      "role": "The (i) button beside the label; takes data-fd-tooltip."
+    },
+    {
+      "class": "fd-field-hint",
+      "role": "Help text under the control; gives way to the error."
+    },
+    {
+      "class": "fd-field-error",
+      "role": "The single error message; hidden until needed."
+    },
+    {
+      "class": "fd-field-foot",
+      "role": "Row under the control for hint and counter."
+    },
+    {
+      "class": "fd-field-counter",
+      "role": "Live character count for a control with maxlength."
+    },
+    {
+      "class": "fd-field-name",
+      "role": "Schema variant: the parameter name."
+    },
+    {
+      "class": "fd-field-type",
+      "role": "Schema variant: the parameter type."
+    }
+  ],
+  "related": [
+    "input",
+    "textarea",
+    "select",
+    "form",
+    "form-section",
+    "setting"
+  ],
+  "keyboard": [],
+  "example": "docs/forms.html#field",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

@@ -1,0 +1,106 @@
+{
+  "id": "combobox",
+  "job": "Pick from a long list by typing to filter it.",
+  "purpose": "A text field with a listbox that uses the Popover API, so it layers above everything and closes on outside clicks. Type to filter, arrow keys to move, Enter to choose. Options are role=\"option\" rows with an optional icon, description and mono meta. The multiple variant keeps choices as removable tokens. Fires fd:open, fd:close, fd:select and fd:change.",
+  "useWhen": [
+    "The list is long enough that people need to type to find an item.",
+    "Each option needs an icon, a description or a meta label (a model, a team member).",
+    "Several items may be chosen and shown as tokens (data-multiple)."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The list is short and plain.",
+      "instead": "select"
+    },
+    {
+      "when": "People may enter values that are not on a list.",
+      "instead": "tag-input"
+    },
+    {
+      "when": "The choice runs a command or jumps to a page.",
+      "instead": "command"
+    },
+    {
+      "when": "The options are two to four visible labels.",
+      "instead": "segmented"
+    }
+  ],
+  "aka": [
+    "autocomplete",
+    "typeahead",
+    "combo box",
+    "searchable select",
+    "multiselect",
+    "dropdown search"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "form",
+    "list"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\" on the wrapper; the listbox is shown"
+    },
+    {
+      "name": "multiple",
+      "how": "data-multiple on the wrapper; choices become tokens"
+    },
+    {
+      "name": "no match",
+      "how": "data-empty=\"No matches\" text shows when the filter finds nothing"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-combobox",
+      "role": "The wrapper; carries data-fd-combobox and data-name."
+    }
+  ],
+  "related": [
+    "listbox",
+    "select",
+    "input-group",
+    "tag-input",
+    "command"
+  ],
+  "keyboard": [
+    {
+      "keys": "ArrowDown",
+      "does": "Opens the list, then moves to the next option."
+    },
+    {
+      "keys": "ArrowUp",
+      "does": "Opens the list at the last option, then moves up."
+    },
+    {
+      "keys": "Enter",
+      "does": "Chooses the active option, or closes the list."
+    },
+    {
+      "keys": "Escape",
+      "does": "Closes the list."
+    },
+    {
+      "keys": "Tab",
+      "does": "Closes the list and moves on."
+    },
+    {
+      "keys": "Backspace",
+      "does": "In multiple mode with an empty field: removes the last token."
+    }
+  ],
+  "example": "docs/forms.html#combobox",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.1.0"
+}

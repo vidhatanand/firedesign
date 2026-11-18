@@ -1,0 +1,94 @@
+{
+  "id": "codefield",
+  "job": "Edit raw code or JSON that has to be valid.",
+  "purpose": "A text area in the code face with a head showing the language and an optional Format button. Tab inserts two spaces. data-fd-json checks the value on blur and on submit and writes the parser's reason and line into the field's error. Without script it is a plain text area. It is for the few places raw code is the input, never a stand-in for a control that fits better.",
+  "useWhen": [
+    "An expert overrides configuration by hand and the value is JSON.",
+    "The input is code and needs checking: a template, a schema, a config override."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The value is a list, a map or a choice that a control fits.",
+      "instead": "tag-input"
+    },
+    {
+      "when": "The value is a map of names to values.",
+      "instead": "pairs"
+    },
+    {
+      "when": "The text is prose.",
+      "instead": "textarea"
+    },
+    {
+      "when": "The code is shown, not edited.",
+      "instead": "codeblock"
+    }
+  ],
+  "aka": [
+    "code editor",
+    "JSON editor",
+    "config editor",
+    "monospace textarea"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "form",
+    "text"
+  ],
+  "states": [
+    {
+      "name": "invalid JSON",
+      "how": "aria-invalid=\"true\" with the reason in .fd-field-error, set by data-fd-json"
+    },
+    {
+      "name": "ready",
+      "how": "data-ready set by the script; the Format button shows"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-codefield",
+      "role": "The wrapper."
+    },
+    {
+      "class": "fd-codefield-head",
+      "role": "Row with the language and the Format button."
+    },
+    {
+      "class": "fd-codefield-lang",
+      "role": "The language label."
+    },
+    {
+      "class": "fd-codefield-input",
+      "role": "The text area."
+    }
+  ],
+  "related": [
+    "textarea",
+    "pairs",
+    "tag-input",
+    "codeblock",
+    "field"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Inserts two spaces."
+    },
+    {
+      "keys": "Escape, then Tab",
+      "does": "Leaves the field."
+    }
+  ],
+  "example": "docs/forms.html#codefield",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.4.0"
+}

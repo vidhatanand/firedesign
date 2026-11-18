@@ -1,0 +1,167 @@
+{
+  "id": "filters",
+  "job": "Narrow a table or list by many fields from one Filter button, and see each filter that is set as a chip.",
+  "purpose": "One button opens a menu whose search finds fields and values at once; each field opens a panel of values (one, many, a date preset or range, text that the item contains, or a flag) with counts. What is set shows as chips that read as a sentence: the operator flips is and is not, the value reopens its panel. With data-fd-for it hides the rows itself. On a phone the menu is a bottom sheet in two steps.",
+  "useWhen": [
+    "A table or list has more than three fields to filter by: status, endpoint, key, owner, priority, labels, date.",
+    "People need several filters at once and must see and change each one in place.",
+    "A filtered view should be sharable: data-fd-url keeps the set in the address."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Three fields or fewer that people change all the time.",
+      "instead": "filter"
+    },
+    {
+      "when": "A public listing such as a blog or a changelog.",
+      "instead": "site-posts"
+    },
+    {
+      "when": "Free-text search is the only way to narrow the list.",
+      "instead": "search"
+    },
+    {
+      "when": "A list of actions on a row or a page.",
+      "instead": "menu"
+    }
+  ],
+  "aka": [
+    "filter menu",
+    "filter builder",
+    "faceted filter",
+    "add filter",
+    "filter chips",
+    "filter pills",
+    "query filter"
+  ],
+  "surfaces": ["app", "phone"],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "empty",
+      "how": "nothing set: the button alone, no chips, Clear hidden"
+    },
+    {
+      "name": "set",
+      "how": "aria-checked=\"true\" on values (or a text input's value attribute); chips appear and the button shows the count"
+    },
+    {
+      "name": "negated",
+      "how": "data-op=\"not\" on a one or many field's item; the chip reads is not"
+    },
+    {
+      "name": "open",
+      "how": "the menu or a panel has data-state=\"open\"; the button or chip value has aria-expanded=\"true\""
+    },
+    {
+      "name": "searching",
+      "how": "a query in the menu's search: matching fields and values as flat results, or one quiet line when nothing matches"
+    },
+    {
+      "name": "no match",
+      "how": "with data-fd-for, every item hidden: the target's [data-fd-none] shows, with a .fd-filters-clear button"
+    },
+    {
+      "name": "phone",
+      "how": "below 640px the button opens .fd-filters-sheet: fields, then one field's values with a back button"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-icon-only",
+      "value": "",
+      "useWhen": "On fd-filters-add in a tight toolbar: the icon alone with aria-label; the count becomes a badge. Put the chip list on the row below with data-fd-filters."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-filters",
+      "role": "The root: data-fd-for, data-fd-url, data-fd-key and data-now; holds the button, the chips and the menu."
+    },
+    {
+      "class": "fd-filters-add",
+      "role": "The Filter button (an fd-btn that opens the menu); shows the count and the key."
+    },
+    {
+      "class": "fd-filters-menu",
+      "role": "The menu of fields (an fd-menu), with a search at the top and fields in groups."
+    },
+    {
+      "class": "fd-filters-panel",
+      "role": "A field's values (an fd-menu sub-menu), or a text field's input."
+    },
+    {
+      "class": "fd-filters-search",
+      "role": "The search row at the top of the menu or of a long panel."
+    },
+    {
+      "class": "fd-filters-count",
+      "role": "A value's count, tabular; in the button, how many filters are set."
+    },
+    {
+      "class": "fd-filters-list",
+      "role": "The chips: one fd-filter-token per field that is set."
+    },
+    {
+      "class": "fd-filters-op",
+      "role": "A chip's operator: a button that flips is and is not, or plain text."
+    },
+    {
+      "class": "fd-filters-value",
+      "role": "A chip's value: a button that reopens the field's panel."
+    },
+    {
+      "class": "fd-filters-clear",
+      "role": "Removes every filter; hidden while none is set."
+    },
+    {
+      "class": "fd-filters-sheet",
+      "role": "The phone form: a bottom fd-sheet holding the menu, then one field's values."
+    },
+    {
+      "class": "fd-filters-back",
+      "role": "The sheet's button back from a field's values to the fields."
+    }
+  ],
+  "related": [
+    "filter",
+    "menu",
+    "toolbar",
+    "table",
+    "search",
+    "sheet",
+    "date-picker"
+  ],
+  "keyboard": [
+    {
+      "keys": "F",
+      "does": "Opens the menu from anywhere outside a text field (data-fd-key changes it); listed in the shortcut sheet."
+    },
+    {
+      "keys": "Typing",
+      "does": "Searches fields and values at once; Enter takes the first result."
+    },
+    {
+      "keys": "Arrow Up, Arrow Down, Home, End",
+      "does": "Move through fields or values; Arrow Up from the first returns to the search."
+    },
+    {
+      "keys": "Arrow Right, Enter",
+      "does": "Opens a field's values; Enter or Space sets a value."
+    },
+    {
+      "keys": "Arrow Left, Escape, Backspace",
+      "does": "Back to the fields (Backspace from an empty panel search); Escape clears a search, then closes and returns focus."
+    }
+  ],
+  "example": "docs/data.html#combined",
+  "provenance": [
+    "docs/data.html",
+    "fire/components/data.css",
+    "fire/js/filters.js",
+    "templates/audit.html"
+  ],
+  "since": "0.8.0"
+}

@@ -51,6 +51,25 @@
                      group's rows; a group whose rows are all [hidden] hides its heading too.
 
    FILTERS   fd-filter (> fd-filter-trigger + fd-filter-clear) · fd-filter-bar · fd-filter-search · fd-filter-applied > fd-filter-token
+   COMBINED FILTER (0.8; behaviour and the full markup in fire/js/filters.js): one button, a searchable menu of fields, a panel
+             of values per field, and the filters that are set as chips. For more than three fields; up to three, use fd-filter.
+             <div class="fd-filters" id="req-filters" data-fd-for="#req-table" [data-fd-url] [data-fd-key="f"]>
+               <button class="fd-btn fd-filters-add" type="button" data-fd-menu="req-filters-menu" [data-icon-only aria-label="Filter"]>
+                 <i data-icon="list-filter"></i><span>Filter</span></button>
+               <div class="fd-filters-list"></div>             the chips (written by the script): fd-filter-token holding
+                                                               fd-filter-token-key, fd-filters-op, fd-filters-value, fd-filter-token-remove
+               <button class="fd-btn-text fd-filters-clear" type="button">Clear</button>
+               <div class="fd-menu fd-filters-menu" id="req-filters-menu" popover>
+                 <div class="fd-filters-search">…</div>         the search at the top (added when missing)
+                 <p class="fd-menu-label">Request</p>
+                 <button class="fd-menu-item" data-field="status" data-kind="many" data-fd-submenu="rf-status">…Status</button>
+                 <div class="fd-menu fd-filters-panel" id="rf-status" popover> value items, each with data-value and an
+                   optional icon, .fd-status dot or .fd-avatar, a label and a .fd-filters-count </div>
+               </div>
+             </div>
+             fd-filters-count   a value's count (tabular); in fd-filters-add, the number of filters set (a badge when data-icon-only)
+             fd-filters-sheet   the phone form: a bottom fd-sheet holding the menu, then one field's values (fd-filters-back)
+             fd-toolbar > fd-filters takes the toolbar's free space; below 640px of its container the chips scroll in one row.
    LIST      fd-list[data-divided|data-card|data-interactive] > fd-list-row > fd-list-lead, -body (-title, -desc), -meta, -trail
              Selected: aria-current="true" on a row that is a button or link (or on its fd-list-link), or aria-selected="true"
              on a row with role="option" in a role="listbox" list.
@@ -121,6 +140,14 @@
   --fd-data-fsearch-min: 160px;
   --fd-data-fsearch-max: 320px;
   --fd-data-halo: 3px;               /* focus halo of the filter search */
+  /* combined filter */
+  --fd-filters-menu-w: 280px;        /* the menu of fields */
+  --fd-filters-panel-w: 264px;       /* a field's values */
+  --fd-filters-value-max: 200px;     /* a chip's value before it truncates */
+  --fd-filters-badge: 16px;          /* the count on the icon-only button */
+  --fd-filters-badge-inset: 4px;     /*   overhangs the button by this much */
+  --fd-filters-badge-font: 10px;
+  --fd-filters-fade: 24px;           /* edge fade of the chips' scrolling row */
   /* list */
   --fd-data-dot: 6px;                /* unread dot */
   --fd-data-dot-nudge: 2px;          /*   baseline lift */
@@ -719,6 +746,110 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-filter-token-remove:hover { background: var(--fd-a10); color: var(--fd-text); }
 .fd-filter-token-remove .fd-icon { width: var(--fd-icon-xs); height: var(--fd-icon-xs); stroke-width: 1.75; }
 .fd-filter-applied > .fd-btn-text { margin-inline-start: var(--fd-space-1-5); }
+
+/* ==========================================================================
+   Combined filter: one button, a menu of fields, a panel of values per field, chips for what is set
+   ========================================================================== */
+@property --_d-cl { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --_d-cr { syntax: "<length>"; inherits: false; initial-value: 0px; }
+.fd-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); min-width: 0; }
+.fd-filters[hidden] { display: none; }
+
+/* The button: icon, "Filter", how many are set, the key that opens it. */
+.fd-filters-add { flex: none; }
+.fd-filters-add > .fd-kbd { margin-inline-end: calc(var(--fd-space-1) * -1); }
+.fd-filters-add > .fd-filters-count {
+  display: inline-grid; place-items: center; min-width: var(--fd-filters-badge); height: var(--fd-filters-badge); padding-inline: var(--fd-space-1);
+  border-radius: var(--fd-radius-full); background: var(--fd-a8); color: var(--fd-text);
+  font-family: var(--fd-font-mono); font-size: var(--fd-filters-badge-font); line-height: 1; font-variant-numeric: tabular-nums;
+}
+.fd-filters-add[data-icon-only] { position: relative; }
+.fd-filters-add[data-icon-only] > :is(span:not(.fd-filters-count), .fd-kbd) { display: none; }
+.fd-filters-add[data-icon-only] > .fd-filters-count {
+  position: absolute; top: calc(var(--fd-filters-badge-inset) * -1); inset-inline-end: calc(var(--fd-filters-badge-inset) * -1);
+  background: var(--fd-accent); color: var(--fd-accent-contrast); box-shadow: 0 0 0 var(--fd-overlay-ring) var(--fd-bg);
+  pointer-events: none;
+}
+@media (pointer: coarse) { .fd-filters-add > .fd-kbd { display: none; } }
+
+/* The chips: an applied-filter token whose operator and value are buttons. */
+.fd-filters-list { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1-5); min-width: 0; }
+.fd-filters-list:empty { display: none; }
+.fd-filters-list > .fd-filter-token { gap: var(--fd-space-1); padding-inline-start: var(--fd-space-2-5); }
+.fd-filters-list .fd-filter-token-key::after { content: none; }
+.fd-filters-op, .fd-filters-value {
+  display: inline-flex; align-items: center; min-width: 0; height: var(--fd-data-clear); padding-inline: var(--fd-space-1);
+  border-radius: var(--fd-radius-sm); color: var(--fd-text-3); font: inherit; white-space: nowrap;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-filters-value { max-width: var(--fd-filters-value-max); overflow: hidden; text-overflow: ellipsis; display: block; line-height: var(--fd-data-clear); color: var(--fd-text); font-weight: var(--fd-weight-label); }
+span.fd-filters-op { padding-inline: 0; }
+:is(button.fd-filters-op, .fd-filters-value):hover, .fd-filters-value[aria-expanded="true"] { background: var(--fd-a8); color: var(--fd-text); }
+:is(button.fd-filters-op, .fd-filters-value):active { scale: var(--fd-press-scale); }
+.fd-filters-list .fd-filter-token-remove { margin-inline-start: 0; }
+
+/* Fields and values: menus wider than the default, a value's count at the end. */
+.fd-filters-menu { width: min(var(--fd-filters-menu-w), calc(100vw - var(--fd-overlay-inset))); padding-block-start: 0; }
+.fd-filters-panel { width: min(var(--fd-filters-panel-w), calc(100vw - var(--fd-overlay-inset))); }
+.fd-filters-panel:has(> .fd-filters-search) { padding-block-start: 0; }
+.fd-filters-count { flex: none; margin-inline-start: auto; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+.fd-filters-count:empty { display: none; }
+:is(.fd-filters-menu, .fd-filters-panel) .fd-menu-item > .fd-status { flex: none; gap: 0; }
+:is(.fd-filters-menu, .fd-filters-panel) .fd-menu-item > .fd-avatar { flex: none; }
+.fd-filters-panel > .fd-input { margin: var(--fd-space-1); width: calc(100% - 2 * var(--fd-space-1)); }
+
+/* The search at the top of the menu and of a long panel: a full-bleed row like the menu head. */
+.fd-filters-search {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; gap: var(--fd-space-2-5);
+  height: var(--fd-control-xl);
+  margin: 0 calc(-1 * var(--fd-space-1)) var(--fd-space-1);
+  padding-inline: var(--fd-space-3-5) var(--fd-space-3);
+  border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
+  background: var(--fd-surface-raised); color: var(--fd-text-4);
+  border-start-start-radius: inherit; border-start-end-radius: inherit;
+}
+.fd-filters-search > input {
+  flex: 1 1 auto; min-width: 0; height: 100%; padding: 0; border: 0; background: none; outline: none;
+  font-size: var(--fd-text-md); color: var(--fd-text);
+}
+.fd-filters-search > input::placeholder { color: var(--fd-text-4); }
+.fd-filters-search > input:focus-visible { box-shadow: none; }
+.fd-filters-search > input::-webkit-search-cancel-button { display: none; }
+.fd-filters-search:focus-within { color: var(--fd-text-3); }
+.fd-filters-search > .fd-kbd { flex: none; }
+.fd-filters-search:has(> input:not(:placeholder-shown)) > .fd-kbd { display: none; }
+@media (pointer: coarse) { .fd-filters-search > .fd-kbd { display: none; } }
+
+/* The phone form: the menu, then one field's values, drawn in a bottom sheet. */
+.fd-filters-sheet .fd-sheet-body { padding: var(--fd-space-1) var(--fd-space-2) var(--fd-space-3); gap: 0; }
+.fd-filters-sheet .fd-menu[data-static-demo] { width: auto; min-width: 0; max-width: none; max-height: none; padding: 0; overflow: visible; background: none; box-shadow: none; border-radius: 0; }
+.fd-filters-sheet .fd-filters-search { margin-inline: 0; top: calc(-1 * var(--fd-space-1)); border-radius: 0; }
+.fd-filters-sheet .fd-menu-item { min-height: var(--fd-control-xl); }
+.fd-filters-sheet .fd-sheet-bar > .fd-sheet-title { flex: 1 1 auto; }
+.fd-filters-back { flex: none; }
+.fd-filters-sheet[data-static-demo] { translate: none; height: auto; }   /* the docs' drawing of the phone form */
+
+/* Below 640px of its container the chips stay on one row that scrolls sideways, with a fade on the side that has more. */
+@keyframes fd-filters-fade {
+  0% { --_d-cl: 0; --_d-cr: var(--fd-filters-fade); }
+  12% { --_d-cl: var(--fd-filters-fade); }
+  88% { --_d-cr: var(--fd-filters-fade); }
+  100% { --_d-cl: var(--fd-filters-fade); --_d-cr: 0; }
+}
+@container (width < 640px) {
+  .fd-filters { flex-wrap: nowrap; }
+  .fd-filters-list {
+    flex: 1 1 0; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+    padding: var(--fd-toolbar-ring-room); margin: calc(-1 * var(--fd-toolbar-ring-room));
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--_d-cl), #000 calc(100% - var(--_d-cr)), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 var(--_d-cl), #000 calc(100% - var(--_d-cr)), transparent);
+    animation: fd-filters-fade linear both; animation-timeline: scroll(self inline);
+  }
+  .fd-filters-list::-webkit-scrollbar { display: none; }
+  .fd-filters-list > * { flex: none; }
+  .fd-filters-clear { flex: none; }
+}
 
 /* ==========================================================================
    List

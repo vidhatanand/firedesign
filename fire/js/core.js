@@ -245,6 +245,14 @@ export async function copyText(text) {
  *   hold.note "Nothing is sent until the countdown ends." · hold.undo "Undo" · hold.action "Sending"
  *   hold.start "{action} in {seconds} seconds. Undo or Escape stops it." · hold.undone "Stopped. Nothing was sent."
  *   frame.empty "No picture" · frame.refused "This address isn't allowed" · frame.failed "The picture didn't load"
+ *   filters.title "Filter" · filters.search "Add filter…" · filters.find "Search {field}" · filters.list "Filters"
+ *   filters.clear "Clear" · filters.is "is" · filters.not "is not" · filters.any "any of {count}"
+ *   filters.contains "contains" · filters.op "{field} {op}. Change to {other}"
+ *   filters.change "{field} {op} {values}. Change" · filters.remove "Remove the {field} filter"
+ *   filters.empty "Nothing matches “{query}”" · filters.back "All fields" · filters.done "Done"
+ *   filters.named "{name}, {count} set" · filters.removed "{field} filter removed."
+ *   filters.cleared "Filters cleared." · filters.none "No filters" · filters.one "1 filter"
+ *   filters.many "{count} filters" · filters.result "1 result" · filters.results "{count} results"
  */
 let dictionary;
 export function label(el, key, fallback, vars) {

@@ -887,8 +887,9 @@ function bindDelegates() {
   });
   on(document, 'click', '.fd-filter-token-remove', (event, button) => {
     const container = button.closest('.fd-filter-applied');
+    if (!container) return;   // the combined filter's chips (filters.js) remove themselves
     button.closest('.fd-filter-token')?.remove();
-    if (container) tokenState(container);
+    tokenState(container);
   });
   on(document, 'click', '[data-filter-clear-all]', (event, button) => {
     const container = button.closest('.fd-filter-applied');

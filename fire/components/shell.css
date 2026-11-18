@@ -57,6 +57,15 @@
                        page (name, mark, logo, logoDark, href); the same JSON as an attribute on an element fills only the brands
                        inside it. No style attribute: a logo is an <img class="fd-brand-logo"> with width and height. A .fd-brand
                        with data-fd-brand-keep is left as written. Behaviour in fire/js/shell.js (setBrand).
+   fd-toolbar          now wraps on purpose (CSS only, no markup change). It measures its nearest container (the page in an app;
+                       put it inside .fd-cq elsewhere). A toolbar with a search, an end group and other controls (filters) keeps
+                       one line while they fit; when they do not, the search and the end group share the first line and the
+                       filters move together to the second (visual order only: the tab order stays search, filters, end). Under
+                       640px the search takes a line, the filters one row that scrolls sideways with a fade, then the end group.
+                       How wide "fits" is depends on how many filters there are (one, two, three, four or more).
+   fd-toolbar-filters  optional wrapper around the filters: one item in the row on a desktop, and below 640px the scrolling row
+                       itself (the toolbar draws that row without it too). Quiet end buttons are fd-btn data-variant="ghost"
+                       data-icon-only with an aria-label.
 
    Responsive: the shell is a size container named `fd-app`; under 900px the sidebar
    hides and .fd-mobile-nav takes over. Page parts query the `fd-page` container.
@@ -127,6 +136,8 @@
   --fd-page-head-basis: 240px;
   --fd-toolbar-search-basis: 220px;
   --fd-toolbar-search-max: 280px;
+  --fd-toolbar-fade: 24px;            /* the edge fade of the filters' scrolling row */
+  --fd-toolbar-ring-room: 4px;        /* the scrolling toolbar keeps this much room for focus rings */
   --fd-topbar-search-w: 240px;        /* the top bar's search trigger */
   --fd-panel-head-h: 32px;
   /* initial mark */
@@ -799,20 +810,105 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); text-align: center;
 }
 
-/* ---------- Toolbar ---------- */
+/* ---------- Toolbar ----------
+   One wrapping row. It measures its nearest container (a container cannot restyle itself, and below 640px the toolbar
+   itself becomes the scroller), so every rule below queries that container, never the toolbar.
+   "Filters" are the children that are not the search, the end group or a separator (or the children of
+   .fd-toolbar-filters). The layouts are switched by private flags set on the toolbar, read by its children. */
+@property --_s-fl { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --_s-fr { syntax: "<length>"; inherits: false; initial-value: 0px; }
 .fd-toolbar {
   display: flex; flex-wrap: wrap; align-items: center;
   gap: var(--fd-space-2);
   min-width: 0;
 }
-.fd-toolbar-search { flex: 1 1 var(--fd-toolbar-search-basis); max-width: var(--fd-toolbar-search-max); min-width: 0; }
+.fd-toolbar-search { flex: 1 1 var(--fd-toolbar-search-basis); max-width: var(--_s-search-max, var(--fd-toolbar-search-max)); min-width: 0; margin-block-end: var(--_s-line1-mb, 0); }
 .fd-toolbar-search[data-size="full"] { max-width: none; }
 .fd-topbar [data-fd-search-trigger] { inline-size: var(--fd-topbar-search-w); }
-.fd-toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); margin-inline-start: auto; }
+.fd-toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); margin-inline-start: auto; order: var(--_s-end-order, 0); margin-block-end: var(--_s-line1-mb, 0); }
 .fd-toolbar-sep { flex: none; width: var(--fd-hairline); height: var(--fd-shell-sep-h); background: var(--fd-line); margin-inline: var(--fd-space-1); }
-@container (max-width: 640px) {
+:where(.fd-toolbar) > :where(:not(.fd-toolbar-search, .fd-toolbar-end)) { order: var(--_s-mid-order, 0); }
+/* The break between the two lines: a zero-height item that takes a whole line (the first line's items give back
+   the extra row gap it makes, through --_s-line1-mb). */
+.fd-toolbar::after { content: var(--_s-break, none); flex-basis: 100%; order: 2; height: 0; }
+.fd-toolbar-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); min-width: 0; }
+.fd-toolbar:has(> .fd-filters) { align-items: flex-start; }
+.fd-toolbar > .fd-filters { flex: 1 1 0; }
+
+/* Two lines: search and end group, then the filters. The width below which a toolbar takes them depends on how
+   many filters it holds: one (780px), two (940px), three (1110px), four or more (1280px). */
+@container (640px <= width < 1280px) {
+  .fd-toolbar:has(> .fd-toolbar-search):has(> .fd-toolbar-end):has(> :nth-child(4 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep)), > .fd-toolbar-filters > :nth-child(4)) {
+    --_s-end-order: 1; --_s-mid-order: 3; --_s-break: ""; --_s-search-max: none; --_s-line1-mb: calc(-1 * var(--fd-space-2));
+  }
+}
+@container (640px <= width < 1110px) {
+  .fd-toolbar:has(> .fd-toolbar-search):has(> .fd-toolbar-end):has(> :nth-child(3 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep)), > .fd-toolbar-filters > :nth-child(3)) {
+    --_s-end-order: 1; --_s-mid-order: 3; --_s-break: ""; --_s-search-max: none; --_s-line1-mb: calc(-1 * var(--fd-space-2));
+  }
+}
+@container (640px <= width < 940px) {
+  .fd-toolbar:has(> .fd-toolbar-search):has(> .fd-toolbar-end):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep)), > .fd-toolbar-filters > :nth-child(2)) {
+    --_s-end-order: 1; --_s-mid-order: 3; --_s-break: ""; --_s-search-max: none; --_s-line1-mb: calc(-1 * var(--fd-space-2));
+  }
+}
+@container (640px <= width < 780px) {
+  .fd-toolbar:has(> .fd-toolbar-search):has(> .fd-toolbar-end):has(> :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep)) {
+    --_s-end-order: 1; --_s-mid-order: 3; --_s-break: ""; --_s-search-max: none; --_s-line1-mb: calc(-1 * var(--fd-space-2));
+  }
+}
+
+@container (width < 640px) {
   .fd-toolbar-search { flex-basis: 100%; max-width: none; }
   .fd-toolbar-sep { display: none; }
+}
+/* Below 640px the filters are one row that scrolls sideways, with a fade on the side that has more. */
+@keyframes fd-toolbar-fade {
+  0% { --_s-fl: 0; --_s-fr: var(--fd-toolbar-fade); }
+  12% { --_s-fl: var(--fd-toolbar-fade); }
+  88% { --_s-fr: var(--fd-toolbar-fade); }
+  100% { --_s-fl: var(--fd-toolbar-fade); --_s-fr: 0; }
+}
+@container (width < 640px) {
+  .fd-toolbar-filters, .fd-toolbar > .fd-filters { flex-basis: 100%; }
+  /* The end group starts its own line at the left edge, like the search and the filters above it. */
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep)) > .fd-toolbar-end { flex-basis: 100%; margin-inline-start: 0; }
+  .fd-toolbar-filters {
+    flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+    padding: var(--fd-toolbar-ring-room); margin: calc(-1 * var(--fd-toolbar-ring-room));
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--_s-fl), #000 calc(100% - var(--_s-fr)), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 var(--_s-fl), #000 calc(100% - var(--_s-fr)), transparent);
+    animation: fd-toolbar-fade linear both; animation-timeline: scroll(self inline);
+  }
+  .fd-toolbar-filters::-webkit-scrollbar { display: none; }
+  .fd-toolbar-filters > * { flex: none; }
+  /* Without the wrapper (two filters or more): the toolbar is the scroller. The search and the end group span every
+     filter column (up to 24) and stay put (sticky, as wide as the toolbar); only the filters' row moves and fades. */
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep))):not(:has(> .fd-toolbar-filters)) {
+    --_s-row: var(--fd-control-md);
+    --_s-band: calc(var(--fd-toolbar-ring-room) + var(--_s-row) + var(--fd-space-2) / 2);
+    container-type: inline-size;
+    display: grid; grid-auto-columns: max-content; align-items: center; column-gap: 0;
+    overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none;
+    padding: var(--fd-toolbar-ring-room); margin: calc(-1 * var(--fd-toolbar-ring-room));
+    -webkit-mask:
+      linear-gradient(#000 0 0) 0 0 / 100% var(--_s-band) no-repeat,
+      linear-gradient(to right, transparent, #000 var(--_s-fl), #000 calc(100% - var(--_s-fr)), transparent) 0 var(--_s-band) / 100% calc(var(--_s-row) + var(--fd-space-2)) no-repeat,
+      linear-gradient(#000 0 0) 0 calc(var(--_s-band) + var(--_s-row) + var(--fd-space-2)) / 100% 100% no-repeat;
+    mask:
+      linear-gradient(#000 0 0) 0 0 / 100% var(--_s-band) no-repeat,
+      linear-gradient(to right, transparent, #000 var(--_s-fl), #000 calc(100% - var(--_s-fr)), transparent) 0 var(--_s-band) / 100% calc(var(--_s-row) + var(--fd-space-2)) no-repeat,
+      linear-gradient(#000 0 0) 0 calc(var(--_s-band) + var(--_s-row) + var(--fd-space-2)) / 100% 100% no-repeat;
+    animation: fd-toolbar-fade linear both; animation-timeline: scroll(self inline);
+  }
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep))):not(:has(> .fd-toolbar-filters))::-webkit-scrollbar { display: none; }
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep))):not(:has(> .fd-toolbar-filters)) > :is(.fd-toolbar-search, .fd-toolbar-end) {
+    grid-column: 1 / span 24; position: sticky; inset-inline-start: 0;
+    inline-size: 100cqi; max-width: none; margin-inline: 0 -100cqi;
+  }
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep))):not(:has(> .fd-toolbar-filters)) > .fd-toolbar-search { grid-row: 1; }
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep))):not(:has(> .fd-toolbar-filters)) > :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep) { grid-row: 2; margin-inline-end: var(--fd-space-2); }
+  .fd-toolbar:has(> .fd-toolbar-search):has(> :nth-child(2 of :not(.fd-toolbar-search, .fd-toolbar-end, .fd-toolbar-sep))):not(:has(> .fd-toolbar-filters)) > .fd-toolbar-end { grid-row: 3; justify-content: flex-start; }
 }
 
 /* ---------- Split: content + side panel ---------- */

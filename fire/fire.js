@@ -7,6 +7,7 @@ import * as nav from './js/nav.js';
 import * as forms from './js/forms.js';
 import * as overlays from './js/overlays.js';
 import * as data from './js/data.js';
+import * as filters from './js/filters.js';
 import * as content from './js/content.js';
 import * as code from './js/code.js';
 import * as agent from './js/agent.js';
@@ -18,7 +19,7 @@ import * as tweaks from './js/tweaks.js';
 import * as site from './js/site.js';
 import * as transitions from './js/transitions.js';
 
-const modules = { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks, site, transitions };
+const modules = { shell, nav, forms, overlays, data, filters, content, code, agent, chat, charts, texture, docsite, tweaks, site, transitions };
 
 /** Initialise every behaviour inside `root`. Call again after inserting markup. */
 export function init(root = document) {
@@ -48,4 +49,4 @@ ready(() => { initIcons(); init(document); bindCopy(); document.documentElement.
 export * from './js/core.js';
 export { icon, setIcon, ICONS } from './js/icons.js';
 export { transition } from './js/transitions.js';
-export { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks, site, transitions };
+export { shell, nav, forms, overlays, data, filters, content, code, agent, chat, charts, texture, docsite, tweaks, site, transitions };

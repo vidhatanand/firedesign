@@ -57,7 +57,104 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#screen"
+      "docs": "docs/agent.html#screen",
+      "card": {
+        "id": "agent",
+        "job": "Lay out a whole agent screen: past sessions, the thread and a docked composer.",
+        "purpose": "The page layout for an AI agent. A session list sits in a side column, the thread scrolls in the middle at reading measure, and the composer docks at the bottom with the thread fading under it. With data-fill it takes the viewport height under the top bar. Below 760px the side column leaves and the thread takes the width.",
+        "useWhen": [
+          "The product is a conversation with an agent and the screen is the agent: ask, watch it work, read the answer.",
+          "People return to earlier runs and need the session list beside the thread."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The conversation is help or support inside another product screen.",
+            "instead": "chat"
+          },
+          {
+            "when": "One endpoint with options is tried through a request form and a response panel.",
+            "instead": "playground"
+          },
+          {
+            "when": "A page needs only a prompt box, not the whole screen.",
+            "instead": "composer"
+          }
+        ],
+        "aka": [
+          "agent screen",
+          "assistant page",
+          "chat page",
+          "AI workspace",
+          "copilot layout"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "fills the viewport",
+            "how": "data-fill on .fd-agent"
+          },
+          {
+            "name": "no session column",
+            "how": "omit .fd-agent-side; the grid collapses to one column"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fill",
+            "value": "",
+            "useWhen": "The agent is the whole page: height is the viewport minus the top bar, and the thread scrolls inside."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-agent",
+            "role": "The grid: optional side column plus the main column."
+          },
+          {
+            "class": "fd-agent-side",
+            "role": "Holds the session list, with a hairline on its end edge."
+          },
+          {
+            "class": "fd-agent-main",
+            "role": "The column with the top row, scroll area and dock."
+          },
+          {
+            "class": "fd-agent-top",
+            "role": "A slim row for the title and page-level actions."
+          },
+          {
+            "class": "fd-agent-scroll",
+            "role": "The scrolling thread, or the hero prompt when empty."
+          },
+          {
+            "class": "fd-agent-dock",
+            "role": "Pinned bottom area for the composer."
+          },
+          {
+            "class": "fd-agent-dock-note",
+            "role": "One muted line under the composer, such as \"can be wrong\"."
+          }
+        ],
+        "related": [
+          "session-list",
+          "thread",
+          "composer",
+          "split"
+        ],
+        "keyboard": [],
+        "example": "docs/agent.html#screen",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "templates/agent.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "announce",
@@ -124,7 +221,130 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/shell.html#app"
+      "docs": "docs/shell.html#app",
+      "card": {
+        "id": "app",
+        "job": "Frame every signed-in screen with a sidebar, a top bar and a page.",
+        "purpose": "The app shell: a sidebar on the left, a main column with the top bar and the page, and a mobile nav. The sidebar is expanded or a 64px icon rail; the choice is remembered. The shell is a size container, so under 900px of its own width the sidebar gives way to the top bar and a menu button. It also holds the floating support button.",
+        "useWhen": [
+          "The product has several screens that share navigation, an account and a top bar.",
+          "A screen is a working page inside the product, not a single task on its own page."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A single task on a page of its own: sign in, consent, a result.",
+            "instead": "screen"
+          },
+          {
+            "when": "A docs site with its own two-row top bar and contents column.",
+            "instead": "doc"
+          },
+          {
+            "when": "A marketing page with no signed-in navigation.",
+            "instead": "page"
+          }
+        ],
+        "aka": [
+          "app shell",
+          "layout",
+          "dashboard layout",
+          "admin layout",
+          "scaffold",
+          "chrome",
+          "main layout"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "expanded",
+            "how": "data-sidebar=\"expanded\"; the default"
+          },
+          {
+            "name": "collapsed rail",
+            "how": "data-sidebar=\"collapsed\"; 64px, labels become tooltips"
+          },
+          {
+            "name": "contained",
+            "how": "data-contained; fills its parent box instead of the viewport"
+          },
+          {
+            "name": "no motion on load",
+            "how": "data-fd-instant; skips the sidebar transition"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-sidebar",
+            "value": "expanded",
+            "useWhen": "The default: icons with labels."
+          },
+          {
+            "attribute": "data-sidebar",
+            "value": "collapsed",
+            "useWhen": "Dense work, such as a playground or a long log, where width matters more than labels."
+          },
+          {
+            "attribute": "data-contained",
+            "value": "",
+            "useWhen": "The shell sits in a box, as in docs or a preview."
+          },
+          {
+            "attribute": "data-fd-instant",
+            "value": "",
+            "useWhen": "Render the saved sidebar state without animating on load."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-app",
+            "role": "The root; a size container named fd-app."
+          },
+          {
+            "class": "fd-main",
+            "role": "The column to the right of the sidebar."
+          },
+          {
+            "class": "fd-frame",
+            "role": "The drafted page column with 1px rails inside fd-page."
+          },
+          {
+            "class": "fd-crosshair",
+            "role": "One registration mark where a hairline crosses a rail."
+          },
+          {
+            "class": "fd-app-fab",
+            "role": "Positions the floating support button."
+          }
+        ],
+        "related": [
+          "sidebar",
+          "topbar",
+          "page",
+          "mobile-nav",
+          "screen"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves through the sidebar, top bar and page in markup order."
+          }
+        ],
+        "example": "docs/shell.html#app",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "fire/js/shell.js",
+          "GUIDE.md",
+          "templates/shell-static.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "approval-bar",
@@ -140,7 +360,71 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#parts"
+      "docs": "docs/agent.html#parts",
+      "card": {
+        "id": "approval-bar",
+        "job": "Ask whether the agent may run an action, with allow once, always allow and deny.",
+        "purpose": "A one-line strip with an icon, the action in plain words (what, where, how much it costs) and up to three choices. It is the small form of the approval state of a tool call; use it when the permission is asked outside a tool call row.",
+        "useWhen": [
+          "The agent wants to do something that costs credits or touches data and a person must say yes first.",
+          "A permission sits between turns, not inside a tool call row."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The pending step is already a row in a run.",
+            "instead": "toolcall"
+          },
+          {
+            "when": "The action deletes or changes access and needs a typed or explicit confirmation.",
+            "instead": "confirm"
+          },
+          {
+            "when": "The message is a notice with no choice to make.",
+            "instead": "banner"
+          }
+        ],
+        "aka": [
+          "permission prompt",
+          "consent bar",
+          "allow once",
+          "tool approval",
+          "human in the loop"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-approval-bar",
+            "role": "The strip; takes an icon first."
+          },
+          {
+            "class": "fd-approval-bar-text",
+            "role": "The question; bold the action and the cost."
+          },
+          {
+            "class": "fd-approval-bar-actions",
+            "role": "The choices, usually Allow once, Always allow and Deny."
+          }
+        ],
+        "related": [
+          "toolcall",
+          "confirm",
+          "banner"
+        ],
+        "keyboard": [],
+        "example": "docs/agent.html#parts",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "avatar",
@@ -417,7 +701,99 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#brand"
+      "docs": "docs/shell.html#brand",
+      "card": {
+        "id": "brand",
+        "job": "Sign a surface with the product mark and name, an uploaded logo or a wordmark.",
+        "purpose": "The brand is a mark and a name, set in a 40px row. A customer logo can replace the mark as an image of 24px, or a wide logo can replace both (up to 160px wide; it cannot shrink to the rail). A wordmark is an SVG in the current colour, for a caption or a line of text.",
+        "useWhen": [
+          "The top of the sidebar or a centred screen needs the product identity.",
+          "A page says \"Powered by\" with a small wordmark."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person or a team needs an avatar.",
+            "instead": "avatar"
+          },
+          {
+            "when": "A small rounded icon stands for an object, not the brand.",
+            "instead": "tile"
+          },
+          {
+            "when": "A label on a card or row.",
+            "instead": "badge"
+          }
+        ],
+        "aka": [
+          "logo",
+          "logotype",
+          "wordmark",
+          "product name",
+          "site title",
+          "masthead"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A wordmark inside a caption or a line of small text."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "The wordmark is the brand itself and takes the accent."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-brand",
+            "role": "The link row."
+          },
+          {
+            "class": "fd-brand-mark",
+            "role": "The 36px mark, an inline SVG or a 24px image."
+          },
+          {
+            "class": "fd-brand-name",
+            "role": "The name at 17px."
+          },
+          {
+            "class": "fd-brand-logo",
+            "role": "A wide logo that stands in for the mark and the name."
+          },
+          {
+            "class": "fd-wordmark",
+            "role": "An SVG wordmark that takes the current colour."
+          }
+        ],
+        "related": [
+          "sidebar",
+          "topbar",
+          "screen",
+          "avatar"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Follows the brand link."
+          }
+        ],
+        "example": "docs/shell.html#brand",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "breadcrumb",
@@ -1132,7 +1508,235 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/chat.html#composer"
+      "docs": "docs/chat.html#composer",
+      "card": {
+        "id": "chat",
+        "job": "Talk with an AI assistant and a support person in one thread, with rich replies.",
+        "purpose": "A support and help chat. A head says who is answering, an optional banner flags incidents, a body shows one view (home, conversation, history or offline), and the composer is pinned to the bottom. The AI replies in prose, a person in a bubble beside their face, and messages carry blocks such as forms, cards and approvals. It docks, floats, fills a page or pushes it. Under 640px it is a full-screen sheet.",
+        "useWhen": [
+          "Customers ask for help from inside the product or on docs and marketing pages.",
+          "An AI answers first and a person can take over in the same thread.",
+          "A help page needs a persistent conversation with history and an offline form."
+        ],
+        "avoidWhen": [
+          {
+            "when": "An agent that does the person's work, with tool calls, plans and results.",
+            "instead": "agent"
+          },
+          {
+            "when": "Only a prompt box on a page.",
+            "instead": "composer"
+          },
+          {
+            "when": "A short question in a floating card with no history.",
+            "instead": "popover"
+          },
+          {
+            "when": "Comments or notes on a record.",
+            "instead": "list"
+          }
+        ],
+        "aka": [
+          "live chat",
+          "chat widget",
+          "support chat",
+          "help widget",
+          "messenger",
+          "intercom",
+          "assistant panel",
+          "chatbot"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "list",
+          "text",
+          "form"
+        ],
+        "states": [
+          {
+            "name": "open",
+            "how": "data-state=\"open\" on .fd-chat"
+          },
+          {
+            "name": "closed",
+            "how": "data-state=\"closed\""
+          },
+          {
+            "name": "expanded",
+            "how": "data-expanded; a 760px panel or a taller popup"
+          },
+          {
+            "name": "closed conversation",
+            "how": "data-disabled; the composer is disabled with a reason"
+          },
+          {
+            "name": "dragging",
+            "how": "data-dragging; the file drop overlay shows"
+          },
+          {
+            "name": "remembered",
+            "how": "open state and mode saved per browser session; data-persist=\"false\" opts out"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-mode",
+            "value": "panel",
+            "useWhen": "Help from anywhere in the console: 420px, docked right, over the page."
+          },
+          {
+            "attribute": "data-mode",
+            "value": "popup",
+            "useWhen": "Marketing and docs pages: a 400px card that grows out of the launcher."
+          },
+          {
+            "attribute": "data-mode",
+            "value": "inline",
+            "useWhen": "An embedded help page or a full-page inbox: fills its box and is always open."
+          },
+          {
+            "attribute": "data-mode",
+            "value": "side",
+            "useWhen": "Long sessions where the person works and asks together: a 400px column that pushes the page."
+          },
+          {
+            "attribute": "data-agent",
+            "value": "ai",
+            "useWhen": "The AI is answering; the disclaimer shows."
+          },
+          {
+            "attribute": "data-agent",
+            "value": "human",
+            "useWhen": "A person from support is answering."
+          },
+          {
+            "attribute": "data-agent",
+            "value": "away",
+            "useWhen": "Nobody is in; the head says when they are back."
+          },
+          {
+            "attribute": "data-agent",
+            "value": "queue",
+            "useWhen": "Waiting for a person; the head shows the place in line."
+          },
+          {
+            "attribute": "data-view",
+            "value": "home",
+            "useWhen": "A new conversation: greeting and up to four starter questions."
+          },
+          {
+            "attribute": "data-view",
+            "value": "conversation",
+            "useWhen": "The thread."
+          },
+          {
+            "attribute": "data-view",
+            "value": "history",
+            "useWhen": "Past conversations with their state."
+          },
+          {
+            "attribute": "data-view",
+            "value": "offline",
+            "useWhen": "The form that takes a message when nobody is in."
+          },
+          {
+            "attribute": "data-expanded",
+            "value": "",
+            "useWhen": "A wider panel or taller popup for long answers."
+          },
+          {
+            "attribute": "data-contained",
+            "value": "",
+            "useWhen": "Position inside the nearest positioned box, for docs and previews."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-chat",
+            "role": "The root; an empty one is filled with the default support chat by chat.js."
+          },
+          {
+            "class": "fd-chat-head",
+            "role": "The 52px head: who answers, the status line and the icon actions."
+          },
+          {
+            "class": "fd-chat-banner",
+            "role": "An incident strip under the head; tone is warning, danger or info."
+          },
+          {
+            "class": "fd-chat-body",
+            "role": "Holds the four views."
+          },
+          {
+            "class": "fd-chat-log",
+            "role": "The thread; role=\"log\" and polite."
+          },
+          {
+            "class": "fd-chat-foot",
+            "role": "The composer, reply strip, closed line and disclaimer."
+          },
+          {
+            "class": "fd-chat-home",
+            "role": "The home view."
+          },
+          {
+            "class": "fd-chat-history",
+            "role": "The history view."
+          },
+          {
+            "class": "fd-chat-offline",
+            "role": "The offline form."
+          },
+          {
+            "class": "fd-chat-jump",
+            "role": "The \"New messages\" pill when scrolled up."
+          },
+          {
+            "class": "fd-chat-drop",
+            "role": "The overlay shown while a file is dragged over."
+          },
+          {
+            "class": "fd-chat-teaser",
+            "role": "The one-time offer of help near the launcher."
+          }
+        ],
+        "related": [
+          "chat-launcher",
+          "chat-message",
+          "composer",
+          "agent",
+          "chat-lightbox"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Sends the message."
+          },
+          {
+            "keys": "Shift+Enter",
+            "does": "Adds a new line."
+          },
+          {
+            "keys": "ArrowUp",
+            "does": "In an empty composer, edits your last message."
+          },
+          {
+            "keys": "Escape",
+            "does": "Cancels an edit or quote, or closes a floating chat."
+          }
+        ],
+        "example": "docs/chat.html#anatomy",
+        "provenance": [
+          "docs/chat.html",
+          "fire/components/chat.css",
+          "fire/js/chat.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "chat-launcher",
@@ -1157,7 +1761,118 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/chat.html#launcher"
+      "docs": "docs/chat.html#launcher",
+      "card": {
+        "id": "chat-launcher",
+        "job": "Open and close the chat from a floating button with an unread count.",
+        "purpose": "The floating action button for the chat. Its chat icon turns and fades into a chevron while the chat is open; an unread count pops in beside it. Add data-fd-chat-toggle with the chat id and it keeps aria-expanded and aria-controls in sync, and focus returns to it when the chat closes. A teaser can offer help once after a delay.",
+        "useWhen": [
+          "The chat floats over the page and needs a button that is always in reach.",
+          "Unread replies should show on a button when the chat is closed."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A floating action that is not the chat.",
+            "instead": "fab"
+          },
+          {
+            "when": "A chat that sits in a column or fills a page and is always open.",
+            "instead": "chat"
+          },
+          {
+            "when": "A button in a toolbar that opens a menu.",
+            "instead": "button"
+          }
+        ],
+        "aka": [
+          "chat bubble",
+          "chat button",
+          "help button",
+          "support button",
+          "messenger button",
+          "widget launcher"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "open",
+            "how": "aria-expanded=\"true\"; shows the chevron"
+          },
+          {
+            "name": "unread",
+            "how": "the badge shows the count; setUnread(n) updates it and the accessible name"
+          },
+          {
+            "name": "badge pop",
+            "how": "data-pop on the badge"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-float",
+            "value": "",
+            "useWhen": "Pin to the bottom-right corner of the viewport."
+          },
+          {
+            "attribute": "data-contained",
+            "value": "",
+            "useWhen": "Pin inside the nearest positioned box instead of the viewport."
+          },
+          {
+            "attribute": "data-role",
+            "value": "open",
+            "useWhen": "The icon shown while the chat is closed."
+          },
+          {
+            "attribute": "data-role",
+            "value": "close",
+            "useWhen": "The icon shown while the chat is open."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-chat-launcher",
+            "role": "The button; also takes fd-fab."
+          },
+          {
+            "class": "fd-chat-launcher-icon",
+            "role": "One of two stacked icons, data-role open or close."
+          },
+          {
+            "class": "fd-chat-launcher-badge",
+            "role": "The unread count."
+          },
+          {
+            "class": "fd-chat-pill",
+            "role": "A pill used for a starter question or a quick reply."
+          }
+        ],
+        "related": [
+          "chat",
+          "fab",
+          "button"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens or closes the chat."
+          }
+        ],
+        "example": "docs/chat.html#launcher",
+        "provenance": [
+          "docs/chat.html",
+          "fire/components/chat.css",
+          "fire/js/chat.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "chat-lightbox",
@@ -1173,7 +1888,86 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": null
+      "docs": null,
+      "card": {
+        "id": "chat-lightbox",
+        "job": "View a chat image full size and step through the others.",
+        "purpose": "A large dialog that opens when a person clicks an image in a chat message. It shows the image, a counter such as 2 of 4, and Previous and Next buttons. chat.js creates one shared dialog for the page. It is a dialog with a media area, so it traps focus and closes on Escape.",
+        "useWhen": [
+          "A chat message holds images and people should see them larger."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Images in a gallery outside a chat.",
+            "instead": "dialog"
+          },
+          {
+            "when": "A zoomable figure in documentation.",
+            "instead": "doc-frame"
+          },
+          {
+            "when": "A file that is not an image.",
+            "instead": "chat-message"
+          }
+        ],
+        "aka": [
+          "image viewer",
+          "gallery",
+          "image preview",
+          "photo viewer",
+          "zoom"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-chat-lightbox",
+            "role": "The dialog; it is also an fd-dialog."
+          },
+          {
+            "class": "fd-chat-lightbox-media",
+            "role": "The image area."
+          },
+          {
+            "class": "fd-chat-lightbox-count",
+            "role": "The counter, mono."
+          }
+        ],
+        "related": [
+          "chat-message",
+          "dialog",
+          "chat"
+        ],
+        "keyboard": [
+          {
+            "keys": "ArrowRight",
+            "does": "Shows the next image."
+          },
+          {
+            "keys": "ArrowLeft",
+            "does": "Shows the previous image."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the lightbox."
+          }
+        ],
+        "example": "docs/chat.html#blocks",
+        "provenance": [
+          "docs/chat.html",
+          "fire/components/chat.css",
+          "fire/js/chat.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "chat-message",
@@ -1272,7 +2066,221 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/chat.html#messages"
+      "docs": "docs/chat.html#messages",
+      "card": {
+        "id": "chat-message",
+        "job": "Show who said what in a chat, and carry blocks such as forms, cards and approvals.",
+        "purpose": "One message in a chat. The person speaks from a grey bubble on the right, the AI in prose beside a spark, a person from support in a white bubble beside their face, and the system in small muted lines. Messages from one author within two minutes join into a run. The body is a stack of blocks, each built from another Fire component. Only the latest message of the person shows its delivery state.",
+        "useWhen": [
+          "A support or help chat shows turns from the person, the AI, an agent and the system.",
+          "An answer should hold a form, a card, a list of choices or an approval, not only text."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A turn in an agent thread.",
+            "instead": "message"
+          },
+          {
+            "when": "A notification outside a conversation.",
+            "instead": "notification"
+          },
+          {
+            "when": "A single tool step.",
+            "instead": "toolcall"
+          }
+        ],
+        "aka": [
+          "chat bubble",
+          "chat turn",
+          "support message",
+          "rich message",
+          "message block",
+          "quick replies",
+          "chat card"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "text",
+          "record",
+          "form"
+        ],
+        "states": [
+          {
+            "name": "sending",
+            "how": "data-state=\"sending\"; spinner under the bubble"
+          },
+          {
+            "name": "sent",
+            "how": "data-state=\"sent\""
+          },
+          {
+            "name": "delivered",
+            "how": "data-state=\"delivered\""
+          },
+          {
+            "name": "read",
+            "how": "data-state=\"read\"; double check in accent"
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\"; offers a retry"
+          },
+          {
+            "name": "typing",
+            "how": "data-typing; the indicator at the end of the thread"
+          },
+          {
+            "name": "editing",
+            "how": "data-editing"
+          },
+          {
+            "name": "removing",
+            "how": "data-removing; fades out"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-author",
+            "value": "user",
+            "useWhen": "The person's own message: grey bubble on the right."
+          },
+          {
+            "attribute": "data-author",
+            "value": "ai",
+            "useWhen": "The AI: unboxed prose beside a spark."
+          },
+          {
+            "attribute": "data-author",
+            "value": "human",
+            "useWhen": "A support person: white bubble beside their face with name and role."
+          },
+          {
+            "attribute": "data-author",
+            "value": "system",
+            "useWhen": "A date, join, handover or resolution line."
+          },
+          {
+            "attribute": "data-continued",
+            "value": "",
+            "useWhen": "Same author within two minutes; chat.js sets it."
+          },
+          {
+            "attribute": "data-type",
+            "value": "text",
+            "useWhen": "Prose, lists, code and citations."
+          },
+          {
+            "attribute": "data-type",
+            "value": "quick-replies",
+            "useWhen": "Offer up to three likely answers that send themselves."
+          },
+          {
+            "attribute": "data-type",
+            "value": "actions",
+            "useWhen": "One to three buttons for what to do next."
+          },
+          {
+            "attribute": "data-type",
+            "value": "card",
+            "useWhen": "An object worth opening: a docs article or a plan."
+          },
+          {
+            "attribute": "data-type",
+            "value": "list",
+            "useWhen": "The answer depends on which one; radio rows with meta."
+          },
+          {
+            "attribute": "data-type",
+            "value": "form",
+            "useWhen": "Collect a few details without leaving the thread."
+          },
+          {
+            "attribute": "data-type",
+            "value": "confirm",
+            "useWhen": "An action that moves money, deletes or changes access asks first."
+          },
+          {
+            "attribute": "data-type",
+            "value": "handoff",
+            "useWhen": "Hand over to a person with the wait and place in line."
+          },
+          {
+            "attribute": "data-type",
+            "value": "rating",
+            "useWhen": "Ask once, at the end, how the conversation went."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-chat-msg",
+            "role": "One message; data-author sets who."
+          },
+          {
+            "class": "fd-chat-msg-avatar",
+            "role": "The face or mark."
+          },
+          {
+            "class": "fd-chat-msg-main",
+            "role": "The column with head, body and meta."
+          },
+          {
+            "class": "fd-chat-msg-head",
+            "role": "Name, role and time."
+          },
+          {
+            "class": "fd-chat-msg-body",
+            "role": "The bubble or prose."
+          },
+          {
+            "class": "fd-chat-block",
+            "role": "One block in the body; data-type picks the kind. Other kinds: carousel, details, table, code, attachment, sources, tool, steps, metric, schedule, notice."
+          },
+          {
+            "class": "fd-chat-msg-actions",
+            "role": "Copy, react, reply and good or bad answer on hover or focus."
+          },
+          {
+            "class": "fd-chat-msg-reactions",
+            "role": "Reaction chips under the message."
+          },
+          {
+            "class": "fd-chat-receipt",
+            "role": "The delivery line under the latest message."
+          },
+          {
+            "class": "fd-chat-typing",
+            "role": "The typing indicator."
+          }
+        ],
+        "related": [
+          "chat",
+          "message",
+          "sources",
+          "chat-lightbox",
+          "chat-launcher"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Reveals the message actions and moves through the blocks."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Activates a focused action, option or button in a block."
+          }
+        ],
+        "example": "docs/chat.html#messages",
+        "provenance": [
+          "docs/chat.html",
+          "fire/components/chat.css",
+          "fire/js/chat.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "checkbox",
@@ -2237,7 +3245,182 @@
         "fd:stop",
         "fd:submit"
       ],
-      "docs": "docs/agent.html#composer"
+      "docs": "docs/agent.html#composer",
+      "card": {
+        "id": "composer",
+        "job": "Ask the agent for something and attach context, sources and a model.",
+        "purpose": "The prompt form for an agent. A textarea grows to 240px, then scrolls. A row of tools holds the model chip, attachments, source toggles and the send button. The send button is a grey dot with no text, the accent with text, and a stop square while the agent runs. Sending fires fd:submit.",
+        "useWhen": [
+          "The person writes a prompt for an agent and may choose a model, sources or files.",
+          "A hero prompt needs example suggestions that fill the field.",
+          "A playground endpoint needs one card of rows (input, sources, actions)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A short free-text answer inside a form.",
+            "instead": "textarea"
+          },
+          {
+            "when": "A conversation with a person or support, with a reply strip and file drop.",
+            "instead": "chat"
+          },
+          {
+            "when": "A single-line query that filters a list or jumps to a page.",
+            "instead": "search"
+          }
+        ],
+        "aka": [
+          "prompt box",
+          "prompt input",
+          "message input",
+          "chat input",
+          "ask bar",
+          "command input"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "text",
+          "form"
+        ],
+        "states": [
+          {
+            "name": "ready",
+            "how": "data-ready, set by agent.js while the field has text"
+          },
+          {
+            "name": "running",
+            "how": "data-state=\"running\"; send becomes a stop square"
+          },
+          {
+            "name": "focused",
+            "how": "data-focus; the accent halo, shown statically"
+          },
+          {
+            "name": "uploading",
+            "how": "data-upload=\"uploading\" on an attachment"
+          },
+          {
+            "name": "upload failed",
+            "how": "data-upload=\"failed\" on an attachment"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the input and buttons"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "playground",
+            "useWhen": "One card of rows for a single endpoint: input, source chips and a footer with the actions."
+          },
+          {
+            "attribute": "data-variant",
+            "value": "bare",
+            "useWhen": "The composer sits inside a surface that already has an edge, so it draws none."
+          },
+          {
+            "attribute": "data-variant",
+            "value": "ghost",
+            "useWhen": "A quiet composer in a dense panel, without the raised card."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A compact composer inside a chat or a narrow panel."
+          },
+          {
+            "attribute": "data-side",
+            "value": "top",
+            "useWhen": "The model menu opens upward because the composer sits at the bottom of the screen."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-composer",
+            "role": "The form."
+          },
+          {
+            "class": "fd-composer-input",
+            "role": "The textarea; grows to 240px."
+          },
+          {
+            "class": "fd-composer-tools",
+            "role": "The row under the input."
+          },
+          {
+            "class": "fd-composer-tool",
+            "role": "A toggle or action button; aria-pressed marks a source that is on."
+          },
+          {
+            "class": "fd-composer-send",
+            "role": "The round send button; the stop square while running."
+          },
+          {
+            "class": "fd-composer-attachments",
+            "role": "Chips for files above the input, each with progress and a remove button."
+          },
+          {
+            "class": "fd-composer-hero",
+            "role": "The empty-state wrapper that holds a heading, the composer and suggestions."
+          },
+          {
+            "class": "fd-model-chip",
+            "role": "The button that opens the model menu (a native popover)."
+          },
+          {
+            "class": "fd-model-menu",
+            "role": "The menu of models, one radio item each."
+          },
+          {
+            "class": "fd-context-meter",
+            "role": "A ring and percentage for how full the context is."
+          },
+          {
+            "class": "fd-usage-chip",
+            "role": "A mono line of credits, tokens and pages used."
+          },
+          {
+            "class": "fd-stop-btn",
+            "role": "A \"Stop generating\" button outside the composer."
+          }
+        ],
+        "related": [
+          "suggestions",
+          "message",
+          "thread",
+          "chat",
+          "textarea"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Sends; cancel fd:submit to keep the text."
+          },
+          {
+            "keys": "Shift+Enter",
+            "does": "Adds a new line."
+          },
+          {
+            "keys": "Ctrl/Cmd+Enter",
+            "does": "Sends."
+          },
+          {
+            "keys": "Ctrl/Cmd+Enter",
+            "does": "In a playground form, runs the request."
+          }
+        ],
+        "example": "docs/agent.html#composer",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "confirm",
@@ -2955,7 +4138,208 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/documentation.html#shell"
+      "docs": "docs/documentation.html#shell",
+      "card": {
+        "id": "doc",
+        "job": "Build a documentation site in the product's own look: nav, article, contents and footer.",
+        "purpose": "The docs shell: a two-row top bar (tools and section tabs), a neutral nav, a reading column of 720px or less with an On this page rail, and an article footer with Was this helpful, the pager and the site footer. Declare the page with data-docs-shell on body; the page supplies only its article. It also holds search, the changelog and the home page.",
+        "useWhen": [
+          "The product has guides, SDK pages and an API reference that should read like the product.",
+          "A page needs the docs header, nav and contents column around an article."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The signed-in app shell with a sidebar and top bar.",
+            "instead": "app"
+          },
+          {
+            "when": "A single help article inside a chat.",
+            "instead": "chat"
+          },
+          {
+            "when": "One long page of text without navigation.",
+            "instead": "prose"
+          }
+        ],
+        "aka": [
+          "docs site",
+          "documentation layout",
+          "developer docs",
+          "knowledge base",
+          "help center",
+          "docs shell",
+          "reference"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "text",
+          "list"
+        ],
+        "states": [
+          {
+            "name": "contained",
+            "how": "data-contained; the shell scrolls inside a box of height --h"
+          },
+          {
+            "name": "no contents column",
+            "how": "data-toc=\"false\" on the body, for reference pages"
+          },
+          {
+            "name": "no footer",
+            "how": "data-foot=\"false\" on the body, for landing pages"
+          },
+          {
+            "name": "nav group open",
+            "how": "aria-expanded=\"true\"; remembered in fd-doc-nav-open"
+          },
+          {
+            "name": "voted",
+            "how": "data-state=\"voted\" on .fd-doc-helpful"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-contained",
+            "value": "",
+            "useWhen": "The shell is a box that scrolls inside itself, as in previews."
+          },
+          {
+            "attribute": "data-width",
+            "value": "wide",
+            "useWhen": "An article that needs more than the 720px reading column, such as a reference table."
+          },
+          {
+            "attribute": "data-row",
+            "value": "tools",
+            "useWhen": "The top bar's first row: brand, search, repository, theme, sign up."
+          },
+          {
+            "attribute": "data-row",
+            "value": "sections",
+            "useWhen": "The top bar's second row: section tabs in ink."
+          },
+          {
+            "attribute": "data-row",
+            "value": "crumbs",
+            "useWhen": "The breadcrumb bar that opens the nav sheet under 900px."
+          },
+          {
+            "attribute": "data-method",
+            "value": "get",
+            "useWhen": "A GET tag in the nav or an endpoint bar."
+          },
+          {
+            "attribute": "data-method",
+            "value": "post",
+            "useWhen": "A POST tag."
+          },
+          {
+            "attribute": "data-method",
+            "value": "put",
+            "useWhen": "A PUT tag."
+          },
+          {
+            "attribute": "data-method",
+            "value": "patch",
+            "useWhen": "A PATCH tag."
+          },
+          {
+            "attribute": "data-method",
+            "value": "delete",
+            "useWhen": "A DELETE tag, labelled DEL to keep the column narrow."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-doc",
+            "role": "The shell; a size container named fd-doc."
+          },
+          {
+            "class": "fd-doc-top",
+            "role": "The sticky two-row top bar."
+          },
+          {
+            "class": "fd-doc-search",
+            "role": "The search pill that opens the command palette."
+          },
+          {
+            "class": "fd-doc-nav",
+            "role": "The neutral nav; the current page is an 8% ink pill."
+          },
+          {
+            "class": "fd-doc-main",
+            "role": "Holds the content and aside."
+          },
+          {
+            "class": "fd-doc-article",
+            "role": "The reading column."
+          },
+          {
+            "class": "fd-doc-aside",
+            "role": "The 264px On this page column."
+          },
+          {
+            "class": "fd-doc-head",
+            "role": "Eyebrow, 36px title, lead and the Copy page split button."
+          },
+          {
+            "class": "fd-doc-method",
+            "role": "A method tag."
+          },
+          {
+            "class": "fd-doc-helpful",
+            "role": "Was this helpful, with a form that opens on No."
+          },
+          {
+            "class": "fd-doc-pager",
+            "role": "Previous and next links."
+          },
+          {
+            "class": "fd-doc-footer",
+            "role": "The site footer."
+          },
+          {
+            "class": "fd-doc-hero",
+            "role": "The docs home: big search and ways in."
+          },
+          {
+            "class": "fd-doc-guide",
+            "role": "A guide card with a time to read."
+          }
+        ],
+        "related": [
+          "prose",
+          "doc-cards",
+          "doc-endpoint",
+          "doc-setup",
+          "doc-changelog",
+          "command"
+        ],
+        "keyboard": [
+          {
+            "keys": "Ctrl/Cmd+K",
+            "does": "Opens the docs search palette."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Opens a nav group or follows a link."
+          },
+          {
+            "keys": "Tab",
+            "does": "Moves through the top bar, nav and article."
+          }
+        ],
+        "example": "docs/documentation.html#shell",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css",
+          "fire/js/docsite.js",
+          "templates/docs-guide.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc-ask",
@@ -2970,7 +4354,73 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/documentation.html#callouts"
+      "docs": "docs/documentation.html#callouts",
+      "card": {
+        "id": "doc-ask",
+        "job": "Point readers to the assistant at the end of a docs section.",
+        "purpose": "A one-line callout with a sparkle, a bold lead (\"Tip: ask the assistant.\") and a button that opens the command palette or the chat. It stays at the same width as the reading column and sits last in a section. Use at most one per screen.",
+        "useWhen": [
+          "A docs section ends and an assistant has read the pages and can answer in the reader's language.",
+          "A reference page should offer one way to ask a question."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A note, tip or warning about the content itself.",
+            "instead": "callout"
+          },
+          {
+            "when": "A system-wide message above a page.",
+            "instead": "banner"
+          },
+          {
+            "when": "A full conversation.",
+            "instead": "chat"
+          }
+        ],
+        "aka": [
+          "ask AI",
+          "ask the docs",
+          "assistant prompt",
+          "AI callout",
+          "did not find it"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-doc-ask",
+            "role": "The row; icon first, button last."
+          },
+          {
+            "class": "fd-doc-ask-text",
+            "role": "The message with a bold lead."
+          }
+        ],
+        "related": [
+          "callout",
+          "chat",
+          "command",
+          "doc"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Activates the button."
+          }
+        ],
+        "example": "docs/documentation.html#callouts",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc-cards",
@@ -2993,7 +4443,96 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/documentation.html#cards"
+      "docs": "docs/documentation.html#cards",
+      "card": {
+        "id": "doc-cards",
+        "job": "Fan out from an overview to the pages beneath it with link cards.",
+        "purpose": "A grid of fd-card[data-interactive] items, each with an icon, a title and one line. They are flush with the page until hovered. The grid has one to six columns and collapses on narrow widths. The icon is a plain glyph, never a logo.",
+        "useWhen": [
+          "A docs overview or an intro page leads to three to six places to read next.",
+          "A section index lists its pages with a line each."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A catalog of items with media, price or state.",
+            "instead": "card"
+          },
+          {
+            "when": "A list of guides with time to read.",
+            "instead": "doc"
+          },
+          {
+            "when": "Related links at the end of an article.",
+            "instead": "doc"
+          }
+        ],
+        "aka": [
+          "link cards",
+          "feature grid",
+          "landing cards",
+          "overview tiles",
+          "quick links",
+          "topic cards"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-cols",
+            "value": "1",
+            "useWhen": "One column for wide descriptions."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "2",
+            "useWhen": "Two cards across: the default for paired choices such as Search and Interact."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "3",
+            "useWhen": "Three across for a short overview."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "4",
+            "useWhen": "Four across on a wide landing page."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "5",
+            "useWhen": "Five across for icon-led links."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "6",
+            "useWhen": "Six across for a dense list of products."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-doc-cards",
+            "role": "The grid."
+          }
+        ],
+        "related": [
+          "card",
+          "doc",
+          "prose",
+          "grid"
+        ],
+        "keyboard": [],
+        "example": "docs/documentation.html#cards",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc-changelog",
@@ -3016,7 +4555,115 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/documentation.html#changelog"
+      "docs": "docs/documentation.html#changelog",
+      "card": {
+        "id": "doc-changelog",
+        "job": "List dated releases on a rail with filters by kind or area.",
+        "purpose": "Releases newest first on a rail. The date column sticks while its entry scrolls, each entry has a title, tags and a body, and filter chips narrow the list by kind or area. The newest release can be marked. An empty filter shows a message.",
+        "useWhen": [
+          "Product changes need a public history people can scan and filter.",
+          "A release has a date, tags and notes with code or links."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A sequence of events on a record, such as an audit trail.",
+            "instead": "timeline"
+          },
+          {
+            "when": "A version note in one guide.",
+            "instead": "callout"
+          },
+          {
+            "when": "A table of versions with columns.",
+            "instead": "table"
+          }
+        ],
+        "aka": [
+          "release notes",
+          "what's new",
+          "updates",
+          "product updates",
+          "version history",
+          "change log"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "latest",
+            "how": "data-latest on the newest release"
+          },
+          {
+            "name": "filtered",
+            "how": "chip value matches data-tags on .fd-doc-release"
+          },
+          {
+            "name": "no match",
+            "how": ".fd-doc-releases-empty"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-latest",
+            "value": "",
+            "useWhen": "The newest release, marked in accent."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-doc-changelog",
+            "role": "The list."
+          },
+          {
+            "class": "fd-doc-changelog-filters",
+            "role": "The chip nav that filters releases."
+          },
+          {
+            "class": "fd-doc-release",
+            "role": "One release; takes data-tags."
+          },
+          {
+            "class": "fd-doc-release-date",
+            "role": "The sticky date column."
+          },
+          {
+            "class": "fd-doc-release-title",
+            "role": "The release title; gets an anchor."
+          },
+          {
+            "class": "fd-doc-release-tags",
+            "role": "The tags."
+          },
+          {
+            "class": "fd-doc-release-body",
+            "role": "The notes in prose."
+          }
+        ],
+        "related": [
+          "doc",
+          "timeline",
+          "chip-nav",
+          "prose"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Applies a filter chip."
+          }
+        ],
+        "example": "docs/documentation.html#changelog",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css",
+          "fire/js/docsite.js",
+          "templates/docs-changelog.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc-endpoint",
@@ -3058,7 +4705,134 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/documentation.html#api-layout"
+      "docs": "docs/documentation.html#api-layout",
+      "card": {
+        "id": "doc-endpoint",
+        "job": "Document an API endpoint: parameters on the left, request and response on the right.",
+        "purpose": "The reference page layout. The endpoint bar leads with the method and path; click the path to copy the URL. Prose and parameters sit on the left, and a sticky request and response panel on the right with a language picker and example picker. Try it opens a sheet built from the parameters, validates and shows a scripted response. Under 1100px the panels flow under the bar.",
+        "useWhen": [
+          "An API reference needs the endpoint, its parameters and examples side by side.",
+          "Readers should try a call in a sandbox before writing code."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A method and path shown inline in an app.",
+            "instead": "endpoint"
+          },
+          {
+            "when": "A form that runs one endpoint in the product.",
+            "instead": "playground"
+          },
+          {
+            "when": "A single code sample in prose.",
+            "instead": "codeblock"
+          }
+        ],
+        "aka": [
+          "API reference",
+          "endpoint docs",
+          "REST docs",
+          "try it",
+          "swagger",
+          "openapi page",
+          "method page"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "record",
+          "form",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "code scrolled to the end",
+            "how": "data-at-end on a response panel"
+          },
+          {
+            "name": "error status",
+            "how": "tone dot on 4xx and 5xx status tabs"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-doc-endpoint",
+            "role": "The endpoint bar."
+          },
+          {
+            "class": "fd-doc-endpoint-url",
+            "role": "The full URL; click copies it."
+          },
+          {
+            "class": "fd-doc-endpoint-param",
+            "role": "A {param} in the path, emphasised in ink."
+          },
+          {
+            "class": "fd-doc-api",
+            "role": "The layout."
+          },
+          {
+            "class": "fd-doc-api-body",
+            "role": "Prose and parameters."
+          },
+          {
+            "class": "fd-doc-api-side",
+            "role": "The sticky request and response."
+          },
+          {
+            "class": "fd-doc-params",
+            "role": "A list of parameter rows built on fd-schema."
+          },
+          {
+            "class": "fd-doc-param",
+            "role": "One parameter: name, type, where, required, default, description."
+          },
+          {
+            "class": "fd-doc-response",
+            "role": "A response with status tabs."
+          },
+          {
+            "class": "fd-doc-api-head",
+            "role": "The top of the page: article head and the endpoint bar."
+          },
+          {
+            "class": "fd-doc-endpoint-path",
+            "role": "The path button that copies the URL."
+          },
+          {
+            "class": "fd-doc-try",
+            "role": "The Try it sheet."
+          }
+        ],
+        "related": [
+          "doc",
+          "endpoint",
+          "schema",
+          "codeblock",
+          "playground",
+          "json"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Copies the endpoint path or opens a picker item."
+          },
+          {
+            "keys": "Tab",
+            "does": "Moves through pickers, parameters and the Try it fields."
+          }
+        ],
+        "example": "docs/documentation.html#api-layout",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css",
+          "fire/js/docsite.js",
+          "templates/docs-api.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc-frame",
@@ -3081,7 +4855,107 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/documentation.html#prose"
+      "docs": "docs/documentation.html#prose",
+      "card": {
+        "id": "doc-frame",
+        "job": "Show a screenshot, video or diagram in a captioned frame that can open larger.",
+        "purpose": "A figure with a media area, an optional caption and a placeholder when there is no image yet. With data-zoom, activating the media opens a dialog with a copy of it. The 16:9 ratio is a preference: a placeholder that holds more grows to fit it, and nothing is clipped.",
+        "useWhen": [
+          "A docs page shows a screen of the product or a demo video.",
+          "A figure needs a caption and the option to look closer."
+        ],
+        "avoidWhen": [
+          {
+            "when": "An image inside a chat message.",
+            "instead": "chat-lightbox"
+          },
+          {
+            "when": "A code sample.",
+            "instead": "codeblock"
+          },
+          {
+            "when": "A decorative texture behind content.",
+            "instead": "texture"
+          }
+        ],
+        "aka": [
+          "figure",
+          "screenshot",
+          "media frame",
+          "image with caption",
+          "video frame",
+          "lightbox"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "zoomable",
+            "how": "data-zoom; the media gets a zoom-in cursor"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-zoom",
+            "value": "",
+            "useWhen": "The reader may open the media in a dialog."
+          },
+          {
+            "attribute": "data-ratio",
+            "value": "wide",
+            "useWhen": "A 21:9 placeholder for a wide banner screenshot."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-doc-frame",
+            "role": "The figure."
+          },
+          {
+            "class": "fd-doc-frame-media",
+            "role": "The image, video or placeholder; focusable when zoomable."
+          },
+          {
+            "class": "fd-doc-frame-caption",
+            "role": "The caption."
+          },
+          {
+            "class": "fd-doc-frame-placeholder",
+            "role": "A stand-in with an icon."
+          },
+          {
+            "class": "fd-doc-frame-play",
+            "role": "A play mark over a video placeholder."
+          }
+        ],
+        "related": [
+          "doc",
+          "prose",
+          "dialog",
+          "chat-lightbox"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens a zoomable frame in a dialog."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the dialog."
+          }
+        ],
+        "example": "docs/documentation.html#prose",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css",
+          "fire/js/docsite.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc-setup",
@@ -3107,7 +4981,107 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/documentation.html#setup"
+      "docs": "docs/documentation.html#setup",
+      "card": {
+        "id": "doc-setup",
+        "job": "Get a reader connected by choosing their tool, with the steps for it below.",
+        "purpose": "A card with a row of tiles (one per tool or client) and a panel for the chosen one. The chosen tile has an accent top rule and a 4% accent wash. Use it once, near the top of an introduction. The same file also holds the numbered steps (fd-doc-steps), where each step holds prose and code on a rail.",
+        "useWhen": [
+          "The same setup differs by tool and the reader needs only their own.",
+          "A setup must happen in order and each step has prose and code."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Instructions that differ by language or framework within an article.",
+            "instead": "tabs"
+          },
+          {
+            "when": "A first-run flow in the product.",
+            "instead": "steps"
+          },
+          {
+            "when": "A single command to copy.",
+            "instead": "snippet"
+          }
+        ],
+        "aka": [
+          "quickstart",
+          "install steps",
+          "getting started",
+          "client picker",
+          "integration setup",
+          "MCP setup",
+          "numbered steps"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "list",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "chosen",
+            "how": "aria-selected=\"true\" on the tile; the panel with the same data-value shows"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-doc-setup",
+            "role": "The card; fires fd:change { value }."
+          },
+          {
+            "class": "fd-doc-setup-head",
+            "role": "Title and description."
+          },
+          {
+            "class": "fd-doc-setup-tiles",
+            "role": "The tile row."
+          },
+          {
+            "class": "fd-doc-setup-tile",
+            "role": "One tool; data-value pairs it with a panel."
+          },
+          {
+            "class": "fd-doc-setup-panel",
+            "role": "The steps for that tool."
+          },
+          {
+            "class": "fd-doc-setup-hint",
+            "role": "A muted line under a step."
+          },
+          {
+            "class": "fd-doc-steps",
+            "role": "Numbered steps on a rail; each step holds prose and code."
+          }
+        ],
+        "related": [
+          "doc",
+          "tabs",
+          "steps",
+          "snippet",
+          "use-agent"
+        ],
+        "keyboard": [
+          {
+            "keys": "ArrowLeft, ArrowRight",
+            "does": "Moves to the previous or next tile."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Moves to the first or last tile."
+          }
+        ],
+        "example": "docs/documentation.html#setup",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css",
+          "fire/js/docsite.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "donut",
@@ -5343,7 +7317,139 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/skeletons.html#spinners"
+      "docs": "docs/skeletons.html#spinners",
+      "card": {
+        "id": "loader",
+        "job": "Show that something small is loading with a ring, dots, bars or a text frame.",
+        "purpose": "Loaders for work too small or too unpredictable to sketch. A ring goes inside controls and small panels. A braille frame or dots go beside a sentence that says what is happening. Equaliser bars show a stream receiving data. fd-pending shows an optimistic change at half strength until the server confirms it. Under reduced motion they hold still.",
+        "useWhen": [
+          "A control, a small panel or one line of text is waiting on a response.",
+          "A stream is receiving data and needs a quiet live mark.",
+          "A change shows at once at half strength and settles when the server confirms."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A page or a region whose layout is known; sketch it.",
+            "instead": "skeleton"
+          },
+          {
+            "when": "Navigation or a full reload.",
+            "instead": "pagebar"
+          },
+          {
+            "when": "A button is busy; set aria-busy=\"true\" on it instead of adding a spinner child.",
+            "instead": "button"
+          },
+          {
+            "when": "Progress with a known amount.",
+            "instead": "progress"
+          }
+        ],
+        "aka": [
+          "spinner",
+          "activity indicator",
+          "busy",
+          "throbber",
+          "loading dots",
+          "progress ring",
+          "waiting"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "announced",
+            "how": "role=\"status\" with aria-label, or the sentence beside it as the label"
+          },
+          {
+            "name": "pending change",
+            "how": ".fd-pending around the changed content"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "12",
+            "useWhen": "Inside an xs control or an inline icon slot."
+          },
+          {
+            "attribute": "data-size",
+            "value": "16",
+            "useWhen": "The default beside a line of text or in a small button row."
+          },
+          {
+            "attribute": "data-size",
+            "value": "20",
+            "useWhen": "In a field, a menu row or a compact panel."
+          },
+          {
+            "attribute": "data-size",
+            "value": "24",
+            "useWhen": "In a card or a panel with room."
+          },
+          {
+            "attribute": "data-size",
+            "value": "32",
+            "useWhen": "A larger box, as a section that is loading."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "Live work the person is waiting on."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "muted",
+            "useWhen": "A quiet spinner that should not draw the eye."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-spinner",
+            "role": "The ring; use data-size and role=\"status\"."
+          },
+          {
+            "class": "fd-braille",
+            "role": "A text loader: a braille frame that cycles every 80ms, then your label."
+          },
+          {
+            "class": "fd-braille-frame",
+            "role": "The cycling frame, added by JavaScript."
+          },
+          {
+            "class": "fd-dots",
+            "role": "Three pulsing dots."
+          },
+          {
+            "class": "fd-pending",
+            "role": "Wraps an optimistic change; children show at half strength."
+          },
+          {
+            "class": "fd-spin",
+            "role": "The rotation helper for an icon."
+          }
+        ],
+        "related": [
+          "skeleton",
+          "pagebar",
+          "progress",
+          "button"
+        ],
+        "keyboard": [],
+        "example": "docs/skeletons.html#spinners",
+        "provenance": [
+          "docs/skeletons.html",
+          "fire/components/skeleton.css",
+          "fire/js/texture.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "log",
@@ -5681,7 +7787,155 @@
       "events": [
         "fd:action"
       ],
-      "docs": "docs/agent.html#streaming"
+      "docs": "docs/agent.html#streaming",
+      "card": {
+        "id": "message",
+        "job": "Show one turn of an agent conversation: the person in a bubble, the agent in prose.",
+        "purpose": "One message in a thread. The person's turn is a grey bubble on the right, at most 70% wide. The agent's turn is unboxed prose at reading size, with copy, retry and thumbs actions under it that appear on hover or focus and always show under the last one. It can show a thinking line, three dots, a streaming caret or an error.",
+        "useWhen": [
+          "A thread shows what the person asked and what the agent answered.",
+          "An answer streams word by word, or fails and offers a retry."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The conversation is with support and carries blocks, delivery state and avatars.",
+            "instead": "chat-message"
+          },
+          {
+            "when": "A single status or announcement sits on a page, not in a thread.",
+            "instead": "callout"
+          },
+          {
+            "when": "The step the agent took, with arguments and cost.",
+            "instead": "toolcall"
+          }
+        ],
+        "aka": [
+          "chat bubble",
+          "answer",
+          "response",
+          "assistant message",
+          "user message",
+          "turn"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "thinking",
+            "how": "fd-message-thinking holds a short shimmering line; fd-message-dots shows three dots"
+          },
+          {
+            "name": "streaming",
+            "how": "fd-cursor at the end of the last word; stream(el, html)"
+          },
+          {
+            "name": "error",
+            "how": "fd-message-error with a title, text and a Retry button"
+          },
+          {
+            "name": "copied",
+            "how": "data-state=\"copied\" on the copy action"
+          },
+          {
+            "name": "actions shown",
+            "how": "data-actions=\"visible\""
+          },
+          {
+            "name": "new",
+            "how": "data-new; the entrance rise"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-role",
+            "value": "user",
+            "useWhen": "The person's turn: a right-aligned bubble."
+          },
+          {
+            "attribute": "data-role",
+            "value": "assistant",
+            "useWhen": "The agent's turn: unboxed prose with actions under it."
+          },
+          {
+            "attribute": "data-actions",
+            "value": "visible",
+            "useWhen": "Keep the actions showing before hover, such as on the latest answer."
+          },
+          {
+            "attribute": "data-new",
+            "value": "",
+            "useWhen": "Play the rise-in for a message just added."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-message",
+            "role": "One turn."
+          },
+          {
+            "class": "fd-message-body",
+            "role": "The text; headings, lists, code and tables need no classes."
+          },
+          {
+            "class": "fd-message-content",
+            "role": "Wraps the body when a message also holds status or tools."
+          },
+          {
+            "class": "fd-message-actions",
+            "role": "Copy, retry and thumbs up and down."
+          },
+          {
+            "class": "fd-message-action",
+            "role": "One action button; data-action is copy, up, down, retry or open."
+          },
+          {
+            "class": "fd-message-meta",
+            "role": "A mono line such as \"2 pages · 3 credits · 4.1s\"."
+          },
+          {
+            "class": "fd-message-thinking",
+            "role": "The shimmering line before the first word."
+          },
+          {
+            "class": "fd-message-dots",
+            "role": "Three soft dots for the unspecific wait."
+          },
+          {
+            "class": "fd-cursor",
+            "role": "The accent caret at the end of streaming text."
+          },
+          {
+            "class": "fd-message-error",
+            "role": "The error block with title, text and retry."
+          }
+        ],
+        "related": [
+          "thread",
+          "toolcall",
+          "reasoning",
+          "sources",
+          "chat-message"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Activates a focused message action."
+          }
+        ],
+        "example": "docs/agent.html#streaming",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "meter",
@@ -5773,7 +8027,133 @@
         "fd:close",
         "fd:open"
       ],
-      "docs": "docs/shell.html#mobile"
+      "docs": "docs/shell.html#mobile",
+      "card": {
+        "id": "mobile-nav",
+        "job": "Open the full navigation as a sheet on a phone.",
+        "purpose": "On phones the menu button opens a full-height sheet under the top bar: the upgrade first, then the account, then every destination with its icon on the right. Between 640 and 900px it is a side sheet over a scrim. It traps focus, locks page scroll and closes on Escape.",
+        "useWhen": [
+          "The sidebar is hidden below 900px and people still need every destination.",
+          "The shell needs the upgrade and the account in reach on a phone."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The same nav on a desktop width.",
+            "instead": "sidebar"
+          },
+          {
+            "when": "A short list of actions anchored to a button.",
+            "instead": "menu"
+          },
+          {
+            "when": "A bottom sheet with other content.",
+            "instead": "sheet"
+          }
+        ],
+        "aka": [
+          "hamburger menu",
+          "drawer",
+          "off-canvas nav",
+          "mobile menu",
+          "burger"
+        ],
+        "surfaces": [
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "open",
+            "how": "data-state=\"open\"; set by openMobileNav"
+          },
+          {
+            "name": "closed",
+            "how": "data-state=\"closed\" or hidden"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-state",
+            "value": "open",
+            "useWhen": "The sheet is showing."
+          },
+          {
+            "attribute": "data-state",
+            "value": "closed",
+            "useWhen": "The sheet is out of the way."
+          },
+          {
+            "attribute": "data-level",
+            "value": "2",
+            "useWhen": "A child item under a group, indented."
+          },
+          {
+            "attribute": "data-only",
+            "value": "mobile",
+            "useWhen": "Show a part only on the phone side of 900px."
+          },
+          {
+            "attribute": "data-only",
+            "value": "desktop",
+            "useWhen": "Show a part only on the desktop side of 900px."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-mobile-nav",
+            "role": "The sheet; trigger it with data-fd-mobile-nav and aria-controls."
+          },
+          {
+            "class": "fd-mobile-nav-scrim",
+            "role": "The dimmed backdrop."
+          },
+          {
+            "class": "fd-mobile-nav-actions",
+            "role": "The upgrade buttons at the top."
+          },
+          {
+            "class": "fd-mobile-nav-account",
+            "role": "The account row."
+          },
+          {
+            "class": "fd-mobile-nav-section",
+            "role": "A labelled group."
+          },
+          {
+            "class": "fd-mobile-nav-item",
+            "role": "One destination."
+          },
+          {
+            "class": "fd-mobile-nav-label",
+            "role": "A section label."
+          }
+        ],
+        "related": [
+          "sidebar",
+          "topbar",
+          "sheet",
+          "app"
+        ],
+        "keyboard": [
+          {
+            "keys": "Escape",
+            "does": "Closes the sheet and returns focus to the menu button."
+          },
+          {
+            "keys": "Tab",
+            "does": "Cycles inside the sheet while it is open."
+          }
+        ],
+        "example": "docs/shell.html#mobile",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "fire/js/shell.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "notification",
@@ -6114,7 +8494,128 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#hero"
+      "docs": "docs/shell.html#hero",
+      "card": {
+        "id": "page",
+        "job": "Lay a page out as a drafted column cut into bands by hairlines.",
+        "purpose": "The page holds a centred column with 1px rails; each fd-band is a horizontal strip, separated by hairlines that run edge to edge, with a crosshair where a line meets a rail. Bands set padding, surface and whether they grow. On phones the rails and marks drop away and only the hairlines remain.",
+        "useWhen": [
+          "Any screen in the app: one band for the title, one for the toolbar, one for the content.",
+          "A band needs a white or sunken surface, a different padding, or to stick under the top bar."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Cards or groups inside one band.",
+            "instead": "card"
+          },
+          {
+            "when": "Two columns of content inside a band.",
+            "instead": "split"
+          },
+          {
+            "when": "A grid of equal tiles.",
+            "instead": "grid"
+          }
+        ],
+        "aka": [
+          "page layout",
+          "section",
+          "band",
+          "container",
+          "content area",
+          "main"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "sticky band",
+            "how": "data-sticky; stays under the top bar with a blur"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-pad",
+            "value": "none",
+            "useWhen": "The band's children own their padding, as a split does."
+          },
+          {
+            "attribute": "data-pad",
+            "value": "sm",
+            "useWhen": "16px: toolbars, filters and pagination."
+          },
+          {
+            "attribute": "data-pad",
+            "value": "md",
+            "useWhen": "24px: the default for content."
+          },
+          {
+            "attribute": "data-pad",
+            "value": "lg",
+            "useWhen": "48px: empty states and anything that needs room."
+          },
+          {
+            "attribute": "data-surface",
+            "value": "surface",
+            "useWhen": "A white band that holds tables and inputs."
+          },
+          {
+            "attribute": "data-surface",
+            "value": "sunken",
+            "useWhen": "A recessed band for a quiet area."
+          },
+          {
+            "attribute": "data-align",
+            "value": "center",
+            "useWhen": "With data-grow, centres the content in the band's height."
+          },
+          {
+            "attribute": "data-grow",
+            "value": "",
+            "useWhen": "The last band fills the rest of the height so the rails reach the bottom."
+          },
+          {
+            "attribute": "data-sticky",
+            "value": "",
+            "useWhen": "A toolbar band that must stay in view while the page scrolls."
+          },
+          {
+            "attribute": "data-marks",
+            "value": "none",
+            "useWhen": "Keep the hairline and drop the crosshairs in a dense area."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-page",
+            "role": "The main element; a size container named fd-page."
+          },
+          {
+            "class": "fd-band",
+            "role": "One strip of the page."
+          }
+        ],
+        "related": [
+          "app",
+          "page-head",
+          "page-hero",
+          "toolbar",
+          "split"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#frame",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "GUIDE.md"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "page-head",
@@ -6136,7 +8637,86 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#compact-head"
+      "docs": "docs/shell.html#compact-head",
+      "card": {
+        "id": "page-head",
+        "job": "Title a working page and put its actions at the end of the row.",
+        "purpose": "The compact title row: the title (the page's h1, at the h2 size), one line of description and the page's actions. Long unbroken titles wrap. data-size=\"sm\" gives a 16px head for use inside a panel or a tool such as the parser.",
+        "useWhen": [
+          "A working page, such as a table of runs or a tool, needs a title, a line and one or two actions.",
+          "A panel needs a small head with its own actions."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A top-level screen opens with a tall band and an ASCII texture.",
+            "instead": "page-hero"
+          },
+          {
+            "when": "A title inside a card or dialog.",
+            "instead": "card"
+          },
+          {
+            "when": "The title of a doc article with eyebrow and lead.",
+            "instead": "doc"
+          }
+        ],
+        "aka": [
+          "page header",
+          "page title",
+          "heading row",
+          "title bar",
+          "content header"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A 16px title inside a panel or a dense tool."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-page-head",
+            "role": "The row."
+          },
+          {
+            "class": "fd-page-head-text",
+            "role": "Wraps the title and description."
+          },
+          {
+            "class": "fd-page-head-title",
+            "role": "The title; the page's h1."
+          },
+          {
+            "class": "fd-page-head-desc",
+            "role": "One line saying what the page is for."
+          },
+          {
+            "class": "fd-page-head-actions",
+            "role": "The actions at the end of the row."
+          }
+        ],
+        "related": [
+          "page-hero",
+          "toolbar",
+          "page",
+          "panel"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#compact-head",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "page-hero",
@@ -6154,7 +8734,84 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#hero"
+      "docs": "docs/shell.html#hero",
+      "card": {
+        "id": "page-hero",
+        "job": "Open a top-level screen with a tall title band and one line about it.",
+        "purpose": "A tall title band for the screens people reach from the sidebar: an eyebrow, the screen name, one line of what it is for, and an art slot that fades toward the text and holds an ASCII texture. Page-wide actions go in fd-page-hero-actions at the end of the title row (at most one primary) and drop under the line when there is no room.",
+        "useWhen": [
+          "A top-level screen, such as Monitoring or Settings, opens a section of the product.",
+          "The page has an action for the whole page: connect, get the code, export everything."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A working page under a section, where space matters.",
+            "instead": "page-head"
+          },
+          {
+            "when": "A create button that belongs to one list.",
+            "instead": "toolbar"
+          },
+          {
+            "when": "A single task outside the shell.",
+            "instead": "screen"
+          }
+        ],
+        "aka": [
+          "hero",
+          "banner",
+          "page banner",
+          "title band",
+          "masthead",
+          "section header",
+          "jumbotron"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-page-hero",
+            "role": "The band."
+          },
+          {
+            "class": "fd-page-hero-text",
+            "role": "Wraps the eyebrow, title and line so the actions can sit beside them."
+          },
+          {
+            "class": "fd-page-hero-desc",
+            "role": "The one-line description."
+          },
+          {
+            "class": "fd-page-hero-actions",
+            "role": "Actions for the whole page."
+          },
+          {
+            "class": "fd-page-hero-art",
+            "role": "The slot for a texture field; it fills this box."
+          }
+        ],
+        "related": [
+          "page-head",
+          "texture",
+          "page",
+          "toolbar"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#hero",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "docs/signature.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "pagebar",
@@ -6178,7 +8835,93 @@
       },
       "element": null,
       "events": [],
-      "docs": null
+      "docs": null,
+      "card": {
+        "id": "pagebar",
+        "job": "Show that a page is navigating or reloading with a thin bar at the top.",
+        "purpose": "A 2px accent bar fixed at the top of the page. start() trickles it toward 94%, set(0 to 1) moves it, and done() completes it and fades it out. createPagebar(host) makes one scoped to a positioned element. Use it for navigation and full reloads, never for work inside a panel.",
+        "useWhen": [
+          "A route change or a full reload takes a moment and the page has nothing of its own to show yet.",
+          "One region fetches new content and the bar is scoped to that region."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Work inside a panel or a control.",
+            "instead": "loader"
+          },
+          {
+            "when": "A known amount of progress with a label.",
+            "instead": "progress"
+          },
+          {
+            "when": "A region whose layout is known.",
+            "instead": "skeleton"
+          }
+        ],
+        "aka": [
+          "top loader",
+          "nprogress",
+          "route progress",
+          "loading bar",
+          "navigation progress",
+          "progress line"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "idle",
+            "how": "data-state=\"idle\""
+          },
+          {
+            "name": "running",
+            "how": "data-state=\"running\"; trickles to 94%"
+          },
+          {
+            "name": "done",
+            "how": "data-state=\"done\"; completes and fades"
+          },
+          {
+            "name": "closed",
+            "how": "data-state=\"closed\""
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-scoped",
+            "value": "",
+            "useWhen": "The bar sits at the top of a positioned element instead of the viewport."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-pagebar",
+            "role": "The bar."
+          },
+          {
+            "class": "fd-pagebar-fill",
+            "role": "The moving fill with the accent glow."
+          }
+        ],
+        "related": [
+          "loader",
+          "progress",
+          "skeleton"
+        ],
+        "keyboard": [],
+        "example": "docs/skeletons.html#pending",
+        "provenance": [
+          "docs/skeletons.html",
+          "fire/components/skeleton.css",
+          "fire/js/texture.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "pagination",
@@ -6480,7 +9223,84 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#split"
+      "docs": "docs/shell.html#split",
+      "card": {
+        "id": "panel",
+        "job": "Hold a titled group of content, or a 320px pane of sessions beside the rail.",
+        "purpose": "A bordered box with a head and a body, used as the side panel of a split. With data-variant=\"pane\" it becomes a 320px pane between the rail and the content, with its own 64px head aligned to the top bar and a scrolling body. The pane hides below 900px.",
+        "useWhen": [
+          "Details sit beside the thing they describe and need a head.",
+          "A screen is built around a list of sessions or items in its own column."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The content is an object in a grid or list.",
+            "instead": "card"
+          },
+          {
+            "when": "A temporary surface that opens over the page.",
+            "instead": "sheet"
+          },
+          {
+            "when": "Settings for one group inside a form.",
+            "instead": "form-section"
+          }
+        ],
+        "aka": [
+          "side panel",
+          "details pane",
+          "inspector",
+          "aside",
+          "secondary sidebar",
+          "drawer"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "record",
+          "list"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "pane",
+            "useWhen": "A fixed 320px column next to the rail that holds a list, such as sessions."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-panel",
+            "role": "The box."
+          },
+          {
+            "class": "fd-panel-head",
+            "role": "The head row."
+          },
+          {
+            "class": "fd-panel-title",
+            "role": "The title."
+          },
+          {
+            "class": "fd-panel-body",
+            "role": "The content."
+          }
+        ],
+        "related": [
+          "split",
+          "session-list",
+          "sheet",
+          "card"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#split",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "pipeline",
@@ -6615,7 +9435,128 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#playground"
+      "docs": "docs/agent.html#playground",
+      "card": {
+        "id": "playground",
+        "job": "Try one capability of a data source with a request form and a response panel.",
+        "purpose": "A two-column screen: the request as a form on the left, the response on the right. The response shows its shape as a skeleton until the first run, so people see what they will get before they spend a credit. A sticky footer shows the cost and Run; Ctrl or Cmd+Enter runs it. Below 720px the columns stack.",
+        "useWhen": [
+          "One endpoint or tool has parameters and people want to try it before writing code.",
+          "The cost of a run should be visible and update with the inputs."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The person talks to the agent in free text.",
+            "instead": "agent"
+          },
+          {
+            "when": "Docs show a reference with a request panel and a Try it sheet.",
+            "instead": "doc-endpoint"
+          },
+          {
+            "when": "A single form saves settings rather than running a request.",
+            "instead": "form"
+          }
+        ],
+        "aka": [
+          "API explorer",
+          "try it",
+          "sandbox",
+          "request builder",
+          "console",
+          "REST client"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "empty response",
+            "how": "skeleton rows until Run"
+          },
+          {
+            "name": "running",
+            "how": "data-action=\"run\" fills the response from a template with a rise"
+          },
+          {
+            "name": "reset",
+            "how": "data-action=\"reset\" restores the fields and the skeleton"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A compact playground inside a panel or a narrow page."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-playground",
+            "role": "The root; takes data-fd-playground."
+          },
+          {
+            "class": "fd-playground-head",
+            "role": "Title, capability count and the Try it / Agent / Docs switch."
+          },
+          {
+            "class": "fd-playground-cols",
+            "role": "The two columns."
+          },
+          {
+            "class": "fd-playground-col",
+            "role": "One column with its head."
+          },
+          {
+            "class": "fd-playground-colhead",
+            "role": "The numbered heading, such as \"1 Request\"."
+          },
+          {
+            "class": "fd-playground-form",
+            "role": "The request fields."
+          },
+          {
+            "class": "fd-playground-field",
+            "role": "One parameter with name, type and hint."
+          },
+          {
+            "class": "fd-playground-output",
+            "role": "The response area with the Table and JSON views."
+          },
+          {
+            "class": "fd-playground-foot",
+            "role": "Sticky footer with the credit estimate and Run."
+          },
+          {
+            "class": "fd-playground-credits",
+            "role": "The cost line; data-fd-credits on an input drives it."
+          }
+        ],
+        "related": [
+          "composer",
+          "result",
+          "doc-endpoint",
+          "endpoint",
+          "skeleton"
+        ],
+        "keyboard": [
+          {
+            "keys": "Ctrl/Cmd+Enter",
+            "does": "Runs the request from inside the form."
+          }
+        ],
+        "example": "docs/agent.html#playground",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "popover",
@@ -6738,7 +9679,80 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/documentation.html#steps"
+      "docs": "docs/documentation.html#steps",
+      "card": {
+        "id": "prose",
+        "job": "Style rendered Markdown or long text without adding classes.",
+        "purpose": "A reading container. Plain elements inside it are styled: 16/28 body text, 24/32 and 20/28 headings, ink links with a quiet underline, inline code on a 6% wash. Headings get anchors, wide tables scroll on their own, and components set in it keep their own type. data-size=\"sm\" is for scanned text such as notes and FAQ answers.",
+        "useWhen": [
+          "The content is Markdown or CMS output that you do not control the markup of.",
+          "A guide or article should read at 16/28 within the reading measure."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Interface text, labels and short captions.",
+            "instead": "text"
+          },
+          {
+            "when": "A note that should stand out in the article.",
+            "instead": "callout"
+          },
+          {
+            "when": "Text in a card or form.",
+            "instead": "type"
+          }
+        ],
+        "aka": [
+          "article",
+          "typography",
+          "markdown",
+          "rich text",
+          "long form",
+          "content body",
+          "copy"
+        ],
+        "surfaces": [
+          "website",
+          "app",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "Dense text: parameter notes, FAQ answers and changelog entries at 14/22."
+          },
+          {
+            "attribute": "data-footnotes",
+            "value": "",
+            "useWhen": "The container holds a footnote list at its end."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-prose",
+            "role": "The container."
+          }
+        ],
+        "related": [
+          "doc",
+          "callout",
+          "text",
+          "type",
+          "codeblock"
+        ],
+        "keyboard": [],
+        "example": "docs/documentation.html#prose",
+        "provenance": [
+          "docs/documentation.html",
+          "fire/components/docsite.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "qr",
@@ -6913,7 +9927,103 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#reasoning"
+      "docs": "docs/agent.html#reasoning",
+      "card": {
+        "id": "reasoning",
+        "job": "Fold away the plan behind an answer for the person who wants to check it.",
+        "purpose": "A collapsed row, \"Thought for 6s\", that opens to the agent's plan in muted text. While the agent is still working it reads \"Thinking…\" with a shimmer. It is folded by default so the answer stays the main thing on the page.",
+        "useWhen": [
+          "The agent's approach is worth showing but most people will skip it.",
+          "The agent is working and has not produced the answer yet."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The steps are actions with arguments, time and cost.",
+            "instead": "toolcall"
+          },
+          {
+            "when": "A long run needs a plan the person can follow and see ticked off.",
+            "instead": "run-steps"
+          },
+          {
+            "when": "Optional detail in a doc or a form.",
+            "instead": "accordion"
+          }
+        ],
+        "aka": [
+          "thinking",
+          "chain of thought",
+          "thought process",
+          "show reasoning",
+          "scratchpad"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "thinking",
+            "how": "data-state=\"thinking\" or \"running\"; label shimmers"
+          },
+          {
+            "name": "done",
+            "how": "data-state=\"done\"; label shows the time"
+          },
+          {
+            "name": "open",
+            "how": "aria-expanded=\"true\" on the toggle"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-reasoning",
+            "role": "The block."
+          },
+          {
+            "class": "fd-reasoning-toggle",
+            "role": "The button that folds the panel."
+          },
+          {
+            "class": "fd-reasoning-label",
+            "role": "The label: \"Thought for 6s\" or \"Thinking…\"."
+          },
+          {
+            "class": "fd-reasoning-panel",
+            "role": "The folding region."
+          },
+          {
+            "class": "fd-reasoning-body",
+            "role": "Inner wrapper for the text."
+          },
+          {
+            "class": "fd-reasoning-text",
+            "role": "The reasoning in muted text."
+          }
+        ],
+        "related": [
+          "toolcall",
+          "run-steps",
+          "message"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens or closes the panel."
+          }
+        ],
+        "example": "docs/agent.html#reasoning",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "result",
@@ -6938,7 +10048,116 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#result"
+      "docs": "docs/agent.html#result",
+      "card": {
+        "id": "result",
+        "job": "Show the data an agent returned as a table, with a JSON view and a cost line.",
+        "purpose": "A result card under the prose of an answer: a title with a row count, a Table / JSON switch, the rows, and one mono line saying what the run cost. Copy and download act on the JSON and CSV. New rows rise in one after another.",
+        "useWhen": [
+          "The agent's answer is rows of data the person may copy, export or inspect.",
+          "A run should state its cost next to its output."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A static table of records that is not an agent output.",
+            "instead": "table"
+          },
+          {
+            "when": "A single JSON value or request body.",
+            "instead": "json"
+          },
+          {
+            "when": "A short fact answered in prose.",
+            "instead": "message"
+          }
+        ],
+        "aka": [
+          "output",
+          "results table",
+          "data result",
+          "answer table",
+          "artifact"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "new rows",
+            "how": "data-new on a row; the staggered rise"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-mono",
+            "value": "",
+            "useWhen": "A cell holds an id, a path or a date; set in mono at a muted tone."
+          },
+          {
+            "attribute": "data-num",
+            "value": "",
+            "useWhen": "A cell holds a number; right-aligned in mono."
+          },
+          {
+            "attribute": "data-new",
+            "value": "",
+            "useWhen": "The row was just added."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-result",
+            "role": "The card."
+          },
+          {
+            "class": "fd-result-head",
+            "role": "Title, row count and tools."
+          },
+          {
+            "class": "fd-result-title",
+            "role": "What the data is."
+          },
+          {
+            "class": "fd-result-count",
+            "role": "The row count."
+          },
+          {
+            "class": "fd-result-tools",
+            "role": "The Table / JSON view switch and copy or download buttons."
+          },
+          {
+            "class": "fd-result-body",
+            "role": "Holds the table or the JSON tree."
+          },
+          {
+            "class": "fd-result-table",
+            "role": "The table in compact form."
+          },
+          {
+            "class": "fd-result-foot",
+            "role": "The file name and the cost line."
+          }
+        ],
+        "related": [
+          "table",
+          "json",
+          "viewswitch",
+          "message",
+          "playground"
+        ],
+        "keyboard": [],
+        "example": "docs/agent.html#result",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "row",
@@ -7108,7 +10327,108 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#run-steps"
+      "docs": "docs/agent.html#run-steps",
+      "card": {
+        "id": "run-steps",
+        "job": "Show the plan of a long run and tick it off as it goes.",
+        "purpose": "A numbered plan for runs that take minutes. The current step is in ink, finished steps fall back, failed steps show the error, and a footer keeps the clock and the credits counting. Each step can carry a detail line and a time.",
+        "useWhen": [
+          "A run takes minutes and the person wants to see the plan and where it is.",
+          "A run stopped and the person needs to see which step failed and what it cost."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Each step needs arguments, a result and an approval.",
+            "instead": "toolcall"
+          },
+          {
+            "when": "A flow with fixed stages the person fills in themselves.",
+            "instead": "steps"
+          },
+          {
+            "when": "A background job shown as one percentage.",
+            "instead": "progress"
+          }
+        ],
+        "aka": [
+          "plan",
+          "task list",
+          "progress steps",
+          "agent plan",
+          "checklist",
+          "stepper"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "active",
+            "how": "data-state=\"active\" or \"running\" on an item"
+          },
+          {
+            "name": "done",
+            "how": "data-state=\"done\""
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\""
+          },
+          {
+            "name": "pending",
+            "how": "data-state=\"pending\" or \"queued\""
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-run-steps",
+            "role": "The list."
+          },
+          {
+            "class": "fd-run-steps-item",
+            "role": "One step."
+          },
+          {
+            "class": "fd-run-steps-icon",
+            "role": "The state icon: ring, spinner, check or cross."
+          },
+          {
+            "class": "fd-run-steps-label",
+            "role": "What the step does."
+          },
+          {
+            "class": "fd-run-steps-detail",
+            "role": "A muted line such as \"18 of 41 pages\"."
+          },
+          {
+            "class": "fd-run-steps-time",
+            "role": "The step's time in mono."
+          },
+          {
+            "class": "fd-run-steps-foot",
+            "role": "Elapsed time and credits so far."
+          }
+        ],
+        "related": [
+          "toolcall",
+          "steps",
+          "reasoning",
+          "progress",
+          "checklist"
+        ],
+        "keyboard": [],
+        "example": "docs/agent.html#run-steps",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "schema",
@@ -7154,7 +10474,83 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#screen"
+      "docs": "docs/shell.html#screen",
+      "card": {
+        "id": "screen",
+        "job": "Centre one task on a page of its own, outside the shell.",
+        "purpose": "A centred column at a readable width for sign in, a second step, consent or a result. The brand leads, one card holds the task, and one quiet line closes it. Navigation stays off these screens. For a result such as link sent or signed out, lead with a 44px tile whose tone says what happened.",
+        "useWhen": [
+          "The person does one thing before entering the app: sign in, verify, consent, finish a flow.",
+          "A result stands alone: link sent, signed out, run stopped."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The page is something people return to; it belongs in the shell.",
+            "instead": "app"
+          },
+          {
+            "when": "A first-run flow with several screens and progress.",
+            "instead": "steps"
+          },
+          {
+            "when": "A confirmation of one action over the page.",
+            "instead": "dialog"
+          }
+        ],
+        "aka": [
+          "auth screen",
+          "login page",
+          "centered layout",
+          "landing card",
+          "standalone page",
+          "interstitial"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form",
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "md",
+            "useWhen": "A wider column for a screen with more to read, such as consent."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-screen",
+            "role": "The centred column."
+          },
+          {
+            "class": "fd-screen-head",
+            "role": "Centres the heading and its line."
+          },
+          {
+            "class": "fd-screen-note",
+            "role": "One small centred line under the card, or inside it for a last word."
+          }
+        ],
+        "related": [
+          "app",
+          "brand",
+          "form",
+          "page"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#screen",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "templates/auth-centered.html"
+        ],
+        "since": "0.3.0"
+      }
     },
     {
       "id": "scroller",
@@ -7835,7 +11231,124 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#sessions"
+      "docs": "docs/agent.html#sessions",
+      "card": {
+        "id": "session-list",
+        "job": "Pick up an earlier agent session, or start a new one.",
+        "purpose": "Past sessions grouped by day, newest first. A title is the question trimmed to one line; the time is mono and gives way to an options button on hover. The active session has an accent wash like the active nav item, and a running one shows a live dot. A braille spinner covers loading.",
+        "useWhen": [
+          "An agent keeps history and people return to earlier runs.",
+          "The list sits in a side column beside the thread or in a pane next to the rail."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Primary navigation between app sections.",
+            "instead": "sidebar"
+          },
+          {
+            "when": "A list of ordinary records with columns.",
+            "instead": "table"
+          },
+          {
+            "when": "Past conversations with a person in a chat, with state badges.",
+            "instead": "chat"
+          }
+        ],
+        "aka": [
+          "history",
+          "conversations",
+          "recent chats",
+          "thread list",
+          "sessions sidebar"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "active session",
+            "how": "data-active on .fd-session-list-item"
+          },
+          {
+            "name": "running",
+            "how": ".fd-session-list-live in place of the time"
+          },
+          {
+            "name": "loading",
+            "how": ".fd-session-list-loading with .fd-session-list-spinner"
+          },
+          {
+            "name": "empty",
+            "how": ".fd-session-list-empty"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-active",
+            "value": "",
+            "useWhen": "Marks the session on screen."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-session-list",
+            "role": "The list."
+          },
+          {
+            "class": "fd-session-list-head",
+            "role": "Heading row with the title."
+          },
+          {
+            "class": "fd-session-list-new",
+            "role": "The New session button."
+          },
+          {
+            "class": "fd-session-list-heading",
+            "role": "A day label such as Today."
+          },
+          {
+            "class": "fd-session-list-item",
+            "role": "One session row."
+          },
+          {
+            "class": "fd-session-list-link",
+            "role": "The title link."
+          },
+          {
+            "class": "fd-session-list-time",
+            "role": "The time, mono."
+          },
+          {
+            "class": "fd-session-list-live",
+            "role": "The live dot for a running session."
+          },
+          {
+            "class": "fd-session-list-more",
+            "role": "The options button."
+          },
+          {
+            "class": "fd-session-list-loading",
+            "role": "The loading line with a spinner."
+          }
+        ],
+        "related": [
+          "agent",
+          "sidebar",
+          "panel",
+          "loader"
+        ],
+        "keyboard": [],
+        "example": "docs/agent.html#sessions",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "setting",
@@ -7970,7 +11483,155 @@
         "fd:close",
         "fd:open"
       ],
-      "docs": "docs/shell.html#app"
+      "docs": "docs/shell.html#app",
+      "card": {
+        "id": "sidebar",
+        "job": "Move between the product's sections from a list on the left.",
+        "purpose": "The left column of the app shell: brand and a collapse button on top, a scrolling nav in the middle, and a foot with a usage card and the account row. One nav row is 36px; the current page gets an accent wash. Groups expand in place. Collapsed, it is a 64px rail and labels move into tooltips.",
+        "useWhen": [
+          "The app has more than three destinations people move between all day.",
+          "The foot should answer \"how much do I have left\" and offer the one upsell."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Moving between views of one page.",
+            "instead": "tabs"
+          },
+          {
+            "when": "A section's own links inside the page.",
+            "instead": "subnav"
+          },
+          {
+            "when": "A docs site's navigation.",
+            "instead": "doc"
+          },
+          {
+            "when": "A phone nav sheet.",
+            "instead": "mobile-nav"
+          }
+        ],
+        "aka": [
+          "side nav",
+          "left nav",
+          "navigation drawer",
+          "rail",
+          "nav menu",
+          "app menu",
+          "primary navigation"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "current page",
+            "how": "aria-current=\"page\" on .fd-nav-item"
+          },
+          {
+            "name": "group open",
+            "how": "aria-expanded=\"true\" with aria-controls on a nav item"
+          },
+          {
+            "name": "collapsed",
+            "how": "data-sidebar=\"collapsed\" on .fd-app"
+          },
+          {
+            "name": "remembered",
+            "how": "saved in localStorage \"fd-sidebar\"; data-persist=\"false\" opts out"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-sidebar",
+            "role": "The aside."
+          },
+          {
+            "class": "fd-sidebar-head",
+            "role": "Brand and the collapse button."
+          },
+          {
+            "class": "fd-sidebar-toggle",
+            "role": "The collapse button; takes data-fd-sidebar-toggle."
+          },
+          {
+            "class": "fd-sidebar-body",
+            "role": "The scrolling nav area."
+          },
+          {
+            "class": "fd-nav",
+            "role": "The nav element."
+          },
+          {
+            "class": "fd-nav-item",
+            "role": "One destination or a group button."
+          },
+          {
+            "class": "fd-nav-label",
+            "role": "A section label."
+          },
+          {
+            "class": "fd-nav-group",
+            "role": "A parent item with its sub list."
+          },
+          {
+            "class": "fd-nav-sub",
+            "role": "The children of a group; no icons."
+          },
+          {
+            "class": "fd-nav-hint",
+            "role": "A mono hint that appears on hover, such as /scrape."
+          },
+          {
+            "class": "fd-nav-badge",
+            "role": "A small count or New."
+          },
+          {
+            "class": "fd-sidebar-foot",
+            "role": "The usage card and account row."
+          },
+          {
+            "class": "fd-usage-card",
+            "role": "Credits left, a ring and an upgrade link."
+          },
+          {
+            "class": "fd-account",
+            "role": "The account row."
+          },
+          {
+            "class": "fd-rail-tip",
+            "role": "The shared tooltip in the collapsed rail."
+          }
+        ],
+        "related": [
+          "app",
+          "topbar",
+          "mobile-nav",
+          "tabs",
+          "brand"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between items; the rail tooltip shows on focus."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Opens a group or follows a link."
+          }
+        ],
+        "example": "docs/shell.html#app",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "fire/js/shell.js",
+          "templates/shell-static.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "skeleton",
@@ -8062,7 +11723,217 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/skeletons.html#parts"
+      "docs": "docs/skeletons.html#parts",
+      "card": {
+        "id": "skeleton",
+        "job": "Hold a place for content that is loading, with the same shape as the real thing.",
+        "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button and tile. Presets for cards, grids, tables, stats, charts, lists, threads, forms, a hero and a whole page fill themselves from an empty element. Skeletons are aria-hidden; set aria-busy on the container.",
+        "useWhen": [
+          "A region has a known layout and its data is on the way.",
+          "A route paints for the first time and the page needs rail, top bar and table in place.",
+          "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A small control or one line of text.",
+            "instead": "loader"
+          },
+          {
+            "when": "Navigation between pages.",
+            "instead": "pagebar"
+          },
+          {
+            "when": "The request failed; say what failed.",
+            "instead": "empty"
+          },
+          {
+            "when": "The page is empty on purpose.",
+            "instead": "empty"
+          }
+        ],
+        "aka": [
+          "loading placeholder",
+          "shimmer",
+          "ghost loader",
+          "content loader",
+          "loading state",
+          "placeholder blocks"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "loading",
+            "how": "aria-busy=\"true\" on the container; data-fd-loading=\"true\" for a swap"
+          },
+          {
+            "name": "ready",
+            "how": "setLoading(el, false); the skeleton fades and the content rises 8px"
+          },
+          {
+            "name": "stagger",
+            "how": "--fd-i on a part staggers its shimmer"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "bars",
+            "useWhen": "A chart skeleton drawn as bars instead of a line."
+          },
+          {
+            "attribute": "data-square",
+            "value": "",
+            "useWhen": "A button skeleton the width of an icon button."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "An accent-tinted block, for the live part of a screen."
+          },
+          {
+            "attribute": "data-size",
+            "value": "display",
+            "useWhen": "A title skeleton the height of display type."
+          },
+          {
+            "attribute": "data-size",
+            "value": "h1",
+            "useWhen": "A title skeleton at the h1 role."
+          },
+          {
+            "attribute": "data-size",
+            "value": "h2",
+            "useWhen": "A title skeleton at the h2 role."
+          },
+          {
+            "attribute": "data-size",
+            "value": "h3",
+            "useWhen": "A title skeleton at the h3 role."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lead",
+            "useWhen": "A lead paragraph line."
+          },
+          {
+            "attribute": "data-size",
+            "value": "label",
+            "useWhen": "A label line."
+          },
+          {
+            "attribute": "data-size",
+            "value": "mono",
+            "useWhen": "A mono line such as a key or id."
+          },
+          {
+            "attribute": "data-size",
+            "value": "caption",
+            "useWhen": "A caption line."
+          },
+          {
+            "attribute": "data-size",
+            "value": "eyebrow",
+            "useWhen": "An eyebrow line."
+          },
+          {
+            "attribute": "data-size",
+            "value": "stat",
+            "useWhen": "A figure in a stat tile."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-skeleton",
+            "role": "A bare block."
+          },
+          {
+            "class": "fd-skeleton-text",
+            "role": "Text lines of varied widths that end at 60%; data-lines sets how many."
+          },
+          {
+            "class": "fd-skeleton-title",
+            "role": "A title bar at a type role."
+          },
+          {
+            "class": "fd-skeleton-avatar",
+            "role": "A round block; data-size sets the diameter."
+          },
+          {
+            "class": "fd-skeleton-button",
+            "role": "A button block."
+          },
+          {
+            "class": "fd-skeleton-tile",
+            "role": "A rounded tile."
+          },
+          {
+            "class": "fd-skeleton-card",
+            "role": "A card preset; on an fd-card the card supplies the frame."
+          },
+          {
+            "class": "fd-skeleton-grid",
+            "role": "A grid of cards; data-count."
+          },
+          {
+            "class": "fd-skeleton-table",
+            "role": "A table; data-rows and data-cols."
+          },
+          {
+            "class": "fd-skeleton-stat",
+            "role": "Stat tiles; data-count."
+          },
+          {
+            "class": "fd-skeleton-chart",
+            "role": "Axes, gridlines and a faint series."
+          },
+          {
+            "class": "fd-skeleton-list",
+            "role": "Rows of avatar, two lines and an action."
+          },
+          {
+            "class": "fd-skeleton-thread",
+            "role": "A saved agent session loading."
+          },
+          {
+            "class": "fd-skeleton-form",
+            "role": "Labels, field frames and actions."
+          },
+          {
+            "class": "fd-skeleton-hero",
+            "role": "A page hero."
+          },
+          {
+            "class": "fd-skeleton-page",
+            "role": "A whole first paint: rail, top bar, hero, toolbar and table."
+          },
+          {
+            "class": "fd-shimmer",
+            "role": "The moving highlight, also used on status text."
+          }
+        ],
+        "related": [
+          "loader",
+          "pagebar",
+          "empty",
+          "table",
+          "card"
+        ],
+        "keyboard": [],
+        "example": "docs/skeletons.html#parts",
+        "provenance": [
+          "docs/skeletons.html",
+          "fire/components/skeleton.css",
+          "fire/js/texture.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "slider",
@@ -8266,7 +12137,148 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#sources"
+      "docs": "docs/agent.html#sources",
+      "card": {
+        "id": "sources",
+        "job": "Show where an answer came from, with numbered citations and a list of sources.",
+        "purpose": "Citation chips (18px mono pills) sit in the text; hovering or focusing one opens a card with the title, domain and snippet from its data attributes. A Sources list follows the answer in the same order, with a letter tile for each site. Never use a site's real logo.",
+        "useWhen": [
+          "An agent's claims come from pages and the person should be able to check each one.",
+          "A chat answer needs a compact scrolling row of sources under it."
+        ],
+        "avoidWhen": [
+          {
+            "when": "An article footnote with no hover card.",
+            "instead": "prose"
+          },
+          {
+            "when": "Links to related reading.",
+            "instead": "doc-cards"
+          },
+          {
+            "when": "Attribution for a quote or an author.",
+            "instead": "text"
+          }
+        ],
+        "aka": [
+          "citations",
+          "references",
+          "footnotes",
+          "links used",
+          "grounding",
+          "bibliography"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "card open",
+            "how": "hover or focus on .fd-citation; Escape closes"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "row",
+            "useWhen": "One scrolling row of compact items, as under a chat answer."
+          },
+          {
+            "attribute": "data-side",
+            "value": "bottom",
+            "useWhen": "The citation card opens below the chip when there is no room above."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "The default letter tile."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "A tile that groups sources by kind, such as docs."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "success",
+            "useWhen": "A tile for a verified or first-party source."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "violet",
+            "useWhen": "A tile for a distinct fourth group, such as catalog data."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-citation",
+            "role": "The numbered chip in the text; needs aria-label and data-title, data-domain and data-snippet."
+          },
+          {
+            "class": "fd-citation-card",
+            "role": "The hover card, built by agent.js."
+          },
+          {
+            "class": "fd-sources",
+            "role": "The list block."
+          },
+          {
+            "class": "fd-sources-head",
+            "role": "Heading with a count."
+          },
+          {
+            "class": "fd-sources-list",
+            "role": "The items."
+          },
+          {
+            "class": "fd-sources-item",
+            "role": "One source."
+          },
+          {
+            "class": "fd-sources-tile",
+            "role": "The letter tile."
+          },
+          {
+            "class": "fd-sources-num",
+            "role": "The number that matches the chip."
+          },
+          {
+            "class": "fd-sources-title",
+            "role": "The page title."
+          },
+          {
+            "class": "fd-sources-domain",
+            "role": "The domain."
+          }
+        ],
+        "related": [
+          "message",
+          "chat-message",
+          "hovercard",
+          "toolcall"
+        ],
+        "keyboard": [
+          {
+            "keys": "Escape",
+            "does": "Closes an open citation card."
+          },
+          {
+            "keys": "Tab",
+            "does": "Focuses a chip and shows its card."
+          }
+        ],
+        "example": "docs/agent.html#sources",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "sparkline",
@@ -8331,7 +12343,80 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#split"
+      "docs": "docs/shell.html#split",
+      "card": {
+        "id": "split",
+        "job": "Put details beside the thing they describe, in two columns.",
+        "purpose": "A main area with a 320px panel at its end, or a nav at its start. Below 760px of page width the panel stacks under, or above, the content. With data-grow, a split that is the only child of a growing band fills its height.",
+        "useWhen": [
+          "A list or run needs a details panel beside it.",
+          "Settings pages have a section nav at the start and a form beside it."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Equal columns of cards or tiles.",
+            "instead": "grid"
+          },
+          {
+            "when": "Rows that align across columns.",
+            "instead": "row"
+          },
+          {
+            "when": "Details that should cover the page while open.",
+            "instead": "sheet"
+          }
+        ],
+        "aka": [
+          "two-column layout",
+          "master-detail",
+          "sidebar layout",
+          "aside layout",
+          "detail pane",
+          "inspector layout"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-side",
+            "value": "start",
+            "useWhen": "The secondary column sits at the start, as a settings nav does."
+          },
+          {
+            "attribute": "data-grow",
+            "value": "",
+            "useWhen": "The split fills the remaining height of the page."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-split",
+            "role": "The two-column container."
+          },
+          {
+            "class": "fd-split-main",
+            "role": "The main column."
+          }
+        ],
+        "related": [
+          "panel",
+          "page",
+          "grid",
+          "subnav"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#split",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "stack",
@@ -8808,7 +12893,78 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#hero"
+      "docs": "docs/agent.html#hero",
+      "card": {
+        "id": "suggestions",
+        "job": "Offer example prompts that fill the composer when clicked.",
+        "purpose": "Text rows under the hero prompt: 15px muted text that turns to ink with a small arrow on hover. They show the range of what can be asked. Clicking one puts its text, or its data-prompt, into the composer and focuses it so it can be edited before sending.",
+        "useWhen": [
+          "The empty state of an agent needs to show what it can do.",
+          "A prompt box benefits from three to five real examples."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The next likely reply inside a chat thread; they send themselves.",
+            "instead": "chat-message"
+          },
+          {
+            "when": "Choices that filter or navigate.",
+            "instead": "chip-nav"
+          },
+          {
+            "when": "Entries in a command menu.",
+            "instead": "command"
+          }
+        ],
+        "aka": [
+          "example prompts",
+          "starter prompts",
+          "prompt chips",
+          "quick starts",
+          "try asking"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-suggestions",
+            "role": "The list; data-target names a composer if it is not in the same hero."
+          },
+          {
+            "class": "fd-suggestions-item",
+            "role": "One example as a button."
+          },
+          {
+            "class": "fd-suggestions-text",
+            "role": "The prompt text."
+          }
+        ],
+        "related": [
+          "composer",
+          "agent",
+          "chat-message"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Fills the composer with the prompt."
+          }
+        ],
+        "example": "docs/agent.html#hero",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "switch",
@@ -9985,7 +14141,192 @@
       },
       "element": "fd-texture",
       "events": [],
-      "docs": "docs/signature.html#fields"
+      "docs": "docs/signature.html#fields",
+      "card": {
+        "id": "texture",
+        "job": "Add a quiet generated field of characters, dots or marks behind a hero, banner or empty state.",
+        "purpose": "Fire's signature: letters and punctuation whose density follows a generated field, at very low contrast (under 1.6:1) and always decorative. A field fills its positioned parent behind the content. Fields are seeded by name so a page always looks the same, animate at 12 frames a second where they should, pause off-screen and stand still under reduced motion. Also holds dot grids, registration marks, grain and glyphs.",
+        "useWhen": [
+          "A page hero, a launch banner or an empty state needs depth without adding anything to read.",
+          "A single object needs the page frame's registration marks.",
+          "An empty state needs a small accent glyph above its title."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The decoration would sit behind paragraphs, tables, forms or code.",
+            "instead": "Leave the surface plain."
+          },
+          {
+            "when": "A status that shows live work.",
+            "instead": "loader"
+          },
+          {
+            "when": "The surface needs to say something, such as an announcement.",
+            "instead": "announce"
+          },
+          {
+            "when": "A chart or a data picture.",
+            "instead": "chart"
+          }
+        ],
+        "aka": [
+          "ascii art",
+          "background pattern",
+          "noise",
+          "grain",
+          "dot grid",
+          "hero background",
+          "generative art",
+          "backdrop"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "animated",
+            "how": "waves, orbit, rain and flame by default; data-animate on others"
+          },
+          {
+            "name": "still",
+            "how": "data-animate=\"false\", or prefers-reduced-motion"
+          },
+          {
+            "name": "interactive",
+            "how": "data-interactive; characters near the pointer step up"
+          },
+          {
+            "name": "in flow",
+            "how": "data-inline with a height"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-ascii",
+            "value": "terrain",
+            "useWhen": "The top of a page hero: a range rising from the right."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "waves",
+            "useWhen": "Behind an empty or waiting state, slowly moving."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "orbit",
+            "useWhen": "Behind a waiting state or a loading overview."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "rain",
+            "useWhen": "A quiet falling field for a technical surface."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "flame",
+            "useWhen": "On accent announcement banners, rising at the sides."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "grid",
+            "useWhen": "A technical or media frame; perspective with data-variant."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "halftone",
+            "useWhen": "A media frame, or dots with data-style=\"dots\"."
+          },
+          {
+            "attribute": "data-fd-ascii",
+            "value": "spark",
+            "useWhen": "The small glyph above an empty state's title."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "One small moment on a page."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "contrast",
+            "useWhen": "A field drawn on an accent or inverse surface."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "The default: right almost everywhere."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "strong",
+            "useWhen": "A little more contrast for a small glyph or a pinned mark."
+          },
+          {
+            "attribute": "data-fade",
+            "value": "left",
+            "useWhen": "Fade out toward the left, where a title sits."
+          },
+          {
+            "attribute": "data-fade",
+            "value": "radial",
+            "useWhen": "Fade out toward the edges, as on a dot grid."
+          },
+          {
+            "attribute": "data-fade",
+            "value": "bottom",
+            "useWhen": "Fade out toward the bottom of a banner."
+          },
+          {
+            "attribute": "data-inline",
+            "value": "",
+            "useWhen": "The field sits in normal flow and needs a height."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-ascii",
+            "role": "The field; set data-fd-ascii to the pattern."
+          },
+          {
+            "class": "fd-ascii-canvas",
+            "role": "The canvas the script draws into."
+          },
+          {
+            "class": "fd-glyph",
+            "role": "The small character glyph for an empty state; data-size 40 to 64."
+          },
+          {
+            "class": "fd-dotgrid",
+            "role": "A CSS dot lattice, no script."
+          },
+          {
+            "class": "fd-corners",
+            "role": "Four registration marks around a box."
+          },
+          {
+            "class": "fd-noise",
+            "role": "Four per cent film grain for large accent areas."
+          }
+        ],
+        "related": [
+          "page-hero",
+          "announce",
+          "empty",
+          "skeleton"
+        ],
+        "keyboard": [],
+        "example": "docs/signature.html#fields",
+        "provenance": [
+          "docs/signature.html",
+          "fire/components/texture.css",
+          "fire/js/texture.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "thread",
@@ -9999,7 +14340,73 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#demo"
+      "docs": "docs/agent.html#demo",
+      "card": {
+        "id": "thread",
+        "job": "Hold the turns of an agent conversation in order.",
+        "purpose": "The column of messages, tool calls, reasoning, results and sources for one session. It sets reading width and spacing, and shows actions under the last answer. With data-fd-demo it plays a scripted run once when it scrolls into view.",
+        "useWhen": [
+          "An agent screen needs the container for its messages and the work between them.",
+          "A saved session loads into the page."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A conversation with support, with views, headers and a composer built in.",
+            "instead": "chat"
+          },
+          {
+            "when": "A chronological list of events with dates.",
+            "instead": "timeline"
+          },
+          {
+            "when": "Comment replies under a document.",
+            "instead": "list"
+          }
+        ],
+        "aka": [
+          "conversation",
+          "message list",
+          "transcript",
+          "chat log",
+          "feed"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "demo",
+            "how": "data-fd-demo plays the scripted run; data-fd-replay on a button replays it"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-thread",
+            "role": "The column; its children are fd-message, fd-toolcall, fd-reasoning, fd-result and fd-sources."
+          }
+        ],
+        "related": [
+          "message",
+          "toolcall",
+          "reasoning",
+          "composer",
+          "skeleton"
+        ],
+        "keyboard": [],
+        "example": "docs/agent.html#demo",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "tile",
@@ -10267,7 +14674,84 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#app"
+      "docs": "docs/shell.html#app",
+      "card": {
+        "id": "toolbar",
+        "job": "Search, filter and act on a list, with controls wrapping instead of scrolling.",
+        "purpose": "A row for the controls above a list: search, filters and view controls at the start, export and create at the end. It wraps instead of scrolling, and the search takes a full row on phones. It lives in a small-padded band.",
+        "useWhen": [
+          "A table, list or grid needs search, filters and one create action.",
+          "View controls and export belong at the end of the row."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The title row of a page.",
+            "instead": "page-head"
+          },
+          {
+            "when": "A filter state that needs chips for what is applied.",
+            "instead": "filter"
+          },
+          {
+            "when": "Tabs that switch views of the same data.",
+            "instead": "tabs"
+          }
+        ],
+        "aka": [
+          "action bar",
+          "filter bar",
+          "list controls",
+          "table header",
+          "command bar",
+          "toolbar row"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "full",
+            "useWhen": "The search takes the full row instead of its 280px maximum."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-toolbar",
+            "role": "The wrapping row."
+          },
+          {
+            "class": "fd-toolbar-search",
+            "role": "The search field; grows to 280px."
+          },
+          {
+            "class": "fd-toolbar-sep",
+            "role": "A vertical separator."
+          },
+          {
+            "class": "fd-toolbar-end",
+            "role": "The group pushed to the end."
+          }
+        ],
+        "related": [
+          "page",
+          "table",
+          "search",
+          "filter",
+          "segmented"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#toolbar",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "toolcall",
@@ -10308,7 +14792,133 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#toolcalls"
+      "docs": "docs/agent.html#toolcalls",
+      "card": {
+        "id": "toolcall",
+        "job": "Show one step the agent took, with its arguments, time and cost.",
+        "purpose": "One quiet row for each tool the agent ran: the name, a summary of the arguments, duration and credits in mono. Open it to see the full arguments and the result. Consecutive calls are joined by a rail. States are queued, running, done, failed with a Retry, and approval with three choices.",
+        "useWhen": [
+          "The agent calls tools and the person may want to check what ran.",
+          "A call needs permission first (approval) or has failed and can be retried."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A plan to tick off, not exact calls.",
+            "instead": "run-steps"
+          },
+          {
+            "when": "The agent's thinking in prose.",
+            "instead": "reasoning"
+          },
+          {
+            "when": "A tool step inside a support chat; use the tool block of a chat message.",
+            "instead": "chat-message"
+          }
+        ],
+        "aka": [
+          "tool use",
+          "function call",
+          "action step",
+          "agent step",
+          "trace span",
+          "MCP call"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "record"
+        ],
+        "states": [
+          {
+            "name": "queued",
+            "how": "data-state=\"queued\"; dashed ring"
+          },
+          {
+            "name": "running",
+            "how": "data-state=\"running\"; spinner and shimmering name"
+          },
+          {
+            "name": "done",
+            "how": "data-state=\"done\""
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\"; danger edge, message and Retry"
+          },
+          {
+            "name": "approval",
+            "how": "data-state=\"approval\"; accent wash with Allow once, Always allow, Deny"
+          },
+          {
+            "name": "open",
+            "how": "aria-expanded=\"true\" on .fd-toolcall-head"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-toolcall",
+            "role": "One call."
+          },
+          {
+            "class": "fd-toolcall-group",
+            "role": "Joins consecutive calls with a rail."
+          },
+          {
+            "class": "fd-toolcall-head",
+            "role": "The button row that opens the panel."
+          },
+          {
+            "class": "fd-toolcall-name",
+            "role": "The tool name."
+          },
+          {
+            "class": "fd-toolcall-args",
+            "role": "A one-line summary of the arguments; hidden below 440px."
+          },
+          {
+            "class": "fd-toolcall-meta",
+            "role": "Duration and credits, mono, right-aligned."
+          },
+          {
+            "class": "fd-toolcall-status",
+            "role": "The status icon."
+          },
+          {
+            "class": "fd-toolcall-panel",
+            "role": "The folding detail."
+          },
+          {
+            "class": "fd-toolcall-body",
+            "role": "Arguments and result."
+          },
+          {
+            "class": "fd-toolcall-foot",
+            "role": "Error text and its actions."
+          }
+        ],
+        "related": [
+          "reasoning",
+          "run-steps",
+          "approval-bar",
+          "message",
+          "thread"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens or closes the call."
+          }
+        ],
+        "example": "docs/agent.html#toolcalls",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css",
+          "fire/js/agent.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "tooltip",
@@ -10365,7 +14975,95 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#app"
+      "docs": "docs/shell.html#app",
+      "card": {
+        "id": "topbar",
+        "job": "Switch teams, reach help and docs, and take the one primary action.",
+        "purpose": "The sticky bar above the page: the team switcher on the left, quiet tools and one primary action on the right. It is translucent and blurred so content scrolls under it. On phones it keeps the brand tile, team, notifications and the menu button. A theme toggle cycles light, dark and system.",
+        "useWhen": [
+          "Every screen in the shell needs the team, help and one upgrade or create action in the same place.",
+          "The search palette needs a trigger."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Controls for the list on this page.",
+            "instead": "toolbar"
+          },
+          {
+            "when": "The docs site's two-row bar.",
+            "instead": "doc"
+          },
+          {
+            "when": "Primary navigation.",
+            "instead": "sidebar"
+          }
+        ],
+        "aka": [
+          "app bar",
+          "header",
+          "navbar",
+          "top navigation",
+          "masthead",
+          "global header"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-fd-search-trigger",
+            "value": "",
+            "useWhen": "Marks the control that opens the command palette."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-topbar",
+            "role": "The header."
+          },
+          {
+            "class": "fd-topbar-brand",
+            "role": "The brand tile on phones."
+          },
+          {
+            "class": "fd-topbar-title",
+            "role": "A page title when the bar carries one."
+          },
+          {
+            "class": "fd-topbar-dot",
+            "role": "A small dot for unread notifications."
+          },
+          {
+            "class": "fd-topbar-actions",
+            "role": "The tools at the end."
+          }
+        ],
+        "related": [
+          "app",
+          "sidebar",
+          "toolbar",
+          "command",
+          "notification"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves through the bar in markup order."
+          }
+        ],
+        "example": "docs/shell.html#topbar",
+        "provenance": [
+          "docs/shell.html",
+          "fire/components/shell.css",
+          "fire/js/shell.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "tweaks",
@@ -10458,7 +15156,148 @@
       },
       "element": null,
       "events": [],
-      "docs": null
+      "docs": null,
+      "card": {
+        "id": "tweaks",
+        "job": "Change the whole look of the product live: palette, type, tone, density, corners and motion.",
+        "purpose": "A floating, non-modal panel with controls for fifteen palettes, twelve type sets, tone (hue, vivid, light, warmth), theme, density, corners, lines, text size, contrast, motion and texture. Choices are saved in localStorage and applied before first paint when fire/boot.js loads. Copy CSS and Copy theme export the look. On phones it is a bottom sheet.",
+        "useWhen": [
+          "A team is choosing a product's character before committing to it.",
+          "Users may tune density, contrast and motion for themselves."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A single light and dark switch.",
+            "instead": "segmented"
+          },
+          {
+            "when": "Settings that belong to the account and save to the server.",
+            "instead": "setting"
+          },
+          {
+            "when": "A modal choice that blocks the page.",
+            "instead": "dialog"
+          }
+        ],
+        "aka": [
+          "theme switcher",
+          "theme customizer",
+          "appearance settings",
+          "style panel",
+          "design controls",
+          "palette picker",
+          "live editor"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "open",
+            "how": "data-state=\"open\" on .fd-tweaks"
+          },
+          {
+            "name": "closed",
+            "how": "data-state=\"closed\""
+          },
+          {
+            "name": "changed",
+            "how": "data-changed on a row whose value differs from the default"
+          },
+          {
+            "name": "dragging",
+            "how": "data-dragging while the header is dragged on desktop"
+          },
+          {
+            "name": "moved",
+            "how": "data-moved after it was dragged; double-click the header to dock again"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-inline",
+            "value": "",
+            "useWhen": "A row with the label beside the control instead of above it."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-tweaks",
+            "role": "The panel; a role=\"dialog\" that is not modal."
+          },
+          {
+            "class": "fd-tweaks-head",
+            "role": "The drag handle with the title, Reset and Close."
+          },
+          {
+            "class": "fd-tweaks-body",
+            "role": "The sections of controls."
+          },
+          {
+            "class": "fd-tweaks-row",
+            "role": "One control with its label."
+          },
+          {
+            "class": "fd-tweaks-palettes",
+            "role": "The 5 by 3 grid of palette swatches."
+          },
+          {
+            "class": "fd-tweaks-faces",
+            "role": "The 4 by 3 grid of type sets."
+          },
+          {
+            "class": "fd-tweaks-range",
+            "role": "A slider for tone, corners or texture."
+          },
+          {
+            "class": "fd-tweaks-value",
+            "role": "The readout; click to reset that control."
+          },
+          {
+            "class": "fd-tweaks-foot",
+            "role": "Copy CSS and Copy theme, and a summary."
+          },
+          {
+            "class": "fd-tweaks-launcher",
+            "role": "The round button added when html has data-fd-tweaks and no trigger."
+          }
+        ],
+        "related": [
+          "segmented",
+          "slider",
+          "switch",
+          "dialog"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between controls."
+          },
+          {
+            "keys": "Arrow keys",
+            "does": "Move inside the palette and type grids and select."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Jump to the first or last swatch or type set."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the panel and returns focus to its trigger."
+          }
+        ],
+        "example": "docs/tweaks.html#panel",
+        "provenance": [
+          "docs/tweaks.html",
+          "fire/components/tweaks.css",
+          "fire/js/tweaks.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "type",
@@ -10680,7 +15519,93 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/agent.html#parts"
+      "docs": "docs/agent.html#parts",
+      "card": {
+        "id": "use-agent",
+        "job": "Offer to add the product to the person's own agent or coding tool.",
+        "purpose": "A pill button with a small stack of overlapping tiles for the tools it works with (Claude, Cursor and so on). The tiles spread on hover. It sits in an agent top row or a page head as the way out to MCP or skill setup.",
+        "useWhen": [
+          "The product can run inside the person's own agent and you want a visible entry to setup.",
+          "An agent page needs a secondary action next to history or settings."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action is a plain command in the page.",
+            "instead": "button"
+          },
+          {
+            "when": "Setup is a set of steps with a command to copy.",
+            "instead": "doc-setup"
+          },
+          {
+            "when": "Several actions need a menu.",
+            "instead": "menu"
+          }
+        ],
+        "aka": [
+          "connect to agent",
+          "add to Claude",
+          "MCP install",
+          "integrations button",
+          "use in your agent"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "A tile coloured with the info tone."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "A tile in the neutral fill."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "violet",
+            "useWhen": "A tile in the violet fill, to tell stacked tools apart."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-use-agent",
+            "role": "The button."
+          },
+          {
+            "class": "fd-use-agent-stack",
+            "role": "The overlapping tiles."
+          },
+          {
+            "class": "fd-use-agent-tile",
+            "role": "One tool tile with an icon."
+          }
+        ],
+        "related": [
+          "button",
+          "doc-setup",
+          "agent"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Activates the button."
+          }
+        ],
+        "example": "docs/agent.html#parts",
+        "provenance": [
+          "docs/agent.html",
+          "fire/components/agent.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "utilities",

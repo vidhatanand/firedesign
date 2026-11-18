@@ -279,13 +279,15 @@ test('7. the layout primitives list the layout attributes GUIDE.md documents for
   assert.equal(grid['data-span'], undefined, 'data-span goes on a grid\'s child');
 });
 
-test('values on a part stay with the part: loader, app, sidebar, tweaks, texture', () => {
+test('values on a part stay with the part: loader, app, page (the frame), sidebar, tweaks, texture', () => {
   assert.equal(catalog.classes['fd-bars-loader'], 'loader');
   assert.deepEqual(comp('loader').attributes['data-size'], ['12', '16', '20', '24', '32']);
   const app = comp('app');
   for (const a of ['data-corner', 'data-tone', 'data-marks', 'data-fill']) assert.equal(app.attributes[a], undefined, `app: ${a}`);
-  assert.deepEqual(part('app', 'fd-crosshair')['data-corner'], ['', 'bl', 'br', 'tl', 'tr']);
-  assert.deepEqual(part('app', 'fd-frame')['data-marks'], ['', 'corners', 'crosses', 'dots', 'none']);
+  // The frame draws public pages as well as app screens, so it belongs to the page, not the app shell.
+  assert.equal(catalog.classes['fd-frame'], 'page');
+  assert.deepEqual(part('page', 'fd-crosshair')['data-corner'], ['', 'bl', 'br', 'tl', 'tr']);
+  assert.deepEqual(part('page', 'fd-frame')['data-marks'], ['', 'corners', 'crosses', 'dots', 'none']);
   assert.equal(comp('sidebar').attributes['data-side'], undefined);
   assert.deepEqual(part('sidebar', 'fd-rail-tip')['data-side'], ['left']);
   for (const a of ['data-palette', 'data-type']) assert.deepEqual(everywhere('tweaks', a), [], `tweaks: ${a} is the page's, not the panel's`);

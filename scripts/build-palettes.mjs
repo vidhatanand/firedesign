@@ -25,7 +25,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const engine = await import(pathToFileURL(path.join(ROOT, 'fire/js/palettes.js')).href);
-const { PALETTES, PALETTE_TOKENS, CONTRAST_TOKENS, TONE_DEFAULT, toneTokens, cssValue, contrast, toOklch, parse, format, washOver } = engine;
+const { PALETTES, PALETTE_TOKENS, CONTRAST_TOKENS, TONE_DEFAULT, toneTokens, cssValue, contrast, toOklch, parse, washOver } = engine;
+// The rules themselves live in fire/js/palette-rules.js, so fire/js/theme.js holds every palette it builds to them.
+const rules = await import(pathToFileURL(path.join(ROOT, 'fire/js/palette-rules.js')).href);
+const { TEXT_MIN, FAINT_MIN, TEXT_STEPS, TEXT_LADDER } = rules;
 
 /* ---------- Write ---------- */
 function build() {
@@ -62,13 +65,6 @@ const errors = [];
 const fail = (msg) => errors.push(msg);
 const r2 = (n) => n.toFixed(2).padStart(5);
 const L = (c) => toOklch(parse(c).rgb)[0];
-
-
-const TEXT_MIN = 4.5;    // text that carries information
-const FAINT_MIN = 3;     // --fd-text-4: placeholders, disabled text, decoration
-const BASES = ['--fd-bg', '--fd-bg-sunken', '--fd-surface', '--fd-surface-raised'];
-const BASE_SHORT = { '--fd-bg': 'bg', '--fd-bg-sunken': 'sunken', '--fd-surface': 'surface', '--fd-surface-raised': 'raised' };
-const TEXT_STEPS = ['--fd-text', '--fd-text-2', '--fd-text-3', '--fd-text-4'];
 
 /* ---------- tokens.css, read as the browser reads it ---------- */
 const CSS = fs.readFileSync(path.join(ROOT, 'fire/tokens.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -117,100 +113,24 @@ function mixValue(value, m, table) {
   }
   throw new Error(`tokens.css: cannot resolve "${value}"`);
 }
-/** `fg` at `alpha` over the opaque `bg`, composited in sRGB as the browser does. */
-function over(fg, alpha, bg) {
-  const f = parse(fg).rgb;
-  const b = parse(bg).rgb;
-  return format(f.map((c, i) => c * alpha + b[i] * (1 - alpha)));
-}
-/** Each text step's worst contrast over every background a palette offers, in one mode and contrast level. */
-function measureText(tokens, m, level) {
-  const table = level === 'high' ? { ...LADDER, ...HIGH } : LADDER;
-  const v = (k) => tokens[k][m];
-  const fill = mixOf('--fd-fill', m, LADDER);
-  const grounds = [];
-  for (const b of BASES) {
-    grounds.push([BASE_SHORT[b], v(b)]);
-    grounds.push([`fill/${BASE_SHORT[b]}`, over(v(fill.base), fill.alpha, v(b))]);
-  }
-  // The accent wash sits on the page (the active nav item) and on surfaces (a selected row).
-  for (const b of ['--fd-bg', '--fd-surface']) grounds.push([`wash/${BASE_SHORT[b]}`, washOver(v('--fd-accent'), v(b))]);
-  const out = {};
-  for (const step of TEXT_STEPS) {
-    const { base, alpha } = mixOf(step, m, table);
-    let worst = Infinity;
-    let where = '';
-    for (const [label, bg] of grounds) {
-      const c = contrast(over(v(base), alpha, bg), bg);
-      if (c < worst) { worst = c; where = label; }
-    }
-    out[step] = { worst, where, alpha };
-  }
-  return out;
-}
-/** The text rules for one palette map; returns [light, dark] × { default, high } measurements. */
-function checkText(tokens, name, context = '') {
-  const result = [];
-  for (const m of [0, 1]) {
-    const mode = m === 0 ? 'light' : 'dark';
-    const row = {};
-    for (const level of ['default', 'high']) {
-      const t = measureText(tokens, m, level);
-      row[level] = t;
-      const where = `${name} ${mode}${level === 'high' ? ' high contrast' : ''}${context ? ` (${context})` : ''}`;
-      for (const step of TEXT_STEPS) {
-        const min = step === '--fd-text-4' ? FAINT_MIN : TEXT_MIN;
-        if (t[step].worst < min) fail(`${where}: ${step} ${t[step].worst.toFixed(2)} on ${t[step].where} < ${min}`);
-      }
-    }
-    if (!context) {
-      for (const step of TEXT_STEPS.slice(1)) {
-        if (row.high[step].alpha <= row.default[step].alpha) fail(`${name} ${mode}: high-contrast ${step} (${row.high[step].alpha}) is not stronger than the default (${row.default[step].alpha})`);
-      }
-    }
-    result.push(row);
-  }
-  return result;
-}
-
-/** The rules every palette (and every toned palette) must meet in both modes. Returns the measured ratios. */
-function measure(tokens, name, context) {
-  const rows = [];
-  for (const m of [0, 1]) {
-    const mode = m === 0 ? 'light' : 'dark';
-    const v = (k) => tokens[k][m];
-    const textBg = contrast(v('--fd-accent-text'), v('--fd-bg'));
-    const textSurface = contrast(v('--fd-accent-text'), v('--fd-surface'));
-    const textWash = Math.min(...['--fd-bg', '--fd-surface'].map((k) => contrast(v('--fd-accent-text'), washOver(v('--fd-accent'), v(k)))));
-    const label = contrast(v('--fd-accent-contrast'), v('--fd-accent'));
-    const labelHover = contrast(v('--fd-accent-contrast'), v('--fd-accent-hover'));
-    const ink = contrast(v('--fd-ink'), v('--fd-bg'));
-    const hoverDL = L(v('--fd-accent-hover')) - L(v('--fd-accent'));
-    const where = `${name} ${mode}${context ? ` (${context})` : ''}`;
-    if (textBg < TEXT_MIN) fail(`${where}: accent-text on bg ${textBg.toFixed(2)} < ${TEXT_MIN}`);
-    if (textSurface < TEXT_MIN) fail(`${where}: accent-text on surface ${textSurface.toFixed(2)} < ${TEXT_MIN}`);
-    if (textWash < TEXT_MIN) fail(`${where}: accent-text on the accent wash ${textWash.toFixed(2)} < ${TEXT_MIN}`);
-    if (label < TEXT_MIN) fail(`${where}: label on accent ${label.toFixed(2)} < ${TEXT_MIN}`);
-    if (labelHover < TEXT_MIN) fail(`${where}: label on accent-hover ${labelHover.toFixed(2)} < ${TEXT_MIN}`);
-    if (ink < 12) fail(`${where}: ink on bg ${ink.toFixed(2)} < 12`);
-    if (!context) {
-      // Structure: surfaces lighter than the page, lines stepping darker (light) / lighter (dark), hover direction.
-      const bgL = L(v('--fd-bg'));
-      if (L(v('--fd-surface')) <= bgL) fail(`${where}: surface is not lighter than the page`);
-      const lines = ['--fd-line-faint', '--fd-line', '--fd-line-strong'].map((k) => L(v(k)));
-      const ordered = m === 0 ? lines[0] > lines[1] && lines[1] > lines[2] : lines[0] < lines[1] && lines[1] < lines[2];
-      if (!ordered) fail(`${where}: line steps out of order (${lines.map((x) => x.toFixed(3)).join(', ')})`);
-      // The hover moves away from the label: darker under a light label, lighter under a dark one.
-      const want = L(v('--fd-accent-contrast')) > 0.6 ? hoverDL < 0 : hoverDL > 0;
-      if (!want) fail(`${where}: accent-hover moves toward its label (${hoverDL.toFixed(3)})`);
-      if (Math.abs(hoverDL) > 0.05 || Math.abs(hoverDL) < 0.02) fail(`${where}: accent-hover moves ${hoverDL.toFixed(3)} L (want about .03–.04)`);
-    }
-    rows.push({ mode, textBg, textSurface, textWash, label, labelHover, ink, hoverDL });
-  }
-  return rows;
-}
+/* The text ladder as tokens.css declares it, resolved per mode: the rules measure this, and palette-rules.js keeps
+   a copy for the browser (theme.js), which must not drift from it. */
+const ladderOf = (table) => Object.fromEntries(TEXT_STEPS.map((s) => {
+  const [l, d] = [0, 1].map((m) => mixOf(s, m, table));
+  return [s, { base: l.base, alpha: [l.alpha, d.alpha] }];
+}));
+const LADDER_RESOLVED = (() => {
+  const [l, d] = [0, 1].map((m) => mixOf('--fd-fill', m, LADDER));
+  return { fill: { base: l.base, alpha: [l.alpha, d.alpha] }, default: ladderOf(LADDER), high: ladderOf({ ...LADDER, ...HIGH }) };
+})();
+const plain = (o) => JSON.parse(JSON.stringify(o));
+const checkText = (tokens, name, context = '') => rules.checkText(tokens, name, context, fail, { ladder: LADDER_RESOLVED });
+const measure = (tokens, name, context) => rules.measure(tokens, name, context, fail);
 
 function check() {
+  // 0. palette-rules.js mixes the text steps exactly as tokens.css does.
+  if (JSON.stringify(plain(TEXT_LADDER)) !== JSON.stringify(plain(LADDER_RESOLVED))) fail(`fire/js/palette-rules.js TEXT_LADDER differs from tokens.css: ${JSON.stringify(LADDER_RESOLVED)}`);
+
   // 1. Ember equals the literals in tokens.css.
   const rootTokens = { ...decls(block(':root')), ...decls(block(':root, [data-accent="ember"]')) };
   const ember = PALETTES.find((p) => p.name === 'ember');

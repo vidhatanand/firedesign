@@ -615,14 +615,193 @@
       <li>Everything else derives by itself on <code class="fd-code">[data-palette]</code>: the ink ladder, text steps, fills, accent washes, the focus ring and the primary button's shadow.</li>
     </ul>
   </section>
+
+  <section class="doc-section" id="records">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Theme records</h2>
+      <p>A theme record is a product's whole look as one JSON object: the palette, its tone, the type set and the dials. The Tweaks panel, agents and Facet all read and write it, and <code class="fd-code">fire/js/theme.js</code> turns it into tokens. Every field is optional: a missing field is Fire's default, and an unknown field is an error. The schema is <code class="fd-code">contract/theme.schema.json</code>.</p>
+    </div>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code data-lang="json">{
+  "contract": "fire/1",
+  "palette": "paper",
+  "tone": { "hue": 0, "vivid": 100, "light": 0, "warmth": 20 },
+  "type": "editorial",
+  "dials": {
+    "corners": 0.75,
+    "density": "comfortable",
+    "lines": 1,
+    "textSize": "md",
+    "contrast": "default",
+    "motion": "default",
+    "texture": 1
+  }
+}</code></pre>
+    </figure>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Field</th><th>Default</th><th>What it sets</th></tr></thead>
+        <tbody>
+          <tr><td>contract</td><td>"fire/1"</td><td>The record format.</td></tr>
+          <tr><td>palette</td><td>"ember"</td><td>A palette name (<code class="fd-code">data-palette</code>), or a spec Fire builds a palette from: an accent, brand colours, or the full spec form of <code class="fd-code">fire/js/palettes.js</code>.</td></tr>
+          <tr><td>tone</td><td>0 · 100 · 0 · 0</td><td><code class="fd-code">hue</code>, <code class="fd-code">vivid</code>, <code class="fd-code">light</code> and <code class="fd-code">warmth</code>, whole numbers in the ranges of <a class="fd-link" href="#tone">Tone</a>. A toned palette is written out as its nineteen colour tokens.</td></tr>
+          <tr><td>type</td><td>"geist"</td><td>A type set name (<code class="fd-code">data-type</code>), or <code class="fd-code">{ "display", "sans", "mono" }</code> families your page loads, written to the three font tokens.</td></tr>
+          <tr><td>dials</td><td></td><td><code class="fd-code">corners</code> 0–2 (<code class="fd-code">--fd-radius-scale</code>), <code class="fd-code">density</code> (<code class="fd-code">data-density</code>), <code class="fd-code">lines</code> 1 · 1.5 · 2 (<code class="fd-code">--fd-hairline</code>), <code class="fd-code">textSize</code> (<code class="fd-code">data-text-size</code>), <code class="fd-code">contrast</code> (<code class="fd-code">data-contrast</code>), <code class="fd-code">motion</code> off · default · slow (<code class="fd-code">--fd-motion</code>), <code class="fd-code">texture</code> 0–1.5 (<code class="fd-code">--fd-texture</code>).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="doc-sub">A palette from an accent</h3>
+    <p class="fd-muted">Give one colour and how the neutrals should lean: <code class="fd-code">pure</code> grey, <code class="fd-code">cool</code>, <code class="fd-code">warm</code>, <code class="fd-code">tinted</code> toward the accent (the default) or a hue in degrees. Fire builds the palette on Ember's lightness structure with the same engine as the fifteen presets, so it passes the same checks: text at 4.5:1 on every background, the label at 4.5:1 on the accent and its hover, accent text at 4.5:1 on the page and surfaces. Add <code class="fd-code">"on": "white"</code> or <code class="fd-code">"dark"</code> to ask for a label. When a colour cannot pass, it moves the least it must, and the record's notes say how far and why.</p>
+    <div class="doc-pair">
+      <div class="doc-cell">
+        <div class="doc-specimen" data-layout="stack">
+          <div class="fd-field">
+            <label class="fd-field-label" for="tw-from-accent">Accent</label>
+            <input class="fd-input" id="tw-from-accent" value="#1f6feb" autocomplete="off" spellcheck="false" data-tw-accent>
+          </div>
+          <div class="fd-segmented" data-size="sm" data-block role="radiogroup" aria-label="Neutrals" data-tw-neutral>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="pure">Pure</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="cool">Cool</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="warm">Warm</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="tinted">Tinted</button>
+          </div>
+          <div class="fd-segmented" data-size="sm" data-block role="radiogroup" aria-label="Label on the accent" data-tw-label>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="">Best label</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="white">White</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="dark">Dark</button>
+          </div>
+        </div>
+        <figure class="fd-codeblock">
+          <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+          <pre class="fd-codeblock-body"><code data-lang="json" data-tw-record="accent">{
+  "contract": "fire/1",
+  "palette": {
+    "from": "accent",
+    "accent": "#1f6feb",
+    "neutral": "cool"
+  }
+}</code></pre>
+        </figure>
+        <p class="fd-small fd-muted" role="status" data-tw-notes="accent">Nothing moved: every rule passes as asked.</p>
+      </div>
+      <div class="tw-card" data-palette="ember" id="tw-accent-card">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">From an accent</p><code class="fd-mono-sm fd-muted">paletteFrom()</code></div>
+        <p class="fd-small fd-muted">Built live by fire/js/theme.js and applied with themeToCss().</p>
+        <a class="fd-nav-item" href="#records" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (from an accent)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#records">View usage</a></p>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">A palette from brand colours</h3>
+    <p class="fd-muted">Give one to three brand colours and Fire chooses. The accent is the colour that works best as a fill: the most saturated, discounted for being very dark or very light. The neutrals lean toward the darkest of the other colours, since a brand's dark colour is usually its ink; they stay pure grey when the others are black, white or grey, and lean toward the accent when it is the only colour. The notes say what was chosen.</p>
+    <div class="doc-pair">
+      <div class="doc-cell">
+        <div class="doc-specimen" data-layout="center">
+          <button class="fd-btn" data-size="sm" type="button" data-tw-brand='["#14342b", "#f2c14e"]'>Forest and gold</button>
+          <button class="fd-btn" data-size="sm" type="button" data-tw-brand='["#ff5a00", "#111111", "#f4f4f4"]'>Orange, black, white</button>
+          <button class="fd-btn" data-size="sm" type="button" data-tw-brand='["#5b2a86", "#e8d5b5"]'>Aubergine and cream</button>
+          <button class="fd-btn" data-size="sm" type="button" data-tw-brand='["#0b7a75"]'>One teal</button>
+        </div>
+        <figure class="fd-codeblock">
+          <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+          <pre class="fd-codeblock-body"><code data-lang="json" data-tw-record="brand">{
+  "contract": "fire/1",
+  "palette": {
+    "from": "brand",
+    "colors": ["#14342b", "#f2c14e"]
+  }
+}</code></pre>
+        </figure>
+        <p class="fd-small fd-muted" role="status" data-tw-notes="brand">Brand: accent #f2c14e (the brand colour that works best as a fill); neutrals toward #14342b (hue 173°).</p>
+      </div>
+      <div class="tw-card" data-palette="ember" id="tw-brand-card">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">From brand colours</p><code class="fd-mono-sm fd-muted">paletteFrom()</code></div>
+        <p class="fd-small fd-muted">The accent and the neutrals' temperature, chosen from the brand.</p>
+        <a class="fd-nav-item" href="#records" aria-current="page"><i data-icon="activity"></i><span class="fd-nav-text">Monitors</span></a>
+        <input class="fd-input" data-size="sm" value="https://docs.ember.dev" aria-label="Start URL (from brand colours)">
+        <div class="fd-row" data-wrap>
+          <button class="fd-btn" data-variant="primary" data-size="sm" type="button">Start crawl</button>
+          <button class="fd-btn" data-size="sm" type="button"><i data-icon="code"></i><span>Get code</span></button>
+          <span class="fd-badge" data-tone="accent">Live</span>
+        </div>
+        <p class="fd-small fd-muted">1,520 of 3,000 credits used · <a class="fd-link" href="#records">View usage</a></p>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">From a record to a stylesheet</h3>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code data-lang="javascript">import { readFile, writeFile } from "node:fs/promises";
+import { validateTheme, themeToCss, expandTheme } from "fire-design/theme";
+
+const record = JSON.parse(await readFile("theme.json", "utf8"));
+const { ok, errors, notes } = validateTheme(record);   // errors name the field: "/dials/corners: …"
+if (!ok) throw new Error(errors.join("\n"));
+
+// A file a strict Content Security Policy allows: the tokens on :root, and in its comment
+// the attributes to put on &lt;html&gt; (data-palette, data-type, data-density, …). Load it after fire.css.
+await writeFile("public/theme.css", themeToCss(record));
+
+// Or the parts: { tokens: { "--fd-bg": ["#f7f4ee", "#0b0a08"], … }, attributes: { … }, notes: [ … ] }
+const { tokens, attributes } = expandTheme(record);</code></pre>
+    </figure>
+    <ul class="doc-notes">
+      <li>Copy theme, beside Copy CSS in the Tweaks panel's footer, copies the panel's look as a record. In code, <code class="fd-code">toTheme()</code> from <code class="fd-code">fire/js/tweaks.js</code> returns the same, and <code class="fd-code">set(fromThemeRecord(record))</code> applies a record that uses a named palette and type set.</li>
+      <li>A record has no light or dark: the theme is the viewer's choice, so Copy theme leaves it out and Copy CSS's <code class="fd-code">data-theme</code> has no counterpart. Otherwise <code class="fd-code">themeToCss</code> writes exactly the variables Copy CSS writes.</li>
+      <li>Named families are written to <code class="fd-code">--fd-font-display</code>, <code class="fd-code">--fd-font-sans</code> and <code class="fd-code">--fd-font-mono</code> with Fire's fallbacks behind them; the notes remind you to load them, since Fire ships only its type sets' fonts.</li>
+      <li><code class="fd-code">contract/looks/</code> holds a record for each of the fifteen palettes, and <code class="fd-code">contract/fire-contract.json</code> lists every token a record sets (tier <code class="fd-code">input</code>) beside the scales and derived tokens.</li>
+    </ul>
+  </section>
 </main>
 <script type="module">
   // Tone demo buttons on this page.
   import { set } from '../fire/js/tweaks.js';
+  import { paletteFrom, themeToCss } from '../fire/js/theme.js';
+  import { highlight } from '../fire/js/code.js';
   document.addEventListener('click', (event) => {
     const button = event.target instanceof Element ? event.target.closest('[data-tw-tone]') : null;
     if (button) set({ tone: JSON.parse(button.dataset.twTone) });
   });
+
+  // Theme records: build a palette live and paint a card with themeToCss() through a constructed stylesheet
+  // (no style attribute, so a strict CSP allows it).
+  const sheets = {};
+  function paint(kind, spec) {
+    const card = document.getElementById(`tw-${kind}-card`);
+    const code = document.querySelector(`[data-tw-record="${kind}"]`);
+    const notes = document.querySelector(`[data-tw-notes="${kind}"]`);
+    let palette;
+    try { palette = paletteFrom(spec); } catch (error) { notes.textContent = error.message.replace(/^\[theme\] /, ''); return; }
+    sheets[kind] ??= new CSSStyleSheet();
+    sheets[kind].replaceSync(themeToCss({ palette: spec }, { selector: `#${card.id}` }));
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets.filter((s) => s !== sheets[kind]), sheets[kind]];
+    // One field a line; a colour list stays on one line.
+    const text = JSON.stringify({ contract: 'fire/1', palette: spec }, null, 2).replace(/\[\s+([^\]]*?)\s+\]/g, (m, list) => `[${list.split(/,\s+/).join(', ')}]`);
+    code.innerHTML = highlight(text, 'json');
+    notes.textContent = palette.notes.length ? palette.notes.join(' ') : 'Nothing moved: every rule passes as asked.';
+  }
+  const accentSpec = () => {
+    const hex = document.querySelector('[data-tw-accent]').value.trim();
+    const neutral = document.querySelector('[data-tw-neutral] [aria-checked="true"]')?.dataset.value || 'tinted';
+    const on = document.querySelector('[data-tw-label] [aria-checked="true"]')?.dataset.value;
+    return { from: 'accent', accent: hex.startsWith('#') ? hex : `#${hex}`, neutral, ...(on ? { on } : {}) };
+  };
+  document.querySelector('[data-tw-accent]').addEventListener('input', () => paint('accent', accentSpec()));
+  for (const group of document.querySelectorAll('[data-tw-neutral], [data-tw-label]')) group.addEventListener('fd:change', () => paint('accent', accentSpec()));
+  document.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-tw-brand]') : null;
+    if (button) paint('brand', { from: 'brand', colors: JSON.parse(button.dataset.twBrand) });
+  });
+  paint('accent', accentSpec());
+  paint('brand', { from: 'brand', colors: ['#14342b', '#f2c14e'] });
 </script>
 </body>
 </html>

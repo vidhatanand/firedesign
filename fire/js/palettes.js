@@ -24,6 +24,10 @@
  *   contrast(a, b)           WCAG 2 contrast ratio of two colours
  *   washOver(accent, bg)     the 8% accent wash composited over an opaque background
  *   toOklch(color)           [L, C, h] · oklch(L, C, h) → '#rrggbb' gamut-mapped by reducing chroma
+ *   expandSpec(spec)         a compact spec (the SPECS form below) → a palette object, on ember's lightness structure
+ *   shift(hex, dL)           the colour with its OKLCH L moved by dL (chroma and hue kept, gamut-mapped)
+ *   nearBlack(accent)        the near-black label tinted toward an accent's hue that reaches 4.5:1 on it
+ *   (fire/js/theme.js builds palettes from an accent or brand colours with these; palette-rules.js checks them)
  */
 
 /* ==========================================================================
@@ -225,7 +229,7 @@ const hoverOf = (accent, label) => shift(accent, isLightLabel(label) ? -0.035 : 
 
 /** A near-black label tinted toward the accent's hue (olive-black on lime, brown-black on amber) at L 0.2, or
  *  darker on a mid-light accent where 0.2 does not reach the label rule (rose, periwinkle). */
-const nearBlack = (accent) => {
+export const nearBlack = (accent) => {
   const [, C, h] = toOklch(accent);
   const c = Math.min(0.024, C * 0.14);
   for (let l = 0.2; l > 0; l -= 0.005) {
@@ -249,7 +253,7 @@ function glowOf(accent, mode) {
   if (C < 0.02) return format([0, 0, 0], mode === 0 ? 0.3 : 0.1);
   return format(fit([Math.max(0.32, L - 0.16), C * 1.2, h]), mode === 0 ? 0.3 : 0.38);
 }
-const shift = (hex, dL) => {
+export const shift = (hex, dL) => {
   const [L, C, h] = toOklch(hex);
   return oklch(Math.min(0.999, Math.max(0.02, L + dL)), C, h);
 };
@@ -372,6 +376,8 @@ function expand(spec) {
   for (const key of PALETTE_TOKENS) tokens[key] = t[key];
   return { name: spec.name, label: spec.label, note: spec.note, tokens, contrast: hc };
 }
+
+export { expand as expandSpec };
 
 export const DEFAULT_PALETTE = 'ember';
 export const PALETTES = [

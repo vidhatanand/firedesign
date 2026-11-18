@@ -17,7 +17,7 @@ type Base = HTMLAttributes & VNodeProps & AllowedComponentProps & ComponentCusto
 type FireElementComponent<Props, Events = unknown> = new () => { $props: Base & Props & FireEventHandlers & Events };
 
 /** `<fd-chart>`: A chart drawn from data, safe to render from a framework. */
-export type FdChartProps = Partial<Pick<FdChart, 'type' | 'variant' | 'data' | 'height' | 'width' | 'legend' | 'grid' | 'state' | 'label' | 'yFormat' | 'values' | 'area' | 'dot' | 'invert' | 'fluid' | 'tone' | 'size' | 'thickness' | 'value' | 'max' | 'format'>>;
+export type FdChartProps = Partial<Pick<FdChart, 'type' | 'variant' | 'data' | 'height' | 'width' | 'legend' | 'grid' | 'hideLabels' | 'state' | 'label' | 'yFormat' | 'values' | 'area' | 'dot' | 'invert' | 'fluid' | 'tone' | 'size' | 'thickness' | 'value' | 'max' | 'format'>>;
 export type FdChartEvents = { 'onFd:hover'?: (event: FireEventMap['fd:hover']) => void; 'onFd:select'?: (event: FireEventMap['fd:select']) => void; 'onFd:change'?: (event: FireEventMap['fd:change']) => void };
 
 /** `<fd-code>`: A highlighted code block, safe to render from a framework. */

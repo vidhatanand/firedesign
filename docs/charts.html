@@ -542,6 +542,103 @@
     </ul>
   </section>
 
+  <section class="doc-section" id="quadrant">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Quadrant</h2>
+      <p>Use a quadrant to sort a handful of things on two measures at once: where each endpoint sits between cheap and costly, and between flaky and reliable. The midpoints on each axis cut the field into four corners, and a corner can carry a name and a tone. Hover or focus a point for both values; the arrow keys move to the nearest point.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-chart" data-fd-chart="quadrant" data-height="380" id="chart-quadrant">
+        <script type="application/json">
+      {
+        "x": { "label": "Credits per call", "min": 0, "max": 12, "mid": 4, "format": "number" },
+        "y": { "label": "Success rate", "min": 90, "max": 100, "mid": 97, "format": "percent" },
+        "corners": {
+          "topLeft": { "label": "Cheap and reliable", "tone": "success" },
+          "topRight": "Costly but reliable",
+          "bottomLeft": "Cheap and flaky",
+          "bottomRight": { "label": "Costly and flaky", "tone": "danger" }
+        },
+        "size": { "label": "Calls this month", "format": "compact" },
+        "points": [
+          { "name": "/search", "x": 1, "y": 99.6, "size": 412000, "href": "#quadrant" },
+          { "name": "/scrape", "x": 2, "y": 99.1, "size": 286000, "tone": "accent", "href": "#quadrant" },
+          { "name": "/map", "x": 1.5, "y": 98.2, "size": 64000, "href": "#quadrant" },
+          { "name": "/crawl", "x": 7.5, "y": 98.4, "size": 91000, "href": "#quadrant" },
+          { "name": "/batch", "x": 9.5, "y": 96.2, "size": 38000, "href": "#quadrant" },
+          { "name": "/interact", "x": 5.5, "y": 93.4, "size": 22000, "tone": "warning", "href": "#quadrant" },
+          { "name": "/parse", "x": 3, "y": 95.1, "size": 17000, "href": "#quadrant" },
+          { "name": "/agent", "x": 11, "y": 91.2, "size": 9000, "tone": "danger", "href": "#quadrant" }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <span class="doc-specimen-label">No names, no sizes</span>
+      <div class="fd-chart" data-fd-chart="quadrant" data-height="260" data-labels="none">
+        <script type="application/json">
+      {
+        "x": { "label": "Pages per run", "min": 0, "max": 1000, "mid": 500, "format": "compact" },
+        "y": { "label": "Median time", "min": 0, "max": 5000, "mid": 2000, "format": "ms" },
+        "corners": { "topLeft": "Slow and small", "topRight": "Slow and large", "bottomLeft": "Quick and small", "bottomRight": { "label": "Quick and large", "tone": "success" } },
+        "points": [
+          { "name": "docs.quarry.dev", "x": 120, "y": 900 },
+          { "name": "blog.northwind.dev", "x": 340, "y": 1400 },
+          { "name": "shop.acme.dev", "x": 760, "y": 1800 },
+          { "name": "api.acme.dev", "x": 880, "y": 3600 }
+        ]
+      }
+        </script>
+      </div>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <span class="doc-specimen-label">Empty</span>
+        <div class="fd-chart" data-fd-chart="quadrant" data-height="260">
+          <script type="application/json">
+        {
+          "x": { "label": "Credits per call" },
+          "y": { "label": "Success rate" },
+          "points": []
+        }
+          </script>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <span class="doc-specimen-label">Loading</span>
+        <div class="fd-chart" data-fd-chart="quadrant" data-height="200" data-state="loading"></div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <p class="doc-specimen-label">on a phone, the same data as a list by corner</p>
+      <div data-frame="phone">
+        <div class="fd-chart" data-fd-chart="quadrant" data-height="300" id="chart-quadrant-list">
+          <script type="application/json">
+        {
+          "x": { "label": "Credits per call", "min": 0, "max": 12, "mid": 4, "format": "number" },
+          "y": { "label": "Success rate", "min": 90, "max": 100, "mid": 97, "format": "percent" },
+          "corners": { "topLeft": { "label": "Cheap and reliable", "tone": "success" }, "topRight": "Costly but reliable", "bottomLeft": "Cheap and flaky", "bottomRight": { "label": "Costly and flaky", "tone": "danger" } },
+          "points": [
+            { "name": "/search", "x": 1, "y": 99.6, "href": "#quadrant" },
+            { "name": "/scrape", "x": 2, "y": 99.1, "href": "#quadrant" },
+            { "name": "/crawl", "x": 7.5, "y": 98.4, "href": "#quadrant" },
+            { "name": "/parse", "x": 3, "y": 95.1, "href": "#quadrant" },
+            { "name": "/agent", "x": 11, "y": 91.2, "href": "#quadrant" }
+          ]
+        }
+          </script>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Config: <code class="fd-code">x</code> and <code class="fd-code">y</code> each take <code class="fd-code">{ label, min, max, mid, format }</code> (<code class="fd-code">min</code> and <code class="fd-code">max</code> default to the data, <code class="fd-code">mid</code> to the centre); <code class="fd-code">corners</code> names <code class="fd-code">topLeft</code>, <code class="fd-code">topRight</code>, <code class="fd-code">bottomLeft</code> and <code class="fd-code">bottomRight</code> as text or <code class="fd-code">{ label, tone }</code>; <code class="fd-code">size</code> says what a point's size means; <code class="fd-code">points</code> are <code class="fd-code">{ name, x, y, size?, tone?, href? }</code>.</li>
+      <li>A point with an <code class="fd-code">href</code> is a link; one without is a button that fires <code class="fd-code">fd:select</code> with <code class="fd-code">{ index, name, x, y, href }</code>. <code class="fd-code">fd:hover</code> fires when the active point changes.</li>
+      <li>Below 520px of width the plot is replaced by a list grouped by corner. Every name, value and link is still there; only the two-dimensional position is lost, so the corner names carry it. Keep to about a dozen points: past that, names collide and a table reads better.</li>
+      <li>Redraw with <code class="fd-code">charts.update(el, { points })</code>. Works in <code class="fd-code">&lt;fd-chart type="quadrant"&gt;</code> too, with the config as <code class="fd-code">data</code>.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="states">
     <div class="doc-section-head">
       <h2 class="fd-h3">States</h2>
@@ -809,7 +906,8 @@
       <table class="doc-table">
         <thead><tr><th>Attribute</th><th>On</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td>data-fd-chart</td><td>.fd-chart</td><td><code class="fd-code">line</code> · <code class="fd-code">area</code> · <code class="fd-code">bar</code> · <code class="fd-code">stacked</code></td></tr>
+          <tr><td>data-fd-chart</td><td>.fd-chart</td><td><code class="fd-code">line</code> · <code class="fd-code">area</code> · <code class="fd-code">bar</code> · <code class="fd-code">stacked</code> · <code class="fd-code">quadrant</code></td></tr>
+          <tr><td>data-labels</td><td>.fd-chart (quadrant)</td><td><code class="fd-code">none</code> hides the names beside the points.</td></tr>
           <tr><td>data-height</td><td>.fd-chart</td><td>Height in px, 240 by default.</td></tr>
           <tr><td>data-legend</td><td>.fd-chart</td><td>Render a toggling legend under the chart.</td></tr>
           <tr><td>data-grid</td><td>.fd-chart</td><td><code class="fd-code">dashed</code> (default) · <code class="fd-code">solid</code> · <code class="fd-code">none</code></td></tr>

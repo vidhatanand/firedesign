@@ -16,46 +16,54 @@
  * renderShell(options) returns the markup as a string (no DOM needed).
  *
  * Overlays are rendered once into the shell (renderOverlays): team switcher menu, account menu, help menu,
- * notifications popover and the ⌘K command palette. Their ids are `${prefix}-menu-team`, `-menu-account`,
- * `-menu-help`, `-notifs` and `-command`. A page can open the palette from anywhere with
- * `<button data-fd-command-open="ember-command">`.
+ * notifications popover, the running-now popover, the shortcut sheet and the ⌘K command palette. Their ids are
+ * `${prefix}-menu-team`, `-menu-account`, `-menu-help`, `-notifs`, `-running`, `-shortcuts` and `-command`. A page can
+ * open the palette from anywhere with `<button data-fd-command-open="ember-command">`.
+ *
+ * Keys (0.7): every NAV item has `keys` ("g l"), written as data-fd-keys; "/" on the search trigger opens the palette
+ * and "?" on the help menu's shortcut item opens the sheet, which lists whatever the page binds. Found records: the
+ * palette searches RUNS and MONITORS as you type (command.records); a real product swaps `search` for its API.
+ * Running now: RUNNING lists what is in progress; the top bar's pill counts the items of its popover. Service
+ * status: SERVICE_STATUS ("operational" shows the icon alone). All three are fixtures: replace them with your data.
  */
+import { initialMark } from '../fire/js/initial.js';
+
 const PLAYGROUND = 'playground.html?endpoint=';
 
 export const NAV = [
   {
     items: [
-      { id: 'overview', label: 'Overview', icon: 'home', href: 'overview.html' },
-      { id: 'install', label: 'Add Ember to your agent', icon: 'bot', href: 'install.html' },
-      { id: 'catalog', label: 'Catalog', icon: 'blocks', href: 'catalog.html', badge: 'New' },
+      { id: 'overview', label: 'Overview', icon: 'home', href: 'overview.html', keys: 'g o' },
+      { id: 'install', label: 'Add Ember to your agent', icon: 'bot', href: 'install.html', keys: 'g i' },
+      { id: 'catalog', label: 'Catalog', icon: 'blocks', href: 'catalog.html', keys: 'g c', badge: 'New' },
     ],
   },
   {
     label: 'Playground',
     items: [
-      { id: 'search', label: 'Search the web', icon: 'search', href: `${PLAYGROUND}search`, hint: '/search' },
-      { id: 'scrape', label: 'Scrape a page', icon: 'file-text', href: `${PLAYGROUND}scrape`, hint: '/scrape' },
+      { id: 'search', label: 'Search the web', icon: 'search', href: `${PLAYGROUND}search`, keys: 'g w', hint: '/search' },
+      { id: 'scrape', label: 'Scrape a page', icon: 'file-text', href: `${PLAYGROUND}scrape`, keys: 'g p', hint: '/scrape' },
       { id: 'interact', label: 'Interact with a page', icon: 'mouse-pointer-click', href: `${PLAYGROUND}interact`, hint: '/interact' },
       { id: 'parse', label: 'Parse a file', icon: 'paperclip', href: 'parse.html', hint: '/parse' },
       {
         id: 'crawl-group', label: 'Crawl a website', icon: 'network',
         children: [
-          { id: 'crawl', label: 'Crawl', icon: 'network', href: `${PLAYGROUND}crawl`, hint: '/crawl' },
+          { id: 'crawl', label: 'Crawl', icon: 'network', href: `${PLAYGROUND}crawl`, keys: 'g r', hint: '/crawl' },
           { id: 'map', label: 'Map', icon: 'map', href: `${PLAYGROUND}map`, hint: '/map' },
           { id: 'batch', label: 'Batch', icon: 'layers', href: `${PLAYGROUND}batch`, hint: '/batch' },
         ],
       },
-      { id: 'monitoring', label: 'Monitor the web', icon: 'radar', href: 'monitoring.html' },
-      { id: 'agent', label: 'Agent', icon: 'wand-sparkles', href: 'agent.html', hint: '/agent' },
+      { id: 'monitoring', label: 'Monitor the web', icon: 'radar', href: 'monitoring.html', keys: 'g m' },
+      { id: 'agent', label: 'Agent', icon: 'wand-sparkles', href: 'agent.html', keys: 'g a', hint: '/agent' },
     ],
   },
   {
     label: 'Account',
     items: [
-      { id: 'logs', label: 'Activity logs', icon: 'list', href: 'logs.html' },
-      { id: 'usage', label: 'Usage', icon: 'chart-column', href: 'usage.html' },
-      { id: 'api-keys', label: 'API keys', icon: 'key-round', href: 'api-keys.html' },
-      { id: 'settings', label: 'Settings', icon: 'settings', href: 'settings.html' },
+      { id: 'logs', label: 'Activity logs', icon: 'list', href: 'logs.html', keys: 'g l' },
+      { id: 'usage', label: 'Usage', icon: 'chart-column', href: 'usage.html', keys: 'g u' },
+      { id: 'api-keys', label: 'API keys', icon: 'key-round', href: 'api-keys.html', keys: 'g k' },
+      { id: 'settings', label: 'Settings', icon: 'settings', href: 'settings.html', keys: 'g s' },
     ],
   },
 ];
@@ -68,12 +76,43 @@ export const TEAMS = [
 ];
 const DOCS = 'https://docs.ember.dev';
 
+/** What is running now (the pill in the top bar counts these). `value` is the progress, 0 to 1. */
+export const RUNNING = [
+  { id: 'run_8f2a91', kind: 'crawl', icon: 'network', title: 'Crawl docs.quarry.dev', meta: '412 of 1,200 pages · 3 credits per 10', time: '2m 08s', value: 0.34, href: 'logs.html#run_8f2a91' },
+  { id: 'run_77c4d0', kind: 'agent', icon: 'wand-sparkles', title: 'Agent: compare plans on three sites', meta: 'Step 4 of 9 · reading northwind.dev/pricing', time: '48s', value: 0.44, href: 'logs.html#run_77c4d0' },
+  { id: 'mon_31e9b2', kind: 'monitor', icon: 'radar', title: 'Monitor: acme.dev/changelog', meta: 'Checking now · 6 pages', time: '12s', value: 0.8, href: 'monitoring.html#mon_31e9b2' },
+];
+/** "operational" | "degraded" | "outage" | "maintenance"; the control shows its label unless it is operational. */
+export const SERVICE_STATUS = { status: 'operational', href: 'https://status.ember.dev' };
+
+/** Records the palette finds as you type: a real product asks its API. `search(query, { signal })` resolves to rows. */
+const FOUND = {
+  Runs: [
+    { id: 'run_8f2a91', label: 'run_8f2a91', hint: 'Crawl docs.quarry.dev · running', href: 'logs.html#run_8f2a91', icon: 'network' },
+    { id: 'run_6d03ee', label: 'run_6d03ee', hint: 'Scrape northwind.dev/pricing · 2h ago', href: 'logs.html#run_6d03ee', icon: 'file-text' },
+    { id: 'run_4b1c7a', label: 'run_4b1c7a', hint: 'Crawl shop.acme.dev · failed on page 41', href: 'logs.html#run_4b1c7a', icon: 'network' },
+    { id: 'run_2a9f10', label: 'run_2a9f10', hint: 'Agent: compare plans · yesterday', href: 'logs.html#run_2a9f10', icon: 'wand-sparkles' },
+  ],
+  Monitors: [
+    { id: 'mon_31e9b2', label: 'acme.dev/changelog', hint: 'Daily · changed 2 days ago', href: 'monitoring.html#mon_31e9b2', icon: 'radar' },
+    { id: 'mon_90ab55', label: 'northwind.dev/pricing', hint: 'Hourly · 3 changes since yesterday', href: 'monitoring.html#mon_90ab55', icon: 'radar' },
+  ],
+};
+const searchFound = (group) => (query, { signal } = {}) => new Promise((resolve, reject) => {
+  const done = setTimeout(() => {
+    const q = query.toLowerCase();
+    resolve(FOUND[group].filter((row) => `${row.label} ${row.hint}`.toLowerCase().includes(q)));
+  }, 220);
+  signal?.addEventListener('abort', () => { clearTimeout(done); reject(new DOMException('Aborted', 'AbortError')); });
+});
+
 /** The Ember mark: a glowing coal (rounded diamond) and two sparks rising from it. */
 export const EMBER_MARK = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg>';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const i = (name, attrs = '') => `<i data-icon="${name}"${attrs}></i>`;
 const current = (on) => (on ? ' aria-current="page"' : '');
+const keyAttr = (item) => (item.keys ? ` data-fd-keys="${esc(item.keys)}" data-fd-keys-label="${esc(item.label)}"` : '');
 
 /** Work out the active nav id from a URL (file name, ?endpoint=). */
 export function activeFromUrl(url = typeof location !== 'undefined' ? location.href : '') {
@@ -90,7 +129,7 @@ export function activeFromUrl(url = typeof location !== 'undefined' ? location.h
 function navItem(item, active) {
   const hint = item.hint ? `<span class="fd-nav-hint">${esc(item.hint)}</span>` : '';
   const badge = item.badge ? `<span class="fd-nav-badge">${esc(item.badge)}</span>` : '';
-  return `<a class="fd-nav-item" href="${esc(item.href)}"${current(item.id === active)}>${i(item.icon)}<span class="fd-nav-text">${esc(item.label)}</span>${badge}${hint}</a>`;
+  return `<a class="fd-nav-item" href="${esc(item.href)}"${current(item.id === active)}${keyAttr(item)}>${i(item.icon)}<span class="fd-nav-text">${esc(item.label)}</span>${badge}${hint}</a>`;
 }
 
 function navGroup(item, active, prefix) {
@@ -98,7 +137,7 @@ function navGroup(item, active, prefix) {
   const id = `${prefix}-${item.id}`;
   const children = item.children.map((c) => {
     const hint = c.hint ? `<span class="fd-nav-hint">${esc(c.hint)}</span>` : '';
-    return `<a class="fd-nav-item" href="${esc(c.href)}"${current(c.id === active)}><span class="fd-nav-text">${esc(c.label)}</span>${hint}</a>`;
+    return `<a class="fd-nav-item" href="${esc(c.href)}"${current(c.id === active)}${keyAttr(c)}><span class="fd-nav-text">${esc(c.label)}</span>${hint}</a>`;
   }).join('\n          ');
   return `<div class="fd-nav-group">
         <button class="fd-nav-item" type="button" aria-expanded="${open}" aria-controls="${id}">${i(item.icon)}<span class="fd-nav-text">${esc(item.label)}</span>${i('chevron-down', ' class="fd-nav-chevron"')}</button>
@@ -145,7 +184,9 @@ export function renderTopbar({ prefix = 'ember', mobileOpen = false } = {}) {
   <a class="fd-topbar-brand" data-only="mobile" href="overview.html" aria-label="Ember overview">${EMBER_MARK}</a>
   <button class="fd-btn fd-team-switch" type="button" data-fd-menu="${prefix}-menu-team" data-placement="bottom-start"><span class="fd-team-switch-tile" aria-hidden="true" data-fd-team-tile>${a.teamInitial}</span><span data-fd-menu-value>${esc(a.team)}</span><span class="fd-team-switch-meta">Team</span>${i('chevrons-up-down')}</button>
   <div class="fd-topbar-actions">
-    <button class="fd-btn" type="button" data-only="desktop" data-fd-search-trigger data-fd-command-open="${prefix}-command">${i('search')}<span class="fd-grow fd-muted">Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
+    <button class="fd-running" type="button" data-fd-running="${prefix}-running" data-fd-popover="${prefix}-running" data-placement="bottom-end"${RUNNING.length ? '' : ' hidden'} aria-label="${RUNNING.length} running"><span class="fd-running-dot" aria-hidden="true"></span><span class="fd-running-count">${RUNNING.length}</span><span class="fd-running-label">running</span></button>
+    <a class="fd-service-status" data-status="${SERVICE_STATUS.status}" href="${SERVICE_STATUS.href}" target="_blank" rel="noopener" data-fd-tooltip="All systems operational" aria-label="All systems operational">${i('activity')}<span class="fd-service-status-label">All systems operational</span></a>
+    <button class="fd-btn" type="button" data-only="desktop" data-fd-search-trigger data-fd-command-open="${prefix}-command" data-fd-keys="/" data-fd-keys-label="Search">${i('search')}<span class="fd-grow fd-muted">Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
     <button class="fd-btn" type="button" data-icon-only data-fd-popover="${prefix}-notifs" data-placement="bottom-end" data-fd-tooltip="Notifications" aria-label="Notifications">${i('bell')}<span class="fd-overlay-count" data-fd-unread-count="${prefix}-notifs">2</span></button>
     <button class="fd-btn" type="button" data-icon-only data-fd-tweaks-open data-fd-tooltip="Tweaks" aria-label="Tweaks" aria-expanded="false">${i('sliders-horizontal')}</button>
     <button class="fd-btn" type="button" data-icon-only data-only="desktop" data-fd-theme-toggle data-fd-tooltip="Theme" aria-label="Theme">${i('monitor')}</button>
@@ -197,7 +238,7 @@ const kbd = (keys) => keys.map((k) => `<kbd class="fd-kbd">${k}</kbd>`).join('')
 const menuLink = (href, icon, label, external) => `<a class="fd-menu-item" href="${esc(href)}"${external ? ' target="_blank" rel="noopener"' : ''}>${i(icon)}<span class="fd-menu-item-label">${esc(label)}</span>${external ? i('arrow-up-right') : ''}</a>`;
 
 export function renderOverlays({ prefix = 'ember' } = {}) {
-  const teams = TEAMS.map((t) => `<button class="fd-menu-item" role="menuitemradio" aria-checked="${t.current ? 'true' : 'false'}" data-value="${t.id}" data-initial="${t.initial}"><span class="fd-tile" data-size="20" data-tone="${t.tone}"${t.current ? ' data-bordered' : ''}>${t.initial}</span><span class="fd-menu-item-label">${esc(t.name)}</span></button>`).join('\n    ');
+  const teams = TEAMS.map((t) => `<button class="fd-menu-item" role="menuitemradio" aria-checked="${t.current ? 'true' : 'false'}" data-value="${t.id}" data-initial="${t.initial}"><span class="fd-tile" data-size="20" data-tone="${t.tone}"${t.current ? ' data-bordered' : ''} role="img" aria-label="${esc(t.name)}">${initialMark(t.name)}</span><span class="fd-menu-item-label">${esc(t.name)}</span></button>`).join('\n    ');
   const navItems = flatNav().map((n) => `<a class="fd-command-item" href="${esc(n.href)}" data-keywords="${esc(NAV_KEYWORDS[n.id] || '')}">${i(n.icon)}<span class="fd-command-item-label">${esc(n.label)}</span>${NAV_HINTS[n.id] || n.hint ? navHint(n) : ''}</a>`).join('\n      ');
   return `<div class="fd-menu" id="${prefix}-menu-team" popover role="menu" data-variant="switcher" aria-label="Teams">
     <div class="fd-menu-head"><p class="fd-menu-title">Teams</p><button class="fd-menu-close" type="button" aria-label="Close menu">${i('x')}</button></div>
@@ -224,7 +265,7 @@ export function renderOverlays({ prefix = 'ember' } = {}) {
     ${menuLink(DOCS, 'book-open', 'Documentation', true)}
     ${menuLink(`${DOCS}/api-reference`, 'braces', 'API reference', true)}
     ${menuLink('https://status.ember.dev', 'activity', 'Status', true)}
-    <button class="fd-menu-item" data-value="shortcuts">${i('keyboard')}<span class="fd-menu-item-label">Keyboard shortcuts</span>${kbd(['⌘K'])}</button>
+    <button class="fd-menu-item" type="button" data-fd-dialog-open="${prefix}-shortcuts" data-fd-keys="?" data-fd-keys-label="Keyboard shortcuts">${i('keyboard')}<span class="fd-menu-item-label">Keyboard shortcuts</span>${kbd(['?'])}</button>
     <hr class="fd-menu-sep">
     ${menuLink('mailto:support@ember.dev', 'mail', 'Contact support')}
   </div>
@@ -275,6 +316,23 @@ export function renderOverlays({ prefix = 'ember' } = {}) {
     </div>
     <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="logs.html"><span>View all notifications</span>${i('arrow-right', ' data-nudge')}</a></div>
   </div>
+  <div class="fd-popover" id="${prefix}-running" popover data-size="lg" aria-label="Running now">
+    <div class="fd-popover-head"><p class="fd-popover-title">Running now</p></div>
+    <div class="fd-popover-body">
+      <div class="fd-running-list">
+        ${RUNNING.map((r) => `<a class="fd-running-item" href="${esc(r.href)}" data-kind="${r.kind}"><span class="fd-tile" data-size="28" data-tone="${r.kind === 'monitor' ? 'neutral' : 'accent'}">${i(r.icon)}</span><span class="fd-running-title">${esc(r.title)}</span><span class="fd-running-time">${r.time}</span><span class="fd-running-meta">${esc(r.meta)}</span><span class="fd-running-bar" data-fd-vars="--value: ${r.value}" aria-hidden="true"></span></a>`).join('\n        ')}
+      </div>
+    </div>
+    <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="logs.html"><span>View all runs</span>${i('arrow-right', ' data-nudge')}</a></div>
+  </div>
+  <dialog class="fd-dialog" id="${prefix}-shortcuts" data-size="md" data-fd-shortcuts>
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title">Keyboard shortcuts</h2>
+      <p class="fd-dialog-desc">They work anywhere except in a field.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close">${i('x')}</button>
+    </div>
+    <div class="fd-dialog-body"><div data-fd-shortcuts-list></div></div>
+  </dialog>
   <dialog class="fd-command" id="${prefix}-command" aria-label="Command palette">
     <div class="fd-command-search">
       ${i('search')}
@@ -356,8 +414,6 @@ function bindBehaviour(fire, prefix) {
       else if (value === 'invite') say('Invite members', 'Invitations are not part of this demo.', 'info');
     } else if (item.closest(`#${prefix}-menu-account`) && value === 'sign-out') {
       say('Signed out', 'This is a demo, so you are still signed in.', 'info');
-    } else if (item.closest(`#${prefix}-menu-help`) && value === 'shortcuts') {
-      setTimeout(() => command.open(`${prefix}-command`), 60);
     } else if (item.closest(`#${prefix}-command`) && value === 'theme') {
       fire.shell.cycleTheme();
     } else if (item.closest(`#${prefix}-command`) && value === 'tweaks') {
@@ -367,6 +423,9 @@ function bindBehaviour(fire, prefix) {
       setTimeout(() => fire.chat.get(`${prefix}-chat`)?.open(), 60);
     }
   });
+  // Found records: the palette searches runs and monitors as you type.
+  command.records({ group: 'Runs', icon: 'activity', search: searchFound('Runs'), palette: `${prefix}-command` });
+  command.records({ group: 'Monitors', icon: 'radar', search: searchFound('Monitors'), palette: `${prefix}-command` });
   // The search control only earns its width on large screens.
   const wide = matchMedia('(min-width: 1100px)');
   const sync = () => document.querySelectorAll('[data-fd-search-trigger]').forEach((el) => { el.hidden = !wide.matches; });

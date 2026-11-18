@@ -2335,19 +2335,42 @@
         "fd-chart-tooltip-row",
         "fd-chart-tooltip-swatch",
         "fd-chart-tooltip-title",
-        "fd-chart-tooltip-value"
+        "fd-chart-tooltip-value",
+        "fd-quadrant-axis",
+        "fd-quadrant-axis-title",
+        "fd-quadrant-cell",
+        "fd-quadrant-corner",
+        "fd-quadrant-dot",
+        "fd-quadrant-frame",
+        "fd-quadrant-group",
+        "fd-quadrant-group-count",
+        "fd-quadrant-group-label",
+        "fd-quadrant-key",
+        "fd-quadrant-list",
+        "fd-quadrant-name",
+        "fd-quadrant-plot",
+        "fd-quadrant-point",
+        "fd-quadrant-row",
+        "fd-quadrant-row-name",
+        "fd-quadrant-row-values",
+        "fd-quadrant-rows",
+        "fd-quadrant-tick"
       ],
       "attributes": {
         "data-fd-chart": [
           "area",
           "bar",
           "line",
+          "quadrant",
           "stacked"
         ],
         "data-grid": [
           "dashed",
           "none",
           "solid"
+        ],
+        "data-labels": [
+          "none"
         ],
         "data-legend": [
           ""
@@ -2410,6 +2433,36 @@
           "data-shape": [
             "square"
           ]
+        },
+        "fd-quadrant-axis": {
+          "data-axis": [
+            "x",
+            "y"
+          ]
+        },
+        "fd-quadrant-cell": {
+          "data-corner": [
+            "bl",
+            "br",
+            "tl",
+            "tr"
+          ],
+          "data-tone": [
+            ""
+          ]
+        },
+        "fd-quadrant-group": {
+          "data-tone": [
+            ""
+          ]
+        },
+        "fd-quadrant-point": {
+          "data-active": [
+            ""
+          ],
+          "data-side": [
+            "start"
+          ]
         }
       },
       "stateAttributes": {
@@ -2438,12 +2491,13 @@
       "card": {
         "id": "chart",
         "job": "See how values change over time or between periods.",
-        "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table.",
+        "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table. A fifth type, quadrant, places points on two axes and names the four corners; on a phone it becomes a list grouped by corner.",
         "useWhen": [
           "A value moves continuously over time: use line, or area for volume.",
           "Discrete periods are compared: use bar, or stacked for a total and its parts.",
           "A number has a limit: draw a labelled threshold on the chart.",
-          "A live series should end in a pulsing dot."
+          "A live series should end in a pulsing dot.",
+          "A handful of things are sorted on two measures at once, such as cost against reliability: use quadrant."
         ],
         "avoidWhen": [
           {
@@ -2469,6 +2523,10 @@
           {
             "when": "Exact values to compare across many columns.",
             "instead": "table"
+          },
+          {
+            "when": "More than about a dozen points to place, or exact values matter more than position.",
+            "instead": "table"
           }
         ],
         "aka": [
@@ -2480,7 +2538,11 @@
           "graph",
           "time series",
           "plot",
-          "trend chart"
+          "trend chart",
+          "quadrant chart",
+          "scatter plot",
+          "bubble chart",
+          "2x2 matrix"
         ],
         "surfaces": [
           "app",
@@ -2505,6 +2567,10 @@
           {
             "name": "gap",
             "how": "a null value is a gap, not a zero"
+          },
+          {
+            "name": "phone",
+            "how": "quadrant below 520px of width: the plot gives way to a list grouped by corner"
           }
         ],
         "variants": [
@@ -2527,6 +2593,11 @@
             "attribute": "data-fd-chart",
             "value": "stacked",
             "useWhen": "A total and its parts; the tooltip adds a Total row."
+          },
+          {
+            "attribute": "data-fd-chart",
+            "value": "quadrant",
+            "useWhen": "Points on two axes with a midpoint on each, split into four named corners."
           },
           {
             "attribute": "data-grid",
@@ -2562,6 +2633,11 @@
             "attribute": "data-ring",
             "value": "bg",
             "useWhen": "The chart sits on the page colour, not a card."
+          },
+          {
+            "attribute": "data-labels",
+            "value": "none",
+            "useWhen": "A quadrant whose names would collide: the tooltip still names each point."
           }
         ],
         "parts": [
@@ -2612,6 +2688,22 @@
           {
             "class": "fd-chart-svg",
             "role": "The drawing surface."
+          },
+          {
+            "class": "fd-quadrant-plot",
+            "role": "The quadrant's field, with a dashed line at each midpoint."
+          },
+          {
+            "class": "fd-quadrant-point",
+            "role": "One point of a quadrant: a link, or a button; takes focus."
+          },
+          {
+            "class": "fd-quadrant-cell",
+            "role": "One corner of a quadrant; data-tone tints it."
+          },
+          {
+            "class": "fd-quadrant-list",
+            "role": "The phone fallback: the points as a list grouped by corner."
           }
         ],
         "related": [
@@ -2638,11 +2730,16 @@
           {
             "keys": "Escape",
             "does": "Hides the tooltip."
+          },
+          {
+            "keys": "Arrow keys (quadrant)",
+            "does": "Moves focus to the nearest point in that direction."
           }
         ],
         "example": "docs/charts.html#line",
         "provenance": [
           "docs/charts.html",
+          "docs/charts.html#quadrant",
           "fire/components/charts.css",
           "fire/js/charts.js"
         ],
@@ -5221,6 +5318,7 @@
         "fd-command-item-hint",
         "fd-command-item-label",
         "fd-command-list",
+        "fd-command-note",
         "fd-command-search"
       ],
       "attributes": {
@@ -5232,6 +5330,12 @@
         "fd-command-item": {
           "data-icon": [
             "*"
+          ]
+        },
+        "fd-command-note": {
+          "data-state": [
+            "error",
+            "loading"
           ]
         }
       },
@@ -5249,11 +5353,12 @@
       "card": {
         "id": "command",
         "job": "Jump to a page or run an action by typing, from anywhere.",
-        "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant.",
+        "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant. command.records() adds a group of found records, searched as you type.",
         "useWhen": [
           "An app has many pages and actions and power users want the keyboard.",
           "People should reach a recent run, a doc or a setting without navigating.",
-          "Actions need shortcuts and hints shown beside them."
+          "Actions need shortcuts and hints shown beside them.",
+          "A search should return records, such as runs, keys or monitors, beside pages and actions: register a records group."
         ],
         "avoidWhen": [
           {
@@ -5301,6 +5406,14 @@
           {
             "name": "empty",
             "how": "fd-command-empty is shown when nothing matches"
+          },
+          {
+            "name": "records loading",
+            "how": "aria-busy=\"true\" on the .fd-command-group[data-records]; a .fd-command-note says it is searching"
+          },
+          {
+            "name": "records failed",
+            "how": ".fd-command-note[data-state=\"error\"] in the records group"
           }
         ],
         "variants": [
@@ -5354,6 +5467,10 @@
           {
             "class": "fd-command-foot",
             "role": "A key legend row."
+          },
+          {
+            "class": "fd-command-note",
+            "role": "One quiet line in a records group: searching, or the error."
           }
         ],
         "related": [
@@ -5383,6 +5500,7 @@
         "example": "docs/overlays.html#command-palette",
         "provenance": [
           "docs/overlays.html",
+          "docs/shell.html#palette-records",
           "fire/components/overlays.css",
           "fire/js/overlays.js"
         ],
@@ -10565,6 +10683,94 @@
       }
     },
     {
+      "id": "initial",
+      "name": "Initial",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-initial",
+      "classes": [
+        "fd-initial"
+      ],
+      "attributes": {},
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/shell.html#initial-mark",
+      "card": {
+        "id": "initial",
+        "job": "Show an organisation's first letter as a dot-matrix mark where it has no logo.",
+        "purpose": "A drawn mark: the first letter of a name on a 5 by 7 grid of dots, lit dots in the box's colour and unlit ones faint. The same name always draws the same glyph and takes the same tone. It goes in a brand mark, tile or avatar through data-fd-initial, or as an SVG string from initial.js on a server or in an email.",
+        "useWhen": [
+          "An organisation, team or brand has no uploaded logo and needs a mark in the brand slot, a tile or an avatar.",
+          "An email or a server-rendered page needs the same mark: call initialMark() or initialRows(), no DOM needed.",
+          "A list of organisations should be told apart at a glance without anyone choosing a colour."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person's initials, or a box smaller than 28px.",
+            "instead": "avatar"
+          },
+          {
+            "when": "The thing has a real logo or a symbol: an icon, an image.",
+            "instead": "tile"
+          },
+          {
+            "when": "The product's own mark, or a logotype in the current colour.",
+            "instead": "brand"
+          }
+        ],
+        "aka": [
+          "generated logo",
+          "letter mark",
+          "initial avatar",
+          "identicon",
+          "dot matrix",
+          "placeholder logo",
+          "monogram"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "no script",
+            "how": "the host keeps its own letter, styled by the tile or avatar"
+          },
+          {
+            "name": "other character",
+            "how": "a first character that is not A to Z or 0 to 9 draws a diamond"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-initial",
+            "role": "The drawing: an svg in currentColor, sized by its box."
+          }
+        ],
+        "related": [
+          "tile",
+          "avatar",
+          "brand"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#initial-mark",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/initial.js",
+          "fire/js/shell.js",
+          "fire/components/shell.css"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "inline-code",
       "name": "Inline code",
       "family": "Base",
@@ -13845,6 +14051,14 @@
           "data-align": [
             "center"
           ],
+          "data-column": [
+            "",
+            "lg",
+            "md",
+            "sm",
+            "xl",
+            "xs"
+          ],
           "data-grow": [
             ""
           ],
@@ -13880,7 +14094,8 @@
         "purpose": "The page holds a centred column with 1px rails; each fd-band is a horizontal strip, separated by hairlines that run edge to edge, with a crosshair where a line meets a rail. Bands set padding, surface and whether they grow. On phones the rails and marks drop away and only the hairlines remain.",
         "useWhen": [
           "Any screen in the app: one band for the title, one for the toolbar, one for the content.",
-          "A band needs a white or sunken surface, a different padding, or to stick under the top bar."
+          "A band needs a white or sunken surface, a different padding, or to stick under the top bar.",
+          "A public page needs a narrow column of text under a header band: data-column on the band."
         ],
         "avoidWhen": [
           {
@@ -13967,6 +14182,36 @@
             "attribute": "data-marks",
             "value": "none",
             "useWhen": "Keep the hairline and drop the crosshairs in a dense area."
+          },
+          {
+            "attribute": "data-column",
+            "value": "",
+            "useWhen": "A public or signed-out page: the band's content in a centred reading column of 560px under a header band."
+          },
+          {
+            "attribute": "data-column",
+            "value": "xs",
+            "useWhen": "A reading column of 320px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "sm",
+            "useWhen": "A reading column of 400px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "lg",
+            "useWhen": "A reading column of 640px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "xl",
+            "useWhen": "A reading column of 768px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "md",
+            "useWhen": "The default reading column of 560px, written out."
           }
         ],
         "parts": [
@@ -13989,9 +14234,11 @@
         "keyboard": [],
         "example": "docs/shell.html#frame",
         "provenance": [
+          "GUIDE.md",
           "docs/shell.html",
+          "docs/shell.html#reading-column",
           "fire/components/shell.css",
-          "GUIDE.md"
+          "fire/layout.css"
         ],
         "since": "0.1.0"
       }
@@ -16839,6 +17086,156 @@
       }
     },
     {
+      "id": "running",
+      "name": "Running",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-running",
+      "classes": [
+        "fd-running",
+        "fd-running-bar",
+        "fd-running-count",
+        "fd-running-dot",
+        "fd-running-item",
+        "fd-running-label",
+        "fd-running-list",
+        "fd-running-meta",
+        "fd-running-time",
+        "fd-running-title"
+      ],
+      "attributes": {
+        "data-fd-running": [
+          "*"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change",
+        "fd:keys"
+      ],
+      "docs": "docs/shell.html#running",
+      "card": {
+        "id": "running",
+        "job": "Show how many jobs are in progress and open the list from the top bar.",
+        "purpose": "A pill in the top bar with a pulsing dot and a count, that opens a popover of what is running: a title, the time so far, a line of detail and an optional progress bar, each row a link to the run. The count is the number of rows in the popover and follows them; with none the pill is hidden, so a quiet account has a quiet bar.",
+        "useWhen": [
+          "Work continues after the page that started it: crawls, agent runs, monitor checks, imports.",
+          "A person should find a long job from any screen without opening the page that started it."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A job finished, failed or needs a decision.",
+            "instead": "notification"
+          },
+          {
+            "when": "One job on the page you are on, with its own progress.",
+            "instead": "progress"
+          },
+          {
+            "when": "The health of the product itself.",
+            "instead": "service-status"
+          }
+        ],
+        "aka": [
+          "running jobs",
+          "activity indicator",
+          "background tasks",
+          "in progress",
+          "job tray",
+          "live runs"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "none running",
+            "how": "hidden; set by shell.js when the popover has no .fd-running-item"
+          },
+          {
+            "name": "open",
+            "how": "aria-expanded=\"true\" on the pill while its popover is open"
+          },
+          {
+            "name": "phone",
+            "how": "the label drops and the pill keeps the dot and the count"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-running",
+            "role": "The pill; a button that opens the popover. data-fd-running names the popover."
+          },
+          {
+            "class": "fd-running-dot",
+            "role": "The pulsing dot."
+          },
+          {
+            "class": "fd-running-count",
+            "role": "The number of rows in the popover."
+          },
+          {
+            "class": "fd-running-label",
+            "role": "The word 'running'; hidden on a phone."
+          },
+          {
+            "class": "fd-running-list",
+            "role": "The rows inside the popover."
+          },
+          {
+            "class": "fd-running-item",
+            "role": "One running job, a link to its run."
+          },
+          {
+            "class": "fd-running-title",
+            "role": "The job's name."
+          },
+          {
+            "class": "fd-running-time",
+            "role": "Time so far."
+          },
+          {
+            "class": "fd-running-meta",
+            "role": "One line of detail, such as the step or the page count."
+          },
+          {
+            "class": "fd-running-bar",
+            "role": "A progress bar; --value is 0 to 1."
+          }
+        ],
+        "related": [
+          "popover",
+          "notification",
+          "progress",
+          "service-status"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens the popover from the pill."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the popover and returns focus to the pill."
+          }
+        ],
+        "example": "docs/shell.html#running",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/shell.js",
+          "fire/components/shell.css",
+          "templates/shell.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "schema",
       "name": "Schema",
       "family": "Code",
@@ -17855,6 +18252,143 @@
       }
     },
     {
+      "id": "service-status",
+      "name": "Service Status",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-service-status",
+      "classes": [
+        "fd-service-status",
+        "fd-service-status-label"
+      ],
+      "attributes": {
+        "data-icon": [
+          "*"
+        ],
+        "data-status": [
+          "",
+          "degraded",
+          "maintenance",
+          "operational",
+          "outage"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/shell.html#service-status",
+      "card": {
+        "id": "service-status",
+        "job": "Show whether the product is healthy: an icon when normal, a labelled pill when not.",
+        "purpose": "A link to the status page in the top bar. When operational it is an icon alone, with its label for assistive technology and a tooltip. When degraded, down or in maintenance it shows its label in a tone, so a problem is read where it matters. The page sets it with setServiceStatus(); the control fetches nothing itself.",
+        "useWhen": [
+          "People depend on the service and should see an incident without looking for a status page.",
+          "A top bar needs a quiet place for 'all good' that turns into words when it is not."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person's own job or resource is unhealthy.",
+            "instead": "status"
+          },
+          {
+            "when": "A message that must be read and dismissed.",
+            "instead": "banner"
+          },
+          {
+            "when": "How many jobs are running.",
+            "instead": "running"
+          }
+        ],
+        "aka": [
+          "system status",
+          "uptime indicator",
+          "incident indicator",
+          "health pill",
+          "status page link"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "operational",
+            "how": "data-status=\"operational\"; the icon alone"
+          },
+          {
+            "name": "degraded",
+            "how": "data-status=\"degraded\"; label in warning"
+          },
+          {
+            "name": "outage",
+            "how": "data-status=\"outage\"; label in danger"
+          },
+          {
+            "name": "maintenance",
+            "how": "data-status=\"maintenance\"; label in info"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-status",
+            "value": "operational",
+            "useWhen": "Everything works: the icon alone."
+          },
+          {
+            "attribute": "data-status",
+            "value": "degraded",
+            "useWhen": "Slower or partly failing."
+          },
+          {
+            "attribute": "data-status",
+            "value": "outage",
+            "useWhen": "The service is down."
+          },
+          {
+            "attribute": "data-status",
+            "value": "maintenance",
+            "useWhen": "Planned work is under way."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-service-status",
+            "role": "The link to the status page; data-status sets the look."
+          },
+          {
+            "class": "fd-service-status-label",
+            "role": "The words; visually hidden when operational, hidden on a phone otherwise (aria-label keeps the name)."
+          }
+        ],
+        "related": [
+          "status",
+          "running",
+          "banner",
+          "topbar"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Follows the link to the status page."
+          }
+        ],
+        "example": "docs/shell.html#service-status",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/shell.js",
+          "fire/components/shell.css",
+          "templates/shell.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "session-list",
       "name": "Session List",
       "family": "Agent",
@@ -18359,6 +18893,144 @@
       }
     },
     {
+      "id": "shortcuts",
+      "name": "Shortcuts",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-shortcuts",
+      "classes": [
+        "fd-keys-hint",
+        "fd-shortcuts",
+        "fd-shortcuts-group",
+        "fd-shortcuts-keys",
+        "fd-shortcuts-label",
+        "fd-shortcuts-name",
+        "fd-shortcuts-row"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-keys-hint": {
+          "data-state": [
+            "open"
+          ],
+          "data-static": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/shell.html#go-keys",
+      "card": {
+        "id": "shortcuts",
+        "job": "Go to a page by keyboard and list every shortcut in a sheet.",
+        "purpose": "Keys are data attributes on controls: data-fd-keys=\"g l\" on a link makes G then L follow it, \"/\" opens search, \"?\" opens the sheet. While the first key waits, nav items show their key and a hint says a key is expected. The sheet is a dialog filled from the page each time it opens, so it never lists a key that does nothing.",
+        "useWhen": [
+          "People return to the same few pages all day: an app with a sidebar of destinations.",
+          "A product has several shortcuts and needs one place that lists them."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Jumping to anything by typing, including records.",
+            "instead": "command"
+          },
+          {
+            "when": "A shortcut hint on one control.",
+            "instead": "tooltip"
+          }
+        ],
+        "aka": [
+          "hotkeys",
+          "go-to keys",
+          "keyboard shortcuts",
+          "key bindings",
+          "shortcut sheet",
+          "cheat sheet",
+          "vim keys"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "waiting",
+            "how": "data-fd-keys-pending=\"g\" on <html> for 1.6 seconds after the first key; the hint shows data-state=\"open\""
+          },
+          {
+            "name": "skipped",
+            "how": "no key works in a field, in a modal, with Ctrl, Cmd or Alt, or on a hidden or disabled control"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-shortcuts",
+            "role": "The sheet's list, filled from the page."
+          },
+          {
+            "class": "fd-shortcuts-group",
+            "role": "One group: 'General', 'Go to'."
+          },
+          {
+            "class": "fd-shortcuts-label",
+            "role": "The group's name."
+          },
+          {
+            "class": "fd-shortcuts-row",
+            "role": "One shortcut: its name and its keys."
+          },
+          {
+            "class": "fd-shortcuts-name",
+            "role": "What the key does."
+          },
+          {
+            "class": "fd-shortcuts-keys",
+            "role": "The keys, as kbd elements."
+          },
+          {
+            "class": "fd-keys-hint",
+            "role": "The status line shown while a key waits for its second."
+          }
+        ],
+        "related": [
+          "command",
+          "dialog",
+          "sidebar",
+          "inline-code"
+        ],
+        "keyboard": [
+          {
+            "keys": "g then a letter",
+            "does": "Follows the control that carries that sequence."
+          },
+          {
+            "keys": "/",
+            "does": "Opens search."
+          },
+          {
+            "keys": "?",
+            "does": "Opens the shortcut sheet."
+          },
+          {
+            "keys": "Escape",
+            "does": "Drops a first key that is waiting."
+          }
+        ],
+        "example": "docs/shell.html#go-keys",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/shell.js",
+          "fire/components/shell.css",
+          "templates/shell.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "sidebar",
       "name": "Sidebar",
       "family": "Shell",
@@ -18374,6 +19046,7 @@
         "fd-nav-group",
         "fd-nav-hint",
         "fd-nav-item",
+        "fd-nav-key",
         "fd-nav-label",
         "fd-nav-sub",
         "fd-nav-text",
@@ -24648,6 +25321,7 @@
     "fd-command-item-hint": "command",
     "fd-command-item-label": "command",
     "fd-command-list": "command",
+    "fd-command-note": "command",
     "fd-command-search": "command",
     "fd-composer": "composer",
     "fd-composer-attachment": "composer",
@@ -25020,6 +25694,7 @@
     "fd-hovercard-text": "hovercard",
     "fd-hovercard-title": "hovercard",
     "fd-icon": "icon",
+    "fd-initial": "initial",
     "fd-input": "input",
     "fd-input-affix": "input-group",
     "fd-input-group": "input-group",
@@ -25043,6 +25718,7 @@
     "fd-json-tools": "json",
     "fd-json-tree": "json",
     "fd-kbd": "inline-code",
+    "fd-keys-hint": "shortcuts",
     "fd-kv": "kv",
     "fd-kv-copy": "kv",
     "fd-kv-item": "kv",
@@ -25157,6 +25833,7 @@
     "fd-nav-group": "sidebar",
     "fd-nav-hint": "sidebar",
     "fd-nav-item": "sidebar",
+    "fd-nav-key": "sidebar",
     "fd-nav-label": "sidebar",
     "fd-nav-sub": "sidebar",
     "fd-nav-text": "sidebar",
@@ -25289,6 +25966,25 @@
     "fd-progress-value": "progress",
     "fd-prose": "prose",
     "fd-qr": "qr",
+    "fd-quadrant-axis": "chart",
+    "fd-quadrant-axis-title": "chart",
+    "fd-quadrant-cell": "chart",
+    "fd-quadrant-corner": "chart",
+    "fd-quadrant-dot": "chart",
+    "fd-quadrant-frame": "chart",
+    "fd-quadrant-group": "chart",
+    "fd-quadrant-group-count": "chart",
+    "fd-quadrant-group-label": "chart",
+    "fd-quadrant-key": "chart",
+    "fd-quadrant-list": "chart",
+    "fd-quadrant-name": "chart",
+    "fd-quadrant-plot": "chart",
+    "fd-quadrant-point": "chart",
+    "fd-quadrant-row": "chart",
+    "fd-quadrant-row-name": "chart",
+    "fd-quadrant-row-values": "chart",
+    "fd-quadrant-rows": "chart",
+    "fd-quadrant-tick": "chart",
     "fd-radio": "radio",
     "fd-radio-box": "radio",
     "fd-radio-desc": "radio",
@@ -25323,6 +26019,16 @@
     "fd-run-steps-item": "run-steps",
     "fd-run-steps-label": "run-steps",
     "fd-run-steps-time": "run-steps",
+    "fd-running": "running",
+    "fd-running-bar": "running",
+    "fd-running-count": "running",
+    "fd-running-dot": "running",
+    "fd-running-item": "running",
+    "fd-running-label": "running",
+    "fd-running-list": "running",
+    "fd-running-meta": "running",
+    "fd-running-time": "running",
+    "fd-running-title": "running",
     "fd-schema": "schema",
     "fd-schema-children": "schema",
     "fd-schema-default": "schema",
@@ -25359,6 +26065,8 @@
     "fd-segmented-label": "segmented",
     "fd-segmented-thumb": "segmented",
     "fd-select": "select",
+    "fd-service-status": "service-status",
+    "fd-service-status-label": "service-status",
     "fd-session-list": "session-list",
     "fd-session-list-actions": "session-list",
     "fd-session-list-body": "session-list",
@@ -25389,6 +26097,12 @@
     "fd-sheet-section": "sheet",
     "fd-sheet-title": "sheet",
     "fd-shimmer": "skeleton",
+    "fd-shortcuts": "shortcuts",
+    "fd-shortcuts-group": "shortcuts",
+    "fd-shortcuts-keys": "shortcuts",
+    "fd-shortcuts-label": "shortcuts",
+    "fd-shortcuts-name": "shortcuts",
+    "fd-shortcuts-row": "shortcuts",
     "fd-sidebar": "sidebar",
     "fd-sidebar-body": "sidebar",
     "fd-sidebar-foot": "sidebar",
@@ -25668,7 +26382,7 @@
   "elements": [
     {
       "tagName": "fd-chart",
-      "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
+      "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, quadrants, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart` for the cartesian types and the quadrant, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
       "attributes": [
         {
           "name": "area",
@@ -25680,7 +26394,7 @@
           "name": "data",
           "type": "FdChartData | undefined",
           "default": "",
-          "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
+          "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
         },
         {
           "name": "dot",
@@ -25710,7 +26424,13 @@
           "name": "height",
           "type": "number | undefined",
           "default": "",
-          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24)."
+          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24)."
+        },
+        {
+          "name": "hide-labels",
+          "type": "boolean",
+          "default": "false",
+          "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`)."
         },
         {
           "name": "invert",
@@ -25746,7 +26466,7 @@
           "name": "state",
           "type": "'loading' | 'empty' | undefined",
           "default": "",
-          "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
+          "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
         },
         {
           "name": "thickness",
@@ -25764,7 +26484,7 @@
           "name": "type",
           "type": "FdChartType",
           "default": "'line'",
-          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
+          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
         },
         {
           "name": "value",
@@ -25808,7 +26528,7 @@
           "name": "data",
           "type": "FdChartData | undefined",
           "attribute": "data",
-          "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
+          "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
         },
         {
           "name": "dot",
@@ -25838,7 +26558,13 @@
           "name": "height",
           "type": "number | undefined",
           "attribute": "height",
-          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24)."
+          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24)."
+        },
+        {
+          "name": "hideLabels",
+          "type": "boolean",
+          "attribute": "hide-labels",
+          "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`)."
         },
         {
           "name": "invert",
@@ -25874,7 +26600,7 @@
           "name": "state",
           "type": "'loading' | 'empty' | undefined",
           "attribute": "state",
-          "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
+          "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
         },
         {
           "name": "thickness",
@@ -25892,7 +26618,7 @@
           "name": "type",
           "type": "FdChartType",
           "attribute": "type",
-          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
+          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
         },
         {
           "name": "value",
@@ -26351,7 +27077,9 @@
           "{ trigger }"
         ],
         "shell": [
-          "{ value: \"expanded\"|\"collapsed\" }"
+          "{ value: \"expanded\"|\"collapsed\" }",
+          "{ value: count }",
+          "{ value: status }"
         ],
         "texture": [
           "{ value: 'loading' | 'ready' }"
@@ -26415,7 +27143,8 @@
       "detail": "{ index, label, values }",
       "shapes": {
         "charts": [
-          "{ index, label, values }"
+          "{ index, label, values }",
+          "{ index, name, x, y }"
         ]
       }
     },
@@ -26424,6 +27153,14 @@
       "shapes": {
         "forms": [
           "{ fields }"
+        ]
+      }
+    },
+    "fd:keys": {
+      "detail": "{ keys }",
+      "shapes": {
+        "shell": [
+          "{ keys }"
         ]
       }
     },
@@ -26443,7 +27180,8 @@
       "detail": "{ value, item }",
       "shapes": {
         "charts": [
-          "{ index, label, values }"
+          "{ index, label, values }",
+          "{ index, name, x, y, href }"
         ],
         "core": [
           "{ value, item }"

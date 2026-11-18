@@ -194,6 +194,53 @@ export interface StripConfig {
   summary?: string;
 }
 
+/** One axis of a quadrant chart. */
+export interface QuadrantAxis {
+  /** Axis title and the name of the value in tooltips. */
+  label?: string;
+  /** Ends of the axis (default: the data's own range). */
+  min?: number;
+  max?: number;
+  /** Where the dashed line cuts the axis (default: the centre). */
+  mid?: number;
+  /** Named format of the ticks and values (default "number"). */
+  format?: ChartFormat;
+}
+
+/** One corner of a quadrant chart: its name, as text or with a tone that tints it. */
+export type QuadrantCorner = string | { label: string; tone?: ChartTone | null };
+
+/** One point of a quadrant chart. A point with an href is a link, one without is a button. */
+export interface QuadrantPoint {
+  name: string;
+  x: number;
+  y: number;
+  /** Area of the dot, relative to the largest. */
+  size?: number;
+  /** Default: ink. */
+  tone?: ChartTone | null;
+  href?: string | null;
+}
+
+/** Config of a quadrant chart (data-fd-chart="quadrant"): the JSON inside the element, or charts.quadrant(el, config). */
+export interface QuadrantConfig {
+  type?: 'quadrant';
+  x?: QuadrantAxis;
+  y?: QuadrantAxis;
+  corners?: { topLeft?: QuadrantCorner; topRight?: QuadrantCorner; bottomLeft?: QuadrantCorner; bottomRight?: QuadrantCorner };
+  /** What the size of a point means, for the tooltip and the phone list. */
+  size?: { label?: string; format?: ChartFormat };
+  points?: QuadrantPoint[];
+  /** aria-label override. */
+  label?: string;
+  empty?: { title?: string; description?: string };
+  state?: 'loading' | 'empty';
+  /** Plot height in px, 160–900 (default data-height, else 360). */
+  height?: number;
+  /** false hides the names beside the points (data-labels="none"). */
+  labels?: boolean;
+}
+
 /* ==========================================================================
    Theme record (spec/ARCHITECTURE.md section 3) and the tweaks state
    ========================================================================== */
@@ -1160,10 +1207,12 @@ export declare namespace charts {
   export function init(root?: ParentNode): void;
   /** Format a value with a named format or a custom function ("–" for null). */
   export function formatValue(value: number | null | undefined, format?: ChartFormat | ChartFormatter, long?: boolean): string;
-  /** Draw (or redraw) a chart from a config object. Returns el. */
-  export function render<E extends HTMLElement>(el: E, config?: ChartConfig): E;
+  /** Draw (or redraw) a chart from a config object (a QuadrantConfig for a quadrant). Returns el. */
+  export function render<E extends HTMLElement>(el: E, config?: ChartConfig | QuadrantConfig): E;
   /** Merge a patch into the current config and redraw (no entrance animation). Returns el. */
-  export function update<E extends HTMLElement>(el: E, patch?: ChartConfig): E;
+  export function update<E extends HTMLElement>(el: E, patch?: ChartConfig | QuadrantConfig): E;
+  /** Draw (or redraw) a quadrant chart from a config, or from the element's JSON when none is given. Returns el. */
+  export function quadrant<E extends HTMLElement>(el: E, config?: QuadrantConfig): E;
   /** Show or hide one series (what a legend click does); never hides the last one. Fires fd:change. */
   export function toggleSeries(el: HTMLElement, index: number, visible?: boolean): void;
   /** Redraw a .fd-sparkline from its data-* attributes. */

@@ -22,6 +22,7 @@ export const EXTRA_ROOTS = {
   'fd-feature-row': 'Content',
   'fd-file': 'Forms',                  // an uploaded file row (fd-filelist is its list)
   'fd-glyph': 'Texture & loading',
+  'fd-initial': 'Shell',               // a dot-matrix mark drawn from a name's first letter
   'fd-listbox': 'Forms',
   'fd-matrix': 'Forms',                // a table of switches
   'fd-model-menu': 'Agent',
@@ -34,7 +35,10 @@ export const EXTRA_ROOTS = {
   'fd-pick': 'Overlays',               // pickable object card
   'fd-reason': 'Forms',                // a disabled control and the reason it is off
   'fd-result': 'Agent',
+  'fd-running': 'Shell',               // the running-now pill and its popover list
   'fd-scroller': 'Content',
+  'fd-service-status': 'Shell',        // the top bar's service status
+  'fd-shortcuts': 'Shell',             // the shortcut sheet's list
   'fd-swatch': 'Forms',                // a colour that is content
   'fd-tooltip': 'Overlays',            // the vocabulary lists it only as the part of data-fd-tooltip
   'fd-usage-chip': 'Agent',
@@ -58,9 +62,11 @@ export const PART_OF = {
   'fd-fade': 'fd-rise',                // entrance animations
   'fd-filelist': 'fd-file',
   'fd-free-runs': 'fd-usage-chip',
+  'fd-keys-hint': 'fd-shortcuts',      // the status line while a key sequence waits
   'fd-num': 'fd-mono',                 // tabular figures
   'fd-options': 'fd-option',
   'fd-overlay-count': 'fd-popover',    // count badge on a trigger
+  'fd-quadrant': 'fd-chart',           // the quadrant is a type of chart (data-fd-chart="quadrant"), drawn into an fd-chart
   'fd-rail-tip': 'fd-sidebar',         // the collapsed sidebar's tip
   'fd-spin': 'fd-spinner',
   'fd-stat': 'fd-stats',               // the figure and its row, delta and unit belong to the stats block
@@ -195,6 +201,7 @@ export const FREE_ATTRIBUTES = {
   kv: ['data-copy'],                   // the text a row copies
   menu: ['data-fd-submenu'],           // the id of the sub-menu
   pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
+  running: ['data-fd-running'],        // the id of the popover whose rows the pill counts
   secret: ['data-noun'],               // the word the buttons name: "password", "API key", "signing secret"
   steps: ['data-current'],             // the 0-based index of the current step (nav.js header: data-current="n")
   'doc-endpoint': ['data-in'],         // where a parameter goes (body, query, path, header…); docsite.js's try form reads body, query and path
@@ -205,7 +212,7 @@ export const FREE_ATTRIBUTES = {
  * svg.fd-icon[data-icon] (EXPORT I2), takes it on the icon's root; rules such as `.fd-badge > i[data-icon]` give it to
  * the components below, on their root or on the part a drawn icon may carry, where it would otherwise allow only the
  * bare attribute. data-icon-fill stays a presence flag (`.fd-icon[data-icon-fill]`). */
-for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline']) {
+for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline', 'service-status']) {
   (FREE_ATTRIBUTES[id] ??= []).push('data-icon');
 }
 

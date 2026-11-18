@@ -1,11 +1,12 @@
 {
   "id": "command",
   "job": "Jump to a page or run an action by typing, from anywhere.",
-  "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant.",
+  "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant. command.records() adds a group of found records, searched as you type.",
   "useWhen": [
     "An app has many pages and actions and power users want the keyboard.",
     "People should reach a recent run, a doc or a setting without navigating.",
-    "Actions need shortcuts and hints shown beside them."
+    "Actions need shortcuts and hints shown beside them.",
+    "A search should return records, such as runs, keys or monitors, beside pages and actions: register a records group."
   ],
   "avoidWhen": [
     {
@@ -53,6 +54,14 @@
     {
       "name": "empty",
       "how": "fd-command-empty is shown when nothing matches"
+    },
+    {
+      "name": "records loading",
+      "how": "aria-busy=\"true\" on the .fd-command-group[data-records]; a .fd-command-note says it is searching"
+    },
+    {
+      "name": "records failed",
+      "how": ".fd-command-note[data-state=\"error\"] in the records group"
     }
   ],
   "variants": [
@@ -106,6 +115,10 @@
     {
       "class": "fd-command-foot",
       "role": "A key legend row."
+    },
+    {
+      "class": "fd-command-note",
+      "role": "One quiet line in a records group: searching, or the error."
     }
   ],
   "related": [
@@ -135,6 +148,7 @@
   "example": "docs/overlays.html#command-palette",
   "provenance": [
     "docs/overlays.html",
+    "docs/shell.html#palette-records",
     "fire/components/overlays.css",
     "fire/js/overlays.js"
   ],

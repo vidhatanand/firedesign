@@ -96,6 +96,15 @@
  *   cancelable fd:select on the item (detail: { value, item, data }).
  *   command.open() · command.close() · command.toggle() ·
  *   command.register([{ id, label, group, icon, hint, shortcut, keywords, href, perform }]) → unregister
+ *   command.records({ group, search, icon, min, delay, limit, palette, empty, error }) → unregister
+ *     A group of found records, as against actions: `search(query, { signal })` returns (or resolves to) an array of
+ *     { id, label, hint, href, icon, keywords, perform, data } for the typed query. It runs after `delay` ms (default
+ *     160) once the query has `min` characters (default 2), and an older search is aborted by `signal` when the query
+ *     changes. The group is rendered as `.fd-command-group[data-records]` with `aria-busy` while it waits (a
+ *     `.fd-command-note` row says "Searching…"), is hidden when the query is too short or finds nothing, and its items
+ *     carry `data-found`: the palette's own filter never hides or re-ranks them. `limit` caps the rows (default 5).
+ *     `error` (default "Could not search {group}") shows in a note when the search rejects. Selecting a record fires
+ *     fd:select like any item, with detail.data the record. The palette's empty state waits for every search to settle.
  */
 import { $$, on, once, emit, position, autoUpdate, focusables, trapFocus, ensureId, clamp, reducedMotion, label as fdLabel } from './core.js';
 import { icon } from './icons.js';
@@ -1567,6 +1576,7 @@ function filterCommand(palette, query) {
   const groups = $$('.fd-command-group', palette);
   const containers = groups.length ? groups : [palette.querySelector('.fd-command-list')].filter(Boolean);
   for (const group of containers) {
+    if (group.hasAttribute?.('data-records')) continue; // found by a search: command.records() manages it
     const scored = [];
     for (const item of $$('.fd-command-item', group)) {
       let match = q ? fuzzy(q, item.dataset.label || textOf(item)) : { score: 0, hits: [] };
@@ -1583,6 +1593,8 @@ function filterCommand(palette, query) {
     if (group.matches('.fd-command-group')) group.hidden = scored.length === 0;
     any = any || scored.length > 0;
   }
+  runRecords(palette, q);
+  any = any || $$('.fd-command-group[data-records]', palette).some((g) => !g.hidden);
   for (const empty of $$('.fd-command-empty', palette)) {
     empty.hidden = any;
     for (const slot of $$('[data-fd-command-query]', empty)) slot.textContent = q;
@@ -1590,6 +1602,86 @@ function filterCommand(palette, query) {
   const list = palette.querySelector('.fd-command-list');
   if (list) list.scrollTop = 0;
   setActive(palette, commandItems(palette)[0] || null, false);
+}
+
+/* ---------- Records: groups of found items, searched as the query changes ---------- */
+const recordSources = new WeakMap();   // palette -> Set of sources
+
+function recordGroup(palette, source) {
+  const list = palette.querySelector('.fd-command-list');
+  let group = $$('.fd-command-group[data-records]', list).find((g) => g.dataset.records === source.group);
+  if (group) return group;
+  group = doc.createElement('div');
+  group.className = 'fd-command-group';
+  group.dataset.records = source.group;
+  group.hidden = true;
+  const head = doc.createElement('p');
+  head.className = 'fd-command-group-label';
+  head.textContent = source.group;
+  group.append(head);
+  list.append(group);
+  setupGroup(group);
+  return group;
+}
+
+function recordNote(group, text, state) {
+  for (const n of $$('.fd-command-note', group)) n.remove();
+  if (!text) return;
+  const note = doc.createElement('p');
+  note.className = 'fd-command-note';
+  note.dataset.state = state;
+  note.setAttribute('role', state === 'error' ? 'alert' : 'status');
+  note.textContent = text;
+  group.append(note);
+}
+
+function clearRecords(group) {
+  for (const n of $$('.fd-command-item, .fd-command-note', group)) n.remove();
+  group.removeAttribute('aria-busy');
+  group.hidden = true;
+}
+
+function settleCommand(palette) {
+  const any = commandItems(palette).length > 0 || $$('.fd-command-group[data-records]', palette).some((g) => !g.hidden);
+  for (const empty of $$('.fd-command-empty', palette)) empty.hidden = any;
+  if (!palette.querySelector('.fd-command-item[data-active]')) setActive(palette, commandItems(palette)[0] || null, false);
+}
+
+function runRecords(palette, query) {
+  const q = query.trim();
+  for (const source of recordSources.get(palette) || []) {
+    clearTimeout(source.timer);
+    source.abort?.abort();
+    const group = recordGroup(palette, source);
+    if (q.length < source.min) { clearRecords(group); continue; }
+    group.hidden = false;
+    group.setAttribute('aria-busy', 'true');
+    if (!group.querySelector('.fd-command-item')) recordNote(group, `Searching ${source.group.toLowerCase()}…`, 'loading');
+    source.timer = setTimeout(async () => {
+      const control = new AbortController();
+      source.abort = control;
+      let found = [];
+      let failed = false;
+      try { found = await source.search(q, { signal: control.signal }); } catch { failed = true; }
+      if (control.signal.aborted || !group.isConnected) return;
+      for (const n of $$('.fd-command-item', group)) n.remove();
+      group.removeAttribute('aria-busy');
+      if (failed) {
+        recordNote(group, source.error, 'error');
+      } else {
+        recordNote(group, '', '');
+        for (const def of (found || []).slice(0, source.limit)) {
+          const item = buildCommandItem({ ...def, icon: def.icon ?? source.icon });
+          item.setAttribute('data-found', '');
+          group.append(item);
+          setupCommandItem(item);
+          commandData.set(item, def);
+        }
+        group.hidden = !group.querySelector('.fd-command-item');
+      }
+      settleCommand(palette);
+    }, source.delay);
+  }
 }
 
 function setActive(palette, item, scroll = true) {
@@ -1650,7 +1742,52 @@ function onCommandKey(event, palette) {
   }
 }
 
+function buildCommandItem(def) {
+  const item = doc.createElement(def.href ? 'a' : 'div');
+  item.className = 'fd-command-item';
+  if (def.href) item.href = def.href;
+  if (def.id != null) item.dataset.value = String(def.id);
+  if (def.keywords) item.dataset.keywords = [].concat(def.keywords).join(' ');
+  if (def.icon) item.insertAdjacentHTML('beforeend', icon(def.icon));
+  const label = doc.createElement('span');
+  label.className = 'fd-command-item-label';
+  label.textContent = def.label;
+  item.append(label);
+  if (def.hint) {
+    const hint = doc.createElement('span');
+    hint.className = 'fd-command-item-hint';
+    hint.textContent = def.hint;
+    item.append(hint);
+  }
+  for (const key of String(def.shortcut || '').split(/\s+/).filter(Boolean)) {
+    const kbd = doc.createElement('kbd');
+    kbd.className = 'fd-kbd';
+    kbd.textContent = key;
+    item.append(kbd);
+  }
+  return item;
+}
+
 export const command = {
+  records(def, { palette } = {}) {
+    const p = byId(def.palette || palette) || palettes()[0] || createPalette();
+    setupCommand(p);
+    const source = {
+      group: def.group || 'Records', search: def.search, icon: def.icon,
+      min: def.min ?? 2, delay: def.delay ?? 160, limit: def.limit ?? 5,
+      error: def.error || `Could not search ${(def.group || 'records').toLowerCase()}`,
+    };
+    const set = recordSources.get(p) || new Set();
+    set.add(source);
+    recordSources.set(p, set);
+    recordGroup(p, source);
+    return () => {
+      clearTimeout(source.timer);
+      source.abort?.abort();
+      set.delete(source);
+      recordGroup(p, source).remove();
+    };
+  },
   open(ref) { const p = byId(ref) || palettes()[0]; return p ? openDialog(p, { trigger: doc.activeElement }) : null; },
   close(ref) { const p = byId(ref) || palettes().find((d) => d.open); if (p) closeDialog(p); },
   toggle(ref) { const p = byId(ref) || palettes()[0]; if (!p) return; if (p.open) closeDialog(p); else openDialog(p, { trigger: doc.activeElement }); },
@@ -1672,28 +1809,7 @@ export const command = {
         list.append(group);
         setupGroup(group);
       }
-      const item = doc.createElement(def.href ? 'a' : 'div');
-      item.className = 'fd-command-item';
-      if (def.href) item.href = def.href;
-      if (def.id != null) item.dataset.value = String(def.id);
-      if (def.keywords) item.dataset.keywords = [].concat(def.keywords).join(' ');
-      if (def.icon) item.insertAdjacentHTML('beforeend', icon(def.icon));
-      const label = doc.createElement('span');
-      label.className = 'fd-command-item-label';
-      label.textContent = def.label;
-      item.append(label);
-      if (def.hint) {
-        const hint = doc.createElement('span');
-        hint.className = 'fd-command-item-hint';
-        hint.textContent = def.hint;
-        item.append(hint);
-      }
-      for (const key of String(def.shortcut || '').split(/\s+/).filter(Boolean)) {
-        const kbd = doc.createElement('kbd');
-        kbd.className = 'fd-kbd';
-        kbd.textContent = key;
-        item.append(kbd);
-      }
+      const item = buildCommandItem(def);
       group.append(item);
       setupCommandItem(item);
       commandData.set(item, def);

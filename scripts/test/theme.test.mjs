@@ -228,7 +228,8 @@ test('validateTheme names the field, lists the choices, and notes the fonts a pa
   assert.equal(validateTheme({ dials: { blur: 1 } }).errors[0], '/dials/blur: unknown field');
   const v = validateTheme({ type: { display: 'Fraunces', sans: 'Inter' } });
   assert.ok(v.ok);
-  assert.deepEqual(v.notes, ['The page must load Fraunces, Inter (an @font-face for each): Fire ships only the families of its type sets.']);
+  // Fraunces is one of Fire's own families (typefaces.css loads it); Inter is not.
+  assert.deepEqual(v.notes, ['The page must load Inter (an @font-face for each; node scripts/fonts.mjs add "<family>" fetches a catalogue family\'s files): Fire ships only the families of its type sets.']);
   assert.deepEqual(validateTheme({ type: 'editorial' }).notes, []);
 });
 
@@ -279,8 +280,8 @@ test('fromThemeRecord refuses what the Tweaks panel cannot hold', () => {
 /* ---------- expandTheme / themeToCss ---------- */
 
 test('expandTheme: defaults leave no trace; dials and names map as Tweaks maps them', () => {
-  assert.deepEqual(expandTheme({}), { tokens: {}, attributes: {}, notes: [] });
-  assert.deepEqual(expandTheme(DEFAULT_RECORD), { tokens: {}, attributes: {}, notes: [] });
+  assert.deepEqual(expandTheme({}), { tokens: {}, attributes: {}, faces: [], notes: [] });
+  assert.deepEqual(expandTheme(DEFAULT_RECORD), { tokens: {}, attributes: {}, faces: [], notes: [] });
   const e = expandTheme({ palette: 'volt', type: 'book', dials: { corners: 0.5, lines: 2, motion: 'slow', texture: 0, density: 'compact', textSize: 'lg', contrast: 'high' } });
   assert.deepEqual(e.attributes, { 'data-palette': 'volt', 'data-type': 'book', 'data-density': 'compact', 'data-text-size': 'lg', 'data-contrast': 'high' });
   assert.deepEqual(e.tokens, { '--fd-radius-scale': '0.5', '--fd-hairline': '2px', '--fd-motion': '1.75', '--fd-texture': '0' });
@@ -290,7 +291,7 @@ test('expandTheme: defaults leave no trace; dials and names map as Tweaks maps t
   assert.deepEqual(g.tokens['--fd-line'], paletteFrom({ from: 'accent', accent: '#1f6feb', neutral: 'cool' }).contrast['--fd-line']);
   // Families become the three font tokens.
   const f = expandTheme({ type: { display: 'Fraunces', mono: 'Berkeley Mono' } });
-  assert.equal(f.tokens['--fd-font-display'], '"Fraunces", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif');
+  assert.equal(f.tokens['--fd-font-display'], '"Fraunces", "Fraunces Fallback", ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif');
   assert.equal(f.tokens['--fd-font-mono'], '"Berkeley Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace');
   assert.equal(f.tokens['--fd-font-sans'], undefined);
   assert.throws(() => expandTheme({ palette: 'neon' }), /invalid theme record/);

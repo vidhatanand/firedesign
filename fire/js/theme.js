@@ -11,11 +11,18 @@
  *     "fire": "0.6.1",                          the Fire release the record was written against (optional; pins the expander)
  *     "palette": "ember",                       a palette name, or a spec (below)
  *     "tone": { "hue": 0, "vivid": 100, "light": 0, "warmth": 0 },
- *     "type": "geist",                          a type set name, or { "display", "sans", "mono" } families the page loads
+ *     "type": "geist",                          a type set name, or a type set spec (below)
  *     "dials": { "corners": 1, "density": "comfortable", "lines": 1, "textSize": "md",
  *                "contrast": "default", "motion": "default", "texture": 1 },
  *     "signature": { "field": "auto", "mark": "auto", "cell": "auto", "ramp": "auto", "marks": "crosses", "intensity": 1 }
  *   }
+ *   Type set spec (fire/js/typefaces.js; the families are in contract/fonts.json):
+ *     { "display"?, "sans"?, "mono"?, "displayWeight"?: 600, "displayTracking"?: -0.02,
+ *       "headingCase"?: "sentence" | "upper", "figures"?: "proportional" | "tabular" }
+ *     At most two families plus a mono; an interface (sans) family has an x-height ratio of at least 0.5; a display-only
+ *     family cannot be the interface face; the mono is a mono. Families Fire ships are loaded by fire.css; the others
+ *     the page loads (node scripts/fonts.mjs add "<family>"), and expandTheme writes each one's metric-matched fallback
+ *     @font-face so swapping a font does not move the layout.
  *   Palette specs:
  *     { "from": "accent", "accent": "#1f6feb", "neutral"?: "pure" | "cool" | "warm" | "tinted" | <hue°>, "on"?: "white" | "dark" }
  *     { "from": "brand", "colors": ["#14342b", "#f2c14e"] }            1–3 colours
@@ -37,7 +44,9 @@
  *   texture   0…1.5   --fd-texture               density   compact · comfortable · spacious → data-density
  *   textSize  sm · md · lg → data-text-size      contrast  default · high → data-contrast="high"
  *   A named palette is data-palette; a toned or generated palette is written out as its nineteen colour tokens.
- *   A type set is data-type; families are written to --fd-font-display, --fd-font-sans and --fd-font-mono.
+ *   A type set is data-type; a spec's families are written to --fd-font-display, --fd-font-sans and --fd-font-mono (each
+ *   with its fallback face first), displayWeight to --fd-weight-display, displayTracking to --fd-ls-display and
+ *   --fd-ls-h1 to -h3, headingCase "upper" to data-heading-case="upper" and figures "tabular" to data-figures="tabular".
  *   Defaults leave no trace: no attribute, no token. The light / dark / system choice is the viewer's, not the
  *   look's, so a record has no theme field.
  *
@@ -46,7 +55,7 @@
  *   FIRE_VERSION                 the Fire release this module belongs to (a test keeps it equal to package.json)
  *   DEFAULT_RECORD               the full record of Fire's default look
  *   INPUT_TOKENS                 the tokens a record sets: the palette's colours, the three families, the dial variables
- *   expandTheme(record)          → { tokens: { name: [light, dark] | value }, attributes: { 'data-palette': … }, notes }
+ *   expandTheme(record)          → { tokens: { name: [light, dark] | value }, attributes: { 'data-palette': … }, faces: [@font-face …], notes }
  *   themeToCss(record, { selector = ':root' })   → a stylesheet string (with the attributes to set, in its comment)
  *   paletteFrom(spec)            → { name, label, note, tokens, contrast, spec, notes }, the same form as the presets
  *   validateTheme(record)        → { ok, errors, notes }
@@ -57,7 +66,7 @@ import {
   PALETTES, PALETTE_TOKENS, DEFAULT_PALETTE, TONE_DEFAULT, TONE_RANGE, isDefaultTone, paletteTokens, toneTokens,
   cssValue, contrast, toOklch, oklch, expandSpec, shift, nearBlack,
 } from './palettes.js';
-import { TYPEFACES, DEFAULT_TYPEFACE } from './typefaces.js';
+import { TYPEFACES, DEFAULT_TYPEFACE, checkTypeSpec, typeSpecTokens } from './typefaces.js';
 import { paletteFailures } from './palette-rules.js';
 
 /* ==========================================================================
@@ -96,6 +105,7 @@ export const DIAL_TOKENS = Object.freeze({ corners: '--fd-radius-scale', lines: 
    (--fd-space-scale is density's: data-density sets it with the control sizes). */
 export const INPUT_TOKENS = Object.freeze([
   ...PALETTE_TOKENS, '--fd-font-display', '--fd-font-sans', '--fd-font-mono',
+  '--fd-weight-display', '--fd-ls-display', '--fd-ls-h1', '--fd-ls-h2', '--fd-ls-h3',
   '--fd-space-scale', '--fd-radius-scale', '--fd-hairline', '--fd-motion', '--fd-texture',
 ]);
 export const NEUTRALS = Object.freeze(['pure', 'cool', 'warm', 'tinted']);
@@ -109,17 +119,12 @@ export const DEFAULT_RECORD = Object.freeze({
 const PALETTE_NAMES = PALETTES.map((p) => p.name);
 const TYPE_NAMES = TYPEFACES.map((t) => t.name);
 const SPEC_STEPS = ['bg', 'bgSunken', 'surface', 'raised', 'lineFaint', 'line', 'lineStrong', 'ink'];
-/* The fallbacks tokens.css puts behind Geist and Geist Mono. */
-const SANS_STACK = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-const MONO_STACK = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
 /* ==========================================================================
    Validation (the same rules as contract/theme.schema.json, plus Fire's lists)
    ========================================================================== */
 
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-/* A family name, quoted in CSS: letters, digits, spaces and . _ & + ' - (no quotes, slashes or braces). */
-const FAMILY = /^[\p{L}\p{N}][\p{L}\p{N} '._&+-]{0,63}$/u;
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
 const inRange = (v, [min, max]) => isNum(v) && v >= min && v <= max;
@@ -182,13 +187,9 @@ function checkType(v, errors, notes) {
     if (!TYPE_NAMES.includes(v)) errors.push(`${P}: unknown type set ${JSON.stringify(v)} (one of ${TYPE_NAMES.join(', ')})`);
     return;
   }
-  if (!isObj(v)) { errors.push(`${P}: must be a type set name or { display, sans, mono } families`); return; }
-  only(v, Object.keys(FONT_TOKENS), P, errors);
-  const given = Object.keys(FONT_TOKENS).filter((k) => v[k] !== undefined);
-  if (!given.length) errors.push(`${P}: name at least one of display, sans, mono`);
-  for (const k of given) if (typeof v[k] !== 'string' || !FAMILY.test(v[k])) errors.push(`${P}/${k}: must be a font family name (letters, digits, spaces and . _ & + ' -, up to 64)`);
-  const families = [...new Set(given.map((k) => v[k]).filter((f) => typeof f === 'string' && FAMILY.test(f)))];
-  if (families.length) notes.push(`The page must load ${families.join(', ')} (an @font-face for each): Fire ships only the families of its type sets.`);
+  const r = checkTypeSpec(v, { path: P });
+  errors.push(...r.errors);
+  notes.push(...r.notes);
 }
 
 /** Check a record against the schema's rules and Fire's palette and type set lists. */
@@ -455,14 +456,13 @@ export function paletteFrom(input) {
    Expansion
    ========================================================================== */
 
-const fontStack = (family, voice) => `"${family}", ${voice === 'mono' ? MONO_STACK : SANS_STACK}`;
-
 /** A record → the tokens and attributes that make the look, as the Tweaks panel writes them. */
 export function expandTheme(record = {}) {
   const { notes: found } = assertValid(record);
   const r = complete(record);
   const tokens = {};
   const attributes = {};
+  const faces = [];
   const notes = [...found];
   const toned = !isDefaultTone(r.tone);
 
@@ -483,7 +483,10 @@ export function expandTheme(record = {}) {
   if (typeof r.type === 'string') {
     if (r.type !== DEFAULT_TYPEFACE) attributes['data-type'] = r.type;
   } else {
-    for (const [voice, token] of Object.entries(FONT_TOKENS)) if (r.type[voice]) tokens[token] = fontStack(r.type[voice], voice);
+    const t = typeSpecTokens(r.type);
+    Object.assign(tokens, t.tokens);
+    Object.assign(attributes, t.attributes);
+    faces.push(...t.faces);
   }
 
   const d = r.dials;
@@ -495,7 +498,7 @@ export function expandTheme(record = {}) {
   if (d.textSize !== 'md') attributes['data-text-size'] = d.textSize;
   if (d.contrast === 'high') attributes['data-contrast'] = 'high';
   for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (r.signature[k] !== SIGNATURE_DEFAULT[k]) attributes[name] = String(r.signature[k]);
-  return { tokens, attributes, notes };
+  return { tokens, attributes, faces, notes };
 }
 
 const fmtX = (v) => `${Number(v.toFixed(3))}×`;
@@ -508,13 +511,13 @@ function summaryOf(r) {
 /** A record → a stylesheet: the tokens on `selector`, the attributes to set in its comment. Load it after fire.css. */
 export function themeToCss(record = {}, { selector = ':root' } = {}) {
   if (typeof selector !== 'string' || !selector.trim() || /[{};]|\/\*|\*\//.test(selector)) throw new TypeError(`[theme] not a usable selector: ${selector}`);
-  const { tokens, attributes, notes } = expandTheme(record);
+  const { tokens, attributes, faces, notes } = expandTheme(record);
   const r = complete(record);
   const attrs = Object.entries(attributes).map(([k, v]) => `${k}="${v}"`);
   const where = selector === ':root' ? '<html>' : `the element ${selector} matches`;
   const lines = [`On ${where}: ${attrs.length ? attrs.join(' ') : 'nothing (default attributes)'}`];
   if (attributes['data-palette']) lines.push('data-palette needs fire/palettes.css.');
-  if (attributes['data-type']) lines.push('Type sets need fire/typefaces.css (part of fire.css).');
+  if (attributes['data-type'] || attributes['data-heading-case'] || attributes['data-figures']) lines.push('Type sets, heading case and figures need fire/typefaces.css (part of fire.css).');
   if (selector !== ':root' && PALETTE_TOKENS.some((k) => k in tokens)) lines.push('Off <html>, give that element data-palette too, so the text steps and fills recompute from these colours.');
   lines.push(...notes, 'Load this after fire.css.');
   const decls = Object.entries(tokens).map(([k, v]) => `  ${k}: ${Array.isArray(v) ? cssValue(v) : v};`);
@@ -522,6 +525,7 @@ export function themeToCss(record = {}, { selector = ':root' } = {}) {
     `/* Fire theme: ${summaryOf(r)}`,
     ...lines.map((n) => `   ${n}`),
     '*/',
+    ...faces,
     `${selector} {`,
     ...(decls.length ? decls : ['  /* nothing overridden: the default look */']),
     '}',

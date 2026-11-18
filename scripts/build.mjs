@@ -12,6 +12,7 @@ const check = process.argv.includes('--check');
 // Order matters: the catalogue reads the elements' manifest; the Facet export reads the contract and the catalogue.
 const steps = [
   ['build-palettes.mjs', check ? ['--check'] : []],
+  ['build-typefaces.mjs', check ? ['--check'] : []],   // fire/typefaces.css and fire/js/fonts.js from the specs
   ['build-elements.mjs', check ? ['--check'] : []],
   ['build-contract.mjs', check ? ['--check'] : []],
   ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card

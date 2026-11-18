@@ -2,6 +2,56 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.6.0 — 18 Nov 2026
+
+Fire becomes one system for plain pages, Lit, React and Next.js, Vue, and Facet. Its HTML and CSS stay the
+contract: no class, attribute, token, event or export was removed or renamed, and a product that copies `fire/` keeps
+working unchanged. Read `spec/ARCHITECTURE.md` for how the parts fit.
+
+### Added
+
+- **Theme record** (`contract/theme.schema.json`, `fire/js/theme.js`): a product's look as one JSON object (palette,
+  tone, type set, dials). `expandTheme`, `themeToCss`, `validateTheme`, `toThemeRecord` and `fromThemeRecord`;
+  `paletteFrom()` builds a palette from an accent or one to three brand colours that passes every contrast rule the
+  presets pass, and notes anything it moved. Tweaks gains "Copy theme". `contract/looks/` holds a record per palette.
+- **Contract** (`contract/fire-contract.json`): every global token with type, tier (input, scale, derived), group,
+  defaults and its Facet role.
+- **Catalogue and cards** (`contract/catalog.json`, `contract/cards/`): 142 components with their classes, the
+  values each attribute takes (tied to evidence for that component), state attributes, events, elements, icons,
+  tokens and templates, and a card for every component: job, purpose, when to use, when not and what instead,
+  other names, surfaces, data, states, variants, keyboard and an example. Agents search the cards before composing.
+- **Custom elements** (`fire/elements.js`, Lit 3.3.3 bundled; `fire/LICENSE-lit.txt`): `fd-icon`, `fd-chart`,
+  `fd-code`, `fd-texture`, for the four components that build their own DOM. Each element is its component's root,
+  renders the same DOM and pixels as the markup form, and shares Fire's modules with `fire.js`.
+- **Types**: `fire/fire.d.ts` (every export, the `fd:*` event map, the theme record), `fire/elements.d.ts`,
+  `fire/js/icons.d.ts`, `fire/fire.css.d.ts`.
+- **`fire-design/react`**: `FireIcon`, `FireChart`, `FireCode`, `FireTexture` (typed props and event props),
+  `useFire`, `useFireEvent`, and the exporter's helpers. **`fire-design/vue`**: the plugin, the `v-fire` directive,
+  a router hook, `fireVueOptions()` for `vite.config`, and typed elements and events.
+- **Starters** (`starters/lit-vite`, the default; `starters/next`; `starters/vue-vite`): the shell and three
+  screens converted from Fire's templates, a theme record, a strict Content Security Policy, and `npm run check`,
+  which proves each screen renders like the template in Chromium, WebKit and Firefox, at 1440 and 375, light and
+  dark, with the lint clean and no CSP violations (and clean hydration in Next.js).
+- **Export rules** (`spec/EXPORT.md`, `spec/export-map.json`): how Fire markup is written in each framework,
+  verified against the pinned versions; what an exporter (Facet's) implements.
+- **Checks that run in any project**: `scripts/lint-markup.mjs` (markup against the catalogue: HTML, JSX/TSX, Vue,
+  Lit templates) and `scripts/render-equal.mjs` (a page against its reference: structure, computed styles, pixels).
+- **Facet** (`facet/`): Fire as a Facet design system: `content.json` (accepted by Facet's own check), the files
+  Facet carries with their hashes and the token aliases, and the theme record.
+- **`npm run check`** runs every generator in check mode, the audit, the palette rules and 120+ tests.
+
+### Changed
+
+- `package.json` is a real package (`fire-design`) with `exports` for every part, and pinned development tools.
+- Charts redraw on every font load, so a chart drawn after navigation is measured with the real font.
+- The docs overview's width switcher passes names, not pixel widths, and the German secret field on the Writing page names its buttons in its own language (both found by the new markup lint).
+
+### For products refreshing from 0.5.x
+
+Nothing to change in existing markup. To adopt the new parts: run the markup lint over your source and fix what it
+reports; in a framework app, follow `spec/EXPORT.md` (or start from the matching starter); keep your look as a theme
+record (Tweaks, "Copy theme").
+
 ## 0.5.1 — 18 Nov 2026
 
 Fixes and small extensions requested by Touchstone, Assay, Imprim and Fragmatic. No class or attribute was removed or renamed.

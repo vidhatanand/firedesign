@@ -1,6 +1,6 @@
 # Fire 0.6 architecture: one system for plain pages, Lit, React and Next.js, Vue, and Facet
 
-Status: decided for 0.6 by the Fire maintainer (18 Nov 2026). Every 0.6 work package follows this file. Where a
+Status: decided for 0.6 by the Fire maintainer (18 Nov 2026), and as built in v0.6.0. Every 0.6 work package follows this file. Where a
 package needs a choice this file does not make, it makes the smallest choice that keeps every rule below, and says so
 in its report.
 
@@ -154,11 +154,17 @@ base class holds the shared rules for future elements. Elements are registered b
   property bindings. Components extend nothing of Fire's; Fire's CSS is global, so Lit components render to light DOM
   (`createRenderRoot() { return this; }`) or adopt Fire's stylesheet.
 - **React 19 and Next.js**: markup in JSX per `spec/EXPORT.md`; `wrappers/react` gives typed components for the
-  elements (`@lit/react`), `useFire(ref)` (calls `init` on mount) and `useFireEvent(ref, 'fd:select', fn)` (JSX cannot
-  name an event with a colon). Fire's modules load in the browser only (a client component in Next.js); server
-  rendering emits plain Fire markup.
-- **Vue 3**: markup in templates per `spec/EXPORT.md`; `wrappers/vue` installs `isCustomElement` for `fd-` tags and a
-  `v-fire` directive (calls `init` on mount), and declares element types.
+  elements (`@lit/react`), `useFire(ref)` (calls `init` after every commit) and `useFireEvent(ref, 'fd:select', fn)`
+  (JSX cannot name an event with a colon). Fire's modules and elements load in the browser only, after hydration
+  (a client component in Next.js; importing `fire-design/elements` at the top of a module breaks server
+  rendering); server rendering emits plain Fire markup, with the icon sprite and `boot.js` in the document.
+- **Vue 3**: markup in templates per `spec/EXPORT.md`; `wrappers/vue` installs a `v-fire` directive (calls `init` on
+  mount and update) and a router hook, and declares element types. `isCustomElement` and `whitespace: 'preserve'`
+  go in the Vue plugin's `template.compilerOptions` in `vite.config` (`fireVueOptions()`), because
+  `app.config.compilerOptions` does not reach single-file components.
+- **Every bundler**: keep `light-dark()` as written. Vite's `build.cssTarget` and Next.js's browserslist must target
+  Chrome 123, Edge 123, Firefox 120 and Safari 17.5 or later, or the CSS minifier lowers `light-dark()` and
+  `color-scheme` overrides stop working (spec rules P5 and N6).
 
 ## 7. Checks
 

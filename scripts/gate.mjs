@@ -44,6 +44,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 import { ROOT, read } from './lib/source.mjs';
+import { MODULES } from './lib/catalog-assign.mjs';
 import { bitCount, parseTree, structuralFingerprint, structuralSimilarity, dHash, hashDistance, lookDistance } from './fingerprint.mjs';
 
 export const THRESHOLDS = { STRUCT: 0.7, LOOK: 0.06, JOB: 0.6, DRIFT: 0.12, MIN_NODES: 8, MIN_BITS: 24 };
@@ -203,6 +204,7 @@ export function readRelations() {
   const dir = path.join(ROOT, 'contract/cards');
   for (const f of fs.readdirSync(dir).filter((n) => n.endsWith('.json') && n !== 'card.schema.json' && n !== '_missing.json')) {
     const c = JSON.parse(read(path.join(dir, f)));
+    if (MODULES.some((m) => m.id === c.id)) continue;   // a module is not a component: it owns no specimen
     if (c.relation) rel.components[c.id] = c.relation;
     if (c.example) rel.examples[c.example.replace(/^docs\//, '')] = c.id;
   }

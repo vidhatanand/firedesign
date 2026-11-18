@@ -136,10 +136,17 @@ test('contract/index.json is current and complete', () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/catalog.json'), 'utf8'));
   assert.equal(fs.readFileSync(path.join(ROOT, 'contract/index.json'), 'utf8'), render(buildIndex(catalog)));
   const idx = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/index.json'), 'utf8'));
-  assert.equal(idx.entries.length, catalog.components.length + catalog.templates.length);
+  assert.equal(idx.entries.length, catalog.components.length + catalog.modules.length + catalog.templates.length);
+  assert.ok(idx.entries.some((e) => e.kind === "module" && e.id === "email"), "modules are in the index");
   for (const e of idx.entries) {
     for (const k of ['id', 'kind', 'name', 'family', 'job', 'aka', 'surfaces', 'data', 'use', 'not', 'docs']) assert.ok(e[k] !== undefined, `${e.id}.${k}`);
     assert.ok(e.surfaces.length && e.data.length && e.docs, e.id);
   }
   assert.ok(render(idx).length / 4 < 25000, 'the whole index stays readable in one pass');
+});
+
+test('fire find finds the email module', () => {
+  const r = spawnSync(process.execPath, ['scripts/find.mjs', 'send a sign-in email', '--json'], { cwd: ROOT, encoding: 'utf8' });
+  const top = JSON.parse(r.stdout)[0];
+  assert.deepEqual([top.id, top.kind], ['email', 'module']);
 });

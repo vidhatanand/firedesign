@@ -159,10 +159,10 @@ test('safety: escaping and validation', () => {
   assert.throws(() => renderEmail({ theme: { palette: 'nope' }, brand: BRAND, blocks: [{ type: 'divider' }] }), /palette/);
 });
 
-test('the card (fire/email/email.card.json) is valid against the card schema and names real components and docs', async () => {
+test('the card (contract/cards/email.json) is valid against the card schema and names real components and docs', async () => {
   const { default: Ajv2020 } = await import('ajv/dist/2020.js');
   const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/cards/card.schema.json'), 'utf8'));
-  const card = JSON.parse(fs.readFileSync(path.join(ROOT, 'fire/email/email.card.json'), 'utf8'));
+  const card = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/cards/email.json'), 'utf8'));
   const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
   assert.ok(validate(card), JSON.stringify(validate.errors));
   const ids = new Set(JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/catalog.json'), 'utf8')).components.map((c) => c.id));

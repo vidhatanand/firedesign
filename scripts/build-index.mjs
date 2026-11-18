@@ -1,6 +1,6 @@
 // node scripts/build-index.mjs [--check]
 // Builds contract/index.json: one compact entry per component, pattern, layout and template, small enough for an
-// agent to read whole. Reads contract/catalog.json (run build-catalog first); writes nothing else. Deterministic.
+// agent to read whole (modules, JS-only parts with a card, are kind "module"). Reads contract/catalog.json (run build-catalog first); writes nothing else. Deterministic.
 // Entry: id, kind, name, family, job, aka[], surfaces[], data[], use (first use-when), not [{when-less ids}] (the
 // "instead" ids of avoid-when that name a component or template), docs (docs/<page>.html#<section>, or a template path).
 // A template has no card, so its aka, surfaces and data come from TEMPLATE_META below (the judgement a template card
@@ -54,6 +54,14 @@ export function buildIndex(catalog) {
     entries.push({
       id: c.id, kind: c.kind, name: c.name, family: c.family, job: clean(k.job), aka: k.aka,
       surfaces: k.surfaces, data: k.data, use: clean(k.useWhen[0]), not, docs: c.docs || k.example,
+    });
+  }
+  for (const m of catalog.modules || []) {
+    const k = m.card;
+    const not = [...new Set(k.avoidWhen.map((a) => a.instead).filter((i) => ids.has(i) || tpl.has(i)))];
+    entries.push({
+      id: m.id, kind: 'module', name: m.name, family: 'Modules', job: clean(k.job), aka: k.aka,
+      surfaces: k.surfaces, data: k.data, use: clean(k.useWhen[0]), not, docs: m.docs,
     });
   }
   for (const t of catalog.templates) {

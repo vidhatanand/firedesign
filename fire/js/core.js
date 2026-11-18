@@ -213,17 +213,37 @@ export async function copyText(text) {
  *   2. the page dictionary: <script type="application/json" data-fd-labels>{"menu.open": "Menü öffnen"}</script>,
  *      parsed once (it is data, so a strict Content Security Policy allows it)
  *   3. `fallback`, the English default written at the call site.
- * {name} placeholders are filled from `vars`. Keys and English defaults (vars in braces):
+ * {name} placeholders are filled from `vars`. Keys and English defaults (vars in braces; scripts/test/label.test.mjs keeps this list, docs/writing.html#translating
+ * and the label() calls in fire/js the same):
  *   secret.show "Show {noun}" · secret.hide "Hide {noun}" · secret.copy "Copy {noun}" · secret.copied "Copied {noun}"
  *   search.options "Search options" · options.list "Options" · otp.char "Character {n} of {total}"
  *   token.remove "Remove {label}" · pairs.remove-row "Remove row" · pairs.remove-key "Remove {key}"
- *   pairs.remove-n "Remove row {n}" · textarea.tab "Tab inserts two spaces. To leave the field, press Escape, then Tab."
- *   nav.expand "Expand sidebar" · nav.collapse "Collapse sidebar" · menu.open "Open menu" · menu.close "Close menu"
- *   menu.title "Menu" · theme.switch "Theme: {theme}. Switch to {next}" · theme.light "Light" · theme.dark "Dark"
- *   theme.system "System" · copy.done "Copied" · copy.announce "Copied to clipboard" · copy.value "Copy value"
- *   copy.key "Copy {key}" · code.more "Show all {count} lines" · code.less "Show less" · table.scroll "Scrollable table"
- *   calendar.prev "Previous month" · calendar.next "Next month" · filter.selected "{count} selected"
- *   filter.none "None selected" · toast.region "Notifications" · toast.dismiss "Dismiss notification"
+ *   pairs.remove-n "Remove row {n}"
+ *   textarea.tab "Tab inserts two spaces. To leave the field, press Escape, then Tab."
+ *   datefield.invalid "Enter a real date, like {example}." · datefield.min "Pick {date} or later."
+ *   datefield.max "Pick {date} or earlier." · color.page "On the page" · color.accent "Against the accent"
+ *   color.page.pass "Readable as text" · color.page.warn "Marks and large text only"
+ *   color.page.fail "Too faint on the page" · color.accent.pass "Distinct from the accent"
+ *   color.accent.fail "Too close to the accent" · color.invalid "Enter a hex colour, like {example}."
+ *   confirm.partial "Matches so far." · confirm.match "Matches. You can continue."
+ *   confirm.mismatch "Differs at character {n}. Case and dashes count." · nav.expand "Expand sidebar"
+ *   nav.collapse "Collapse sidebar" · menu.open "Open menu" · menu.close "Close menu" · menu.title "Menu"
+ *   theme.switch "Theme: {theme}. Switch to {next}" · theme.light "Light" · theme.dark "Dark" · theme.system "System"
+ *   keys.general "General" · keys.go "Go to" · keys.then "then a key" · keys.then-short "then"
+ *   running.count "{n} running" · status.operational "All systems operational"
+ *   status.degraded "Degraded performance" · status.outage "Service outage"
+ *   status.maintenance "Scheduled maintenance" · copy.done "Copied" · copy.announce "Copied to clipboard"
+ *   copy.key "Copy {key}" · copy.value "Copy value" · code.more "Show all {count} lines" · code.less "Show less"
+ *   log.line "Line {n}" · table.scroll "Scrollable table" · calendar.prev "Previous month"
+ *   calendar.next "Next month" · filter.selected "{count} selected" · filter.none "None selected"
+ *   period.versus "vs {range}" · toast.region "Notifications" · toast.dismiss "Dismiss notification"
+ *   toast.undo "Undo" · toast.undone "Undone" · toast.undo-failed "Couldn’t undo" · toast.stopped "Stopped"
+ *   toast.nothing-sent "Nothing was sent." · commit.budget "{count} / {max} words" · commit.words "{count} words"
+ *   commit.empty "Write a reason first." · commit.short "Write at least {min} words."
+ *   commit.long "Keep it to {max} words. It has {count}."
+ *   draft.used "The draft is in the reason now. Edit it before you commit."
+ *   hold.note "Nothing is sent until the countdown ends." · hold.undo "Undo" · hold.action "Sending"
+ *   hold.start "{action} in {seconds} seconds. Undo or Escape stops it." · hold.undone "Stopped. Nothing was sent."
  */
 let dictionary;
 export function label(el, key, fallback, vars) {

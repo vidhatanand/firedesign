@@ -365,3 +365,15 @@ export const STATE_ATTRIBUTES = {
   'fd-input': { 'data-type': [] },
   'fd-textarea': { 'data-type': [] },
 };
+
+/**
+ * JS-only parts: a module with no CSS root class, so the class-based build cannot find it. id (also the card's file
+ * name, contract/cards/<id>.json), name, module (path from the repository root). The build reads the module's exports
+ * from its source. A module is not a component: the catalogue lists it under `modules`, `fire find` finds it (kind
+ * "module"), and the Facet export does not carry it.
+ */
+export const MODULES = [
+  { id: 'email', name: 'Email', module: 'fire/email/email.js' },
+  { id: 'initial-helpers', name: 'Initial mark helpers', module: 'fire/js/initial.js' },
+  { id: 'theme-record', name: 'Theme record', module: 'fire/js/theme.js' },
+];

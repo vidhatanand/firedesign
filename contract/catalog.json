@@ -26687,6 +26687,237 @@
       }
     }
   ],
+  "modules": [
+    {
+      "id": "email",
+      "name": "Email",
+      "module": "fire/email/email.js",
+      "exports": [
+        "emailColors",
+        "isRtl",
+        "renderEmail"
+      ],
+      "docs": "docs/email.html#examples",
+      "card": {
+        "id": "email",
+        "job": "Send a sign-in link, invitation, receipt or alert as an email that matches the product.",
+        "purpose": "A function, not a stylesheet: renderEmail({ theme, brand, preheader, blocks, locale }) returns an HTML part and a plain-text part. Colours come from the theme record as opaque hex, layout is presentation tables 560px wide with inline styles, dark mode is one prefers-color-scheme block, and the button works in Outlook. Nothing loads except the logo.",
+        "useWhen": [
+          "The product sends a transactional message: a sign-in link, a one-time code, an invitation, a receipt or an alert.",
+          "The email must carry the same palette as the app without a web font or a stylesheet."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The message is a marketing campaign with images and layouts a designer owns.",
+            "instead": "Use the email service's own template editor."
+          },
+          {
+            "when": "The news belongs inside the app, where the person is already looking.",
+            "instead": "toast"
+          },
+          {
+            "when": "The page is a screen in the browser, not a message.",
+            "instead": "screen"
+          }
+        ],
+        "aka": [
+          "transactional email",
+          "email template",
+          "html email",
+          "notification email"
+        ],
+        "surfaces": [
+          "email"
+        ],
+        "data": [
+          "text",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "no logo",
+            "how": "omit brand.logoUrl; a square in the accent colour carries the first letter of brand.name"
+          },
+          {
+            "name": "right to left",
+            "how": "locale \"ar\", \"he\", \"fa\" or \"ur\" sets dir=\"rtl\""
+          },
+          {
+            "name": "no fallback link",
+            "how": "fallback: false on a button block"
+          }
+        ],
+        "variants": [],
+        "parts": [],
+        "related": [],
+        "keyboard": [],
+        "example": "docs/email.html#examples",
+        "provenance": [
+          "fire/email/email.js",
+          "docs/email.html",
+          "scripts/test/email.test.mjs"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "initial-helpers",
+      "name": "Initial mark helpers",
+      "module": "fire/js/initial.js",
+      "exports": [
+        "INITIAL_TONES",
+        "initialChar",
+        "initialMark",
+        "initialRows",
+        "initialTone"
+      ],
+      "docs": "docs/shell.html#initial-mark",
+      "card": {
+        "id": "initial-helpers",
+        "job": "Draw an organisation's first-letter mark on a server or in an email, with no DOM.",
+        "purpose": "Pure functions from fire/js/initial.js: initialMark(name) returns the dot-matrix SVG as a string in currentColor, initialRows(name) returns seven strings of five 0 and 1 cells for a mail client that draws no SVG, and initialTone(name) returns the tone the name maps to. The same name always gives the same glyph and tone. In a page, data-fd-initial draws the same mark.",
+        "useWhen": [
+          "A server-rendered page, a PDF or an email needs the mark an organisation without a logo shows in the app.",
+          "The tone of a name is needed in code, for example to colour a row in a list you build yourself."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The page is in a browser and the markup is yours to write.",
+            "instead": "initial"
+          },
+          {
+            "when": "A person's initials in a box under 28px.",
+            "instead": "avatar"
+          }
+        ],
+        "aka": [
+          "generated logo function",
+          "initial mark function",
+          "placeholder logo",
+          "dot matrix letter"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "labelled",
+            "how": "initialMark(name, { label: true }) adds role=\"img\" and an aria-label"
+          },
+          {
+            "name": "other first character",
+            "how": "a character that is not A-Z or 0-9 draws a diamond"
+          }
+        ],
+        "variants": [],
+        "parts": [],
+        "related": [
+          "initial",
+          "avatar"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#initial-mark",
+        "provenance": [
+          "fire/js/initial.js",
+          "docs/shell.html"
+        ],
+        "since": "0.6.0"
+      }
+    },
+    {
+      "id": "theme-record",
+      "name": "Theme record",
+      "module": "fire/js/theme.js",
+      "exports": [
+        "CONTRACT",
+        "DEFAULT_RECORD",
+        "DIAL_CHOICES",
+        "DIAL_DEFAULTS",
+        "DIAL_RANGES",
+        "DIAL_TOKENS",
+        "FIRE_VERSION",
+        "FONT_TOKENS",
+        "INPUT_TOKENS",
+        "LABELS",
+        "MOTION",
+        "NEUTRALS",
+        "SIGNATURE_ATTRIBUTES",
+        "SIGNATURE_CHOICES",
+        "SIGNATURE_DEFAULT",
+        "SIGNATURE_RANGES",
+        "expandTheme",
+        "fromThemeRecord",
+        "paletteFrom",
+        "themeToCss",
+        "toThemeRecord",
+        "validateTheme"
+      ],
+      "docs": "docs/tweaks.html#records",
+      "card": {
+        "id": "theme-record",
+        "job": "Turn a product's whole look, one JSON record, into tokens, a stylesheet or a palette.",
+        "purpose": "A pure ES module, fire/js/theme.js, that runs in Node and in the browser. A theme record names a palette, a tone, a type set and the dials; validateTheme checks it, expandTheme returns its tokens and attributes, themeToCss writes a stylesheet, paletteFrom builds a palette from an accent or brand colours, and toThemeRecord and fromThemeRecord convert to and from the Tweaks panel's state.",
+        "useWhen": [
+          "A product stores its look as data and must apply it on the server, in a build step or in an email.",
+          "An agent or a design tool writes a theme and needs it checked before it is applied.",
+          "A strict content security policy forbids inline styles: write the record as a stylesheet with themeToCss."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person is trying looks out in the browser.",
+            "instead": "tweaks"
+          },
+          {
+            "when": "A single token needs a different value on one page.",
+            "instead": "Set the custom property in your own stylesheet."
+          }
+        ],
+        "aka": [
+          "theme json",
+          "theme expander",
+          "design tokens json",
+          "brand theme",
+          "theme file"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "email"
+        ],
+        "data": [
+          "record"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "validateTheme(record) returns the problems; an unknown field is an error"
+          },
+          {
+            "name": "default",
+            "how": "a missing field is Fire's default; {} is the default look"
+          }
+        ],
+        "variants": [],
+        "parts": [],
+        "related": [
+          "tweaks"
+        ],
+        "keyboard": [],
+        "example": "docs/tweaks.html#records",
+        "provenance": [
+          "fire/js/theme.js",
+          "contract/theme.schema.json",
+          "docs/tweaks.html"
+        ],
+        "since": "0.6.0"
+      }
+    }
+  ],
   "classes": {
     "fd-accent-text": "text",
     "fd-accordion": "accordion",

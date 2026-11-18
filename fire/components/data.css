@@ -338,6 +338,7 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table tbody tr[aria-selected="true"] { background: var(--fd-accent-4); }
 .fd-table tbody tr[aria-selected="true"]:hover { background: var(--fd-accent-8); }
 .fd-table tbody tr[aria-selected="true"] > td:first-child { box-shadow: inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent); }
+.fd-table tbody tr[aria-selected="true"] > td:first-child:dir(rtl) { box-shadow: inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent); }
 
 /* Clickable rows: a stretched link (best for a11y and middle-click) or data-href (data.js). */
 .fd-table tbody tr[data-href], .fd-table tbody tr:has(.fd-table-link) { cursor: pointer; }
@@ -567,7 +568,9 @@ th[aria-sort="descending"] .fd-th-sort {
   }
   .fd-table[data-stack] tbody tr:nth-last-child(1 of :not([hidden])) { border-bottom-color: transparent; }
   .fd-table[data-stack] tbody tr[aria-selected="true"] { box-shadow: inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent); }
+  .fd-table[data-stack] tbody tr[aria-selected="true"]:dir(rtl) { box-shadow: inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent); }
   .fd-table[data-stack] tbody tr[aria-selected="true"] > td:first-child { box-shadow: none; }
+  .fd-table[data-stack] tbody tr[aria-selected="true"] > td:first-child:dir(rtl) { box-shadow: none; }
   .fd-table[data-stack] td {
     display: grid; grid-template-columns: minmax(var(--fd-data-stack-label), 34%) minmax(0, 1fr); gap: var(--fd-space-3); align-items: baseline;
     height: auto; padding: 0; border: 0; text-align: start; white-space: normal; overflow-wrap: anywhere;
@@ -782,6 +785,13 @@ button.fd-list-row { width: 100%; font: inherit; }
 .fd-list-row:is([aria-current]:not([aria-current="false"]), [aria-selected="true"]) .fd-list-chevron { color: var(--fd-accent-text); }
 .fd-list-row:is(a, button, [role="option"]):is([aria-current]:not([aria-current="false"]), [aria-selected="true"]):focus-visible {
   box-shadow: var(--fd-ring-inset), inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent);
+}
+.fd-list-row:dir(rtl):is([aria-current]:not([aria-current="false"]), [aria-selected="true"]),
+.fd-list-row:dir(rtl):has(> .fd-list-body > .fd-list-link[aria-current]:not([aria-current="false"])) {
+  box-shadow: inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent);
+}
+.fd-list-row:dir(rtl):is(a, button, [role="option"]):is([aria-current]:not([aria-current="false"]), [aria-selected="true"]):focus-visible {
+  box-shadow: var(--fd-ring-inset), inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent);
 }
 .fd-list-row[role="option"] { cursor: pointer; }
 .fd-list-row[role="option"]:focus-visible { box-shadow: var(--fd-ring-inset); }

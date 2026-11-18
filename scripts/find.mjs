@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // fire find: search Fire by what a part is for.
 //   node scripts/find.mjs "approve a request" [--surface app|website|phone|email] [--data record|list|series|form|text]
-//                         [--kind component|pattern|template] [--json] [--limit 5]
+//                         [--kind component|pattern|template|module] [--json] [--limit 5]
 // Reads contract/index.json (node scripts/build-index.mjs builds it). No dependencies, no network.
 //
 // Score, per entry, summed over the query's words (stemmed, stop words dropped). A word counts at full weight; a word
@@ -82,7 +82,7 @@ const SYNONYMS = [
   ['login', 'sign-in'],
 ];
 
-const KIND_RANK = { template: 0, pattern: 1, component: 2, layout: 3 };
+const KIND_RANK = { template: 0, pattern: 1, component: 2, layout: 3, module: 4 };
 const WEIGHT = { id: 10, aka: 5, akaPhrase: 12, name: 6, job: 3, use: 2, family: 1, phrase: 6, syn: 0.6 };
 
 export function stem(w) {
@@ -202,10 +202,10 @@ function main(argv) {
   }
   const query = args._.join(' ').trim();
   if (args.help || !query) {
-    console.log('usage: fire find "<what you need>" [--surface app|website|phone|email] [--data record|list|series|form|text]\n                [--kind component|pattern|template] [--json] [--limit 5]');
+    console.log('usage: fire find "<what you need>" [--surface app|website|phone|email] [--data record|list|series|form|text]\n                [--kind component|pattern|template|module] [--json] [--limit 5]');
     return query || args.help ? 0 : 2;
   }
-  const enums = { surface: ['app', 'website', 'phone', 'email'], data: ['record', 'list', 'series', 'form', 'text', 'none'], kind: ['component', 'pattern', 'template'] };
+  const enums = { surface: ['app', 'website', 'phone', 'email'], data: ['record', 'list', 'series', 'form', 'text', 'none'], kind: ['component', 'pattern', 'template', 'module'] };
   for (const k of Object.keys(enums)) if (args[k] && !enums[k].includes(args[k])) { console.error(`fire find: --${k} is one of ${enums[k].join(', ')}`); return 2; }
   const limit = args.limit === undefined ? 5 : Number(args.limit);
   if (!Number.isInteger(limit) || limit < 1) { console.error('fire find: --limit is a positive whole number'); return 2; }

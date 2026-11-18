@@ -1,10 +1,11 @@
 {
   "id": "brand",
   "job": "Sign a surface with the product mark and name, an uploaded logo or a wordmark.",
-  "purpose": "The brand is a mark and a name, set in a 40px row. A customer logo can replace the mark as an image of 24px, or a wide logo can replace both (up to 160px wide; it cannot shrink to the rail). A wordmark is an SVG in the current colour, for a caption or a line of text.",
+  "purpose": "The brand is a mark and a name, set in a 40px row. A customer logo can replace the mark as an image of 24px, or a wide logo can replace both (up to 160px wide; it cannot shrink to the rail). A wordmark is an SVG in the current colour, for a caption or a line of text. A product sets its brand once, as JSON in a data-fd-brand script or with setBrand(), and every fd-brand on the page is filled from it: the name, a picture mark or the initial of the name, a logo with a dark variant, the link.",
   "useWhen": [
     "The top of the sidebar or a centred screen needs the product identity.",
-    "A page says \"Powered by\" with a small wordmark."
+    "A page says \"Powered by\" with a small wordmark.",
+    "A product white-labels itself: one record of name, mark and logo fills the sidebar, the top bar, the auth screens and the docs bar."
   ],
   "avoidWhen": [
     {
@@ -36,7 +37,16 @@
   "data": [
     "none"
   ],
-  "states": [],
+  "states": [
+    {
+      "name": "filled",
+      "how": "data-fd-brand JSON on a script (the page) or on a container (what is inside it), or setBrand(brand)"
+    },
+    {
+      "name": "kept as written",
+      "how": "data-fd-brand-keep on the brand; setBrand and data-fd-brand leave it alone"
+    }
+  ],
   "variants": [
     {
       "attribute": "data-size",
@@ -86,7 +96,8 @@
   "example": "docs/shell.html#brand",
   "provenance": [
     "docs/shell.html",
-    "fire/components/shell.css"
+    "fire/components/shell.css",
+    "fire/js/shell.js"
   ],
   "since": "0.1.0"
 }

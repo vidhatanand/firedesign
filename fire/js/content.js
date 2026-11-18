@@ -88,8 +88,16 @@
  *   hold.start "{action} in {seconds} seconds. Undo or Escape stops it." · hold.undone "Stopped. Nothing was sent."
  *   draft.used "The draft is in the reason now. Edit it before you commit."
  *
+ * Safe picture address (0.8; the picture frame that uses it is fd-doc-frame, in docsite.js)
+ *   safeImageUrl(url, { hosts, data, base }) → the normalised URL, or null. A picture a person supplied (a screenshot, an
+ *   upload, a logo) loads only when this returns a URL. Accepted: https on a listed host ("cdn.ember.dev", or
+ *   "*.ember-usercontent.com" for any subdomain, with an optional :port), and any address on the page's own origin
+ *   (`base`, default the page). `data: true` also accepts data:image/png|jpeg|gif|webp|avif|svg+xml. Refused: every other
+ *   scheme (javascript:, blob:, file:, http: on another origin), addresses with a user name or password, control
+ *   characters, and anything that is not a string.
+ *
  * Exports: init(root), dismiss(el), toggle(details, open?), hold(el, options), cancelHold(el), reopen(form),
- *   select(item), removeItem(item), setState(el, state)
+ *   select(item), removeItem(item), setState(el, state), safeImageUrl(url, options)
  */
 import { $, $$, on, once, emit, reducedMotion, ensureId, label } from './core.js';
 import { icon } from './icons.js';
@@ -540,6 +548,34 @@ function initDecisions(root) {
     updateBudget(form);
     lockCommit(form);
   });
+}
+
+/* ---------- Safe picture address ---------- */
+const DATA_IMAGE = /^data:image\/(?:png|jpe?g|gif|webp|avif|svg\+xml)[;,]/i;
+const hostMatches = (rule, url) => {
+  const r = String(rule).trim().toLowerCase();
+  if (!r) return false;
+  const [name, port] = r.split(':');
+  if (port && port !== url.port) return false;
+  const host = url.hostname.toLowerCase();
+  return name.startsWith('*.') ? host.endsWith(name.slice(1)) && host.length > name.length - 1 : host === name;
+};
+export function safeImageUrl(url, { hosts = [], data = false, base } = {}) {
+  if (typeof url !== 'string') return null;
+  const text = url.trim();
+  // eslint-disable-next-line no-control-regex
+  if (!text || /[\u0000-\u001f\u007f]/.test(text)) return null;
+  if (/^data:/i.test(text)) return data && DATA_IMAGE.test(text) ? text : null;
+  const here = base ?? (typeof location !== 'undefined' ? location.href : undefined);
+  let u;
+  try { u = new URL(text, here); } catch { return null; }
+  if (u.username || u.password) return null;
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+  let own = '';
+  try { own = here ? new URL(here).origin : ''; } catch { /* no base */ }
+  if (own && own !== 'null' && u.origin === own) return u.href;
+  if (u.protocol !== 'https:') return null;
+  return [].concat(hosts).some((rule) => hostMatches(rule, u)) ? u.href : null;
 }
 
 /* ---------- Init ---------- */

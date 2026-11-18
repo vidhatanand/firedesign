@@ -143,6 +143,70 @@
     </ul>
   </section>
 
+  <!-- ===================== ROW MENUS ===================== -->
+  <section class="doc-section" id="menu-rows">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">One menu for every row</h2>
+      <p>When rows share their actions but not every action fits every row, keep one menu and let each row say which items apply. A row names its state in <code class="fd-code">data-fd-flags</code>; an item says when it shows. Nothing is cloned per row.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-table-wrap">
+        <div class="fd-table-scroll">
+          <table class="fd-table" aria-label="Crawl runs">
+            <thead>
+              <tr><th>Run</th><th>Endpoint</th><th>Status</th><th data-actions><span class="fd-sr-only">Actions</span></th></tr>
+            </thead>
+            <tbody>
+              <tr data-value="run_8f2a91" data-fd-flags="running">
+                <td data-mono>run_8f2a91</td>
+                <td data-mono>/crawl</td>
+                <td><span class="fd-status" data-tone="info" data-live>Running</span></td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for run_8f2a91" data-fd-menu="menu-runs" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="run_c41b07" data-fd-flags="paused">
+                <td data-mono>run_c41b07</td>
+                <td data-mono>/crawl</td>
+                <td><span class="fd-status" data-tone="warning">Paused</span></td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for run_c41b07" data-fd-menu="menu-runs" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="run_77d0e2" data-fd-flags="failed admin">
+                <td data-mono>run_77d0e2</td>
+                <td data-mono>/scrape</td>
+                <td><span class="fd-status" data-tone="danger">Failed</span></td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for run_77d0e2" data-fd-menu="menu-runs" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="run_3e9a10" data-fd-flags="done">
+                <td data-mono>run_3e9a10</td>
+                <td data-mono>/extract</td>
+                <td><span class="fd-status" data-tone="success">Done</span></td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for run_3e9a10" data-fd-menu="menu-runs" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr data-value="run_5b02c8" data-fd-flags="expired">
+                <td data-mono>run_5b02c8</td>
+                <td data-mono>/crawl</td>
+                <td><span class="fd-status" data-tone="neutral">Expired</span></td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for run_5b02c8" data-fd-menu="menu-runs" data-placement="bottom-end"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fd-menu" id="menu-runs" popover role="menu" aria-label="Run actions">
+        <button class="fd-menu-item" data-fd-unless="running paused expired"><i data-icon="file-text"></i><span class="fd-menu-item-label">View output</span></button>
+        <button class="fd-menu-item" data-fd-when="running"><i data-icon="pause"></i><span class="fd-menu-item-label">Pause</span></button>
+        <button class="fd-menu-item" data-fd-when="paused"><i data-icon="play"></i><span class="fd-menu-item-label">Resume</span></button>
+        <button class="fd-menu-item" data-fd-when="failed"><i data-icon="refresh-cw"></i><span class="fd-menu-item-label">Retry run</span></button>
+        <button class="fd-menu-item" data-fd-when="admin" data-fd-else="disable"><i data-icon="users"></i><span class="fd-menu-item-label">Transfer to a teammate</span></button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" data-tone="danger" data-fd-when="running paused"><i data-icon="circle-stop"></i><span class="fd-menu-item-label">Cancel run</span></button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-fd-when="a b"</code> shows an item when the flags hold either word; <code class="fd-code">data-fd-unless="a b"</code> hides it when they hold any. Flags come from the opener and from the nearest ancestor with <code class="fd-code">data-fd-flags</code>, read each time the menu opens. A hidden item is <code class="fd-code">hidden</code>, so arrow keys, typing and Home and End skip it, and a separator with nothing on one side goes with it. <code class="fd-code">data-fd-else="disable"</code> dims an item instead of hiding it.</li>
+      <li>A menu with nothing to show (no item that is visible and not dimmed) does not open: the opener gets <code class="fd-code">aria-disabled="true"</code> (the last row), and stays in the tab order so it can say why through a tooltip. <code class="fd-code">fd:select</code> carries <code class="fd-code">row</code>, the row the menu was opened from. Call <code class="fd-code">init(row)</code> after changing a row's flags to refresh its opener.</li>
+    </ul>
+  </section>
+
   <!-- ===================== POPOVERS ===================== -->
   <section class="doc-section" id="popovers">
     <div class="doc-section-head">

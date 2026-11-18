@@ -215,7 +215,8 @@ export const FREE_ATTRIBUTES = {
   doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
   kv: ['data-copy'],                   // the text a row copies
   list: ['data-value'],                // a row's record id: the option a listbox list selects, the record a list-and-detail row opens
-  menu: ['data-fd-submenu'],           // the id of the sub-menu
+  menu: ['data-fd-submenu', 'data-fd-when', 'data-fd-unless'], // the id of the sub-menu; the words an item needs, or must not find, in a row's data-fd-flags (overlays.js header)
+  'doc-frame': ['data-fd-src', 'data-fd-hosts', 'data-fd-alt'], // a picture frame's address, the hosts besides the page's that may serve it, its description (docsite.js header)
   pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
   running: ['data-fd-running'],        // the id of the popover whose rows the pill counts
   secret: ['data-noun'],               // the word the buttons name: "password", "API key", "signing secret"

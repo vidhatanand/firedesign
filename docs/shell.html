@@ -352,6 +352,26 @@
       <li><code class="fd-code">.fd-brand-logo</code> is 32px tall and as wide as it needs, up to 160px. It cannot shrink to the rail: use it on a centred screen, or in a sidebar that does not collapse.</li>
       <li><code class="fd-code">.fd-wordmark</code> takes the current colour, so it reads as text. <code class="fd-code">data-size="sm"</code> sits in a caption; <code class="fd-code">data-tone="accent"</code> is for the brand itself.</li>
     </ul>
+
+    <h3 class="doc-sub">Set once, shown everywhere</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-stack" data-gap="4">
+        <div class="fd-row" data-gap="4" data-wrap data-fd-brand='{"name":"Quarry Labs"}'>
+          <a class="fd-brand" href="#brand"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a>
+        </div>
+        <div class="fd-row" data-gap="4" data-wrap data-fd-brand='{"name":"Northwind","mark":"../fire/favicon.svg","href":"#brand"}'>
+          <a class="fd-brand" href="#brand"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a>
+        </div>
+        <div class="fd-row" data-gap="4" data-wrap data-fd-brand='{"name":"Quarry Labs","logo":{"src":"data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2096%2024%22%3E%3Crect%20width=%2224%22%20height=%2224%22%20rx=%226%22%20fill=%22%2314342b%22/%3E%3Crect%20x=%2234%22%20y=%228%22%20width=%2262%22%20height=%228%22%20rx=%224%22%20fill=%22%2314342b%22/%3E%3C/svg%3E","width":96,"height":24},"logoDark":"data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2096%2024%22%3E%3Crect%20width=%2224%22%20height=%2224%22%20rx=%226%22%20fill=%22%23e9efe9%22/%3E%3Crect%20x=%2234%22%20y=%228%22%20width=%2262%22%20height=%228%22%20rx=%224%22%20fill=%22%23e9efe9%22/%3E%3C/svg%3E"}'>
+          <a class="fd-brand" href="#brand"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The product sets its brand once, as <code class="fd-code">&lt;script type="application/json" data-fd-brand&gt;</code> in the page or <code class="fd-code">setBrand(brand)</code>, and every <code class="fd-code">.fd-brand</code> follows: the sidebar head, the top bar, a centred screen, the docs top bar. The same JSON as an attribute on any element brands only what is inside it, as these three specimens do. All three start as the Ember brand and are filled when the page loads.</li>
+      <li><code class="fd-code">name</code> is the text and the logo's alt. <code class="fd-code">mark</code> is a picture for the mark slot; without it the mark is the dot-matrix initial of the name. <code class="fd-code">logo</code> (a string, or <code class="fd-code">{ src, width, height }</code>) replaces both with an <code class="fd-code">img</code> that carries width and height. <code class="fd-code">logoDark</code> takes its place when the page is dark: switch the theme to see the third one change. <code class="fd-code">href</code> sets the link. Pictures pass <code class="fd-code">safeImageUrl()</code>, so a refused address leaves the mark as it was.</li>
+      <li>A brand that must stay as written (a partner's mark, a wordmark) takes <code class="fd-code">data-fd-brand-keep</code>. For an email, give the same name and logo to <code class="fd-code">renderEmail({ brand: { name, logoUrl } })</code>.</li>
+    </ul>
   </section>
 
   <section class="doc-section" id="nav-items">
@@ -683,10 +703,43 @@
         </div>
       </div>
     </div>
+    <h3 class="doc-sub">Legal footer</h3>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <div class="fd-page">
+        <div class="fd-frame" data-frame-h="5xl">
+          <section class="fd-band" data-pad="lg" data-grow data-align="center">
+            <div class="fd-dotgrid" data-fade="radial" aria-hidden="true"></div>
+            <div class="fd-screen">
+              <a class="fd-brand" href="#screen"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a>
+              <div class="fd-corners">
+                <article class="fd-card" data-size="lg">
+                  <header class="fd-screen-head">
+                    <span class="fd-tile" data-size="44" data-tone="success"><i data-icon="circle-check"></i></span>
+                    <h1 class="fd-h1">You are signed out</h1>
+                    <p class="fd-muted">Your agents keep running. Sign in again to see them.</p>
+                  </header>
+                  <button class="fd-btn" type="button" data-variant="primary" data-size="lg" data-block><span>Sign in again</span></button>
+                </article>
+              </div>
+            </div>
+          </section>
+          <footer class="fd-band" data-pad="sm" aria-label="Legal">
+            <div class="fd-screen-foot">
+              <span>© 2026 Ember Labs, Inc.</span>
+              <a href="#screen">Terms</a>
+              <a href="#screen">Privacy</a>
+              <a href="#screen">Status</a>
+              <button class="fd-btn-text" type="button"><i data-icon="languages"></i><span>English</span></button>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
     <ul class="doc-notes">
       <li><code class="fd-code">data-align="center"</code> on a band with <code class="fd-code">data-grow</code> puts its content in the middle of the height; <code class="fd-code">.fd-screen</code> centres it side to side and stops at a readable width. <code class="fd-code">data-size="md"</code> widens it for a screen with more to read, such as consent.</li>
       <li><code class="fd-code">.fd-screen-head</code> centres the heading and its line. For a result (link sent, signed out, stopped) lead with a 44px tile whose tone says what happened.</li>
       <li><code class="fd-code">.fd-screen-note</code> is one small centred line: under the card for who secures or powers the page, inside it for a last word.</li>
+      <li><code class="fd-code">.fd-screen-foot</code> is the legal line: copyright, terms, privacy, a language or status link, in a centred row that wraps. Put it in a <code class="fd-code">fd-band</code> after the centred one, inside the same <code class="fd-code">fd-frame</code> with <code class="fd-code">data-fill</code>: it sits at the bottom of a tall screen and under the card on a short one or with the keyboard open, and never covers it.</li>
       <li>Keep navigation off these screens. Anything a person returns to belongs in the shell.</li>
     </ul>
   </section>

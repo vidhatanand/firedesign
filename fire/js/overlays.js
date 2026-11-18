@@ -22,6 +22,26 @@
  *   data-keep-open on an item or the menu keeps it open after a selection.
  *   openMenu(id, { trigger, at: { x, y }, focus: 'first'|'last'|'menu'|'none', placement }), closeMenu(id).
  *
+ * One menu for every row (0.8)
+ *   <tr data-fd-flags="paused admin"> … <button data-fd-menu="run-menu" aria-label="Actions for run_8f2a91">…</button></tr>
+ *   <div class="fd-menu" id="run-menu" popover>
+ *     <button class="fd-menu-item" data-fd-when="paused">Resume</button>
+ *     <button class="fd-menu-item" data-fd-unless="paused">Pause</button>
+ *     <button class="fd-menu-item" data-fd-when="admin" data-fd-else="disable">Transfer</button>
+ *     <hr class="fd-menu-sep"> <button class="fd-menu-item" data-tone="danger" data-fd-unless="readonly">Delete</button>
+ *   </div>
+ *   Flags are space-separated words on the opener or on the nearest ancestor that carries data-fd-flags (the row); both count.
+ *   When the menu opens, every item (and separator or label) with data-fd-when="a b" is shown only when the flags hold at
+ *   least one of those words, and data-fd-unless="a b" hides it when they hold any. A hidden item is `hidden`, so arrow
+ *   keys, typeahead and Home/End skip it. data-fd-else="disable" on an item dims it (aria-disabled) instead of hiding it.
+ *   Separators and labels left with nothing to separate or head are hidden too. Items in a sub-menu follow the flags of the
+ *   root opener.
+ *   A menu with no item that shows and can be chosen does not open: its opener gets aria-disabled="true" and data-fd-empty (it stays focusable,
+ *   so a keyboard user can find out why; give it a tooltip that says). The opener is checked when the page initialises and
+ *   each time it is pressed, so changing a row's flags needs nothing more; to refresh the look of an opener without pressing
+ *   it, call init(row) again. fd:select then also carries `row`: the opener's tr, [role="row"], li or [data-fd-flags] element.
+ *   filterMenu(menu, trigger) applies the flags and returns how many items show.
+ *
  * Popover
  *   <button data-fd-popover="usage-pop">…</button>
  *   <div class="fd-popover" id="usage-pop" popover [data-arrow] [data-placement="bottom"]>… [data-fd-popover-close] …</div>
@@ -246,6 +266,56 @@ const typeBuffers = new WeakMap();
 
 const menuItems = (menu) => $$(MENU_ITEM, menu).filter((item) => item.closest('.fd-menu') === menu && visible(item));
 
+/* ---------- Per-row items: data-fd-when / data-fd-unless against data-fd-flags ---------- */
+const GATED = '[data-fd-when], [data-fd-unless]';
+const ROW = 'tr, [role="row"], li, [data-fd-flags]';
+const words = (value) => (value || '').split(/\s+/).filter(Boolean);
+const flagsOf = (trigger) => new Set([...words(trigger?.getAttribute?.('data-fd-flags')), ...words(trigger?.parentElement?.closest('[data-fd-flags]')?.getAttribute('data-fd-flags'))]);
+const passes = (el, flags) => {
+  const when = words(el.dataset.fdWhen);
+  return (!when.length || when.some((f) => flags.has(f))) && !words(el.dataset.fdUnless).some((f) => flags.has(f));
+};
+const ownItems = (menu, selector) => $$(selector, menu).filter((el) => el.closest('.fd-menu') === menu);
+const flagTrigger = (trigger) => {
+  const parent = trigger?.matches?.(MENU_ITEM) ? trigger.closest('.fd-menu') : null;
+  return parent ? flagTrigger(layers.get(rootMenu(parent))?.trigger) : trigger;
+};
+/** Apply an opener's flags to a menu's gated items. Returns the number of items that show and can be chosen. */
+export function filterMenu(menu, trigger) {
+  const flags = flagsOf(flagTrigger(trigger));
+  for (const el of ownItems(menu, GATED)) {
+    const ok = passes(el, flags);
+    if (el.dataset.fdElse === 'disable' && el.matches(MENU_ITEM)) {
+      el.hidden = false;
+      if (!ok) { if (!el.hasAttribute('aria-disabled')) el.dataset.fdGated = ''; el.setAttribute('aria-disabled', 'true'); }
+      else if (el.hasAttribute('data-fd-gated')) { el.removeAttribute('aria-disabled'); el.removeAttribute('data-fd-gated'); }
+    } else el.hidden = !ok;
+  }
+  // Labels and separators with nothing to head or divide.
+  const parts = ownItems(menu, `${MENU_ITEM}, .fd-menu-sep, .fd-menu-label`);
+  for (const el of parts) if (el.hasAttribute('data-fd-auto')) { el.hidden = false; el.removeAttribute('data-fd-auto'); }
+  const shown = (el) => !el.hidden;
+  const hide = (el) => { el.hidden = true; el.dataset.fdAuto = ''; };
+  parts.forEach((el, i) => {
+    if (!el.matches('.fd-menu-label') || !shown(el)) return;
+    for (let j = i + 1; j < parts.length && !parts[j].matches('.fd-menu-sep, .fd-menu-label'); j += 1) if (shown(parts[j])) return;
+    hide(el);
+  });
+  let previous = 'start';
+  let lastSep = null;
+  for (const el of parts) {
+    if (!shown(el)) continue;
+    if (el.matches('.fd-menu-sep')) { if (previous !== 'item') hide(el); else { previous = 'sep'; lastSep = el; } } else { previous = 'item'; lastSep = null; }
+  }
+  if (lastSep) hide(lastSep);
+  return parts.filter((el) => el.matches(MENU_ITEM) && shown(el) && enabled(el)).length;
+}
+const markOpener = (trigger, empty) => {
+  if (!trigger?.hasAttribute) return;
+  if (empty) { trigger.setAttribute('aria-disabled', 'true'); trigger.setAttribute('data-fd-empty', ''); }
+  else if (trigger.hasAttribute('data-fd-empty')) { trigger.removeAttribute('aria-disabled'); trigger.removeAttribute('data-fd-empty'); }
+};
+
 function setupMenu(menu) {
   if (!menu.hasAttribute('role')) menu.setAttribute('role', 'menu');
   if (isStatic(menu)) return;
@@ -277,6 +347,11 @@ export function openMenu(ref, { trigger = null, at = null, focus = 'first', plac
   const menu = byId(ref);
   if (!menu || isStatic(menu)) return null;
   setupMenu(menu);
+  if (menu.querySelector(GATED)) {
+    const count = filterMenu(menu, trigger);
+    if (trigger && !trigger.matches(MENU_ITEM)) markOpener(trigger, !count);
+    if (!count) return null;
+  }
   const parentItem = trigger?.matches?.(MENU_ITEM) && trigger.closest('.fd-menu') ? trigger : null;
   if (parentItem) {
     const parent = parentItem.closest('.fd-menu');
@@ -445,7 +520,8 @@ function activateItem(event, item) {
     if (mirror) mirror.textContent = textOf(item);
     emit(item, 'fd:change', { value, item });
   }
-  const proceed = emit(item, 'fd:select', { value, item, trigger: layers.get(rootMenu(menu))?.trigger || null });
+  const opener = layers.get(rootMenu(menu))?.trigger || null;
+  const proceed = emit(item, 'fd:select', { value, item, trigger: opener, row: opener?.closest?.(ROW) ?? null });
   if (!proceed) keepOpen = true;
   if (!keepOpen && isOpen(menu)) closeMenuTree(menu, true);
 }
@@ -2393,7 +2469,11 @@ export function init(root = document) {
     if (root instanceof Element && root.matches(sel)) list.unshift(root);
     return list;
   };
-  for (const t of scope('[data-fd-menu]')) setupTrigger(t, 'menu');
+  for (const t of scope('[data-fd-menu]')) {
+    setupTrigger(t, 'menu');
+    const menu = byId(t.dataset.fdMenu);
+    if (menu?.querySelector(GATED)) markOpener(t, !filterMenu(menu, t));
+  }
   for (const t of scope('[data-fd-popover]')) setupTrigger(t, 'popover');
   for (const t of scope('[data-fd-dialog-open], [data-fd-sheet-open], [data-fd-command-open]')) if (!t.hasAttribute('aria-haspopup')) t.setAttribute('aria-haspopup', 'dialog');
   for (const menu of scope('.fd-menu')) setupMenu(menu);

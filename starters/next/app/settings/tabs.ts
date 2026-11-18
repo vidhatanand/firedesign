@@ -1,5 +1,5 @@
 // The settings tabs, shared by the page (server: which panel the first paint shows, from ?tab=) and its behaviour.
-export const TABS = ['account', 'team', 'billing', 'data-sources', 'connected-apps', 'notifications', 'advanced'] as const;
+export const TABS = ['account', 'team', 'features', 'billing', 'data-sources', 'connected-apps', 'notifications', 'advanced'] as const;
 export type Tab = (typeof TABS)[number];
 const ALIASES: Record<string, Tab> = { sources: 'data-sources', datasources: 'data-sources', apps: 'connected-apps', connected: 'connected-apps' };
 

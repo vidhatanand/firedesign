@@ -1,12 +1,17 @@
 // The Settings screen's behaviour: the page script of templates/settings.html, ported to TypeScript. Which tab shows
-// first is decided on the server (?tab=, see tabs.ts); this keeps it in step when the subnav switches tabs.
-import type { ToastTone } from 'fire-design';
+// first is decided on the server (?tab=, see tabs.ts); this keeps it in step when the subnav switches tabs. What Fire
+// does declaratively stays Fire's: the dirty bar (data-fd-dirty), disabled-with-a-reason (.fd-reason), the inline
+// delete confirm (data-fd-confirm-inline), the loading and error states (.fd-states).
+import type { ToastOptions, ToastTone } from 'fire-design';
 import { $, $$, $maybe, type Kit } from '../screen-kit';
 import { TABS, resolveTab, type Tab } from './tabs';
 
 export function startSettings({ fire, on, later }: Kit) {
   const { init, forms, overlays, nav, texture, setTheme, setAccent, setDensity, getTheme, reducedMotion } = fire;
-  const { toast, openDialog } = overlays;
+  const { openDialog } = overlays;
+  // fire.d.ts (0.7) does not yet declare content.setState or the toast's undo / undone options, which fire.js has.
+  const toast = overlays.toast as typeof overlays.toast & ((input: ToastOptions & { undo?: () => unknown; undone?: string }) => string);
+  const setState = (fire.content as typeof fire.content & { setState(el: Element, state: string): void }).setState;
   const wait = (ms: number) => new Promise<void>((resolve) => later(resolve, ms));
   const store = {
     get(key: string) { try { return localStorage.getItem(key); } catch { return null; } },
@@ -186,56 +191,45 @@ export function startSettings({ fire, on, later }: Kit) {
 
   function syncTeamForm() {
     const slug = slugInput.value;
-    const problem = slugProblem(slug);
     bind('slug-preview', slug || 'team_8fK2xQvLm');
-    fieldError(slugInput, problem);
-    $<HTMLButtonElement>('#team-name-save').disabled = nameInput.value.trim() === saved.name || !nameOk();
-    $<HTMLButtonElement>('#team-slug-save').disabled = slug === saved.slug || Boolean(problem);
+    fieldError(slugInput, slugProblem(slug));
     if (!nameOk() && 'touched' in nameInput.dataset) fieldError(nameInput, 'Enter a team name.'); else fieldError(nameInput, '');
-    if (nameInput.value.trim() === saved.name && slug === saved.slug) forms.markClean(teamForm);
   }
   on(nameInput, 'blur', () => { nameInput.dataset.touched = ''; syncTeamForm(); });
   on(teamForm, 'input', (event) => { if (event.target === nameInput || event.target === slugInput) syncTeamForm(); });
+  /* Discard: the browser puts every field back to its default (the last saved value), then the form is clean again. */
   on(teamForm, 'reset', () => later(() => {
-    nameInput.value = saved.name; slugInput.value = saved.slug;
     delete nameInput.dataset.touched;
     syncTeamForm();
     forms.markClean(teamForm);
   }, 0));
 
-  async function saveField(field: 'name' | 'slug') {
-    const button = $(`#team-${field}-save`);
-    if (isBusy(button)) return false;
-    if (field === 'name' ? !nameOk() : !slugOk()) return false;
-    setBusy(button, true);
-    await wait(700);
-    setBusy(button, false);
-    saved[field] = field === 'name' ? nameInput.value.trim() : slugInput.value;
-    if (field === 'name') { nameInput.value = saved.name; bind('team-summary', teamSummary()); }
-    syncTeamForm();
-    return true;
-  }
-  on($('#team-name-save'), 'click', async () => { if (await saveField('name')) toast({ title: 'Team name updated', description: `Your team is now called ${saved.name}.`, tone: 'success' }); });
-  on($('#team-slug-save'), 'click', async () => { if (await saveField('slug')) toast({ title: 'Team slug updated', description: `ember.dev/app/t/${saved.slug}/usage`, tone: 'success' }); });
+  /* One save for the whole form, from the bar that appears when anything changed (data-fd-dirty). */
   on<SubmitEvent>(teamForm, 'submit', async (event) => {
     event.preventDefault();
     const button = event.submitter as HTMLElement | null;
-    if (button?.id !== 'team-save-all') return;
+    if (!button || button.id !== 'team-save-all') return;
+    nameInput.dataset.touched = '';
+    syncTeamForm();
     if (!nameOk() || !slugOk()) { (!nameOk() ? nameInput : slugInput).focus(); return; }
+    if (isBusy(button)) return;
     setBusy(button, true);
     await wait(700);
     setBusy(button, false);
-    saved.name = nameInput.value.trim(); saved.slug = slugInput.value;
-    syncTeamForm();
+    nameInput.value = nameInput.value.trim();
+    saved.name = nameInput.value; saved.slug = slugInput.value;
+    // What was saved becomes the default, so Discard returns to it.
+    for (const input of $$<HTMLInputElement>('input[name]', teamForm)) { input.defaultValue = input.value; input.defaultChecked = input.checked; }
     forms.markClean(teamForm);
     bind('team-summary', teamSummary());
-    toast({ title: 'Team settings saved', tone: 'success' });
+    bind('team-changed-by', 'you, just now');
+    toast({ title: 'Team settings saved', description: 'Every member sees the change now.', tone: 'success' });
   });
   on<KeyboardEvent>(teamForm, 'keydown', (event) => {
-    if (event.key !== 'Enter' || !(event.target instanceof HTMLInputElement)) return;
-    const targets: Record<string, string> = { 'team-name': '#team-name-save', 'team-slug': '#team-slug-save', 'invite-email': '#invite-send' };
-    const button = targets[event.target.id] ? $<HTMLButtonElement>(targets[event.target.id]) : null;
-    if (button) { event.preventDefault(); if (!button.disabled) button.click(); }
+    if (event.key !== 'Enter' || !(event.target instanceof HTMLInputElement) || event.target.type === 'radio') return;
+    event.preventDefault();
+    if (event.target.id === 'invite-email') { if (!inviteSend.disabled) inviteSend.click(); return; }
+    if (teamForm.hasAttribute('data-dirty')) $('#team-save-all').click();
   });
 
   /* Members and invites */
@@ -347,7 +341,11 @@ export function startSettings({ fire, on, later }: Kit) {
     refreshCounts();
     toast({ title: 'Invites revoked', tone: 'neutral' });
   });
-  on($('#leave-team'), 'click', () => toast({ title: 'Transfer ownership first', description: 'You are the only owner of Quarry Labs. Make another member an Owner, then leave.', tone: 'warning' }));
+  on($('#leave-team'), 'click', async (event) => {
+    if ((event.currentTarget as Element).getAttribute('aria-disabled') === 'true') return;
+    if (!await confirmAction({ title: 'Leave Quarry Labs?', desc: 'You lose access to its keys, runs and monitors at once. An admin can invite you again.', label: 'Leave team' })) return;
+    toast({ title: 'You left Quarry Labs', description: 'You were moved to your Personal team.', tone: 'neutral' });
+  });
 
   /* ---------------------------------------------------------------- Billing */
   on($('[data-update-card]'), 'click', (event) => { event.preventDefault(); toast({ title: 'Opening the secure card form', description: 'Card details go straight to the payment provider, never through Ember.', tone: 'info' }); });
@@ -432,6 +430,7 @@ export function startSettings({ fire, on, later }: Kit) {
     button.dataset.variant = accepted ? 'ghost' : 'outline';
     toggle.disabled = !accepted;
     $<HTMLInputElement>('.fd-input', card).disabled = !accepted || !toggle.checked;
+    bind('sources-on', String($$('[data-provider] .fd-switch input:checked:not(:disabled)').length));
   }
   $$('[data-provider]').forEach(renderProvider);
   on($('#provider-grid'), 'click', (event) => {
@@ -472,6 +471,7 @@ export function startSettings({ fire, on, later }: Kit) {
     apps.hidden = count === 0;
     $('#apps-empty').hidden = count !== 0;
     bind('apps-count', count ? `${count} app${count === 1 ? '' : 's'} connected` : 'No apps connected');
+    bind('apps-total', String(count));
   }
   on(apps, 'click', async (event) => {
     const button = (event.target as Element).closest('[data-disconnect]');
@@ -482,7 +482,7 @@ export function startSettings({ fire, on, later }: Kit) {
     const next = row.nextElementSibling;
     row.remove();
     refreshApps();
-    toast({ title: `${name} disconnected`, tone: 'neutral', action: { label: 'Undo', onClick: () => { apps.insertBefore(row, next); refreshApps(); } } });
+    toast({ title: `${name} disconnected`, description: 'It can no longer call Ember.', tone: 'success', undo: async () => { await wait(400); apps.insertBefore(row, next); refreshApps(); }, undone: `${name} is connected again` });
   });
   refreshApps();
 
@@ -581,10 +581,113 @@ export function startSettings({ fire, on, later }: Kit) {
     toast.promise(job, { loading: 'Preparing your export…', success: { title: 'Export ready', description: 'quarry-labs-export.zip · 4.2 MB', tone: 'success', action: { label: 'Download' } }, error: 'Export failed' });
   });
 
-  on($('#dlg-delete-team'), 'fd:close', (event) => {
-    if ((event.target as HTMLDialogElement).returnValue !== 'confirm') return;
-    toast.promise(wait(1200), { loading: 'Deleting Quarry Labs…', success: { title: 'Quarry Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' }, error: 'Could not delete the team' });
+  /* Delete team: the confirm-inline form keeps its button off until the name matches; the script only sends it. */
+  const deleteTeam = $<HTMLFormElement>('#delete-team');
+  on(deleteTeam, 'submit', (event) => {
+    event.preventDefault();
+    if (deleteTeam.dataset.state !== 'match') return;
+    const button = $('[data-fd-confirm-submit]', deleteTeam);
+    setBusy(button, true);
+    const job = wait(1200).then(() => {
+      setBusy(button, false);
+      deleteTeam.reset();
+      $('#dt-confirm').dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    toast.promise(job, { loading: 'Deleting Quarry Labs…', success: { title: 'Quarry Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' }, error: 'Could not delete the team' });
   });
+
+  /* ---------------------------------------------------------------- Features: grouped switches, Done · Undo */
+  const featureTable = $('#features-table');
+  const featureSearch = $<HTMLInputElement>('#feature-search');
+  const featureRows = () => $$<HTMLTableRowElement>('tr[data-feature]', featureTable);
+  const switchOf = (row: Element) => $<HTMLInputElement>('input', row);
+  function syncFeatures() {
+    const rows = featureRows();
+    const count = rows.filter((row) => switchOf(row).checked).length;
+    bind('features-on', String(count));
+    const shown = rows.filter((row) => !row.hidden);
+    $('#feature-count').textContent = featureSearch.value.trim() ? `${shown.length} of ${rows.length} match` : `${count} of ${rows.length} on`;
+    $('#features-wrap').hidden = shown.length === 0;
+    $('#features-none').hidden = shown.length !== 0;
+  }
+  function paintFeature(row: Element) {
+    const status = $maybe('.fd-status', row);
+    if (!status) return;
+    const isOn = switchOf(row).checked;
+    status.dataset.tone = isOn ? 'success' : 'neutral';
+    status.textContent = isOn ? 'On' : 'Off';
+  }
+  on(featureTable, 'change', (event) => {
+    const input = (event.target as Element).closest<HTMLInputElement>('input[role="switch"]');
+    const row = input?.closest<HTMLTableRowElement>('tr');
+    if (!input || !row) return;
+    const name = row.dataset.feature;
+    paintFeature(row);
+    syncFeatures();
+    toast({
+      title: `${name} ${input.checked ? 'on' : 'off'}`,
+      description: input.checked ? 'Every key can use it now.' : 'Requests that ask for it now fail.',
+      tone: 'success', id: 'feature',
+      undo: async () => { await wait(300); input.checked = !input.checked; paintFeature(row); syncFeatures(); },
+      undone: `${name} is ${input.checked ? 'off' : 'on'} again`,
+    });
+  });
+  on(featureSearch, 'input', () => {
+    const q = featureSearch.value.trim().toLowerCase();
+    featureRows().forEach((row) => { row.hidden = Boolean(q) && !(row.textContent ?? '').toLowerCase().includes(q); });
+    syncFeatures();
+  });
+  on($('#features-clear'), 'click', () => {
+    featureSearch.value = '';
+    featureSearch.dispatchEvent(new Event('input', { bubbles: true }));
+    featureSearch.focus();
+  });
+  syncFeatures();
+
+  /* ---------------------------------------------------------------- Page states and the demo band
+     ?state=ready|loading|error|member. Member is the ready page as someone who can read but not change it: every
+     control marked data-admin is disabled, and the who-can-edit lines turn into the reason. */
+  const statesEl = $('#settings-states');
+  const stateSwitch = $('#state-switch');
+  const STATES = ['ready', 'loading', 'error', 'member'];
+  let pageState = 'ready';
+  type Lockable = HTMLElement & { disabled: boolean };
+  const memberLocked = () => [...$$<Lockable>('[data-admin]'), ...$$<Lockable>('#members-list .fd-list-trail .fd-btn'), $<Lockable>('#resend-all'), $<Lockable>('#revoke-all')];
+  function setMember(member: boolean) {
+    if (member) memberLocked().forEach((el) => { el.disabled = true; });
+    else {
+      $$<Lockable>('[data-admin]').forEach((el) => { el.disabled = false; });
+      $$<Lockable>('#members-list .fd-list-trail .fd-btn').forEach((el) => { el.disabled = false; });
+      refreshCounts();
+    }
+    $$('[data-member-only]').forEach((el) => { el.hidden = !member; });
+    $('#team-editors').hidden = member;
+    // A member can leave; the only owner cannot, and says why.
+    const leave = $('#leave-team');
+    if (member) leave.removeAttribute('aria-disabled'); else leave.setAttribute('aria-disabled', 'true');
+    $('#leave-reason').hidden = member;
+    if (member) forms.markClean(teamForm);
+  }
+  function setPageState(value: string, { url = true } = {}) {
+    pageState = STATES.includes(value) ? value : 'ready';
+    setState(statesEl, pageState === 'member' ? 'ready' : pageState);
+    setMember(pageState === 'member');
+    const item = $maybe(`.fd-segmented-item[data-value="${pageState}"]`, stateSwitch);
+    if (item) nav.selectSegment(item, { silent: true });
+    if (url) {
+      const next = new URL(location.href);
+      if (pageState === 'ready') next.searchParams.delete('state'); else next.searchParams.set('state', pageState);
+      history.replaceState(history.state, '', next);
+    }
+  }
+  on(stateSwitch, 'fd:change', (event) => { const value = detail<{ value: string }>(event).value; if (value !== pageState) setPageState(value); });
+  /* Try again in the error state goes to loading (data-fd-set-state), then the panel comes back. */
+  on(statesEl, 'fd:change', (event) => {
+    if (event.target !== statesEl || detail<{ value: string }>(event).value !== 'loading' || pageState === 'loading') return;
+    setPageState('loading');
+    later(() => { if (pageState === 'loading') setPageState('ready'); }, 700);
+  });
+  setPageState(new URLSearchParams(location.search).get('state') || 'ready', { url: false });
 
   syncTeamForm();
 

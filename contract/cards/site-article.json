@@ -1,0 +1,187 @@
+{
+  "id": "site-article",
+  "job": "Read a post, report or paper at reading length, with its sources and notes.",
+  "purpose": "The reading page, as one section: a head (breadcrumb, eyebrow, title, standfirst, authors and date, actions), an optional cover, the body (fd-prose at reading size, with figures, tables and pull quotes breaking out of the measure) and a foot of ruled rows (notes, references, cite this, tags, copy link, the authors, a sign-up). plain is one column, aside adds a sticky rail that becomes a disclosure below desktop, cover spans the head over a wide frame.",
+  "useWhen": [
+    "A post, a newsletter issue or a story on the site.",
+    "A report or a research paper read on the page before or instead of the PDF."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Documentation: a guide or a reference with the docs navigation.",
+      "instead": "doc"
+    },
+    {
+      "when": "A few posts that point to articles.",
+      "instead": "site-posts"
+    },
+    {
+      "when": "One claim beside one piece of media on a landing page.",
+      "instead": "site-split"
+    }
+  ],
+  "aka": [
+    "article",
+    "blog post",
+    "report",
+    "paper",
+    "long read"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [
+    {
+      "name": "rail open",
+      "how": "details.fd-site-article-aside[open]: kept open on desktop, summary hidden; a closed disclosure below 900px"
+    },
+    {
+      "name": "note in view",
+      "how": ":target and focus on the note li after an fd-site-notes-ref; its back link returns focus"
+    },
+    {
+      "name": "copied",
+      "how": "button[data-fd-copy-link] shows Copied for 1.4s and announces the copy"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-layout",
+      "value": "plain",
+      "useWhen": "One reading column: a blog post, a newsletter issue, a customer story."
+    },
+    {
+      "attribute": "data-layout",
+      "value": "aside",
+      "useWhen": "A long paper with sections: the rail holds the contents, key facts and the download."
+    },
+    {
+      "attribute": "data-layout",
+      "value": "cover",
+      "useWhen": "A report's front page: the head and key facts across the container over a wide texture or figure."
+    },
+    {
+      "attribute": "data-side",
+      "value": "start",
+      "useWhen": "aside: the rail before the text (the default reading order of contents)."
+    },
+    {
+      "attribute": "data-side",
+      "value": "end",
+      "useWhen": "aside: the rail after the text, when the key facts matter more than the contents."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-site-article",
+      "role": "The section: an article element with fd-site-section."
+    },
+    {
+      "class": "fd-site-article-head",
+      "role": "Breadcrumb, eyebrow, title, standfirst, meta, actions; an fd-kv in it sits at its end on desktop."
+    },
+    {
+      "class": "fd-site-article-title",
+      "role": "The page's h1, a step above a section title (display size under cover)."
+    },
+    {
+      "class": "fd-site-article-standfirst",
+      "role": "One or two sentences: the fluid lead."
+    },
+    {
+      "class": "fd-site-article-meta",
+      "role": "Authors, a time, reading time or the format, over a rule."
+    },
+    {
+      "class": "fd-site-article-actions",
+      "role": "Download, cite, copy link."
+    },
+    {
+      "class": "fd-site-article-cover",
+      "role": "cover: a wide frame of the signature texture, or an fd-doc-frame."
+    },
+    {
+      "class": "fd-site-article-body",
+      "role": "The aside (aside only) and the text."
+    },
+    {
+      "class": "fd-site-article-aside",
+      "role": "aside: a details.fd-disclosure with fd-toc, fd-kv and a download."
+    },
+    {
+      "class": "fd-site-article-text",
+      "role": "The text, with fd-prose data-size=lg; [data-breakout] children span wider than the measure."
+    },
+    {
+      "class": "fd-site-article-foot",
+      "role": "Ruled rows after the text."
+    },
+    {
+      "class": "fd-site-authors",
+      "role": "The byline: a list of fd-site-authors-item."
+    },
+    {
+      "class": "fd-site-authors-item",
+      "role": "One author: optional fd-avatar, name, role or affiliation."
+    },
+    {
+      "class": "fd-site-authors-name",
+      "role": "The author's name."
+    },
+    {
+      "class": "fd-site-authors-role",
+      "role": "Their role or affiliation."
+    },
+    {
+      "class": "fd-site-notes",
+      "role": "Footnotes: an ol whose li#note-n are focus targets."
+    },
+    {
+      "class": "fd-site-notes-ref",
+      "role": "In the text: sup > a#ref-n to the note, aria-describedby the notes heading."
+    },
+    {
+      "class": "fd-site-notes-back",
+      "role": "In the note: the link back to its reference, with an aria-label."
+    },
+    {
+      "class": "fd-site-refs",
+      "role": "References: an ol with a hanging indent."
+    }
+  ],
+  "related": [
+    "prose",
+    "doc-frame",
+    "breadcrumb",
+    "toc",
+    "kv",
+    "copy-field",
+    "site-features",
+    "site-quote",
+    "site-posts",
+    "site-cta"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter on a note reference",
+      "does": "Moves to the note and focuses it; Enter on its back link returns focus to the reference."
+    },
+    {
+      "keys": "Enter, Space on the rail's summary",
+      "does": "Opens or closes the contents below desktop."
+    }
+  ],
+  "example": "docs/site-sections.html#article",
+  "provenance": [
+    "docs/site-sections.html",
+    "fire/components/site.css",
+    "fire/js/site.js",
+    "templates/site-post.html",
+    "templates/site-report.html",
+    "templates/site-research.html"
+  ],
+  "since": "0.8.0"
+}

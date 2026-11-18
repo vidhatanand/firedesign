@@ -36,6 +36,12 @@
  *   { type: 'divider' }
  *   { type: 'note', text, title? }                    a quiet aside: "If you did not ask for this, ignore it"
  *   { type: 'footer', lines?: string[], links?: [{ label, href }] }   rendered below the card; several are joined
+ *   Added in 0.8 for a newsletter issue:
+ *   { type: 'section', title }                        a labelled rule that opens a group of stories ("Shipped")
+ *   { type: 'story', title, text, href, kind?, label? }   one item of an issue: an optional kind label ("Release"), a
+ *                                                     title that links to href, one paragraph, and a link line (label,
+ *                                                     default "Read more") that names where it goes
+ *   { type: 'list', items, ordered?: boolean }        a short list; each item is a string or an array of runs
  *   href: https, http, mailto or tel. Everything else is escaped.
  *
  * Mail-client rules this follows: presentation tables (role="presentation") and a 560px column (a conditional
@@ -141,6 +147,7 @@ function render(theme, brand, preheader, blocks, locale) {
   const spans = (parts) => (Array.isArray(parts) ? parts : [parts]).map((part) => (typeof part === 'string' ? html(run(part)) : link(part.href, oneLine(part.text)))).join('');
 
   let firstHeading = true;
+  let inSection = false;
   let title = '';
   const footers = [];
   const body = [];
@@ -209,6 +216,41 @@ function render(theme, brand, preheader, blocks, locale) {
           `<div class="fe-mu-sunk" style="font-family:${f.body};font-size:14px;line-height:1.6;color:${c.muted.sunk}">${html(text)}</div></td></tr></table>`);
         break;
       }
+      case 'section': {
+        const text = oneLine(needText(b.title, i, 'section', 'title'));
+        body.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0 20px"><tr><td class="fe-mu-card fe-line" style="padding:0 0 8px;border-bottom:1px solid ${c.line};font-family:${f.body};font-size:12px;font-weight:600;letter-spacing:1px;line-height:1.4;text-transform:uppercase;color:${c.muted.card};text-align:${start}"><h2 style="margin:0;font:inherit;letter-spacing:inherit;color:inherit">${esc(text)}</h2></td></tr></table>`);
+        inSection = true;
+        break;
+      }
+      case 'story': {
+        const title = oneLine(needText(b.title, i, 'story', 'title'));
+        const text = para(needText(b.text, i, 'story', 'text'));
+        const href = safeUrl(b.href, i, 'story', 'href');
+        const kind = b.kind ? oneLine(b.kind) : '';
+        const more = oneLine(b.label ?? 'Read more');
+        body.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px"><tr><td style="text-align:${start}">` +
+          (kind ? `<div class="fe-mu-card" style="margin:0 0 4px;font-family:${f.body};font-size:12px;font-weight:600;letter-spacing:1px;line-height:1.4;text-transform:uppercase;color:${c.muted.card}">${esc(kind)}</div>` : '') +
+          `<h${inSection ? 3 : 2} style="margin:0 0 6px;font-family:${f.head};font-size:17px;font-weight:600;line-height:1.35"><a class="fe-ink" href="${esc(href)}" style="color:${c.ink};text-decoration:none">${esc(title)}</a></h${inSection ? 3 : 2}>` +
+          `<p class="fe-ink" style="margin:0 0 8px;font-family:${f.body};font-size:15px;line-height:1.6;color:${c.ink}">${html(text)}</p>` +
+          `<p style="margin:0;font-family:${f.body};font-size:14px;line-height:1.5">${link(href, more)}</p></td></tr></table>`);
+        break;
+      }
+      case 'list': {
+        if (!Array.isArray(b.items) || !b.items.length) fail(i, 'list', 'items must be a non-empty array');
+        const items = b.items.map((item, j) => {
+          const parts = Array.isArray(item) ? item : [item];
+          if (!parts.length) fail(i, 'list', `items[${j}] is empty`);
+          return parts.map((part) => {
+            if (typeof part === 'string') return needText(part, i, 'list', `items[${j}]`);
+            if (!part || typeof part !== 'object') fail(i, 'list', `items[${j}] must be a string or an array of strings and { text, href }`);
+            return { text: needText(part.text, i, 'list', `items[${j}].text`), href: safeUrl(part.href, i, 'list', `items[${j}].href`) };
+          });
+        });
+        const tag = b.ordered ? 'ol' : 'ul';
+        body.push(`<${tag} class="fe-ink" style="margin:0 0 20px;padding-${start}:22px;font-family:${f.body};font-size:15px;line-height:1.6;color:${c.ink}">${items.map((parts, j) =>
+          `<li style="margin:${j ? 6 : 0}px 0 0">${spans(parts)}</li>`).join('')}</${tag}>`);
+        break;
+      }
       case 'footer': {
         const lines = (b.lines ?? []).map((l) => para(needText(l, i, 'footer', 'lines[]')));
         const links = (b.links ?? []).map((l, j) => ({ label: oneLine(needText(l?.label, i, 'footer', `links[${j}].label`)), href: safeUrl(l.href, i, 'footer', `links[${j}].href`) }));
@@ -216,7 +258,7 @@ function render(theme, brand, preheader, blocks, locale) {
         break;
       }
       default:
-        fail(i, String(b?.type), 'unknown block type (heading, text, button, code, keyValue, divider, note, footer)');
+        fail(i, String(b?.type), 'unknown block type (heading, text, button, code, keyValue, divider, note, footer, section, story, list)');
     }
   });
 
@@ -276,6 +318,9 @@ function renderText(blocks) {
       case 'keyValue': out.push(b.rows.map((r) => `${oneLine(r.label)}: ${oneLine(String(r.value))}`).join('\n')); break;
       case 'divider': out.push('----'); break;
       case 'note': out.push((b.title ? `${oneLine(b.title)}\n` : '') + para(b.text)); break;
+      case 'section': out.push(`${oneLine(b.title).toUpperCase()}\n${'='.repeat(Math.min(60, [...oneLine(b.title)].length))}`); break;
+      case 'story': out.push(`${b.kind ? `${oneLine(b.kind)}: ` : ''}${oneLine(b.title)}\n${para(b.text)}\n${oneLine(b.label ?? 'Read more')}: ${new URL(b.href).href}`); break;
+      case 'list': out.push(b.items.map((item, j) => `${b.ordered ? `${j + 1}.` : '-'} ${(Array.isArray(item) ? item : [item]).map((x) => (typeof x === 'string' ? run(x) : `${oneLine(x.text)} (${new URL(x.href).href})`)).join('').replace(/\s+/g, ' ').trim()}`).join('\n')); break;
       case 'footer': foot.push(...(b.lines ?? []).map(para), ...(b.links ?? []).map((l) => `${oneLine(l.label)}: ${new URL(l.href).href}`)); break;
       default: break;
     }

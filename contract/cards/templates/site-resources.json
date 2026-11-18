@@ -1,0 +1,103 @@
+{
+  "id": "site-resources",
+  "job": "Find a report, paper, guide, webinar or template in a library filtered by kind and topic.",
+  "purpose": "The resources library of Ember's site: a short head, the featured report with its cover set large beside its finding, then 30 resources as a grid of typographic covers (kind and title in type on the texture or the inverse ground, no images) with kind chips, a topic select, search, a live count, numbered pages and the filters in the address, and an empty state. The footer carries the newsletter sign-up column.",
+  "useWhen": [
+    "Downloadable reports, guides and templates.",
+    "Readers look for one kind or topic and share the filtered view."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Posts read on the page, newest first.",
+      "instead": "site-blog"
+    },
+    {
+      "when": "One report and its download.",
+      "instead": "site-report"
+    },
+    {
+      "when": "Releases and fixes.",
+      "instead": "site-changelog"
+    }
+  ],
+  "aka": [
+    "library",
+    "content hub"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "list",
+    "form"
+  ],
+  "sections": [
+    {
+      "section": "site-header",
+      "variant": "inline",
+      "why": "Shared with the product pages."
+    },
+    {
+      "section": "site-hero",
+      "variant": "start, tight",
+      "why": "A short type-led head for a page that is mostly a library."
+    },
+    {
+      "section": "site-split",
+      "variant": "side=start, ratio=even, sunken",
+      "why": "The featured report: its drawn cover set large beside what it found and its two actions."
+    },
+    {
+      "section": "site-posts",
+      "variant": "grid, data-page-size=12, data-address",
+      "why": "The library: covers, kind and format lines, the tools bar with a live count, numbered pages and the empty state."
+    },
+    {
+      "section": "site-footer",
+      "variant": "columns with the sign-up column",
+      "why": "The library has no band of its own; the newsletter waits in the footer."
+    }
+  ],
+  "states": [
+    {
+      "name": "default",
+      "how": "30 resources, All, page 1 of 3"
+    },
+    {
+      "name": "filtered",
+      "how": "?kind=report&topic=pricing&q=… or the tools; the count says \"5 of 30 resources\""
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: six skeleton entries, the tools off"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: nothing published yet, with the newsletter"
+    },
+    {
+      "name": "no results",
+      "how": "?state=no-results: webinars about latency, none; fd-empty with Clear filters"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: fd-empty with Retry and the latest report"
+    },
+    {
+      "name": "sign-up invalid, busy, sent, subscribed",
+      "how": "submit the footer form: data-state invalid, then busy, then sent (dana@quarry.dev: subscribed)"
+    },
+    {
+      "name": "menu open",
+      "how": "below 900px wide, the header's menu button opens the links as a sheet (data-state=\"open\")"
+    }
+  ],
+  "example": "templates/site-resources.html",
+  "provenance": [
+    "docs/site-sections.html",
+    "fire/components/site.css",
+    "fire/js/site.js",
+    "templates/site-shell.js"
+  ],
+  "since": "0.8.0"
+}

@@ -146,7 +146,7 @@ test('site-changelog: the filter, every ?state= and the subscribe form', async (
   assert.equal(await visible(page, '#posts .fd-site-posts-item'), 2, 'Engineering shows two');
   await page.click('#kinds [data-value="deprecation"]');
   assert.equal(await visible(page, '#no-results'), 1, 'a filter that matches nothing shows the empty state');
-  await page.click('#no-results [data-show-all]');
+  await page.click('#no-results [data-clear]');
   assert.equal(await visible(page, '#posts .fd-site-posts-item'), 9, 'Show every update clears the filter');
 
   await page.fill('#subscribe-email', 'dana@quarry');

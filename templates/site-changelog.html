@@ -55,11 +55,11 @@
     </div>
   </section>
 
-  <!-- Posts, list: the page itself, dated rows filtered by kind with a chip nav. -->
-  <section class="fd-site-section fd-site-posts" data-layout="list" id="updates">
+  <!-- Posts, list: the page itself, dated rows filtered by kind with a chip nav (the listing behaviour of fire/js/site.js). -->
+  <section class="fd-site-section fd-site-posts" data-layout="list" data-address id="updates">
     <div class="fd-site-container">
       <div class="fd-site-head"><h2 class="fd-site-title">Every update.</h2></div>
-      <div class="fd-chip-nav" role="group" aria-label="Show updates of one kind" id="kinds">
+      <div class="fd-chip-nav" role="group" aria-label="Show updates of one kind" id="kinds" data-filter="kind">
         <button class="fd-chip" type="button" aria-pressed="true" data-value="all"><span>All</span> <span class="fd-chip-count">9</span></button>
         <button class="fd-chip" type="button" aria-pressed="false" data-value="release"><span>Releases</span> <span class="fd-chip-count">5</span></button>
         <button class="fd-chip" type="button" aria-pressed="false" data-value="fix"><span>Fixes</span> <span class="fd-chip-count">1</span></button>
@@ -82,7 +82,7 @@
         <span class="fd-empty-icon"><i data-icon="circle-check"></i></span>
         <h3 class="fd-empty-title">Nothing deprecated</h3>
         <p class="fd-empty-text">No part of the v2 API has been removed or scheduled for removal. Any deprecation is announced here 6 months ahead.</p>
-        <div class="fd-empty-actions"><button class="fd-btn" type="button" data-show-all>Show every update</button></div>
+        <div class="fd-empty-actions"><button class="fd-btn" type="button" data-clear>Show every update</button></div>
       </div>
     </div>
   </section>
@@ -91,64 +91,27 @@
   <section class="fd-site-section fd-site-cta" data-layout="split" data-ground="sunken" id="subscribe">
     <div class="fd-site-container">
       <div class="fd-site-head"><h2 class="fd-site-title">Get the changelog by email.</h2><p class="fd-site-lead">New endpoints and price changes, once a month, and nothing else.</p></div>
-      <form class="fd-site-cta-form" action="#" novalidate id="subscribe-form"><div class="fd-field"><label class="fd-field-label" for="subscribe-email">Work email</label><div class="fd-row" data-gap="2"><input class="fd-input" id="subscribe-email" name="email" type="email" autocomplete="email" placeholder="dana@quarry.dev" aria-describedby="subscribe-hint"><button class="fd-btn" data-variant="primary" type="submit">Subscribe</button></div><p class="fd-field-hint" id="subscribe-hint">One email a month. Unsubscribe from any of them.</p></div></form>
+      <form class="fd-site-cta-form" action="#" novalidate id="subscribe-form"><div class="fd-field"><label class="fd-field-label" for="subscribe-email">Work email</label><div class="fd-row" data-gap="2"><input class="fd-input" id="subscribe-email" name="email" type="email" required autocomplete="email" placeholder="dana@quarry.dev" aria-describedby="subscribe-hint" data-error-type="Use a full address, like dana@quarry.dev."><button class="fd-btn" data-variant="primary" type="submit">Subscribe</button></div><p class="fd-field-hint" id="subscribe-hint">One email a month. Unsubscribe from any of them.</p><p class="fd-field-error" id="subscribe-error" hidden></p></div>
+        <p class="fd-site-cta-done" role="status" data-state="sent" hidden><i data-icon="circle-check"></i><span>Subscribed. The next one goes out Dec 1.</span></p></form>
     </div>
   </section>
 </main>
 <script type="module">
-  /* The list filters by kind (the chip nav's fd:change); the form checks the address, waits, then says it is done.
-     ?state= shows the feed in another moment: loading, error, empty (nothing published yet) or no-results
-     (a filter that matches nothing). Anything else, or nothing, is the changelog as loaded. The masthead and the
-     subscribe form stay in every state; the latest release and the list give way. */
+  /* The list filters by kind and keeps it in the address (?kind=), and the form checks the address, waits, then says it
+     is done: both are fire/js/site.js (the listing and the one sign-up form). ?state= shows the feed in another moment:
+     loading, error, empty (nothing published yet) or no-results (a filter that matches nothing). Anything else, or
+     nothing, is the changelog as loaded. The masthead and the subscribe form stay in every state; the latest release
+     and the list give way. */
   const $ = (s, r = document) => r.querySelector(s);
+  const { filterPosts, setSignup } = await import('../fire/js/site.js');
   const list = $('#posts');
-  const none = $('#no-results');
   const kinds = $('#kinds');
-
-  function filter(kind) {
-    let shown = 0;
-    list.querySelectorAll('.fd-site-posts-item').forEach((post) => {
-      const show = kind === 'all' || post.dataset.kind === kind;
-      post.hidden = !show;
-      if (show) shown++;
-    });
-    list.hidden = shown === 0;
-    none.hidden = shown !== 0;
-  }
-  function choose(kind) {
-    kinds.querySelectorAll('.fd-chip').forEach((chip) => chip.setAttribute('aria-pressed', String(chip.dataset.value === kind)));
-    filter(kind);
-  }
-  kinds.addEventListener('fd:change', (e) => filter(e.detail?.value || e.detail?.item?.dataset.value || 'all'));
-  none.addEventListener('click', (e) => { if (e.target.closest('[data-show-all]')) { choose('all'); kinds.querySelector('[data-value="all"]').focus(); } });
-
   const form = $('#subscribe-form');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input = $('#subscribe-email');
-    const button = form.querySelector('button[type="submit"]');
-    const field = form.querySelector('.fd-field');
-    field.querySelector('.fd-field-error')?.remove();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) {
-      input.setAttribute('aria-invalid', 'true');
-      input.setAttribute('aria-describedby', 'subscribe-error');
-      field.insertAdjacentHTML('beforeend', '<p class="fd-field-error" id="subscribe-error">Use a full address, like dana@quarry.dev.</p>');
-      $('#subscribe-hint').hidden = true;
-      input.focus();
-      return;
-    }
-    input.removeAttribute('aria-invalid');
-    input.readOnly = true;
-    button.setAttribute('aria-busy', 'true');
-    setTimeout(() => {
-      form.innerHTML = '<p class="fd-site-cta-done" role="status"><i data-icon="circle-check"></i>Subscribed. The next one goes out Dec 1.</p>';
-      import('../fire/fire.js').then((fire) => fire.init(form));
-    }, 900);
-  });
+  form.addEventListener('fd:submit', (e) => { e.preventDefault(); setTimeout(() => setSignup(form, 'sent'), 900); });
 
   const asked = new URLSearchParams(location.search).get('state');
   const state = ['loading', 'error', 'empty', 'no-results'].includes(asked) ? asked : null;
-  if (state === 'no-results') choose('deprecation');
+  if (state === 'no-results') filterPosts($('#updates'), { kind: 'deprecation' });
   else if (state) {
     $('#latest').remove();
     const row = () => `<div class="fd-site-posts-item"><span class="fd-skeleton-title" data-size="mono"></span><span class="fd-skeleton-title" data-size="label"></span><div class="fd-skeleton-text" data-lines="1"></div></div>`;

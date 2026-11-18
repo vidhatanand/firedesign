@@ -1,0 +1,95 @@
+{
+  "id": "site-blog",
+  "job": "Browse a product's blog: the newest long read first, then every post filtered by kind and topic.",
+  "purpose": "The blog index of Ember's public site: the newest long read large beside three more (posts featured, its head the page's h1), then every post as editorial rows without a date rail (kind, title, a longer summary, authors, a small frame), filtered by kind and topic, searched, paged eight at a time with the filters in the address, and the newsletter on the inverse ground.",
+  "useWhen": [
+    "A product publishes posts on its own site.",
+    "Readers come for one kind of post or one topic, and share a filtered view."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Releases, fixes and deprecations, newest first, for people who follow the product.",
+      "instead": "site-changelog"
+    },
+    {
+      "when": "Reports, guides and templates people download.",
+      "instead": "site-resources"
+    },
+    {
+      "when": "Reading one post.",
+      "instead": "site-post"
+    }
+  ],
+  "aka": [
+    "blog",
+    "articles"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "list",
+    "form"
+  ],
+  "sections": [
+    {
+      "section": "site-header",
+      "variant": "inline",
+      "why": "Shared with the product pages: the blog is part of the product site."
+    },
+    {
+      "section": "site-posts",
+      "variant": "featured",
+      "why": "The newest long read large with its media, three more beside it; the section head is the page's h1."
+    },
+    {
+      "section": "site-posts",
+      "variant": "list, rule, data-page-size=8, data-address",
+      "why": "Every post as editorial rows without the changelog's date rail: kind, title, summary, authors, a frame at the end; kind chips, a topic select, search and pages."
+    },
+    {
+      "section": "site-cta",
+      "variant": "split, inverse",
+      "why": "The blog's one action, the newsletter, in one field on the site's darkest ground."
+    },
+    {
+      "section": "site-footer",
+      "variant": "columns",
+      "why": "After a list the reader looks for somewhere to go next."
+    }
+  ],
+  "states": [
+    {
+      "name": "default",
+      "how": "18 posts, All, page 1 of 3"
+    },
+    {
+      "name": "filtered",
+      "how": "?kind=engineering&topic=latency&q=… in the address, or the chips, select and search; Back restores the last view"
+    },
+    {
+      "name": "paged",
+      "how": "?page=2, or the page buttons; focus moves to the first post of the page"
+    },
+    {
+      "name": "no results",
+      "how": "a filter that matches nothing: fd-empty with Clear filters"
+    },
+    {
+      "name": "sign-up invalid, busy, sent, subscribed",
+      "how": "submit the newsletter form: data-state invalid, then busy, then sent (dana@quarry.dev: subscribed)"
+    },
+    {
+      "name": "menu open",
+      "how": "below 900px wide, the header's menu button opens the links as a sheet (data-state=\"open\")"
+    }
+  ],
+  "example": "templates/site-blog.html",
+  "provenance": [
+    "docs/site-sections.html",
+    "fire/components/site.css",
+    "fire/js/site.js",
+    "templates/site-shell.js"
+  ],
+  "since": "0.8.0"
+}

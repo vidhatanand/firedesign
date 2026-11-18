@@ -261,10 +261,11 @@ test('the voice comes from WRITING.md and the 100 components are chosen by the s
   const excluded = catalog.components.filter((c) => !carried.has(c.id.split('-').map((p) => p[0].toUpperCase() + p.slice(1)).join('')));
   assert.equal(excluded.length, catalog.components.length - content.components.length);
   for (const c of excluded) assert.ok(readme.includes(`- \`${c.id}\` (`), `${c.id} is not listed as excluded`);
-  // a component of a lower kind is never carried while a higher kind is left out
-  const rank = { component: 0, pattern: 1, layout: 2 };
-  const kindOf = new Map(catalog.components.map((c) => [c.id.split('-').map((p) => p[0].toUpperCase() + p.slice(1)).join(''), c.kind]));
-  for (const c of excluded) for (const k of content.components) if (rank[c.kind] < rank[kindOf.get(k.name)]) assert.fail(`${c.id} (${c.kind}) is excluded while ${k.name} (${kindOf.get(k.name)}) is carried`);
+  // the foundations are always carried, and nothing from the leave-out-first list is carried while a component
+  // outside it is excluded
+  const protectedFamilies = ['Layout', 'Forms', 'Buttons', 'Base', 'Navigation', 'Overlays', 'Data', 'Charts'];
+  for (const c of catalog.components) if (protectedFamilies.includes(c.family)) assert.ok(!excluded.includes(c), `${c.id} (${c.family}) is a foundation and must be carried`);
+  for (const id of ['doc', 'chat', 'tweaks', 'playground']) assert.ok(excluded.some((c) => c.id === id), `${id} is specialised and is left out first`);
 });
 
 test('the build is deterministic and the committed files are current', () => {

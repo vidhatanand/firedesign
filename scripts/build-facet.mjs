@@ -338,9 +338,21 @@ const voice = {
 /* ==========================================================================
    Components
    ========================================================================== */
-// Which components to carry (Facet caps a system at 100): kind component, then pattern, then layout; within a kind,
-// the number of templates/*.html that use one of its classes (most first); then id.
-const KIND_RANK = { component: 0, pattern: 1, layout: 2 };
+// Which components to carry (Facet caps a system at 100). A designer building a board needs the foundations first,
+// so the families below are always carried. Specialised parts that only make sense inside Fire's own docs site,
+// chat, agent playground or Tweaks panel are left out first. Any remaining slots go by the number of
+// templates/*.html that use one of a component's classes (most first), then id.
+const PROTECTED_FAMILIES = new Set(['Layout', 'Forms', 'Buttons', 'Base', 'Navigation', 'Overlays', 'Data', 'Charts']);
+const LEAVE_OUT_FIRST = new Set([
+  // Fire's documentation site
+  'doc', 'doc-endpoint', 'doc-setup', 'doc-ask', 'doc-cards', 'doc-changelog', 'doc-frame',
+  // chat widget internals and the review-only Tweaks panel
+  'chat', 'chat-launcher', 'chat-message', 'chat-lightbox', 'tweaks',
+  // agent playground pieces (the composer, message, thread, tool call, reasoning and sources stay)
+  'agent', 'playground', 'result', 'session-list', 'suggestions', 'use-agent',
+  // narrow content and code pieces
+  'qr', 'verified', 'announce', 'pagebar', 'endpoint', 'schema', 'viewswitch',
+]);
 const templateFiles = fs.readdirSync(path.join(ROOT, 'templates')).filter((f) => f.endsWith('.html')).sort();
 const usage = new Map(catalog.components.map((c) => [c.id, 0]));
 for (const f of templateFiles) {
@@ -348,11 +360,15 @@ for (const f of templateFiles) {
   for (const m of read(`templates/${f}`).matchAll(/\bfd-[a-z0-9-]+/g)) { const id = catalog.classes[m[0]]; if (id) seen.add(id); }
   for (const id of seen) usage.set(id, usage.get(id) + 1);
 }
+const tier = (c) => (PROTECTED_FAMILIES.has(c.family) ? 0 : LEAVE_OUT_FIRST.has(c.id) ? 2 : 1);
 const ranked = [...catalog.components].sort((a, b) =>
-  (KIND_RANK[a.kind] ?? 3) - (KIND_RANK[b.kind] ?? 3) || usage.get(b.id) - usage.get(a.id) || (a.id < b.id ? -1 : 1));
+  tier(a) - tier(b) || usage.get(b.id) - usage.get(a.id) || (a.id < b.id ? -1 : 1));
 const MAX_COMPONENTS = 100;
 const carried = ranked.slice(0, MAX_COMPONENTS);
 const excluded = ranked.slice(MAX_COMPONENTS);
+if (carried.filter((c) => tier(c) === 0).length !== catalog.components.filter((c) => tier(c) === 0).length) {
+  throw new Error('build-facet: the protected families alone exceed the component cap');
+}
 const byId = new Map(catalog.components.map((c) => [c.id, c]));
 
 // States from the CSS: a state selector (:disabled, [aria-invalid], :hover, ...) in a compound that carries the
@@ -456,7 +472,9 @@ for (const c of carried) {
     let prop = camel(attr);
     if (used.has(prop)) { prop += 'Value'; }
     if (used.has(prop) || !/^[a-z][A-Za-z0-9]{0,31}$/.test(prop)) { propNotes.push(`${c.id} ${attr}`); continue; }
-    const vals = [...new Set(values)];
+    // "*" marks a free value (an icon name, a height, an id): a string prop. "" is the bare (presence) form.
+    if (values.includes('*')) { used.add(prop); props.push({ name: prop, type: 'string', required: false, ...(L.prop ? { description: sentence(cut(`Sets ${attr}.`, L.prop)) } : {}) }); continue; }
+    const vals = [...new Set(values.filter((x) => x !== ''))];
     const v = card && card.variants.find((x) => x.attribute === attr);
     const description = L.prop ? sentence(cut(v ? `Sets ${attr}. ${v.useWhen}` : `Sets ${attr}.`, L.prop)) : undefined;
     const withDesc = (o) => ({ ...o, required: false, ...(description ? { description } : {}) });
@@ -623,7 +641,7 @@ w('5. **Components.** Each component is `<cc-component name="Button" variant="pr
 w();
 w('## Which 100 components, and the rest');
 w();
-w(`Fire has ${catalog.components.length} components in the catalogue; Facet caps a system at ${MAX_COMPONENTS}. Rule: kind \`component\`, then \`pattern\`, then \`layout\`; within a kind, the number of \`templates/*.html\` files that use one of the component's classes, most first; then id. The rule reads facts only, so it does not change when cards are written.`);
+w(`Fire has ${catalog.components.length} components in the catalogue; Facet caps a system at ${MAX_COMPONENTS}. Rule: the foundation families (${[...PROTECTED_FAMILIES].join(', ')}) are always carried; specialised parts of Fire's docs site, chat widget, agent playground and Tweaks panel are left out first; any remaining slots go by the number of \`templates/*.html\` that use the component. Fire asks Facet to raise the cap so that all ${catalog.components.length} can travel.`);
 w();
 w(`Excluded (${excluded.length}, for the Facet session to decide; id, kind, templates that use it):`);
 w();

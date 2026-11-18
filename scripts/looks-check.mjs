@@ -15,7 +15,8 @@
  *   Each named look (contract/looks/named, through fire/js/looks.js) by its preview URL, ?look=<name>, the way the
  *   look gallery frames it, in light and in dark. Each random record (seeded, reproducible: a preset palette, toned
  *   or not, or one paletteFrom() builds from a random accent or brand colours; a named type set or a type spec of
- *   families Fire ships; every dial and the signature at random) in one theme picked by the seed. A record the
+ *   families Fire ships; every dial and the signature at random; imagery from a second seeded stream, so adding it
+ *   changed none of the other draws) in one theme picked by the seed. A record the
  *   Tweaks panel can hold is put in its storage, so the panel applies it as it would for a user; a generated palette
  *   or a type spec is added as themeToCss()'s stylesheet, with the rest still through the panel.
  *   Every case renders templates/logs.html, settings.html and overview.html at 1440 and 375 wide.
@@ -88,7 +89,7 @@ const SHIPPED = (() => {
   return [...families];
 })();
 
-function randomRecord(rand) {
+function randomRecord(rand, randImagery) {
   const pick = (list) => list[Math.floor(rand() * list.length)];
   const int = (min, max) => Math.round(min + rand() * (max - min));
   const hex = () => `#${Array.from({ length: 3 }, () => int(0, 255).toString(16).padStart(2, '0')).join('')}`;
@@ -114,7 +115,9 @@ function randomRecord(rand) {
   record.dials = {
     corners: step(DIAL_RANGES.corners, 0.125),
     texture: step(DIAL_RANGES.texture, 0.05),
-    ...Object.fromEntries(Object.entries(DIAL_CHOICES).map(([k, choices]) => [k, pick(choices)])),
+    ...Object.fromEntries(Object.entries(DIAL_CHOICES).filter(([k]) => k !== 'imagery').map(([k, choices]) => [k, pick(choices)])),
+    // imagery (0.8) is drawn from a stream of its own, so the records drawn before it was added stay as they were
+    imagery: DIAL_CHOICES.imagery[Math.floor(randImagery() * DIAL_CHOICES.imagery.length)],
   };
   if (rand() < 0.6) {
     record.signature = {
@@ -128,10 +131,11 @@ function randomRecord(rand) {
 
 export function randomCases(count, seed) {
   const rand = mulberry32(seed);
+  const randImagery = mulberry32(seed + 0x1a9e5);
   const out = [];
   let tries = 0;
   while (out.length < count && tries++ < count * 20) {
-    const record = randomRecord(rand);
+    const record = randomRecord(rand, randImagery);
     const themeChoice = rand() < 0.5 ? 'light' : 'dark';
     if (!validateTheme(record).ok) continue;
     if (typeof record.palette !== 'string') {
@@ -164,7 +168,7 @@ const label = (record) => {
   const pal = typeof record.palette === 'string' ? record.palette : record.palette.from === 'brand' ? `brand ${record.palette.colors.join('+')}` : `accent ${record.palette.accent}`;
   const typ = typeof record.type === 'string' ? record.type : `${record.type.display}/${record.type.sans}`;
   const d = record.dials;
-  return `${pal}${Object.values(record.tone).join() === '0,100,0,0' ? '' : ' toned'} · ${typ} · ${d.density} ${d.textSize} · ${d.surfaces}/${d.controls}/${d.elevation}/${d.headings}${d.contrast === 'high' ? ' · high' : ''}`;
+  return `${pal}${Object.values(record.tone).join() === '0,100,0,0' ? '' : ' toned'} · ${typ} · ${d.density} ${d.textSize} · ${d.surfaces}/${d.controls}/${d.elevation}/${d.headings} · ${d.imagery}${d.contrast === 'high' ? ' · high' : ''}`;
 };
 
 /* ---------- In the page ---------- */

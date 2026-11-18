@@ -41,6 +41,8 @@ export type ElevationSetting = 'none' | 'soft' | 'lifted';
 export type ControlsSetting = 'soft' | 'outlined' | 'filled';
 /** data-headings: the small labels' voice: mono capitals (default) · tracked sans capitals · mono as written. */
 export type HeadingsSetting = 'sentence' | 'upper' | 'mono';
+/** data-imagery: how the site's pictures are treated: as shot (default) · greyscale · ink and a tint of the accent · under an accent veil. */
+export type ImagerySetting = 'natural' | 'mono' | 'duotone' | 'wash';
 /** Hairline weight in px (--fd-hairline). */
 export type LineWeight = 1 | 1.5 | 2;
 
@@ -443,6 +445,7 @@ export interface ThemeDials {
   elevation?: ElevationSetting;
   controls?: ControlsSetting;
   headings?: HeadingsSetting;
+  imagery?: ImagerySetting;
 }
 
 /** The brand of a theme record: the shell's setBrand() input, as strings (fire/js/theme.js). */
@@ -509,6 +512,7 @@ export interface TweaksState {
   elevation: ElevationSetting;
   controls: ControlsSetting;
   headings: HeadingsSetting;
+  imagery: ImagerySetting;
   signature: Required<ThemeSignature>;
 }
 /** A partial tweaks state for tweaks.set(); tone and signature may be partial too. */
@@ -528,6 +532,7 @@ export interface TweaksPatch {
   elevation?: ElevationSetting;
   controls?: ControlsSetting;
   headings?: HeadingsSetting;
+  imagery?: ImagerySetting;
   signature?: ThemeSignature;
   /** A record's brand: tweaks.set() calls setBrand() with it and does not keep it in the state. */
   brand?: ThemeBrand;

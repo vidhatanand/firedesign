@@ -278,14 +278,14 @@ const STATES = [
   { palette: 'ember', tone: { hue: 180, vivid: 150, light: 12, warmth: 100 }, corners: 0.125 },
   { palette: 'iris', tone: { hue: 45, vivid: 0, light: 0, warmth: 0 }, type: 'gallery', contrast: 'high', texture: 0.35 },
   { palette: 'volt', signature: { field: 'contour', mark: 'squares', cell: 9, ramp: 'soft', marks: 'corners', intensity: 1.3 } },
-  { surfaces: 'flat', elevation: 'none', controls: 'outlined', headings: 'upper' },
-  { palette: 'clay', surfaces: 'outlined', elevation: 'lifted', controls: 'filled', headings: 'mono', tone: { hue: 20, vivid: 80, light: 0, warmth: 40 } },
+  { surfaces: 'flat', elevation: 'none', controls: 'outlined', headings: 'upper', imagery: 'duotone' },
+  { palette: 'clay', surfaces: 'outlined', elevation: 'lifted', controls: 'filled', headings: 'mono', imagery: 'wash', tone: { hue: 20, vivid: 80, light: 0, warmth: 40 } },
   { palette: 'ocean', surfaces: 'flat', tone: { hue: -30, vivid: 120, light: 4, warmth: -40 }, contrast: 'high' },
 ];
 const full = (s) => ({
   palette: 'ember', type: 'geist', tone: { hue: 0, vivid: 100, light: 0, warmth: 0 }, theme: 'system', density: 'comfortable',
   corners: 1, lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
-  surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence',
+  surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence', imagery: 'natural',
   signature: { field: 'auto', mark: 'auto', cell: 'auto', ramp: 'auto', marks: 'crosses', intensity: 1 }, ...s,
 });
 

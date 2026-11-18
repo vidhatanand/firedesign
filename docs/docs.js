@@ -46,7 +46,7 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, 
 
 /** Pretty-print a specimen's markup for the code view. */
 function format(html) {
-  const lines = html.replace(/\s+data-fd-bound="[^"]*"/g, '').replace(/\s+data-frame(-[a-z]+)?(="[^"]*")?(?=[\s>\/])/g, '').split('\n').map((l) => l.replace(/\s+$/, '')).filter((l, i, a) => l.trim() || (a[i - 1] || '').trim());
+  const lines = html.replace(/\s+data-fd-bound="[^"]*"/g, '').replace(/\s+data-frame(?:-[a-z]+(?:="[^"]*")?|="[^"]+")(?=[\s>\/])/g, '').split('\n').map((l) => l.replace(/\s+$/, '')).filter((l, i, a) => l.trim() || (a[i - 1] || '').trim());
   while (lines.length && !lines[0].trim()) lines.shift();
   while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
   const indent = Math.min(...lines.filter((l) => l.trim()).map((l) => l.match(/^\s*/)[0].length));

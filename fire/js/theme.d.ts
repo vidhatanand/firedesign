@@ -2,7 +2,7 @@
 // `fire-design/fire/js/theme.js`). The record, palette and dial types live in fire.d.ts; ThemeModule there describes
 // the same functions as one interface.
 import type {
-  ContrastLevel, ControlsSetting, Density, ElevationSetting, ExpandedTheme, GeneratedPalette, HeadingsSetting, LineWeight,
+  ContrastLevel, ControlsSetting, Density, ElevationSetting, ExpandedTheme, GeneratedPalette, HeadingsSetting, ImagerySetting, LineWeight,
   MotionSetting, PaletteSpec, SignatureField, SignatureMark, SignatureMarks, SurfacesSetting, TextSize, ThemeDials,
   ThemeRecord, ThemeSignature, ThemeValidation, Tone, TweaksPatch, RampName, TypeSetName,
 } from '../fire.js';
@@ -23,9 +23,10 @@ export declare const STRUCTURE_CHOICES: Readonly<{
   elevation: readonly ElevationSetting[];
   controls: readonly ControlsSetting[];
   headings: readonly HeadingsSetting[];
+  imagery: readonly ImagerySetting[];
 }>;
-/** The structural dials → their attribute on <html>. */
-export declare const STRUCTURE_ATTRIBUTES: Readonly<{ surfaces: 'data-surfaces'; elevation: 'data-elevation'; controls: 'data-controls'; headings: 'data-headings' }>;
+/** The structural dials (and imagery, carried the same way) → their attribute on <html>. */
+export declare const STRUCTURE_ATTRIBUTES: Readonly<{ surfaces: 'data-surfaces'; elevation: 'data-elevation'; controls: 'data-controls'; headings: 'data-headings'; imagery: 'data-imagery' }>;
 /** The dials that take a choice. */
 export declare const DIAL_CHOICES: Readonly<{
   density: readonly Density[];
@@ -37,6 +38,7 @@ export declare const DIAL_CHOICES: Readonly<{
   elevation: readonly ElevationSetting[];
   controls: readonly ControlsSetting[];
   headings: readonly HeadingsSetting[];
+  imagery: readonly ImagerySetting[];
 }>;
 /** The dials that take a range. */
 export declare const DIAL_RANGES: Readonly<{ corners: readonly [min: number, max: number]; texture: readonly [min: number, max: number] }>;

@@ -17,7 +17,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     // boot.js rewrites <html>'s attributes before React hydrates (saved theme, density, tweaks): N3.
-    <html lang="en" {...theme} suppressHydrationWarning>
+    <html lang="en" data-fd-surface="app" {...theme} suppressHydrationWarning>
       <head>
         {/* Classic and blocking, so the saved look is on <html> in the first paint (N2). Not next/script. */}
         <script src="/fire/boot.js" nonce={nonce} />

@@ -156,7 +156,7 @@ try {
   }
 
   // 5. lint
-  const lint = run(process.execPath, [path.join(fireRoot, 'scripts/lint-markup.mjs'), 'src', 'index.html']);
+  const lint = run(process.execPath, [path.join(fireRoot, 'scripts/lint-markup.mjs'), '--surface', 'app', 'src', 'index.html']);
   console.log(`\nlint-markup: ${lint.stdout.trim().split('\n').pop()}`);
   if (lint.status !== 0) { console.error(lint.stdout); fail('lint-markup'); }
   const lintCss = run(process.execPath, [path.join(fireRoot, 'scripts/lint-css.mjs'), 'src', 'index.html']);

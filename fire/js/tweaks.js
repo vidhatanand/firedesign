@@ -72,7 +72,7 @@
  *            data-fd-look): the state starts as that look and nothing is saved, so a framed preview (docs/looks.html)
  *            neither reads nor changes the viewer's own tweaks. A name that is not a look is ignored.
  *
- * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial), reset(), toCss(), toTheme(),
+ * API: init(root), open(trigger?), close(), toggle(trigger?), get(), set(partial) (a partial with a brand calls setBrand), reset(), toCss(), toTheme(),
  *      applyLook(name), look()
  *      toTheme() is the state as a theme record (fire/js/theme.js): set(fromThemeRecord(record)) applies one.
  * Events: fd:change on <html> with detail { name: 'tweaks', value: state } after every change; fd:open / fd:close on the panel.
@@ -87,6 +87,7 @@ import {
 } from './palettes.js';
 import { TYPEFACES, DEFAULT_TYPEFACE, getTypeface } from './typefaces.js';
 import { LOOKS, getLook } from './looks.js';
+import { setBrand } from './shell.js';
 import {
   toThemeRecord, SIGNATURE_DEFAULT, SIGNATURE_CHOICES, SIGNATURE_RANGES, SIGNATURE_ATTRIBUTES,
   DIAL_DEFAULTS, STRUCTURE_CHOICES, STRUCTURE_ATTRIBUTES,
@@ -325,8 +326,10 @@ function commit(next) {
   return true;
 }
 
-/** Merge a partial state (tone may be partial too) and apply it. Returns the full state. */
+/** Merge a partial state (tone may be partial too) and apply it. Returns the full state. A `brand` (from
+ *  fromThemeRecord(record)) goes to the shell's setBrand(); it is not part of the state. */
 export function set(partial = {}) {
+  if (partial.brand && typeof partial.brand === 'object') setBrand(partial.brand);
   commit(sanitize({ ...state, ...partial, tone: { ...state.tone, ...(partial.tone || {}) }, signature: { ...state.signature, ...(partial.signature || {}) } }));
   return get();
 }

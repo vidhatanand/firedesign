@@ -15,7 +15,8 @@
  *     "dials": { "corners": 1, "density": "comfortable", "lines": 1, "textSize": "md",
  *                "contrast": "default", "motion": "default", "texture": 1,
  *                "surfaces": "objects", "elevation": "soft", "controls": "soft", "headings": "sentence" },
- *     "signature": { "field": "auto", "mark": "auto", "cell": "auto", "ramp": "auto", "marks": "crosses", "intensity": 1 }
+ *     "signature": { "field": "auto", "mark": "auto", "cell": "auto", "ramp": "auto", "marks": "crosses", "intensity": 1 },
+ *     "brand": { "name"?, "mark"?, "logo"?, "logoDark"?, "href"? }         the product's brand (below)
  *   }
  *   Type set spec (fire/js/typefaces.js; the families are in contract/fonts.json):
  *     { "display"?, "sans"?, "mono"?, "displayWeight"?: 600, "displayTracking"?: -0.02,
@@ -39,6 +40,13 @@
  *   marks      crosses · dots · corners · none (the marks where frame bands meet the rails)                           data-signature-marks
  *   intensity  0.4…1.6 (default 1)                                                                                   data-signature-intensity
  *
+ * The brand is the shell's setBrand() input (fire/js/shell.js): name and href are text, mark, logo and logoDark are
+ * addresses of pictures. A picture's address is the page's own (relative or same origin), an https address, or a
+ * data: image, with no credentials and no control characters (the rules of safeImageUrl). A brand is not CSS:
+ * expandTheme() returns it untouched as `brand` and themeToCss() ignores it; tweaks.set(fromThemeRecord(record))
+ * hands it to setBrand(), which uses only the page's own pictures and data: images (another host's picture needs
+ * setBrand({ …, hosts }) from the page itself). A record without a brand leaves the page's brand as it is.
+ *
  * The dials map to exactly what the Tweaks panel sets (fire/js/tweaks.js inlineProps and apply):
  *   corners   0…2     --fd-radius-scale          lines     1 · 1.5 · 2      --fd-hairline (px)
  *   motion    off · default · slow → --fd-motion 0 · 1 · 1.75
@@ -60,7 +68,7 @@
  *   FIRE_VERSION                 the Fire release this module belongs to (a test keeps it equal to package.json)
  *   DEFAULT_RECORD               the full record of Fire's default look
  *   INPUT_TOKENS                 the tokens a record sets: the palette's colours, the three families, the dial variables
- *   expandTheme(record)          → { tokens: { name: [light, dark] | value }, attributes: { 'data-palette': … }, faces: [@font-face …], notes }
+ *   expandTheme(record)          → { tokens: { name: [light, dark] | value }, attributes: { 'data-palette': … }, faces: [@font-face …], notes, brand? }
  *   themeToCss(record, { selector = ':root' })   → a stylesheet string (with the attributes to set, in its comment)
  *   paletteFrom(spec)            → { name, label, note, tokens, contrast, spec, notes }, the same form as the presets
  *   validateTheme(record)        → { ok, errors, notes }
@@ -214,7 +222,7 @@ export function validateTheme(record) {
   const errors = [];
   const notes = [];
   if (!isObj(record)) return { ok: false, errors: ['(record): must be an object'], notes };
-  only(record, ['contract', 'fire', 'palette', 'tone', 'type', 'dials', 'signature'], '', errors);
+  only(record, ['contract', 'fire', 'palette', 'tone', 'type', 'dials', 'signature', 'brand'], '', errors);
   if (record.contract !== undefined && record.contract !== CONTRACT) errors.push(`/contract: must be ${JSON.stringify(CONTRACT)}`);
   if (record.fire !== undefined && !(typeof record.fire === 'string' && /^\d+\.\d+\.\d+$/.test(record.fire))) errors.push('/fire: must be a Fire release, such as "0.6.0"');
   if (record.palette !== undefined) checkPalette(record.palette, errors);
@@ -244,6 +252,7 @@ export function validateTheme(record) {
     }
   }
   if (record.signature !== undefined) checkSignature(record.signature, errors);
+  if (record.brand !== undefined) checkBrand(record.brand, errors);
   return { ok: errors.length === 0, errors, notes };
 }
 
@@ -256,6 +265,27 @@ function checkSignature(sig, errors) {
   const cell = sig.cell;
   if (cell !== undefined && cell !== 'auto' && !inRange(cell, SIGNATURE_RANGES.cell)) errors.push(`/signature/cell: must be "auto" or a number from ${SIGNATURE_RANGES.cell[0]} to ${SIGNATURE_RANGES.cell[1]}`);
   if (sig.intensity !== undefined && !inRange(sig.intensity, SIGNATURE_RANGES.intensity)) errors.push(`/signature/intensity: must be a number from ${SIGNATURE_RANGES.intensity[0]} to ${SIGNATURE_RANGES.intensity[1]}`);
+}
+
+const BRAND_FIELDS = Object.freeze(['name', 'mark', 'logo', 'logoDark', 'href']);
+const BRAND_PICTURES = ['mark', 'logo', 'logoDark'];
+const DATA_IMAGE = /^data:image\/(?:png|jpe?g|gif|webp|avif|svg\+xml)[;,]/i;
+/* The address rules of safeImageUrl (fire/js/content.js) that need no page: this module has no DOM. Which hosts may
+   serve a picture is the page's decision, made when the brand is applied. */
+function pictureOk(url) {
+  // eslint-disable-next-line no-control-regex
+  if (typeof url !== 'string' || !url.trim() || /[\u0000-\u001f\u007f]/.test(url)) return false;
+  const text = url.trim();
+  if (/^data:/i.test(text)) return DATA_IMAGE.test(text);
+  let u;
+  try { u = new URL(text, 'https://fire.invalid/'); } catch { return false; }
+  return !u.username && !u.password && (u.protocol === 'https:' || u.protocol === 'http:');
+}
+function checkBrand(brand, errors) {
+  if (!isObj(brand)) { errors.push('/brand: must be an object'); return; }
+  only(brand, BRAND_FIELDS, '/brand', errors);
+  for (const k of BRAND_FIELDS) if (brand[k] !== undefined && typeof brand[k] !== 'string') errors.push(`/brand/${k}: must be a string`);
+  for (const k of BRAND_PICTURES) if (typeof brand[k] === 'string' && !pictureOk(brand[k])) errors.push(`/brand/${k}: must be a safe picture address (relative, https, or a data: image)`);
 }
 
 function assertValid(record) {
@@ -516,7 +546,7 @@ export function expandTheme(record = {}) {
   if (d.contrast === 'high') attributes['data-contrast'] = 'high';
   for (const [k, name] of Object.entries(STRUCTURE_ATTRIBUTES)) if (d[k] !== DIAL_DEFAULTS[k]) attributes[name] = d[k];
   for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (r.signature[k] !== SIGNATURE_DEFAULT[k]) attributes[name] = String(r.signature[k]);
-  return { tokens, attributes, faces, notes };
+  return record.brand ? { tokens, attributes, faces, notes, brand: { ...record.brand } } : { tokens, attributes, faces, notes };
 }
 
 const fmtX = (v) => `${Number(v.toFixed(3))}×`;
@@ -566,6 +596,8 @@ export function toThemeRecord(state = {}) {
   // The signature is written only when it differs from the default, so a record without one stays as it was.
   const signature = { ...SIGNATURE_DEFAULT, ...(state.signature || {}) };
   if (Object.keys(SIGNATURE_DEFAULT).some((k) => signature[k] !== SIGNATURE_DEFAULT[k])) record.signature = signature;
+  // The brand is not a tweak: a state carries one only when something applied a record that had one.
+  if (state.brand) record.brand = { ...state.brand };
   return record;
 }
 
@@ -576,5 +608,7 @@ export function fromThemeRecord(record = {}) {
   if (record.palette !== undefined && typeof record.palette !== 'string') throw new TypeError('[theme] the Tweaks panel holds a named palette only; apply a palette spec with themeToCss()');
   if (record.type !== undefined && typeof record.type !== 'string') throw new TypeError('[theme] the Tweaks panel holds a named type set only; apply font families with themeToCss()');
   const r = complete(record);
-  return { palette: r.palette, type: r.type, tone: { ...r.tone }, ...r.dials, signature: { ...r.signature } };
+  const patch = { palette: r.palette, type: r.type, tone: { ...r.tone }, ...r.dials, signature: { ...r.signature } };
+  if (record.brand) patch.brand = { ...record.brand };
+  return patch;
 }

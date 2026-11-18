@@ -61,6 +61,14 @@ export class AppShell extends FireLight {
     });
   }
 
+  /** The phone tab bar (templates/shell.js renderTabbar): one tab for each screen, and More, which opens the menu. */
+  private tabbar() {
+    return html`<nav class="fd-tabbar" aria-label="Primary">
+          ${routes.map((route) => html`<a class="fd-tabbar-item" href=${route.path} aria-current=${route === this.route ? 'page' : nothing}><fd-icon icon=${route.icon}></fd-icon><span class="fd-tabbar-label">${route.path === '/logs' ? 'Logs' : route.label}</span></a>`)}
+          <button class="fd-tabbar-item" type="button" data-fd-mobile-nav aria-controls="ember-mobile-nav" aria-expanded="false"><fd-icon icon="ellipsis"></fd-icon><span class="fd-tabbar-label">More</span></button>
+        </nav>`;
+  }
+
   private mobileNav() {
     let group: string | undefined;
     return routes.map((route) => {
@@ -109,6 +117,8 @@ export class AppShell extends FireLight {
           <a class="fd-mobile-nav-account" href="/settings"><span>${ACCOUNT.email}</span><span class="fd-account-avatar" aria-hidden="true">${ACCOUNT.initials}</span></a>
           <div class="fd-mobile-nav-section">${this.mobileNav()}</div>
         </div>
+
+        ${this.tabbar()}
 
         <div class="fd-popover" id="ember-running" popover data-size="lg" aria-label="Running now">
           <div class="fd-popover-head"><p class="fd-popover-title">Running now</p></div>

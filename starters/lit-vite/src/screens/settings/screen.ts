@@ -1,5 +1,5 @@
 import type { PropertyValues } from 'lit';
-import { content, forms, init, nav, overlays, reducedMotion, setAccent, setDensity, setTheme, getTheme, texture, type ToastOptions } from 'fire-design';
+import { content, forms, init, nav, overlays, reducedMotion, setAccent, setDensity, setTheme, getTheme, texture, type PageState } from 'fire-design';
 import { FireLight } from '../../lib/fire-light';
 import { settingsView } from './view';
 
@@ -17,10 +17,9 @@ interface Confirm { title: string; desc: string; label: string; tone: string; re
 type Change = HTMLElementEventMap['fd:change'];
 type Select = HTMLElementEventMap['fd:select'];
 
-/** What Fire's own typings leave out: a toast's Done · Undo, and `content.setState` (both are in fire.js). */
-type UndoToast = ToastOptions & { undo?: () => Promise<void>; undone?: string };
-const setContentState = (content as unknown as { setState(el: Element | null, state: string): void }).setState;
 const PAGE_STATES = ['ready', 'loading', 'error', 'member'];
+/** The state of the .fd-states wrapper for a demo state: a member sees the page ready. */
+const wrapperState = (state: string): PageState => (state === 'loading' || state === 'error' ? state : 'ready');
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const SLUG = /^[a-z0-9-]{3,32}$/;
 const TAKEN = ['ember', 'admin', 'api', 'support'];
@@ -327,7 +326,7 @@ export class ScreenSettings extends FireLight {
       id: 'feature',
       undo: async () => { await wait(300); input.checked = !input.checked; this.paintFeature(row); this.syncFeatures(); },
       undone: `${name} is ${input.checked ? 'off' : 'on'} again`,
-    } as UndoToast);
+    });
   };
 
   /* ------------------------------------------------------------------ demo state: ?state=ready|loading|error|member */
@@ -349,7 +348,7 @@ export class ScreenSettings extends FireLight {
   private setPageState(value: string, url = true): void {
     const state = PAGE_STATES.includes(value) ? value : 'ready';
     this.pageState = state;
-    setContentState(this.querySelector('#settings-states'), state === 'member' ? 'ready' : state);
+    content.setState(this.querySelector<HTMLElement>('#settings-states'), wrapperState(state));
     this.setMember(state === 'member');
     const item = this.querySelector<HTMLElement>(`#state-switch .fd-segmented-item[data-value="${state}"]`);
     if (item) nav.selectSegment(item, { silent: true });

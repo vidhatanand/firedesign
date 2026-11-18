@@ -16,6 +16,8 @@
  *     theme      a theme record (contract/theme.schema.json); omitted, Fire's default look. Invalid → throws.
  *     brand      { name, logoUrl? }  the sender. logoUrl is https, the only remote image the email loads; without
  *                it a square in the accent colour carries the name's first letter, drawn in the markup.
+ *                The theme record's brand shape works too: `logo` is an alias of logoUrl (logoUrl wins), and the
+ *                other fields (mark, logoDark, href) are ignored.
  *     preheader  the line a mailbox shows beside the subject (hidden in the message itself)
  *     blocks     the content, in order (below)
  *     locale     a BCP 47 tag, default "en": sets lang and, for Arabic, Hebrew, Persian and Urdu, dir="rtl".
@@ -286,8 +288,8 @@ export function renderEmail({ theme, brand, preheader = '', blocks, locale = 'en
   if (!brand || typeof brand.name !== 'string' || !oneLine(brand.name)) throw new TypeError('[email] brand.name is required');
   if (!Array.isArray(blocks) || !blocks.length) throw new TypeError('[email] blocks must be a non-empty array');
   if (!/^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(locale)) throw new TypeError('[email] locale must be a BCP 47 tag such as "en" or "pt-BR"');
-  const b = { ...brand };
-  if (b.logoUrl != null) b.logoUrl = safeUrl(b.logoUrl, 'brand', 'logo', 'logoUrl', { schemes: ['https:'] });
+  const b = { name: brand.name, logoUrl: brand.logoUrl ?? brand.logo };
+  if (b.logoUrl != null) b.logoUrl = safeUrl(b.logoUrl, 'brand', 'logo', brand.logoUrl != null ? 'logoUrl' : 'logo', { schemes: ['https:'] });
   const out = render(theme, b, preheader, blocks, locale);   // validates every block before the text part reads them
   return { html: out, text: renderText(blocks) };
 }

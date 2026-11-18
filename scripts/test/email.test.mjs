@@ -98,6 +98,15 @@ test('resources: nothing loads but the logo', () => {
   assert.throws(() => one({ brand: { name: 'Ember', logoUrl: 'data:image/png;base64,AA' } }), /https/);
 });
 
+test('the theme record\'s brand shape: logo is an alias of logoUrl', () => {
+  const logo = 'https://cdn.ember.example/logo.png';
+  const src = (h) => [...h.matchAll(/\ssrc="([^"]*)"/g)].map((m) => m[1]);
+  assert.deepEqual(src(one({ brand: { name: 'Ember', logo } }).html), [logo]);
+  assert.deepEqual(src(one({ brand: { name: 'Ember', logoUrl: logo, logo: 'https://other.example/x.png' } }).html), [logo], 'logoUrl wins');
+  assert.deepEqual(src(one({ brand: { name: 'Ember', mark: '/m.svg', logoDark: 'https://x.example/d.png', href: '/' } }).html), [], 'the other fields are not used');
+  assert.throws(() => one({ brand: { name: 'Ember', logo: 'http://x.example/l.png' } }), /https/);
+});
+
 test('structure', () => {
   const { html } = one();
   assert.match(html, /^<!doctype html>\n<html lang="en" dir="ltr"/);

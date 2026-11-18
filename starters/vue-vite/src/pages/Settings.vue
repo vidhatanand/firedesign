@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { $ as query, $$ as queryAll, content, forms, nav, overlays, texture } from 'fire-design';
-import type { FireEventMap } from 'fire-design';
+import type { FireEventMap, PageState } from 'fire-design';
 import { LOAD_MS, SIMULATE_LOAD } from '../demo';
 
 // Fire runs the dialogs, menus, segmented controls, the dirty bar and the confirm-inline form of this screen from its
@@ -15,9 +15,8 @@ const $$ = <E extends HTMLElement = HTMLElement>(selector: string, root?: Parent
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const bind = (name: string, text: string) => $$(`[data-bind="${name}"]`).forEach((el) => { el.textContent = text; });
 const setBusy = (el: Element, on: boolean) => (on ? el.setAttribute('aria-busy', 'true') : el.removeAttribute('aria-busy'));
-// content.setState and the Undo option of toast() are in Fire's code but not in its type file yet.
-const setState = (content as unknown as { setState(el: Element, state: string): void }).setState;
-const toastUndo = toast as unknown as (options: Record<string, unknown>) => string;
+/** The state of the .fd-states wrapper for a demo state: a member sees the page ready. */
+const wrapperState = (state: string): PageState => (state === 'loading' || state === 'error' ? state : 'ready');
 
 /** One inline error slot per field: shown in place of the hint. */
 function fieldError(input: HTMLElement, message: string) {
@@ -120,7 +119,7 @@ function onFeature(event: Event) {
   const name = row.dataset.feature;
   paintFeature(row);
   syncFeatures();
-  toastUndo({
+  toast({
     title: `${name} ${input.checked ? 'on' : 'off'}`,
     description: input.checked ? 'Every key can use it now.' : 'Requests that ask for it now fail.',
     tone: 'success', id: 'feature',
@@ -173,7 +172,7 @@ function setMember(on: boolean) {
 }
 function setPageState(value: string) {
   pageState = STATES.includes(value) ? value : 'ready';
-  setState($('#settings-states')!, pageState === 'member' ? 'ready' : pageState);
+  content.setState($('#settings-states'), wrapperState(pageState));
   setMember(pageState === 'member');
   const item = $$<HTMLElement>('.fd-segmented-item', $('#state-switch')!).find((el) => el.dataset.value === pageState);
   if (item) nav.selectSegment(item, { silent: true });

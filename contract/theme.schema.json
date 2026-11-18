@@ -84,9 +84,22 @@
         "marks": { "description": "data-signature-marks: the marks where a frame's bands meet its rails (default \"crosses\"). A frame or band's own data-marks wins.", "enum": ["crosses", "dots", "corners", "none"] },
         "intensity": { "description": "data-signature-intensity: the luminance multiplier of every texture without its own data-intensity. Tweaks steps by 0.05.", "type": "number", "minimum": 0.4, "maximum": 1.6 }
       }
+    },
+    "brand": {
+      "description": "The product's brand: the input of the shell's setBrand() (fire/js/shell.js), filling every .fd-brand on the page. Not CSS: expandTheme() returns it untouched and themeToCss() ignores it. Pictures are the page's own addresses, https addresses or data: images (the rules of safeImageUrl, without a host list).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "description": "The wordmark text and the alt text of a logo.", "type": "string" },
+        "mark": { "description": "A picture for the 24px mark slot; without it the mark is the dot-matrix initial of the name.", "$ref": "#/$defs/pictureAddress" },
+        "logo": { "description": "A wide picture that stands in for the mark and the name.", "$ref": "#/$defs/pictureAddress" },
+        "logoDark": { "description": "The logo for the dark scheme.", "$ref": "#/$defs/pictureAddress" },
+        "href": { "description": "The link of a brand that is an <a>.", "type": "string" }
+      }
     }
   },
   "$defs": {
+    "pictureAddress": { "description": "A picture address: the page's own (relative), https, or a data: image, with no credentials and no control characters. validateTheme() applies the rules of safeImageUrl that need no page; the host list is the page's.", "type": "string", "minLength": 1 },
     "hex": { "type": "string", "pattern": "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$" },
     "hue": { "type": "number", "minimum": 0, "maximum": 360 },
     "paletteName": {

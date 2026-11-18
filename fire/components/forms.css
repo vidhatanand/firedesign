@@ -18,6 +18,25 @@
    data-size="sm|lg"          on input, textarea, input-group, search, number, tag-input, select, otp
    aria-invalid="true"        on the native control (the skin follows it)
    data-mono                  mono face for keys, URLs, JSON
+
+   Added in 0.7 (markup in fire/js/forms.js):
+   fd-datefield               a date typed or picked: an input group with a calendar button; its calendar is
+                              fd-datefield-panel in overlays.css. data-min-date / data-max-date (ISO date or "today"). Without
+                              script the button is hidden and the box posts the ISO date.
+   fd-swatch                  a colour as content: --fd-swatch-color set through data-fd-vars (never a style attribute);
+                              data-size="xs|sm|lg|xl", data-shape="round", data-empty (no colour); a <button> swatch
+                              takes aria-pressed
+   fd-color                   a colour control: fd-color-picker (the native colour input, inert until script runs)
+                              and the hex box, then fd-color-checks > fd-color-check (> fd-color-check-name,
+                              -ratio, -verdict; data-level="pass|warn|fail") with the contrast feedback
+   fd-confirm-inline          a plain form that asks for a phrase before a destructive button works;
+                              fd-confirm-inline-rule is the line saying where the typed text stands;
+                              data-state="idle|partial|mismatch|match" on the form. The phrase itself is the dialog
+                              confirm's fd-confirm-phrase
+   fd-reason                  a control and why it is off: fd-reason-text > fd-reason-why + fd-reason-who;
+                              data-layout="inline" puts the text beside the control
+   fd-codes                   one-time recovery codes in a sunken card: fd-codes-head > fd-codes-title +
+                              fd-codes-actions, fd-codes-list > fd-codes-item (data-used), fd-codes-note
    ========================================================================== */
 
 /* ---------- Tokens ---------- */
@@ -112,6 +131,16 @@
   /* pairs */
   --fd-pairs-key: 2fr;                 /* share of a row the name takes … */
   --fd-pairs-value: 3fr;               /* … and the value */
+  /* date field, colour */
+  --fd-form-date-w: 224px;             /* a date field is as wide as a date */
+  --fd-swatch-xs: 16px;
+  --fd-swatch-sm: 20px;
+  --fd-swatch-md: 28px;                /* the default */
+  --fd-swatch-lg: 40px;
+  --fd-swatch-xl: 64px;
+  --fd-swatch-check: 6px;              /* a square of the checkerboard under a colour that is not opaque */
+  /* recovery codes */
+  --fd-codes-gap: var(--fd-space-2-5);
   /* code field */
   --fd-codefield-head: var(--fd-control-sm);  /* the language and Format row */
 }
@@ -1088,3 +1117,123 @@
 @container fd-form (max-width: 480px) {
   .fd-form-section-body { padding: var(--fd-space-4); }
 }
+
+
+/* ==========================================================================
+   Date field
+   ========================================================================== */
+
+.fd-datefield { position: relative; display: block; inline-size: min(100%, var(--fd-form-date-w)); min-inline-size: 0; }
+.fd-datefield:not([data-ready]) .fd-input-affix[data-kind="action"] { display: none; }
+.fd-datefield .fd-input { font-variant-numeric: tabular-nums; }
+
+/* ==========================================================================
+   Swatch: a colour that is content (a brand colour, a series colour), not a theme colour
+   ========================================================================== */
+
+.fd-swatch {
+  --_f-sw: var(--fd-swatch-md);
+  --_f-sw-radius: var(--fd-radius-md);
+  --_f-sw-color: var(--fd-swatch-color, transparent);
+  display: inline-block; flex: none; box-sizing: border-box; vertical-align: middle;
+  inline-size: var(--_f-sw); block-size: var(--_f-sw); padding: 0; border: 0; border-radius: var(--_f-sw-radius);
+  background:
+    linear-gradient(var(--_f-sw-color), var(--_f-sw-color)),
+    conic-gradient(var(--fd-a8) 25%, transparent 0 50%, var(--fd-a8) 0 75%, transparent 0) 0 0 / calc(var(--fd-swatch-check) * 2) calc(var(--fd-swatch-check) * 2);
+  box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-a16);
+  transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-swatch[data-size="xs"] { --_f-sw: var(--fd-swatch-xs); --_f-sw-radius: var(--fd-radius-xs); }
+.fd-swatch[data-size="sm"] { --_f-sw: var(--fd-swatch-sm); --_f-sw-radius: var(--fd-radius-sm); }
+.fd-swatch[data-size="lg"] { --_f-sw: var(--fd-swatch-lg); --_f-sw-radius: var(--fd-radius-lg); }
+.fd-swatch[data-size="xl"] { --_f-sw: var(--fd-swatch-xl); --_f-sw-radius: var(--fd-radius-xl); }
+.fd-swatch[data-shape="round"] { --_f-sw-radius: var(--fd-radius-full); }
+/* No colour: the checkerboard with a slash through it. */
+.fd-swatch[data-empty] {
+  background:
+    linear-gradient(to top right, transparent calc(50% - var(--fd-hairline)), var(--fd-a40) 0 calc(50% + var(--fd-hairline)), transparent 0),
+    conic-gradient(var(--fd-a8) 25%, transparent 0 50%, var(--fd-a8) 0 75%, transparent 0) 0 0 / calc(var(--fd-swatch-check) * 2) calc(var(--fd-swatch-check) * 2);
+}
+/* A swatch that can be chosen. */
+button.fd-swatch { cursor: pointer; }
+button.fd-swatch:hover { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-a40); }
+button.fd-swatch:active { scale: var(--fd-press-scale); }
+button.fd-swatch:focus-visible { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-a16), var(--fd-ring); }
+button.fd-swatch[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-a16), 0 0 0 var(--fd-form-invalid-ring) var(--fd-surface), 0 0 0 calc(var(--fd-form-invalid-ring) * 2) var(--fd-accent); }
+button.fd-swatch:disabled { cursor: not-allowed; opacity: 0.5; }
+
+/* ==========================================================================
+   Colour control: a native colour input, a hex box, and what the colour does on this page
+   ========================================================================== */
+
+.fd-color { display: grid; gap: var(--fd-space-2); inline-size: 100%; min-inline-size: 0; }
+.fd-color .fd-input { font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; font-size: var(--fd-text-sm); }
+.fd-color-picker {
+  -webkit-appearance: none; appearance: none;
+  inline-size: calc(var(--_f-h, var(--fd-control-md)) - var(--fd-space-2)); block-size: calc(var(--_f-h, var(--fd-control-md)) - var(--fd-space-2));
+  padding: 0; border: 0; border-radius: calc(var(--fd-radius-lg) - var(--fd-form-action-inset)); background: none; cursor: pointer;
+  outline: var(--fd-hairline) solid var(--fd-a16); outline-offset: calc(var(--fd-hairline) * -1);
+}
+.fd-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.fd-color-picker::-webkit-color-swatch { border: 0; border-radius: inherit; }
+.fd-color-picker::-moz-color-swatch { border: 0; border-radius: inherit; }
+.fd-color-picker:focus-visible { box-shadow: var(--fd-ring); }
+.fd-color-picker[inert] { cursor: default; }
+.fd-color-picker:disabled { cursor: not-allowed; opacity: 0.5; }
+.fd-color-checks { display: grid; grid-template-columns: auto 1fr auto; column-gap: var(--fd-space-2); row-gap: var(--fd-space-2); margin: 0; padding: 0; list-style: none; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); }
+.fd-color-check { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; row-gap: 0; align-items: baseline; color: var(--fd-text-2); }
+.fd-color-check > .fd-icon { align-self: start; margin-block: calc((var(--fd-lh-sm) - var(--fd-icon-sm)) / 2); }
+.fd-color-check[data-level="pass"] > .fd-icon { color: var(--fd-success-text); }
+.fd-color-check[data-level="warn"] > .fd-icon { color: var(--fd-warning-text); }
+.fd-color-check[data-level="fail"] > .fd-icon { color: var(--fd-danger-text); }
+.fd-color-check-name { font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-color-check-ratio { font-family: var(--fd-font-mono); font-variant-numeric: tabular-nums; color: var(--fd-text-2); }
+.fd-color-check-verdict { grid-column: 2 / -1; min-inline-size: 0; }
+
+/* ==========================================================================
+   Confirm on the page
+   ========================================================================== */
+
+.fd-confirm-inline { display: grid; gap: var(--fd-space-4); min-inline-size: 0; max-inline-size: var(--fd-form-measure-sm); }
+.fd-confirm-inline .fd-form-actions { justify-content: flex-start; }
+.fd-confirm-inline [data-fd-confirm-input] { font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; }
+.fd-confirm-inline-rule { display: flex; align-items: flex-start; gap: var(--fd-space-1-5); margin: 0; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-confirm-inline-rule > .fd-icon { flex: none; margin-block: calc((var(--fd-lh-sm) - var(--fd-icon-sm)) / 2); }
+.fd-confirm-inline[data-state="partial"] .fd-confirm-inline-rule { color: var(--fd-text-2); }
+.fd-confirm-inline[data-state="match"] .fd-confirm-inline-rule { color: var(--fd-success-text); }
+.fd-confirm-inline[data-state="mismatch"] .fd-confirm-inline-rule { color: var(--fd-danger-text); }
+
+/* ==========================================================================
+   Disabled with a reason
+   ========================================================================== */
+
+.fd-reason { display: grid; justify-items: start; gap: var(--fd-space-1-5); min-inline-size: 0; }
+.fd-reason[data-layout="inline"] { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1-5) var(--fd-space-3); }
+.fd-reason-text { display: flex; align-items: flex-start; gap: var(--fd-space-1-5); min-inline-size: 0; margin: 0; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-reason-text > .fd-icon { flex: none; margin-block: calc((var(--fd-lh-sm) - var(--fd-icon-sm)) / 2); }
+.fd-reason-why { color: var(--fd-text-2); }
+.fd-reason-who::before { content: " "; }
+
+/* ==========================================================================
+   Recovery codes
+   ========================================================================== */
+
+.fd-codes {
+  display: grid; gap: var(--fd-space-3); min-inline-size: 0; max-inline-size: var(--fd-form-measure-sm); padding: var(--fd-space-4);
+  border-radius: var(--fd-radius-xl); background: var(--fd-bg-sunken); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint);
+}
+.fd-codes-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--fd-space-2) var(--fd-space-3); }
+.fd-codes-title { margin: 0; font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-medium); }
+.fd-codes-actions { display: flex; flex-wrap: wrap; gap: var(--fd-space-1-5); }
+.fd-codes:not([data-ready]) .fd-codes-actions { display: none; }
+.fd-codes-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--fd-codes-gap); margin: 0; padding: 0; list-style: none; }
+.fd-codes-item {
+  display: flex; align-items: center; min-inline-size: 0; min-block-size: var(--fd-control-md); padding: var(--fd-space-1) var(--fd-space-3);
+  border-radius: var(--fd-radius-lg); background: var(--fd-surface); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint);
+  font-family: var(--fd-font-mono); font-feature-settings: "zero", "ss01"; font-size: var(--fd-text-sm); font-variant-numeric: tabular-nums;
+}
+.fd-codes-item > code { font: inherit; user-select: all; overflow-wrap: anywhere; }
+.fd-codes-item[data-used] { color: var(--fd-text-3); background: none; }
+.fd-codes-item[data-used] > code { text-decoration: line-through; user-select: none; }
+.fd-codes-note { display: flex; align-items: flex-start; gap: var(--fd-space-1-5); margin: 0; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); }
+.fd-codes-note > .fd-icon { flex: none; margin-block: calc((var(--fd-lh-sm) - var(--fd-icon-sm)) / 2); color: var(--fd-warning-text); }

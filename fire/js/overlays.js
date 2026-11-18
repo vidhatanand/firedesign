@@ -30,10 +30,24 @@
  *     [data-fd-category], button [data-fd-mark-read], rows .fd-notification[data-unread][data-category],
  *     .fd-popover-empty, and badges [data-fd-unread-count="<popover id>"] anywhere on the page.
  *   Date range: .fd-daterange[data-fd-daterange] [data-value="2026-11-08/2026-11-14"] [data-preset="7d"]
- *     [data-max="today"], with .fd-daterange-preset[data-preset="24h|7d|30d|month|custom"], an empty
+ *     [data-max="today"], with .fd-daterange-preset[data-preset="24h|7d|30d|month|lastmonth|quarter|year|custom"], an empty
  *     .fd-calendar (rendered here), [data-fd-daterange-summary], [data-fd-daterange-cancel],
  *     [data-fd-daterange-apply]. Apply fires fd:change (detail.value = { start, end, preset }) and writes
- *     the label into [data-fd-daterange-label] inside the trigger.
+ *     the label into [data-fd-daterange-label] inside the trigger. More presets: lastmonth, quarter, year.
+ *   Period with comparison: add a .fd-daterange-compare group inside the .fd-daterange: <fieldset
+ *     class="fd-daterange-compare" data-fd-daterange-compare> holding radios named for the mode, with value
+ *     none | previous | year (previous = the period of the same length just before; year = the same dates a year
+ *     earlier), and [data-fd-daterange-compare-dates] showing the comparison dates. data-compare="previous" on the
+ *     .fd-daterange picks the starting mode (none by default). The trigger is a .fd-period: its
+ *     [data-fd-daterange-label] and [data-fd-daterange-compare-label] (empty when there is no comparison) are written
+ *     on Apply, and on load. With the group present fd:change carries detail.value = { start, end, preset,
+ *     compare } where compare is null or { mode, start, end } (ISO dates).
+ *   Date field panel: the calendar popover of .fd-datefield (forms.js owns the field). <div class="fd-popover"
+ *     popover id="x"><div class="fd-datefield-panel" data-fd-datepanel><div class="fd-calendar"></div>
+ *     [data-fd-datepanel-today] [data-fd-datepanel-clear]</div></div>, opened by a [data-fd-popover="x"] button inside
+ *     the field. Opening reads the input's value, data-min-date and data-max-date (ISO dates or "today") from the field; picking
+ *     a day writes the ISO date into the input, dispatches native input and change events on it and closes the
+ *     popover, returning focus to the input. The calendar keys are the date range's.
  *   Filter list: [data-fd-filter-list] with input[data-fd-filter-search], .fd-checklist > .fd-checklist-item
  *     (.fd-checklist-label, .fd-checklist-count), .fd-checklist-empty, [data-fd-filter-summary],
  *     [data-fd-filter-clear]. Changes fire fd:change (detail.value = selected values) and update
@@ -439,7 +453,7 @@ export function openPopover(ref, { trigger = null, placement, focus = true } = {
     if (layers.get(pop)?.trigger === trigger) return pop;
     conceal(pop);
   }
-  refreshContent(pop);
+  refreshContent(pop, trigger);
   const side = placement || trigger?.dataset.placement || pop.dataset.placement || 'bottom-start';
   const entry = { trigger, onClose: onPopoverClose };
   layers.set(pop, entry);
@@ -447,7 +461,7 @@ export function openPopover(ref, { trigger = null, placement, focus = true } = {
   if (!reveal(pop, update, trigger)) { layers.delete(pop); return null; }
   if (update) entry.stop = track(pop, update);
   trigger?.setAttribute('aria-expanded', 'true');
-  if (focus) focusEl($$('[autofocus]', pop).find(visible) || pop);
+  if (focus) focusEl($$('[autofocus]', pop).find(visible) || pop.querySelector('[data-fd-datepanel] .fd-calendar-day[tabindex="0"]') || pop);
   emit(pop, 'fd:open', { trigger });
   return pop;
 }
@@ -464,8 +478,9 @@ function onPopoverClose(pop, entry) {
   if (entry.trigger?.isConnected && (entry.returnFocus || pop.contains(doc.activeElement))) restoreFocus(entry.trigger);
 }
 
-function refreshContent(pop) {
+function refreshContent(pop, trigger = null) {
   for (const range of $$('[data-fd-daterange]', pop)) resetRange(range);
+  for (const panel of $$('[data-fd-datepanel]', pop)) syncDatePanel(panel, trigger);
   if (pop.matches('[data-fd-notifications]')) applyNotifications(pop);
   for (const list of $$('[data-fd-filter-list]', pop)) syncFilter(list);
   if (pop.matches('[data-fd-filter-list]')) syncFilter(pop);
@@ -514,21 +529,98 @@ const PRESETS = {
   '7d': (t) => [addDays(t, -6), t],
   '30d': (t) => [addDays(t, -29), t],
   month: (t) => [new Date(t.getFullYear(), t.getMonth(), 1), t],
+  lastmonth: (t) => [new Date(t.getFullYear(), t.getMonth() - 1, 1), new Date(t.getFullYear(), t.getMonth(), 0)],
+  quarter: (t) => [new Date(t.getFullYear(), Math.floor(t.getMonth() / 3) * 3, 1), t],
+  year: (t) => [new Date(t.getFullYear(), 0, 1), t],
 };
+const COMPARE = ['none', 'previous', 'year'];
+const oneYearBack = (d) => {
+  const back = new Date(d.getFullYear() - 1, d.getMonth(), 1);
+  back.setDate(Math.min(d.getDate(), new Date(back.getFullYear(), back.getMonth() + 1, 0).getDate()));
+  return back;
+};
+/** The comparison range of [start, end]: the period just before it, or the same dates a year earlier. */
+function compareRange(start, end, mode) {
+  if (mode === 'previous') {
+    const days = Math.round((end - start) / 86400000) + 1;
+    return [addDays(start, -days), addDays(start, -1)];
+  }
+  if (mode === 'year') return [oneYearBack(start), oneYearBack(end)];
+  return null;
+}
+const rangeText = (a, b) => (sameDay(a, b) ? shortDate(a) : `${shortDate(a)} – ${shortDate(b)}`);
 
 function rangeState(root) {
   let state = ranges.get(root);
   if (state) return state;
   const t = today();
+  if (root.hasAttribute('data-fd-datepanel')) {
+    const picked = parseDate(root.dataset.value);
+    const focus = picked || limitDate(root, t);
+    state = { start: picked, end: picked, preset: 'custom', pending: null, hover: null, focus, view: new Date(focus.getFullYear(), focus.getMonth(), 1) };
+    state.committed = { start: picked, end: picked, preset: 'custom' };
+    ranges.set(root, state);
+    return state;
+  }
   let [start, end] = (root.dataset.value || '').split('/').map(parseDate);
   let preset = root.dataset.preset || (start ? 'custom' : '7d');
   if (!start && PRESETS[preset]) [start, end] = PRESETS[preset](t);
   if (!start) [start, end] = PRESETS['7d'](t);
   end = end || start;
-  state = { start, end, preset, pending: null, hover: null, focus: end, view: new Date(end.getFullYear(), end.getMonth(), 1) };
-  state.committed = { start, end, preset };
+  const compare = COMPARE.includes(root.dataset.compare) ? root.dataset.compare : 'none';
+  state = { start, end, preset, compare, pending: null, hover: null, focus: end, view: new Date(end.getFullYear(), end.getMonth(), 1) };
+  state.committed = { start, end, preset, compare };
   ranges.set(root, state);
   return state;
+}
+
+/** A date moved inside the limits of a root: data-min-date and data-max-date (date field panel), data-min and data-max (date range). */
+function limitDate(root, date) {
+  const min = parseDate(root.dataset.minDate ?? root.dataset.min);
+  const max = parseDate(root.dataset.maxDate ?? root.dataset.max);
+  if (max && date > max) return max;
+  if (min && date < min) return min;
+  return date;
+}
+
+/** Date field panel: take the value and limits of the field whose trigger opened it. */
+function syncDatePanel(panel, trigger) {
+  const field = trigger?.closest?.('[data-fd-datefield]');
+  if (field) {
+    const input = field.querySelector('input:not([type="hidden"])');
+    panel.dataset.value = input ? input.value.trim() : '';
+    for (const key of ['minDate', 'maxDate']) { if (field.dataset[key]) panel.dataset[key] = field.dataset[key]; else delete panel.dataset[key]; }
+    const state = rangeState(panel);
+    const picked = parseDate(panel.dataset.value);
+    state.start = state.end = picked;
+    state.focus = picked ? limitDate(panel, picked) : limitDate(panel, today());
+    state.view = new Date(state.focus.getFullYear(), state.focus.getMonth(), 1);
+    state.pending = state.hover = null;
+    const required = !!input?.required;
+    for (const clear of $$('[data-fd-datepanel-clear]', panel)) clear.hidden = required;
+  }
+  const t = today();
+  for (const now of $$('[data-fd-datepanel-today]', panel)) now.disabled = limitDate(panel, t).getTime() !== t.getTime();
+  buildCalendar(panel);
+  paintRange(panel);
+}
+
+/** Write a date (or nothing) from the calendar into its field and close the popover. */
+function chooseDate(panel, date) {
+  const pop = panel.closest('.fd-popover');
+  const trigger = pop && layers.get(pop)?.trigger;
+  const field = trigger?.closest?.('[data-fd-datefield]');
+  const input = field?.querySelector('input:not([type="hidden"])');
+  const state = rangeState(panel);
+  state.start = state.end = date;
+  panel.dataset.value = date ? isoDate(date) : '';
+  if (input) {
+    input.value = date ? isoDate(date) : '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  if (pop && isOpen(pop)) closePopover(pop, false);
+  if (input) focusEl(input);
 }
 
 function resetRange(root) {
@@ -545,8 +637,8 @@ function buildCalendar(root) {
   const state = rangeState(root);
   const year = state.view.getFullYear();
   const month = state.view.getMonth();
-  const max = parseDate(root.dataset.max);
-  const min = parseDate(root.dataset.min);
+  const max = parseDate(root.dataset.maxDate ?? root.dataset.max);
+  const min = parseDate(root.dataset.minDate ?? root.dataset.min);
   const title = state.view.toLocaleDateString(LOCALE, { month: 'long', year: 'numeric' });
   const lead = (new Date(year, month, 1).getDay() + 6) % 7; // weeks start on Monday
   const days = new Date(year, month + 1, 0).getDate();
@@ -669,10 +761,23 @@ function paintRange(root) {
     else summary.textContent = sameDay(a, b) ? shortDate(a) : `${shortDate(a)} – ${shortDate(b)}`;
   }
   for (const apply of $$('[data-fd-daterange-apply]', root)) apply.disabled = !!state.pending;
+  paintCompare(root, state);
   for (const p of $$('.fd-daterange-preset', root)) p.setAttribute('aria-pressed', String(p.dataset.preset === (state.pending ? 'custom' : state.preset)));
 }
 
+/** Period with comparison: the radios and the comparison dates follow the chosen range. */
+function paintCompare(root, state) {
+  const group = root.querySelector('[data-fd-daterange-compare]');
+  if (!group) return;
+  for (const radio of $$('input[type="radio"]', group)) radio.checked = radio.value === state.compare;
+  const dates = group.querySelector('[data-fd-daterange-compare-dates]');
+  const other = state.pending ? null : compareRange(state.start, state.end, state.compare);
+  if (dates) dates.textContent = other ? rangeText(...other) : '';
+  if (dates) dates.hidden = !other;
+}
+
 function pickDay(root, date) {
+  if (root.hasAttribute('data-fd-datepanel')) { chooseDate(root, date); return; }
   const state = rangeState(root);
   if (!state.pending) {
     state.pending = date;
@@ -690,8 +795,8 @@ function pickDay(root, date) {
 
 function moveDay(root, date) {
   const state = rangeState(root);
-  const max = parseDate(root.dataset.max);
-  const min = parseDate(root.dataset.min);
+  const max = parseDate(root.dataset.maxDate ?? root.dataset.max);
+  const min = parseDate(root.dataset.minDate ?? root.dataset.min);
   if ((max && date > max) || (min && date < min)) return;
   state.focus = date;
   if (date.getMonth() !== state.view.getMonth() || date.getFullYear() !== state.view.getFullYear()) {
@@ -706,16 +811,33 @@ function moveDay(root, date) {
 function applyRange(root) {
   const state = rangeState(root);
   if (state.pending) return;
-  state.committed = { start: state.start, end: state.end, preset: state.preset };
+  state.committed = { start: state.start, end: state.end, preset: state.preset, compare: state.compare };
+  const { label, compareLabel, other } = writeLabels(root);
+  const value = { start: isoDate(state.start), end: isoDate(state.end), preset: state.preset };
+  if (root.querySelector('[data-fd-daterange-compare]')) value.compare = other ? { mode: state.compare, start: isoDate(other[0]), end: isoDate(other[1]) } : null;
+  emit(root, 'fd:change', { value, label, compareLabel });
+  const pop = root.closest('.fd-popover');
+  if (pop && isOpen(pop)) closePopover(pop, true);
+}
+
+/** Write the range (and comparison) into the trigger's label slots. Returns the texts and the comparison range. */
+function writeLabels(root) {
+  const state = rangeState(root);
   const preset = state.preset !== 'custom' ? root.querySelector(`.fd-daterange-preset[data-preset="${CSS.escape(state.preset)}"]`) : null;
-  const label = preset ? textOf(preset) : sameDay(state.start, state.end) ? shortDate(state.start) : `${shortDate(state.start)} – ${shortDate(state.end)}`;
+  const label = preset ? textOf(preset) : rangeText(state.start, state.end);
+  const other = compareRange(state.start, state.end, state.compare);
+  const compareLabel = other ? fdLabel(root, 'period.versus', 'vs {range}', { range: rangeText(...other) }) : '';
   const pop = root.closest('.fd-popover');
   const triggers = new Set();
   if (pop && layers.get(pop)?.trigger) triggers.add(layers.get(pop).trigger);
   if (pop?.id) for (const t of $$(`[data-fd-popover="${CSS.escape(pop.id)}"]`)) triggers.add(t);
-  for (const t of triggers) { const slot = t.querySelector('[data-fd-daterange-label]'); if (slot) slot.textContent = label; }
-  emit(root, 'fd:change', { value: { start: isoDate(state.start), end: isoDate(state.end), preset: state.preset }, label });
-  if (pop && isOpen(pop)) closePopover(pop, true);
+  for (const t of triggers) {
+    const slot = t.querySelector('[data-fd-daterange-label]');
+    if (slot) slot.textContent = label;
+    const second = t.querySelector('[data-fd-daterange-compare-label]');
+    if (second) second.textContent = compareLabel;
+  }
+  return { label, compareLabel, other };
 }
 
 /* ---------- Filter list ---------- */
@@ -1827,7 +1949,7 @@ function bindGlobal() {
     // Calendar
     const day = target.closest('.fd-calendar-day');
     if (day) {
-      const root = day.closest('[data-fd-daterange]');
+      const root = day.closest('[data-fd-daterange], [data-fd-datepanel]');
       const d = parseDate(day.dataset.date);
       const monday = (d.getDay() + 6) % 7;
       const moves = {
@@ -1945,9 +2067,9 @@ function bindGlobal() {
       focusEl(rovingDay(root));
     }
   });
-  on(doc, 'click', '[data-fd-daterange] [data-cal-nav]', (event, btn) => {
+  on(doc, 'click', ':is([data-fd-daterange], [data-fd-datepanel]) [data-cal-nav]', (event, btn) => {
     event.preventDefault();
-    const root = btn.closest('[data-fd-daterange]');
+    const root = btn.closest('[data-fd-daterange], [data-fd-datepanel]');
     const state = rangeState(root);
     state.view = new Date(state.view.getFullYear(), state.view.getMonth() + Number(btn.dataset.calNav), 1);
     buildCalendar(root);
@@ -1955,9 +2077,18 @@ function bindGlobal() {
     const same = root.querySelector(`[data-cal-nav="${btn.dataset.calNav}"]`);
     focusEl(same && !same.disabled ? same : rovingDay(root));
   });
-  on(doc, 'click', '[data-fd-daterange] .fd-calendar-day', (event, btn) => {
+  on(doc, 'click', ':is([data-fd-daterange], [data-fd-datepanel]) .fd-calendar-day', (event, btn) => {
     event.preventDefault();
-    if (!btn.disabled) pickDay(btn.closest('[data-fd-daterange]'), parseDate(btn.dataset.date));
+    if (!btn.disabled) pickDay(btn.closest('[data-fd-daterange], [data-fd-datepanel]'), parseDate(btn.dataset.date));
+  });
+  on(doc, 'click', '[data-fd-datepanel-today]', (event, btn) => { event.preventDefault(); if (!btn.disabled) chooseDate(btn.closest('[data-fd-datepanel]'), today()); });
+  on(doc, 'click', '[data-fd-datepanel-clear]', (event, btn) => { event.preventDefault(); chooseDate(btn.closest('[data-fd-datepanel]'), null); });
+  on(doc, 'change', '[data-fd-daterange-compare] input[type="radio"]', (_event, radio) => {
+    const root = radio.closest('[data-fd-daterange]');
+    const state = root && rangeState(root);
+    if (!state || !COMPARE.includes(radio.value)) return;
+    state.compare = radio.value;
+    paintRange(root);
   });
   on(doc, 'click', '[data-fd-daterange-apply]', (event, btn) => { event.preventDefault(); const root = btn.closest('[data-fd-daterange]'); if (root) applyRange(root); });
   on(doc, 'click', '[data-fd-daterange-cancel]', (event, btn) => {
@@ -2041,7 +2172,14 @@ export function init(root = document) {
     if (isStatic(dialog)) updateEdges(dialog);
     else if (!dialog.dataset.state) dialog.dataset.state = dialog.open ? 'open' : 'closed';
   }
-  for (const range of scope('[data-fd-daterange]')) { rangeState(range); buildCalendar(range); paintRange(range); }
+  for (const range of scope('[data-fd-daterange]')) {
+    rangeState(range); buildCalendar(range); paintRange(range);
+    if (range.querySelector('[data-fd-daterange-compare]')) writeLabels(range);
+  }
+  for (const panel of scope('[data-fd-datepanel]')) {
+    if (panel.closest('.fd-popover[popover]') && !isStatic(panel.closest('.fd-popover'))) continue;   // built when it opens
+    rangeState(panel); buildCalendar(panel); paintRange(panel);
+  }
   for (const list of scope('[data-fd-filter-list]')) syncFilter(list);
   for (const n of scope('[data-fd-notifications]')) applyNotifications(n);
   for (const p of scope('.fd-command[data-static-demo]')) {

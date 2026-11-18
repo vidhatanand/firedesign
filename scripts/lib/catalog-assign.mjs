@@ -12,7 +12,11 @@ export const EXTRA_ROOTS = {
   'fd-calendar': 'Overlays',           // month grid drawn by the date range
   'fd-checklist': 'Overlays',          // the filter list's checklist
   'fd-context-meter': 'Agent',
+  'fd-codes': 'Forms',                 // one-time recovery codes in a sunken card
+  'fd-color': 'Forms',                 // colour control: native picker, hex box, contrast feedback
+  'fd-confirm-inline': 'Forms',        // type-to-confirm on the page, in a plain form (the dialog is fd-confirm)
   'fd-corners': 'Texture & loading',   // four marks on a wrapper's corners
+  'fd-datefield': 'Forms',             // one date, typed or picked
   'fd-daterange': 'Overlays',
   'fd-data-card': 'Data',
   'fd-feature-row': 'Content',
@@ -26,9 +30,12 @@ export const EXTRA_ROOTS = {
   'fd-option': 'Forms',                // an option row (fd-options is its list)
   'fd-pagebar': 'Texture & loading',
   'fd-pending': 'Texture & loading',
+  'fd-period': 'Overlays',             // the trigger of a date range with a compare band
   'fd-pick': 'Overlays',               // pickable object card
+  'fd-reason': 'Forms',                // a disabled control and the reason it is off
   'fd-result': 'Agent',
   'fd-scroller': 'Content',
+  'fd-swatch': 'Forms',                // a colour that is content
   'fd-tooltip': 'Overlays',            // the vocabulary lists it only as the part of data-fd-tooltip
   'fd-usage-chip': 'Agent',
   'fd-use-agent': 'Agent',
@@ -111,7 +118,7 @@ export const FAMILY_MODULES = {
  *  (forms.js: "fd:change ... combobox, tag input, otp ..."). Module -> { words: { word: root class } }. */
 export const EVENT_SUBJECTS = {
   data: { words: { table: 'fd-table', tr: 'fd-table' } },
-  forms: { words: { combobox: 'fd-combobox', 'tag input': 'fd-tag-input', otp: 'fd-otp', number: 'fd-number', slider: 'fd-slider', search: 'fd-search', dropzone: 'fd-dropzone', secret: 'fd-secret', 'copy field': 'fd-copy-field' } },
+  forms: { words: { combobox: 'fd-combobox', 'tag input': 'fd-tag-input', otp: 'fd-otp', number: 'fd-number', slider: 'fd-slider', search: 'fd-search', dropzone: 'fd-dropzone', secret: 'fd-secret', 'copy field': 'fd-copy-field', 'date field': 'fd-datefield', 'colour': 'fd-color', 'confirm on the page': 'fd-confirm-inline', 'recovery codes': 'fd-codes' } },
 };
 
 /** Events that module headers document in prose the heuristics above cannot tie to a class. Reviewed by hand
@@ -179,6 +186,10 @@ export const LAYOUT_PRIMITIVES = ['fd-stack', 'fd-row', 'fd-grid', 'fd-column', 
 
 /** Attributes whose value is free (a number, a name, text, an id): the single value "*" means any value. component id -> attributes. */
 export const FREE_ATTRIBUTES = {
+  codes: ['data-filename'],            // the name of the downloaded file ("ember-recovery-codes.txt")
+  'confirm-inline': ['data-confirm'],  // the phrase to type (the form's data-confirm; the input may carry data-match)
+  datefield: ['data-min-date', 'data-max-date'], // an ISO date or "today" (forms.js header)
+  'date-picker': ['data-compare'],     // starting comparison of a period: none, previous or year
   codeblock: ['data-collapse'],        // collapsed height in px: "200", "240", "420" (code.js header)
   doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
   kv: ['data-copy'],                   // the text a row copies

@@ -8,6 +8,7 @@
  * The record, version 1 (every field optional; a missing field is Fire's default; an unknown field is an error):
  *   {
  *     "contract": "fire/1",
+ *     "fire": "0.6.0",                          the Fire release the record was written against (optional; pins the expander)
  *     "palette": "ember",                       a palette name, or a spec (below)
  *     "tone": { "hue": 0, "vivid": 100, "light": 0, "warmth": 0 },
  *     "type": "geist",                          a type set name, or { "display", "sans", "mono" } families the page loads
@@ -31,6 +32,7 @@
  *
  * API
  *   CONTRACT                     'fire/1'
+ *   FIRE_VERSION                 the Fire release this module belongs to (a test keeps it equal to package.json)
  *   DEFAULT_RECORD               the full record of Fire's default look
  *   INPUT_TOKENS                 the tokens a record sets: the palette's colours, the three families, the dial variables
  *   expandTheme(record)          → { tokens: { name: [light, dark] | value }, attributes: { 'data-palette': … }, notes }
@@ -74,6 +76,8 @@ export const INPUT_TOKENS = Object.freeze([
 ]);
 export const NEUTRALS = Object.freeze(['pure', 'cool', 'warm', 'tinted']);
 export const LABELS = Object.freeze(['white', 'dark']);
+export const FIRE_VERSION = '0.6.0';
+
 export const DEFAULT_RECORD = Object.freeze({
   contract: CONTRACT, palette: DEFAULT_PALETTE, tone: TONE_DEFAULT, type: DEFAULT_TYPEFACE, dials: DIAL_DEFAULTS,
 });
@@ -168,8 +172,9 @@ export function validateTheme(record) {
   const errors = [];
   const notes = [];
   if (!isObj(record)) return { ok: false, errors: ['(record): must be an object'], notes };
-  only(record, ['contract', 'palette', 'tone', 'type', 'dials'], '', errors);
+  only(record, ['contract', 'fire', 'palette', 'tone', 'type', 'dials'], '', errors);
   if (record.contract !== undefined && record.contract !== CONTRACT) errors.push(`/contract: must be ${JSON.stringify(CONTRACT)}`);
+  if (record.fire !== undefined && !(typeof record.fire === 'string' && /^\d+\.\d+\.\d+$/.test(record.fire))) errors.push('/fire: must be a Fire release, such as "0.6.0"');
   if (record.palette !== undefined) checkPalette(record.palette, errors);
   if (record.tone !== undefined) {
     if (!isObj(record.tone)) errors.push('/tone: must be { hue, vivid, light, warmth }');
@@ -496,7 +501,7 @@ export function toThemeRecord(state = {}) {
   for (const k of Object.keys(TONE_DEFAULT)) tone[k] = state.tone?.[k] ?? TONE_DEFAULT[k];
   const dials = {};
   for (const k of Object.keys(DIAL_DEFAULTS)) dials[k] = state[k] ?? DIAL_DEFAULTS[k];
-  return { contract: CONTRACT, palette: state.palette ?? DEFAULT_PALETTE, tone, type: state.type ?? DEFAULT_TYPEFACE, dials };
+  return { contract: CONTRACT, fire: FIRE_VERSION, palette: state.palette ?? DEFAULT_PALETTE, tone, type: state.type ?? DEFAULT_TYPEFACE, dials };
 }
 
 /** A record → the Tweaks state it describes (for tweaks.set()). Tweaks holds named palettes and type sets only;

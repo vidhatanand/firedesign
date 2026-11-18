@@ -412,3 +412,12 @@ test('contract/looks: one valid record per preset palette', () => {
     assert.equal(record.palette, f.replace('.json', ''));
   }
 });
+
+test('a record names the Fire release it was written against, and the module knows its own', async () => {
+  const { FIRE_VERSION, validateTheme, toThemeRecord } = await import('../../fire/js/theme.js');
+  const pkg = JSON.parse((await import('node:fs')).readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+  assert.equal(FIRE_VERSION, pkg.version);
+  assert.equal(toThemeRecord({}).fire, FIRE_VERSION);
+  assert.ok(validateTheme({ contract: 'fire/1', fire: '0.6.0', palette: 'ember' }).ok);
+  assert.ok(!validateTheme({ fire: 'latest' }).ok);
+});

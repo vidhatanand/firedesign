@@ -1,0 +1,191 @@
+{
+  "id": "pipeline",
+  "job": "See what ran, what runs in parallel and what comes after, for one run.",
+  "purpose": "Staged work read left to right: stages in order, jobs in a stage run in parallel, and every job shows a status icon and a word for screen readers. It turns vertical in narrow containers. A job can be a button that selects, a link or plain text. A stage with data-when runs on a condition and joins by a dashed link. It is not a node editor.",
+  "useWhen": [
+    "A crawl, deploy, data job or agent plan has stages and parallel jobs.",
+    "A run page lets people pick a failed job and read it beside the graph."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Steps that run one after another.",
+      "instead": "run-steps"
+    },
+    {
+      "when": "The history of one thing.",
+      "instead": "timeline"
+    },
+    {
+      "when": "A free-form graph with arbitrary edges and dragging.",
+      "instead": "Use a purpose-built graph library."
+    },
+    {
+      "when": "Progress with a total.",
+      "instead": "progress"
+    }
+  ],
+  "aka": [
+    "workflow",
+    "build pipeline",
+    "job graph",
+    "stages",
+    "DAG",
+    "CI pipeline",
+    "flow"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "current",
+      "how": "aria-current=\"true\" on the selected job"
+    },
+    {
+      "name": "live",
+      "how": "data-live on a running job"
+    },
+    {
+      "name": "skipped",
+      "how": "data-state=\"skipped\" on a job that did not run"
+    },
+    {
+      "name": "loading",
+      "how": "aria-busy=\"true\" on the pipeline shows placeholders"
+    },
+    {
+      "name": "overflow",
+      "how": "data-overflow marks the sides with more stages"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-orientation",
+      "value": "vertical",
+      "useWhen": "Force stacking at any width."
+    },
+    {
+      "attribute": "data-orientation",
+      "value": "horizontal",
+      "useWhen": "Keep sideways scroll in a narrow container."
+    },
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "Icon and name only, for cards and expanded rows."
+    },
+    {
+      "attribute": "data-when",
+      "value": "*",
+      "useWhen": "A stage that runs on a condition, such as failure; the dash is the only mark."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "success",
+      "useWhen": "A passed job."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "A failed job."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "warning",
+      "useWhen": "A passed with retries job."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "info",
+      "useWhen": "A running or informational job."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "neutral",
+      "useWhen": "A queued job."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "violet",
+      "useWhen": "An agent job."
+    },
+    {
+      "attribute": "data-live",
+      "value": "",
+      "useWhen": "A job that is running now."
+    },
+    {
+      "attribute": "data-state",
+      "value": "skipped",
+      "useWhen": "A job that did not run."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-pipeline",
+      "role": "The block and its own container."
+    },
+    {
+      "class": "fd-pipeline-stages",
+      "role": "The ordered list of stages."
+    },
+    {
+      "class": "fd-pipeline-stage",
+      "role": "One stage."
+    },
+    {
+      "class": "fd-pipeline-stage-label",
+      "role": "An optional label above a stage."
+    },
+    {
+      "class": "fd-pipeline-jobs",
+      "role": "The parallel jobs of a stage."
+    },
+    {
+      "class": "fd-pipeline-job",
+      "role": "One job."
+    },
+    {
+      "class": "fd-pipeline-job-name",
+      "role": "The job name."
+    },
+    {
+      "class": "fd-pipeline-job-meta",
+      "role": "A duration or note."
+    }
+  ],
+  "related": [
+    "timeline",
+    "run-steps",
+    "progress",
+    "status"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow Right, Arrow Left",
+      "does": "Move to the next or previous stage."
+    },
+    {
+      "keys": "Arrow Down, Arrow Up",
+      "does": "Move within a stage; in the vertical layout, walk every job."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Go to the first or last job."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Selects a button job; fires fd:select."
+    }
+  ],
+  "example": "docs/data.html#pipeline",
+  "provenance": [
+    "docs/data.html",
+    "fire/components/data.css",
+    "fire/js/data.js"
+  ],
+  "since": "0.5.0"
+}

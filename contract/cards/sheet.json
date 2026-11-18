@@ -1,0 +1,157 @@
+{
+  "id": "sheet",
+  "job": "Show the detail of something picked from a list without losing the list.",
+  "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. Escape, a close button and a backdrop click close it. Focus never opens on a footer action. It can run in steps and fires fd:open, fd:close and fd:change.",
+  "useWhen": [
+    "A row in a table or a log opens its full detail beside the list.",
+    "A filter or navigation panel slides in from the left on a small screen.",
+    "A multi-step flow needs more room than a dialog."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A short question that needs a yes or no.",
+      "instead": "dialog"
+    },
+    {
+      "when": "A panel anchored to a button.",
+      "instead": "popover"
+    },
+    {
+      "when": "A permanent side panel.",
+      "instead": "split"
+    },
+    {
+      "when": "A preview on hover.",
+      "instead": "hovercard"
+    }
+  ],
+  "aka": [
+    "drawer",
+    "side panel",
+    "slide-over",
+    "off-canvas",
+    "bottom sheet",
+    "inspector",
+    "detail pane"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "record",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\"; openDialog(id) or [data-fd-dialog-open]"
+    },
+    {
+      "name": "dragging",
+      "how": "data-dragging while a phone sheet is pulled down"
+    },
+    {
+      "name": "step",
+      "how": "data-step on a section; [data-fd-dialog-step] buttons move between steps"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-side",
+      "value": "right",
+      "useWhen": "Detail of a row; the default."
+    },
+    {
+      "attribute": "data-side",
+      "value": "left",
+      "useWhen": "Navigation or filters."
+    },
+    {
+      "attribute": "data-side",
+      "value": "bottom",
+      "useWhen": "A phone-style sheet."
+    },
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A narrow panel."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "Wide content such as a response body, 560px."
+    },
+    {
+      "attribute": "data-size",
+      "value": "md",
+      "useWhen": "The default width, 420px."
+    },
+    {
+      "attribute": "data-start",
+      "value": "",
+      "useWhen": "On a footer child: pushes it to the start edge, as a secondary action."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-sheet",
+      "role": "The dialog."
+    },
+    {
+      "class": "fd-sheet-bar",
+      "role": "A compact title row with the title and controls, used in place of the head."
+    },
+    {
+      "class": "fd-sheet-head",
+      "role": "Title and close row."
+    },
+    {
+      "class": "fd-sheet-title",
+      "role": "The sheet title."
+    },
+    {
+      "class": "fd-sheet-desc",
+      "role": "A muted line under the title."
+    },
+    {
+      "class": "fd-sheet-close",
+      "role": "The close button."
+    },
+    {
+      "class": "fd-sheet-body",
+      "role": "The scrolling content."
+    },
+    {
+      "class": "fd-sheet-section",
+      "role": "A titled group inside the body."
+    },
+    {
+      "class": "fd-sheet-foot",
+      "role": "Footer actions."
+    }
+  ],
+  "related": [
+    "dialog",
+    "popover",
+    "table",
+    "menu"
+  ],
+  "keyboard": [
+    {
+      "keys": "Escape",
+      "does": "Closes the sheet and returns focus to the trigger."
+    },
+    {
+      "keys": "Tab",
+      "does": "Stays inside the sheet."
+    }
+  ],
+  "example": "docs/overlays.html#sheets",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.1.0"
+}

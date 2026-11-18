@@ -1,0 +1,167 @@
+{
+  "id": "toast",
+  "job": "Confirm something that already happened, then get out of the way.",
+  "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise. It never asks a question. Toasts last 5 seconds, 8 for errors; loading lasts until settled. The stack is a polite live region.",
+  "useWhen": [
+    "An action finished and needs a quiet receipt: key copied, saved, deleted.",
+    "Something finished elsewhere: a crawl completed, a webhook failed.",
+    "A long task needs a loading toast that turns into the result."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The reader must choose or confirm something.",
+      "instead": "dialog"
+    },
+    {
+      "when": "A persistent warning next to content.",
+      "instead": "callout"
+    },
+    {
+      "when": "A notice about the whole account.",
+      "instead": "banner"
+    },
+    {
+      "when": "A list of past events to read later.",
+      "instead": "notification"
+    }
+  ],
+  "aka": [
+    "snackbar",
+    "flash message",
+    "growl",
+    "notification toast",
+    "alert toast",
+    "sonner",
+    "message"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\"; set by script"
+    },
+    {
+      "name": "expanded",
+      "how": "data-expanded when the stack fans out on hover; timers pause"
+    },
+    {
+      "name": "swiped",
+      "how": "data-swiping and data-swiped while a toast is dragged sideways"
+    },
+    {
+      "name": "loading",
+      "how": "tone loading shows a spinner until toast.update or toast.promise settles"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-tone",
+      "value": "neutral",
+      "useWhen": "A plain confirmation."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "success",
+      "useWhen": "The action worked."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "The action failed; lasts 8 seconds."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "warning",
+      "useWhen": "A limit or a risk to read."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "info",
+      "useWhen": "News the reader did not trigger."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "loading",
+      "useWhen": "Work in progress; use toast.promise."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "accent",
+      "useWhen": "An accent receipt that is not a state."
+    },
+    {
+      "attribute": "data-front",
+      "value": "",
+      "useWhen": "The newest toast at the front of the stack."
+    },
+    {
+      "attribute": "data-hidden",
+      "value": "",
+      "useWhen": "A toast tucked behind the front three."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-toaster",
+      "role": "The stack, a manual popover and live region."
+    },
+    {
+      "class": "fd-toast",
+      "role": "One toast."
+    },
+    {
+      "class": "fd-toast-icon",
+      "role": "The tone icon."
+    },
+    {
+      "class": "fd-toast-content",
+      "role": "Title and description."
+    },
+    {
+      "class": "fd-toast-title",
+      "role": "What happened."
+    },
+    {
+      "class": "fd-toast-desc",
+      "role": "A line of detail."
+    },
+    {
+      "class": "fd-toast-action",
+      "role": "One action, such as Undo."
+    },
+    {
+      "class": "fd-toast-close",
+      "role": "The close button."
+    },
+    {
+      "class": "fd-toast-progress",
+      "role": "The thin line showing the time left."
+    }
+  ],
+  "related": [
+    "callout",
+    "banner",
+    "dialog",
+    "notification"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Reaches the action and close buttons of a toast."
+    }
+  ],
+  "example": "docs/overlays.html#toasts",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.1.0"
+}

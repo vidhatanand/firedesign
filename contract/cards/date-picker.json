@@ -1,0 +1,146 @@
+{
+  "id": "date-picker",
+  "job": "Choose a start and an end date, with presets for the usual ranges.",
+  "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs.",
+  "useWhen": [
+    "A log, a chart or a report is filtered by a time range.",
+    "People mostly want the same few ranges but sometimes a custom one."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A single date in a form.",
+      "instead": "input"
+    },
+    {
+      "when": "A time of day or a number.",
+      "instead": "number"
+    },
+    {
+      "when": "A short fixed set of ranges and nothing custom.",
+      "instead": "segmented"
+    },
+    {
+      "when": "Choosing from a list of named options.",
+      "instead": "select"
+    }
+  ],
+  "aka": [
+    "date range",
+    "calendar",
+    "range picker",
+    "date picker",
+    "time range",
+    "datepicker"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "pending",
+      "how": "data-pending on the first click; the start is picked, the end is not"
+    },
+    {
+      "name": "preview",
+      "how": "data-preview on days between the start and the hovered day"
+    },
+    {
+      "name": "today",
+      "how": "data-today on today's cell, shown with an accent dot"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A narrow panel without the presets column."
+    },
+    {
+      "attribute": "data-range",
+      "value": "start",
+      "useWhen": "The first day of the chosen range."
+    },
+    {
+      "attribute": "data-range",
+      "value": "middle",
+      "useWhen": "A day inside the range."
+    },
+    {
+      "attribute": "data-range",
+      "value": "end",
+      "useWhen": "The last day of the chosen range."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-daterange",
+      "role": "The panel; carries data-fd-daterange."
+    },
+    {
+      "class": "fd-daterange-presets",
+      "role": "The preset column."
+    },
+    {
+      "class": "fd-daterange-preset",
+      "role": "One preset button."
+    },
+    {
+      "class": "fd-daterange-main",
+      "role": "The calendar side."
+    },
+    {
+      "class": "fd-calendar",
+      "role": "The month grid."
+    },
+    {
+      "class": "fd-calendar-head",
+      "role": "Month title and arrows."
+    },
+    {
+      "class": "fd-calendar-day",
+      "role": "One selectable day."
+    },
+    {
+      "class": "fd-daterange-summary",
+      "role": "The chosen dates as text."
+    },
+    {
+      "class": "fd-daterange-foot",
+      "role": "Cancel and Apply."
+    }
+  ],
+  "related": [
+    "popover",
+    "filter",
+    "segmented",
+    "chart"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow keys",
+      "does": "Move by one day, left and right, or one week, up and down."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Jump to Monday or Sunday of the week."
+    },
+    {
+      "keys": "Page Up, Page Down",
+      "does": "Move by month; with Shift, by year."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Picks the focused day."
+    }
+  ],
+  "example": "docs/overlays.html#date-range",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.1.0"
+}

@@ -25,6 +25,7 @@ const PAGES = [
     ['documentation', 'Documentation', 'book-open'],
     ['chat', 'Chat', 'message-circle'],
     ['skeletons', 'Skeletons & loading', 'loader'],
+    ['elements', 'Custom elements', 'blocks'],
   ]],
   ['Templates', [
     ['../templates/index', 'All screens', 'monitor'],

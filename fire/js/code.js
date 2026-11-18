@@ -31,7 +31,7 @@
  *  .fd-diff  > script.fd-diff-src    unified diff text → rows with old/new numbers; data-file adds a header.
  *  .fd-schema-toggle                 shows/hides the next `.fd-schema-children`.
  *
- * API: init(root), highlight(code, lang) → HTML, tokenize(code, lang) → [{t, v}],
+ * API: init(root), enhanceCodeblock(block), highlight(code, lang) → HTML, tokenize(code, lang) → [{t, v}],
  *      renderJSON(el, data, {depth, truncate}), setJSONExpanded(el, open), getJSON(el),
  *      selectTab(block, value), appendLog(el, entry | string) → row, streamLogDemo(el) → stop(),
  *      playTerminal(el, script?) → Promise, copied(button, {label, slot}).
@@ -278,6 +278,12 @@ const syncGroup = (block) => block.dataset.sync || 'lang';
 
 function initCodeblock(block) {
   if (!once(block, 'fd-codeblock')) return;
+  enhanceCodeblock(block);
+}
+
+/** Prepare a code block's panes, tabs, wrap button and collapse. init() runs it once per block; fd-code runs it again
+ *  after it replaced the block's code. Idempotent. */
+export function enhanceCodeblock(block) {
   const panes = $$(':scope > .fd-codeblock-body', block);
   panes.forEach((pane) => {
     const code = pane.querySelector(':scope > code');

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ember status</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body>
+<main class="fd-page">
+  <div class="fd-frame" data-fill>
+
+    <header class="fd-band" data-pad="sm" aria-label="Ember status">
+      <div class="fd-row" data-justify="between" data-gap="3">
+        <div class="fd-row" data-gap="2-5">
+          <a class="fd-brand" href="index.html" aria-label="Ember, template index"><span class="fd-brand-mark" data-ember-mark></span><span class="fd-brand-name">Ember</span></a>
+          <span class="fd-small fd-muted">Status</span>
+        </div>
+        <div class="fd-row" data-gap="2">
+          <button class="fd-btn" type="button" data-variant="outline" data-fd-dialog-open="dlg-subscribe"><i data-icon="bell"></i><span>Subscribe</span></button>
+          <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-fd-theme-toggle aria-label="Theme"><i data-icon="monitor"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="fd-states" id="page" data-state="ready">
+
+      <!-- Loading -->
+      <section class="fd-band" data-pad="lg" data-grow data-when="loading" aria-busy="true" aria-label="Loading the status">
+        <div class="fd-column" data-size="lg" data-align="center">
+          <div class="fd-stack" data-gap="8">
+            <div class="fd-skeleton-hero"></div>
+            <div class="fd-skeleton-list" data-rows="8"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Error -->
+      <section class="fd-band" data-pad="lg" data-grow data-when="error" aria-label="Status unavailable">
+        <div class="fd-empty" data-size="lg" data-tone="danger" role="alert">
+          <span class="fd-empty-icon"><i data-icon="wifi-off"></i></span>
+          <h1 class="fd-empty-title">Couldn’t load the status</h1>
+          <p class="fd-empty-text">This page could not reach its feed. The API may be fine: try a request, or reload in a minute.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-action="reload"><i data-icon="refresh-cw"></i><span>Try again</span></button></div>
+        </div>
+      </section>
+
+      <!-- Overall, in one line -->
+      <section class="fd-band fd-rise" data-pad="lg" data-when="ready" aria-labelledby="h-overall">
+        <div class="fd-column" data-size="lg" data-align="center">
+          <div class="fd-row" data-gap="4" data-align="start">
+            <span class="fd-tile" data-size="44" data-tone="warning" id="overall-tile"><i data-icon="triangle-alert"></i></span>
+            <div class="fd-stack fd-grow" data-gap="1">
+              <h1 class="fd-h1" id="h-overall">Degraded performance</h1>
+              <p class="fd-muted" id="overall-desc">Crawls are starting slowly. Updated 11:38 AM UTC.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The open incident or the maintenance underway -->
+      <section class="fd-band" data-when="ready" id="now-band" aria-labelledby="h-now">
+        <div class="fd-column" data-size="lg" data-align="center">
+          <article class="fd-card">
+            <header class="fd-card-head">
+              <div class="fd-card-heading"><h2 class="fd-title" id="h-now">Crawls are starting slowly</h2><p class="fd-card-desc" id="now-desc">Crawl and map · since 9:12 AM UTC</p></div>
+              <div class="fd-card-action"><span class="fd-status" data-variant="pill" data-tone="info" id="now-phase">Monitoring</span></div>
+            </header>
+            <ol class="fd-timeline" id="now-updates" aria-label="Updates">
+              <li class="fd-timeline-item" data-tone="info"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Monitoring</span><time class="fd-timeline-time">10:58 AM</time></div><p class="fd-timeline-body">Wait times are back under 30 seconds for most crawls. We are watching the queue.</p></div></li>
+              <li class="fd-timeline-item" data-tone="warning"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Identified</span><time class="fd-timeline-time">9:41 AM</time></div><p class="fd-timeline-body">A crawl queue in eu-west-1 is short of workers after a deploy. We are adding capacity.</p></div></li>
+              <li class="fd-timeline-item" data-tone="warning"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Investigating</span><time class="fd-timeline-time">9:12 AM</time></div><p class="fd-timeline-body">New crawls wait up to 6 minutes before the first page. Running crawls are not affected.</p></div></li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <!-- Components, each with 90 days -->
+      <section class="fd-band" data-when="ready" aria-labelledby="h-components">
+        <div class="fd-column" data-size="lg" data-align="center">
+          <div class="fd-stack" data-gap="4">
+            <div class="fd-row" data-wrap data-justify="between" data-align="end" data-gap="3">
+              <h2 class="fd-h3" id="h-components">Components</h2>
+              <span class="fd-small fd-muted" data-bind="window">Uptime over the last 90 days</span>
+            </div>
+            <ul class="fd-list" data-card id="components" aria-labelledby="h-components">
+              <li class="fd-list-row" data-component="api"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">API</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>99.99% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="search"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Search</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>99.98% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="scrape"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Scrape</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>99.97% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="crawl"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Crawl and map</span><span class="fd-status" data-size="sm" data-tone="warning" data-now>Degraded</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>99.86% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="agent"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Agent</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>99.95% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="monitors"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Monitors</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>100% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="webhooks"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Webhooks</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>99.92% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+              <li class="fd-list-row" data-component="dashboard"><div class="fd-list-body fd-stack" data-gap="2"><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-title">Dashboard</span><span class="fd-status" data-size="sm" data-tone="success" data-now>Operational</span></div><div class="fd-heatgrid" data-variant="strip" data-size="sm"></div><div class="fd-row" data-justify="between" data-gap="3"><span class="fd-list-desc" data-bind="ago">90 days ago</span><span class="fd-list-desc" data-uptime>100% uptime</span><span class="fd-list-desc">Today</span></div></div></li>
+            </ul>
+            <div class="fd-legend" aria-label="Day colours">
+              <span class="fd-legend-item" data-tone="success"><span class="fd-legend-swatch" data-shape="square"></span><span>No incident</span></span>
+              <span class="fd-legend-item" data-tone="warning"><span class="fd-legend-swatch" data-shape="square"></span><span>Degraded</span></span>
+              <span class="fd-legend-item" data-tone="danger"><span class="fd-legend-swatch" data-shape="square"></span><span>Outage</span></span>
+              <span class="fd-legend-item" data-tone="info"><span class="fd-legend-swatch" data-shape="square"></span><span>Maintenance</span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scheduled maintenance -->
+      <section class="fd-band" data-when="ready" aria-labelledby="h-scheduled">
+        <div class="fd-column" data-size="lg" data-align="center">
+          <div class="fd-stack" data-gap="4">
+            <h2 class="fd-h3" id="h-scheduled">Scheduled maintenance</h2>
+            <ul class="fd-list" data-card aria-labelledby="h-scheduled">
+              <li class="fd-list-row">
+                <span class="fd-list-lead" data-tone="info"><i data-icon="calendar-clock"></i></span>
+                <div class="fd-list-body"><span class="fd-list-title">Database upgrade</span><span class="fd-list-desc">Nov 21, 2:00 AM to 3:00 AM UTC · Monitors, Webhooks</span></div>
+                <span class="fd-list-meta"><span class="fd-badge" data-tone="info">In 3 days</span></span>
+              </li>
+              <li class="fd-list-row">
+                <span class="fd-list-lead" data-tone="info"><i data-icon="calendar-clock"></i></span>
+                <div class="fd-list-body"><span class="fd-list-title">Dashboard sign-in move</span><span class="fd-list-desc">Nov 26, 6:00 AM to 8:00 AM UTC · Dashboard</span></div>
+                <span class="fd-list-meta"><span class="fd-badge" data-tone="info">In 8 days</span></span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Past incidents -->
+      <section class="fd-band" data-when="ready" aria-labelledby="h-history">
+        <div class="fd-column" data-size="lg" data-align="center">
+          <div class="fd-stack" data-gap="6">
+            <div class="fd-stack" data-gap="1">
+              <h2 class="fd-h3" id="h-history">Past incidents</h2>
+              <p class="fd-small fd-muted">The last 7 days. Open one to read its updates.</p>
+            </div>
+            <div class="fd-stack" data-gap="3">
+              <h3 class="fd-label">Nov 17</h3>
+              <div class="fd-accordion" data-variant="card">
+                <details class="fd-accordion-item">
+                  <summary class="fd-accordion-trigger"><span>Agent runs timing out · resolved in 48 min</span><i data-icon="chevron-down"></i></summary>
+                  <div class="fd-accordion-panel"><div class="fd-accordion-inner">
+                    <ol class="fd-timeline" aria-label="Agent runs timing out, updates">
+                      <li class="fd-timeline-item" data-tone="success"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Resolved</span><time class="fd-timeline-time">3:52 PM</time></div><p class="fd-timeline-body">Agent runs finish normally again. Runs that timed out were not charged.</p></div></li>
+                      <li class="fd-timeline-item" data-tone="warning"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Investigating</span><time class="fd-timeline-time">3:04 PM</time></div><p class="fd-timeline-body">Some /agent runs stop after 60 seconds with a timeout.</p></div></li>
+                    </ol>
+                  </div></div>
+                </details>
+              </div>
+            </div>
+            <div class="fd-stack" data-gap="1">
+              <h3 class="fd-label">Nov 16</h3>
+              <p class="fd-small fd-muted">No incidents reported.</p>
+            </div>
+            <div class="fd-stack" data-gap="1">
+              <h3 class="fd-label">Nov 15</h3>
+              <p class="fd-small fd-muted">No incidents reported.</p>
+            </div>
+            <div class="fd-stack" data-gap="3">
+              <h3 class="fd-label">Nov 14</h3>
+              <div class="fd-accordion" data-variant="card">
+                <details class="fd-accordion-item">
+                  <summary class="fd-accordion-trigger"><span>Webhook deliveries delayed · resolved in 1 h 12 min</span><i data-icon="chevron-down"></i></summary>
+                  <div class="fd-accordion-panel"><div class="fd-accordion-inner">
+                    <ol class="fd-timeline" aria-label="Webhook deliveries delayed, updates">
+                      <li class="fd-timeline-item" data-tone="success"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Resolved</span><time class="fd-timeline-time">10:31 AM</time></div><p class="fd-timeline-body">Every delayed event was delivered, in order.</p></div></li>
+                      <li class="fd-timeline-item" data-tone="warning"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Identified</span><time class="fd-timeline-time">9:40 AM</time></div><p class="fd-timeline-body">A slow region held back retries. We moved deliveries to another one.</p></div></li>
+                      <li class="fd-timeline-item" data-tone="warning"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Investigating</span><time class="fd-timeline-time">9:19 AM</time></div><p class="fd-timeline-body">Webhook events arrive up to 20 minutes late.</p></div></li>
+                    </ol>
+                  </div></div>
+                </details>
+              </div>
+            </div>
+            <div class="fd-stack" data-gap="1">
+              <h3 class="fd-label">Nov 13</h3>
+              <p class="fd-small fd-muted">No incidents reported.</p>
+            </div>
+            <div class="fd-stack" data-gap="3">
+              <h3 class="fd-label">Nov 12</h3>
+              <div class="fd-accordion" data-variant="card">
+                <details class="fd-accordion-item">
+                  <summary class="fd-accordion-trigger"><span>Search index rebuild · completed as planned</span><i data-icon="chevron-down"></i></summary>
+                  <div class="fd-accordion-panel"><div class="fd-accordion-inner">
+                    <ol class="fd-timeline" aria-label="Search index rebuild, updates">
+                      <li class="fd-timeline-item" data-tone="success"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Completed</span><time class="fd-timeline-time">4:00 AM</time></div><p class="fd-timeline-body">/search returns fresh results from the new index.</p></div></li>
+                      <li class="fd-timeline-item" data-tone="info"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">In progress</span><time class="fd-timeline-time">2:00 AM</time></div><p class="fd-timeline-body">Results may be up to an hour old until 4:00 AM.</p></div></li>
+                    </ol>
+                  </div></div>
+                </details>
+              </div>
+            </div>
+            <div class="fd-stack" data-gap="1">
+              <h3 class="fd-label">Nov 11</h3>
+              <p class="fd-small fd-muted">No incidents reported.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="fd-band" data-pad="sm" aria-label="About this page">
+      <div class="fd-column" data-size="lg" data-align="center">
+        <div class="fd-row" data-wrap data-justify="between" data-gap="3">
+          <span class="fd-small fd-muted">Times are UTC. This page refreshes every minute.</span>
+          <div class="fd-row" data-wrap data-gap="4">
+            <a class="fd-btn-text" href="https://docs.ember.dev"><span>API docs</span></a>
+            <a class="fd-btn-text" href="status-admin.html"><span>Operators</span></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <section class="fd-band" data-pad="sm" data-grow aria-label="Demo state">
+      <div class="fd-row" data-wrap data-justify="between">
+        <span class="fd-eyebrow">Demo state</span>
+        <div class="fd-segmented" data-size="sm" id="state-switch" role="radiogroup" aria-label="Page state">
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="operational">Operational</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="degraded">Degraded</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="outage">Outage</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="maintenance">Maintenance</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <dialog class="fd-dialog" id="dlg-subscribe" data-size="sm" data-reset>
+    <form method="dialog" data-fd-validate>
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Get status updates</h2>
+        <p class="fd-dialog-desc">An email when an incident opens, changes or ends, and before maintenance.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="sub-email" data-required>Email</label>
+          <input class="fd-input" type="email" id="sub-email" name="email" required autocomplete="email" placeholder="maya@quarry.dev" data-error-required="Enter the email to send updates to." data-error-type="Enter an email like maya@quarry.dev.">
+        </div>
+        <div class="fd-field">
+          <span class="fd-field-label" id="sub-scope-label">Send updates about</span>
+          <div class="fd-segmented" data-block role="radiogroup" aria-labelledby="sub-scope-label">
+            <label class="fd-segmented-item"><input type="radio" name="scope" value="all" checked><span>Everything</span></label>
+            <label class="fd-segmented-item"><input type="radio" name="scope" value="incidents"><span>Incidents only</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" value="subscribe" data-variant="primary"><span>Subscribe</span></button>
+      </div>
+    </form>
+  </dialog>
+</main>
+
+<script type="module">
+  import { init, overlays, content, charts, nav, reducedMotion } from '../fire/fire.js';
+  import { EMBER_MARK } from './shell.js';
+
+  const { toast } = overlays;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  $$('[data-ember-mark]').forEach((el) => { el.innerHTML = EMBER_MARK; });
+
+  /* ---------- The feed (demo data, fixed to Nov 18, 2026, 11:38 AM UTC; the same story as status-admin.html) ---------- */
+  const STATES = {
+    operational: ['success', 'Operational'], degraded: ['warning', 'Degraded'], partial: ['danger', 'Partial outage'],
+    major: ['danger', 'Major outage'], maintenance: ['info', 'Maintenance'],
+  };
+  const TONE_OF = { degraded: 'warning', partial: 'danger', major: 'danger', maintenance: 'info' };
+  /** Each component's earlier days that were not clean: [days ago, tone, minutes down]. Maintenance does not count as down. */
+  const PAST = {
+    api: [[63, 'danger', 41]],
+    search: [[6, 'info', 0]],
+    scrape: [[22, 'warning', 25], [63, 'danger', 41]],
+    crawl: [[9, 'danger', 70], [41, 'warning', 30]],
+    agent: [[1, 'warning', 48]],
+    monitors: [[77, 'info', 0]],
+    webhooks: [[4, 'warning', 72]],
+    dashboard: [],
+  };
+  const PHASE = { investigating: ['warning', 'Investigating'], identified: ['warning', 'Identified'], monitoring: ['info', 'Monitoring'], progress: ['info', 'In progress'], scheduled: ['neutral', 'Scheduled'] };
+  const SCENES = {
+    operational: {
+      tile: ['success', 'circle-check'], title: 'All systems operational', desc: 'Updated 11:38 AM UTC.', comps: {},
+    },
+    degraded: {
+      tile: ['warning', 'triangle-alert'], title: 'Degraded performance', desc: 'Crawls are starting slowly. Updated 11:38 AM UTC.',
+      comps: { crawl: 'degraded' }, today: { crawl: 146 },
+      now: { title: 'Crawls are starting slowly', desc: 'Crawl and map · since 9:12 AM UTC', updates: [
+        ['monitoring', '10:58 AM', 'Wait times are back under 30 seconds for most crawls. We are watching the queue.'],
+        ['identified', '9:41 AM', 'A crawl queue in eu-west-1 is short of workers after a deploy. We are adding capacity.'],
+        ['investigating', '9:12 AM', 'New crawls wait up to 6 minutes before the first page. Running crawls are not affected.'],
+      ] },
+    },
+    outage: {
+      tile: ['danger', 'circle-alert'], title: 'Major outage', desc: 'New crawls fail and some scrapes time out. Updated 11:38 AM UTC.',
+      comps: { crawl: 'major', scrape: 'partial' }, today: { crawl: 36, scrape: 36 },
+      now: { title: 'Crawls fail to start', desc: 'Crawl and map, Scrape · since 11:02 AM UTC', updates: [
+        ['identified', '11:20 AM', 'A database failover left the crawl queue read-only. We are switching it back.'],
+        ['investigating', '11:04 AM', 'New crawls fail with 503 and some scrapes time out. Retry with backoff; nothing is charged.'],
+      ] },
+    },
+    maintenance: {
+      tile: ['info', 'hard-drive'], title: 'Maintenance in progress', desc: 'Monitors and webhooks pause until 12:00 PM UTC.',
+      comps: { monitors: 'maintenance', webhooks: 'maintenance' },
+      now: { title: 'Queue storage upgrade', desc: 'Monitors, Webhooks · 11:00 AM to 12:00 PM UTC', updates: [
+        ['progress', '11:00 AM', 'Checks and deliveries are queued. None are lost, and they catch up after.'],
+        ['scheduled', 'Nov 11', 'Planned for Nov 18, 11:00 AM to 12:00 PM UTC.'],
+      ] },
+    },
+  };
+  const VALID = ['operational', 'degraded', 'outage', 'maintenance', 'loading', 'error'];
+
+  const page = $('#page');
+  const list = $('#components');
+  const switcher = $('#state-switch');
+  let state = 'degraded';
+
+  /* ---------- 90 days on a wide screen; 60 or 30 where 90 days would not fit ---------- */
+  const daysFor = (width) => (width >= 460 ? 90 : width >= 310 ? 60 : 30);
+  let days = 90;
+
+  function drawComponents() {
+    const scene = SCENES[state] || SCENES.degraded;
+    days = daysFor(list.clientWidth || 640);
+    const start = new Date(Date.UTC(2026, 10, 18) - (days - 1) * 864e5).toISOString().slice(0, 10);
+    $$('[data-bind="ago"]', list).forEach((el) => { el.textContent = `${days} days ago`; });
+    $$('[data-bind="window"]').forEach((el) => { el.textContent = `Uptime over the last ${days} days`; });
+    for (const row of $$('[data-component]', list)) {
+      const id = row.dataset.component;
+      const now = scene.comps[id] || 'operational';
+      const tones = Array.from({ length: days }, () => 'success');
+      let down = 0;
+      for (const [ago, tone, minutes] of PAST[id]) if (ago < days) { tones[days - 1 - ago] = tone; down += minutes; }
+      if (now !== 'operational') tones[days - 1] = TONE_OF[now];
+      down += scene.today?.[id] || 0;
+      const uptime = 100 - (down / (days * 1440)) * 100;
+      const [tone, label] = STATES[now];
+      const pill = $('[data-now]', row);
+      pill.dataset.tone = tone;
+      pill.textContent = label;
+      $('[data-uptime]', row).textContent = `${down ? uptime.toFixed(2) : '100'}% uptime`;
+      const strip = $('.fd-heatgrid', row);
+      strip.innerHTML = `<script type="application/json">${JSON.stringify({ start, tones, label: `${$('.fd-list-title', row).textContent}, last ${days} days`, legend: { success: 'No incident', warning: 'Degraded', danger: 'Outage', info: 'Maintenance' } })}<\/script>`;
+      charts.heatgrid(strip);
+    }
+  }
+  new ResizeObserver(() => { if (daysFor(list.clientWidth) !== days && list.clientWidth) drawComponents(); }).observe(list);
+
+  function render() {
+    const scene = SCENES[state];
+    const [tone, glyph] = scene.tile;
+    const tile = $('#overall-tile');
+    tile.dataset.tone = tone;
+    tile.innerHTML = `<i data-icon="${glyph}"></i>`;
+    $('#h-overall').textContent = scene.title;
+    $('#overall-desc').textContent = scene.desc;
+    $('#now-band').hidden = !scene.now;
+    if (scene.now) {
+      $('#h-now').textContent = scene.now.title;
+      $('#now-desc').textContent = scene.now.desc;
+      const [ptone, plabel] = PHASE[scene.now.updates[0][0]];
+      const phase = $('#now-phase');
+      phase.dataset.tone = ptone;
+      phase.textContent = plabel;
+      $('#now-updates').innerHTML = scene.now.updates.map(([p, time, text]) => `<li class="fd-timeline-item" data-tone="${PHASE[p][0]}"><span class="fd-timeline-node"></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">${PHASE[p][1]}</span><time class="fd-timeline-time">${esc(time)}</time></div><p class="fd-timeline-body">${esc(text)}</p></div></li>`).join('');
+    }
+    drawComponents();
+    init($('#page'));
+  }
+
+  function setState(next, { url = true } = {}) {
+    state = VALID.includes(next) ? next : 'degraded';
+    if (SCENES[state]) render();
+    content.setState(page, SCENES[state] ? 'ready' : state);
+    nav.selectSegment($(`.fd-segmented-item[data-value="${state}"]`, switcher), { silent: true });
+    document.title = SCENES[state] ? `${SCENES[state].title} · Ember status` : 'Ember status';
+    if (url) { const u = new URL(location.href); u.searchParams.set('state', state); history.replaceState(null, '', u); }
+  }
+
+  switcher.addEventListener('fd:change', (event) => { if (event.detail.value !== state) setState(event.detail.value); });
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('[data-action="reload"]')) return;
+    content.setState(page, 'loading');
+    setTimeout(() => setState('degraded'), 900);
+  });
+
+  /* ---------- Subscribe ---------- */
+  $('#dlg-subscribe').addEventListener('fd:close', (event) => {
+    const dialog = event.target;
+    if (dialog.returnValue !== 'subscribe') return;
+    const email = $('#sub-email', dialog).value.trim();
+    toast({ title: 'Check your inbox', description: `Confirm the link sent to ${email}.`, tone: 'success' });
+  });
+
+  /* ---------- First paint: the state in the URL, or a short load (none with reduced motion) ---------- */
+  const asked = new URLSearchParams(location.search).get('state');
+  if (asked && VALID.includes(asked)) setState(asked, { url: false });
+  else if (reducedMotion()) setState('degraded', { url: false });
+  else {
+    state = 'degraded';
+    render();
+    content.setState(page, 'loading');
+    setTimeout(() => { if (page.dataset.state === 'loading') setState('degraded', { url: false }); }, 600);
+  }
+</script>
+</body>
+</html>

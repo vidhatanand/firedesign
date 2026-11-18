@@ -1,6 +1,6 @@
 {
   "name": "fire-design",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "private": true,
   "description": "Fire: a design system for developer, agent and AI products. Plain HTML and CSS as the contract, with Lit elements, React and Vue wrappers, and a Facet export.",
   "type": "module",
@@ -15,7 +15,14 @@
     "build:elements": "node scripts/build-elements.mjs",
     "build:contract": "node scripts/build-contract.mjs",
     "build:catalog": "node scripts/build-catalog.mjs",
-    "build:facet": "node scripts/build-facet.mjs"
+    "build:facet": "node scripts/build-facet.mjs",
+    "find": "node scripts/find.mjs",
+    "build:index": "node scripts/build-index.mjs",
+    "fonts": "node scripts/fonts.mjs",
+    "build:typefaces": "node scripts/build-typefaces.mjs",
+    "gate": "node scripts/gate.mjs",
+    "looks": "node scripts/looks-check.mjs",
+    "check:full": "npm run check && node scripts/gate.mjs --check && node scripts/looks-check.mjs --check"
   },
   "exports": {
     ".": "./fire/fire.js",
@@ -28,7 +35,10 @@
       "types": "./fire/elements.d.ts",
       "default": "./fire/elements.js"
     },
-    "./theme": "./fire/js/theme.js",
+    "./theme": {
+      "types": "./fire/js/theme.d.ts",
+      "default": "./fire/js/theme.js"
+    },
     "./react": {
       "types": "./wrappers/react/index.d.ts",
       "default": "./wrappers/react/index.js"
@@ -40,7 +50,21 @@
     "./contract": "./contract/fire-contract.json",
     "./catalog": "./contract/catalog.json",
     "./fire/*": "./fire/*",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./index": "./contract/index.json",
+    "./email": {
+      "types": "./fire/email/email.d.ts",
+      "default": "./fire/email/email.js"
+    },
+    "./initial": {
+      "types": "./fire/js/initial.d.ts",
+      "default": "./fire/js/initial.js"
+    },
+    "./looks": {
+      "types": "./fire/js/looks.d.ts",
+      "default": "./fire/js/looks.js"
+    },
+    "./fonts": "./contract/fonts.json"
   },
   "types": "./fire/fire.d.ts",
   "files": [
@@ -54,7 +78,13 @@
     "GUIDE.md",
     "AGENT-RULES.md",
     "WRITING.md",
-    "README.md"
+    "README.md",
+    "scripts/fire.mjs",
+    "scripts/find.mjs",
+    "scripts/fonts.mjs",
+    "scripts/gate.mjs",
+    "scripts/fingerprint.mjs",
+    "scripts/looks-check.mjs"
   ],
   "peerDependencies": {
     "react": ">=19",
@@ -95,5 +125,8 @@
     "pngjs": "7.0.0",
     "ajv": "8.17.1"
   },
-  "customElements": "contract/custom-elements.json"
+  "customElements": "contract/custom-elements.json",
+  "bin": {
+    "fire": "scripts/fire.mjs"
+  }
 }

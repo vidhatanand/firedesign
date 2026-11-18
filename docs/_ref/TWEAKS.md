@@ -120,6 +120,10 @@ State (defaults in brackets), stored as JSON in `localStorage['fd-tweaks']`, onl
 | `contrast` | [`default`] · `high` | `data-contrast="high"` on `<html>` |
 | `motion` | `off` 0 · [`default`] 1 · `slow` 1.75 | inline `--fd-motion` |
 | `texture` | 0…1.5, step .05 [1] | inline `--fd-texture` |
+| `surfaces` | [`objects`] · `flat` · `outlined` | `data-surfaces` on `<html>` (removed for objects) |
+| `elevation` | `none` · [`soft`] · `lifted` | `data-elevation` on `<html>` (removed for soft) |
+| `controls` | [`soft`] · `outlined` · `filled` | `data-controls` on `<html>` (removed for soft) |
+| `headings` | [`sentence`] · `upper` · `mono` | `data-headings` on `<html>` (removed for sentence) |
 
 - Saved tweaks are applied **synchronously when the module is evaluated** (before `ready`), so there is no flash.
 - Default state leaves no trace: no attributes, no inline properties.

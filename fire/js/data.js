@@ -14,6 +14,12 @@
  *  Expand     <button class="fd-table-expand" aria-expanded="false" aria-controls="detail-id"> and a following
  *             <tr class="fd-table-detail" id="detail-id" hidden>.
  *  Rows       tr[data-href] navigates on click or Enter (tabindex is added). Prefer a stretched .fd-table-link in markup.
+ *  Groups     <tbody class="fd-table-group" [data-state="closed"]> whose first row is <tr class="fd-table-group-head"> with a
+ *             <th scope="rowgroup" colspan="…">. The th is given scope and an id that labels the tbody (aria-labelledby), and
+ *             a missing colspan is filled in to span the columns. A .fd-table-group-toggle[aria-expanded] in the th opens and
+ *             closes the group (data-state on the tbody); data-collapsible on the table builds that toggle from each
+ *             heading's content. .fd-table-group-count[data-auto] is kept to the number of rows not [hidden].
+ *             input[data-select-group] in the heading selects the group's rows. Sorting sorts within each group.
  *  Stacked    <table data-stack>: data-label on each cell is filled in from the header text when missing.
  *             td|th[data-stack="hide"] is dropped, and [data-stack-only] inside a cell is shown, only while the table stacks.
  *  Actions    any [data-action] emits fd:select once per click (except buttons inside components that handle their own:
@@ -21,6 +27,13 @@
  *             Anywhere else (a toolbar's "Clear filters"): { action, value: [], row: null, wrap: null }.
  *  Filters    .fd-filter[data-active][data-default="All endpoints"] with .fd-filter-value and .fd-filter-clear.
  *             .fd-filter-applied > .fd-filter-token (+ .fd-filter-token-remove) and [data-filter-clear-all].
+ *  Listbox    <div class="fd-list" role="listbox" aria-label="…"> > <div class="fd-list-row" role="option" data-value
+ *             aria-selected>: one tab stop; Arrow Up/Down, Home and End move the selection, which follows focus.
+ *  List and detail  <div class="fd-list-detail"> > .fd-list-detail-list (rows: button or a[href], each with data-value) and
+ *             .fd-list-detail-main (optional [data-detail="value"] panels and a .fd-list-detail-back button). Clicking a
+ *             button row moves aria-current="true" to it and shows its panel; below 760px of its own width the root
+ *             switches data-view from "list" to "detail" and focus moves to the detail's first heading. The back
+ *             button switches to "list" and returns focus to the open row. A link row navigates as usual.
  *  Key-value  .fd-kv-value[data-copy] (optionally data-copy="text to copy") gains a copy button.
  *  Meter      .fd-meter[data-value][data-max] (+ data-warn / data-danger thresholds, default 80 / 95, data-tone to force a tone).
  *             Segmented: .fd-meter-seg[data-value] children. .fd-meter-figure[data-auto] is filled "1,520 of 3,000 {data-unit}".
@@ -57,16 +70,21 @@
  *   fd:open / fd:close  .fd-data-card-toggle  { target }
  *   fd:select  .fd-pipeline-job  { value, item }                            value is the job's data-value; cancelable:
  *                                                                            preventDefault keeps aria-current where it was, or stops a link
+ *   fd:open / fd:close  .fd-table-group-toggle  { group }                   group is the tbody
+ *   fd:change  .fd-list[role=listbox]  { value, item }                      the selected option's data-value
+ *   fd:select  .fd-list-detail row  { value, item }                         cancelable: preventDefault keeps the current row and view
+ *   fd:change  .fd-list-detail  { source: 'view', value: 'list' | 'detail' }   only when one pane shows at a time
  *
- * API: init(root), selection(table), clearSelection(table), sortTable(table, index, direction),
- *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max), selectJob(pipeline, value).
+ * API: init(root), selection(table), clearSelection(table), sortTable(table, index, direction), setGroupOpen(group, open),
+ *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max), selectJob(pipeline, value),
+ *      selectOption(listbox, value), showDetail(listDetail, value, { focus }), showList(listDetail, { focus }).
  */
-import { $$, on, once, emit, copyText, label } from './core.js';
+import { $$, on, once, emit, copyText, label, ensureId } from './core.js';
 import { icon } from './icons.js';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
-const BODY_ROWS = ':scope > tbody > tr:not(.fd-table-detail):not(.fd-table-state):not([data-skeleton])';
+const BODY_ROWS = ':scope > tbody > tr:not(.fd-table-detail):not(.fd-table-state):not(.fd-table-group-head):not([data-skeleton])';
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -101,7 +119,81 @@ function setupTable(table) {
     else tr.setAttribute('aria-selected', 'false');
   });
   $$('.fd-table-expand', table).forEach((button) => syncExpand(button));
+  setupGroups(table);
   syncSelection(table, { silent: true });
+}
+
+/* ------------------------------------------------------------------ table: groups */
+
+const groupsOf = (table) => [...table.tBodies].filter((tbody) => tbody.classList.contains('fd-table-group'));
+const groupHead = (group) => group.querySelector(':scope > tr.fd-table-group-head');
+const groupRows = (group) => [...group.querySelectorAll(':scope > tr')].filter((tr) => tr.matches(BODY_ROWS.replace(':scope > tbody > tr', '*')));
+const columnCount = (table) => {
+  const head = table.querySelector(':scope > thead > tr:last-child') ?? table.querySelector('tr');
+  return head ? [...head.children].reduce((n, cell) => n + (cell.colSpan || 1), 0) : 1;
+};
+
+function setupGroups(table) {
+  const groups = groupsOf(table);
+  if (!groups.length) return;
+  const columns = columnCount(table);
+  groups.forEach((group) => {
+    const head = groupHead(group);
+    const th = head?.querySelector(':scope > th');
+    if (!th) return;
+    if (!th.hasAttribute('scope')) th.setAttribute('scope', 'rowgroup');
+    if (!th.hasAttribute('colspan')) {
+      const before = [...head.children].filter((cell) => cell !== th).reduce((n, cell) => n + (cell.colSpan || 1), 0);
+      th.colSpan = Math.max(1, columns - before);
+    }
+    if (!group.hasAttribute('aria-label') && !group.hasAttribute('aria-labelledby')) {
+      const title = th.querySelector('.fd-table-group-title') ?? th;
+      group.setAttribute('aria-labelledby', ensureId(title, 'fd-group'));
+    }
+    let toggle = th.querySelector('.fd-table-group-toggle');
+    if (!toggle && table.hasAttribute('data-collapsible')) {
+      toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'fd-table-group-toggle';
+      toggle.innerHTML = icon('chevron-right');
+      toggle.append(...[...th.childNodes]);
+      th.append(toggle);
+    }
+    if (toggle) {
+      if (toggle.hasAttribute('aria-expanded') && !group.hasAttribute('data-state')) group.dataset.state = toggle.getAttribute('aria-expanded') === 'false' ? 'closed' : 'open';
+      toggle.setAttribute('aria-expanded', String(group.dataset.state !== 'closed'));
+      if (!group.dataset.state) group.dataset.state = 'open';
+    }
+  });
+  syncGroups(table);
+  if ('MutationObserver' in window) {
+    // Rows filtered ([hidden]), added or removed: keep counts and the group checkboxes true.
+    new MutationObserver(() => syncGroups(table)).observe(table, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+  }
+}
+
+/** Counts (data-auto) and each group's select checkbox. */
+function syncGroups(table) {
+  groupsOf(table).forEach((group) => {
+    const rows = groupRows(group).filter((tr) => !tr.hidden);
+    const count = groupHead(group)?.querySelector('.fd-table-group-count[data-auto]');
+    const text = fmt(rows.length);
+    if (count && count.textContent !== text) count.textContent = text;
+    const check = groupHead(group)?.querySelector('input[data-select-group]');
+    if (check) {
+      const selectable = rows.filter((tr) => rowCheck(tr));
+      const chosen = selectable.filter((tr) => tr.getAttribute('aria-selected') === 'true');
+      check.checked = selectable.length > 0 && chosen.length === selectable.length;
+      check.indeterminate = chosen.length > 0 && chosen.length < selectable.length;
+      check.disabled = !selectable.length;
+    }
+  });
+}
+
+/** Open or close a group (its tbody). Emits nothing. */
+export function setGroupOpen(group, open) {
+  group.dataset.state = open ? 'open' : 'closed';
+  group.querySelector(':scope > tr.fd-table-group-head .fd-table-group-toggle')?.setAttribute('aria-expanded', String(open));
 }
 
 /** Fill data-label on cells from header text, for the stacked phone layout. */
@@ -188,23 +280,27 @@ export function sortTable(table, index, direction = 'ascending', { silent = fals
   const type = th.dataset.sortType || 'text';
   $$('th[aria-sort]', head).forEach((other) => other.setAttribute('aria-sort', other === th ? direction : 'none'));
   if (table.dataset.sort !== 'server') {
-    const tbody = table.tBodies[0];
-    const rows = bodyRows(table);
-    rows.forEach((tr, i) => { if (tr.dataset.fdOrder === undefined) tr.dataset.fdOrder = String(i); });
-    const groups = rows.map((tr) => {
-      const next = tr.nextElementSibling;
-      return { tr, detail: next?.classList.contains('fd-table-detail') ? next : null, key: sortKey(tr.children[index], type), order: Number(tr.dataset.fdOrder) };
-    });
+    const all = bodyRows(table);
+    all.forEach((tr, i) => { if (tr.dataset.fdOrder === undefined) tr.dataset.fdOrder = String(i); });
     const sign = direction === 'descending' ? -1 : 1;
-    groups.sort((a, b) => {
-      if (direction === 'none') return a.order - b.order;
-      if (a.key === null || b.key === null) return a.key === b.key ? a.order - b.order : a.key === null ? 1 : -1; // empty values always last
-      const cmp = type === 'text' ? collator.compare(String(a.key), String(b.key)) : a.key - b.key;
-      return cmp ? cmp * sign : a.order - b.order;
+    // Each tbody sorts on its own, so the rows of a group stay under its heading.
+    [...table.tBodies].forEach((tbody) => {
+      const rows = all.filter((tr) => tr.parentElement === tbody);
+      if (!rows.length) return;
+      const items = rows.map((tr) => {
+        const next = tr.nextElementSibling;
+        return { tr, detail: next?.classList.contains('fd-table-detail') ? next : null, key: sortKey(tr.children[index], type), order: Number(tr.dataset.fdOrder) };
+      });
+      items.sort((a, b) => {
+        if (direction === 'none') return a.order - b.order;
+        if (a.key === null || b.key === null) return a.key === b.key ? a.order - b.order : a.key === null ? 1 : -1; // empty values always last
+        const cmp = type === 'text' ? collator.compare(String(a.key), String(b.key)) : a.key - b.key;
+        return cmp ? cmp * sign : a.order - b.order;
+      });
+      const fragment = document.createDocumentFragment();
+      items.forEach(({ tr, detail }) => { fragment.append(tr); if (detail) fragment.append(detail); });
+      tbody.append(fragment);
     });
-    const fragment = document.createDocumentFragment();
-    groups.forEach(({ tr, detail }) => { fragment.append(tr); if (detail) fragment.append(detail); });
-    tbody.append(fragment);
   }
   if (!silent) {
     const sort = { key: th.dataset.key ?? th.textContent.trim(), index, direction };
@@ -244,6 +340,7 @@ function syncSelection(table, { silent = false } = {}) {
     const count = bar.querySelector('[data-bulk-count]');
     if (count) count.textContent = fmt(chosen.length);
   }
+  syncGroups(table);
   if (!silent) {
     const values = chosen.map((tr) => rowValue(tr, bodyRows(table).indexOf(tr)));
     emit(table, 'fd:change', { source: 'selection', value: values, selected: values, rows: chosen });
@@ -267,6 +364,9 @@ function onSelectChange(input) {
   if (!table) return;
   if (input.matches('[data-select-all]')) {
     visibleRows(table).forEach((tr) => rowCheck(tr) && setRowSelected(tr, input.checked));
+  } else if (input.matches('[data-select-group]')) {
+    const group = input.closest('tbody');
+    if (group) groupRows(group).filter((tr) => !tr.hidden && rowCheck(tr)).forEach((tr) => setRowSelected(tr, input.checked));
   } else {
     const rows = visibleRows(table);
     const tr = input.closest('tr');
@@ -608,6 +708,125 @@ function onPipelineKey(event, job) {
   target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
+/* ------------------------------------------------------------------ listbox list */
+
+const optionsOf = (list) => $$(':scope > [role="option"]', list).filter((o) => o.getAttribute('aria-disabled') !== 'true');
+const optionValue = (o) => o.dataset.value ?? o.textContent.trim();
+
+function setupListbox(list) {
+  if (!once(list, 'fd-listbox-list')) return;
+  const options = optionsOf(list);
+  const chosen = options.find((o) => o.getAttribute('aria-selected') === 'true');
+  $$(':scope > [role="option"]', list).forEach((o) => {
+    if (!o.hasAttribute('aria-selected')) o.setAttribute('aria-selected', 'false');
+    o.tabIndex = o === (chosen ?? options[0]) ? 0 : -1;
+  });
+}
+
+/** Select the option with this data-value (or this element) in a listbox list. Emits nothing. */
+export function selectOption(list, value) {
+  const option = value instanceof Element ? value : optionsOf(list).find((o) => optionValue(o) === String(value));
+  if (!option) return null;
+  $$(':scope > [role="option"]', list).forEach((o) => { o.setAttribute('aria-selected', String(o === option)); o.tabIndex = o === option ? 0 : -1; });
+  return option;
+}
+
+function chooseOption(option, { focus = false } = {}) {
+  const list = option.closest('.fd-list[role="listbox"]');
+  if (!list || option.getAttribute('aria-disabled') === 'true') return;
+  const already = option.getAttribute('aria-selected') === 'true';
+  selectOption(list, option);
+  if (focus) { option.focus(); option.scrollIntoView({ block: 'nearest' }); }
+  if (!already) emit(list, 'fd:change', { value: optionValue(option), item: option });
+}
+
+const LISTBOX_KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
+function onListboxKey(event, option) {
+  const list = option.closest('.fd-list[role="listbox"]');
+  if (!list || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); chooseOption(option); return; }
+  if (!LISTBOX_KEYS.includes(event.key)) return;
+  event.preventDefault();
+  const options = optionsOf(list);
+  const i = options.indexOf(option);
+  const target = { ArrowDown: options[i + 1], ArrowUp: options[i - 1], Home: options[0], End: options[options.length - 1] }[event.key];
+  if (target) chooseOption(target, { focus: true });
+}
+
+/* ------------------------------------------------------------------ list and detail */
+
+const LD_ITEM = ':is(button, a[href])[data-value]';
+const ldItems = (root) => $$(`.fd-list-detail-list ${LD_ITEM}`, root).filter((el) => el.closest('.fd-list-detail') === root);
+const ldCurrent = (root) => ldItems(root).find(isCurrent);
+const ldSingle = (root) => {
+  const pane = root.querySelector(':scope > .fd-list-detail-list');
+  return Boolean(pane) && getComputedStyle(pane).getPropertyValue('--_d-ld-mode').trim() === 'single';
+};
+
+function ldPanels(root, value) {
+  const main = root.querySelector(':scope > .fd-list-detail-main');
+  const panels = main ? $$(':scope > [data-detail]', main) : [];
+  if (panels.length && value !== undefined) panels.forEach((p) => { p.hidden = p.dataset.detail !== String(value); });
+  return panels;
+}
+
+/** Where focus lands in the detail: its first visible heading (made focusable), else the main pane. */
+function ldFocusTarget(root) {
+  const main = root.querySelector(':scope > .fd-list-detail-main');
+  if (!main) return null;
+  const heading = $$('h1, h2, h3', main).find((h) => !h.closest('[hidden]'));
+  const target = heading ?? main;
+  if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
+  return target;
+}
+
+function setView(root, view, { silent = false } = {}) {
+  const changed = root.dataset.view !== view;
+  root.dataset.view = view;
+  if (changed && !silent && ldSingle(root)) emit(root, 'fd:change', { source: 'view', value: view });
+}
+
+/** Open the record with this data-value (or this row): aria-current moves to it, its panel shows, and when one pane
+ *  shows at a time the detail replaces the list. Focus moves to the detail only then (or with focus: true). */
+export function showDetail(root, value, { focus } = {}) {
+  const item = value instanceof Element ? value : ldItems(root).find((el) => el.dataset.value === String(value));
+  if (item) {
+    ldItems(root).forEach((el) => { if (el !== item && isCurrent(el)) el.removeAttribute('aria-current'); });
+    item.setAttribute('aria-current', 'true');
+    ldPanels(root, item.dataset.value);
+  }
+  const single = ldSingle(root);
+  setView(root, 'detail');
+  if (focus ?? single) {
+    const target = ldFocusTarget(root);
+    target?.focus({ preventScroll: true });
+    if (single) (target ?? root).scrollIntoView({ block: 'nearest' });
+  }
+  return item ?? null;
+}
+
+/** Back to the list (one pane at a time); focus returns to the open row. */
+export function showList(root, { focus = true } = {}) {
+  setView(root, 'list');
+  const item = ldCurrent(root) ?? ldItems(root)[0];
+  if (focus && item) { item.focus({ preventScroll: true }); item.scrollIntoView({ block: 'nearest' }); }
+}
+
+function setupListDetail(root) {
+  if (!once(root, 'fd-list-detail')) return;
+  if (!root.dataset.view) root.dataset.view = 'list';
+  const current = ldCurrent(root);
+  if (current) ldPanels(root, current.dataset.value);
+}
+
+function onListDetailClick(event, item) {
+  const root = item.closest('.fd-list-detail');
+  if (!root || item.closest('.fd-list-detail-list')?.closest('.fd-list-detail') !== root) return;
+  if (!emit(item, 'fd:select', { value: item.dataset.value, item })) { if (item.matches('a')) event.preventDefault(); return; }
+  if (item.matches('a')) return; // a link opens its own page
+  showDetail(root, item);
+}
+
 /* ------------------------------------------------------------------ init */
 
 /** Components that answer their own [data-action] buttons; a click inside them is not a list action. */
@@ -690,6 +909,23 @@ function bindDelegates() {
     if (!pipeline.contains(event.relatedTarget)) syncPipeline(pipeline, { leaving: true });
   });
 
+  on(document, 'click', '.fd-table-group-toggle', (event, button) => {
+    const group = button.closest('tbody');
+    if (!group) return;
+    const open = button.getAttribute('aria-expanded') !== 'true';
+    setGroupOpen(group, open);
+    emit(button, open ? 'fd:open' : 'fd:close', { group });
+  });
+
+  on(document, 'click', '.fd-list[role="listbox"] > [role="option"]', (event, option) => chooseOption(option, { focus: true }));
+  on(document, 'keydown', '.fd-list[role="listbox"] > [role="option"]', onListboxKey);
+
+  on(document, 'click', `.fd-list-detail-list ${LD_ITEM}`, onListDetailClick);
+  on(document, 'click', '.fd-list-detail-back', (event, button) => {
+    const root = button.closest('.fd-list-detail');
+    if (root) { event.preventDefault(); showList(root); }
+  });
+
   on(document, 'click', '.fd-data-card-toggle', (event, button) => {
     const open = button.getAttribute('aria-expanded') !== 'true';
     button.setAttribute('aria-expanded', String(open));
@@ -715,4 +951,6 @@ export function init(root = document) {
   initProgress(root);
   matchesIn(root, '.fd-data-card-toggle').forEach((button) => once(button, 'fd-toggle') && syncToggle(button));
   matchesIn(root, '.fd-pipeline').forEach(setupPipeline);
+  matchesIn(root, '.fd-list[role="listbox"]').forEach(setupListbox);
+  matchesIn(root, '.fd-list-detail').forEach(setupListDetail);
 }

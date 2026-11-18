@@ -19,6 +19,13 @@
 //   facetRole the Facet colour role the token fills (ARCHITECTURE.md section 4)
 // and, under "facet", each role with its token and Ember's opaque values (muted is --fd-text-3 laid over the page).
 // looks/<palette>.json is the theme record of each preset palette, as the Tweaks panel's Copy theme writes it.
+// looks/named/<name>.json are the named looks, written by hand: { name, label, note, record }. Each record must pass
+// validateTheme and be one the Tweaks panel can hold (a named palette, toned or not, and a named type set), so the
+// panel and ?look= can apply it whole; build-palettes.mjs --check holds each to the contrast rules under its own
+// surfaces and controls. From them this writes
+//   fire/js/looks.js   LOOKS, in LOOK_ORDER: { name, label, note, record, state, swatch, attributes, props }
+//   fire/boot.js       the block between "looks:begin" and "looks:end": each look's attributes and custom properties,
+//                      so ?look=<name> puts a look on <html> before the first paint (names from this list only)
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,7 +35,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHECK = process.argv.includes('--check');
 const load = (rel) => import(pathToFileURL(path.join(ROOT, rel)).href);
 const { PALETTES, PALETTE_TOKENS, parse, format } = await load('fire/js/palettes.js');
-const { INPUT_TOKENS, CONTRACT, toThemeRecord, validateTheme } = await load('fire/js/theme.js');
+const { INPUT_TOKENS, CONTRACT, toThemeRecord, validateTheme, fromThemeRecord, expandTheme } = await load('fire/js/theme.js');
+const { paletteTokens, toneTokens, cssValue } = await load('fire/js/palettes.js');
 
 /* ---------- CSS: every rule with its at-rule parents ---------- */
 function rulesOf(css) {
@@ -105,9 +113,20 @@ function resolve(value, m, seen = new Set()) {
   v = replaceCalls(v, 'light-dark', (inner) => resolve(args(inner)[m], m, seen));
   v = replaceCalls(v, 'color-mix', (inner) => {
     const mm = inner.match(/^in srgb, (.+) ([\d.]+)%, transparent$/);
-    if (!mm) throw new Error(`cannot resolve color-mix(${inner})`);
-    const { rgb, alpha } = parse(mm[1]);
-    return format(rgb, alpha * Number(mm[2]) / 100);
+    if (mm) {
+      const { rgb, alpha } = parse(mm[1]);
+      return format(rgb, alpha * Number(mm[2]) / 100);
+    }
+    // Two opaque colours, one of them with a percentage: color-mix(in srgb, A p%, B) or (in srgb, A, B p%).
+    const [space, a, b] = args(inner);
+    const pct = (part) => { const pm = part.match(/^(.+) ([\d.]+)%$/); return pm ? [pm[1], Number(pm[2]) / 100] : [part, null]; };
+    const [ca, pa] = pct(a);
+    const [cb, pb] = pct(b);
+    if (space !== 'in srgb' || (pa === null) === (pb === null)) throw new Error(`cannot resolve color-mix(${inner})`);
+    const wa = pa ?? 1 - pb;
+    const [A, B] = [parse(ca), parse(cb)];
+    if (A.alpha !== 1 || B.alpha !== 1) throw new Error(`cannot resolve color-mix(${inner}): translucent colours`);
+    return format(A.rgb.map((c, i) => c * wa + B.rgb[i] * (1 - wa)));
   });
   v = replaceCalls(v, 'calc', (inner) => {
     const mm = inner.match(/^(-?[\d.]+)([a-z%]*) \* (-?[\d.]+)$/);
@@ -142,21 +161,25 @@ const GROUPS = [
   [/^--fd-z-/, 'layer'],
   [/^--fd-a\d+$/, 'ink-ladder'],
   [/^--fd-(fill(-\w+)?|control-line(-hover)?)$/, 'fill'],
+  [/^--fd-(surface-(edge|flush|head)|field(-hover)?|control-(bg|edge)(-hover|-active)?)$/, 'structure'],
+  [/^--fd-(eyebrow|section-label)-/, 'label'],
   [/^--fd-accent-\d+$/, 'accent-wash'],
   [/^--fd-(success|warning|danger|info|violet)-/, 'status'],
   [/^--fd-chart-/, 'chart'],
   [/^--fd-syntax-/, 'syntax'],
 ];
 function groupOf(name) {
+  // The ring's colour is set by each palette (an input) but stays with the ring in the focus group.
+  if (name === '--fd-focus') return 'focus';
   if (PALETTE_TOKENS.includes(name)) return 'palette';
   const hit = GROUPS.find(([re]) => re.test(name));
   if (!hit) throw new Error(`${name}: no group; add it to GROUPS in scripts/build-contract.mjs`);
   return hit[1];
 }
-const COLOR_GROUPS = new Set(['palette', 'text', 'ink-ladder', 'fill', 'accent-wash', 'status', 'chart', 'syntax']);
+const COLOR_GROUPS = new Set(['palette', 'text', 'ink-ladder', 'fill', 'structure', 'accent-wash', 'status', 'chart', 'syntax']);
 function typeOf(name, group, def) {
   const v = typeof def === 'string' ? def : def.light;
-  if (group === 'font') return 'fontFamily';
+  if (group === 'font' || name === '--fd-eyebrow-font' || name === '--fd-section-label-font') return 'fontFamily';
   if (group === 'shadow' || name.startsWith('--fd-ring')) return 'shadow';
   if (/^cubic-bezier\(/.test(v)) return 'cubicBezier';
   if (COLOR_GROUPS.has(group) || name === '--fd-focus' || /^(#|rgb|hsl|oklch|transparent$)/.test(v)) return 'color';
@@ -240,6 +263,66 @@ for (const p of PALETTES) {
   outputs.set(`contract/looks/${p.name}.json`, `${JSON.stringify(record, null, 2)}\n`);
 }
 
+/* ---------- The named looks ---------- */
+const LOOK_ORDER = ['steady', 'operator', 'folio', 'hearth', 'instrument', 'marquee', 'gentle', 'clear'];
+const NAMED_DIR = path.join(ROOT, 'contract/looks/named');
+const namedFiles = fs.readdirSync(NAMED_DIR).filter((f) => f.endsWith('.json')).sort();
+if (JSON.stringify(namedFiles) !== JSON.stringify([...LOOK_ORDER].sort().map((n) => `${n}.json`))) {
+  throw new Error(`contract/looks/named: expected ${LOOK_ORDER.map((n) => `${n}.json`).join(', ')}; found ${namedFiles.join(', ')}`);
+}
+const looks = LOOK_ORDER.map((name) => {
+  const file = `contract/looks/named/${name}.json`;
+  const look = JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'));
+  const keys = Object.keys(look).sort().join(',');
+  if (keys !== 'label,name,note,record') throw new Error(`${file}: want exactly { name, label, note, record }, got ${keys}`);
+  if (look.name !== name) throw new Error(`${file}: name must be "${name}"`);
+  if (!/^[A-Z][a-z]+$/.test(look.label)) throw new Error(`${file}: label must be one capitalised word`);
+  if (typeof look.note !== 'string' || !/^[A-Z].*\.$/.test(look.note) || look.note.split(/(?<=\.)\s/).length !== 1) throw new Error(`${file}: note must be one sentence`);
+  const { ok, errors } = validateTheme(look.record);
+  if (!ok) throw new Error(`${file}: ${errors.join('; ')}`);
+  // The panel holds it whole (named palette and type set), and the record round-trips through the panel's state.
+  const state = fromThemeRecord(look.record);
+  const back = toThemeRecord(state);
+  const full = { ...back, signature: back.signature ?? state.signature };
+  if (JSON.stringify(full) !== JSON.stringify(look.record)) throw new Error(`${file}: write the record in full, as Copy theme does:\n${JSON.stringify(full, null, 2)}`);
+  // What ?look= puts on <html>: every attribute the panel would set (the palette and type set always, so a page's
+  // own replaces nothing), and the custom properties (a toned palette's colours, the dial variables).
+  const { tokens, attributes } = expandTheme(look.record);
+  const attrs = { 'data-palette': state.palette, 'data-type': state.type, ...attributes };
+  const props = Object.fromEntries(Object.entries(tokens).map(([k, v]) => [k, Array.isArray(v) ? cssValue(v) : v]));
+  // The swatch: page, ink and accent of the palette as the look tones it.
+  const t = toneTokens(paletteTokens(state.palette, { contrast: state.contrast }), state.tone);
+  const swatch = { bg: cssValue(t['--fd-bg']), ink: cssValue(t['--fd-ink']), accent: cssValue(t['--fd-accent']) };
+  return { name, label: look.label, note: look.note, record: look.record, state, swatch, attributes: attrs, props };
+});
+const looksJs = [
+  '/* Fire looks — the named looks: complete theme records, each a far-apart starting point.',
+  ' * GENERATED by scripts/build-contract.mjs from contract/looks/named/*.json; do not edit by hand.',
+  ' *',
+  ' * LOOKS        [{ name, label, note, record, state, swatch, attributes, props }] in display order',
+  ' *   record     the theme record (fire/js/theme.js), as Copy theme writes it',
+  ' *   state      the Tweaks state it describes (fromThemeRecord(record)): tweaks.set(state) applies it',
+  ' *   swatch     { bg, ink, accent } as CSS values (light-dark() pairs): the palette as the look tones it',
+  ' *   attributes the attributes the look puts on <html> (fire/boot.js does the same for ?look=<name>)',
+  ' *   props      the custom properties it writes on <html> (a toned palette, the dial variables)',
+  ' * getLook(name) → the look, or undefined',
+  ' */',
+  `export const LOOKS = Object.freeze(${JSON.stringify(looks, null, 2)});`,
+  'export const LOOK_NAMES = Object.freeze(LOOKS.map((l) => l.name));',
+  'export const getLook = (name) => LOOKS.find((l) => l.name === name);',
+  '',
+].join('\n');
+outputs.set('fire/js/looks.js', looksJs);
+// fire/boot.js: the block between the markers.
+const BOOT = fs.readFileSync(path.join(ROOT, 'fire/boot.js'), 'utf8');
+const BEGIN = '/* looks:begin (GENERATED by scripts/build-contract.mjs from contract/looks/named) */';
+const END = '/* looks:end */';
+const at = BOOT.indexOf(BEGIN);
+const until = BOOT.indexOf(END);
+if (at < 0 || until < at) throw new Error('fire/boot.js: the looks:begin / looks:end markers are missing');
+const table = Object.fromEntries(looks.map((l) => [l.name, { a: l.attributes, p: l.props }]));
+outputs.set('fire/boot.js', `${BOOT.slice(0, at)}${BEGIN}\n    var LOOKS = ${JSON.stringify(table)};\n    ${BOOT.slice(until)}`);
+
 if (CHECK) {
   const stale = [];
   for (const [rel, text] of outputs) {
@@ -250,11 +333,11 @@ if (CHECK) {
     console.error(`stale: ${stale.join(', ')}\nrun node scripts/build-contract.mjs`);
     process.exitCode = 1;
   } else {
-    console.log(`ok: contract/fire-contract.json (${tokens.length} tokens) and ${PALETTES.length} looks are current.`);
+    console.log(`ok: contract/fire-contract.json (${tokens.length} tokens), ${PALETTES.length} palette looks and ${looks.length} named looks (fire/js/looks.js, fire/boot.js) are current.`);
   }
 } else {
   fs.mkdirSync(path.join(ROOT, 'contract/looks'), { recursive: true });
   for (const [rel, text] of outputs) fs.writeFileSync(path.join(ROOT, rel), text);
   const count = (tier) => tokens.filter((t) => t.tier === tier).length;
-  console.log(`wrote contract/fire-contract.json (${tokens.length} tokens: ${count('input')} input, ${count('scale')} scale, ${count('derived')} derived) and ${PALETTES.length} looks`);
+  console.log(`wrote contract/fire-contract.json (${tokens.length} tokens: ${count('input')} input, ${count('scale')} scale, ${count('derived')} derived), ${PALETTES.length} palette looks and ${looks.length} named looks`);
 }

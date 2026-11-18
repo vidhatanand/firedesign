@@ -320,7 +320,7 @@ export function startLogs({ fire, on, later }: Kit): LogsBehaviour {
 
   function onSelect(event: FireEventMap['fd:select']) {
     const { action, value, row, item, trigger } = event.detail || {};
-    const values = Array.isArray(value) ? value : value ? [value] : [];
+    const values = Array.isArray(value) ? value : typeof value === 'string' && value ? [value] : [];   // a log line sends its number; rows send strings
     if (action === 'open' && row?.closest('#logs-table')) { event.preventDefault(); openLog(row); return; }
     if (action === 'clear-filters') { clearFilters(); return; }
     if (action === 'reload') { setState('loading'); later(() => setState('loaded'), 900); return; }

@@ -1,11 +1,12 @@
 {
   "id": "table",
   "job": "Compare, sort and act on records laid out in rows and columns.",
-  "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
+  "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, grouped rows under heading rows that can open and close, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
   "useWhen": [
     "People compare the same fields across many records: logs, keys, invoices, runs.",
     "Rows need sorting, selection, bulk actions or an actions cell.",
-    "The same records must stay readable on a phone (add data-stack)."
+    "The same records must stay readable on a phone (add data-stack).",
+    "Records fall into a few kinds that share columns (keys by environment, monitors by site): one table with a heading row per group."
   ],
   "avoidWhen": [
     {
@@ -23,13 +24,20 @@
     {
       "when": "The numbers are a trend over time.",
       "instead": "chart"
+    },
+    {
+      "when": "Each group has different columns.",
+      "instead": "Use one table per group, each with its own heading."
     }
   ],
   "aka": [
     "data grid",
     "datagrid",
     "list view",
-    "activity log"
+    "activity log",
+    "grouped table",
+    "row groups",
+    "section rows"
   ],
   "surfaces": [
     "app",
@@ -63,6 +71,14 @@
     {
       "name": "expanded",
       "how": "tr[data-expanded] followed by a tr.fd-table-detail row"
+    },
+    {
+      "name": "group closed",
+      "how": "data-state=\"closed\" on a tbody.fd-table-group; its toggle has aria-expanded=\"false\" and only the heading shows"
+    },
+    {
+      "name": "group filtered out",
+      "how": "every row of a group carries hidden; the group's heading hides too"
     }
   ],
   "variants": [
@@ -105,6 +121,11 @@
       "attribute": "data-href",
       "value": "",
       "useWhen": "On a tr: the whole row opens a page; keep a real link in the row for keyboard and middle-click."
+    },
+    {
+      "attribute": "data-collapsible",
+      "value": "",
+      "useWhen": "Groups open and close: data.js turns each group heading into a toggle button."
     }
   ],
   "parts": [
@@ -163,6 +184,26 @@
     {
       "class": "fd-table-foot",
       "role": "The foot under the table: count or summary on the left, pagination and actions on the right."
+    },
+    {
+      "class": "fd-table-group",
+      "role": "A tbody holding one group: its heading row, then its rows."
+    },
+    {
+      "class": "fd-table-group-head",
+      "role": "The group's heading row, a th scope=\"rowgroup\" across the columns; no hover, never a link."
+    },
+    {
+      "class": "fd-table-group-title",
+      "role": "The group's name; it labels the tbody."
+    },
+    {
+      "class": "fd-table-group-count",
+      "role": "The number of rows in the group; data-auto keeps it to the rows shown."
+    },
+    {
+      "class": "fd-table-group-toggle",
+      "role": "The button in a heading that opens and closes the group (aria-expanded)."
     }
   ],
   "related": [
@@ -185,6 +226,10 @@
     {
       "keys": "Enter",
       "does": "Opens a row that carries data-href, or sorts the focused header."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "On a group heading's toggle: opens or closes the group."
     }
   ],
   "example": "docs/data.html#activity",

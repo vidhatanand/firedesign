@@ -151,10 +151,11 @@ window.run = async () => {
   const cancelled = !source.dispatchEvent(new CustomEvent('fd:select', { bubbles: true, cancelable: true, detail: { action: 'delete' } }));
   out.hooks.select = { kept, cancelled, seen: log.selects.filter((s) => typeof s === 'string') };
   // useFire: Fire markup inserted by a later render is enhanced.
-  out.hooks.thumbBefore = !!document.querySelector('#seg-1 .fd-segmented-thumb');
+  // Enhancement happens after a frame or two (and later still on a busy machine): wait for the condition, not a time.
+  const until = async (test, ms = 8000) => { const end = performance.now() + ms; while (!test() && performance.now() < end) await new Promise((r) => setTimeout(r, 25)); return !!test(); };
+  out.hooks.thumbBefore = await until(() => document.querySelector('#seg-1 .fd-segmented-thumb'));
   flushSync(() => setExtra(true));
-  await new Promise((r) => setTimeout(r, 100));
-  out.hooks.thumbAfter = !!document.querySelector('#seg-2 .fd-segmented-thumb');
+  out.hooks.thumbAfter = await until(() => document.querySelector('#seg-2 .fd-segmented-thumb'));
   return out;
 };
 `;

@@ -30,10 +30,24 @@
  *     [data-fd-category], button [data-fd-mark-read], rows .fd-notification[data-unread][data-category],
  *     .fd-popover-empty, and badges [data-fd-unread-count="<popover id>"] anywhere on the page.
  *   Date range: .fd-daterange[data-fd-daterange] [data-value="2026-11-08/2026-11-14"] [data-preset="7d"]
- *     [data-max="today"], with .fd-daterange-preset[data-preset="24h|7d|30d|month|custom"], an empty
+ *     [data-max="today"], with .fd-daterange-preset[data-preset="24h|7d|30d|month|lastmonth|quarter|year|custom"], an empty
  *     .fd-calendar (rendered here), [data-fd-daterange-summary], [data-fd-daterange-cancel],
  *     [data-fd-daterange-apply]. Apply fires fd:change (detail.value = { start, end, preset }) and writes
- *     the label into [data-fd-daterange-label] inside the trigger.
+ *     the label into [data-fd-daterange-label] inside the trigger. More presets: lastmonth, quarter, year.
+ *   Period with comparison: add a .fd-daterange-compare group inside the .fd-daterange: <fieldset
+ *     class="fd-daterange-compare" data-fd-daterange-compare> holding radios named for the mode, with value
+ *     none | previous | year (previous = the period of the same length just before; year = the same dates a year
+ *     earlier), and [data-fd-daterange-compare-dates] showing the comparison dates. data-compare="previous" on the
+ *     .fd-daterange picks the starting mode (none by default). The trigger is a .fd-period: its
+ *     [data-fd-daterange-label] and [data-fd-daterange-compare-label] (empty when there is no comparison) are written
+ *     on Apply, and on load. With the group present fd:change carries detail.value = { start, end, preset,
+ *     compare } where compare is null or { mode, start, end } (ISO dates).
+ *   Date field panel: the calendar popover of .fd-datefield (forms.js owns the field). <div class="fd-popover"
+ *     popover id="x"><div class="fd-datefield-panel" data-fd-datepanel><div class="fd-calendar"></div>
+ *     [data-fd-datepanel-today] [data-fd-datepanel-clear]</div></div>, opened by a [data-fd-popover="x"] button inside
+ *     the field. Opening reads the input's value, data-min-date and data-max-date (ISO dates or "today") from the field; picking
+ *     a day writes the ISO date into the input, dispatches native input and change events on it and closes the
+ *     popover, returning focus to the input. The calendar keys are the date range's.
  *   Filter list: [data-fd-filter-list] with input[data-fd-filter-search], .fd-checklist > .fd-checklist-item
  *     (.fd-checklist-label, .fd-checklist-count), .fd-checklist-empty, [data-fd-filter-summary],
  *     [data-fd-filter-clear]. Changes fire fd:change (detail.value = selected values) and update
@@ -72,6 +86,17 @@
  *   toast.promise(promise, { loading, success, error }) → id   (each a string, options or fn(value))
  *   toast.update(id, options) · toast.dismiss(id?) · toast.success/error/warning/info(title, options)
  *   Declarative: <button data-fd-toast='{"title":"Key copied","tone":"success"}'>.
+ *   Done · Undo: toast({ title, description, undo: async () => …, undone }) adds an Undo action and lasts 8 seconds.
+ *     Undo runs the function (the button is busy meanwhile), fires fd:undo on the toast (detail { value: id }) and turns
+ *     it into "Undone" (or `undone`); a rejected promise turns it into a danger toast with the error's message.
+ *   Held: toast.hold({ title, description, seconds = 10, tone, target, detail, onCommit, onUndo }) → id. Nothing has
+ *     happened yet: a ring counts down beside Undo and the toast has data-held. fd:hold fires when it starts, fd:undo when
+ *     Undo is pressed, fd:commit when the time runs out (or the page is left, detail.cause "pagehide"), each on `target`
+ *     or else on the toast, with detail { ...detail, toast: id }. Cancel fd:commit to keep the toast as a loading toast
+ *     to update with toast.update(id, …); otherwise it goes. A held toast has no close button and cannot be swiped away.
+ *   Keys: Ctrl+Z or Cmd+Z, outside a text field, presses Undo on the newest toast that has one; Escape inside a held toast
+ *   presses its Undo. Labels: toast.undo "Undo" · toast.undone "Undone" · toast.undo-failed "Couldn't undo" ·
+ *   toast.stopped "Stopped" · toast.nothing-sent "Nothing was sent."
  *
  * Command palette
  *   <dialog class="fd-command" id="command" aria-label="Command palette">
@@ -82,6 +107,15 @@
  *   cancelable fd:select on the item (detail: { value, item, data }).
  *   command.open() · command.close() · command.toggle() ·
  *   command.register([{ id, label, group, icon, hint, shortcut, keywords, href, perform }]) → unregister
+ *   command.records({ group, search, icon, min, delay, limit, palette, empty, error }) → unregister
+ *     A group of found records, as against actions: `search(query, { signal })` returns (or resolves to) an array of
+ *     { id, label, hint, href, icon, keywords, perform, data } for the typed query. It runs after `delay` ms (default
+ *     160) once the query has `min` characters (default 2), and an older search is aborted by `signal` when the query
+ *     changes. The group is rendered as `.fd-command-group[data-records]` with `aria-busy` while it waits (a
+ *     `.fd-command-note` row says "Searching…"), is hidden when the query is too short or finds nothing, and its items
+ *     carry `data-found`: the palette's own filter never hides or re-ranks them. `limit` caps the rows (default 5).
+ *     `error` (default "Could not search {group}") shows in a note when the search rejects. Selecting a record fires
+ *     fd:select like any item, with detail.data the record. The palette's empty state waits for every search to settle.
  */
 import { $$, on, once, emit, position, autoUpdate, focusables, trapFocus, ensureId, clamp, reducedMotion, label as fdLabel } from './core.js';
 import { icon } from './icons.js';
@@ -439,7 +473,7 @@ export function openPopover(ref, { trigger = null, placement, focus = true } = {
     if (layers.get(pop)?.trigger === trigger) return pop;
     conceal(pop);
   }
-  refreshContent(pop);
+  refreshContent(pop, trigger);
   const side = placement || trigger?.dataset.placement || pop.dataset.placement || 'bottom-start';
   const entry = { trigger, onClose: onPopoverClose };
   layers.set(pop, entry);
@@ -447,7 +481,7 @@ export function openPopover(ref, { trigger = null, placement, focus = true } = {
   if (!reveal(pop, update, trigger)) { layers.delete(pop); return null; }
   if (update) entry.stop = track(pop, update);
   trigger?.setAttribute('aria-expanded', 'true');
-  if (focus) focusEl($$('[autofocus]', pop).find(visible) || pop);
+  if (focus) focusEl($$('[autofocus]', pop).find(visible) || pop.querySelector('[data-fd-datepanel] .fd-calendar-day[tabindex="0"]') || pop);
   emit(pop, 'fd:open', { trigger });
   return pop;
 }
@@ -464,8 +498,9 @@ function onPopoverClose(pop, entry) {
   if (entry.trigger?.isConnected && (entry.returnFocus || pop.contains(doc.activeElement))) restoreFocus(entry.trigger);
 }
 
-function refreshContent(pop) {
+function refreshContent(pop, trigger = null) {
   for (const range of $$('[data-fd-daterange]', pop)) resetRange(range);
+  for (const panel of $$('[data-fd-datepanel]', pop)) syncDatePanel(panel, trigger);
   if (pop.matches('[data-fd-notifications]')) applyNotifications(pop);
   for (const list of $$('[data-fd-filter-list]', pop)) syncFilter(list);
   if (pop.matches('[data-fd-filter-list]')) syncFilter(pop);
@@ -514,21 +549,98 @@ const PRESETS = {
   '7d': (t) => [addDays(t, -6), t],
   '30d': (t) => [addDays(t, -29), t],
   month: (t) => [new Date(t.getFullYear(), t.getMonth(), 1), t],
+  lastmonth: (t) => [new Date(t.getFullYear(), t.getMonth() - 1, 1), new Date(t.getFullYear(), t.getMonth(), 0)],
+  quarter: (t) => [new Date(t.getFullYear(), Math.floor(t.getMonth() / 3) * 3, 1), t],
+  year: (t) => [new Date(t.getFullYear(), 0, 1), t],
 };
+const COMPARE = ['none', 'previous', 'year'];
+const oneYearBack = (d) => {
+  const back = new Date(d.getFullYear() - 1, d.getMonth(), 1);
+  back.setDate(Math.min(d.getDate(), new Date(back.getFullYear(), back.getMonth() + 1, 0).getDate()));
+  return back;
+};
+/** The comparison range of [start, end]: the period just before it, or the same dates a year earlier. */
+function compareRange(start, end, mode) {
+  if (mode === 'previous') {
+    const days = Math.round((end - start) / 86400000) + 1;
+    return [addDays(start, -days), addDays(start, -1)];
+  }
+  if (mode === 'year') return [oneYearBack(start), oneYearBack(end)];
+  return null;
+}
+const rangeText = (a, b) => (sameDay(a, b) ? shortDate(a) : `${shortDate(a)} – ${shortDate(b)}`);
 
 function rangeState(root) {
   let state = ranges.get(root);
   if (state) return state;
   const t = today();
+  if (root.hasAttribute('data-fd-datepanel')) {
+    const picked = parseDate(root.dataset.value);
+    const focus = picked || limitDate(root, t);
+    state = { start: picked, end: picked, preset: 'custom', pending: null, hover: null, focus, view: new Date(focus.getFullYear(), focus.getMonth(), 1) };
+    state.committed = { start: picked, end: picked, preset: 'custom' };
+    ranges.set(root, state);
+    return state;
+  }
   let [start, end] = (root.dataset.value || '').split('/').map(parseDate);
   let preset = root.dataset.preset || (start ? 'custom' : '7d');
   if (!start && PRESETS[preset]) [start, end] = PRESETS[preset](t);
   if (!start) [start, end] = PRESETS['7d'](t);
   end = end || start;
-  state = { start, end, preset, pending: null, hover: null, focus: end, view: new Date(end.getFullYear(), end.getMonth(), 1) };
-  state.committed = { start, end, preset };
+  const compare = COMPARE.includes(root.dataset.compare) ? root.dataset.compare : 'none';
+  state = { start, end, preset, compare, pending: null, hover: null, focus: end, view: new Date(end.getFullYear(), end.getMonth(), 1) };
+  state.committed = { start, end, preset, compare };
   ranges.set(root, state);
   return state;
+}
+
+/** A date moved inside the limits of a root: data-min-date and data-max-date (date field panel), data-min and data-max (date range). */
+function limitDate(root, date) {
+  const min = parseDate(root.dataset.minDate ?? root.dataset.min);
+  const max = parseDate(root.dataset.maxDate ?? root.dataset.max);
+  if (max && date > max) return max;
+  if (min && date < min) return min;
+  return date;
+}
+
+/** Date field panel: take the value and limits of the field whose trigger opened it. */
+function syncDatePanel(panel, trigger) {
+  const field = trigger?.closest?.('[data-fd-datefield]');
+  if (field) {
+    const input = field.querySelector('input:not([type="hidden"])');
+    panel.dataset.value = input ? input.value.trim() : '';
+    for (const key of ['minDate', 'maxDate']) { if (field.dataset[key]) panel.dataset[key] = field.dataset[key]; else delete panel.dataset[key]; }
+    const state = rangeState(panel);
+    const picked = parseDate(panel.dataset.value);
+    state.start = state.end = picked;
+    state.focus = picked ? limitDate(panel, picked) : limitDate(panel, today());
+    state.view = new Date(state.focus.getFullYear(), state.focus.getMonth(), 1);
+    state.pending = state.hover = null;
+    const required = !!input?.required;
+    for (const clear of $$('[data-fd-datepanel-clear]', panel)) clear.hidden = required;
+  }
+  const t = today();
+  for (const now of $$('[data-fd-datepanel-today]', panel)) now.disabled = limitDate(panel, t).getTime() !== t.getTime();
+  buildCalendar(panel);
+  paintRange(panel);
+}
+
+/** Write a date (or nothing) from the calendar into its field and close the popover. */
+function chooseDate(panel, date) {
+  const pop = panel.closest('.fd-popover');
+  const trigger = pop && layers.get(pop)?.trigger;
+  const field = trigger?.closest?.('[data-fd-datefield]');
+  const input = field?.querySelector('input:not([type="hidden"])');
+  const state = rangeState(panel);
+  state.start = state.end = date;
+  panel.dataset.value = date ? isoDate(date) : '';
+  if (input) {
+    input.value = date ? isoDate(date) : '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  if (pop && isOpen(pop)) closePopover(pop, false);
+  if (input) focusEl(input);
 }
 
 function resetRange(root) {
@@ -545,8 +657,8 @@ function buildCalendar(root) {
   const state = rangeState(root);
   const year = state.view.getFullYear();
   const month = state.view.getMonth();
-  const max = parseDate(root.dataset.max);
-  const min = parseDate(root.dataset.min);
+  const max = parseDate(root.dataset.maxDate ?? root.dataset.max);
+  const min = parseDate(root.dataset.minDate ?? root.dataset.min);
   const title = state.view.toLocaleDateString(LOCALE, { month: 'long', year: 'numeric' });
   const lead = (new Date(year, month, 1).getDay() + 6) % 7; // weeks start on Monday
   const days = new Date(year, month + 1, 0).getDate();
@@ -669,10 +781,23 @@ function paintRange(root) {
     else summary.textContent = sameDay(a, b) ? shortDate(a) : `${shortDate(a)} – ${shortDate(b)}`;
   }
   for (const apply of $$('[data-fd-daterange-apply]', root)) apply.disabled = !!state.pending;
+  paintCompare(root, state);
   for (const p of $$('.fd-daterange-preset', root)) p.setAttribute('aria-pressed', String(p.dataset.preset === (state.pending ? 'custom' : state.preset)));
 }
 
+/** Period with comparison: the radios and the comparison dates follow the chosen range. */
+function paintCompare(root, state) {
+  const group = root.querySelector('[data-fd-daterange-compare]');
+  if (!group) return;
+  for (const radio of $$('input[type="radio"]', group)) radio.checked = radio.value === state.compare;
+  const dates = group.querySelector('[data-fd-daterange-compare-dates]');
+  const other = state.pending ? null : compareRange(state.start, state.end, state.compare);
+  if (dates) dates.textContent = other ? rangeText(...other) : '';
+  if (dates) dates.hidden = !other;
+}
+
 function pickDay(root, date) {
+  if (root.hasAttribute('data-fd-datepanel')) { chooseDate(root, date); return; }
   const state = rangeState(root);
   if (!state.pending) {
     state.pending = date;
@@ -690,8 +815,8 @@ function pickDay(root, date) {
 
 function moveDay(root, date) {
   const state = rangeState(root);
-  const max = parseDate(root.dataset.max);
-  const min = parseDate(root.dataset.min);
+  const max = parseDate(root.dataset.maxDate ?? root.dataset.max);
+  const min = parseDate(root.dataset.minDate ?? root.dataset.min);
   if ((max && date > max) || (min && date < min)) return;
   state.focus = date;
   if (date.getMonth() !== state.view.getMonth() || date.getFullYear() !== state.view.getFullYear()) {
@@ -706,16 +831,33 @@ function moveDay(root, date) {
 function applyRange(root) {
   const state = rangeState(root);
   if (state.pending) return;
-  state.committed = { start: state.start, end: state.end, preset: state.preset };
+  state.committed = { start: state.start, end: state.end, preset: state.preset, compare: state.compare };
+  const { label, compareLabel, other } = writeLabels(root);
+  const value = { start: isoDate(state.start), end: isoDate(state.end), preset: state.preset };
+  if (root.querySelector('[data-fd-daterange-compare]')) value.compare = other ? { mode: state.compare, start: isoDate(other[0]), end: isoDate(other[1]) } : null;
+  emit(root, 'fd:change', { value, label, compareLabel });
+  const pop = root.closest('.fd-popover');
+  if (pop && isOpen(pop)) closePopover(pop, true);
+}
+
+/** Write the range (and comparison) into the trigger's label slots. Returns the texts and the comparison range. */
+function writeLabels(root) {
+  const state = rangeState(root);
   const preset = state.preset !== 'custom' ? root.querySelector(`.fd-daterange-preset[data-preset="${CSS.escape(state.preset)}"]`) : null;
-  const label = preset ? textOf(preset) : sameDay(state.start, state.end) ? shortDate(state.start) : `${shortDate(state.start)} – ${shortDate(state.end)}`;
+  const label = preset ? textOf(preset) : rangeText(state.start, state.end);
+  const other = compareRange(state.start, state.end, state.compare);
+  const compareLabel = other ? fdLabel(root, 'period.versus', 'vs {range}', { range: rangeText(...other) }) : '';
   const pop = root.closest('.fd-popover');
   const triggers = new Set();
   if (pop && layers.get(pop)?.trigger) triggers.add(layers.get(pop).trigger);
   if (pop?.id) for (const t of $$(`[data-fd-popover="${CSS.escape(pop.id)}"]`)) triggers.add(t);
-  for (const t of triggers) { const slot = t.querySelector('[data-fd-daterange-label]'); if (slot) slot.textContent = label; }
-  emit(root, 'fd:change', { value: { start: isoDate(state.start), end: isoDate(state.end), preset: state.preset }, label });
-  if (pop && isOpen(pop)) closePopover(pop, true);
+  for (const t of triggers) {
+    const slot = t.querySelector('[data-fd-daterange-label]');
+    if (slot) slot.textContent = label;
+    const second = t.querySelector('[data-fd-daterange-compare-label]');
+    if (second) second.textContent = compareLabel;
+  }
+  return { label, compareLabel, other };
 }
 
 /* ---------- Filter list ---------- */
@@ -1130,7 +1272,7 @@ function syncPause() {
   }
 }
 
-const toastDuration = (opts) => opts.duration ?? (opts.tone === 'loading' ? Infinity : opts.tone === 'danger' ? 8000 : 5000);
+const toastDuration = (opts) => opts.duration ?? (opts.hold ? 10000 : opts.tone === 'loading' ? Infinity : typeof opts.undo === 'function' ? 8000 : opts.tone === 'danger' ? 8000 : 5000);
 
 function renderToast(t) {
   const { el, opts } = t;
@@ -1141,7 +1283,9 @@ function renderToast(t) {
   const iconWrap = doc.createElement('span');
   iconWrap.className = 'fd-toast-icon';
   iconWrap.setAttribute('aria-hidden', 'true');
-  if (tone !== 'loading') iconWrap.innerHTML = icon(opts.icon || TONE_ICON[tone] || TONE_ICON.neutral);
+  el.toggleAttribute('data-held', !!opts.hold);
+  if (opts.hold) iconWrap.innerHTML = `<span class="fd-hold-ring" data-size="sm"><span class="fd-hold-count">${Math.ceil(toastDuration(opts) / 1000)}</span></span>`;
+  else if (tone !== 'loading') iconWrap.innerHTML = icon(opts.icon || TONE_ICON[tone] || TONE_ICON.neutral);
   const content = doc.createElement('div');
   content.className = 'fd-toast-content';
   const title = doc.createElement('p');
@@ -1155,7 +1299,19 @@ function renderToast(t) {
     content.append(desc);
   }
   const parts = [iconWrap, content];
-  if (opts.action?.label) {
+  if (opts.hold || typeof opts.undo === 'function') {
+    const undo = doc.createElement('button');
+    undo.type = 'button';
+    undo.className = 'fd-btn fd-toast-action';
+    undo.dataset.size = 'sm';
+    undo.dataset.fdToastUndo = '';
+    undo.innerHTML = icon('undo-2');
+    const text = doc.createElement('span');
+    text.textContent = fdLabel(el, 'toast.undo', 'Undo');
+    undo.append(text);
+    undo.addEventListener('click', () => (opts.hold ? undoHeld(t) : runUndo(t, undo)));
+    parts.push(undo);
+  } else if (opts.action?.label) {
     const action = doc.createElement('button');
     action.type = 'button';
     action.className = 'fd-btn fd-toast-action';
@@ -1167,7 +1323,7 @@ function renderToast(t) {
     });
     parts.push(action);
   }
-  if (opts.dismissible !== false) {
+  if (opts.dismissible !== false && !opts.hold) {
     const close = doc.createElement('button');
     close.type = 'button';
     close.className = 'fd-toast-close';
@@ -1216,11 +1372,12 @@ function startTimer(t) {
   const bar = t.el.querySelector('.fd-toast-progress');
   if (bar?.animate) {
     t.anim = bar.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: t.duration, easing: 'linear', fill: 'forwards' });
-    t.anim.onfinish = () => dismissToast(t.id);
+    t.anim.onfinish = () => (t.opts.hold ? commitHeld(t, 'time') : dismissToast(t.id));
     syncPause();
   } else {
-    t.timer = setTimeout(() => dismissToast(t.id), t.duration);
+    t.timer = setTimeout(() => (t.opts.hold ? commitHeld(t, 'time') : dismissToast(t.id)), t.duration);
   }
+  if (t.opts.hold) startHoldTick(t);
 }
 
 export function toast(input = {}) {
@@ -1240,6 +1397,8 @@ export function toast(input = {}) {
   el.getBoundingClientRect(); // commit the entering style, then rise into place
   el.dataset.state = 'open';
   startTimer(t);
+  if (opts.hold) emit(opts.target?.isConnected ? opts.target : el, 'fd:hold', { ...(opts.detail || {}), toast: id, seconds: Math.round(t.duration / 1000) });
+  watchUndoKeys();
   while (toasts.length > TOAST_MAX) dismissToast(toasts[toasts.length - 1].id);
   return id;
 }
@@ -1263,6 +1422,7 @@ function dismissToast(id) {
   const [t] = toasts.splice(index, 1);
   t.anim?.cancel();
   clearTimeout(t.timer);
+  clearInterval(t.tick);
   const hadFocus = t.el.contains(doc.activeElement);
   t.el.dataset.state = 'closing';
   layoutToasts();
@@ -1293,9 +1453,100 @@ toast.promise = (promise, messages = {}) => {
   return id;
 };
 
+/* ---------- Undo and held toasts ---------- */
+const findToast = (id) => toasts.find((x) => x.id === id);
+const holdTarget = (t) => (t.opts.target?.isConnected ? t.opts.target : t.el);
+
+/** Done · Undo: run the toast's undo function, then say it was undone (or that it could not be). */
+async function runUndo(t, button) {
+  if (t.undoing) return;
+  t.undoing = true;
+  button?.setAttribute('aria-busy', 'true');
+  t.anim?.pause();
+  clearTimeout(t.timer);
+  try {
+    await t.opts.undo();
+    emit(t.el, 'fd:undo', { value: t.id });
+    if (findToast(t.id)) updateToast(t.id, { title: t.opts.undone ?? fdLabel(t.el, 'toast.undone', 'Undone'), description: t.opts.undoneDescription, tone: 'neutral', icon: 'undo-2', undo: undefined, action: undefined, duration: undefined });
+  } catch (error) {
+    if (findToast(t.id)) updateToast(t.id, { title: fdLabel(t.el, 'toast.undo-failed', 'Couldn\u2019t undo'), description: error?.message || undefined, tone: 'danger', undo: undefined, action: undefined, duration: undefined });
+  } finally {
+    t.undoing = false;
+  }
+}
+
+/** A held toast: keep the ring and the count in step with the time left (the timer pauses with the stack). */
+function startHoldTick(t) {
+  clearInterval(t.tick);
+  const ring = t.el.querySelector('.fd-hold-ring');
+  const count = t.el.querySelector('.fd-hold-count');
+  const started = performance.now();
+  const update = () => {
+    const spent = t.anim ? Number(t.anim.currentTime) || 0 : performance.now() - started;
+    const left = Math.max(0, t.duration - spent);
+    const seconds = Math.ceil(left / 1000);
+    if (count && count.textContent !== String(seconds)) count.textContent = String(seconds);
+    ring?.style.setProperty('--_c-hold-p', String(reducedMotion() ? seconds / Math.ceil(t.duration / 1000) : left / t.duration));
+  };
+  update();
+  t.tick = setInterval(update, 100);
+}
+
+function endHeld(t) {
+  t.held = true;
+  t.anim?.cancel();
+  t.anim = null;
+  clearTimeout(t.timer);
+  clearInterval(t.tick);
+}
+
+function undoHeld(t) {
+  if (t.held || !findToast(t.id)) return;
+  endHeld(t);
+  emit(holdTarget(t), 'fd:undo', { ...(t.opts.detail || {}), toast: t.id });
+  t.opts.onUndo?.(t.id);
+  updateToast(t.id, { title: t.opts.undone ?? fdLabel(t.el, 'toast.stopped', 'Stopped'), description: fdLabel(t.el, 'toast.nothing-sent', 'Nothing was sent.'), tone: 'neutral', icon: 'undo-2', hold: false, target: undefined, duration: undefined });
+}
+
+function commitHeld(t, cause) {
+  if (t.held || !findToast(t.id)) return;
+  endHeld(t);
+  const go = emit(holdTarget(t), 'fd:commit', { ...(t.opts.detail || {}), toast: t.id, cause });
+  t.opts.onCommit?.(t.id, cause);
+  if (go) dismissToast(t.id);
+  else updateToast(t.id, { tone: 'loading', hold: false, description: undefined, target: undefined, duration: undefined });
+}
+
+toast.hold = (opts = {}) => {
+  const seconds = Math.max(1, Math.round(Number(opts.seconds) || 10));
+  return toast({ ...opts, hold: true, tone: opts.tone || 'neutral', duration: seconds * 1000 });
+};
+
+let undoKeys = false;
+function watchUndoKeys() {
+  if (undoKeys) return;
+  undoKeys = true;
+  doc.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      const t = toasts.find((x) => x.opts.hold && !x.held && x.el.contains(doc.activeElement));
+      if (t) { event.preventDefault(); event.stopPropagation(); undoHeld(t); }
+      return;
+    }
+    if (event.key.toLowerCase() !== 'z' || !(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) return;
+    const a = doc.activeElement;
+    if (a && (a.isContentEditable || a.matches('input, textarea, select, [contenteditable]'))) return;
+    const t = toasts.find((x) => (x.opts.hold && !x.held) || (typeof x.opts.undo === 'function' && !x.undoing));
+    if (!t) return;
+    event.preventDefault();
+    if (t.opts.hold) undoHeld(t); else runUndo(t, t.el.querySelector('[data-fd-toast-undo]'));
+  }, true);
+  // Leaving the page sends what is held: the person decided and did not take it back.
+  window.addEventListener('pagehide', () => { for (const t of [...toasts]) if (t.opts.hold && !t.held) commitHeld(t, 'pagehide'); });
+}
+
 function swipeStart(event) {
   const el = event.target.closest('.fd-toast');
-  if (!el || event.button !== 0 || event.target.closest('button, a, input')) return;
+  if (!el || el.hasAttribute('data-held') || event.button !== 0 || event.target.closest('button, a, input')) return;
   swipe = { el, id: event.pointerId, x: event.clientX, y: event.clientY, t: performance.now(), dx: 0, active: false };
 }
 function swipeMove(event) {
@@ -1445,6 +1696,7 @@ function filterCommand(palette, query) {
   const groups = $$('.fd-command-group', palette);
   const containers = groups.length ? groups : [palette.querySelector('.fd-command-list')].filter(Boolean);
   for (const group of containers) {
+    if (group.hasAttribute?.('data-records')) continue; // found by a search: command.records() manages it
     const scored = [];
     for (const item of $$('.fd-command-item', group)) {
       let match = q ? fuzzy(q, item.dataset.label || textOf(item)) : { score: 0, hits: [] };
@@ -1461,6 +1713,8 @@ function filterCommand(palette, query) {
     if (group.matches('.fd-command-group')) group.hidden = scored.length === 0;
     any = any || scored.length > 0;
   }
+  runRecords(palette, q);
+  any = any || $$('.fd-command-group[data-records]', palette).some((g) => !g.hidden);
   for (const empty of $$('.fd-command-empty', palette)) {
     empty.hidden = any;
     for (const slot of $$('[data-fd-command-query]', empty)) slot.textContent = q;
@@ -1468,6 +1722,86 @@ function filterCommand(palette, query) {
   const list = palette.querySelector('.fd-command-list');
   if (list) list.scrollTop = 0;
   setActive(palette, commandItems(palette)[0] || null, false);
+}
+
+/* ---------- Records: groups of found items, searched as the query changes ---------- */
+const recordSources = new WeakMap();   // palette -> Set of sources
+
+function recordGroup(palette, source) {
+  const list = palette.querySelector('.fd-command-list');
+  let group = $$('.fd-command-group[data-records]', list).find((g) => g.dataset.records === source.group);
+  if (group) return group;
+  group = doc.createElement('div');
+  group.className = 'fd-command-group';
+  group.dataset.records = source.group;
+  group.hidden = true;
+  const head = doc.createElement('p');
+  head.className = 'fd-command-group-label';
+  head.textContent = source.group;
+  group.append(head);
+  list.append(group);
+  setupGroup(group);
+  return group;
+}
+
+function recordNote(group, text, state) {
+  for (const n of $$('.fd-command-note', group)) n.remove();
+  if (!text) return;
+  const note = doc.createElement('p');
+  note.className = 'fd-command-note';
+  note.dataset.state = state;
+  note.setAttribute('role', state === 'error' ? 'alert' : 'status');
+  note.textContent = text;
+  group.append(note);
+}
+
+function clearRecords(group) {
+  for (const n of $$('.fd-command-item, .fd-command-note', group)) n.remove();
+  group.removeAttribute('aria-busy');
+  group.hidden = true;
+}
+
+function settleCommand(palette) {
+  const any = commandItems(palette).length > 0 || $$('.fd-command-group[data-records]', palette).some((g) => !g.hidden);
+  for (const empty of $$('.fd-command-empty', palette)) empty.hidden = any;
+  if (!palette.querySelector('.fd-command-item[data-active]')) setActive(palette, commandItems(palette)[0] || null, false);
+}
+
+function runRecords(palette, query) {
+  const q = query.trim();
+  for (const source of recordSources.get(palette) || []) {
+    clearTimeout(source.timer);
+    source.abort?.abort();
+    const group = recordGroup(palette, source);
+    if (q.length < source.min) { clearRecords(group); continue; }
+    group.hidden = false;
+    group.setAttribute('aria-busy', 'true');
+    if (!group.querySelector('.fd-command-item')) recordNote(group, `Searching ${source.group.toLowerCase()}…`, 'loading');
+    source.timer = setTimeout(async () => {
+      const control = new AbortController();
+      source.abort = control;
+      let found = [];
+      let failed = false;
+      try { found = await source.search(q, { signal: control.signal }); } catch { failed = true; }
+      if (control.signal.aborted || !group.isConnected) return;
+      for (const n of $$('.fd-command-item', group)) n.remove();
+      group.removeAttribute('aria-busy');
+      if (failed) {
+        recordNote(group, source.error, 'error');
+      } else {
+        recordNote(group, '', '');
+        for (const def of (found || []).slice(0, source.limit)) {
+          const item = buildCommandItem({ ...def, icon: def.icon ?? source.icon });
+          item.setAttribute('data-found', '');
+          group.append(item);
+          setupCommandItem(item);
+          commandData.set(item, def);
+        }
+        group.hidden = !group.querySelector('.fd-command-item');
+      }
+      settleCommand(palette);
+    }, source.delay);
+  }
 }
 
 function setActive(palette, item, scroll = true) {
@@ -1528,7 +1862,52 @@ function onCommandKey(event, palette) {
   }
 }
 
+function buildCommandItem(def) {
+  const item = doc.createElement(def.href ? 'a' : 'div');
+  item.className = 'fd-command-item';
+  if (def.href) item.href = def.href;
+  if (def.id != null) item.dataset.value = String(def.id);
+  if (def.keywords) item.dataset.keywords = [].concat(def.keywords).join(' ');
+  if (def.icon) item.insertAdjacentHTML('beforeend', icon(def.icon));
+  const label = doc.createElement('span');
+  label.className = 'fd-command-item-label';
+  label.textContent = def.label;
+  item.append(label);
+  if (def.hint) {
+    const hint = doc.createElement('span');
+    hint.className = 'fd-command-item-hint';
+    hint.textContent = def.hint;
+    item.append(hint);
+  }
+  for (const key of String(def.shortcut || '').split(/\s+/).filter(Boolean)) {
+    const kbd = doc.createElement('kbd');
+    kbd.className = 'fd-kbd';
+    kbd.textContent = key;
+    item.append(kbd);
+  }
+  return item;
+}
+
 export const command = {
+  records(def, { palette } = {}) {
+    const p = byId(def.palette || palette) || palettes()[0] || createPalette();
+    setupCommand(p);
+    const source = {
+      group: def.group || 'Records', search: def.search, icon: def.icon,
+      min: def.min ?? 2, delay: def.delay ?? 160, limit: def.limit ?? 5,
+      error: def.error || `Could not search ${(def.group || 'records').toLowerCase()}`,
+    };
+    const set = recordSources.get(p) || new Set();
+    set.add(source);
+    recordSources.set(p, set);
+    recordGroup(p, source);
+    return () => {
+      clearTimeout(source.timer);
+      source.abort?.abort();
+      set.delete(source);
+      recordGroup(p, source).remove();
+    };
+  },
   open(ref) { const p = byId(ref) || palettes()[0]; return p ? openDialog(p, { trigger: doc.activeElement }) : null; },
   close(ref) { const p = byId(ref) || palettes().find((d) => d.open); if (p) closeDialog(p); },
   toggle(ref) { const p = byId(ref) || palettes()[0]; if (!p) return; if (p.open) closeDialog(p); else openDialog(p, { trigger: doc.activeElement }); },
@@ -1550,28 +1929,7 @@ export const command = {
         list.append(group);
         setupGroup(group);
       }
-      const item = doc.createElement(def.href ? 'a' : 'div');
-      item.className = 'fd-command-item';
-      if (def.href) item.href = def.href;
-      if (def.id != null) item.dataset.value = String(def.id);
-      if (def.keywords) item.dataset.keywords = [].concat(def.keywords).join(' ');
-      if (def.icon) item.insertAdjacentHTML('beforeend', icon(def.icon));
-      const label = doc.createElement('span');
-      label.className = 'fd-command-item-label';
-      label.textContent = def.label;
-      item.append(label);
-      if (def.hint) {
-        const hint = doc.createElement('span');
-        hint.className = 'fd-command-item-hint';
-        hint.textContent = def.hint;
-        item.append(hint);
-      }
-      for (const key of String(def.shortcut || '').split(/\s+/).filter(Boolean)) {
-        const kbd = doc.createElement('kbd');
-        kbd.className = 'fd-kbd';
-        kbd.textContent = key;
-        item.append(kbd);
-      }
+      const item = buildCommandItem(def);
       group.append(item);
       setupCommandItem(item);
       commandData.set(item, def);
@@ -1827,7 +2185,7 @@ function bindGlobal() {
     // Calendar
     const day = target.closest('.fd-calendar-day');
     if (day) {
-      const root = day.closest('[data-fd-daterange]');
+      const root = day.closest('[data-fd-daterange], [data-fd-datepanel]');
       const d = parseDate(day.dataset.date);
       const monday = (d.getDay() + 6) % 7;
       const moves = {
@@ -1945,9 +2303,9 @@ function bindGlobal() {
       focusEl(rovingDay(root));
     }
   });
-  on(doc, 'click', '[data-fd-daterange] [data-cal-nav]', (event, btn) => {
+  on(doc, 'click', ':is([data-fd-daterange], [data-fd-datepanel]) [data-cal-nav]', (event, btn) => {
     event.preventDefault();
-    const root = btn.closest('[data-fd-daterange]');
+    const root = btn.closest('[data-fd-daterange], [data-fd-datepanel]');
     const state = rangeState(root);
     state.view = new Date(state.view.getFullYear(), state.view.getMonth() + Number(btn.dataset.calNav), 1);
     buildCalendar(root);
@@ -1955,9 +2313,18 @@ function bindGlobal() {
     const same = root.querySelector(`[data-cal-nav="${btn.dataset.calNav}"]`);
     focusEl(same && !same.disabled ? same : rovingDay(root));
   });
-  on(doc, 'click', '[data-fd-daterange] .fd-calendar-day', (event, btn) => {
+  on(doc, 'click', ':is([data-fd-daterange], [data-fd-datepanel]) .fd-calendar-day', (event, btn) => {
     event.preventDefault();
-    if (!btn.disabled) pickDay(btn.closest('[data-fd-daterange]'), parseDate(btn.dataset.date));
+    if (!btn.disabled) pickDay(btn.closest('[data-fd-daterange], [data-fd-datepanel]'), parseDate(btn.dataset.date));
+  });
+  on(doc, 'click', '[data-fd-datepanel-today]', (event, btn) => { event.preventDefault(); if (!btn.disabled) chooseDate(btn.closest('[data-fd-datepanel]'), today()); });
+  on(doc, 'click', '[data-fd-datepanel-clear]', (event, btn) => { event.preventDefault(); chooseDate(btn.closest('[data-fd-datepanel]'), null); });
+  on(doc, 'change', '[data-fd-daterange-compare] input[type="radio"]', (_event, radio) => {
+    const root = radio.closest('[data-fd-daterange]');
+    const state = root && rangeState(root);
+    if (!state || !COMPARE.includes(radio.value)) return;
+    state.compare = radio.value;
+    paintRange(root);
   });
   on(doc, 'click', '[data-fd-daterange-apply]', (event, btn) => { event.preventDefault(); const root = btn.closest('[data-fd-daterange]'); if (root) applyRange(root); });
   on(doc, 'click', '[data-fd-daterange-cancel]', (event, btn) => {
@@ -2041,7 +2408,14 @@ export function init(root = document) {
     if (isStatic(dialog)) updateEdges(dialog);
     else if (!dialog.dataset.state) dialog.dataset.state = dialog.open ? 'open' : 'closed';
   }
-  for (const range of scope('[data-fd-daterange]')) { rangeState(range); buildCalendar(range); paintRange(range); }
+  for (const range of scope('[data-fd-daterange]')) {
+    rangeState(range); buildCalendar(range); paintRange(range);
+    if (range.querySelector('[data-fd-daterange-compare]')) writeLabels(range);
+  }
+  for (const panel of scope('[data-fd-datepanel]')) {
+    if (panel.closest('.fd-popover[popover]') && !isStatic(panel.closest('.fd-popover'))) continue;   // built when it opens
+    rangeState(panel); buildCalendar(panel); paintRange(panel);
+  }
   for (const list of scope('[data-fd-filter-list]')) syncFilter(list);
   for (const n of scope('[data-fd-notifications]')) applyNotifications(n);
   for (const p of scope('.fd-command[data-static-demo]')) {

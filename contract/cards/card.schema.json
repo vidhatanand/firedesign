@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fire.example/contract/cards/card.schema.json",
   "title": "Fire component card",
-  "description": "The judgement about one component that cannot be generated from the source: when to use it, when not to, and what it is called elsewhere. One file per component, contract/cards/<component id>.json. Every field is required; a list with nothing to say is [].",
+  "description": "The judgement about one component that cannot be generated from the source: when to use it, when not to, and what it is called elsewhere. One file per component, contract/cards/<component id>.json. Every field is required except relation; a list with nothing to say is [].",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "job", "purpose", "useWhen", "avoidWhen", "aka", "surfaces", "data", "states", "variants", "parts", "related", "keyboard", "example", "provenance", "since"],
@@ -83,6 +83,18 @@
     },
     "example": { "description": "The docs section whose specimen shows it: docs/<page>.html#<section id>. The build checks it exists.", "type": "string", "pattern": "^docs/[a-z0-9-]+\\.html#[A-Za-z0-9_-]+$" },
     "provenance": { "description": "Repository paths the card was written from (docs pages, component CSS, module headers).", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } },
+    "relation": {
+      "description": "Optional. Declares how this component differs from another that does a similar job, so the near-duplicate gate (scripts/gate.mjs) lets the pair stand. Exactly one of variantOf (this is a form of the other: use the other unless the reason holds) or distinctFrom (they look alike and are not the same thing), and one sentence on when you would use this one instead.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["because"],
+      "oneOf": [{ "required": ["variantOf"], "properties": { "variantOf": true } }, { "required": ["distinctFrom"], "properties": { "distinctFrom": true } }],
+      "properties": {
+        "variantOf": { "description": "A component id.", "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "distinctFrom": { "description": "A component id.", "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "because": { "description": "One sentence on when you would use this instead.", "type": "string", "minLength": 20, "maxLength": 240, "pattern": "[.!?]$" }
+      }
+    },
     "since": { "description": "The Fire version that introduced the component.", "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
   }
 }

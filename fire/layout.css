@@ -12,6 +12,12 @@
    data-cols="4"     the most columns that grid may have (it still drops columns to keep the minimum)
    data-span="2"     how many columns of its grid a child covers (full: all of them)
 
+   data-column="md"  on a .fd-band: its content sits in a centred reading column of that measure (xs 320 · sm 400 ·
+                      md 560, the default · lg 640 · xl 768), while the band, its hairline and its surface still run
+                      edge to edge. For a public or signed-out page under a header band. It never narrows below the band's
+                      own side padding, so on a phone the content simply fills the band. With data-grow and
+                      data-align="center" on the band, the column also centres in the height of the screen.
+
    Space steps are the --fd-space-* names (0, 0-5, 1, 1-5, 2, 2-5, 3, 3-5, 4, 5, 6, 8, 10, 12, 16, 20, 24).
    Column minimums are the --fd-size-* names (4xs 24 · 3xs 48 · 2xs 64 · xs 96 · sm 160 · md 240 · lg 320 ·
    xl 400 · 2xl 480 · 3xl 560 · 4xl 640 · 5xl 768 · 6xl 960), plus full.
@@ -80,3 +86,11 @@
 [data-span][data-span="5"] { grid-column: span 5; }
 [data-span][data-span="6"] { grid-column: span 6; }
 [data-span][data-span="full"] { grid-column: 1 / -1; }
+
+/* ---------- Reading column in a band ---------- */
+.fd-band[data-column] { --_l-col: var(--fd-column-md); padding-inline: max(var(--_s-px, var(--fd-gutter)), calc((100% - var(--_l-col)) / 2)); }
+.fd-band[data-column="xs"] { --_l-col: var(--fd-column-xs); }
+.fd-band[data-column="md"] { --_l-col: var(--fd-column-md); }
+.fd-band[data-column="sm"] { --_l-col: var(--fd-column-sm); }
+.fd-band[data-column="lg"] { --_l-col: var(--fd-column-lg); }
+.fd-band[data-column="xl"] { --_l-col: var(--fd-column-xl); }

@@ -1,0 +1,90 @@
+{
+  "id": "confirm-inline",
+  "job": "Make someone type a name on the page before a destructive button works.",
+  "purpose": "A plain form with a field, the phrase to type (fd-confirm-phrase) and a danger button. Without script the button is enabled and the server checks the posted text. With script the button stays disabled until the trimmed text equals the phrase, and a line under the field says it matches so far, differs at character n, or matches.",
+  "useWhen": [
+    "A destructive action has its own page: delete a workspace, approve a restore.",
+    "The action must also work, and be checked, with no script."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The action starts from a row or a menu and a dialog is natural.",
+      "instead": "confirm"
+    },
+    {
+      "when": "A yes or no with nothing lost.",
+      "instead": "dialog"
+    },
+    {
+      "when": "The action can be undone.",
+      "instead": "toast"
+    }
+  ],
+  "aka": [
+    "type to confirm",
+    "typed confirmation",
+    "delete confirmation",
+    "danger zone",
+    "are you sure"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "idle",
+      "how": "data-state=\"idle\" on the form; nothing typed"
+    },
+    {
+      "name": "partial",
+      "how": "data-state=\"partial\"; the text so far is the start of the phrase"
+    },
+    {
+      "name": "mismatch",
+      "how": "data-state=\"mismatch\"; the rule line names the first wrong character"
+    },
+    {
+      "name": "match",
+      "how": "data-state=\"match\"; the button is enabled"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-confirm",
+      "value": "*",
+      "useWhen": "The phrase to type, on the form; an input may carry data-match instead."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-confirm-inline",
+      "role": "The form; carries data-fd-confirm-inline and data-confirm."
+    },
+    {
+      "class": "fd-confirm-inline-rule",
+      "role": "The line that says where the typed text stands; carries data-fd-confirm-rule."
+    }
+  ],
+  "related": [
+    "confirm",
+    "button",
+    "field",
+    "callout"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "Sends the form when the text matches."
+    }
+  ],
+  "example": "docs/forms.html#confirm-inline",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.7.0"
+}

@@ -11,8 +11,10 @@
  *              items scrolls sideways (without data-block), and the chosen item is scrolled into view.
  *  Chip nav    .fd-chip-nav > .fd-chip — links (aria-current) navigate; buttons (aria-pressed) select one.
  *  Subnav      .fd-subnav > .fd-subnav-item — links navigate; buttons get aria-current="true" on click.
- *  Steps       .fd-steps[data-current="n"] (0-based) or call setStep(stepsEl, n).
+ *  Steps       .fd-steps[data-current="n"] (0-based) or call setStep(stepsEl, n): a wizard, where earlier steps are done.
  *              Buttons [data-fd-step="next|prev|n"][aria-controls=stepsId] move it.
+ *              Live work (data-state="running|failed|waiting|skipped" per step, aria-current="step" on one) is written by
+ *              the product and needs no script: leave data-current off. setStep keeps a skipped or failed step as it is.
  *  TOC         .fd-toc > .fd-toc-list > a.fd-toc-item[href="#id"]; add data-fd-scrollspy to track scrolling.
  *
  * Events (bubbling): fd:change { value, item } from .fd-tabs, .fd-segmented, .fd-chip-nav, .fd-subnav, .fd-steps, .fd-toc.
@@ -300,11 +302,14 @@ function selectInGroup(container, containerSelector, itemSelector, item, attr, v
 }
 
 /* ---------- Steps ---------- */
-/** Mark steps before `index` done, `index` current, the rest upcoming. Fires fd:change. */
+/** Mark steps before `index` done, `index` current, the rest upcoming. A step marked skipped or failed keeps that
+ *  state (a skipped step stays skipped once passed). Fires fd:change. */
 export function setStep(steps, index, { silent = false } = {}) {
   const items = $$(':scope > .fd-step', steps);
   const i = Math.max(0, Math.min(items.length - 1, Number(index) || 0));
+  const kept = (step) => step.dataset.state === 'skipped' || step.dataset.state === 'failed';
   items.forEach((step, n) => {
+    if (n !== i && kept(step)) { step.removeAttribute('aria-current'); return; }
     if (n < i) { step.dataset.state = 'done'; step.removeAttribute('aria-current'); }
     else if (n === i) { step.dataset.state = 'current'; step.setAttribute('aria-current', 'step'); }
     else { step.removeAttribute('data-state'); step.removeAttribute('aria-current'); }

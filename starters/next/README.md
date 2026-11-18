@@ -6,12 +6,15 @@ that its screens render the same as Fire's templates.
 
 ## What it shows
 
-- **The app shell** (`app/app-shell.tsx`), converted from `templates/shell-static.html`: sidebar, top bar, phone menu,
-  plus the support launcher and chat panel every Ember screen has. Navigation uses `next/link`, so route changes are
+- **The app shell** (`app/app-shell.tsx`), converted from `templates/shell-static.html`: sidebar with go-to keys
+  (`data-fd-keys="g l"`), top bar (running-now pill, service status, search, shortcut sheet), phone menu, the
+  running-now popover, the shortcut sheet and the command palette, plus the support launcher and chat panel every
+  Ember screen has. The nav lists this starter's three routes only. Navigation uses `next/link`, so route changes are
   client-side and Fire's `init` runs again after each one.
 - **Three screens**, each the `.fd-page` of a template converted to JSX:
   `/overview` (`templates/overview.html`), `/logs` (`templates/logs.html`) and `/settings` (`templates/settings.html`,
-  with the tab from `?tab=` rendered on the server). Each `page.tsx` is a server component holding plain Fire markup;
+  with the tab from `?tab=` rendered on the server; `?state=` (loading, error, member) is applied in the browser, as
+  the template does). Each `page.tsx` is a server component holding plain Fire markup;
   a small client component (`*-screen.tsx`) renders the `<main class="fd-page">` and runs the screen's behaviour
   (`*-behaviour.ts`, the template's page script in TypeScript) once Fire has loaded.
 - **Fire's behaviours**: menus, filters, tabs, segmented controls, table selection and row actions, dialogs, sheets,
@@ -25,7 +28,7 @@ that its screens render the same as Fire's templates.
 ## Start a project from it
 
 1. Copy this folder.
-2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.6.2"`,
+2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.7.0"`,
    and delete the `check` script (it compares against the templates in Fire's repository).
 3. `npm install`, then `npm run dev`. `next.config.ts` sets Turbopack's root only when Fire is linked from outside the
    project, and its rewrites only serve the templates' `*.html` links: remove them when your screens use routes.

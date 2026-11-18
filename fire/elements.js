@@ -790,6 +790,7 @@ var FdChart = class extends FireElement {
     super(...arguments);
     this.type = "line";
     this.legend = false;
+    this.hideLabels = false;
     this.area = false;
     this.dot = false;
     this.invert = false;
@@ -811,25 +812,27 @@ var FdChart = class extends FireElement {
   }
   /** @internal */
   rootClass() {
-    return { cartesian: "fd-chart", sparkline: "fd-sparkline", donut: "fd-donut", heatgrid: "fd-heatgrid" }[this.#family];
+    return { cartesian: "fd-chart", quadrant: "fd-chart", sparkline: "fd-sparkline", donut: "fd-donut", heatgrid: "fd-heatgrid" }[this.#family];
   }
   /** @internal Every name is listed for every type, so switching type removes what no longer applies. */
   rootAttributes() {
     const family = this.#family;
     const cartesian = family === "cartesian";
+    const quad = family === "quadrant";
     const spark = family === "sparkline";
     const donut = family === "donut";
     const heat = family === "heatgrid";
     return {
-      "data-fd-chart": cartesian ? this.type : void 0,
+      "data-fd-chart": cartesian || quad ? this.type : void 0,
+      "data-labels": quad && this.hideLabels ? "none" : void 0,
       "data-type": spark && this.variant === "bars" || donut && this.variant === "progress" ? this.variant : void 0,
       "data-variant": heat && this.variant === "strip" ? "strip" : void 0,
       "data-values": spark ? Array.isArray(this.data) ? this.data.join(",") : this.values : void 0,
-      "data-height": cartesian || spark ? this.height : void 0,
+      "data-height": cartesian || quad || spark ? this.height : void 0,
       "data-width": spark ? this.width : void 0,
       "data-legend": cartesian && this.legend,
       "data-grid": cartesian ? this.grid : void 0,
-      "data-state": cartesian ? this.state : void 0,
+      "data-state": cartesian || quad ? this.state : void 0,
       "data-y-format": cartesian ? this.yFormat : void 0,
       "data-area": spark && this.area,
       "data-dot": spark && this.dot,
@@ -869,6 +872,11 @@ var FdChart = class extends FireElement {
     this.#drawn = true;
     const family = this.#family;
     if (this.#scripted) syncConfig(this, this.data);
+    if (family === "quadrant") {
+      charts.quadrant(this, this.#config());
+      charts.init(this);
+      return;
+    }
     if (family === "cartesian") {
       charts.render(this, this.#config());
       charts.init(this);
@@ -899,6 +907,9 @@ var FdChart = class extends FireElement {
       case "heatgrid":
         charts.heatgrid(this);
         break;
+      case "quadrant":
+        charts.quadrant(this, this.#config());
+        break;
       default:
         charts.render(this, this.#config());
     }
@@ -925,6 +936,9 @@ __decorateClass([
 __decorateClass([
   n4()
 ], FdChart.prototype, "grid", 2);
+__decorateClass([
+  n4({ type: Boolean, attribute: "hide-labels" })
+], FdChart.prototype, "hideLabels", 2);
 __decorateClass([
   n4()
 ], FdChart.prototype, "state", 2);
@@ -1041,7 +1055,6 @@ if (typeof customElements !== "undefined" && !customElements.get("fd-code")) cus
 var FdTexture = class extends FireElement {
   constructor() {
     super(...arguments);
-    this.pattern = "terrain";
     this.interactive = false;
     this.inline = false;
   }
@@ -1072,6 +1085,7 @@ var FdTexture = class extends FireElement {
       "data-side": this.side,
       "data-variant": this.variant,
       "data-shape": this.shape,
+      "data-signature": this.signature,
       "data-inline": this.inline
     };
   }
@@ -1125,6 +1139,9 @@ __decorateClass([
 __decorateClass([
   n4()
 ], FdTexture.prototype, "shape", 2);
+__decorateClass([
+  n4()
+], FdTexture.prototype, "signature", 2);
 __decorateClass([
   n4({ type: Boolean })
 ], FdTexture.prototype, "inline", 2);

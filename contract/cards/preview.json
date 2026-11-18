@@ -1,0 +1,94 @@
+{
+  "id": "preview",
+  "job": "Edit a value, see what the change will touch, then commit it with a reason.",
+  "purpose": "A pattern for changes whose reach depends on what is typed. The edit fields come first with a Preview button; asking for a preview checks them, fires fd:open (fill the fd-impact then) and shows the result: the impact and an fd-commit. Changing a field afterwards marks the preview stale, hides the commit and says to preview again. It works inline or inside a dialog.",
+  "useWhen": [
+    "Changing a default, a limit or a policy that applies to many teams at once.",
+    "The person should see \"412 teams change\" before the commit button exists."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Nothing is edited and the reach is known: show it in the case.",
+      "instead": "impact"
+    },
+    {
+      "when": "A setting that affects only the person changing it.",
+      "instead": "setting"
+    },
+    {
+      "when": "A multi-step create flow.",
+      "instead": "dialog"
+    }
+  ],
+  "aka": [
+    "dry run",
+    "review changes",
+    "preview changes",
+    "change summary",
+    "impact preview"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "editing",
+      "how": "no data-state: the edit fields and the Preview button"
+    },
+    {
+      "name": "preview",
+      "how": "data-state=\"preview\": fd-preview-result shows"
+    },
+    {
+      "name": "stale",
+      "how": "data-state=\"stale\": a field changed after the preview; fd-preview-stale shows"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-fd-preview-open",
+      "value": "",
+      "useWhen": "On the button that asks for the preview."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-preview",
+      "role": "The form that holds the edit and the result."
+    },
+    {
+      "class": "fd-preview-edit",
+      "role": "The fields and the Preview button."
+    },
+    {
+      "class": "fd-preview-stale",
+      "role": "The line that says the preview is out of date."
+    },
+    {
+      "class": "fd-preview-result",
+      "role": "The fd-impact and the fd-commit."
+    }
+  ],
+  "related": [
+    "impact",
+    "commit",
+    "dialog",
+    "delta"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "In an edit field: asks for the preview; it never commits."
+    }
+  ],
+  "example": "docs/decisions.html#preview",
+  "provenance": [
+    "docs/decisions.html",
+    "fire/components/content.css",
+    "fire/js/content.js"
+  ],
+  "since": "0.7.0"
+}

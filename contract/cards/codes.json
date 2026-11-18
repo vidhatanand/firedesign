@@ -1,0 +1,103 @@
+{
+  "id": "codes",
+  "job": "Show one-time recovery codes once, with copy and download.",
+  "purpose": "A sunken card holding a two-column grid of codes, a title with Copy all and Download buttons, and a warning line. Copy all and Download use the codes not marked data-used, one per line; Download makes a text file through a Blob URL. Without script the buttons are hidden and the codes stay selectable text.",
+  "useWhen": [
+    "Two-step sign-in has just been set up and the person must save backup codes.",
+    "A set of codes is shown with some already used."
+  ],
+  "avoidWhen": [
+    {
+      "when": "One secret that is shown and hidden.",
+      "instead": "secret"
+    },
+    {
+      "when": "Entering a code.",
+      "instead": "otp"
+    },
+    {
+      "when": "A single value to copy.",
+      "instead": "copy-field"
+    }
+  ],
+  "aka": [
+    "backup codes",
+    "recovery codes",
+    "2FA codes",
+    "one-time codes",
+    "emergency codes"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "used",
+      "how": "data-used on the fd-codes-item; struck through and left out of copy and download"
+    },
+    {
+      "name": "ready",
+      "how": "data-ready on the root once the script has run; the buttons show then"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-filename",
+      "value": "*",
+      "useWhen": "The name of the downloaded file."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-codes",
+      "role": "The sunken card; carries data-fd-codes."
+    },
+    {
+      "class": "fd-codes-head",
+      "role": "The title and actions row."
+    },
+    {
+      "class": "fd-codes-title",
+      "role": "The card's heading."
+    },
+    {
+      "class": "fd-codes-actions",
+      "role": "Holds the copy and download buttons."
+    },
+    {
+      "class": "fd-codes-list",
+      "role": "The ordered list of codes."
+    },
+    {
+      "class": "fd-codes-item",
+      "role": "One code, in a code element."
+    },
+    {
+      "class": "fd-codes-note",
+      "role": "The warning line."
+    }
+  ],
+  "related": [
+    "otp",
+    "secret",
+    "copy-field",
+    "callout"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "On Copy all or Download, runs it."
+    }
+  ],
+  "example": "docs/forms.html#recovery-codes",
+  "provenance": [
+    "docs/forms.html",
+    "fire/components/forms.css",
+    "fire/js/forms.js"
+  ],
+  "since": "0.7.0"
+}

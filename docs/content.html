@@ -517,6 +517,17 @@
       <span class="fd-status" data-variant="pill" data-tone="violet">Cached</span>
       <span class="fd-status" data-variant="pill" data-size="sm" data-tone="success">Operational</span>
     </div>
+    <h3 class="doc-sub">With a note</h3>
+    <div class="doc-specimen" data-code>
+      <span class="fd-status" data-tone="success">Succeeded<span class="fd-status-note">1 flaky page</span></span>
+      <span class="fd-status" data-tone="warning">Rate limited<span class="fd-status-note">retry at 4:12 PM</span></span>
+      <span class="fd-status" data-variant="icon" data-tone="danger"><i data-icon="circle-x"></i>Failed<span class="fd-status-note">3 of 412 pages</span></span>
+      <span class="fd-status" data-size="sm" data-tone="info" data-live>Running<span class="fd-status-note">288 of 412</span></span>
+      <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Degraded<span class="fd-status-note">eu-west</span></span>
+    </div>
+    <ul class="doc-notes">
+      <li>A note qualifies the state in two or three words: a count, a time, a place. It sits after the word, muted, behind a small dot, and is cut with an ellipsis when space runs out. The state stays the word people scan for.</li>
+    </ul>
   </section>
 
   <!-- ===================== CALLOUT / BANNER ===================== -->
@@ -685,6 +696,110 @@
         <div class="fd-empty-actions"><button class="fd-btn" data-variant="primary" data-size="lg"><i data-icon="plus"></i><span>Create API key</span></button></div>
       </div>
     </div>
+  </section>
+
+  <!-- ===================== PAGE STATES ===================== -->
+  <section class="doc-section" id="page-states">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Page states</h2>
+      <p>Every screen, and every section that loads on its own, has the same nine states. Wrap them in <code class="fd-code">fd-states</code> and show one with <code class="fd-code">data-state</code>.</p>
+    </div>
+    <div class="doc-specimen" data-surface="surface">
+      <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Page state" data-ps-switch>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="ready">Ready</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="empty">Empty</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="filtered">Filtered</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="no-access">No access</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="not-found">Not found</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="off">Off</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="expired">Expired</button>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-states" id="ps" data-state="ready">
+        <div class="fd-skeleton-list" data-rows="3" data-when="loading" aria-busy="true" aria-label="Loading monitors"></div>
+        <ul class="fd-list" data-card aria-label="Monitors" data-when="ready">
+          <li class="fd-list-row">
+            <span class="fd-list-lead"><i data-icon="radar"></i></span>
+            <div class="fd-list-body"><span class="fd-list-title">pricing.ember.dev</span><span class="fd-list-desc">Every hour · last change Nov 17</span></div>
+            <span class="fd-list-meta">Active</span>
+          </li>
+          <li class="fd-list-row">
+            <span class="fd-list-lead"><i data-icon="radar"></i></span>
+            <div class="fd-list-body"><span class="fd-list-title">docs.ember.dev/changelog</span><span class="fd-list-desc">Every day · no change in 6 days</span></div>
+            <span class="fd-list-meta">Active</span>
+          </li>
+        </ul>
+        <div class="fd-empty" data-when="empty">
+          <span class="fd-empty-icon"><i data-icon="radar"></i></span>
+          <h3 class="fd-empty-title">No monitors yet</h3>
+          <p class="fd-empty-text">A monitor checks a page on a schedule and tells you when its content changes.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="primary"><i data-icon="plus"></i><span>New monitor</span></button></div>
+        </div>
+        <div class="fd-empty" data-when="filtered">
+          <span class="fd-empty-icon"><i data-icon="list-filter"></i></span>
+          <h3 class="fd-empty-title">No monitors match “paused”</h3>
+          <p class="fd-empty-text">2 monitors are hidden by the filter. Clear it to see them all.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="outline" data-fd-set-state="ready"><span>Clear filters</span></button></div>
+        </div>
+        <div class="fd-empty" data-tone="danger" data-when="error" role="alert">
+          <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+          <h3 class="fd-empty-title">Couldn’t load monitors</h3>
+          <p class="fd-empty-text">The request timed out after 10 seconds. Your monitors kept running.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-fd-set-state="loading"><i data-icon="refresh-cw"></i><span>Try again</span></button></div>
+          <p class="fd-empty-meta"><span>Request ID</span><code class="fd-code">req_8f2a91c4</code><button class="fd-btn" type="button" data-size="xs" data-variant="ghost" data-icon-only data-fd-copy="req_8f2a91c4" aria-label="Copy request ID"><i data-icon="copy"></i></button></p>
+        </div>
+        <div class="fd-empty" data-when="no-access">
+          <span class="fd-empty-icon"><i data-icon="lock"></i></span>
+          <h3 class="fd-empty-title">You can’t see monitors</h3>
+          <p class="fd-empty-text">Monitors belong to the Growth team. A team admin can add you.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="primary"><i data-icon="send"></i><span>Ask for access</span></button></div>
+          <p class="fd-empty-meta"><span class="fd-avatar-stack"><span class="fd-avatar" data-size="24">VK</span><span class="fd-avatar" data-size="24">TN</span></span><span>Vera Kowalski and Tomasz Nowak can add you.</span></p>
+        </div>
+        <div class="fd-empty" data-when="not-found">
+          <span class="fd-empty-icon"><i data-icon="file-search"></i></span>
+          <h3 class="fd-empty-title">No monitor with this ID</h3>
+          <p class="fd-empty-text">It may have been deleted. Every monitor, active or paused, is on the Monitors page.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="outline" href="#page-states"><span>Open monitors</span></a></div>
+          <p class="fd-empty-meta"><code class="fd-code">mon_7x2k9q</code></p>
+        </div>
+        <div class="fd-empty" data-when="off">
+          <span class="fd-empty-icon"><i data-icon="power"></i></span>
+          <h3 class="fd-empty-title">Monitors are off for Ember Labs</h3>
+          <p class="fd-empty-text">They check pages on a schedule and alert you to changes. An owner can turn them on in Settings.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button"><i data-icon="send"></i><span>Ask an owner</span></button></div>
+          <p class="fd-empty-meta"><span class="fd-avatar-stack"><span class="fd-avatar" data-size="24">MC</span></span><span>Maya Chen, owner, can turn them on.</span></p>
+        </div>
+        <div class="fd-empty" data-when="expired">
+          <span class="fd-empty-icon"><i data-icon="unlink"></i></span>
+          <h3 class="fd-empty-title">This link has expired</h3>
+          <p class="fd-empty-text">Shared monitor links last 7 days. Ask the person who sent it for a new one, or sign in.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="primary" href="#page-states"><i data-icon="log-in"></i><span>Sign in</span></a></div>
+          <p class="fd-empty-meta"><span>Shared by Vera Kowalski on Nov 4 · expired Nov 11</span></p>
+        </div>
+      </div>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>State</th><th>Says</th><th>Offers</th></tr></thead>
+      <tbody>
+        <tr><td>loading</td><td>Nothing: a skeleton in the shape of what is coming, with <code class="fd-code">aria-busy</code>.</td><td>Nothing.</td></tr>
+        <tr><td>ready</td><td>The content. The default when <code class="fd-code">data-state</code> is absent.</td><td>—</td></tr>
+        <tr><td>empty</td><td>What will appear here, on first use.</td><td>The one action that fills it.</td></tr>
+        <tr><td>filtered</td><td>That the filter or search hides everything, and what it searched for.</td><td>Clear filters.</td></tr>
+        <tr><td>error</td><td>What failed and what was not lost, plus the request ID in <code class="fd-code">fd-empty-meta</code>.</td><td>Try again, which goes back to loading.</td></tr>
+        <tr><td>no-access</td><td>What the person cannot see and who can grant it, by name.</td><td>Ask for access.</td></tr>
+        <tr><td>not-found</td><td>What is missing, its ID, and where everything of its kind is.</td><td>The list it belongs to.</td></tr>
+        <tr><td>off</td><td>That the area is switched off for this team, what it does, and who can turn it on.</td><td>Ask an owner, or Turn on for an owner.</td></tr>
+        <tr><td>expired</td><td>That the link ran out, when, and who sent it.</td><td>Sign in, or ask for a new link.</td></tr>
+      </tbody>
+    </table>
+    <ul class="doc-notes">
+      <li>Only the wrapper’s direct children with <code class="fd-code">data-when</code> switch; a part can belong to several states (<code class="fd-code">data-when="empty filtered"</code> for a toolbar that stays). The wrapper adds no box, so it can switch whole bands of a page.</li>
+      <li><code class="fd-code">content.setState(el, "error")</code> changes it; a button with <code class="fd-code">data-fd-set-state="loading"</code> inside does the same. Both fire <code class="fd-code">fd:change</code>, and focus moves to the new heading when it was in a part that hid.</li>
+      <li>Use <code class="fd-code">data-size="lg"</code> on the empty states when they fill a page, the default in a section, and <code class="fd-code">sm</code> inside a card or a table.</li>
+    </ul>
   </section>
 
   <!-- ===================== ACCORDION ===================== -->
@@ -956,10 +1071,23 @@
         <tr><td>data-fd-scroller</td><td>fd-scroller</td><td>Wires <span class="fd-code">data-fd-scroll="prev|next"</span> buttons; hides the nav when nothing overflows.</td></tr>
         <tr><td>fd:change</td><td>details, scroller</td><td>Accordion and disclosure: <span class="fd-code">{ open }</span>. Scroller: <span class="fd-code">{ value: "start|middle|end" }</span>.</td></tr>
         <tr><td>fd:close</td><td>callout, banner, badge, tag</td><td>Cancelable. Call <span class="fd-code">preventDefault()</span> to keep the element.</td></tr>
-        <tr><td>content.init(root)</td><td>script</td><td>Idempotent. Also exports <span class="fd-code">dismiss(el)</span> and <span class="fd-code">toggle(details, open?)</span>.</td></tr>
+        <tr><td>data-state · data-when</td><td>fd-states and its direct children</td><td>loading, ready, empty, filtered, error, no-access, not-found, off, expired. <span class="fd-code">data-fd-set-state</span> on a button inside switches it and fires <span class="fd-code">fd:change</span>.</td></tr>
+        <tr><td>content.init(root)</td><td>script</td><td>Idempotent. Also exports <span class="fd-code">dismiss(el)</span>, <span class="fd-code">toggle(details, open?)</span> and <span class="fd-code">setState(el, state)</span>; the decision parts are on <a class="fd-link" href="decisions.html#api">Decisions</a>.</td></tr>
       </tbody>
     </table>
   </section>
 </main>
+<script type="module">
+  import { content, nav } from '../fire/fire.js';
+  const ps = document.getElementById('ps');
+  const sw = document.querySelector('[data-ps-switch]');
+  sw?.addEventListener('fd:change', (event) => content.setState(ps, event.detail.value));
+  // Try again goes to loading; the demo then loads the list.
+  ps?.addEventListener('fd:change', (event) => {
+    const item = sw?.querySelector(`[data-value="${event.detail.value}"]`);
+    if (item && item.getAttribute('aria-checked') !== 'true') nav.selectSegment(item, { silent: true });
+    if (event.detail.value === 'loading' && event.detail.previous === 'error') setTimeout(() => content.setState(ps, 'ready'), 1200);
+  });
+</script>
 </body>
 </html>

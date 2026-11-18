@@ -74,6 +74,12 @@ export const advancedPanel = (s: ScreenSettings) => html`
           </div>
         </div>
 
+        <div class="fd-setting" data-align="start">
+          <div class="fd-setting-text"><h3 class="fd-setting-title" id="sso-title">Require single sign-on</h3><p class="fd-setting-desc">Members sign in through your identity provider only.</p></div>
+          <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" disabled aria-labelledby="sso-title" aria-describedby="reason-sso"><span class="fd-switch-track"></span></label></div>
+          <p class="fd-reason-text" id="reason-sso"><svg class="fd-icon" data-icon="lock" aria-hidden="true"><use href="#i-lock"></use></svg><span><span class="fd-reason-why">Single sign-on is on the Scale plan.</span> <span class="fd-reason-who">Billing admins can upgrade.</span></span></p>
+        </div>
+
         <div class="fd-setting">
           <div class="fd-setting-text"><h3 class="fd-setting-title">Data retention</h3><p class="fd-setting-desc">How long Ember keeps request logs and run output before deleting them.</p></div>
           <div class="fd-setting-control"><label class="fd-select"><span class="fd-sr-only">Data retention</span>
@@ -94,17 +100,24 @@ export const advancedPanel = (s: ScreenSettings) => html`
           <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="outline" id="export-data"><svg class="fd-icon" data-icon="download" aria-hidden="true"><use href="#i-download"></use></svg><span>Export data</span></button></div>
         </div>
 
-        <div class="fd-setting" data-tone="danger">
+        <div class="fd-setting" data-tone="danger" data-align="start" id="delete-team-row">
           <div class="fd-setting-text">
             <div class="fd-row" data-align="start" data-gap="3">
               <span class="fd-tile" data-size="44" data-tone="accent">QL</span>
               <div>
-                <h3 class="fd-setting-title">Delete team</h3>
+                <h3 class="fd-setting-title" id="delete-team-title">Delete team</h3>
                 <p class="fd-setting-desc"><span class="fd-label">Quarry Labs</span> and its 4 API keys, 12 monitors and 30 days of logs will be permanently deleted. <strong>This cannot be undone.</strong></p>
               </div>
             </div>
           </div>
-          <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-open="dlg-delete-team">Delete</button></div>
+          <form class="fd-confirm-inline" method="dialog" id="delete-team" data-fd-confirm-inline data-confirm="quarry-labs" aria-labelledby="delete-team-title">
+            <div class="fd-field">
+              <label class="fd-field-label" for="dt-confirm">Type <span class="fd-confirm-phrase">quarry-labs</span> to confirm</label>
+              <input class="fd-input" id="dt-confirm" name="confirm" autocomplete="off" autocapitalize="off" spellcheck="false" required data-fd-confirm-input aria-describedby="dt-confirm-rule" data-admin>
+              <p class="fd-confirm-inline-rule" id="dt-confirm-rule" data-fd-confirm-rule>Type it exactly as shown. Case counts.</p>
+            </div>
+            <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="danger" data-fd-confirm-submit>Delete team</button></div>
+          </form>
         </div>
       </div>
     </section>

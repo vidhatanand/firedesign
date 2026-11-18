@@ -2,6 +2,168 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.7.0 — 19 Nov 2026
+
+Fire gains what products built beside it: decisions with an Undo, grouped and live data, forms for dates, colours and
+dangerous actions, email, a vetted font catalogue, dials for a product's structure and signature, nine new or rebuilt
+screens, and tools that let an agent find a part by its job and refuse a near-duplicate. No class, attribute value,
+token, event or export was removed or renamed: every class and attribute value in 0.6.2's catalogue is still there,
+and a product that copies `fire/` keeps working. A few things look or behave differently on purpose; read "Changed"
+before you refresh.
+
+### Added
+
+**Decisions and page states** (`docs/decisions.html`, `docs/content.html#page-states`)
+
+- `fd-decision`: the brief, with `fd-decision-lead`, `-facts`, `-parts`, `-quote`, `-outcome` (`data-tone`) and
+  `-actions`. `fd-delta` shows a value before and after. `fd-impact` says how much a change will touch.
+- `fd-draft`: words an agent wrote, which stay the agent's until the person uses them (`data-fd-draft="use|discard"`;
+  `fd:accept`).
+- `fd-commit`: a reason with a word budget and buttons named for their effect (`data-verb`). `data-fd-hold` waits
+  before it goes and `data-fd-hold-in="toast"` waits in a toast. `fd-commit-lock` says who can decide when the viewer
+  cannot. Events `fd:commit`, `fd:hold`, `fd:undo`.
+- `fd-hold`: a countdown with Undo (`data-seconds`), and `hold()` and `cancelHold()`.
+- `fd-preview` (edit, see what it touches, commit; it goes `stale` when a field changes), `fd-queue` (what waits, one
+  case at a time, beside the list; list then case on a phone) and `fd-states` (one state for a screen or section:
+  `loading`, `ready`, `empty`, `filtered`, `error`, `no-access`, `not-found`, `off`, `expired`; `setState()` and
+  `data-fd-set-state`).
+- Toasts: `toast({ undo })` adds Undo and lasts 8 seconds; `toast.hold()` holds a send with a ring and Undo. Ctrl+Z or
+  Cmd+Z outside a text field presses the newest Undo.
+
+**Data**
+
+- Grouped rows: `fd-table-group` with a `fd-table-group-head` row (title, count, toggle, `data-collapsible`, a
+  checkbox that selects the group, sorting within each group). (Touchstone R12, Assay R9)
+- Steps: `data-state="running|failed|waiting|skipped"` per step, `data-variant="tracker"`, `fd-step-owner` and
+  `fd-step-action`. (Assay R4)
+- List and detail: `fd-list-detail` (a list beside the record; one pane at a time on a phone, with a back button), and
+  `fd-list` as a listbox with `data-value` and `fd:change`. (Assay R4)
+- Log anchors: `data-lines` numbers the rows, `#L42` links to one, `data-anchor` prefixes them, and
+  `data-action="first-error"` jumps to the first error; `fd:select` reports a chosen line. (Assay R4)
+- Small items: `fd-stat-delta` with `data-tone="neutral"` and `data-dir="flat"`, `fd-status-note`, `fd-empty-meta`,
+  and `fd-bars-was` and `fd-bars-mark` for a bar with the previous value.
+
+**Forms** (`docs/forms.html`, `docs/overlays.html#period`)
+
+- `fd-datefield`: one date, typed or picked; it posts `YYYY-MM-DD`; `data-min-date` and `data-max-date`. (Touchstone R11)
+- `fd-period` with `fd-daterange-compare`: a period and what to compare it with (`none`, `previous`, `year`), and the
+  presets `lastmonth`, `quarter` and `year`.
+- `fd-color` and `fd-swatch`: a colour from a picker or a hex code, with its contrast on the page and against the
+  accent; `fd-swatch` shows a colour that is content. (Fragmatic)
+- `fd-confirm-inline`: type a name on the page before a destructive button works (`data-confirm`). (Assay R9)
+- `fd-reason`: a control that is off, with why and who can turn it on.
+- `fd-codes`: one-time recovery codes with Copy all and Download (`fd:download`).
+
+**Charts and shell**
+
+- Quadrant chart: `data-fd-chart="quadrant"` and `charts.quadrant()`, with a list by corner on a phone. (Fragmatic)
+- `fd-initial` and `data-fd-initial`: an organisation's first letter as a dot-matrix mark. `initialMark()`,
+  `initialRows()` and `initialTone()` in `fire/js/initial.js` run on a server. (Imprim)
+- Reading column: `fd-band[data-column="xs|sm|md|lg|xl"]`. Frame marks: `data-marks="crosses|dots|corners"` on
+  `fd-frame` and `fd-band`.
+- Go-to keys: `data-fd-keys="g l"` on any control, a hint while a key is waiting (`fd-nav-key`, `fd-keys-hint`) and the
+  shortcut sheet (`fd-shortcuts`). Event `fd:keys`.
+- Palette records: `command.records({ group, search })` adds found records to the command palette, with a
+  `fd-command-note` for searching and for errors.
+- `fd-running`: the top bar's count of work in progress, with a popover list. `fd-service-status`
+  (`data-status="operational|degraded|outage|maintenance"`): an icon when normal, a labelled pill when not.
+  `setServiceStatus()`.
+
+**Email** (`docs/email.html`)
+
+- `fire/email/email.js`: `renderEmail({ theme, brand, preheader, blocks, locale })` returns an HTML part and a text part
+  in the product's look: opaque colours, a 560px table layout, dark mode, an Outlook button and right-to-left
+  locales. (Imprim)
+
+**Templates**
+
+- Eight new screens: `decisions`, `decision-case`, `answer` (approve or decline from an email link), `record` (one team
+  on one page), `audit`, `status-admin`, `status` (the public page) and `proof` (a shared result). The `settings`
+  template is rebuilt: nine in all. Each has a card in `contract/cards/templates/`. `templates/index.html` lists
+  all 32 screens.
+- The states of these nine screens open from `?state=` or from the screen's Demo state band, so a state can be linked
+  and checked.
+
+**Looks**
+
+- Type sets: a vetted font catalogue of 53 open-licensed families (`contract/fonts.json`) with measured metrics and a
+  metric-matched fallback face. A theme record's `type` can name families, a heading weight and tracking, heading case
+  and tabular figures; `validateTheme()` enforces the pairing rules. `node scripts/fonts.mjs add "<family>"` puts a
+  family's files in your product.
+- Signature dials: one theme setting restyles every texture, glyph, loader and frame. `data-signature-field`, `-mark`,
+  `-cell`, `-ramp`, `-marks` and `-intensity` on `<html>`; new fields (`halftone`, `spark`, `contour`, `stipple`,
+  `bars`), marks (`dots`, `squares`, `plus`, `dashes`) and ramps. `data-signature="own"` pins an instance.
+- Four structural dials: `data-surfaces="flat|outlined"`, `data-elevation="none|lifted"`,
+  `data-controls="outlined|filled"` and `data-headings="upper|mono"`. Each has a Tweaks control and a theme record
+  field, and each is checked for contrast in every palette.
+- Named looks: eight complete theme records in `contract/looks/named` (steady, operator, folio, hearth, instrument,
+  marquee, gentle, clear), far apart in palette, type and structure. Tweaks has a Looks row that applies one whole;
+  `?look=<name>` puts a shipped look on a page before first paint; `docs/looks.html` shows each look on three real
+  screens. `scripts/looks-check.mjs` renders real screens under every look and 40 random theme records and checks
+  console errors, overflow, text contrast and focus rings.
+
+**For agents**
+
+- `npx fire find "<what you need>"` searches parts by what they are for (`--surface`, `--data`, `--kind`, `--limit`,
+  `--json`) over `contract/index.json`: 198 entries (components, patterns, templates, layouts and modules).
+- The catalogue lists modules (`fire/email/email.js`, `fire/js/initial.js`, `fire/js/theme.js`), each with a card. It
+  now holds 163 components, patterns and layouts, up from 142.
+- The near-duplicate gate: `node scripts/gate.mjs` compares every component, pattern and template and fails a pair that
+  does the same job in nearly the same way, unless a card declares a `relation` (`variantOf` or `distinctFrom`, with
+  `because`). `--probe <page>` checks a candidate before you add it. `scripts/build.mjs` runs it.
+
+### Changed
+
+- **Settings template rebuilt.** One panel at a time, a side navigation grouped by owner, `?tab=` to open one, and
+  loading, error and member states. A product that copied `templates/settings.html` should compare it with the new one.
+- **Phone top bar.** A healthy service is not shown below 640px, the team switch keeps only its tile below 420px, and
+  below 360px a service problem outranks the running count.
+- **Right-to-left.** The bar on a selected row now sits on the start side.
+- **Label keys.** There are 71 keys, all listed in `fire/js/core.js` and `docs/writing.html`; 34 were documented
+  before. A translated page needs the new ones: `datefield.*`, `color.*`, `confirm.*`, `keys.*`, `running.count`,
+  `status.*`, `log.line`, `period.versus`, `toast.*`, `commit.*`, `hold.*` and `draft.used`.
+- **Small labels, fields, secondary controls and objects read semantic tokens** (`--fd-eyebrow-*`, `--fd-field`,
+  `--fd-control-*`, `--fd-surface-edge`, `--fd-shadow-object`), so the structural dials reach them. The default look
+  is unchanged. A product stylesheet that recolours these must set the same tokens, or a dial will not reach it.
+- **Events.** `fd:select` now also fires for log lines, list-detail rows and queue items; `fd:change` for a listbox and
+  for `fd-states`; `fd:open` and `fd:close` for table groups. A generic handler must check the element and `detail`.
+- **Narrow screens.** Log level chips wrap, callout bodies break long words, horizontal steps hide inactive labels on a
+  phone, and `data-fit` on `fd-number` wins inside a field.
+- **Keys.** `/` focuses a search that carries `data-fd-search-hotkey`, and `g` then a letter follows a `data-fd-keys`
+  control. Keys are ignored while a field has focus.
+
+- **Focus ring.** `--fd-focus` is now a palette token: the accent where it reaches 3:1 on every ground a control sits
+  on, else the accent text. Ember's light-mode ring and input focus line are the darker orange (`#be4000`); Volt's are
+  olive. Input, search and code-field focus lines use `--fd-focus`. Four text colours that the look sweep measured
+  under 4.5:1 are fixed (the announcement tag, the snippet prompt, the account avatar, an accent secret value).
+- **Types.** `fire/fire.d.ts` declares every export and event of 0.7, and `theme`, `palettes`, `typefaces`, `fonts`,
+  `palette-rules`, `initial`, `looks` and `email` have their own declarations. New package entries: `fire-design/email`,
+  `/initial`, `/looks`, `/fonts`. A test fails when a declaration and the runtime differ.
+- **Starters** are converted from the rebuilt settings template and the new shell, and each passes its check again.
+
+### For products refreshing from 0.6.x
+
+Check the screens in "Changed", then delete the stopgaps these parts replace, each with the request it closes:
+
+- **Touchstone R11:** the native `<input type="date">` on two pages becomes `fd-datefield`.
+- **Touchstone R12:** `tr[data-group-head]` in one `tbody` becomes `tbody.fd-table-group` with `fd-table-group-head`.
+- **Assay R4:** your list-and-detail layout, selected row and phone back step become `fd-list-detail`; log line
+  numbers and "jump to first error" become `data-lines` and `data-action="first-error"`; live step state becomes
+  `data-state` on `fd-step`. Secret entry (0.5.0) is `fd-secret` with `data-mode="entry"`: drop the password inputs.
+- **Assay R9:** the held action with Undo becomes `fd-hold` or `toast.hold()`; preview then commit becomes
+  `fd-preview` with `fd-impact`; type-the-name on the page becomes `fd-confirm-inline`; group rows as above.
+- **Assay R10:** the history strip is `fd-heatgrid` with `data-variant="strip"` (0.5.0). Per-row menu items are still
+  yours, and the icons `wrench` and `calendar-check` are not in Fire.
+- **Fragmatic:** the colour control becomes `fd-color` with `fd-swatch`; the quadrant becomes
+  `data-fd-chart="quadrant"`.
+- **Imprim:** the branded email layout becomes `renderEmail()`, and the generated brand-initial mark becomes
+  `data-fd-initial`.
+
+Then add the new label keys to a translated page, remove local `overflow-wrap` and 320px overflow fixes, check that
+your own bindings for Ctrl+Z, `/` and `g` still work, run `npx fire find` before you write a new pattern, and keep your
+look as a theme record, which now takes `type`, `signature` and the four structural dials. Run the markup lint over
+your source.
+
 ## 0.6.2 — 18 Nov 2026
 
 **Facet export on Facet's new schema.** `facet/content.json` carries all 142 components with full cards and a

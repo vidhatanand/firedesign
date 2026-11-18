@@ -1,0 +1,74 @@
+{
+  "id": "settings",
+  "job": "Change how an account and a team work, one settings page at a time, beside a side navigation grouped by owner.",
+  "purpose": "An app screen: a page head, then a split with the subnav on the left (groups split by separators, counts on the right; below 760px of its own width one scrolling strip) and one panel at a time on the right, kept in ?tab=. The team panel is one form with unsaved-changes tracking and a line that says who can edit; locked controls say why and who can unlock them; features are switches in one table grouped by area; deleting the team is confirmed on the page.",
+  "useWhen": [
+    "A product has more than three groups of settings and people move between them often.",
+    "Some settings belong to the person and others to the team, and the page has to show which are which and who can change them.",
+    "A list of on and off switches needs to stay scannable by area, with some of them locked by plan or role."
+  ],
+  "avoidWhen": [
+    {
+      "when": "One long create or edit form with sections, saved once at the end.",
+      "instead": "form"
+    },
+    {
+      "when": "A change reaches many accounts and has to be previewed and committed with a reason.",
+      "instead": "preview"
+    },
+    {
+      "when": "The page is a record of what changed, not a place to change it.",
+      "instead": "audit"
+    }
+  ],
+  "aka": [
+    "preferences",
+    "account settings",
+    "team settings",
+    "workspace settings",
+    "admin settings",
+    "feature flags"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "form",
+    "record",
+    "list"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "?state=ready (or no state), or the Demo state band; fd-states data-state=\"ready\". ?tab=account|notifications|team|features|billing|data-sources|connected-apps|advanced picks the panel"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading, or the Demo state band; data-state=\"loading\" shows a skeleton in the panel's shape"
+    },
+    {
+      "name": "error",
+      "how": "?state=error, or the Demo state band; data-state=\"error\" with the request ID and Try again (data-fd-set-state=\"loading\"), which comes back to ready"
+    },
+    {
+      "name": "member",
+      "how": "?state=member, or the Demo state band: the ready page for someone who can read but not change it; controls marked data-admin are disabled and the who-can-edit lines become the reason"
+    }
+  ],
+  "example": "templates/settings.html",
+  "provenance": [
+    "templates/settings.html",
+    "Assay prototype: settings.html",
+    "Assay prototype: settings-features.html",
+    "Touchstone: limits.html",
+    "Fragmatic prototype: setup.html",
+    "docs/navigation.html#subnav",
+    "docs/forms.html#settings-form",
+    "docs/forms.html#reason",
+    "docs/forms.html#confirm-inline",
+    "docs/data.html#groups",
+    "docs/content.html#page-states"
+  ],
+  "since": "0.1.0"
+}

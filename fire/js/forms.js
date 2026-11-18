@@ -71,6 +71,53 @@
  *                         named input inside (<input name="code" required>): it works as a plain field without script and
  *                         becomes the boxes with it, keeping its name, id, value, required, disabled, readonly, autofocus
  *                         and aria-invalid. Resetting the form clears the carried code too.
+ * Date field            <div class="fd-datefield" data-fd-datefield [data-min-date="today"] [data-max-date="2027-11-18"]>
+ *                          <div class="fd-input-group"><input class="fd-input" type="text" name="pause_until" inputmode="numeric"
+ *                            placeholder="2026-12-01" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" autocomplete="off">
+ *                            <span class="fd-input-affix" data-kind="action"><button class="fd-btn" type="button" data-variant="ghost"
+ *                              data-size="sm" data-icon-only aria-label="Choose date" data-fd-popover="pause-cal"
+ *                              data-placement="bottom-end"><i data-icon="calendar"></i></button></span></div>
+ *                          <div class="fd-popover" id="pause-cal" popover data-size="auto" aria-label="Choose a date">
+ *                            <div class="fd-datefield-panel" data-fd-datepanel><div class="fd-calendar"></div>
+ *                              <div class="fd-datefield-foot"><button data-fd-datepanel-today>Today</button>
+ *                              <button data-fd-datepanel-clear>Clear</button></div></div></div></div>
+ *                        Without script it is a text box that posts the ISO date (YYYY-MM-DD) and the calendar button is hidden.
+ *                        With it (data-ready is set on the root) the calendar opens from the button or with ArrowDown in the
+ *                        field (overlays.js draws it); typing accepts 2026-11-18, 2026/11/18, "Nov 18, 2026" and "18 Nov 2026"
+ *                        and is written back as the ISO date when the field is left or the form is sent. data-min-date and
+ *                        data-max-date (an ISO date or "today") are checked with setCustomValidity, so required, data-fd-validate and the
+ *                        browser's own submit check all see them. The message goes into the field's .fd-field-error.
+ * Colour                 <div class="fd-color" data-fd-color><div class="fd-input-group">
+ *                          <span class="fd-input-affix" data-kind="action"><input class="fd-color-picker" type="color" inert
+ *                            aria-label="Pick a colour" value="#14342b" data-fd-color-picker></span>
+ *                          <input class="fd-input" type="text" name="brand_color" value="#14342b" data-fd-color-hex maxlength="7"
+ *                            spellcheck="false" autocomplete="off" pattern="#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})"></div>
+ *                          <ul class="fd-color-checks" data-fd-color-feedback></ul></div>
+ *                        The hex text box carries the name and posts "#rrggbb" (lower case) as a plain field; the native picker
+ *                        has no name and is inert until the script runs. With script the two stay in step, a short or
+ *                        hash-less hex is completed, a bad one marks the field invalid, and [data-fd-color-feedback] lists the
+ *                        contrast of the colour on the page (--fd-bg) and against the accent (--fd-accent), re-measured
+ *                        when the theme, palette or accent changes: 4.5:1 reads as text (palette-rules TEXT_MIN), 3:1 as
+ *                        marks and large text (FAINT_MIN).
+ * Confirm on the page    <form class="fd-confirm-inline" method="post" data-fd-confirm-inline data-confirm="ember-prod"> … a field
+ *                          with <span class="fd-confirm-phrase">ember-prod</span> in its label, <input class="fd-input"
+ *                          name="confirm" data-fd-confirm-input autocomplete="off" required>, <p class="fd-confirm-inline-rule"
+ *                          data-fd-confirm-rule>Type it exactly as shown. Case counts.</p> and <button class="fd-btn"
+ *                          data-variant="danger" type="submit" data-fd-confirm-submit>Delete team</button></form>
+ *                        Without script the button is enabled and the server checks the posted text. With it the button is
+ *                        disabled until the text, trimmed, equals data-confirm (or the input's data-match), and the rule line
+ *                        says where it stands: it matches so far, where it first differs, or that it matches. The form is
+ *                        not sent while the text does not match. data-state on the form: idle | partial | mismatch | match.
+ * Disabled with a reason <div class="fd-reason"><button class="fd-btn" disabled aria-describedby="why">Rotate key</button>
+ *                          <p class="fd-reason-text" id="why"><i data-icon="lock"></i><span><span class="fd-reason-why">…</span>
+ *                          <span class="fd-reason-who">…</span></span></p></div>. A control marked aria-disabled="true" (instead of
+ *                        disabled, so keyboard users can reach it and hear the reason) inside a .fd-reason does nothing when
+ *                        activated: the script stops its click, so a link without href or a button of type submit is safe too.
+ * Recovery codes         <section class="fd-codes" data-fd-codes data-filename="ember-recovery-codes.txt"> head with
+ *                          <h3 class="fd-codes-title">, actions [data-fd-codes-copy] and [data-fd-codes-download] (hidden until the
+ *                          script runs), <ol class="fd-codes-list"><li class="fd-codes-item" [data-used]><code>…</code></li></ol>
+ *                          and <p class="fd-codes-note">. Copy all and Download use the codes not marked data-used, one per line;
+ *                          Download makes a text file through a Blob URL. Without script the codes stay selectable text.
  * Validation             <form data-fd-validate> validates on blur and submit with native constraint validation and fills .fd-field-error
  * Unsaved changes        <form data-fd-dirty> toggles [data-dirty] and shows .fd-form-actions[data-variant="sticky"]
  *
@@ -82,11 +129,17 @@
  *   fd:copy     { value }                       secret / copy field
  *   fd:rotate   {}                              secret rotate button (replace the value with setSecret)
  *   fd:files    { files }  (cancelable)         dropzone accepted files; cancel to run your own upload and drive setFileProgress
+ *   fd:change   { value, valid }                date field: the ISO date ("" when empty); colour: "#rrggbb" or the text typed
+ *   fd:change   { value, matched }              confirm on the page, on the form
+ *   fd:copy     { value }                       recovery codes, Copy all (the codes joined by new lines)
+ *   fd:download { filename, value }             recovery codes, after Download
  *   fd:invalid  { fields } / fd:valid           validated form
  *   fd:dirty    { dirty }                       form[data-fd-dirty]
  */
 import { $, $$, on, once, emit, ensureId, position, autoUpdate, copyText, clamp, reducedMotion, label as fdLabel } from './core.js';
 import { icon, setIcon } from './icons.js';
+import { contrast } from './palettes.js';
+import { TEXT_MIN, FAINT_MIN } from './palette-rules.js';
 
 const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const each = (root, selector, fn) => {
@@ -1439,6 +1492,271 @@ function validateForm(form) {
   return invalid;
 }
 
+
+/* ==========================================================================
+   Date field
+   ========================================================================== */
+
+const pad2 = (n) => String(n).padStart(2, '0');
+const isoOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+/** An ISO date for real calendar days only; null otherwise. */
+function realDate(y, m, d) {
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d ? `${String(y).padStart(4, '0')}-${pad2(m)}-${pad2(d)}` : null;
+}
+
+/** Read a typed date: 2026-11-18, 2026/11/18, Nov 18 2026, November 18, 2026, 18 Nov 2026. Returns "YYYY-MM-DD" or null. */
+export function parseDateText(text) {
+  const t = String(text ?? '').trim().replace(/\s+/g, ' ');
+  let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/.exec(t);
+  if (m) return realDate(+m[1], +m[2], +m[3]);
+  m = /^([a-z]{3,9})\.? (\d{1,2})(?:st|nd|rd|th)?,? (\d{4})$/i.exec(t);
+  if (m && MONTH_NAMES.includes(m[1].slice(0, 3).toLowerCase())) return realDate(+m[3], MONTH_NAMES.indexOf(m[1].slice(0, 3).toLowerCase()) + 1, +m[2]);
+  m = /^(\d{1,2}) ([a-z]{3,9})\.?,? (\d{4})$/i.exec(t);
+  if (m && MONTH_NAMES.includes(m[2].slice(0, 3).toLowerCase())) return realDate(+m[3], MONTH_NAMES.indexOf(m[2].slice(0, 3).toLowerCase()) + 1, +m[1]);
+  return null;
+}
+
+const dateLimit = (value) => (value === 'today' ? isoOf(new Date()) : /^\d{4}-\d{2}-\d{2}$/.test(value || '') ? value : '');
+const dateWords = (iso, el) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(el.closest('[lang]')?.lang || undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+};
+const dateInput = (field) => $('input:not([type="hidden"])', field);
+const dateSent = new WeakMap();   // field -> the last value announced
+
+/** What is wrong with the text in a date field, or '' when it is fine (an empty field is fine: `required` answers for it). */
+export function dateProblem(field) {
+  const input = dateInput(field);
+  const text = input.value.trim();
+  if (!text) return '';
+  const iso = parseDateText(text);
+  if (!iso) {
+    const example = /^\d{4}-\d{2}-\d{2}$/.test(input.placeholder) ? input.placeholder : isoOf(new Date());
+    return fdLabel(field, 'datefield.invalid', 'Enter a real date, like {example}.', { example });
+  }
+  const min = dateLimit(field.dataset.minDate);
+  const max = dateLimit(field.dataset.maxDate);
+  if (min && iso < min) return fdLabel(field, 'datefield.min', 'Pick {date} or later.', { date: dateWords(min, field) });
+  if (max && iso > max) return fdLabel(field, 'datefield.max', 'Pick {date} or earlier.', { date: dateWords(max, field) });
+  return '';
+}
+
+/**
+ * Check a date field. `show` writes the error (and aria-invalid); without it a field already marked invalid is
+ * re-checked and cleared once it is right. `commit` rewrites an accepted typed date as the ISO date.
+ * Returns true when the field is valid.
+ */
+export function checkDateField(field, { show = false, commit = false } = {}) {
+  const input = dateInput(field);
+  if (!input) return true;
+  const message = dateProblem(field);
+  input.setCustomValidity(message);
+  const iso = parseDateText(input.value);
+  if (!message && iso && commit && input.value !== iso) input.value = iso;
+  if (message && (show || input.hasAttribute('aria-invalid'))) {
+    input.setAttribute('aria-invalid', 'true');
+    setOwnError(field, input, message);
+  } else if (!message) {
+    input.removeAttribute('aria-invalid');
+    setOwnError(field, input, null);
+  }
+  const value = message ? null : iso || '';
+  if (value !== null && dateSent.get(field) !== value) {
+    dateSent.set(field, value);
+    emit(field, 'fd:change', { value, valid: true });
+  }
+  return !message;
+}
+
+function setupDateField(field) {
+  const input = dateInput(field);
+  if (!input || !once(field, 'datefield')) return;
+  input.removeAttribute('pattern');   // the script reads more formats than the pattern does
+  dateSent.set(field, parseDateText(input.value) || '');
+  field.setAttribute('data-ready', '');
+}
+
+/* ==========================================================================
+   Colour: swatch input and hex field with contrast feedback
+   ========================================================================== */
+
+/** "#14342b", "14342b", "#fff" → "#14342b" (lower case); null for anything else. */
+export function normalizeHex(text) {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(text ?? '').trim());
+  if (!m) return null;
+  const hex = m[1].length === 3 ? [...m[1]].map((c) => c + c).join('') : m[1];
+  return `#${hex.toLowerCase()}`;
+}
+
+let swatchContext;
+/** A token's colour as the browser paints it now (theme, palette and accent included), as "#rrggbb". */
+function tokenColor(host, token) {
+  const probe = document.createElement('span');
+  probe.style.color = `var(${token})`;
+  host.append(probe);
+  const computed = getComputedStyle(probe).color;
+  probe.remove();
+  swatchContext ??= document.createElement('canvas').getContext('2d');
+  swatchContext.fillStyle = '#000000';
+  swatchContext.fillStyle = computed;
+  return swatchContext.fillStyle;
+}
+
+const hexInput = (root) => $('[data-fd-color-hex]', root);
+const pickerInput = (root) => $('[data-fd-color-picker]', root);
+
+/** The contrast rows of a colour: [{ key, name, ratio, level: pass|warn|fail, verdict }]. */
+export function colorChecks(root, hex) {
+  const against = [['page', '--fd-bg'], ['accent', '--fd-accent']];
+  return against.map(([key, token]) => {
+    const ratio = contrast(hex, tokenColor(root, token));
+    const level = key === 'page' ? (ratio >= TEXT_MIN ? 'pass' : ratio >= FAINT_MIN ? 'warn' : 'fail') : (ratio >= FAINT_MIN ? 'pass' : 'fail');
+    const words = {
+      page: { pass: 'Readable as text', warn: 'Marks and large text only', fail: 'Too faint on the page' },
+      accent: { pass: 'Distinct from the accent', fail: 'Too close to the accent' },
+    }[key][level];
+    const name = key === 'page' ? fdLabel(root, 'color.page', 'On the page') : fdLabel(root, 'color.accent', 'Against the accent');
+    return { key, name, ratio, level, verdict: fdLabel(root, `color.${key}.${level}`, words) };
+  });
+}
+
+const CHECK_ICON = { pass: 'circle-check', warn: 'triangle-alert', fail: 'circle-x' };
+
+function renderColorFeedback(root) {
+  const list = $('[data-fd-color-feedback]', root);
+  if (!list) return;
+  const hex = normalizeHex(hexInput(root).value);
+  if (!hex) { list.replaceChildren(); list.hidden = true; return; }
+  list.hidden = false;
+  list.innerHTML = colorChecks(root, hex).map((c) => `<li class="fd-color-check" data-level="${c.level}">${icon(CHECK_ICON[c.level], { size: 14 })}<span class="fd-color-check-name">${esc(c.name)}</span><span class="fd-color-check-ratio">${c.ratio.toFixed(1)}:1</span><span class="fd-color-check-verdict">${esc(c.verdict)}</span></li>`).join('');
+}
+
+/** Write a colour into both inputs. Returns the normalised value, or null when the text is not a colour. */
+function applyColor(root, text, { commit = false, show = false } = {}) {
+  const hexField = hexInput(root);
+  const picker = pickerInput(root);
+  const hex = normalizeHex(text);
+  const empty = !String(text).trim();
+  const message = !hex && !empty ? fdLabel(root, 'color.invalid', 'Enter a hex colour, like {example}.', { example: normalizeHex(picker?.value) || '#14342b' }) : '';
+  hexField.setCustomValidity(message);
+  if (hex) {
+    if (picker && picker.value !== hex) picker.value = hex;
+    if (commit && hexField.value !== hex) hexField.value = hex;
+  }
+  if (message && (show || hexField.hasAttribute('aria-invalid'))) {
+    hexField.setAttribute('aria-invalid', 'true');
+    setOwnError(root, hexField, message);
+  } else if (!message) {
+    hexField.removeAttribute('aria-invalid');
+    setOwnError(root, hexField, null);
+  }
+  renderColorFeedback(root);
+  return hex;
+}
+
+function setupColor(root) {
+  if (!hexInput(root) || !once(root, 'color')) return;
+  const picker = pickerInput(root);
+  picker?.removeAttribute('inert');
+  root.setAttribute('data-ready', '');
+  applyColor(root, hexInput(root).value);
+}
+
+let colorFrame = 0;
+const remeasureColors = () => {
+  cancelAnimationFrame(colorFrame);
+  colorFrame = requestAnimationFrame(() => $$('[data-fd-color][data-ready]').forEach(renderColorFeedback));
+};
+
+/* ==========================================================================
+   Confirm on the page
+   ========================================================================== */
+
+/** Where the typed text stands against the phrase: idle, partial (a start of it), mismatch (with the first wrong place) or match. */
+export function confirmProgress(typed, phrase) {
+  if (!typed) return { state: 'idle' };
+  if (typed === phrase) return { state: 'match' };
+  if (phrase.startsWith(typed)) return { state: 'partial' };
+  let at = 0;
+  while (at < typed.length && typed[at] === phrase[at]) at += 1;
+  return { state: 'mismatch', at: at + 1 };
+}
+
+function updateConfirmInline(root) {
+  const input = $('[data-fd-confirm-input]', root);
+  const submit = $('[data-fd-confirm-submit]', root);
+  const rule = $('[data-fd-confirm-rule]', root);
+  if (!input) return false;
+  const phrase = input.dataset.match ?? root.dataset.confirm ?? '';
+  const typed = input.value.trim();
+  const progress = phrase ? confirmProgress(typed, phrase) : { state: 'idle' };
+  const matched = progress.state === 'match';
+  if (submit) submit.disabled = !matched;
+  if (root.dataset.state !== progress.state || progress.state === 'mismatch') {
+    root.dataset.state = progress.state;
+    if (rule) {
+      rule.dataset.idle ??= rule.textContent.trim();
+      const text = {
+        idle: rule.dataset.idle,
+        partial: fdLabel(root, 'confirm.partial', 'Matches so far.'),
+        match: fdLabel(root, 'confirm.match', 'Matches. You can continue.'),
+        mismatch: fdLabel(root, 'confirm.mismatch', 'Differs at character {n}. Case and dashes count.', { n: progress.at }),
+      }[progress.state];
+      const name = { match: 'circle-check', mismatch: 'circle-alert' }[progress.state];
+      rule.innerHTML = `${name ? icon(name, { size: 14 }) : ''}<span>${esc(text)}</span>`;
+    }
+  }
+  return matched;
+}
+
+function setupConfirmInline(root) {
+  if (!once(root, 'confirm-inline')) return;
+  root.setAttribute('data-ready', '');
+  updateConfirmInline(root);
+}
+
+/* ==========================================================================
+   Recovery codes
+   ========================================================================== */
+
+const codeValues = (root) => $$('.fd-codes-item:not([data-used])', root).map((item) => item.textContent.trim()).filter(Boolean);
+
+function setupCodes(root) {
+  if (!once(root, 'codes')) return;
+  if (!$('[data-fd-codes-status]', root)) root.insertAdjacentHTML('beforeend', '<span class="fd-sr-only" data-fd-codes-status role="status"></span>');
+  root.setAttribute('data-ready', '');
+}
+
+async function copyCodes(root, button) {
+  const value = codeValues(root).join('\n');
+  if (!(await copyText(value))) return;
+  const status = $('[data-fd-codes-status]', root);
+  if (status) status.textContent = fdLabel(root, 'copy.announce', 'Copied to clipboard');
+  button.dataset.fdOriginal ??= button.innerHTML;
+  button.dataset.state = 'copied';
+  button.innerHTML = `${icon('check')}<span>${esc(fdLabel(root, 'copy.done', 'Copied'))}</span>`;
+  later(button, 'copied', () => { delete button.dataset.state; button.innerHTML = button.dataset.fdOriginal; if (status) status.textContent = ''; }, 1600);
+  emit(root, 'fd:copy', { value });
+}
+
+function downloadCodes(root) {
+  const value = `${codeValues(root).join('\n')}\n`;
+  const filename = root.dataset.filename || 'recovery-codes.txt';
+  const url = URL.createObjectURL(new Blob([value], { type: 'text/plain' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.hidden = true;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  emit(root, 'fd:download', { filename, value });
+}
+
 /* ==========================================================================
    Unsaved changes
    ========================================================================== */
@@ -1475,7 +1793,7 @@ function setupDirty(form) {
    Init
    ========================================================================== */
 
-const UPGRADE = 'input[data-fd-checkall], input[data-indeterminate], [data-fd-otp], .fd-checkbox-box, .fd-choice-mark, .fd-search-input, .fd-slider, .fd-number, .fd-otp, [data-fd-tag-input], [data-fd-pairs], .fd-codefield, [data-fd-combobox], [data-fd-secret], [data-fd-copy-field], .fd-copy-field, .fd-secret, textarea[data-fd-autogrow], .fd-field-counter, form[data-fd-validate], form[data-fd-dirty]';
+const UPGRADE = 'input[data-fd-checkall], input[data-indeterminate], [data-fd-otp], .fd-checkbox-box, .fd-choice-mark, .fd-search-input, .fd-slider, .fd-number, .fd-otp, [data-fd-tag-input], [data-fd-pairs], .fd-codefield, [data-fd-combobox], [data-fd-secret], [data-fd-copy-field], .fd-copy-field, .fd-secret, textarea[data-fd-autogrow], .fd-field-counter, form[data-fd-validate], form[data-fd-dirty], [data-fd-datefield], [data-fd-color], [data-fd-confirm-inline], [data-fd-codes]';
 
 function upgrade(root) {
   enhanceChecks(root);
@@ -1493,6 +1811,10 @@ function upgrade(root) {
   each(root, '.fd-field-counter', (counter) => { const control = counter.closest('.fd-field')?.querySelector('textarea, input'); if (control) updateCounter(control); });
   each(root, 'form[data-fd-validate]', (form) => { form.noValidate = true; });
   each(root, 'form[data-fd-dirty]', setupDirty);
+  each(root, '[data-fd-datefield]', setupDateField);
+  each(root, '[data-fd-color]', setupColor);
+  each(root, '[data-fd-confirm-inline]', setupConfirmInline);
+  each(root, '[data-fd-codes]', setupCodes);
   each(root, '.fd-checkbox > input[type="checkbox"][data-fd-checkall]', (parent) => {
     const children = $$(parent.dataset.fdCheckall).filter((el) => el !== parent);
     if (children.length) syncCheckAll(children[0]);
@@ -1858,6 +2180,74 @@ function bind() {
     emit(list, 'fd:change', { value: [...list.children].map((el) => el.fdFile).filter(Boolean) });
   });
 
+
+  /* Date field */
+  const dateFieldOf = (el) => (el instanceof Element ? el.closest('[data-fd-datefield]') : null);
+  const isDateInput = (el) => { const f = dateFieldOf(el); return !!f && el === dateInput(f); };
+  document.addEventListener('input', (e) => { const f = isDateInput(e.target) && dateFieldOf(e.target); if (f) checkDateField(f, { show: false }); });
+  document.addEventListener('change', (e) => { const f = isDateInput(e.target) && dateFieldOf(e.target); if (f) checkDateField(f, { show: true, commit: true }); });
+  document.addEventListener('keydown', (e) => {
+    const f = isDateInput(e.target) && dateFieldOf(e.target);
+    if (!f || e.key !== 'ArrowDown' || !f.hasAttribute('data-ready')) return;
+    const opener = $('[data-fd-popover]', f);
+    if (!opener) return;
+    e.preventDefault();
+    if (opener.getAttribute('aria-expanded') !== 'true') opener.click();
+  });
+  document.addEventListener('submit', (e) => {
+    if (!(e.target instanceof HTMLFormElement)) return;
+    const bad = $$('[data-fd-datefield][data-ready]', e.target).filter((f) => !checkDateField(f, { show: true, commit: true }));
+    if (bad.length) { e.preventDefault(); dateInput(bad[0]).focus(); }
+  }, true);
+
+  /* Colour */
+  document.addEventListener('input', (e) => {
+    const root = e.target instanceof Element ? e.target.closest('[data-fd-color]') : null;
+    if (!root || !root.hasAttribute('data-ready')) return;
+    if (e.target.matches('[data-fd-color-picker]')) {
+      const hexField = hexInput(root);
+      hexField.value = e.target.value;
+      applyColor(root, e.target.value);
+      hexField.dispatchEvent(new Event('input', { bubbles: true }));   // the hex field's handler announces the change
+    } else if (e.target.matches('[data-fd-color-hex]')) {
+      const hex = applyColor(root, e.target.value);
+      if (hex) emit(root, 'fd:change', { value: hex, valid: true });
+    }
+  });
+  document.addEventListener('change', (e) => {
+    const root = e.target instanceof Element && e.target.matches('[data-fd-color-hex]') ? e.target.closest('[data-fd-color]') : null;
+    if (!root || !root.hasAttribute('data-ready')) return;
+    const hex = applyColor(root, e.target.value, { commit: true, show: true });
+    if (!hex && e.target.value.trim()) emit(root, 'fd:change', { value: e.target.value.trim(), valid: false });
+  });
+  document.addEventListener('submit', (e) => {
+    if (!(e.target instanceof HTMLFormElement)) return;
+    const bad = $$('[data-fd-color][data-ready]', e.target).filter((root) => !applyColor(root, hexInput(root).value, { commit: true, show: true }) && hexInput(root).value.trim());
+    if (bad.length) { e.preventDefault(); hexInput(bad[0]).focus(); }
+  }, true);
+  document.documentElement.addEventListener('fd:theme', remeasureColors);
+  document.documentElement.addEventListener('fd:accent', remeasureColors);
+  if (typeof MutationObserver !== 'undefined') {
+    new MutationObserver(remeasureColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-palette', 'data-accent', 'data-contrast', 'class'] });
+  }
+
+  /* Confirm on the page */
+  on(document, 'input', '[data-fd-confirm-inline] [data-fd-confirm-input]', (e, input) => updateConfirmInline(input.closest('[data-fd-confirm-inline]')));
+  document.addEventListener('submit', (e) => {
+    const root = e.target instanceof Element && e.target.matches('[data-fd-confirm-inline]') ? e.target : null;
+    if (root && root.hasAttribute('data-ready') && !updateConfirmInline(root)) { e.preventDefault(); $('[data-fd-confirm-input]', root)?.focus(); }
+  }, true);
+
+  /* Disabled with a reason: an aria-disabled control stays reachable and does nothing */
+  document.addEventListener('click', (e) => {
+    const off = e.target instanceof Element ? e.target.closest('.fd-reason [aria-disabled="true"]') : null;
+    if (off) { e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+
+  /* Recovery codes */
+  on(document, 'click', '[data-fd-codes-copy]', (e, button) => { const root = button.closest('[data-fd-codes]'); if (root) copyCodes(root, button); });
+  on(document, 'click', '[data-fd-codes-download]', (e, button) => { const root = button.closest('[data-fd-codes]'); if (root) downloadCodes(root); });
+
   /* Validation */
   on(document, 'focusout', 'form[data-fd-validate] :is(input, select, textarea)', (e, control) => {
     if (!validatable(control)) return;
@@ -1886,6 +2276,10 @@ function bind() {
       $$('input, select, textarea', form).forEach((el) => { delete el.dataset.touched; });
     }
     setTimeout(() => {
+      $$('[data-fd-datefield][data-ready]', form).forEach((f) => checkDateField(f));
+      $$('[data-fd-color][data-ready]', form).forEach((root) => applyColor(root, hexInput(root).value));
+      $$('[data-fd-confirm-inline][data-ready]', form).forEach(updateConfirmInline);
+      if (form.matches('[data-fd-confirm-inline][data-ready]')) updateConfirmInline(form);
       $$('.fd-slider', form).forEach(syncSlider);
       $$('.fd-number', form).forEach(syncNumber);
       $$('textarea[data-fd-autogrow]', form).forEach(autogrow);

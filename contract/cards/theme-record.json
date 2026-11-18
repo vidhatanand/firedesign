@@ -1,0 +1,28 @@
+{
+  "id": "theme-record",
+  "job": "Turn a product's whole look, one JSON record, into tokens, a stylesheet or a palette.",
+  "purpose": "A pure ES module, fire/js/theme.js, that runs in Node and in the browser. A theme record names a palette, a tone, a type set and the dials; validateTheme checks it, expandTheme returns its tokens and attributes, themeToCss writes a stylesheet, paletteFrom builds a palette from an accent or brand colours, and toThemeRecord and fromThemeRecord convert to and from the Tweaks panel's state.",
+  "useWhen": [
+    "A product stores its look as data and must apply it on the server, in a build step or in an email.",
+    "An agent or a design tool writes a theme and needs it checked before it is applied.",
+    "A strict content security policy forbids inline styles: write the record as a stylesheet with themeToCss."
+  ],
+  "avoidWhen": [
+    { "when": "A person is trying looks out in the browser.", "instead": "tweaks" },
+    { "when": "A single token needs a different value on one page.", "instead": "Set the custom property in your own stylesheet." }
+  ],
+  "aka": ["theme json", "theme expander", "design tokens json", "brand theme", "theme file"],
+  "surfaces": ["app", "website", "email"],
+  "data": ["record"],
+  "states": [
+    { "name": "invalid", "how": "validateTheme(record) returns the problems; an unknown field is an error" },
+    { "name": "default", "how": "a missing field is Fire's default; {} is the default look" }
+  ],
+  "variants": [],
+  "parts": [],
+  "related": ["tweaks"],
+  "keyboard": [],
+  "example": "docs/tweaks.html#records",
+  "provenance": ["fire/js/theme.js", "contract/theme.schema.json", "docs/tweaks.html"],
+  "since": "0.6.0"
+}

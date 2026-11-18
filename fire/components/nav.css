@@ -21,6 +21,11 @@
    Back           <a class="fd-back" href="…"><i data-icon="arrow-left"></i><span>Back to dashboard</span></a>
    Pagination     <nav class="fd-pagination"><p class="fd-pagination-info">Page <b>1</b> of 12</p><div class="fd-btn-group">…</div></nav>
    Steps          <ol class="fd-steps"><li class="fd-step" data-state="done|current"><span class="fd-step-marker"></span><span class="fd-step-body">…</span></li></ol>
+                  data-orientation="vertical" · data-variant="tracker" (one record's stages: words under the markers,
+                  vertical below 560px of its own width; data-orientation="horizontal" keeps it across)
+                  fd-step[data-state] wizard: done | current | error; live work: running | failed | waiting | skipped;
+                  aria-current="step" on the step the flow or record is at (with any state)
+                  fd-step-body > fd-step-title, fd-step-desc, fd-step-owner (> fd-avatar + name) · fd-step-action (after the body)
    TOC            <nav class="fd-toc"><p class="fd-toc-title">On this page</p><div class="fd-toc-list"><a class="fd-toc-item" aria-current="true">…</a></div></nav>
 
    Scrollers (tabs, chip nav, phone subnav) get data-overflow="start|end|both" from nav.js
@@ -52,6 +57,7 @@
   --fd-nav-step-link: 16px;          /* connector: preferred length */
   --fd-nav-step-link-min: 12px;      /*   and minimum */
   --fd-nav-step-nudge: 1px;          /* vertical: aligns the text with the marker */
+  --fd-nav-step-arc: 1.5px;          /* running step: the turning arc */
   /* on this page */
   --fd-nav-toc-bar: 2px;             /* active marker thickness */
   --fd-nav-toc-bar-inset: 4px;       /*   and its inset top and bottom */
@@ -249,8 +255,8 @@
 .fd-segmented-label {
   position: absolute; inset-inline-start: var(--_n-px);
   bottom: calc(100% + var(--_n-pad) + var(--fd-space-1-5));
-  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
-  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase;
+  font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight);
   color: var(--fd-text-3);
   white-space: nowrap; pointer-events: none;
 }
@@ -400,8 +406,12 @@
 .fd-pagination-gap { display: inline-grid; place-items: center; width: var(--fd-control-xs); color: var(--fd-text-4); font-size: var(--fd-text-sm); user-select: none; }
 .fd-pagination[data-variant="numbered"] { justify-content: center; gap: var(--fd-space-1); }
 
-/* ---------- Steps (wizard) ---------- */
+/* ---------- Steps (wizard, live work, lifecycle tracker) ---------- */
 .fd-steps {
+  --_n-glyph-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  --_n-glyph-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
+  --_n-glyph-skip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12h12'/%3E%3C/svg%3E");
+  --_n-glyph-wait: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h12'/%3E%3Cpath d='M6 21h12'/%3E%3Cpath d='M7.5 3v3.2a3 3 0 0 0 1 2.2L12 12l3.5-3.6a3 3 0 0 0 1-2.2V3'/%3E%3Cpath d='M7.5 21v-3.2a3 3 0 0 1 1-2.2L12 12l3.5 3.6a3 3 0 0 1 1 2.2V21'/%3E%3C/svg%3E");
   display: flex; align-items: center; gap: var(--fd-space-3);
   min-width: 0; margin: 0; padding: 0; list-style: none;
   counter-reset: fd-step;
@@ -437,6 +447,14 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .fd-step-desc { font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Who the step waits on: an avatar and a name, under the title. */
+.fd-step-owner {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1-5); min-width: 0; margin-top: var(--fd-space-1);
+  font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3);
+}
+.fd-step-owner > .fd-avatar { flex: none; }
+/* What to do about the step now: one small button or link. */
+.fd-step-action { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); flex: none; min-width: 0; }
 /* An interactive step (go back to a finished one). */
 .fd-step > :is(a, button):first-child {
   display: flex; align-items: center; gap: var(--fd-space-2-5); min-width: 0;
@@ -451,39 +469,117 @@
 }
 .fd-step[data-state="done"] { color: var(--fd-text-2); }
 .fd-step[data-state="done"] .fd-step-marker { background: var(--fd-fill-active); box-shadow: none; color: transparent; }
-.fd-step[data-state="done"] .fd-step-marker::after {
-  content: ""; position: absolute; inset: 0; margin: auto;
-  width: var(--fd-icon-xs); height: var(--fd-icon-xs);
-  background: var(--fd-text);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
-  animation: fd-pop var(--fd-dur-3) var(--fd-ease-spring) both;
-}
 .fd-steps:not([data-orientation="vertical"]) > .fd-step[data-state="done"]:not(:last-child)::after { background: var(--fd-line-strong); }
 .fd-step[data-state="error"] .fd-step-marker { background: var(--fd-danger-bg); color: var(--fd-danger-text); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-danger-line); }
 
+/* Live work. A step that is running, failed or waiting on someone is open work, so it reads at full strength; only
+   upcoming and skipped steps are muted. Each state has its own mark, so none relies on colour alone. */
+.fd-step:is([data-state="running"], [data-state="failed"], [data-state="waiting"]) { color: var(--fd-text); }
+.fd-step:is([data-state="done"], [data-state="failed"], [data-state="skipped"], [data-state="waiting"]) .fd-step-marker { color: transparent; }
+.fd-step:is([data-state="done"], [data-state="failed"], [data-state="skipped"], [data-state="waiting"]) .fd-step-marker::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: var(--fd-icon-xs); height: var(--fd-icon-xs);
+  background: var(--_n-gc, var(--fd-text));
+  -webkit-mask: var(--_n-glyph) center / contain no-repeat;
+  mask: var(--_n-glyph) center / contain no-repeat;
+  animation: fd-pop var(--fd-dur-3) var(--fd-ease-spring) both;
+}
+.fd-step[data-state="done"] { --_n-glyph: var(--_n-glyph-check); --_n-gc: var(--fd-text); }
+.fd-step[data-state="failed"] { --_n-glyph: var(--_n-glyph-x); --_n-gc: var(--fd-danger-text); }
+.fd-step[data-state="failed"] .fd-step-marker { background: var(--fd-danger-bg); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-danger-line); }
+.fd-step[data-state="waiting"] { --_n-glyph: var(--_n-glyph-wait); --_n-gc: var(--fd-warning-text); }
+.fd-step[data-state="waiting"] .fd-step-marker { background: var(--fd-warning-bg); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-warning-line); }
+/* Skipped: did not run. A dashed ring and a dash, like a skipped pipeline job. */
+.fd-step[data-state="skipped"] { --_n-glyph: var(--_n-glyph-skip); --_n-gc: var(--fd-text-3); }
+.fd-step[data-state="skipped"] .fd-step-marker {
+  background: transparent; box-shadow: none;
+  outline: var(--fd-hairline) dashed var(--fd-line-strong); outline-offset: calc(var(--fd-hairline) * -1);
+}
+/* Running: the current step's accent with an arc turning around the number. */
+.fd-step[data-state="running"] .fd-step-marker { background: var(--fd-accent-8); color: var(--fd-accent-text); box-shadow: none; }
+.fd-step[data-state="running"] .fd-step-marker::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  border: var(--fd-nav-step-arc) solid var(--fd-accent-16); border-block-start-color: var(--fd-accent);
+  animation: fd-spin var(--fd-loop-spin) linear infinite;
+}
+/* The step the record is at keeps its halo in its own tone. */
+.fd-step[aria-current="step"][data-state="running"] .fd-step-marker { box-shadow: 0 0 0 var(--fd-nav-step-ring) var(--fd-accent-12); }
+.fd-step[aria-current="step"][data-state="failed"] .fd-step-marker { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-danger-line), 0 0 0 var(--fd-nav-step-ring) var(--fd-danger-bg); }
+.fd-step[aria-current="step"][data-state="waiting"] .fd-step-marker { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-warning-line), 0 0 0 var(--fd-nav-step-ring) var(--fd-warning-bg); }
+.fd-step[data-state="failed"] .fd-step-desc { color: var(--fd-danger-text); }
+
 /* Vertical: a rail of markers with the connector beneath each. */
+/* Vertical lists and trackers measure themselves (their own width decides the layout), so they fill their container's
+   width: a size container cannot take its width from its content. */
+.fd-steps:is([data-orientation="vertical"], [data-variant="tracker"]) { container: fd-steps / inline-size; inline-size: 100%; }
 .fd-steps[data-orientation="vertical"] { flex-direction: column; align-items: stretch; gap: 0; }
-.fd-steps[data-orientation="vertical"] > .fd-step { flex: none; align-items: flex-start; padding-bottom: var(--fd-space-5); }
+.fd-steps[data-orientation="vertical"] > .fd-step { flex: none; flex-wrap: wrap; align-items: flex-start; padding-bottom: var(--fd-space-5); }
 .fd-steps[data-orientation="vertical"] > .fd-step:last-child { padding-bottom: 0; }
 .fd-steps[data-orientation="vertical"] > .fd-step:not(:last-child)::before {
   content: ""; position: absolute; inset-inline-start: calc(var(--fd-nav-step-marker) / 2 - var(--fd-hairline) / 2); top: calc(var(--fd-nav-step-marker) + var(--fd-space-1-5)); bottom: var(--fd-space-1-5);
   width: var(--fd-hairline); background: var(--fd-line);
 }
 .fd-steps[data-orientation="vertical"] > .fd-step[data-state="done"]:not(:last-child)::before { background: var(--fd-line-strong); }
-.fd-steps[data-orientation="vertical"] .fd-step-body { padding-top: var(--fd-nav-step-nudge); }
+.fd-steps[data-orientation="vertical"] .fd-step-body { flex: 1 1 0; padding-top: var(--fd-nav-step-nudge); }
 .fd-steps[data-orientation="vertical"] :is(.fd-step-title, .fd-step-desc) { white-space: normal; }
+.fd-steps[data-orientation="vertical"] .fd-step-action { margin-inline-start: auto; }
+/* A narrow list puts the action under the text, where the body starts. */
+@container fd-steps (max-width: 479.98px) {
+  .fd-steps[data-orientation="vertical"] .fd-step-action { flex-basis: 100%; margin-inline-start: 0; padding-inline-start: calc(var(--fd-nav-step-marker) + var(--fd-space-2-5)); }
+}
 
 @container (max-width: 560px) {
-  .fd-steps:not([data-orientation="vertical"]) > .fd-step:not([aria-current="step"]):not([data-state="current"]) .fd-step-body { display: none; }
-  .fd-steps:not([data-orientation="vertical"]) .fd-step-desc { display: none; }
+  .fd-steps:not([data-orientation="vertical"], [data-variant="tracker"]) > .fd-step:not([aria-current="step"]):not([data-state="current"]) .fd-step-body { display: none; }
+  .fd-steps:not([data-orientation="vertical"], [data-variant="tracker"]) .fd-step-desc { display: none; }
+}
+/* The same on a phone when no ancestor is a size container (the query above then never matches): a viewport this
+   narrow always holds a container this narrow, so where there is one the two agree. */
+@media (max-width: 560px) {
+  .fd-steps:not([data-orientation="vertical"], [data-variant="tracker"]) > .fd-step:not([aria-current="step"]):not([data-state="current"]) .fd-step-body { display: none; }
+  .fd-steps:not([data-orientation="vertical"], [data-variant="tracker"]) .fd-step-desc { display: none; }
+}
+
+/* Tracker: the stages of one record (Proposed, Checked, Approved, Testing, Result). Each stage is a column with its
+   marker on one line and its words centred under it; below 560px of its own width it turns into the vertical list.
+   data-orientation="horizontal" keeps it across. */
+.fd-steps[data-variant="tracker"] { flex-wrap: wrap; align-items: flex-start; gap: 0; }
+.fd-steps[data-variant="tracker"] > .fd-step,
+.fd-steps[data-variant="tracker"] > .fd-step:last-child {
+  flex: 1 1 0; flex-direction: column; align-items: center; gap: var(--fd-space-2);
+  min-width: 0; padding-inline: var(--fd-space-2); text-align: center;
+}
+.fd-steps[data-variant="tracker"] > .fd-step:not(:last-child)::after {
+  position: absolute; top: calc(var(--fd-nav-step-marker) / 2);
+  inset-inline-start: calc(50% + var(--fd-nav-step-marker) / 2 + var(--fd-space-2));
+  width: calc(100% - var(--fd-nav-step-marker) - 2 * var(--fd-space-2)); min-width: 0;
+}
+.fd-steps[data-variant="tracker"] .fd-step-body { align-items: center; }
+.fd-steps[data-variant="tracker"] :is(.fd-step-title, .fd-step-desc) { white-space: normal; overflow-wrap: anywhere; }
+.fd-steps[data-variant="tracker"] .fd-step-action { justify-content: center; }
+@container fd-steps (max-width: 559.98px) {
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) > .fd-step,
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) > .fd-step:last-child {
+    flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: var(--fd-space-2-5);
+    padding: 0 0 var(--fd-space-5); text-align: start;
+  }
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) > .fd-step:last-child { padding-bottom: 0; }
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) > .fd-step:not(:last-child)::after { content: none; }
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) > .fd-step:not(:last-child)::before {
+    content: ""; position: absolute; inset-inline-start: calc(var(--fd-nav-step-marker) / 2 - var(--fd-hairline) / 2); top: calc(var(--fd-nav-step-marker) + var(--fd-space-1-5)); bottom: var(--fd-space-1-5);
+    width: var(--fd-hairline); background: var(--fd-line);
+  }
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) > .fd-step[data-state="done"]:not(:last-child)::before { background: var(--fd-line-strong); }
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) .fd-step-body { flex: 1 1 0; align-items: flex-start; padding-top: var(--fd-nav-step-nudge); }
+  .fd-steps[data-variant="tracker"]:not([data-orientation="horizontal"]) .fd-step-action {
+    flex-basis: 100%; justify-content: flex-start; padding-inline-start: calc(var(--fd-nav-step-marker) + var(--fd-space-2-5));
+  }
 }
 
 /* ---------- On this page ---------- */
 .fd-toc { display: flex; flex-direction: column; gap: var(--fd-space-2-5); min-width: 0; }
 .fd-toc-title {
-  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
-  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3);
+  font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3);
 }
 .fd-toc-list { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .fd-toc-list::before {

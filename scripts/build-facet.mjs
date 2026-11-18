@@ -793,6 +793,8 @@ w();
 w(`Carried without a card (${noCard.length}; each has a minimal entry from the catalogue: purpose, classes as parts, attribute values as props, states from the CSS and the \`data-state\` values): ${noCard.length ? noCard.map((i) => `\`${i}\``).join(', ') : 'none'}.`);
 w();
 }
+w(`- **Modules are not carried.** The catalogue also lists ${(catalog.modules || []).length} modules (${(catalog.modules || []).map((m) => `\`${m.id}\``).join(', ')}): JS-only parts such as the email renderer and the theme record, each with a card. They are not Facet components and are not in \`components\`; their cards are in \`contract/catalog.json\` under \`modules\`, carried in the extras.`);
+w();
 w('## Where Fire\'s model did not fit Facet\'s');
 w();
 w('- **Accent role.** Facet requires an `accent` colour; Fire has one accent. `accent` repeats `primary` and Facet may set another.');

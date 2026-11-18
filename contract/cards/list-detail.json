@@ -1,0 +1,110 @@
+{
+  "id": "list-detail",
+  "job": "Work through a queue: pick a record from a list and read or act on it beside the list.",
+  "purpose": "Two panes: a list of rows (buttons with data-value) and the record that is open. The open row has aria-current=\"true\" and the accent wash. Panels in the main pane with a matching data-detail are shown for you, or the page renders the record on fd:select. Below 760px of its own width one pane shows at a time (data-view=\"list|detail\"): focus moves to the record's heading, and the back button returns it to the row.",
+  "useWhen": [
+    "People decide or review records one after another: requests, approvals, failures, messages.",
+    "The list must stay in view while one record is open, and a phone shows the list first."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Each record needs its own page and address.",
+      "instead": "table"
+    },
+    {
+      "when": "The side pane is settings navigation.",
+      "instead": "subnav"
+    },
+    {
+      "when": "The detail is a short summary over the page.",
+      "instead": "sheet"
+    }
+  ],
+  "aka": [
+    "master-detail",
+    "list-detail",
+    "split view",
+    "inbox",
+    "queue",
+    "drill-down"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "selected",
+      "how": "aria-current=\"true\" on the open row"
+    },
+    {
+      "name": "list",
+      "how": "data-view=\"list\" (the default): below 760px only the list shows"
+    },
+    {
+      "name": "detail",
+      "how": "data-view=\"detail\": below 760px only the record shows, with fd-list-detail-back"
+    },
+    {
+      "name": "loading",
+      "how": "aria-busy=\"true\" on the root with skeletons in both panes"
+    },
+    {
+      "name": "empty",
+      "how": "an fd-empty in place of the whole layout"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-view",
+      "value": "detail",
+      "useWhen": "Rendering a page whose address names one record, so a phone opens on it."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-list-detail",
+      "role": "The root: two columns, one pane at a time below 760px of its own width."
+    },
+    {
+      "class": "fd-list-detail-list",
+      "role": "The list pane: a heading and an fd-list (or cards) of rows with data-value."
+    },
+    {
+      "class": "fd-list-detail-main",
+      "role": "The record pane: the back button and the record, or [data-detail] panels."
+    },
+    {
+      "class": "fd-list-detail-back",
+      "role": "The way back to the list, shown only when one pane shows; put it on an fd-back button."
+    }
+  ],
+  "related": [
+    "list",
+    "card",
+    "split",
+    "back",
+    "empty"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "On a row: opens its record; on a phone focus moves to the record's heading."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "On the back button: returns to the list with focus on the open row."
+    }
+  ],
+  "example": "docs/data.html#list-detail",
+  "provenance": [
+    "docs/data.html",
+    "fire/components/data.css",
+    "fire/js/data.js"
+  ],
+  "since": "0.7.0"
+}

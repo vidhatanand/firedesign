@@ -67,6 +67,7 @@
   --fd-code-search-pad: 28px;               /* room for the search icon */
   --fd-code-term-dot: 10px;
   --fd-code-title-inset: 72px;              /* terminal title clears the dots */
+  --fd-code-num-min: 3ch;                   /* line-number column: room for three digits */
   /* diff and schema */
   --fd-code-bar: 7px;
   --fd-code-num-pad: 20px;
@@ -154,7 +155,7 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .fd-codeblock-file > .fd-icon { width: var(--fd-icon-sm); height: var(--fd-icon-sm); color: var(--fd-text-4); }
-.fd-codeblock-lang { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3); }
+.fd-codeblock-lang { font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3); }
 .fd-codeblock-actions { display: flex; align-items: center; gap: var(--fd-space-0-5); margin-inline-start: auto; flex: none; }
 
 /* Language tabs: quiet text with an ink underline. */
@@ -226,11 +227,13 @@
 }
 .fd-codeblock[data-lines] .fd-codeblock-line::before { content: counter(fd-line); }
 .fd-codeblock-line[data-hl] { background-color: var(--fd-accent-8); box-shadow: inset var(--fd-code-rule-bold) 0 0 var(--fd-accent); }
+.fd-codeblock-line[data-hl]:dir(rtl) { box-shadow: inset calc(var(--fd-code-rule-bold) * -1) 0 0 var(--fd-accent); }
 .fd-codeblock-line[data-hl]::before {
   background-image: linear-gradient(var(--fd-accent-8), var(--fd-accent-8));
   box-shadow: inset var(--fd-code-rule-bold) 0 0 var(--fd-accent);
   color: var(--fd-accent-text);
 }
+.fd-codeblock-line[data-hl]:dir(rtl)::before { box-shadow: inset calc(var(--fd-code-rule-bold) * -1) 0 0 var(--fd-accent); }
 
 /* Wrap */
 .fd-codeblock[data-wrap] .fd-codeblock-body > code { width: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -293,7 +296,7 @@
   font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text);
 }
 .fd-snippet[data-size="sm"] { --_k-h: var(--fd-control-md); font-size: var(--fd-text-xs); }
-.fd-snippet-prompt { flex: none; color: var(--fd-text-4); user-select: none; }
+.fd-snippet-prompt { flex: none; color: var(--fd-text-3); user-select: none; }   /* read like any text: 4.5:1 */
 .fd-snippet-text {
   flex: 1 1 auto; min-width: 0;
   font: inherit; color: inherit; background: none; padding: 0;
@@ -305,7 +308,7 @@
 .fd-snippet-em { color: var(--fd-accent-text); }
 .fd-snippet-copy:hover { background: var(--fd-fill-hover); }
 .fd-snippet[data-variant="accent"] { background: var(--fd-accent-8); color: var(--fd-accent-text); }
-.fd-snippet[data-variant="accent"] .fd-snippet-prompt { color: color-mix(in srgb, var(--fd-accent-text) 56%, transparent); }
+.fd-snippet[data-variant="accent"] .fd-snippet-prompt { color: var(--fd-text-3); }
 .fd-snippet[data-variant="accent"] .fd-snippet-dim { color: var(--fd-text-2); }
 .fd-snippet[data-variant="accent"] .fd-snippet-copy { color: color-mix(in srgb, var(--fd-accent-text) 72%, transparent); }
 .fd-snippet[data-variant="accent"] .fd-snippet-copy:hover { background: var(--fd-accent-12); color: var(--fd-accent-text); }
@@ -507,6 +510,10 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
      </div>
    </div>
    data-fit: the body is as tall as its lines, up to the usual height (or data-height), and scrolls from there.
+   data-lines: each row gets a line number that links to it, <a class="fd-log-num" href="#L42">42</a>, and the row
+   the id L42 (data-anchor="build" makes it build-L42). The row the address points at, or the one a number or
+   "First error" chose, is aria-current="true". <button class="fd-log-btn" data-action="first-error"> jumps to the
+   first row with data-level="error" (terminal rows may carry it too) and is disabled while there is none.
    data-variant="terminal": add <div class="fd-log-title"><span class="fd-log-dots"><i></i><i></i><i></i></span><span class="fd-log-title-text">ember — zsh</span></div>
    rows hold <span class="fd-log-msg"> only; <span class="fd-log-prompt">$</span>, <span class="fd-log-cursor"></span>.
    ANSI-ish tones: <span class="fd-log-tone" data-tone="success|warning|danger|info|violet|dim|bold">.
@@ -534,9 +541,9 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
   transition: box-shadow var(--fd-dur-2) var(--fd-ease-out);
 }
 .fd-log-search > input:hover { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong); }
-.fd-log-search > input:focus { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-accent), 0 0 0 var(--fd-code-halo) var(--fd-accent-16); border-radius: var(--fd-radius-md); }
+.fd-log-search > input:focus { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-focus), 0 0 0 var(--fd-code-halo) var(--fd-accent-16); border-radius: var(--fd-radius-md); }
 .fd-log-search > input::-webkit-search-cancel-button { -webkit-appearance: none; }
-.fd-log-filters { display: flex; align-items: center; gap: var(--fd-space-0-5); }
+.fd-log-filters { display: flex; align-items: center; flex-wrap: wrap; gap: var(--fd-space-0-5); min-width: 0; max-width: 100%; }
 .fd-log-filter, .fd-log-follow {
   display: inline-flex; align-items: center; gap: var(--fd-space-1-5); flex: none;
   height: var(--fd-control-sm); padding: 0 var(--fd-space-2); border-radius: var(--fd-radius-md);
@@ -638,6 +645,28 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
   animation: fd-blink var(--fd-loop-blink) steps(1) infinite;
 }
 
+/* Line numbers and anchors (data-lines). The numbers are links: one tab stop, arrows walk the lines. */
+.fd-log[data-lines] .fd-log-body { grid-template-columns: auto auto auto minmax(max-content, 1fr); }
+.fd-log[data-lines][data-wrap] .fd-log-body { grid-template-columns: auto auto auto minmax(0, 1fr); }
+.fd-log[data-variant="terminal"][data-lines] .fd-log-body { grid-template-columns: auto minmax(max-content, 1fr); }
+.fd-log[data-variant="terminal"][data-lines][data-wrap] .fd-log-body { grid-template-columns: auto minmax(0, 1fr); }
+.fd-log-num {
+  min-width: var(--fd-code-num-min); text-align: end;
+  color: var(--fd-text-3); text-decoration: none; font-variant-numeric: tabular-nums; user-select: none;
+  border-radius: var(--fd-code-radius-nub);
+  transition: color var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-log-num:hover { color: var(--fd-text); text-decoration: underline; text-decoration-thickness: var(--fd-hairline); text-underline-offset: var(--fd-code-halo); }
+.fd-log-num:focus-visible { box-shadow: var(--fd-ring); }
+/* The linked line: an accent start bar on every row, and the accent wash unless the row is an error. */
+.fd-log .fd-log-row[aria-current="true"] { box-shadow: inset var(--fd-code-rule-bold) 0 0 0 var(--fd-accent); }
+.fd-log .fd-log-row[aria-current="true"]:dir(rtl) { box-shadow: inset calc(var(--fd-code-rule-bold) * -1) 0 0 0 var(--fd-accent); }
+.fd-log .fd-log-row[aria-current="true"]:not([data-level="error"]),
+.fd-log .fd-log-row[aria-current="true"]:not([data-level="error"]):hover { background: var(--fd-accent-12); }
+.fd-log .fd-log-row[aria-current="true"] .fd-log-num { color: var(--fd-accent-text); }
+.fd-log[data-variant="terminal"] .fd-log-row[data-level="error"] { background: var(--fd-danger-bg); }
+.fd-log-btn:disabled { background: none; color: var(--fd-text-4); cursor: not-allowed; scale: none; }
+
 /* ==========================================================================
    Diff — unified, with old/new line numbers.
    <div class="fd-diff" data-file="ember.config.json" data-lang="json">
@@ -728,7 +757,7 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
 .fd-schema-value {
   font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-code-value-lh);
   padding: 0 var(--fd-space-1-5); border-radius: var(--fd-radius-sm);
-  background: var(--fd-surface); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint); color: var(--fd-text-2);
+  background: var(--fd-surface); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-surface-edge); color: var(--fd-text-2);
 }
 .fd-schema-toggle {
   display: inline-flex; align-items: center; gap: var(--fd-space-1); margin-top: var(--fd-space-1);

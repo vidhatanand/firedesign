@@ -2,6 +2,15 @@
    Overlays — everything that floats above the page.
    fd-menu · fd-popover · fd-tooltip · fd-hovercard · fd-dialog · fd-confirm
    fd-sheet · fd-toast · fd-command
+   Date (markup in fire/js/overlays.js):
+     fd-daterange                       presets, calendar and Apply
+     fd-daterange-compare               a band in a fd-daterange: "Compared with" radios (none, previous period, same
+       > fd-daterange-compare-label       period last year) and the comparison dates
+       > fd-daterange-compare-dates
+     fd-period                          on the fd-filter that triggers a fd-daterange with a compare band; the range and,
+       > fd-period-compare                muted, "vs <comparison dates>" (empty and hidden when there is none)
+     fd-datefield-panel                 the calendar popover of a fd-datefield (forms.css), with fd-datefield-foot
+                                        (Today and Clear)
    Behaviour lives in fire/js/overlays.js; its header documents the markup.
 
    Floating surfaces (menu, popover, tooltip, hovercard) use the native
@@ -216,8 +225,8 @@
 
 .fd-menu-label {
   padding: var(--fd-space-2) var(--fd-space-2-5) var(--fd-space-1);
-  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
-  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3);
+  font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3);
   user-select: none;
 }
 .fd-menu-sep { height: var(--fd-hairline); margin: var(--_o-pad) calc(-1 * var(--_o-pad)); border: 0; background: var(--fd-line-faint); }
@@ -357,11 +366,11 @@
 .fd-popover[data-size="sm"] { --_o-w: var(--fd-popover-w-sm); }
 .fd-popover[data-size="lg"] { --_o-w: var(--fd-popover-w-lg); }
 .fd-popover[data-size="auto"] { --_o-w: calc(100vw - var(--fd-overlay-inset)); }
-.fd-popover:has(> :is(.fd-popover-head, .fd-popover-body, .fd-popover-foot, .fd-popover-search, .fd-daterange)) {
+.fd-popover:has(> :is(.fd-popover-head, .fd-popover-body, .fd-popover-foot, .fd-popover-search, .fd-daterange, .fd-datefield-panel)) {
   --_o-pad: 0px;
   width: min(var(--_o-w), calc(100vw - var(--fd-overlay-inset)));
 }
-.fd-popover[data-size="auto"]:has(> .fd-daterange) { width: max-content; }
+.fd-popover[data-size="auto"]:has(> :is(.fd-daterange, .fd-datefield-panel)) { width: max-content; }
 .fd-popover[data-static-demo], .fd-hovercard[data-static-demo] { display: block; width: min(var(--_o-w), 100%); }
 .fd-popover[data-static-demo][data-size="auto"] { width: max-content; max-width: 100%; }
 
@@ -504,7 +513,7 @@
 .fd-calendar-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; }
 .fd-calendar-grid { display: grid; row-gap: var(--fd-space-0-5); }
 .fd-calendar-row { display: grid; grid-template-columns: repeat(7, var(--_o-cell)); }
-.fd-calendar-weekday { display: grid; place-items: center; height: var(--fd-calendar-weekday-h); font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-text-3); text-transform: uppercase; letter-spacing: var(--fd-ls-eyebrow); }
+.fd-calendar-weekday { display: grid; place-items: center; height: var(--fd-calendar-weekday-h); font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: 1; color: var(--fd-text-3); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); letter-spacing: var(--fd-eyebrow-ls); }
 .fd-calendar-cell { position: relative; height: var(--_o-cell); }
 .fd-calendar-cell::before { content: ""; position: absolute; inset: 0; background: transparent; pointer-events: none; }
 .fd-calendar-cell[data-range="middle"]::before { background: var(--fd-accent-8); }
@@ -532,8 +541,33 @@
 }
 .fd-calendar-day[data-today][aria-selected="true"]::after { background: var(--fd-accent-contrast); }
 
+/* ---------- Period with comparison: a .fd-daterange with a compare band, and its trigger ---------- */
+.fd-daterange:has(> .fd-daterange-compare) { grid-template-areas: "presets main" "compare compare" "foot foot"; }
+.fd-daterange:has(> .fd-daterange-compare) > .fd-daterange-main { display: grid; justify-content: center; }
+.fd-daterange-compare {
+  grid-area: compare; display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1-5) var(--fd-space-4);
+  padding: var(--fd-space-2-5) var(--fd-space-4);
+  border-top: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-daterange-compare-label { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label); color: var(--fd-text-2); }
+.fd-daterange-compare .fd-options { display: flex; flex-wrap: wrap; gap: var(--fd-space-1) var(--fd-space-4); }
+.fd-daterange-compare-dates { margin-inline-start: auto; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); font-variant-numeric: tabular-nums; }
+.fd-period .fd-filter-value { display: inline-flex; align-items: baseline; gap: var(--fd-space-2); max-inline-size: none; }
+.fd-period-compare { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fd-text-3); font-weight: var(--fd-weight-regular); font-variant-numeric: tabular-nums; }
+.fd-period-compare:empty { display: none; }
+.fd-period-compare::before { content: "·"; margin-inline-end: var(--fd-space-2); }
+
+/* ---------- Date field panel: the calendar under a .fd-datefield ---------- */
+.fd-datefield-panel { padding: var(--fd-space-3) var(--fd-space-4) var(--fd-space-2); }
+.fd-datefield-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-2);
+  margin-block-start: var(--fd-space-2); margin-inline: calc(var(--fd-space-1) * -1);
+}
+
 @media (max-width: 640px) {
   .fd-daterange { grid-template-columns: minmax(0, 1fr); grid-template-areas: "presets" "main" "foot"; }
+  .fd-daterange:has(> .fd-daterange-compare) { grid-template-areas: "presets" "main" "compare" "foot"; }
+  .fd-daterange-compare-dates { margin-inline-start: 0; inline-size: 100%; }
   .fd-daterange-presets { flex-direction: row; overflow-x: auto; border-inline-end: 0; border-bottom: var(--fd-hairline) solid var(--fd-line-faint); scrollbar-width: none; }
   .fd-daterange-preset { flex: none; }
   .fd-daterange-main { display: grid; justify-content: center; }
@@ -590,7 +624,7 @@
   border-top: var(--fd-hairline) solid var(--fd-line-faint);
 }
 .fd-hovercard-stats > div { display: grid; gap: var(--fd-space-0-5); min-width: 0; }
-.fd-hovercard-stats dt { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-hovercard-stats dt { font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-hovercard-stats dd { margin: 0; font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
@@ -920,6 +954,9 @@
      </li>
    </ol>
    data-tone  neutral | success | danger | warning | info | loading
+   data-held  a held toast (toast.hold): nothing has happened yet. Its icon is the countdown ring of fd-hold
+              (fd-hold-ring data-size="sm", content.css) beside Undo, and it has no close button.
+   Done · Undo: toast({ undo }) puts Undo in fd-toast-action; it lasts 8 seconds.
    ========================================================================== */
 .fd-toaster {
   --_o-w: var(--fd-toast-w);
@@ -1001,6 +1038,10 @@
   border: var(--fd-toast-spinner-w) solid var(--fd-a16); border-top-color: var(--fd-text-2);
   animation: fd-spin var(--fd-loop-spin) linear infinite;
 }
+/* Held: the ring takes the icon's place and counts down in the toast's tone. */
+.fd-toast[data-held] { align-items: center; }
+.fd-toast[data-held] .fd-toast-icon { width: auto; height: auto; --_c-c: var(--fd-text); }
+.fd-toast[data-held]:is([data-tone="danger"], [data-tone="warning"], [data-tone="accent"]) .fd-toast-icon { --_c-c: var(--_o-tone); }
 .fd-toast-content { flex: 1 1 auto; min-width: 0; display: grid; gap: var(--fd-space-0-5); }
 .fd-toast-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .fd-toast-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty; overflow-wrap: anywhere; }
@@ -1039,6 +1080,11 @@
      <div class="fd-command-empty" hidden>…</div>
      <div class="fd-command-foot">…key hints…</div>
    </dialog>
+
+   Found records (command.records() in overlays.js): a group of items that a search returned, not actions.
+     .fd-command-group[data-records="Runs"]   the group; aria-busy="true" while a search runs (its old rows dim)
+     .fd-command-item[data-found]             a record: the palette's filter never hides or re-ranks it
+     .fd-command-note[data-state="loading|error"]   one quiet line in a group: "Searching runs…" or the error
    ========================================================================== */
 .fd-command {
   position: fixed;
@@ -1075,8 +1121,8 @@
 .fd-command-group + .fd-command-group { margin-block-start: var(--fd-space-1-5); }
 .fd-command-group-label {
   padding: var(--fd-space-2) var(--fd-space-2-5) var(--fd-space-1-5);
-  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
-  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3);
+  font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3);
 }
 .fd-command-item {
   display: flex; align-items: center; gap: var(--fd-space-3);
@@ -1097,6 +1143,9 @@
 .fd-command-item-hint.fd-mono, .fd-command-item-hint > .fd-mono { font-size: var(--fd-text-xs); }
 .fd-command-item > .fd-kbd + .fd-kbd { margin-inline-start: var(--fd-space-0-5); }
 .fd-command-item > .fd-status, .fd-command-item > .fd-badge { flex: none; margin-inline-start: auto; }
+.fd-command-group[aria-busy="true"] > .fd-command-item { opacity: 0.55; }
+.fd-command-note { margin: 0; padding: var(--fd-space-2-5) var(--fd-space-2-5); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-command-note[data-state="error"] { color: var(--fd-danger-text); }
 .fd-command-empty { flex: none; display: grid; justify-items: center; gap: var(--fd-space-1); padding: var(--fd-space-10) var(--fd-space-6); text-align: center; }
 .fd-command-empty > .fd-icon { width: var(--fd-icon-lg); height: var(--fd-icon-lg); margin-block-end: var(--fd-space-2); color: var(--fd-text-4); }
 .fd-command-empty-title { font-weight: var(--fd-weight-label); color: var(--fd-text); }

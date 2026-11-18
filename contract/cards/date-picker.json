@@ -1,7 +1,7 @@
 {
   "id": "date-picker",
   "job": "Choose a start and an end date, with presets for the usual ranges.",
-  "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs.",
+  "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs. With a compare band it becomes a period (see period).",
   "useWhen": [
     "A log, a chart or a report is filtered by a time range.",
     "People mostly want the same few ranges but sometimes a custom one."
@@ -9,7 +9,7 @@
   "avoidWhen": [
     {
       "when": "A single date in a form.",
-      "instead": "input"
+      "instead": "datefield"
     },
     {
       "when": "A time of day or a number.",
@@ -52,7 +52,13 @@
       "how": "data-today on today's cell, shown with an accent dot"
     }
   ],
-  "variants": [],
+  "variants": [
+    {
+      "attribute": "data-compare",
+      "value": "*",
+      "useWhen": "Starts a period on previous or year instead of none."
+    }
+  ],
   "parts": [
     {
       "class": "fd-daterange",
@@ -89,13 +95,27 @@
     {
       "class": "fd-daterange-foot",
       "role": "Cancel and Apply."
+    },
+    {
+      "class": "fd-daterange-compare",
+      "role": "The band under the calendar: Compared with radios and the comparison dates."
+    },
+    {
+      "class": "fd-daterange-compare-label",
+      "role": "The band's label."
+    },
+    {
+      "class": "fd-daterange-compare-dates",
+      "role": "The comparison dates as text."
     }
   ],
   "related": [
-    "popover",
+    "chart",
+    "datefield",
     "filter",
-    "segmented",
-    "chart"
+    "period",
+    "popover",
+    "segmented"
   ],
   "keyboard": [
     {

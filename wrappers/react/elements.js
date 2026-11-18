@@ -23,7 +23,7 @@ const shape = (name, fields) => {
 export const FireChart = createComponent({
   react: React,
   tagName: 'fd-chart',
-  elementClass: shape('FdChart', ['type', 'variant', 'data', 'height', 'width', 'legend', 'grid', 'state', 'label', 'yFormat', 'values', 'area', 'dot', 'invert', 'fluid', 'tone', 'size', 'thickness', 'value', 'max', 'format']),
+  elementClass: shape('FdChart', ['type', 'variant', 'data', 'height', 'width', 'legend', 'grid', 'hideLabels', 'state', 'label', 'yFormat', 'values', 'area', 'dot', 'invert', 'fluid', 'tone', 'size', 'thickness', 'value', 'max', 'format']),
   events: { onHover: 'fd:hover', onSelect: 'fd:select', onChange: 'fd:change' },
   displayName: 'FireChart',
 });
@@ -50,7 +50,7 @@ export const FireIcon = createComponent({
 export const FireTexture = createComponent({
   react: React,
   tagName: 'fd-texture',
-  elementClass: shape('FdTexture', ['pattern', 'tone', 'fade', 'marks', 'ramp', 'cell', 'seed', 'animated', 'speed', 'intensity', 'interactive', 'origin', 'side', 'variant', 'shape', 'inline']),
+  elementClass: shape('FdTexture', ['pattern', 'tone', 'fade', 'marks', 'ramp', 'cell', 'seed', 'animated', 'speed', 'intensity', 'interactive', 'origin', 'side', 'variant', 'shape', 'signature', 'inline']),
   events: {},
   displayName: 'FireTexture',
 });

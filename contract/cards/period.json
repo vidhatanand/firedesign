@@ -1,0 +1,90 @@
+{
+  "id": "period",
+  "job": "Choose a reporting period and what to compare it with.",
+  "purpose": "The trigger of a date range that has a compare band: presets and a calendar, then Compared with Nothing, Previous period or Same period last year. The trigger shows the range and, muted, the comparison dates. Apply fires fd:change with { start, end, preset, compare }, where compare is null or { mode, start, end }.",
+  "useWhen": [
+    "A report, chart or stats row shows a figure and how it changed against an earlier period.",
+    "Several screens share one period control."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Only the period matters, with no comparison.",
+      "instead": "date-picker"
+    },
+    {
+      "when": "One date.",
+      "instead": "datefield"
+    },
+    {
+      "when": "A fixed set of ranges and nothing custom.",
+      "instead": "segmented"
+    }
+  ],
+  "aka": [
+    "period picker",
+    "compare to",
+    "date range with comparison",
+    "previous period",
+    "comparison range",
+    "vs last period"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form",
+    "series"
+  ],
+  "states": [
+    {
+      "name": "no comparison",
+      "how": "data-compare=\"none\" or the Nothing radio; the trigger's compare label is empty and hidden"
+    },
+    {
+      "name": "pending",
+      "how": "data-pending in the calendar after the first click of a custom range"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-period",
+      "role": "On the fd-filter that triggers the popover."
+    },
+    {
+      "class": "fd-period-compare",
+      "role": "The muted \"vs\" part of the trigger; carries data-fd-daterange-compare-label."
+    }
+  ],
+  "related": [
+    "date-picker",
+    "filter",
+    "stats",
+    "chart"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow keys",
+      "does": "In the calendar, move by day and week."
+    },
+    {
+      "keys": "Page Up, Page Down",
+      "does": "Move by month; with Shift, by year."
+    },
+    {
+      "keys": "Arrow keys",
+      "does": "In the Compared with radios, move between modes."
+    },
+    {
+      "keys": "Escape",
+      "does": "Close without applying."
+    }
+  ],
+  "example": "docs/overlays.html#period",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.7.0"
+}

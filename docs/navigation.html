@@ -333,6 +333,112 @@
     </ul>
   </section>
 
+  <section class="doc-section" id="steps-live">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Steps for live work</h2>
+      <p>When steps run on their own, each one says how it went: running, failed, waiting on someone, or skipped. Several can be open at once.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <ol class="fd-steps" data-orientation="vertical" aria-label="Rotate the production key">
+        <li class="fd-step" data-state="done">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Create the new key</span><span class="fd-step-desc">ember_live_…7d30, Nov 14 at 3:02 PM</span><span class="fd-sr-only">Done</span></span>
+        </li>
+        <li class="fd-step" data-state="running" aria-current="step">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Move the CI pipeline to the new key</span><span class="fd-step-desc">12 of 18 jobs moved</span><span class="fd-sr-only">Running</span></span>
+        </li>
+        <li class="fd-step" data-state="failed">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Update the n8n workflow</span><span class="fd-step-desc">n8n answered 401: the new key is not saved there yet.</span><span class="fd-step-owner"><span class="fd-avatar" data-size="20" aria-hidden="true">AO</span>Amara Okafor</span></span>
+          <span class="fd-step-action"><button class="fd-btn" type="button" data-size="sm" data-variant="outline"><i data-icon="rotate-ccw"></i><span>Retry</span></button></span>
+        </li>
+        <li class="fd-step" data-state="waiting">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Approve revoking the old key</span><span class="fd-step-desc">Waiting since 3:40 PM</span><span class="fd-step-owner"><span class="fd-avatar" data-size="20" aria-hidden="true">VK</span>Vera Kowalski</span></span>
+          <span class="fd-step-action"><button class="fd-btn" type="button" data-size="sm"><i data-icon="bell"></i><span>Remind</span></button></span>
+        </li>
+        <li class="fd-step" data-state="skipped">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Post to Slack</span><span class="fd-step-desc">Skipped: no Slack channel is connected</span></span>
+        </li>
+        <li class="fd-step">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Revoke the old key</span><span class="fd-step-desc">After approval</span></span>
+        </li>
+      </ol>
+    </div>
+    <h3 class="doc-sub">Across the page</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <ol class="fd-steps" aria-label="Crawl docs.ember.dev">
+        <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Fetch sitemap</span><span class="fd-step-desc">412 URLs</span></span></li>
+        <li class="fd-step" data-state="skipped"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Log in</span><span class="fd-step-desc">Not needed</span></span></li>
+        <li class="fd-step" data-state="running" aria-current="step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Scrape pages</span><span class="fd-step-desc">288 of 412</span></span></li>
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Extract</span></span></li>
+      </ol>
+    </div>
+    <ul class="doc-notes">
+      <li>Live states are written by your code on each step: <code class="fd-code">data-state="running|failed|waiting|skipped"</code>, beside <code class="fd-code">done</code>. Mark the step the work is at with <code class="fd-code">aria-current="step"</code>, and leave <code class="fd-code">data-current</code> off: it is for wizards, where every earlier step is done.</li>
+      <li>Each state has its own mark (a turning arc, a cross, an hourglass, a dash), so colour is never the only signal. Put the word in the description or in an <code class="fd-code">fd-sr-only</code> span for screen readers.</li>
+      <li><code class="fd-code">fd-step-owner</code> (an avatar and a name) goes under the title; <code class="fd-code">fd-step-action</code> holds one small button after the body, and drops under the text in a narrow list.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="tracker">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Lifecycle tracker</h2>
+      <p>The stages one record moves through, shown across the top of its page. Below 560px of its own width it turns into the vertical list.</p>
+    </div>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <ol class="fd-steps" data-variant="tracker" aria-label="Stage of change chg_31b7">
+        <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Proposed</span><span class="fd-step-desc">Support agent, Nov 12</span></span></li>
+        <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Checked</span><span class="fd-step-desc">Limits and robots.txt</span></span></li>
+        <li class="fd-step" data-state="waiting" aria-current="step">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Approved</span><span class="fd-step-desc">Waiting 2 days</span><span class="fd-step-owner"><span class="fd-avatar" data-size="20" aria-hidden="true">VK</span>Vera Kowalski</span></span>
+          <span class="fd-step-action"><button class="fd-btn" type="button" data-size="sm" data-variant="primary"><span>Review</span></button></span>
+        </li>
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Testing</span><span class="fd-step-desc">10% of crawls</span></span></li>
+        <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Result</span></span></li>
+      </ol>
+    </div>
+    <h3 class="doc-sub">Failed at a stage</h3>
+    <div class="doc-specimen" data-code data-surface="surface">
+      <ol class="fd-steps" data-variant="tracker" aria-label="Stage of change chg_2f90">
+        <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Proposed</span><span class="fd-step-desc">Nov 3</span></span></li>
+        <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Checked</span><span class="fd-step-desc">Nov 3</span></span></li>
+        <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Approved</span><span class="fd-step-desc">Tomasz Nowak, Nov 4</span></span></li>
+        <li class="fd-step" data-state="failed" aria-current="step">
+          <span class="fd-step-marker"></span>
+          <span class="fd-step-body"><span class="fd-step-title">Testing</span><span class="fd-step-desc">Error rate 4.1%, limit 2%</span></span>
+          <span class="fd-step-action"><button class="fd-btn" type="button" data-size="sm" data-variant="outline"><span>See runs</span></button></span>
+        </li>
+        <li class="fd-step" data-state="skipped"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Result</span><span class="fd-step-desc">Not reached</span></span></li>
+      </ol>
+    </div>
+    <h3 class="doc-sub">On a phone</h3>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="surface">
+      <div data-frame="phone">
+        <ol class="fd-steps" data-variant="tracker" aria-label="Stage of change chg_31b7, narrow">
+          <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Proposed</span><span class="fd-step-desc">Support agent, Nov 12</span></span></li>
+          <li class="fd-step" data-state="done"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Checked</span><span class="fd-step-desc">Limits and robots.txt</span></span></li>
+          <li class="fd-step" data-state="waiting" aria-current="step">
+            <span class="fd-step-marker"></span>
+            <span class="fd-step-body"><span class="fd-step-title">Approved</span><span class="fd-step-desc">Waiting 2 days</span><span class="fd-step-owner"><span class="fd-avatar" data-size="20" aria-hidden="true">VK</span>Vera Kowalski</span></span>
+            <span class="fd-step-action"><button class="fd-btn" type="button" data-size="sm" data-variant="primary"><span>Review</span></button></span>
+          </li>
+          <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Testing</span><span class="fd-step-desc">10% of crawls</span></span></li>
+          <li class="fd-step"><span class="fd-step-marker"></span><span class="fd-step-body"><span class="fd-step-title">Result</span></span></li>
+        </ol>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-variant="tracker"</code> centres each stage’s words under its marker and gives every stage the same width. <code class="fd-code">data-orientation="horizontal"</code> keeps it across on a narrow screen.</li>
+      <li>The stage the record is at carries <code class="fd-code">aria-current="step"</code> with whatever state it is in, so its halo takes that state’s tone. A stage the record never reached is <code class="fd-code">skipped</code>.</li>
+      <li>Give the list an <code class="fd-code">aria-label</code> that names the record. Keep stage names to one word; the description says who or when.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="toc">
     <div class="doc-section-head">
       <h2 class="fd-h3">On this page</h2>
@@ -367,7 +473,7 @@
         <tr><td>.fd-subnav</td><td><code class="fd-code">.fd-subnav-item</code>, <code class="fd-code">.fd-subnav-meta</code>, <code class="fd-code">.fd-subnav-sep</code>. Becomes a pill row in containers under 760px.</td></tr>
         <tr><td>.fd-breadcrumb, .fd-back</td><td>Breadcrumb wraps an <code class="fd-code">ol</code>; the last item carries <code class="fd-code">aria-current="page"</code>. Back is a link with a leading arrow.</td></tr>
         <tr><td>.fd-pagination</td><td><code class="fd-code">.fd-pagination-info</code> + <code class="fd-code">.fd-btn-group</code>, or <code class="fd-code">data-variant="numbered"</code> with <code class="fd-code">.fd-pagination-pages</code>, <code class="fd-code">-page</code>, <code class="fd-code">-gap</code>.</td></tr>
-        <tr><td>.fd-steps</td><td><code class="fd-code">.fd-step</code> with <code class="fd-code">data-state="done|current|error"</code> or <code class="fd-code">aria-current="step"</code>; parts <code class="fd-code">-marker</code>, <code class="fd-code">-body</code>, <code class="fd-code">-title</code>, <code class="fd-code">-desc</code>. <code class="fd-code">data-orientation="vertical"</code>, <code class="fd-code">data-current</code>.</td></tr>
+        <tr><td>.fd-steps</td><td><code class="fd-code">.fd-step</code> with <code class="fd-code">data-state="done|current|error"</code> in a wizard, <code class="fd-code">data-state="running|failed|waiting|skipped"</code> for live work, and <code class="fd-code">aria-current="step"</code> on the step the flow or record is at; parts <code class="fd-code">-marker</code>, <code class="fd-code">-body</code>, <code class="fd-code">-title</code>, <code class="fd-code">-desc</code>, <code class="fd-code">-owner</code>, <code class="fd-code">-action</code>. <code class="fd-code">data-orientation="vertical|horizontal"</code>, <code class="fd-code">data-variant="tracker"</code>, <code class="fd-code">data-current</code>.</td></tr>
         <tr><td>.fd-toc</td><td><code class="fd-code">.fd-toc-title</code>, <code class="fd-code">.fd-toc-list</code>, <code class="fd-code">.fd-toc-item</code> (<code class="fd-code">data-level="2"</code>), <code class="fd-code">data-fd-scrollspy</code>, <code class="fd-code">data-offset</code> (px from the top, default 96).</td></tr>
         <tr><td>nav.js</td><td><code class="fd-code">selectTab(tab)</code>, <code class="fd-code">selectSegment(item)</code>, <code class="fd-code">setStep(steps, index)</code>, <code class="fd-code">refresh(el)</code> after changing content. Every control fires a bubbling <code class="fd-code">fd:change</code> with <code class="fd-code">{ value, item }</code>.</td></tr>
       </tbody>

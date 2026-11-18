@@ -12,12 +12,18 @@ export const EXTRA_ROOTS = {
   'fd-calendar': 'Overlays',           // month grid drawn by the date range
   'fd-checklist': 'Overlays',          // the filter list's checklist
   'fd-context-meter': 'Agent',
+  'fd-codes': 'Forms',                 // one-time recovery codes in a sunken card
+  'fd-color': 'Forms',                 // colour control: native picker, hex box, contrast feedback
+  'fd-confirm-inline': 'Forms',        // type-to-confirm on the page, in a plain form (the dialog is fd-confirm)
   'fd-corners': 'Texture & loading',   // four marks on a wrapper's corners
+  'fd-datefield': 'Forms',             // one date, typed or picked
   'fd-daterange': 'Overlays',
   'fd-data-card': 'Data',
   'fd-feature-row': 'Content',
   'fd-file': 'Forms',                  // an uploaded file row (fd-filelist is its list)
   'fd-glyph': 'Texture & loading',
+  'fd-initial': 'Shell',               // a dot-matrix mark drawn from a name's first letter
+  'fd-list-detail': 'Data',           // a list beside the record it opens (one pane at a time on a phone)
   'fd-listbox': 'Forms',
   'fd-matrix': 'Forms',                // a table of switches
   'fd-model-menu': 'Agent',
@@ -26,13 +32,29 @@ export const EXTRA_ROOTS = {
   'fd-option': 'Forms',                // an option row (fd-options is its list)
   'fd-pagebar': 'Texture & loading',
   'fd-pending': 'Texture & loading',
+  'fd-period': 'Overlays',             // the trigger of a date range with a compare band
   'fd-pick': 'Overlays',               // pickable object card
+  'fd-reason': 'Forms',                // a disabled control and the reason it is off
   'fd-result': 'Agent',
+  'fd-running': 'Shell',               // the running-now pill and its popover list
   'fd-scroller': 'Content',
+  'fd-service-status': 'Shell',        // the top bar's service status
+  'fd-shortcuts': 'Shell',             // the shortcut sheet's list
+  'fd-swatch': 'Forms',                // a colour that is content
   'fd-tooltip': 'Overlays',            // the vocabulary lists it only as the part of data-fd-tooltip
   'fd-usage-chip': 'Agent',
   'fd-use-agent': 'Agent',
   'fd-viewswitch': 'Code',
+  // Decisions (content.css, docs/decisions.html): the brief, its parts and the patterns around them
+  'fd-decision': 'Content',
+  'fd-delta': 'Content',
+  'fd-draft': 'Content',
+  'fd-commit': 'Content',
+  'fd-impact': 'Content',
+  'fd-hold': 'Content',
+  'fd-preview': 'Content',             // pattern: change, see what it touches, then commit
+  'fd-queue': 'Content',               // pattern: the list of what waits, beside the case
+  'fd-states': 'Content',              // pattern: one set of page states for a screen or a section
 };
 
 /** Classes (and their dash-descendants) that are parts of another component: class -> root of the component.
@@ -51,9 +73,11 @@ export const PART_OF = {
   'fd-fade': 'fd-rise',                // entrance animations
   'fd-filelist': 'fd-file',
   'fd-free-runs': 'fd-usage-chip',
+  'fd-keys-hint': 'fd-shortcuts',      // the status line while a key sequence waits
   'fd-num': 'fd-mono',                 // tabular figures
   'fd-options': 'fd-option',
   'fd-overlay-count': 'fd-popover',    // count badge on a trigger
+  'fd-quadrant': 'fd-chart',           // the quadrant is a type of chart (data-fd-chart="quadrant"), drawn into an fd-chart
   'fd-rail-tip': 'fd-sidebar',         // the collapsed sidebar's tip
   'fd-spin': 'fd-spinner',
   'fd-stat': 'fd-stats',               // the figure and its row, delta and unit belong to the stats block
@@ -75,10 +99,10 @@ export const PART_OF = {
 export const ID_ALIASES = { 'fd-btn': 'button' };
 
 /** Kind of a component. Default: `layout` in the Layout family, otherwise `component`. */
-export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground']);
+export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground', 'fd-preview', 'fd-queue', 'fd-states']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {
@@ -89,7 +113,7 @@ export const FAMILY_PAGES = {
   Forms: ['forms.html'],
   Overlays: ['overlays.html'],
   Data: ['data.html'],
-  Content: ['content.html'],
+  Content: ['content.html', 'decisions.html'],
   Code: ['code.html'],
   Agent: ['agent.html'],
   Chat: ['chat.html'],
@@ -111,7 +135,7 @@ export const FAMILY_MODULES = {
  *  (forms.js: "fd:change ... combobox, tag input, otp ..."). Module -> { words: { word: root class } }. */
 export const EVENT_SUBJECTS = {
   data: { words: { table: 'fd-table', tr: 'fd-table' } },
-  forms: { words: { combobox: 'fd-combobox', 'tag input': 'fd-tag-input', otp: 'fd-otp', number: 'fd-number', slider: 'fd-slider', search: 'fd-search', dropzone: 'fd-dropzone', secret: 'fd-secret', 'copy field': 'fd-copy-field' } },
+  forms: { words: { combobox: 'fd-combobox', 'tag input': 'fd-tag-input', otp: 'fd-otp', number: 'fd-number', slider: 'fd-slider', search: 'fd-search', dropzone: 'fd-dropzone', secret: 'fd-secret', 'copy field': 'fd-copy-field', 'date field': 'fd-datefield', 'colour': 'fd-color', 'confirm on the page': 'fd-confirm-inline', 'recovery codes': 'fd-codes' } },
 };
 
 /** Events that module headers document in prose the heuristics above cannot tie to a class. Reviewed by hand
@@ -123,6 +147,9 @@ export const EVENT_EXTRA = {
   confirm: ['fd:confirm'],
   'date-picker': ['fd:change'],
   filter: ['fd:change'],
+  commit: ['fd:hold'],                 // content.js: "fd:hold fires on the fd-commit" (the line names the fd-hold it starts)
+  hold: ['fd:commit'],                 // content.js: a standalone hold fires fd:commit on itself when it runs out
+  toast: ['fd:hold', 'fd:undo', 'fd:commit'],   // overlays.js: a held toast, and Done · Undo
 };
 
 /** Events a module listens for; they are not events of any component. */
@@ -179,22 +206,31 @@ export const LAYOUT_PRIMITIVES = ['fd-stack', 'fd-row', 'fd-grid', 'fd-column', 
 
 /** Attributes whose value is free (a number, a name, text, an id): the single value "*" means any value. component id -> attributes. */
 export const FREE_ATTRIBUTES = {
+  codes: ['data-filename'],            // the name of the downloaded file ("ember-recovery-codes.txt")
+  'confirm-inline': ['data-confirm'],  // the phrase to type (the form's data-confirm; the input may carry data-match)
+  datefield: ['data-min-date', 'data-max-date'], // an ISO date or "today" (forms.js header)
+  'date-picker': ['data-compare'],     // starting comparison of a period: none, previous or year
   codeblock: ['data-collapse'],        // collapsed height in px: "200", "240", "420" (code.js header)
   doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
   kv: ['data-copy'],                   // the text a row copies
+  list: ['data-value'],                // a row's record id: the option a listbox list selects, the record a list-and-detail row opens
   menu: ['data-fd-submenu'],           // the id of the sub-menu
   pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
+  running: ['data-fd-running'],        // the id of the popover whose rows the pill counts
   secret: ['data-noun'],               // the word the buttons name: "password", "API key", "signing secret"
   steps: ['data-current'],             // the 0-based index of the current step (nav.js header: data-current="n")
   'doc-endpoint': ['data-in'],         // where a parameter goes (body, query, path, header…); docsite.js's try form reads body, query and path
   button: ['data-action'],             // the page's name for what the button does (agent.js: run, copy-result; pages: retry, export)
-  log: ['data-action'],                // code.js handles wrap and download; a page adds its own (replay)
+  log: ['data-action', 'data-anchor'], // code.js handles wrap, download and first-error; a page adds its own (replay). data-anchor: the prefix of line ids (build -> #build-L42)
+  commit: ['data-fd-hold', 'data-min-words', 'data-max-words'],   // seconds to hold a commit; the reason's word budget on fd-commit-budget
+  hold: ['data-seconds'],              // the length of a hold started by data-fd-hold-for or hold(el)
+  draft: ['data-fd-draft-for'],        // the id of the field a draft fills
 };
 /* An icon name is free text (the lint's unknown-icon rule checks it against catalog.icons). The drawn icon,
  * svg.fd-icon[data-icon] (EXPORT I2), takes it on the icon's root; rules such as `.fd-badge > i[data-icon]` give it to
  * the components below, on their root or on the part a drawn icon may carry, where it would otherwise allow only the
  * bare attribute. data-icon-fill stays a presence flag (`.fd-icon[data-icon-fill]`). */
-for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline']) {
+for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline', 'service-status', 'decision', 'draft', 'commit', 'preview']) {
   (FREE_ATTRIBUTES[id] ??= []).push('data-icon');
 }
 
@@ -319,6 +355,25 @@ export const STATE_ATTRIBUTES = {
   progress: { 'data-complete': [], 'data-empty': [] },
   'fd-progress-steps': { 'data-current': [], 'data-done': [] },
   // the docs site's try-it form: docsite.js writes the fields and reads their type
+  // decisions (content.js): a draft used or edited, a hold running, a commit held or sent, a preview gone stale, a narrow queue's view
+  draft: { 'data-state': [] },
+  'fd-commit': { 'data-state': ['committed'] },
+  'fd-commit-budget': { 'data-state': [] },
+  hold: { 'data-state': [] },
+  preview: { 'data-state': [] },
+  queue: { 'data-view': [] },
   'fd-input': { 'data-type': [] },
   'fd-textarea': { 'data-type': [] },
 };
+
+/**
+ * JS-only parts: a module with no CSS root class, so the class-based build cannot find it. id (also the card's file
+ * name, contract/cards/<id>.json), name, module (path from the repository root). The build reads the module's exports
+ * from its source. A module is not a component: the catalogue lists it under `modules`, `fire find` finds it (kind
+ * "module"), and the Facet export does not carry it.
+ */
+export const MODULES = [
+  { id: 'email', name: 'Email', module: 'fire/email/email.js' },
+  { id: 'initial-helpers', name: 'Initial mark helpers', module: 'fire/js/initial.js' },
+  { id: 'theme-record', name: 'Theme record', module: 'fire/js/theme.js' },
+];

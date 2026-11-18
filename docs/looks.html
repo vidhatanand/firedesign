@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looks · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<style>
+  /* The index: one tile per look, in the look's own page, ink, accent, corners and headings face. */
+  .lk-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 12px; }
+  .lk-tile { display: grid; gap: 10px; align-content: space-between; min-height: 132px; padding: 16px; border-radius: var(--fd-radius-xl); border: 1px solid var(--fd-line); background: var(--fd-bg); color: var(--fd-text); font-family: var(--fd-font-sans); text-decoration: none; transition: border-color var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-2) var(--fd-ease-out); }
+  .lk-tile:hover { border-color: var(--fd-line-strong); translate: 0 -2px; }
+  .lk-tile:focus-visible { box-shadow: var(--fd-ring); }
+  .lk-tile-name { font-family: var(--fd-font-display); font-weight: var(--fd-weight-display); letter-spacing: var(--fd-ls-display); font-size: 1.5rem; line-height: 1.1; }
+  .lk-tile-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); }
+  .lk-tile-swatch { display: inline-flex; gap: 4px; }
+  .lk-tile-swatch span { width: 12px; height: 12px; border-radius: var(--fd-radius-full); box-shadow: inset 0 0 0 1px var(--fd-a8); }
+  .lk-tile-swatch span:nth-child(1) { background: var(--fd-accent); }
+  .lk-tile-swatch span:nth-child(2) { background: var(--fd-ink); }
+  .lk-tile-swatch span:nth-child(3) { background: var(--fd-surface); }
+
+  /* A look: its card (rendered under the look itself), three live templates, its record. */
+  .lk-look { gap: 18px; }
+  .lk-card { display: grid; gap: 12px; padding: 24px; border-radius: var(--fd-radius-2xl); border: 1px solid var(--fd-line); background: var(--fd-bg); color: var(--fd-text); font-family: var(--fd-font-sans); }
+  .lk-card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+  .lk-name { font-family: var(--fd-font-display); font-weight: var(--fd-weight-display); letter-spacing: var(--fd-ls-display); font-size: var(--fd-text-h1); line-height: var(--fd-lh-h1); }
+  .lk-note { max-width: 70ch; color: var(--fd-text-2); font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); }
+  .lk-traits { display: flex; flex-wrap: wrap; gap: 6px; }
+  .lk-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .lk-thumbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+  .lk-thumb { display: grid; gap: 8px; color: var(--fd-text-3); font-size: var(--fd-text-sm); text-decoration: none; border-radius: var(--fd-radius-lg); }
+  .lk-thumb:hover { color: var(--fd-text); }
+  .lk-thumb:focus-visible { box-shadow: var(--fd-ring); }
+  .lk-thumb-frame { position: relative; display: block; aspect-ratio: 1440 / 900; overflow: hidden; border-radius: var(--fd-radius-lg); border: 1px solid var(--fd-line); background: var(--fd-bg-sunken); }
+  .lk-thumb-frame iframe { position: absolute; inset: 0 auto auto 0; width: 1440px; height: 900px; border: 0; transform-origin: 0 0; scale: var(--lk-k, 0.3); pointer-events: none; }
+  .lk-thumb:hover .lk-thumb-frame { border-color: var(--fd-line-strong); }
+  .lk-thumb-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .lk-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+  .lk-how > div { display: grid; gap: 6px; align-content: start; padding: 18px; border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); }
+  .lk-how p { color: var(--fd-text-3); }
+</style>
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+<script type="module">
+  /* The gallery is built from fire/js/looks.js (generated from contract/looks/named), so it cannot drift from the
+     records. Each card and index tile is rendered under its look: the look's attributes on the element (palettes,
+     type sets, structure and signature apply to any subtree; data-scale re-derives corners and density there) and a
+     toned palette's colours as custom properties. Thumbnails are the real templates with ?look=<name>, lazy-loaded. */
+  import { LOOKS } from '../fire/js/looks.js';
+  import { getPalette } from '../fire/js/palettes.js';
+  import { getTypeface } from '../fire/js/typefaces.js';
+  import { applyLook } from '../fire/js/tweaks.js';
+  import { init } from '../fire/fire.js';
+
+  const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const TEMPLATES = [['logs', 'Activity logs'], ['settings', 'Settings'], ['overview', 'Overview']];
+  const SIGNATURE = { auto: 'own textures', terrain: 'terrain', waves: 'waves', orbit: 'orbit', rain: 'rain', grid: 'grid', flame: 'flame', halftone: 'halftone', spark: 'spark', contour: 'contour', stipple: 'stipple', bars: 'bars' };
+
+  /** Put a look on one element: its attributes, and the custom properties a toned palette or a dial writes. */
+  function wear(el, look) {
+    for (const [name, value] of Object.entries(look.attributes)) el.setAttribute(name, value);
+    el.setAttribute('data-scale', '');
+    for (const [name, value] of Object.entries(look.props)) el.style.setProperty(name, value);
+  }
+
+  function traits(l) {
+    const s = l.state;
+    const t = getTypeface(s.type);
+    return [
+      `${getPalette(s.palette).label}${Object.values(s.tone).join() === '0,100,0,0' ? '' : ', toned'}`,
+      t.display === t.sans ? t.display : `${t.display} + ${t.sans}`,
+      `${s.density}, ${s.textSize === 'md' ? 'default' : s.textSize === 'lg' ? 'large' : 'small'} text`,
+      `corners ${s.corners}×`,
+      `${s.surfaces} surfaces, ${s.controls} controls`,
+      `${s.elevation === 'none' ? 'no' : s.elevation} shadows`,
+      s.texture === 0 ? 'no texture' : `${SIGNATURE[s.signature.field]} texture`,
+      ...(s.contrast === 'high' ? ['high contrast'] : []),
+      ...(s.motion !== 'default' ? [`motion ${s.motion}`] : []),
+    ];
+  }
+
+  const index = document.querySelector('[data-looks-index]');
+  index.innerHTML = LOOKS.map((l) => `<a class="lk-tile" href="#look-${l.name}" data-look="${l.name}"><span class="lk-tile-name">${esc(l.label)}</span><span class="lk-tile-foot"><span>${esc(getPalette(l.state.palette).label)} · ${esc(getTypeface(l.state.type).label)}</span><span class="lk-tile-swatch" aria-hidden="true"><span></span><span></span><span></span></span></span></a>`).join('');
+  for (const tile of index.querySelectorAll('[data-look]')) wear(tile, LOOKS.find((l) => l.name === tile.dataset.look));
+
+  const gallery = document.querySelector('[data-looks-gallery]');
+  gallery.innerHTML = LOOKS.map((l, i) => `
+  <section class="doc-section lk-look" id="look-${l.name}" aria-labelledby="look-${l.name}-name">
+    <div class="lk-card" data-look="${l.name}">
+      <div class="lk-card-head">
+        <h2 class="lk-name" id="look-${l.name}-name">${esc(l.label)}</h2>
+        <p class="fd-eyebrow">Look ${i + 1} of ${LOOKS.length}</p>
+      </div>
+      <p class="lk-note">${esc(l.note)}</p>
+      <ul class="lk-traits" aria-label="What the look sets">${traits(l).map((t) => `<li class="fd-badge">${esc(t)}</li>`).join('')}</ul>
+      <div class="lk-actions">
+        <button class="fd-btn" type="button" data-variant="primary" data-apply-look="${l.name}"><i data-icon="wand-sparkles"></i>Use ${esc(l.label)} here</button>
+        <a class="fd-btn" href="../templates/logs.html?look=${l.name}"><i data-icon="external-link"></i>Open a screen</a>
+      </div>
+    </div>
+    <div class="lk-thumbs">${TEMPLATES.map(([page, title]) => `
+      <a class="lk-thumb" href="../templates/${page}.html?look=${l.name}">
+        <span class="lk-thumb-frame"><iframe src="../templates/${page}.html?look=${l.name}" title="${esc(title)} under ${esc(l.label)}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe></span>
+        <span class="lk-thumb-name"><span>${esc(title)}</span><span class="fd-faint" aria-hidden="true">${page}.html?look=${l.name}</span></span>
+      </a>`).join('')}
+    </div>
+    <details class="doc-code">
+      <summary><i data-icon="chevron-right"></i><span>Theme record · contract/looks/named/${l.name}.json</span></summary>
+      <figure class="fd-codeblock">
+        <button class="fd-codeblock-copy" aria-label="Copy the ${esc(l.label)} record"><i data-icon="copy"></i></button>
+        <pre class="fd-codeblock-body"><code data-lang="json">${esc(JSON.stringify(l.record, null, 2))}</code></pre>
+      </figure>
+    </details>
+  </section>`).join('');
+  for (const card of gallery.querySelectorAll('.lk-card')) wear(card, LOOKS.find((l) => l.name === card.dataset.look));
+
+  // Fire has initialised the page already: bind what was added (icons, code blocks, buttons).
+  init(index);
+  init(gallery);
+
+  // "Use … here": the look becomes this site's own tweaks (saved, like any change in the panel).
+  gallery.addEventListener('click', (event) => {
+    const button = event.target instanceof Element ? event.target.closest('[data-apply-look]') : null;
+    if (button) applyLook(button.dataset.applyLook);
+  });
+
+  // Each thumbnail is a 1440 × 900 page scaled to its frame.
+  const fit = (frame) => frame.style.setProperty('--lk-k', String(frame.clientWidth / 1440));
+  const observer = new ResizeObserver((entries) => { for (const entry of entries) fit(entry.target); });
+  for (const frame of gallery.querySelectorAll('.lk-thumb-frame')) { fit(frame); observer.observe(frame); }
+</script>
+</head>
+<body class="doc" data-page="looks">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Start</p>
+    <h1 class="fd-display">Looks</h1>
+    <p class="doc-lede">Eight complete theme records, each a product's character from palette and type down to corners, surfaces and texture, drawn far apart so one of them is a good place to start. Every look passes the same contrast rules as a palette, under its own surfaces and controls, and the gallery check renders three real screens under each one.</p>
+  </header>
+
+  <section class="doc-section" id="index" aria-labelledby="index-head">
+    <div class="doc-section-head">
+      <h2 class="fd-h3" id="index-head">The eight looks</h2>
+      <p>Each tile is drawn in its own look. Pick the one nearest your product, apply it, then tune it in Tweaks: any change turns the panel's Looks readout to Custom, and Copy theme gives you the record to commit.</p>
+    </div>
+    <div class="lk-index" data-looks-index></div>
+  </section>
+
+  <section class="doc-section" id="apply" aria-labelledby="apply-head">
+    <div class="doc-section-head">
+      <h2 class="fd-h3" id="apply-head">Applying a look</h2>
+    </div>
+    <div class="lk-how">
+      <div><h3 class="fd-title">In Tweaks</h3><p>The Looks row at the top of the panel applies a whole record in one click and shows which look is active. Copy theme and Copy CSS then carry it.</p></div>
+      <div><h3 class="fd-title">In code</h3><p>Each record is in <code class="fd-code">contract/looks/named</code>. Pass it to <code class="fd-code">themeToCss()</code>, or import <code class="fd-code">LOOKS</code> from <code class="fd-code">fire/js/looks.js</code> and call <code class="fd-code">applyLook(name)</code> from <code class="fd-code">fire/js/tweaks.js</code>.</p></div>
+      <div><h3 class="fd-title">As a preview</h3><p>Add <code class="fd-code">?look=steady</code> to any page that loads <code class="fd-code">fire/boot.js</code>. The look is on the page before its first paint and nothing is saved. Only the eight names work.</p></div>
+    </div>
+  </section>
+
+  <div data-looks-gallery></div>
+</main>
+</body>
+</html>

@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decisions · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="decisions">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Decisions</h1>
+    <p class="doc-lede">A person decides what a system or an agent may do: grant credits, allow a host, ship a change. One family covers it: a brief that reads in five seconds, a reason that is the person's own, a button named for its effect, and a few seconds to take it back.</p>
+  </header>
+
+  <!-- ===================== QUEUE AND CASE ===================== -->
+  <section class="doc-section" id="queue">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Queue and case</h2>
+      <p>Use it when several decisions wait for one person. Pick one, decide, and the next case opens while the last one counts down.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-states" id="dq-states" data-state="ready">
+        <div class="fd-queue" id="dq" data-when="ready">
+          <nav class="fd-queue-list" aria-label="Waiting for you">
+            <div class="fd-queue-group" role="group" aria-labelledby="dq-g-credits">
+              <p class="fd-queue-group-label" id="dq-g-credits">Credits <span class="fd-queue-count">1</span></p>
+              <button class="fd-queue-item" type="button" data-value="credit" aria-current="true">
+                <span class="fd-tile" data-size="28" data-tone="warning"><i data-icon="wallet"></i></span>
+                <span class="fd-queue-text"><span class="fd-queue-title">40,000 credits for Northwind Labs</span><span class="fd-queue-meta">Lena Ortiz · Growth plan</span></span>
+                <span class="fd-queue-age">2 h</span>
+              </button>
+            </div>
+            <div class="fd-queue-group" role="group" aria-labelledby="dq-g-hosts">
+              <p class="fd-queue-group-label" id="dq-g-hosts">Outbound hosts <span class="fd-queue-count">1</span></p>
+              <button class="fd-queue-item" type="button" data-value="host">
+                <span class="fd-tile" data-size="28"><i data-icon="globe"></i></span>
+                <span class="fd-queue-text"><span class="fd-queue-title">api.ledgerly.example for Halcyon</span><span class="fd-queue-meta">Omar Haddad · owner</span></span>
+                <span class="fd-queue-age">35 m</span>
+              </button>
+            </div>
+            <div class="fd-queue-group" role="group" aria-labelledby="dq-g-crawl">
+              <p class="fd-queue-group-label" id="dq-g-crawl">Crawl changes <span class="fd-queue-count">1</span></p>
+              <button class="fd-queue-item" type="button" data-value="crawl">
+                <span class="fd-tile" data-size="28" data-tone="violet"><i data-icon="workflow"></i></span>
+                <span class="fd-queue-text"><span class="fd-queue-title">Obey crawl-delay on every crawl</span><span class="fd-queue-meta">Ember agent · 29 teams</span></span>
+                <span class="fd-queue-age" data-urgent>Due 4 h</span>
+              </button>
+            </div>
+          </nav>
+
+          <div class="fd-queue-case">
+            <button class="fd-btn fd-queue-back" type="button" data-variant="ghost" data-size="sm"><i data-icon="arrow-left"></i><span>Queue</span></button>
+
+            <!-- Case 1: a credit grant -->
+            <section data-case="credit" aria-label="Credit grant for Northwind Labs">
+              <article class="fd-decision" aria-labelledby="dq-credit-title">
+                <header class="fd-decision-head">
+                  <span class="fd-tile" data-tone="warning"><i data-icon="wallet"></i></span>
+                  <div class="fd-decision-heading">
+                    <p class="fd-eyebrow">Credit grant</p>
+                    <h2 class="fd-decision-title" id="dq-credit-title">Grant 40,000 credits to Northwind Labs?</h2>
+                    <p class="fd-decision-meta"><span>Lena Ortiz asked 2 h ago</span><span>Expires in 22 h</span></p>
+                  </div>
+                  <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Waiting</span>
+                </header>
+                <dl class="fd-decision-parts">
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">The change</dt>
+                    <dd class="fd-decision-lead"><span class="fd-delta"><span class="fd-delta-from">12,400</span><span class="fd-delta-to">52,400 credits</span></span></dd>
+                    <dd class="fd-decision-detail">A one-time grant. The Growth plan and its 50,000 a month do not change.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Who it touches</dt>
+                    <dd class="fd-decision-lead">Northwind Labs only</dd>
+                    <dd class="fd-decision-detail">Its 6 members see the new balance. The owner, ana@northwind.dev, gets an email.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Evidence</dt>
+                    <dd>
+                      <ul class="fd-decision-facts">
+                        <li><span>Incident</span><a href="#queue">Crawl outage, Nov 14</a></li>
+                        <li><span>Failed crawls</span><b>212</b></li>
+                        <li><span>Credits they cost</span><b>38,600</b></li>
+                      </ul>
+                    </dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Who signs</dt>
+                    <dd class="fd-decision-lead">An owner who did not ask</dd>
+                    <dd class="fd-decision-detail">Grants above 10,000 credits need two people. Lena asked, so you can sign.</dd>
+                  </div>
+                </dl>
+              </article>
+              <form class="fd-commit" data-fd-hold="10" data-fd-hold-in="toast" aria-label="Decide the credit grant">
+                <p class="fd-commit-effect">Approving adds <b>40,000 credits</b> to Northwind Labs now. Declining sends nothing, and Lena sees your reason.</p>
+                <aside class="fd-draft" aria-label="Drafted reason">
+                  <p class="fd-draft-by"><i data-icon="bot"></i><span>Drafted by <b>Ember agent</b> for Maya Chen</span><span class="fd-draft-when">1 h ago</span></p>
+                  <p class="fd-draft-text">Northwind lost 212 crawls in the Nov 14 outage, which cost 38,600 credits. 40,000 covers them with a small margin.</p>
+                  <div class="fd-draft-actions">
+                    <button class="fd-btn" type="button" data-size="sm" data-variant="outline" data-fd-draft="use"><i data-icon="arrow-down"></i><span>Use as my reason</span></button>
+                    <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-draft="discard">Discard</button>
+                  </div>
+                  <p class="fd-draft-used">You used this draft. Edit it until it says what you mean.</p>
+                </aside>
+                <div class="fd-field">
+                  <label class="fd-field-label" for="dq-credit-reason">Reason</label>
+                  <textarea class="fd-textarea" id="dq-credit-reason" name="reason" rows="3" required data-fd-autogrow placeholder="Covers the crawls lost in the Nov 14 outage." aria-describedby="dq-credit-hint"></textarea>
+                  <div class="fd-field-foot"><p class="fd-field-hint" id="dq-credit-hint">Kept in the audit log with your name. Northwind does not see it.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="60">0 / 60 words</span></div>
+                  <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+                </div>
+                <div class="fd-commit-actions">
+                  <button class="fd-btn" type="submit" data-variant="primary" value="approve" data-verb="Approving the credit"><i data-icon="check"></i><span>Approve the credit</span></button>
+                  <button class="fd-btn" type="submit" data-variant="outline" value="decline" data-verb="Declining the credit">Decline</button>
+                </div>
+              </form>
+            </section>
+
+            <!-- Case 2: an outbound host -->
+            <section data-case="host" aria-label="Outbound host for Halcyon" hidden>
+              <article class="fd-decision" aria-labelledby="dq-host-title">
+                <header class="fd-decision-head">
+                  <span class="fd-tile"><i data-icon="globe"></i></span>
+                  <div class="fd-decision-heading">
+                    <p class="fd-eyebrow">Outbound host</p>
+                    <h2 class="fd-decision-title" id="dq-host-title">Let Halcyon’s agents call api.ledgerly.example?</h2>
+                    <p class="fd-decision-meta"><span>Omar Haddad, owner, asked 35 min ago</span><span class="fd-mono">team_9t6r3a</span></p>
+                  </div>
+                  <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Waiting</span>
+                </header>
+                <dl class="fd-decision-parts">
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">The change</dt>
+                    <dd class="fd-decision-lead">Agents may call <span class="fd-mono">api.ledgerly.example</span> over HTTPS</dd>
+                    <dd class="fd-decision-detail">Port 443 only. Private and literal IP addresses stay refused.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Who it touches</dt>
+                    <dd class="fd-decision-lead">Halcyon only</dd>
+                    <dd class="fd-decision-detail">Its 3 agents and its scheduled runs reach the host within 15 seconds. The other 47 teams are unchanged.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Why they ask</dt>
+                    <dd class="fd-decision-quote">Our invoice agent posts monthly totals to our ledger.</dd>
+                    <dd class="fd-decision-detail">118 calls to the host were refused this week.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">If you wait</dt>
+                    <dd class="fd-decision-lead">Calls stay refused</dd>
+                    <dd class="fd-decision-detail">A waiting request allows nothing. Halcyon’s invoice run fails again on Dec 1.</dd>
+                  </div>
+                </dl>
+              </article>
+              <form class="fd-commit" data-fd-hold="10" data-fd-hold-in="toast" aria-label="Decide the outbound host">
+                <p class="fd-commit-effect">Allowing lets Halcyon’s agents call the host within 15 seconds. Declining keeps it refused.</p>
+                <div class="fd-field">
+                  <label class="fd-field-label" for="dq-host-reason">Reason, shown to Halcyon</label>
+                  <textarea class="fd-textarea" id="dq-host-reason" name="reason" rows="3" required data-fd-autogrow placeholder="A single named host for your invoice agent." aria-describedby="dq-host-hint"></textarea>
+                  <div class="fd-field-foot"><p class="fd-field-hint" id="dq-host-hint">Halcyon sees this with the decision.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40">0 / 40 words</span></div>
+                  <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+                </div>
+                <div class="fd-commit-actions">
+                  <button class="fd-btn" type="submit" data-variant="primary" value="approve" data-verb="Allowing api.ledgerly.example"><i data-icon="check"></i><span>Allow the host</span></button>
+                  <button class="fd-btn" type="submit" data-variant="outline" value="decline" data-verb="Declining api.ledgerly.example">Decline</button>
+                </div>
+              </form>
+            </section>
+
+            <!-- Case 3: a crawl change -->
+            <section data-case="crawl" aria-label="Crawl change: obey crawl-delay" hidden>
+              <article class="fd-decision" aria-labelledby="dq-crawl-title">
+                <header class="fd-decision-head">
+                  <span class="fd-tile" data-tone="violet"><i data-icon="workflow"></i></span>
+                  <div class="fd-decision-heading">
+                    <p class="fd-eyebrow">Crawl change</p>
+                    <h2 class="fd-decision-title" id="dq-crawl-title">Ship crawl-delay to every crawl?</h2>
+                    <p class="fd-decision-meta"><span>Proposed by Ember agent yesterday</span><span>Tested on 3 teams for 7 days</span></p>
+                  </div>
+                  <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Due in 4 h</span>
+                </header>
+                <dl class="fd-decision-parts">
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">The change</dt>
+                    <dd class="fd-decision-lead">Crawls wait the crawl-delay a site asks for</dd>
+                    <dd class="fd-decision-detail">Today they ignore it. Running crawls finish as they started.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Who it touches</dt>
+                    <dd class="fd-decision-lead">29 teams</dd>
+                    <dd class="fd-decision-detail">Teams whose crawls reach sites that set a crawl-delay. Their pages per minute drop on those sites.</dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Evidence</dt>
+                    <dd>
+                      <ul class="fd-decision-facts">
+                        <li><span>Sites that blocked the test teams</span><span class="fd-delta"><span class="fd-delta-from">41</span><span class="fd-delta-to">2</span></span></li>
+                        <li><span>Crawl time, docs.ember.dev</span><b>+3 min</b></li>
+                      </ul>
+                    </dd>
+                  </div>
+                  <div class="fd-decision-part">
+                    <dt class="fd-decision-label">Who signs</dt>
+                    <dd class="fd-decision-lead">An engineer and an owner</dd>
+                    <dd class="fd-decision-detail">Dev Anand signed as the engineer. Your signature ships it.</dd>
+                  </div>
+                </dl>
+              </article>
+              <div class="fd-impact" data-tone="warning" role="status">
+                <p class="fd-impact-count"><b>29</b> teams change</p>
+                <p class="fd-impact-text">Pages per minute on sites that set a crawl-delay, for the largest of them:</p>
+                <ul class="fd-impact-list">
+                  <li><span>Northwind Labs</span><span class="fd-delta"><span class="fd-delta-from">120</span><span class="fd-delta-to">40</span></span></li>
+                  <li><span>Halcyon</span><span class="fd-delta"><span class="fd-delta-from">90</span><span class="fd-delta-to">30</span></span></li>
+                  <li><span>Orchard Data</span><span class="fd-delta"><span class="fd-delta-from">60</span><span class="fd-delta-to">20</span></span></li>
+                </ul>
+                <p class="fd-impact-more">and 26 more · <a href="#preview">See all 29</a></p>
+              </div>
+              <form class="fd-commit" data-fd-hold="10" data-fd-hold-in="toast" aria-label="Decide the crawl change">
+                <p class="fd-commit-effect">Shipping changes the 29 teams’ next crawls. Declining keeps today’s behaviour and tells the agent why.</p>
+                <div class="fd-field">
+                  <label class="fd-field-label" for="dq-crawl-reason">Reason</label>
+                  <textarea class="fd-textarea" id="dq-crawl-reason" name="reason" rows="3" required data-fd-autogrow placeholder="Fewer blocks are worth slower crawls on those sites." aria-describedby="dq-crawl-hint"></textarea>
+                  <div class="fd-field-foot"><p class="fd-field-hint" id="dq-crawl-hint">The agent reads this before it proposes again.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="60">0 / 60 words</span></div>
+                  <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+                </div>
+                <div class="fd-commit-actions">
+                  <button class="fd-btn" type="submit" data-variant="primary" value="approve" data-verb="Shipping crawl-delay"><i data-icon="rocket"></i><span>Ship the change</span></button>
+                  <button class="fd-btn" type="submit" data-variant="outline" value="decline" data-verb="Declining the crawl change">Decline</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+
+        <div class="fd-empty" data-size="lg" data-when="empty">
+          <span class="fd-empty-icon"><i data-icon="check-check"></i></span>
+          <h2 class="fd-empty-title">Nothing waits for you</h2>
+          <p class="fd-empty-text">New requests and agent proposals appear here. Ember emails you when one has a deadline.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="outline" data-dq-reset><i data-icon="rotate-ccw"></i><span>Fill the queue again</span></button></div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Write a reason, then commit. The case leaves the queue at once and a held toast counts 10 seconds: nothing is sent until it ends. Undo, or <kbd class="fd-kbd">Ctrl</kbd> <kbd class="fd-kbd">Z</kbd>, puts the case back with your reason in it.</li>
+      <li>Below 800px of width the queue shows the list or the case, never both; the case has a Queue button back. Arrow keys, Home and End move along the list.</li>
+      <li>Every commit names its effect. Decline is a commit too: it needs the reason, and it is held the same way.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== WHICH PART ===================== -->
+  <section class="doc-section" id="parts">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Which part when</h2>
+      <p>Start from the brief and the commit. Add the rest only when the decision needs it.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Part</th><th>Use it when</th><th>Leave it out when</th></tr></thead>
+      <tbody>
+        <tr><td>fd-decision</td><td>Someone must decide, and getting it wrong costs money, access or trust.</td><td>The action is routine and undoable: a plain button and a toast do.</td></tr>
+        <tr><td>fd-draft</td><td>An agent wrote the reason or the recommendation for the person.</td><td>Nobody drafted anything. Never fill the reason field with an agent’s words.</td></tr>
+        <tr><td>fd-commit</td><td>The decision needs a reason that someone reads later: an audit, the requester, the agent.</td><td>A yes or no with no record, such as dismissing a tip.</td></tr>
+        <tr><td>fd-impact</td><td>The change reaches more than the one thing on screen: “29 teams change”.</td><td>It touches one record, which the brief already names.</td></tr>
+        <tr><td>fd-preview</td><td>The person edits a value first, and the reach depends on what they type.</td><td>Nothing is edited: show the fd-impact in the case.</td></tr>
+        <tr><td>fd-hold</td><td>Sending is hard to take back: money, access, a message, a shipped change.</td><td>The server can undo it later: use Done · Undo instead.</td></tr>
+        <tr><td>toast.hold</td><td>The page moves on after the commit: a queue, a list, a batch.</td><td>The person stays on the case: the inline fd-hold reads better.</td></tr>
+        <tr><td>toast({ undo })</td><td>It is done, and the server can reverse it for a few seconds.</td><td>Nothing should happen until the person is sure: hold it.</td></tr>
+        <tr><td>fd-decision-outcome</td><td>The case stays on screen after the decision, or can be reopened from a link.</td><td>The case leaves view at once (a queue): the toast says it.</td></tr>
+        <tr><td>fd-states</td><td>Always, around the screen or the section: loading, empty, error, no access, not found, switched off, expired.</td><td>Never; a screen without its states is not finished.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ===================== BRIEF ===================== -->
+  <section class="doc-section" id="brief">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Decision brief</h2>
+      <p>The question as the title, then four numbered parts in reading order. Use it for any decision that needs more than a sentence.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <article class="fd-decision" aria-labelledby="db-title">
+        <header class="fd-decision-head">
+          <span class="fd-tile" data-tone="warning"><i data-icon="key-round"></i></span>
+          <div class="fd-decision-heading">
+            <p class="fd-eyebrow">Key scope</p>
+            <h2 class="fd-decision-title" id="db-title">Let the billing-export key read every team’s runs?</h2>
+            <p class="fd-decision-meta"><span>Priya Das asked 10 min ago</span><span class="fd-mono">key_4h8n7p</span><span>Expires in 23 h</span></p>
+          </div>
+          <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Waiting</span>
+        </header>
+        <dl class="fd-decision-parts">
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">The change</dt>
+            <dd class="fd-decision-lead"><span class="fd-delta" data-mono><span class="fd-delta-from">runs:read:own</span><span class="fd-delta-to">runs:read:all</span></span></dd>
+            <dd class="fd-decision-detail">The key keeps every other scope it has.</dd>
+          </div>
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">Who it touches</dt>
+            <dd class="fd-decision-lead">All 48 teams in Ember Labs</dd>
+            <dd class="fd-decision-detail">Their run history, inputs and outputs become readable by one service.</dd>
+          </div>
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">Evidence</dt>
+            <dd>
+              <ul class="fd-decision-facts">
+                <li><span>Used by</span><b>billing-export, nightly</b></li>
+                <li><span>Last call</span><b>Nov 17, 2:04 AM</b></li>
+                <li><span>Ticket</span><a href="#brief">FIN-212</a></li>
+              </ul>
+            </dd>
+          </div>
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">If you wait</dt>
+            <dd class="fd-decision-lead">Tonight’s export covers Priya’s team only</dd>
+            <dd class="fd-decision-detail">The request expires tomorrow at 10:20 AM and Priya has to ask again.</dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+    <h3 class="doc-sub">On a phone, and with three parts</h3>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <article class="fd-decision" aria-labelledby="db2-title" data-frame="xl">
+        <header class="fd-decision-head">
+          <span class="fd-tile"><i data-icon="users"></i></span>
+          <div class="fd-decision-heading">
+            <p class="fd-eyebrow">Seat increase</p>
+            <h2 class="fd-decision-title" id="db2-title">Add 5 seats to Orchard Data?</h2>
+            <p class="fd-decision-meta"><span>Sam Ortiz asked today</span></p>
+          </div>
+          <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Waiting</span>
+        </header>
+        <dl class="fd-decision-parts">
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">The change</dt>
+            <dd class="fd-decision-lead"><span class="fd-delta"><span class="fd-delta-from">10</span><span class="fd-delta-to">15 seats</span></span></dd>
+            <dd class="fd-decision-detail">$60 a month more, from the next invoice.</dd>
+          </div>
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">Who it touches</dt>
+            <dd class="fd-decision-lead">Orchard Data’s invoice</dd>
+          </div>
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">Who signs</dt>
+            <dd class="fd-decision-lead">Any owner, you included</dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+    <ul class="doc-notes">
+      <li>The title is the question, ending in a question mark, with the object and the amount: “Grant 40,000 credits to Northwind Labs?”.</li>
+      <li>Each part leads with one line and adds at most one muted line. Evidence can be a list of facts (<code class="fd-code">fd-decision-facts</code>) or the requester’s own words (<code class="fd-code">fd-decision-quote</code>).</li>
+      <li>The fourth part says who signs, or what happens if nobody decides. Never both: pick the one that changes the person’s mind.</li>
+      <li>Two columns on a wide case, one when the brief is narrower than about 560px. An odd last part takes the full row.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== DRAFT ===================== -->
+  <section class="doc-section" id="draft">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Drafted reason</h2>
+      <p>When an agent drafts the reason, show it as the agent’s until the person takes it. The field stays empty until then.</p>
+    </div>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <div class="fd-commit">
+          <aside class="fd-draft" aria-label="Drafted reason">
+            <p class="fd-draft-by"><i data-icon="bot"></i><span>Drafted by <b>Ember agent</b> for Maya Chen</span><span class="fd-draft-when">1 h ago</span></p>
+            <p class="fd-draft-text">The key only exports billing totals, and FIN-212 needs every team’s runs to reconcile November.</p>
+            <div class="fd-draft-actions">
+              <button class="fd-btn" type="button" data-size="sm" data-variant="outline" data-fd-draft="use"><i data-icon="arrow-down"></i><span>Use as my reason</span></button>
+              <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-draft="discard">Discard</button>
+            </div>
+            <p class="fd-draft-used">You used this draft. Edit it until it says what you mean.</p>
+          </aside>
+          <div class="fd-field">
+            <label class="fd-field-label" for="dr-reason">Reason</label>
+            <textarea class="fd-textarea" id="dr-reason" name="reason" rows="2" required data-fd-autogrow placeholder="Why you decided."></textarea>
+            <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p><span class="fd-commit-budget" data-max-words="60">0 / 60 words</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+        <div class="fd-commit">
+          <aside class="fd-draft" aria-label="Drafted reason" data-state="used">
+            <p class="fd-draft-by"><i data-icon="bot"></i><span>Drafted by <b>Ember agent</b> for Maya Chen</span><span class="fd-draft-when">1 h ago</span></p>
+            <p class="fd-draft-text">The key only exports billing totals.</p>
+            <p class="fd-draft-used">You used this draft. Edit it until it says what you mean.</p>
+          </aside>
+          <div class="fd-field">
+            <label class="fd-field-label" for="dr-reason-used">Reason</label>
+            <textarea class="fd-textarea" id="dr-reason-used" name="reason" rows="2" data-fd-drafted="used">The key only exports billing totals.</textarea>
+            <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p><span class="fd-commit-budget" data-max-words="60">6 / 60 words</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The draft has a dashed edge, the agent’s name and who it was written for, and quotes. Nothing about it looks like a filled field.</li>
+      <li>“Use as my reason” copies the words into the field and puts the cursor at the end; the draft folds to one line that stays as provenance. Discard folds it away. The agent never commits.</li>
+      <li>The field records where its words came from in <code class="fd-code">data-fd-drafted</code>: <code class="fd-code">used</code>, then <code class="fd-code">edited</code> once the person changes them. <code class="fd-code">fd:commit</code> reports it as <code class="fd-code">detail.drafted</code>, so the audit log can say “drafted by Ember agent, accepted by Maya”.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== COMMIT ===================== -->
+  <section class="doc-section" id="commit">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Reason and commit</h2>
+      <p>One line says what each button does; the reason has a word budget; the buttons are named for their effect.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <form class="fd-commit" id="dc-commit" aria-label="Decide the monitor quota">
+        <p class="fd-commit-effect">Raising sets Orchard Data’s limit to <b>200 monitors</b> at once. Declining keeps 100, and Sam sees your reason.</p>
+        <div class="fd-field">
+          <label class="fd-field-label" for="dc-reason">Reason</label>
+          <textarea class="fd-textarea" id="dc-reason" name="reason" rows="3" required data-fd-autogrow placeholder="Their monitor count doubled after the docs migration."></textarea>
+          <div class="fd-field-foot"><p class="fd-field-hint">Sam Ortiz reads this with the answer.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40">0 / 40 words</span></div>
+          <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+        </div>
+        <div class="fd-commit-actions">
+          <button class="fd-btn" type="submit" data-variant="primary" value="approve" data-verb="Raising the limit"><i data-icon="check"></i><span>Raise to 200</span></button>
+          <button class="fd-btn" type="submit" data-variant="outline" value="decline" data-verb="Declining">Decline</button>
+        </div>
+      </form>
+    </div>
+    <h3 class="doc-sub">States</h3>
+    <div class="doc-specimen" data-code data-layout="grid" data-surface="surface" data-fd-vars="--min: var(--fd-size-xl)">
+      <div class="fd-commit" aria-label="Reason missing">
+        <div class="fd-field">
+          <label class="fd-field-label" for="dcs-empty">Reason</label>
+          <textarea class="fd-textarea" id="dcs-empty" rows="2" required aria-invalid="true" aria-describedby="dcs-empty-error"></textarea>
+          <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40">0 / 40 words</span></div>
+          <p class="fd-field-error" id="dcs-empty-error"><i data-icon="circle-alert"></i><span>Write a reason first.</span></p>
+        </div>
+        <div class="fd-commit-actions"><button class="fd-btn" type="button" data-variant="primary"><i data-icon="check"></i><span>Raise to 200</span></button><button class="fd-btn" type="button" data-variant="outline">Decline</button></div>
+      </div>
+      <div class="fd-commit" aria-label="Reason over budget">
+        <div class="fd-field">
+          <label class="fd-field-label" for="dcs-over">Reason</label>
+          <textarea class="fd-textarea" id="dcs-over" rows="2" aria-invalid="true" aria-describedby="dcs-over-error">Their monitor count doubled after the docs migration, every new docs page got its own monitor, the team asked twice in October, and the usage graph shows no sign of slowing down before the end of the year, so a higher limit now saves another request soon.</textarea>
+          <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40" data-state="over">47 / 40 words</span></div>
+          <p class="fd-field-error" id="dcs-over-error"><i data-icon="circle-alert"></i><span>Keep it to 40 words. It has 47.</span></p>
+        </div>
+        <div class="fd-commit-actions"><button class="fd-btn" type="button" data-variant="primary"><i data-icon="check"></i><span>Raise to 200</span></button><button class="fd-btn" type="button" data-variant="outline">Decline</button></div>
+      </div>
+      <div class="fd-commit" aria-label="Viewer cannot decide">
+        <p class="fd-commit-effect">Raising sets Orchard Data’s limit to <b>200 monitors</b> at once.</p>
+        <div class="fd-commit-actions">
+          <button class="fd-btn" type="button" data-variant="primary" disabled aria-describedby="dcs-lock"><i data-icon="check"></i><span>Raise to 200</span></button>
+          <button class="fd-btn" type="button" data-variant="outline" disabled aria-describedby="dcs-lock">Decline</button>
+        </div>
+        <p class="fd-commit-lock" id="dcs-lock"><i data-icon="lock"></i><span>Only owners decide limits. Ask Maya Chen or Sam Ortiz.</span></p>
+      </div>
+      <div class="fd-commit" aria-label="You asked for this">
+        <p class="fd-commit-effect">Granting adds <b>5,000 credits</b> to Halcyon now.</p>
+        <div class="fd-commit-actions">
+          <button class="fd-btn" type="button" data-variant="primary" disabled aria-describedby="dcs-self"><i data-icon="check"></i><span>Grant the credit</span></button>
+        </div>
+        <p class="fd-commit-lock" id="dcs-self"><i data-icon="lock"></i><span>You asked for this, so another owner has to approve it.</span></p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Primary button: verb and object, at most three words, saying what happens: “Approve the credit”, “Allow the host”, “Raise to 200”. Never “Submit”, “Confirm” or “OK”.</li>
+      <li>Decline also needs the reason; the requester or the agent reads it. One field serves both buttons, and the effect line says what each does.</li>
+      <li>The budget counts words, not characters: <code class="fd-code">data-min-words</code> and <code class="fd-code">data-max-words</code> on <code class="fd-code">fd-commit-budget</code>. It turns amber near the limit and red past it; a commit outside it shows the error in the field and keeps focus there.</li>
+      <li>When the viewer cannot decide, keep the case readable, disable the buttons and say who can in <code class="fd-code">fd-commit-lock</code>. content.js wires <code class="fd-code">aria-describedby</code> when the markup does not.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== PREVIEW ===================== -->
+  <section class="doc-section" id="preview">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Preview then commit</h2>
+      <p>When the person edits a value whose reach depends on what they type, show what will change before the commit appears.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <form class="fd-preview" id="pv-inline" aria-label="Change the Hobby crawl limit">
+        <div class="fd-preview-edit">
+          <div class="fd-field">
+            <label class="fd-field-label" for="pv-limit">Concurrent crawls on Hobby</label>
+            <div class="fd-number">
+              <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease concurrent crawls"><i data-icon="minus"></i></button>
+              <input class="fd-number-input" type="number" id="pv-limit" name="limit" value="4" min="1" max="20" step="1" required>
+              <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase concurrent crawls"><i data-icon="plus"></i></button>
+            </div>
+            <p class="fd-field-hint">Today: 2. Running crawls keep the limit they started with.</p>
+          </div>
+          <div><button class="fd-btn" type="button" data-fd-preview-open><i data-icon="eye"></i><span>Preview the change</span></button></div>
+        </div>
+        <p class="fd-preview-stale" role="status"><i data-icon="triangle-alert"></i><span>You changed the limit. Preview again before you commit.</span></p>
+        <div class="fd-preview-result">
+          <div class="fd-impact" data-tone="warning">
+            <p class="fd-impact-count"><b data-pv-count>412</b> teams change</p>
+            <p class="fd-impact-text">Every team on Hobby. Their crawls start sooner; their credit use does not change.</p>
+            <ul class="fd-impact-list">
+              <li><span>Concurrent crawls</span><span class="fd-delta"><span class="fd-delta-from">2</span><span class="fd-delta-to" data-pv-to>4</span></span></li>
+              <li><span>Teams at the limit last week</span><b>87</b></li>
+            </ul>
+          </div>
+          <div class="fd-commit">
+            <div class="fd-field">
+              <label class="fd-field-label" for="pv-reason">Reason</label>
+              <textarea class="fd-textarea" id="pv-reason" name="reason" rows="2" required data-fd-autogrow placeholder="87 teams waited on the limit last week."></textarea>
+              <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40">0 / 40 words</span></div>
+              <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+            </div>
+            <div class="fd-commit-actions">
+              <button class="fd-btn" type="submit" data-variant="primary" value="apply" data-verb="Changing the Hobby limit"><i data-icon="check"></i><span>Change for 412 teams</span></button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <h3 class="doc-sub">In a dialog</h3>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-fd-dialog-open="pv-dialog"><i data-icon="sliders-horizontal"></i><span>Change the Hobby limit</span></button>
+      <dialog class="fd-dialog" id="pv-dialog" data-size="md" aria-labelledby="pv-dialog-title">
+        <form class="fd-preview" id="pv-dialog-form">
+          <div class="fd-dialog-head">
+            <h2 class="fd-h3 fd-dialog-title" id="pv-dialog-title">Change the Hobby limit</h2>
+            <p class="fd-dialog-desc">Every team on Hobby gets the new limit at once.</p>
+            <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <div class="fd-dialog-body fd-stack" data-gap="4">
+            <div class="fd-preview-edit">
+              <div class="fd-field">
+                <label class="fd-field-label" for="pvd-limit">Concurrent crawls</label>
+                <div class="fd-number">
+                  <button type="button" class="fd-number-step" data-fd-step="-1" aria-label="Decrease concurrent crawls"><i data-icon="minus"></i></button>
+                  <input class="fd-number-input" type="number" id="pvd-limit" name="limit" value="3" min="1" max="20" step="1" required autofocus>
+                  <button type="button" class="fd-number-step" data-fd-step="1" aria-label="Increase concurrent crawls"><i data-icon="plus"></i></button>
+                </div>
+              </div>
+              <div><button class="fd-btn" type="button" data-fd-preview-open><i data-icon="eye"></i><span>Preview the change</span></button></div>
+            </div>
+            <p class="fd-preview-stale" role="status"><i data-icon="triangle-alert"></i><span>You changed the limit. Preview again.</span></p>
+            <div class="fd-preview-result">
+              <div class="fd-impact" data-tone="warning">
+                <p class="fd-impact-count"><b>412</b> teams change</p>
+                <p class="fd-impact-text">Every team on Hobby, from their next crawl.</p>
+              </div>
+              <div class="fd-commit" data-fd-hold="5">
+                <div class="fd-field">
+                  <label class="fd-field-label" for="pvd-reason">Reason</label>
+                  <textarea class="fd-textarea" id="pvd-reason" name="reason" rows="2" required placeholder="87 teams waited on the limit last week."></textarea>
+                  <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40">0 / 40 words</span></div>
+                  <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+                </div>
+                <div class="fd-commit-actions">
+                  <button class="fd-btn" type="submit" data-variant="primary" value="apply" data-verb="Changing the Hobby limit"><i data-icon="check"></i><span>Change for 412 teams</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>“Preview the change” checks the fields, then fires <code class="fd-code">fd:open</code> on the <code class="fd-code">fd-preview</code>: compute the reach and fill the <code class="fd-code">fd-impact</code> then. Focus moves to the impact.</li>
+      <li>Change a field after the preview and the commit hides, with a line that says to preview again. A preview never stays on screen for a value it was not computed for.</li>
+      <li>Name the count first, in the person’s words: “412 teams change”. List a few of them with <code class="fd-code">fd-delta</code>, never all; link to the full list.</li>
+      <li>The commit button can carry the count: “Change for 412 teams”.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== HOLD ===================== -->
+  <section class="doc-section" id="hold">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Held actions and Undo</h2>
+      <p>Hold a commit for a few seconds when sending is hard to take back. Nothing leaves until the countdown ends.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-row" data-wrap data-gap="2">
+        <button class="fd-btn" type="button" data-variant="danger-soft" data-fd-hold-for="hd-run" data-verb="Cancelling run_8f2a91" value="cancel"><i data-icon="circle-stop"></i><span>Cancel the run</span></button>
+      </div>
+      <div class="fd-hold" id="hd-run" data-tone="danger" data-seconds="10" hidden>
+        <span class="fd-hold-ring" aria-hidden="true"><span class="fd-hold-count">10</span></span>
+        <div class="fd-hold-text">
+          <p class="fd-hold-title">Cancelling run_8f2a91</p>
+          <p class="fd-hold-note">The crawl stops when the countdown ends. 312 pages are kept.</p>
+        </div>
+        <button class="fd-btn fd-hold-undo" type="button"><i data-icon="undo-2"></i><span>Undo</span></button>
+      </div>
+    </div>
+    <h3 class="doc-sub">While it runs</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="sunken">
+      <div class="fd-hold" data-state="running" aria-label="Held action">
+        <span class="fd-hold-ring" aria-hidden="true" data-fd-vars="--_c-hold-p: 0.6"><span class="fd-hold-count">6</span></span>
+        <div class="fd-hold-text">
+          <p class="fd-hold-title">Approving the credit</p>
+          <p class="fd-hold-note">Nothing is sent until the countdown ends.</p>
+        </div>
+        <button class="fd-btn fd-hold-undo" type="button"><i data-icon="undo-2"></i><span>Undo</span></button>
+      </div>
+      <div class="fd-hold" data-state="running" data-tone="danger" aria-label="Held action">
+        <span class="fd-hold-ring" aria-hidden="true" data-fd-vars="--_c-hold-p: 0.3"><span class="fd-hold-count">3</span></span>
+        <div class="fd-hold-text">
+          <p class="fd-hold-title">Revoking 3 API keys</p>
+          <p class="fd-hold-note">Requests with these keys fail when the countdown ends.</p>
+        </div>
+        <button class="fd-btn fd-hold-undo" type="button"><i data-icon="undo-2"></i><span>Undo</span></button>
+      </div>
+    </div>
+    <h3 class="doc-sub">In a toast: held, and Done · Undo</h3>
+    <div class="doc-specimen" data-code data-layout="center">
+      <button class="fd-btn" type="button" data-demo-held><i data-icon="timer"></i><span>Hold a send</span></button>
+      <button class="fd-btn" type="button" data-demo-undo><i data-icon="archive"></i><span>Archive a monitor</span></button>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="sunken">
+      <div class="fd-toast" data-static-demo data-tone="neutral" data-held data-timed role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><span class="fd-hold-ring" data-size="sm" data-fd-vars="--_c-hold-p: 0.7"><span class="fd-hold-count">7</span></span></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Approving the credit</p><p class="fd-toast-desc">Nothing is sent until the countdown ends.</p></div>
+        <button class="fd-btn fd-toast-action" type="button" data-size="sm"><i data-icon="undo-2"></i><span>Undo</span></button>
+        <span class="fd-toast-progress" aria-hidden="true"></span>
+      </div>
+      <div class="fd-toast" data-static-demo data-tone="success" data-timed role="status">
+        <span class="fd-toast-icon" aria-hidden="true"><i data-icon="circle-check"></i></span>
+        <div class="fd-toast-content"><p class="fd-toast-title">Monitor archived</p><p class="fd-toast-desc">pricing.ember.dev stops checking now.</p></div>
+        <button class="fd-btn fd-toast-action" type="button" data-size="sm"><i data-icon="undo-2"></i><span>Undo</span></button>
+        <button class="fd-toast-close" type="button" aria-label="Dismiss notification"><i data-icon="x"></i></button>
+        <span class="fd-toast-progress" aria-hidden="true"></span>
+      </div>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Window</th><th>What has happened</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>Seconds before</td><td>Nothing. It goes when the countdown ends.</td><td><code class="fd-code">fd-hold</code> on the case, or <code class="fd-code">toast.hold</code> when the page moves on. 10 seconds; 5 inside a dialog.</td></tr>
+        <tr><td>Seconds after</td><td>It is done, and the server can reverse it.</td><td><code class="fd-code">toast({ title, undo })</code>: Done · Undo for 8 seconds.</td></tr>
+        <tr><td>Days after</td><td>It is done and recorded; reversing it is a new action.</td><td><code class="fd-code">fd-decision-outcome</code> with Undo and the date it stops working.</td></tr>
+      </tbody>
+    </table>
+    <ul class="doc-notes">
+      <li>The ring drains with the time left and the number counts whole seconds. Focus moves to Undo when the hold starts; Undo or <kbd class="fd-kbd">Esc</kbd> stops it, and focus returns to the button that started it.</li>
+      <li>Screen readers hear “Approving the credit in 10 seconds. Undo or Escape stops it.” when it starts, and “Stopped. Nothing was sent.” when it is undone. The count itself is silent.</li>
+      <li>A held toast has no close button and cannot be swiped away: closing it would have to mean send or stop. <kbd class="fd-kbd">Ctrl</kbd> <kbd class="fd-kbd">Z</kbd> (<kbd class="fd-kbd">⌘</kbd> <kbd class="fd-kbd">Z</kbd>) outside a text field presses the newest Undo.</li>
+      <li>Leaving the page while a hold runs sends it at once, with <code class="fd-code">detail.cause</code> “pagehide”: send it with <code class="fd-code">fetch(…, { keepalive: true })</code>.</li>
+      <li>Events: <code class="fd-code">fd:hold</code> when it starts, <code class="fd-code">fd:undo</code> when it is stopped, <code class="fd-code">fd:commit</code> when it goes. Send the request on <code class="fd-code">fd:commit</code>, never earlier.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== OUTCOME ===================== -->
+  <section class="doc-section" id="outcome">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Decided</h2>
+      <p>Once decided, the brief keeps its parts and ends with who decided, when, why, and how long Undo works.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <article class="fd-decision" aria-labelledby="do-title">
+        <header class="fd-decision-head">
+          <span class="fd-tile" data-tone="success"><i data-icon="wallet"></i></span>
+          <div class="fd-decision-heading">
+            <p class="fd-eyebrow">Credit grant</p>
+            <h2 class="fd-decision-title" id="do-title">Grant 40,000 credits to Northwind Labs</h2>
+            <p class="fd-decision-meta"><span>Lena Ortiz asked Nov 18</span></p>
+          </div>
+          <span class="fd-status" data-variant="pill" data-size="sm" data-tone="success">Approved</span>
+        </header>
+        <dl class="fd-decision-parts">
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">The change</dt>
+            <dd class="fd-decision-lead"><span class="fd-delta"><span class="fd-delta-from">12,400</span><span class="fd-delta-to">52,400 credits</span></span></dd>
+          </div>
+          <div class="fd-decision-part">
+            <dt class="fd-decision-label">Who it touches</dt>
+            <dd class="fd-decision-lead">Northwind Labs only</dd>
+          </div>
+        </dl>
+        <div class="fd-decision-outcome" data-tone="success" role="status">
+          <i data-icon="circle-check"></i>
+          <p class="fd-decision-outcome-title">Approved by you just now</p>
+          <p class="fd-decision-quote">Northwind lost 212 crawls in the Nov 14 outage. 40,000 covers them.</p>
+          <div class="fd-decision-actions">
+            <button class="fd-btn" type="button" data-size="sm" data-variant="outline"><i data-icon="undo-2"></i><span>Undo the grant</span></button>
+            <span>Works until Nov 25, while the credits are unspent.</span>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="doc-specimen" data-code data-layout="grid" data-fd-vars="--min: var(--fd-size-xl)">
+      <div class="fd-decision-outcome" data-tone="neutral" role="status">
+        <i data-icon="ban"></i>
+        <p class="fd-decision-outcome-title">Declined by you at 9:42 AM</p>
+        <p class="fd-decision-quote">Ask again with a host name, not a wildcard.</p>
+        <div class="fd-decision-actions"><span>Halcyon sees this reason and can ask again.</span></div>
+      </div>
+      <div class="fd-decision-outcome" data-tone="info" role="status">
+        <i data-icon="users"></i>
+        <p class="fd-decision-outcome-title">Approved by Sam Ortiz 5 min ago</p>
+        <p class="fd-decision-detail">Someone answered first. Nothing for you to do.</p>
+      </div>
+      <div class="fd-decision-outcome" data-tone="warning" role="status">
+        <i data-icon="hourglass"></i>
+        <p class="fd-decision-outcome-title">Expired unanswered on Nov 19</p>
+        <p class="fd-decision-detail">Nothing changed. Priya can ask again from the key’s page.</p>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The status pill and the outcome agree: Approved, Declined, Expired. The title drops its question mark.</li>
+      <li>A decided case reached from a link or the history keeps its brief, so the reader sees what was decided, not only that it was.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== STATES ===================== -->
+  <section class="doc-section" id="states">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Screen states</h2>
+      <p>A decision screen has every page state. These are the ones a queue meets most; the full set is on Cards &amp; feedback.</p>
+    </div>
+    <div class="doc-specimen" data-surface="surface">
+      <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Queue state" data-ds-switch>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="loading">Loading</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="empty">Empty</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="no-access">No access</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="expired">Link expired</button>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed" data-surface="surface">
+      <div class="fd-states" id="ds" data-state="loading">
+        <div class="fd-queue" data-when="loading" aria-busy="true" aria-label="Loading the queue">
+          <div class="fd-queue-list"><div class="fd-skeleton-list" data-rows="4"></div></div>
+          <div class="fd-queue-case"><div class="fd-skeleton-form" data-count="3"></div></div>
+        </div>
+        <div class="fd-empty" data-size="lg" data-when="empty">
+          <span class="fd-empty-icon"><i data-icon="check-check"></i></span>
+          <h2 class="fd-empty-title">Nothing waits for you</h2>
+          <p class="fd-empty-text">New requests and agent proposals appear here. Ember emails you when one has a deadline.</p>
+        </div>
+        <div class="fd-empty" data-size="lg" data-tone="danger" data-when="error" role="alert">
+          <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+          <h2 class="fd-empty-title">Couldn’t load the queue</h2>
+          <p class="fd-empty-text">The server didn’t answer within 10 seconds. Nothing was decided.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-fd-set-state="loading"><i data-icon="refresh-cw"></i><span>Try again</span></button></div>
+          <p class="fd-empty-meta"><span>Request ID</span><code class="fd-code">req_8f2a91c4</code><button class="fd-btn" type="button" data-size="xs" data-variant="ghost" data-icon-only data-fd-copy="req_8f2a91c4" aria-label="Copy request ID"><i data-icon="copy"></i></button></p>
+        </div>
+        <div class="fd-empty" data-size="lg" data-when="no-access">
+          <span class="fd-empty-icon"><i data-icon="lock"></i></span>
+          <h2 class="fd-empty-title">Only owners decide here</h2>
+          <p class="fd-empty-text">You can read every request in Activity. To decide them, an owner has to make you one.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="primary"><i data-icon="send"></i><span>Ask for owner access</span></button><a class="fd-btn" href="#states">Open Activity</a></div>
+          <p class="fd-empty-meta"><span class="fd-avatar-stack"><span class="fd-avatar" data-size="24">MC</span><span class="fd-avatar" data-size="24">SO</span></span><span>Maya Chen and Sam Ortiz can make you an owner.</span></p>
+        </div>
+        <div class="fd-empty" data-size="lg" data-when="expired">
+          <span class="fd-empty-icon"><i data-icon="unlink"></i></span>
+          <h2 class="fd-empty-title">This link has expired</h2>
+          <p class="fd-empty-text">Links in decision emails work once, for 7 days. Sign in to see the request and decide it there.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="primary" href="#states"><i data-icon="log-in"></i><span>Sign in to Ember</span></a></div>
+          <p class="fd-empty-meta"><span>Sent Nov 11 to maya@ember.dev · expired Nov 18</span></p>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Wrap the screen in <code class="fd-code">fd-states</code> and mark each part with <code class="fd-code">data-when</code>; <code class="fd-code">data-state</code> on the wrapper shows one. See <a class="fd-link" href="content.html#page-states">Page states</a> for all nine.</li>
+      <li>An error says what failed and that nothing was decided, gives Try again and the request ID. No access says who can grant it. An expired link says when it ran out and where to go now.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== API ===================== -->
+  <section class="doc-section" id="api">
+    <div class="doc-section-head"><h2 class="fd-h3">API</h2><p>Attributes, events and the script entry points of the family.</p></div>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>Applies to</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>data-fd-draft</td><td>button in fd-draft</td><td><span class="fd-code">use</span> copies the draft into the reason; <span class="fd-code">discard</span> folds it away. <span class="fd-code">data-fd-draft-for</span> on the draft names another field.</td></tr>
+        <tr><td>data-fd-drafted</td><td>the reason textarea</td><td>Set by script: <span class="fd-code">used</span>, then <span class="fd-code">edited</span>.</td></tr>
+        <tr><td>data-fd-hold</td><td>fd-commit</td><td>Seconds to hold a commit. <span class="fd-code">data-fd-hold-in="toast"</span> holds it in a toast so the page can move on.</td></tr>
+        <tr><td>data-verb</td><td>a commit button</td><td>What the hold says while it runs: “Approving the credit”.</td></tr>
+        <tr><td>data-min-words · data-max-words</td><td>fd-commit-budget</td><td>The reason’s word budget.</td></tr>
+        <tr><td>data-fd-hold-for</td><td>any button</td><td>Starts the fd-hold with that id. <span class="fd-code">data-seconds</span> on the hold sets its length.</td></tr>
+        <tr><td>data-fd-preview-open</td><td>button in fd-preview</td><td>Checks the edit fields and shows the result.</td></tr>
+        <tr><td>data-view</td><td>fd-queue</td><td><span class="fd-code">list</span> or <span class="fd-code">case</span>: which one a narrow queue shows. Set by script.</td></tr>
+        <tr><td>data-state · data-when</td><td>fd-states and its children</td><td>The state shown, and the states each part belongs to. <span class="fd-code">data-fd-set-state</span> on a button switches it.</td></tr>
+        <tr><td>fd:accept</td><td>fd-draft</td><td>Cancelable, before the draft is used. <span class="fd-code">{ value }</span> is its text. Discard fires <span class="fd-code">fd:close</span>.</td></tr>
+        <tr><td>fd:hold · fd:undo · fd:commit</td><td>fd-commit, fd-hold, a held toast</td><td>Started, stopped, sent. From a commit: <span class="fd-code">{ value, reason, drafted, verb }</span>; from a toast also <span class="fd-code">toast</span>; <span class="fd-code">cause</span> is “time” or “pagehide”.</td></tr>
+        <tr><td>fd:open · fd:change</td><td>fd-preview</td><td>A preview was asked for (fill the impact), or it went stale.</td></tr>
+        <tr><td>fd:select</td><td>fd-queue-item</td><td><span class="fd-code">{ value, item }</span> when an item becomes current.</td></tr>
+        <tr><td>content.hold(el, opts)</td><td>script</td><td>Starts a hold; resolves <span class="fd-code">true</span> when it went. Also <span class="fd-code">cancelHold</span>, <span class="fd-code">reopen</span>, <span class="fd-code">select</span>, <span class="fd-code">removeItem</span>, <span class="fd-code">setState</span>.</td></tr>
+        <tr><td>toast.hold(opts)</td><td>script</td><td><span class="fd-code">{ title, description, seconds, tone, target, detail, onCommit, onUndo }</span>. <span class="fd-code">toast({ undo })</span> for Done · Undo.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script type="module">
+  import { content, overlays } from '../fire/fire.js';
+  const { toast } = overlays;
+
+  /* Queue: a commit takes the case out of the queue while its toast counts down; Undo puts it back. */
+  const states = document.getElementById('dq-states');
+  const queue = document.getElementById('dq');
+  const homes = new Map();
+  const DONE = {
+    credit: { approve: ['Credit approved', '40,000 credits added to Northwind Labs.'], decline: ['Credit declined', 'Lena Ortiz sees your reason.'] },
+    host: { approve: ['Host allowed', 'Halcyon’s agents can call it within 15 seconds.'], decline: ['Host declined', 'Halcyon sees your reason.'] },
+    crawl: { approve: ['Crawl change shipped', '29 teams obey crawl-delay from their next crawl.'], decline: ['Crawl change declined', 'The agent reads your reason.'] },
+  };
+  const caseOf = (event) => event.target.closest('[data-case]')?.dataset.case;
+  const itemOf = (value) => queue.querySelector(`.fd-queue-item[data-value="${value}"]`);
+  const countGroup = (group) => {
+    const n = group.querySelectorAll('.fd-queue-item').length;
+    group.querySelector('.fd-queue-count').textContent = String(n);
+    group.hidden = n === 0;
+  };
+  queue.addEventListener('fd:hold', (event) => {
+    const value = caseOf(event);
+    const item = itemOf(value);
+    if (!item) return;
+    homes.set(value, { item, group: item.closest('.fd-queue-group'), next: item.nextElementSibling });
+    const next = content.removeItem(item);
+    queue.querySelector(`[data-case="${value}"]`).hidden = true;
+    if (!next) content.setState(states, 'empty');
+  });
+  queue.addEventListener('fd:undo', (event) => {
+    const value = caseOf(event);
+    const home = homes.get(value);
+    if (!home) return;
+    home.group.insertBefore(home.item, home.next?.parentElement === home.group ? home.next : null);
+    countGroup(home.group);
+    content.setState(states, 'ready');
+    content.select(home.item);
+    home.item.focus();
+  });
+  queue.addEventListener('fd:commit', (event) => {
+    const value = caseOf(event);
+    const [title, description] = DONE[value]?.[event.detail.value] ?? ['Sent', ''];
+    // Keep the toast while the request runs, then say what is now true.
+    event.preventDefault();
+    setTimeout(() => toast.update(event.detail.toast, { title, description, tone: 'success' }), 900);
+  });
+  document.querySelector('[data-dq-reset]')?.addEventListener('click', () => {
+    for (const [, home] of homes) {
+      home.group.append(home.item);
+      countGroup(home.group);
+    }
+    for (const form of queue.querySelectorAll('.fd-commit')) {
+      content.reopen(form);
+      form.reset();
+      form.querySelector('textarea').dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    homes.clear();
+    content.setState(states, 'ready');
+    content.select(itemOf('credit'));
+  });
+
+  /* Commit specimen: say what was sent. */
+  document.getElementById('dc-commit')?.addEventListener('fd:commit', (event) => {
+    const form = event.currentTarget;
+    toast({ title: event.detail.value === 'approve' ? 'Limit raised to 200' : 'Request declined', description: 'Sam Ortiz sees your reason.', tone: 'success' });
+    setTimeout(() => { content.reopen(form); form.reset(); form.querySelector('textarea').dispatchEvent(new Event('input', { bubbles: true })); }, 1200);
+  });
+
+  /* Preview: compute the reach when it is asked for. */
+  for (const id of ['pv-inline', 'pv-dialog-form']) {
+    const preview = document.getElementById(id);
+    preview?.addEventListener('fd:open', (event) => {
+      const to = preview.querySelector('[data-pv-to]');
+      if (to) to.textContent = String(event.detail.value?.get('limit') ?? '');
+    });
+    preview?.addEventListener('fd:commit', (event) => {
+      const commit = event.target;
+      toast({ title: 'Hobby limit changed', description: `412 teams can run ${preview.querySelector('input[name="limit"]').value} crawls at once.`, tone: 'success' });
+      if (id === 'pv-dialog-form') overlays.closeDialog('pv-dialog', 'done');
+      setTimeout(() => { content.reopen(commit); delete preview.dataset.state; commit.querySelector('textarea').value = ''; commit.querySelector('textarea').dispatchEvent(new Event('input', { bubbles: true })); }, 600);
+    });
+  }
+
+  /* Hold: the standalone run cancel. */
+  document.getElementById('hd-run')?.addEventListener('fd:commit', () => toast({ title: 'Run cancelled', description: 'run_8f2a91 stopped. 312 pages are kept.', tone: 'neutral' }));
+
+  /* Toasts: held, and Done · Undo. */
+  document.querySelector('[data-demo-held]')?.addEventListener('click', () => {
+    toast.hold({ title: 'Sending the invite to ana@northwind.dev', description: 'Nothing is sent until the countdown ends.', seconds: 10, onCommit: () => toast({ title: 'Invite sent', tone: 'success' }) });
+  });
+  document.querySelector('[data-demo-undo]')?.addEventListener('click', () => {
+    toast({ title: 'Monitor archived', description: 'pricing.ember.dev stops checking now.', tone: 'success', undo: () => new Promise((resolve) => setTimeout(resolve, 500)), undone: 'Monitor restored' });
+  });
+
+  /* Screen states switcher. */
+  const ds = document.getElementById('ds');
+  document.querySelector('[data-ds-switch]')?.addEventListener('fd:change', (event) => content.setState(ds, event.detail.value));
+</script>
+</body>
+</html>

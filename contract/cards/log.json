@@ -5,7 +5,8 @@
   "useWhen": [
     "A job, a crawl or a deployment writes lines as it runs.",
     "One run's lines sit on its page: use data-fit.",
-    "A CLI session is shown as a terminal."
+    "A CLI session is shown as a terminal.",
+    "People link to a line of a finished log, or need to land on the first error."
   ],
   "avoidWhen": [
     {
@@ -57,6 +58,14 @@
     {
       "name": "copied",
       "how": "data-state=\"copied\" after a copy"
+    },
+    {
+      "name": "linked line",
+      "how": "aria-current=\"true\" on a fd-log-row, set from the address (#L42) or a chosen line number"
+    },
+    {
+      "name": "no errors",
+      "how": "the first-error button is disabled while no visible row has data-level=\"error\""
     }
   ],
   "variants": [
@@ -109,6 +118,16 @@
       "attribute": "data-tone",
       "value": "dim",
       "useWhen": "On a message span: quiet text."
+    },
+    {
+      "attribute": "data-lines",
+      "value": "",
+      "useWhen": "Number the rows; each number links to its line (#L42)."
+    },
+    {
+      "attribute": "data-anchor",
+      "value": "build",
+      "useWhen": "Several numbered logs on one page: line ids become build-L42."
     }
   ],
   "parts": [
@@ -203,6 +222,10 @@
     {
       "class": "fd-log-cursor",
       "role": "The blinking cursor."
+    },
+    {
+      "class": "fd-log-num",
+      "role": "A row's line number, a link to the row (added by code.js with data-lines)."
     }
   ],
   "related": [
@@ -219,6 +242,14 @@
     {
       "keys": "Enter, Space",
       "does": "Toggles a chip or Follow."
+    },
+    {
+      "keys": "Arrow Up, Arrow Down, Home, End",
+      "does": "On a line number: moves to the previous, next, first or last visible line."
+    },
+    {
+      "keys": "Enter",
+      "does": "On a line number: marks that line and writes it to the address."
     }
   ],
   "example": "docs/code.html#log",

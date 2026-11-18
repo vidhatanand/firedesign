@@ -1,0 +1,107 @@
+{
+  "id": "shortcuts",
+  "job": "Go to a page by keyboard and list every shortcut in a sheet.",
+  "purpose": "Keys are data attributes on controls: data-fd-keys=\"g l\" on a link makes G then L follow it, \"/\" opens search, \"?\" opens the sheet. While the first key waits, nav items show their key and a hint says a key is expected. The sheet is a dialog filled from the page each time it opens, so it never lists a key that does nothing.",
+  "useWhen": [
+    "People return to the same few pages all day: an app with a sidebar of destinations.",
+    "A product has several shortcuts and needs one place that lists them."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Jumping to anything by typing, including records.",
+      "instead": "command"
+    },
+    {
+      "when": "A shortcut hint on one control.",
+      "instead": "tooltip"
+    }
+  ],
+  "aka": [
+    "hotkeys",
+    "go-to keys",
+    "keyboard shortcuts",
+    "key bindings",
+    "shortcut sheet",
+    "cheat sheet",
+    "vim keys"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "waiting",
+      "how": "data-fd-keys-pending=\"g\" on <html> for 1.6 seconds after the first key; the hint shows data-state=\"open\""
+    },
+    {
+      "name": "skipped",
+      "how": "no key works in a field, in a modal, with Ctrl, Cmd or Alt, or on a hidden or disabled control"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-shortcuts",
+      "role": "The sheet's list, filled from the page."
+    },
+    {
+      "class": "fd-shortcuts-group",
+      "role": "One group: 'General', 'Go to'."
+    },
+    {
+      "class": "fd-shortcuts-label",
+      "role": "The group's name."
+    },
+    {
+      "class": "fd-shortcuts-row",
+      "role": "One shortcut: its name and its keys."
+    },
+    {
+      "class": "fd-shortcuts-name",
+      "role": "What the key does."
+    },
+    {
+      "class": "fd-shortcuts-keys",
+      "role": "The keys, as kbd elements."
+    },
+    {
+      "class": "fd-keys-hint",
+      "role": "The status line shown while a key waits for its second."
+    }
+  ],
+  "related": [
+    "command",
+    "dialog",
+    "sidebar",
+    "inline-code"
+  ],
+  "keyboard": [
+    {
+      "keys": "g then a letter",
+      "does": "Follows the control that carries that sequence."
+    },
+    {
+      "keys": "/",
+      "does": "Opens search."
+    },
+    {
+      "keys": "?",
+      "does": "Opens the shortcut sheet."
+    },
+    {
+      "keys": "Escape",
+      "does": "Drops a first key that is waiting."
+    }
+  ],
+  "example": "docs/shell.html#go-keys",
+  "provenance": [
+    "docs/shell.html",
+    "fire/js/shell.js",
+    "fire/components/shell.css",
+    "templates/shell.js"
+  ],
+  "since": "0.7.0"
+}

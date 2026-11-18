@@ -201,23 +201,4 @@ export const settingsOverlays = (s: ScreenSettings) => html`
         </div>
       </form>
     </dialog>
-
-    <dialog class="fd-dialog fd-confirm" id="dlg-delete-team" data-size="sm" data-confirm="quarry-labs">
-      <form method="dialog">
-        <div class="fd-dialog-head">
-          <h2 class="fd-h3 fd-dialog-title">Delete Quarry Labs</h2>
-          <p class="fd-dialog-desc">This deletes the team, its 4 API keys, 12 monitors and 30 days of logs. Members lose access at once. You can’t undo this.</p>
-        </div>
-        <div class="fd-dialog-body">
-          <div class="fd-field">
-            <label class="fd-field-label" for="dt-confirm">Type <span class="fd-confirm-phrase">quarry-labs</span> to confirm</label>
-            <input class="fd-input" id="dt-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false">
-          </div>
-        </div>
-        <div class="fd-dialog-foot">
-          <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
-          <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Delete team</span></button>
-        </div>
-      </form>
-    </dialog>
   `;

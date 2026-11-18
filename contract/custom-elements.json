@@ -8,7 +8,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
+          "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, quadrants, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart` for the cartesian types and the quadrant, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
           "name": "FdChart",
           "members": [
             {
@@ -18,7 +18,7 @@
                 "text": "FdChartType"
               },
               "default": "'line'",
-              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
+              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
               "attribute": "type",
               "reflects": true
             },
@@ -38,7 +38,7 @@
               "type": {
                 "text": "FdChartData | undefined"
               },
-              "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
+              "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
               "attribute": "data"
             },
             {
@@ -47,7 +47,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24).",
+              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24).",
               "attribute": "height"
             },
             {
@@ -80,11 +80,21 @@
             },
             {
               "kind": "field",
+              "name": "hideLabels",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`).",
+              "attribute": "hide-labels"
+            },
+            {
+              "kind": "field",
               "name": "state",
               "type": {
                 "text": "'loading' | 'empty' | undefined"
               },
-              "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
+              "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
               "attribute": "state"
             },
             {
@@ -223,7 +233,7 @@
               "name": "#family",
               "privacy": "private",
               "type": {
-                "text": "'cartesian' | 'sparkline' | 'donut' | 'heatgrid'"
+                "text": "'cartesian' | 'quadrant' | 'sparkline' | 'donut' | 'heatgrid'"
               },
               "readonly": true
             },
@@ -323,7 +333,7 @@
                 "text": "FdChartType"
               },
               "default": "'line'",
-              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
+              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
               "fieldName": "type"
             },
             {
@@ -339,7 +349,7 @@
               "type": {
                 "text": "FdChartData | undefined"
               },
-              "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
+              "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
               "fieldName": "data"
             },
             {
@@ -347,7 +357,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24).",
+              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24).",
               "fieldName": "height"
             },
             {
@@ -376,11 +386,20 @@
               "fieldName": "grid"
             },
             {
+              "name": "hide-labels",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`).",
+              "fieldName": "hideLabels"
+            },
+            {
               "name": "state",
               "type": {
                 "text": "'loading' | 'empty' | undefined"
               },
-              "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
+              "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
               "fieldName": "state"
             },
             {
@@ -1065,17 +1084,16 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "A Fire generative character field: terrain, waves, orbit, rain, grid, flame, halftone or spark. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
+          "description": "A Fire generative field: terrain, waves, orbit, rain, grid, flame, halftone, spark, contour, stipple or bars, drawn in characters, dots, squares, plus signs or dashes. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
           "name": "FdTexture",
           "members": [
             {
               "kind": "field",
               "name": "pattern",
               "type": {
-                "text": "string"
+                "text": "string | undefined"
               },
-              "default": "'terrain'",
-              "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`).",
+              "description": "The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`.",
               "attribute": "pattern"
             },
             {
@@ -1100,9 +1118,9 @@
               "kind": "field",
               "name": "marks",
               "type": {
-                "text": "'chars' | 'dots' | undefined"
+                "text": "'chars' | 'dots' | 'squares' | 'plus' | 'dashes' | undefined"
               },
-              "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`).",
+              "description": "The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`.",
               "attribute": "marks"
             },
             {
@@ -1156,7 +1174,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Luminance multiplier, default 1 (`data-intensity`).",
+              "description": "Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`.",
               "attribute": "intensity"
             },
             {
@@ -1204,6 +1222,15 @@
               },
               "description": "`blob` clips the field to a soft, noisy disc (`data-shape`).",
               "attribute": "shape"
+            },
+            {
+              "kind": "field",
+              "name": "signature",
+              "type": {
+                "text": "'own' | undefined"
+              },
+              "description": "`own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`).",
+              "attribute": "signature"
             },
             {
               "kind": "field",
@@ -1284,10 +1311,9 @@
             {
               "name": "pattern",
               "type": {
-                "text": "string"
+                "text": "string | undefined"
               },
-              "default": "'terrain'",
-              "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`).",
+              "description": "The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`.",
               "fieldName": "pattern"
             },
             {
@@ -1309,9 +1335,9 @@
             {
               "name": "marks",
               "type": {
-                "text": "'chars' | 'dots' | undefined"
+                "text": "'chars' | 'dots' | 'squares' | 'plus' | 'dashes' | undefined"
               },
-              "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`).",
+              "description": "The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`.",
               "fieldName": "marks"
             },
             {
@@ -1359,7 +1385,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Luminance multiplier, default 1 (`data-intensity`).",
+              "description": "Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`.",
               "fieldName": "intensity"
             },
             {
@@ -1402,6 +1428,14 @@
               },
               "description": "`blob` clips the field to a soft, noisy disc (`data-shape`).",
               "fieldName": "shape"
+            },
+            {
+              "name": "signature",
+              "type": {
+                "text": "'own' | undefined"
+              },
+              "description": "`own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`).",
+              "fieldName": "signature"
             },
             {
               "name": "inline",

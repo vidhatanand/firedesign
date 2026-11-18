@@ -1,0 +1,77 @@
+{
+  "id": "audit",
+  "job": "Find out who changed what in a team, and when, then read one change with its before and after values.",
+  "purpose": "An app screen for the record of changes: a page head with Export CSV, a toolbar that filters by who, by kind and by a period compared with an earlier one, a strip that sets this period's counts against the compared one, and one table grouped by day. A row opens a sheet with each changed field as before and after, a diff for structured config, and who, when, source, client, IP and IDs. One fd-states wrapper switches the whole page.",
+  "useWhen": [
+    "People need to know who changed a key, a member, a limit or a setting, and from where.",
+    "A security or compliance review reads changes over a period and compares it with the one before.",
+    "A change made by an API key or an agent has to be traced to the person it acted for."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The rows are API requests with status, duration and credits, not changes people made.",
+      "instead": "logs"
+    },
+    {
+      "when": "The history belongs to one record, such as one key or one monitor.",
+      "instead": "timeline"
+    },
+    {
+      "when": "A change is waiting for someone to approve it, not already done.",
+      "instead": "queue"
+    }
+  ],
+  "aka": [
+    "audit trail",
+    "audit log",
+    "activity history",
+    "change log",
+    "security log",
+    "event log"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list",
+    "record",
+    "series"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "?state=ready, or the Demo state band; fd-states data-state=\"ready\""
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading, or the Demo state band; first paint shows it for about 700 ms; data-state=\"loading\" shows the stat and table skeletons"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty, or the Demo state band; data-state=\"empty\": no events yet, with Invite a teammate"
+    },
+    {
+      "name": "filtered",
+      "how": "?state=filtered, or any search, filter or period that leaves no rows; data-state=\"filtered\" keeps the toolbar and offers Clear filters"
+    },
+    {
+      "name": "error",
+      "how": "?state=error, or the Demo state band; data-state=\"error\" with the request ID and Try again, which goes back to loading"
+    },
+    {
+      "name": "no-access",
+      "how": "?state=no-access, or the Demo state band; data-state=\"no-access\" names the owners who can grant it, with Ask for access"
+    }
+  ],
+  "example": "templates/audit.html",
+  "provenance": [
+    "Assay operator prototype: audit.html",
+    "templates/logs.html",
+    "docs/data.html#groups",
+    "docs/overlays.html#period",
+    "docs/content.html#page-states",
+    "docs/decisions.html#brief",
+    "docs/code.html#diff"
+  ],
+  "since": "0.7.0"
+}

@@ -228,7 +228,8 @@ test('validateTheme names the field, lists the choices, and notes the fonts a pa
   assert.equal(validateTheme({ dials: { blur: 1 } }).errors[0], '/dials/blur: unknown field');
   const v = validateTheme({ type: { display: 'Fraunces', sans: 'Inter' } });
   assert.ok(v.ok);
-  assert.deepEqual(v.notes, ['The page must load Fraunces, Inter (an @font-face for each): Fire ships only the families of its type sets.']);
+  // Fraunces is one of Fire's own families (typefaces.css loads it); Inter is not.
+  assert.deepEqual(v.notes, ['The page must load Inter (an @font-face for each; node scripts/fonts.mjs add "<family>" fetches a catalogue family\'s files): Fire ships only the families of its type sets.']);
   assert.deepEqual(validateTheme({ type: 'editorial' }).notes, []);
 });
 
@@ -248,10 +249,16 @@ const STATES = [
   { palette: 'honey', type: 'poster', density: 'spacious', corners: 1.625, lines: 1.5, textSize: 'lg', motion: 'slow', texture: 1.45, contrast: 'high' },
   { palette: 'ember', tone: { hue: 180, vivid: 150, light: 12, warmth: 100 }, corners: 0.125 },
   { palette: 'iris', tone: { hue: 45, vivid: 0, light: 0, warmth: 0 }, type: 'gallery', contrast: 'high', texture: 0.35 },
+  { palette: 'volt', signature: { field: 'contour', mark: 'squares', cell: 9, ramp: 'soft', marks: 'corners', intensity: 1.3 } },
+  { surfaces: 'flat', elevation: 'none', controls: 'outlined', headings: 'upper' },
+  { palette: 'clay', surfaces: 'outlined', elevation: 'lifted', controls: 'filled', headings: 'mono', tone: { hue: 20, vivid: 80, light: 0, warmth: 40 } },
+  { palette: 'ocean', surfaces: 'flat', tone: { hue: -30, vivid: 120, light: 4, warmth: -40 }, contrast: 'high' },
 ];
 const full = (s) => ({
   palette: 'ember', type: 'geist', tone: { hue: 0, vivid: 100, light: 0, warmth: 0 }, theme: 'system', density: 'comfortable',
-  corners: 1, lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1, ...s,
+  corners: 1, lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
+  surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence',
+  signature: { field: 'auto', mark: 'auto', cell: 'auto', ramp: 'auto', marks: 'crosses', intensity: 1 }, ...s,
 });
 
 test('toThemeRecord and fromThemeRecord round-trip every Tweaks state', () => {
@@ -277,8 +284,8 @@ test('fromThemeRecord refuses what the Tweaks panel cannot hold', () => {
 /* ---------- expandTheme / themeToCss ---------- */
 
 test('expandTheme: defaults leave no trace; dials and names map as Tweaks maps them', () => {
-  assert.deepEqual(expandTheme({}), { tokens: {}, attributes: {}, notes: [] });
-  assert.deepEqual(expandTheme(DEFAULT_RECORD), { tokens: {}, attributes: {}, notes: [] });
+  assert.deepEqual(expandTheme({}), { tokens: {}, attributes: {}, faces: [], notes: [] });
+  assert.deepEqual(expandTheme(DEFAULT_RECORD), { tokens: {}, attributes: {}, faces: [], notes: [] });
   const e = expandTheme({ palette: 'volt', type: 'book', dials: { corners: 0.5, lines: 2, motion: 'slow', texture: 0, density: 'compact', textSize: 'lg', contrast: 'high' } });
   assert.deepEqual(e.attributes, { 'data-palette': 'volt', 'data-type': 'book', 'data-density': 'compact', 'data-text-size': 'lg', 'data-contrast': 'high' });
   assert.deepEqual(e.tokens, { '--fd-radius-scale': '0.5', '--fd-hairline': '2px', '--fd-motion': '1.75', '--fd-texture': '0' });
@@ -288,10 +295,17 @@ test('expandTheme: defaults leave no trace; dials and names map as Tweaks maps t
   assert.deepEqual(g.tokens['--fd-line'], paletteFrom({ from: 'accent', accent: '#1f6feb', neutral: 'cool' }).contrast['--fd-line']);
   // Families become the three font tokens.
   const f = expandTheme({ type: { display: 'Fraunces', mono: 'Berkeley Mono' } });
-  assert.equal(f.tokens['--fd-font-display'], '"Fraunces", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif');
+  assert.equal(f.tokens['--fd-font-display'], '"Fraunces", "Fraunces Fallback", ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif');
   assert.equal(f.tokens['--fd-font-mono'], '"Berkeley Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace');
   assert.equal(f.tokens['--fd-font-sans'], undefined);
   assert.throws(() => expandTheme({ palette: 'neon' }), /invalid theme record/);
+  // The structural dials are attributes only; a toned palette is still written out whole (tokens.css derives the
+  // page and surface the dial asks for from it, one element down).
+  const st = expandTheme({ palette: 'ocean', tone: { hue: 30 }, dials: { surfaces: 'flat', elevation: 'none', controls: 'filled', headings: 'mono' } });
+  assert.deepEqual(st.attributes, { 'data-surfaces': 'flat', 'data-elevation': 'none', 'data-controls': 'filled', 'data-headings': 'mono' });
+  assert.deepEqual(Object.keys(st.tokens), PALETTE_TOKENS);
+  assert.deepEqual(expandTheme({ dials: { surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence' } }).attributes, {});
+  assert.match(validateTheme({ dials: { surfaces: 'glass' } }).errors[0], /\/dials\/surfaces: must be one of "objects", "flat", "outlined"/);
 });
 
 test('themeToCss: a stylesheet with no style attribute, on any selector', () => {

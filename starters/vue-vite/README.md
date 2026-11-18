@@ -1,12 +1,14 @@
 # Fire Vue starter
 
 Vue 3.5, Vite 8, vue-router and TypeScript, with Fire's design system, a look applied from a theme record, and a strict
-Content Security Policy. It shows three of Ember's screens (Overview, Activity logs, Settings) inside Ember's app shell,
+Content Security Policy. It shows three of Ember's screens (Overview, Activity logs, and Settings with its dirty-tracked
+form, feature switches with Undo and demo states) inside Ember's app shell,
 written as Vue single-file components from Fire's own templates, and proves the rules in `spec/EXPORT.md` for Vue.
 
 ## What it shows
 
-- **The shell** (`src/layouts/AppShell.vue`): sidebar, top bar and phone menu from `templates/shell-static.html`. The
+- **The shell** (`src/layouts/AppShell.vue`): sidebar, top bar and phone menu from `templates/shell-static.html`, with
+  go-to keys (`data-fd-keys`), the running-now pill, the service status, the command palette and the shortcut sheet. The
   navigation is data; its icons are `<fd-icon>` elements, because their names come from data. The three screens are
   router links, and `RouterLink` sets the `aria-current="page"` that Fire's nav styles read.
 - **Three screens** (`src/pages/`): the `.fd-page` of `templates/overview.html`, `logs.html` and `settings.html`, with
@@ -25,7 +27,7 @@ written as Vue single-file components from Fire's own templates, and proves the 
 ## Start a new project from it
 
 1. Copy this folder.
-2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.6.2"`.
+2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.7.0"`.
 3. `npm install`, then `npm run dev` (it runs `npm run theme` first), or `npm run build`.
 4. Remove `scripts/check.mjs` and the `check` script if you do not compare against Fire's templates. Keep
    `npm run lint:markup`.

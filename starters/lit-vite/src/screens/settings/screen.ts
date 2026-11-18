@@ -1,11 +1,11 @@
 import type { PropertyValues } from 'lit';
-import { init, nav, overlays, setAccent, setDensity, setTheme, getTheme, texture } from 'fire-design';
+import { content, forms, init, nav, overlays, reducedMotion, setAccent, setDensity, setTheme, getTheme, texture, type ToastOptions } from 'fire-design';
 import { FireLight } from '../../lib/fire-light';
 import { settingsView } from './view';
 
 const { toast, openDialog } = overlays;
 
-const TABS = ['account', 'team', 'billing', 'data-sources', 'connected-apps', 'notifications', 'advanced'] as const;
+const TABS = ['account', 'notifications', 'team', 'features', 'billing', 'data-sources', 'connected-apps', 'advanced'] as const;
 type Tab = (typeof TABS)[number];
 const ALIASES: Record<string, Tab> = { sources: 'data-sources', datasources: 'data-sources', apps: 'connected-apps', connected: 'connected-apps' };
 const tabFrom = (value: string | null): Tab => {
@@ -17,10 +17,20 @@ interface Confirm { title: string; desc: string; label: string; tone: string; re
 type Change = HTMLElementEventMap['fd:change'];
 type Select = HTMLElementEventMap['fd:select'];
 
+/** What Fire's own typings leave out: a toast's Done · Undo, and `content.setState` (both are in fire.js). */
+type UndoToast = ToastOptions & { undo?: () => Promise<void>; undone?: string };
+const setContentState = (content as unknown as { setState(el: Element | null, state: string): void }).setState;
+const PAGE_STATES = ['ready', 'loading', 'error', 'member'];
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const SLUG = /^[a-z0-9-]{3,32}$/;
+const TAKEN = ['ember', 'admin', 'api', 'support'];
+
 /**
  * Settings: seven panels behind a sub-navigation. Most buttons need no code here, because Fire does them from
  * markup (`data-fd-toast`, `data-fd-dialog-open`, switches, segmented controls). What this component adds:
- * the tab in the URL, the appearance controls, and removing a member or invite after a confirmation.
+ * the tab in the URL, the appearance controls, the team form (checked, saved, and the dirty bar cleared), the
+ * feature switches with Done · Undo, removing a member or invite after a confirmation, and the demo state
+ * (`?state=ready|loading|error|member`; a member reads the page but cannot change it).
  */
 export class ScreenSettings extends FireLight {
   static override properties = { tab: { state: true }, confirm: { state: true }, themeLabel: { state: true } };
@@ -38,7 +48,21 @@ export class ScreenSettings extends FireLight {
   override connectedCallback(): void {
     super.connectedCallback();
     // First paint: skeletons swap to content after a moment.
-    setTimeout(() => ['members-wrap', 'billing-summary'].forEach((id) => texture.setLoading(this.querySelector<HTMLElement>(`#${id}`), false)), 600);
+    setTimeout(() => ['members-wrap', 'billing-summary'].forEach((id) => texture.setLoading(this.querySelector<HTMLElement>(`#${id}`), false)), reducedMotion() ? 0 : 600);
+    // Fire's `fd:*` events bubble, and form events do too: one listener each, delegated, so Lit may re-render freely.
+    this.addEventListener('input', this.onInput);
+    this.addEventListener('focusout', this.onFocusOut);
+    this.addEventListener('change', this.onFeatureChange);
+    this.addEventListener('keydown', this.onKeyDown);
+    this.addEventListener('submit', this.onSubmit);
+    this.addEventListener('reset', this.onReset);
+    this.addEventListener('click', this.onClick);
+    this.addEventListener('fd:change', this.onStatesChange);
+  }
+
+  override disconnectedCallback(): void {
+    for (const [type, fn] of [['input', this.onInput], ['focusout', this.onFocusOut], ['change', this.onFeatureChange], ['keydown', this.onKeyDown], ['submit', this.onSubmit], ['reset', this.onReset], ['click', this.onClick], ['fd:change', this.onStatesChange]] as const) this.removeEventListener(type, fn as EventListener);
+    super.disconnectedCallback();
   }
 
   protected override render() {
@@ -50,6 +74,11 @@ export class ScreenSettings extends FireLight {
     init(this);
     this.syncAppearance();
     this.refreshCounts();
+    this.syncFeatures();
+    this.syncTeamForm();
+    // After the first frame and the fonts, so the strip is measured at its final size.
+    requestAnimationFrame(() => document.fonts.ready.then(() => this.revealTab()));
+    this.setPageState(new URLSearchParams(location.search).get('state') ?? 'ready', false);
   }
 
   protected override willUpdate(changed: PropertyValues): void {
@@ -64,8 +93,17 @@ export class ScreenSettings extends FireLight {
     event.preventDefault(); // the router leaves a link alone once its handler has done this
     this.tab = tabFrom(link.dataset.tab ?? null);
     history.replaceState(null, '', `?tab=${this.tab}`);
-    this.updateComplete.then(() => this.querySelector<HTMLElement>(`#h-${this.tab}`)?.focus());
+    this.updateComplete.then(() => { this.revealTab(true); this.querySelector<HTMLElement>(`#h-${this.tab}`)?.focus(); });
   };
+
+  /** On a phone the sub-navigation is one scrolling strip: bring the current tab to its middle (at once on load). */
+  private revealTab(smooth = false): void {
+    const strip = this.querySelector<HTMLElement>('.fd-subnav');
+    const active = strip?.querySelector<HTMLElement>(`[data-tab="${this.tab}"]`);
+    if (!strip || !active || strip.scrollWidth <= strip.clientWidth) return;
+    const offset = active.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
+    strip.scrollTo({ left: offset - (strip.clientWidth - active.offsetWidth) / 2, behavior: smooth && !reducedMotion() ? 'smooth' : 'auto' });
+  }
 
   /* ------------------------------------------------------------------ appearance */
 
@@ -135,9 +173,204 @@ export class ScreenSettings extends FireLight {
     const text = (name: string, value: string) => this.querySelectorAll(`[data-bind="${name}"]`).forEach((el) => { el.textContent = value; });
     text('member-count', String(members));
     text('member-badge', String(members + invites));
-    text('team-summary', `Quarry Labs · ${members} member${members === 1 ? '' : 's'} · ${invites} pending invite${invites === 1 ? '' : 's'}`);
-    for (const id of ['resend-all', 'revoke-all']) this.querySelector<HTMLButtonElement>(`#${id}`)!.disabled = !invites;
+    text('team-summary', `${this.savedName} · ${members} member${members === 1 ? '' : 's'} · ${invites} pending invite${invites === 1 ? '' : 's'}`);
+    text('pending-desc', invites ? `${invites} ${invites === 1 ? 'person has' : 'people have'} been invited and ${invites === 1 ? 'has' : 'have'} not joined yet. Invites expire after 7 days.` : 'No pending invites. Invite someone above and they will show up here.');
+    for (const id of ['resend-all', 'revoke-all']) this.querySelector<HTMLButtonElement>(`#${id}`)!.disabled = !invites || this.member;
   }
+
+  /* ------------------------------------------------------------------ team form: checked, saved, clean */
+
+  private member = false;
+  private savedName = 'Quarry Labs';
+  private field = (id: string) => this.querySelector<HTMLInputElement>(`#${id}`)!;
+  private bind = (name: string, value: string) => this.querySelectorAll(`[data-bind="${name}"]`).forEach((el) => { el.textContent = value; });
+
+  private slugProblem(value: string): string {
+    if (!value) return '';
+    if (!SLUG.test(value)) return 'Use 3 to 32 lowercase letters, numbers or dashes.';
+    return TAKEN.includes(value) ? `“${value}” is already taken. Try another slug.` : '';
+  }
+
+  /** One error slot per field, shown in place of the hint. */
+  private fieldError(input: HTMLInputElement, message: string): void {
+    const slot = input.closest('.fd-field')?.querySelector<HTMLElement>(':scope > .fd-field-error');
+    if (!slot) return;
+    if (message) { slot.querySelector('span')!.textContent = message; slot.hidden = false; input.setAttribute('aria-invalid', 'true'); }
+    else { slot.hidden = true; input.removeAttribute('aria-invalid'); }
+  }
+
+  private syncTeamForm(): void {
+    const name = this.field('team-name');
+    const slug = this.field('team-slug');
+    this.bind('slug-preview', slug.value || 'team_8fK2xQvLm');
+    this.fieldError(slug, this.slugProblem(slug.value));
+    this.fieldError(name, !name.value.trim() && 'touched' in name.dataset ? 'Enter a team name.' : '');
+  }
+
+  private onInput = (event: Event): void => {
+    const target = event.target as HTMLInputElement;
+    if (target.id === 'team-name' || target.id === 'team-slug') this.syncTeamForm();
+    else if (target.id === 'feature-search') this.searchFeatures(target.value);
+  };
+
+  private onFocusOut = (event: FocusEvent): void => {
+    if ((event.target as HTMLElement).id !== 'team-name') return;
+    this.field('team-name').dataset.touched = '';
+    this.syncTeamForm();
+  };
+
+  /** Enter in a team field saves the form (the radio buttons keep Enter for themselves). */
+  private onKeyDown = (event: KeyboardEvent): void => {
+    const input = event.target as HTMLInputElement;
+    if (event.key !== 'Enter' || !(input instanceof HTMLInputElement) || input.type === 'radio' || !input.form || input.form.id !== 'panel-team') return;
+    event.preventDefault();
+    if (input.form.hasAttribute('data-dirty')) this.querySelector<HTMLButtonElement>('#team-save-all')!.click();
+  };
+
+  /** Discard: the browser puts every field back to its default (the last saved value), then the form is clean again. */
+  private onReset = (event: Event): void => {
+    const form = event.target as HTMLFormElement;
+    if (form.id !== 'panel-team') return;
+    setTimeout(() => { delete this.field('team-name').dataset.touched; this.syncTeamForm(); forms.markClean(form); }, 0);
+  };
+
+  private onSubmit = async (event: SubmitEvent): Promise<void> => {
+    const form = event.target as HTMLFormElement;
+    if (form.id === 'delete-team') return this.deleteTeam(event, form);
+    if (form.id !== 'panel-team') return;
+    event.preventDefault();
+    const button = event.submitter as HTMLButtonElement | null;
+    if (button?.id !== 'team-save-all' || button.getAttribute('aria-busy') === 'true') return;
+    const name = this.field('team-name');
+    const slug = this.field('team-slug');
+    name.dataset.touched = '';
+    this.syncTeamForm();
+    if (!name.value.trim() || this.slugProblem(slug.value)) { (!name.value.trim() ? name : slug).focus(); return; }
+    button.setAttribute('aria-busy', 'true');
+    await wait(700);
+    button.removeAttribute('aria-busy');
+    name.value = name.value.trim();
+    this.savedName = name.value;
+    // What was saved becomes the default, so Discard returns to it.
+    for (const input of form.querySelectorAll<HTMLInputElement>('input[name]')) { input.defaultValue = input.value; input.defaultChecked = input.checked; }
+    forms.markClean(form);
+    this.refreshCounts();
+    this.bind('team-changed-by', 'you, just now');
+    toast({ title: 'Team settings saved', description: 'Every member sees the change now.', tone: 'success' });
+  };
+
+  /** Delete team: the confirm-inline form keeps its button off until the name matches; this only sends it. */
+  private async deleteTeam(event: SubmitEvent, form: HTMLFormElement): Promise<void> {
+    event.preventDefault();
+    if (form.dataset.state !== 'match') return;
+    const button = form.querySelector<HTMLButtonElement>('[data-fd-confirm-submit]')!;
+    button.setAttribute('aria-busy', 'true');
+    const job = wait(1200).then(() => { button.removeAttribute('aria-busy'); form.reset(); this.field('dt-confirm').dispatchEvent(new Event('input', { bubbles: true })); });
+    toast.promise(job, { loading: 'Deleting Quarry Labs…', success: { title: 'Quarry Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' }, error: 'Could not delete the team' });
+  }
+
+  /** Leave team says why it is off while you are the only owner; a member can leave. */
+  private onClick = (event: MouseEvent): void => {
+    const target = event.target as Element;
+    if (target.closest('#leave-team') && !this.member) return;
+    if (target.closest('#leave-team')) {
+      this.ask({ title: 'Leave Quarry Labs?', desc: 'You lose access to its keys, runs and monitors at once. An admin can invite you again.', label: 'Leave team', tone: 'danger' })
+        .then((ok) => ok && toast({ title: 'You left Quarry Labs', description: 'You were moved to your Personal team.', tone: 'neutral' }));
+    } else if (target.closest('#features-clear')) {
+      const search = this.field('feature-search');
+      search.value = '';
+      this.searchFeatures('');
+      search.focus();
+    }
+  };
+
+  /* ------------------------------------------------------------------ features: switches that apply at once */
+
+  private featureRows = () => [...this.querySelectorAll<HTMLElement>('#features-table tr[data-feature]')];
+
+  private syncFeatures(): void {
+    const rows = this.featureRows();
+    const on = rows.filter((row) => row.querySelector('input')!.checked).length;
+    const shown = rows.filter((row) => !row.hidden).length;
+    const q = this.field('feature-search').value.trim();
+    this.bind('features-on', String(on));
+    this.querySelector('#feature-count')!.textContent = q ? `${shown} of ${rows.length} match` : `${on} of ${rows.length} on`;
+    this.querySelector<HTMLElement>('#features-wrap')!.hidden = shown === 0;
+    this.querySelector<HTMLElement>('#features-none')!.hidden = shown !== 0;
+  }
+
+  private paintFeature(row: HTMLElement): void {
+    const status = row.querySelector<HTMLElement>('.fd-status');
+    if (!status) return;
+    const on = row.querySelector('input')!.checked;
+    status.dataset.tone = on ? 'success' : 'neutral';
+    status.textContent = on ? 'On' : 'Off';
+  }
+
+  private searchFeatures(value: string): void {
+    const q = value.trim().toLowerCase();
+    for (const row of this.featureRows()) row.hidden = Boolean(q) && !row.textContent!.toLowerCase().includes(q);
+    this.syncFeatures();
+  }
+
+  private onFeatureChange = (event: Event): void => {
+    const input = (event.target as Element).closest<HTMLInputElement>('#features-table input[role="switch"]');
+    if (!input) return;
+    const row = input.closest<HTMLElement>('tr')!;
+    const name = row.dataset.feature;
+    this.paintFeature(row);
+    this.syncFeatures();
+    toast({
+      title: `${name} ${input.checked ? 'on' : 'off'}`,
+      description: input.checked ? 'Every key can use it now.' : 'Requests that ask for it now fail.',
+      tone: 'success',
+      id: 'feature',
+      undo: async () => { await wait(300); input.checked = !input.checked; this.paintFeature(row); this.syncFeatures(); },
+      undone: `${name} is ${input.checked ? 'off' : 'on'} again`,
+    } as UndoToast);
+  };
+
+  /* ------------------------------------------------------------------ demo state: ?state=ready|loading|error|member */
+
+  /** A member reads the page and cannot change it: every control marked data-admin is off, and the lines say why. */
+  private setMember(on: boolean): void {
+    this.member = on;
+    const locked = () => [...this.querySelectorAll<HTMLButtonElement | HTMLInputElement>('[data-admin], #members-list .fd-list-trail .fd-btn')];
+    for (const el of locked()) el.disabled = on;
+    this.querySelectorAll<HTMLElement>('[data-member-only]').forEach((el) => { el.hidden = !on; });
+    this.querySelector<HTMLElement>('#team-editors')!.hidden = on;
+    const leave = this.querySelector<HTMLElement>('#leave-team')!;
+    if (on) leave.removeAttribute('aria-disabled'); else leave.setAttribute('aria-disabled', 'true');
+    this.querySelector<HTMLElement>('#leave-reason')!.hidden = on;
+    this.refreshCounts();
+    if (on) forms.markClean(this.field('panel-team') as unknown as HTMLFormElement);
+  }
+
+  private setPageState(value: string, url = true): void {
+    const state = PAGE_STATES.includes(value) ? value : 'ready';
+    this.pageState = state;
+    setContentState(this.querySelector('#settings-states'), state === 'member' ? 'ready' : state);
+    this.setMember(state === 'member');
+    const item = this.querySelector<HTMLElement>(`#state-switch .fd-segmented-item[data-value="${state}"]`);
+    if (item) nav.selectSegment(item, { silent: true });
+    if (!url) return;
+    const next = new URL(location.href);
+    if (state === 'ready') next.searchParams.delete('state'); else next.searchParams.set('state', state);
+    history.replaceState(null, '', next);
+  }
+  private pageState = 'ready';
+
+  onState = (event: Change): void => {
+    if ('value' in event.detail && typeof event.detail.value === 'string' && event.detail.value !== this.pageState) this.setPageState(event.detail.value);
+  };
+
+  /** Try again, in the error state, goes to loading (data-fd-set-state), then the panels come back. */
+  private onStatesChange = (event: Event): void => {
+    const detail = (event as Change).detail;
+    if (!(event.target as Element).matches('#settings-states') || !('value' in detail) || detail.value !== 'loading' || this.pageState === 'loading') return;
+    this.setPageState('loading');
+    setTimeout(() => this.pageState === 'loading' && this.setPageState('ready'), 700);
+  };
 }
 
 customElements.define('screen-settings', ScreenSettings);

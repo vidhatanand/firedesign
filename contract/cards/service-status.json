@@ -1,0 +1,107 @@
+{
+  "id": "service-status",
+  "job": "Show whether the product is healthy: an icon when normal, a labelled pill when not.",
+  "purpose": "A link to the status page in the top bar. When operational it is an icon alone, with its label for assistive technology and a tooltip. When degraded, down or in maintenance it shows its label in a tone, so a problem is read where it matters. The page sets it with setServiceStatus(); the control fetches nothing itself.",
+  "useWhen": [
+    "People depend on the service and should see an incident without looking for a status page.",
+    "A top bar needs a quiet place for 'all good' that turns into words when it is not."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A person's own job or resource is unhealthy.",
+      "instead": "status"
+    },
+    {
+      "when": "A message that must be read and dismissed.",
+      "instead": "banner"
+    },
+    {
+      "when": "How many jobs are running.",
+      "instead": "running"
+    }
+  ],
+  "aka": [
+    "system status",
+    "uptime indicator",
+    "incident indicator",
+    "health pill",
+    "status page link"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "operational",
+      "how": "data-status=\"operational\"; the icon alone"
+    },
+    {
+      "name": "degraded",
+      "how": "data-status=\"degraded\"; label in warning"
+    },
+    {
+      "name": "outage",
+      "how": "data-status=\"outage\"; label in danger"
+    },
+    {
+      "name": "maintenance",
+      "how": "data-status=\"maintenance\"; label in info"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-status",
+      "value": "operational",
+      "useWhen": "Everything works: the icon alone."
+    },
+    {
+      "attribute": "data-status",
+      "value": "degraded",
+      "useWhen": "Slower or partly failing."
+    },
+    {
+      "attribute": "data-status",
+      "value": "outage",
+      "useWhen": "The service is down."
+    },
+    {
+      "attribute": "data-status",
+      "value": "maintenance",
+      "useWhen": "Planned work is under way."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-service-status",
+      "role": "The link to the status page; data-status sets the look."
+    },
+    {
+      "class": "fd-service-status-label",
+      "role": "The words; visually hidden when operational, hidden on a phone otherwise (aria-label keeps the name)."
+    }
+  ],
+  "related": [
+    "status",
+    "running",
+    "banner",
+    "topbar"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "Follows the link to the status page."
+    }
+  ],
+  "example": "docs/shell.html#service-status",
+  "provenance": [
+    "docs/shell.html",
+    "fire/js/shell.js",
+    "fire/components/shell.css",
+    "templates/shell.js"
+  ],
+  "since": "0.7.0"
+}

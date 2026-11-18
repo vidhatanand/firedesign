@@ -1,21 +1,21 @@
 import type { PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { charts } from './fire.js';
-import type { ChartConfig, ChartFormat, ChartTone, DonutConfig, HeatgridConfig, StripConfig } from '../../fire/fire.js';
+import type { ChartConfig, ChartFormat, ChartTone, DonutConfig, HeatgridConfig, QuadrantConfig, StripConfig } from '../../fire/fire.js';
 import { FireElement, type FireInit, type RootAttribute } from './fire-element.js';
 import { json, syncConfig } from './json.js';
 
-/** The chart an `fd-chart` draws: the four cartesian types, or a sparkline, donut or heat grid. */
-export type FdChartType = 'line' | 'area' | 'bar' | 'stacked' | 'sparkline' | 'donut' | 'heatgrid';
-/** The data an `fd-chart` takes, by type: a cartesian config, sparkline values, a donut or a heat grid (or strip). */
-export type FdChartData = ChartConfig | number[] | DonutConfig | HeatgridConfig | StripConfig;
+/** The chart an `fd-chart` draws: the four cartesian types, a quadrant, or a sparkline, donut or heat grid. */
+export type FdChartType = 'line' | 'area' | 'bar' | 'stacked' | 'quadrant' | 'sparkline' | 'donut' | 'heatgrid';
+/** The data an `fd-chart` takes, by type: a cartesian config, a quadrant config, sparkline values, a donut or a heat grid (or strip). */
+export type FdChartData = ChartConfig | QuadrantConfig | number[] | DonutConfig | HeatgridConfig | StripConfig;
 
 const CARTESIAN = new Set(['line', 'area', 'bar', 'stacked']);
 
 /**
- * A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and
+ * A Fire chart drawn from data given as a property: line, area, bar and stacked charts, quadrants, sparklines, donuts and
  * progress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type
- * (`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data
+ * (`fd-chart` for the cartesian types and the quadrant, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data
  * as the markup form's `<script type="application/json">`, and Fire's charts module draws the chart inside it, so it
  * looks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance
  * animation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new
@@ -35,7 +35,7 @@ export class FdChart extends FireElement {
   /** @internal None: `prepare()` runs `charts.init` itself, so that it can tell whether it drew. */
   protected static override fire: FireInit[] = [];
 
-  /** Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three). */
+  /** Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three). */
   @property({ reflect: true })
   type: FdChartType = 'line';
 
@@ -43,11 +43,11 @@ export class FdChart extends FireElement {
   @property({ reflect: true })
   variant?: 'bars' | 'progress' | 'strip';
 
-  /** The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON. */
+  /** The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON. */
   @property({ attribute: 'data', converter: json })
   data?: FdChartData;
 
-  /** Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24). */
+  /** Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24). */
   @property({ type: Number })
   height?: number;
 
@@ -63,7 +63,11 @@ export class FdChart extends FireElement {
   @property()
   grid?: 'dashed' | 'solid' | 'none';
 
-  /** Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state). */
+  /** Quadrant: hide the names beside the points (`data-labels="none"`). */
+  @property({ type: Boolean, attribute: 'hide-labels' })
+  hideLabels = false;
+
+  /** Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state). */
   @property()
   state?: 'loading' | 'empty';
 
@@ -122,8 +126,8 @@ export class FdChart extends FireElement {
   /** Whether this element has drawn a chart yet. */
   #drawn = false;
 
-  get #family(): 'cartesian' | 'sparkline' | 'donut' | 'heatgrid' {
-    return CARTESIAN.has(this.type) ? 'cartesian' : (this.type as 'sparkline' | 'donut' | 'heatgrid');
+  get #family(): 'cartesian' | 'quadrant' | 'sparkline' | 'donut' | 'heatgrid' {
+    return CARTESIAN.has(this.type) ? 'cartesian' : (this.type as 'quadrant' | 'sparkline' | 'donut' | 'heatgrid');
   }
 
   /** Whether the chart reads its data from a JSON script (a sparkline and a progress ring read attributes). */
@@ -133,26 +137,28 @@ export class FdChart extends FireElement {
 
   /** @internal */
   protected override rootClass(): string {
-    return { cartesian: 'fd-chart', sparkline: 'fd-sparkline', donut: 'fd-donut', heatgrid: 'fd-heatgrid' }[this.#family];
+    return { cartesian: 'fd-chart', quadrant: 'fd-chart', sparkline: 'fd-sparkline', donut: 'fd-donut', heatgrid: 'fd-heatgrid' }[this.#family];
   }
 
   /** @internal Every name is listed for every type, so switching type removes what no longer applies. */
   protected override rootAttributes(): Record<string, RootAttribute> {
     const family = this.#family;
     const cartesian = family === 'cartesian';
+    const quad = family === 'quadrant';
     const spark = family === 'sparkline';
     const donut = family === 'donut';
     const heat = family === 'heatgrid';
     return {
-      'data-fd-chart': cartesian ? this.type : undefined,
+      'data-fd-chart': cartesian || quad ? this.type : undefined,
+      'data-labels': quad && this.hideLabels ? 'none' : undefined,
       'data-type': (spark && this.variant === 'bars') || (donut && this.variant === 'progress') ? this.variant : undefined,
       'data-variant': heat && this.variant === 'strip' ? 'strip' : undefined,
       'data-values': spark ? (Array.isArray(this.data) ? this.data.join(',') : this.values) : undefined,
-      'data-height': cartesian || spark ? this.height : undefined,
+      'data-height': cartesian || quad || spark ? this.height : undefined,
       'data-width': spark ? this.width : undefined,
       'data-legend': cartesian && this.legend,
       'data-grid': cartesian ? this.grid : undefined,
-      'data-state': cartesian ? this.state : undefined,
+      'data-state': cartesian || quad ? this.state : undefined,
       'data-y-format': cartesian ? this.yFormat : undefined,
       'data-area': spark && this.area,
       'data-dot': spark && this.dot,
@@ -196,6 +202,11 @@ export class FdChart extends FireElement {
     this.#drawn = true;
     const family = this.#family;
     if (this.#scripted) syncConfig(this, this.data);
+    if (family === 'quadrant') {
+      charts.quadrant(this, this.#config() as QuadrantConfig);
+      charts.init(this);
+      return;
+    }
     if (family === 'cartesian') {
       // Drawn from the object, so a custom yFormat function survives; charts.init then only binds its listeners.
       charts.render(this, this.#config());
@@ -229,6 +240,9 @@ export class FdChart extends FireElement {
         break;
       case 'heatgrid':
         charts.heatgrid(this);
+        break;
+      case 'quadrant':
+        charts.quadrant(this, this.#config() as QuadrantConfig);
         break;
       default:
         charts.render(this, this.#config());

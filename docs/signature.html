@@ -15,73 +15,177 @@
   <header class="doc-hero">
     <p class="fd-eyebrow">Foundations</p>
     <h1 class="fd-display">Texture &amp; frame</h1>
-    <p class="doc-lede">Fire's signature is type used as texture: fields of punctuation and letters whose density follows a generated luminance field, set at very low contrast behind heroes, banners and empty states. Every field is procedural and seeded by its name, so a page always looks the same, and every field is decoration only, so it adds depth without adding anything to read.</p>
+    <p class="doc-lede">Fire's signature is type used as texture: fields of punctuation, letters or small shapes whose density follows a generated luminance field, set at very low contrast behind heroes, banners and empty states. Every field is procedural and seeded by its name, so a page always looks the same, and every field is decoration only, so it adds depth without adding anything to read. The theme holds it as one set of dials, so a product changes its signature in one place.</p>
   </header>
+
+  <section class="doc-section" id="dials">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">The signature, as dials</h2>
+      <p>The texture is not set field by field: the theme record holds one <code class="fd-code">signature</code>, six dials that restyle every hero, glyph, loader and frame at once. Each is written as an attribute on <code class="fd-code">&lt;html&gt;</code>, only where it differs from the default, and every unpinned texture takes the page's value over its own option. A dial left on auto changes nothing; a texture pinned with <code class="fd-code">data-signature="own"</code> ignores them all. Open Tweaks above and change the Signature section: the unpinned textures on this page follow, the pinned specimens do not.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Dial</th><th>Values</th><th>Attribute on html</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td>field</td><td>terrain, waves, orbit, rain, grid, flame, halftone, spark, contour, stipple, bars</td><td>data-signature-field</td><td>auto: each texture keeps its own</td></tr>
+        <tr><td>mark</td><td>chars, dots, squares, plus, dashes</td><td>data-signature-mark</td><td>auto: each field keeps its own</td></tr>
+        <tr><td>cell</td><td>4 to 24, the cell's width in px</td><td>data-signature-cell</td><td>auto</td></tr>
+        <tr><td>ramp</td><td>default, soft, dense, glyph, rain</td><td>data-signature-ramp</td><td>auto</td></tr>
+        <tr><td>marks</td><td>crosses, dots, corners, none: where frame bands meet the rails</td><td>data-signature-marks</td><td>crosses</td></tr>
+        <tr><td>intensity</td><td>0.4 to 1.6, a luminance multiplier</td><td>data-signature-intensity</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
+      <template data-source><div class="fd-ascii" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">no data-fd-ascii: the page's field (terrain until a theme says otherwise)</span>
+      <div class="fd-ascii" aria-hidden="true"></div>
+    </div>
+    <p class="doc-sub">In a theme record</p>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code data-lang="json">{
+  "contract": "fire/1",
+  "signature": { "field": "contour", "mark": "squares", "marks": "corners", "intensity": 1.2 }
+}</code></pre>
+    </figure>
+    <ul class="doc-notes">
+      <li><code class="fd-code">expandTheme()</code> and <code class="fd-code">themeToCss()</code> write the attributes; Tweaks writes the same ones, stores them with the other tweaks, and Copy CSS and Copy theme include them.</li>
+      <li>Per option, in order: a texture pinned with <code class="fd-code">data-signature="own"</code> keeps all its own options; otherwise a page dial that is set (not "auto") wins over the texture's own option; otherwise the texture's own option; otherwise Fire's default. Set the page field to contour and every unpinned hero becomes contour.</li>
+      <li>Pin a specimen whose field or mark is the point, such as the grid and the field specimens on this page. Heroes in templates stay unpinned, so a theme restyles them.</li>
+    </ul>
+  </section>
 
   <section class="doc-section" id="fields">
     <div class="doc-section-head">
       <h2 class="fd-h3">Fields</h2>
-      <p>Pick a field by the job of the surface: terrain for page heroes, waves and orbit behind empty or waiting states, flame on accent banners, grid and halftone for technical or media frames. Each one leaves large calm areas on purpose.</p>
+      <p>Pick a field by the job of the surface: terrain for page heroes, waves and orbit behind empty or waiting states, flame on accent banners, grid and halftone for technical or media frames, contour lines for maps and measurement, stipple for a soft grain and bars for usage and growth. Each one leaves large calm areas on purpose.</p>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="terrain" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">terrain</span>
-      <div class="fd-ascii" data-fd-ascii="terrain" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="waves" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="waves" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">waves · animated</span>
-      <div class="fd-ascii" data-fd-ascii="waves" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="waves" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="orbit" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">orbit · animated</span>
-      <div class="fd-ascii" data-fd-ascii="orbit" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="rain" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="rain" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">rain · animated</span>
-      <div class="fd-ascii" data-fd-ascii="rain" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="rain" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="grid" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">grid</span>
-      <div class="fd-ascii" data-fd-ascii="grid" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="grid" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="grid" data-variant="perspective" data-animate aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-variant="perspective" data-animate aria-hidden="true"></div></template>
       <span class="doc-specimen-label">grid · data-variant="perspective" · data-animate</span>
-      <div class="fd-ascii" data-fd-ascii="grid" data-variant="perspective" data-animate aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-variant="perspective" data-animate aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="flame" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">flame · animated</span>
-      <div class="fd-ascii" data-fd-ascii="flame" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="flame" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="halftone" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">halftone · dots</span>
-      <div class="fd-ascii" data-fd-ascii="halftone" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" aria-hidden="true"></div>
     </div>
 
     <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-      <template data-source><div class="fd-ascii" data-fd-ascii="terrain" data-style="dots" data-cell="6" aria-hidden="true"></div></template>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="dots" data-cell="6" aria-hidden="true"></div></template>
       <span class="doc-specimen-label">terrain · data-style="dots" · data-cell="6"</span>
-      <div class="fd-ascii" data-fd-ascii="terrain" data-style="dots" data-cell="6" aria-hidden="true"></div>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="dots" data-cell="6" aria-hidden="true"></div>
     </div>
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="contour" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">contour</span>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="contour" aria-hidden="true"></div>
+    </div>
+
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">stipple</span>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" aria-hidden="true"></div>
+    </div>
+
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="bars" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">bars · animated</span>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="bars" aria-hidden="true"></div>
+    </div>
+
     <ul class="doc-notes">
       <li>The field fills its positioned parent and paints between the parent's background and its content. Use <code class="fd-code">data-inline</code> and a height to put one in normal flow.</li>
       <li>Waves, orbit, rain and flame animate at 12 frames a second by default; terrain, grid and halftone are still unless you add <code class="fd-code">data-animate</code>. Animation pauses off-screen and in background tabs, and is a single still frame under reduced motion.</li>
       <li>The same name always draws the same picture. Change <code class="fd-code">data-seed</code> for a different one, <code class="fd-code">data-ramp</code> for other characters, <code class="fd-code">data-style="dots"</code> to draw any field as halftone discs.</li>
     </ul>
+  </section>
+
+  <section class="doc-section" id="marks">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Marks</h2>
+      <p>Characters and dots were the only marks. Squares, plus signs and dashes join them: each is drawn in the texture's colour at the size its place on the ramp asks for, so any field can be drawn in any of the five. <code class="fd-code">data-style</code> on one texture, <code class="fd-code">data-signature-mark</code> on the page.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-sm)" data-code>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="squares" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">data-style="squares"</span>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="squares" aria-hidden="true"></div>
+    </div>
+
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-sm)" data-code>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="plus" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">data-style="plus"</span>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="plus" aria-hidden="true"></div>
+    </div>
+
+    <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-sm)" data-code>
+      <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="dashes" aria-hidden="true"></div></template>
+      <span class="doc-specimen-label">data-style="dashes"</span>
+      <div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="dashes" aria-hidden="true"></div>
+    </div>
+
+    <ul class="doc-notes">
+      <li>Squares grow with the level's square root, plus signs lengthen their arms, dashes lengthen; dots grow as discs. Every mark is a pixel-aligned shape drawn once into an atlas, so the cost is the same as characters.</li>
+      <li>Marks have no letters in them, so they suit a quiet, graphic brand. Characters stay the default.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="combinations">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Every field in every mark</h2>
+      <p>One hero under each of the 55 combinations that ship, still frames, all fading out toward the left as a page hero does. Colour is the neutral token ink, so the grid follows the theme and the palette.</p>
+    </div>
+    <div class="doc-sig-grid" role="table" aria-label="Fields by mark">
+      <div class="doc-sig-row" data-head role="row"><span></span><span role="columnheader">chars</span><span role="columnheader">dots</span><span role="columnheader">squares</span><span role="columnheader">plus</span><span role="columnheader">dashes</span></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">terrain</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="terrain" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">waves</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="waves" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="waves" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="waves" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="waves" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="waves" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">orbit</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="orbit" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">rain</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="rain" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="rain" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="rain" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="rain" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="rain" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">grid</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">flame</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">halftone</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">spark</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="spark" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="spark" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="spark" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="spark" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="spark" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">contour</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="contour" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="contour" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="contour" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="contour" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="contour" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">stipple</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="stipple" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+      <div class="doc-sig-row" role="row"><span role="rowheader">bars</span><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="bars" data-style="chars" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="bars" data-style="dots" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="bars" data-style="squares" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="bars" data-style="plus" data-animate="false" data-fade="left" aria-hidden="true"></div></div><div class="doc-sig-hero" role="cell"><div class="fd-ascii" data-signature="own" data-fd-ascii="bars" data-style="dashes" data-animate="false" data-fade="left" aria-hidden="true"></div></div></div>
+    </div>
   </section>
 
   <section class="doc-section" id="tones">
@@ -91,22 +195,22 @@
     </div>
     <div class="doc-pair">
       <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-lg)" data-code>
-        <template data-source><div class="fd-ascii" data-fd-ascii="flame" data-animate="false" aria-hidden="true"></div></template>
+        <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-animate="false" aria-hidden="true"></div></template>
         <span class="doc-specimen-label">neutral</span>
-        <div class="fd-ascii" data-fd-ascii="flame" data-animate="false" aria-hidden="true"></div>
+        <div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-animate="false" aria-hidden="true"></div>
       </div>
       <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-lg)" data-code>
-        <template data-source><div class="fd-ascii" data-fd-ascii="flame" data-tone="accent" data-animate="false" aria-hidden="true"></div></template>
+        <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-tone="accent" data-animate="false" aria-hidden="true"></div></template>
         <span class="doc-specimen-label">data-tone="accent"</span>
-        <div class="fd-ascii" data-fd-ascii="flame" data-tone="accent" data-animate="false" aria-hidden="true"></div>
+        <div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-tone="accent" data-animate="false" aria-hidden="true"></div>
       </div>
       <div class="doc-specimen" data-layout="bleed" data-code>
         <template data-source><div class="fd-announce">
-  <div class="fd-ascii" data-fd-ascii="flame" data-tone="contrast" data-animate="false" aria-hidden="true"></div>
+  <div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-tone="contrast" data-animate="false" aria-hidden="true"></div>
   <p class="fd-mono-sm">data-tone="contrast"</p>
 </div></template>
         <div class="fd-announce">
-          <div class="fd-ascii" data-fd-ascii="flame" data-tone="contrast" data-animate="false" aria-hidden="true"></div>
+          <div class="fd-ascii" data-signature="own" data-fd-ascii="flame" data-tone="contrast" data-animate="false" aria-hidden="true"></div>
           <p class="fd-mono-sm">data-tone="contrast"</p>
         </div>
       </div>
@@ -124,14 +228,14 @@
     </div>
     <div class="doc-pair">
       <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-        <template data-source><div class="fd-ascii" data-fd-ascii="grid" data-interactive aria-hidden="true"></div></template>
+        <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-interactive aria-hidden="true"></div></template>
         <span class="doc-specimen-label">grid · move the pointer here</span>
-        <div class="fd-ascii" data-fd-ascii="grid" data-interactive aria-hidden="true"></div>
+        <div class="fd-ascii" data-signature="own" data-fd-ascii="grid" data-interactive aria-hidden="true"></div>
       </div>
       <div class="doc-specimen" data-layout="bleed" data-height data-fd-vars="--h: var(--fd-size-md)" data-code>
-        <template data-source><div class="fd-ascii" data-fd-ascii="halftone" data-interactive aria-hidden="true"></div></template>
+        <template data-source><div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-interactive aria-hidden="true"></div></template>
         <span class="doc-specimen-label">halftone · move the pointer here</span>
-        <div class="fd-ascii" data-fd-ascii="halftone" data-interactive aria-hidden="true"></div>
+        <div class="fd-ascii" data-signature="own" data-fd-ascii="halftone" data-interactive aria-hidden="true"></div>
       </div>
     </div>
   </section>
@@ -203,7 +307,7 @@
       <span class="fd-glyph" aria-hidden="true"></span>
       <span class="fd-glyph" data-size="64" aria-hidden="true"></span>
       <span class="fd-glyph" data-size="64" data-tone="neutral" aria-hidden="true"></span>
-      <span class="fd-glyph" data-size="64" data-fd-ascii="orbit" data-shape="blob" data-origin="0.5,0.5" data-cell="6x9" aria-hidden="true"></span>
+      <span class="fd-glyph" data-signature="own" data-size="64" data-fd-ascii="orbit" data-shape="blob" data-origin="0.5,0.5" data-cell="6x9" aria-hidden="true"></span>
       <span class="fd-glyph" data-size="64" data-animate aria-hidden="true"></span>
     </div>
     <ul class="doc-notes">
@@ -285,19 +389,21 @@
     <table class="doc-table">
       <thead><tr><th>Attribute</th><th>Values</th><th>Default</th></tr></thead>
       <tbody>
-        <tr><td>data-fd-ascii</td><td>terrain, waves, orbit, rain, grid, flame, halftone, spark, or a registered name</td><td>terrain</td></tr>
+        <tr><td>data-fd-ascii</td><td>terrain, waves, orbit, rain, grid, flame, halftone, spark, contour, stipple, bars, or a registered name; a set page field replaces it unless pinned</td><td>terrain</td></tr>
         <tr><td>data-tone</td><td>neutral, accent, contrast</td><td>neutral</td></tr>
         <tr><td>data-fade</td><td>left, right, top, bottom, x, y, radial</td><td>none</td></tr>
-        <tr><td>data-style</td><td>chars, dots</td><td>per field</td></tr>
+        <tr><td>data-style</td><td>chars, dots, squares, plus, dashes: the mark</td><td>per field</td></tr>
         <tr><td>data-ramp</td><td>default, soft, dense, glyph, rain, or a literal such as " .:-=+*#"</td><td>per field</td></tr>
-        <tr><td>data-cell</td><td>"7x12", or one number for square cells</td><td>7x12 (dots 8x8)</td></tr>
+        <tr><td>data-cell</td><td>"7x12", or one number for square cells</td><td>7x12 (marks 8x8)</td></tr>
         <tr><td>data-seed</td><td>any number or string</td><td>the field name</td></tr>
         <tr><td>data-animate</td><td>present, "true" or "false"</td><td>per field</td></tr>
-        <tr><td>data-speed · data-intensity</td><td>multipliers</td><td>1</td></tr>
+        <tr><td>data-speed</td><td>time multiplier</td><td>1</td></tr>
+        <tr><td>data-intensity</td><td>luminance multiplier</td><td>1</td></tr>
         <tr><td>data-interactive</td><td>boolean</td><td>off</td></tr>
         <tr><td>data-origin</td><td>"x,y" in 0–1 (orbit, flame, halftone, spark, blob)</td><td>per field</td></tr>
         <tr><td>data-side</td><td>left, right (terrain)</td><td>right</td></tr>
         <tr><td>data-variant</td><td>flat, perspective (grid)</td><td>flat</td></tr>
+        <tr><td>data-signature</td><td>own: ignore the page's signature dials (field, mark, cell, ramp, intensity)</td><td>follows the page</td></tr>
         <tr><td>data-shape</td><td>blob</td><td>none</td></tr>
         <tr><td>data-inline</td><td>boolean; give the element a height</td><td>off</td></tr>
       </tbody>
@@ -308,6 +414,7 @@
         <tr><td>init(root)</td><td>Mounts fields, glyphs, loaders and skeleton presets inside root. Idempotent.</td><td></td></tr>
         <tr><td>render(el)</td><td>Re-reads an element's attributes and colour and redraws it. With no argument, redraws every field.</td><td></td></tr>
         <tr><td>registerField(name, fn, options)</td><td><code class="fd-code">fn(x, y, env, col, row)</code> returns luminance 0–1. Options: prepare, animate, ramp, style, chars, cell.</td><td></td></tr>
+        <tr><td>MARKS · SIGNATURE_ATTRIBUTES</td><td>The five mark names and the six data-signature-* attribute names the module reads.</td><td></td></tr>
         <tr><td>fields · ramps</td><td>The registry and the named character ramps.</td><td></td></tr>
         <tr><td>renderText(name, options)</td><td>The same field as a plain string, for a <code class="fd-code">&lt;pre&gt;</code> or a test.</td><td></td></tr>
       </tbody>

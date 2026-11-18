@@ -254,7 +254,9 @@ test('the full variant uses what Facet\'s schema accepts: every size, type step 
   for (const x of pxSizes) assert.equal(t.size[x.name.replace(/^--fd-/, '')].$value, x.default);
   // every shadow layer, light and dark
   const layers = (css) => { let d = 0, n = 1; for (const ch of css) { if (ch === '(') d++; else if (ch === ')') d--; else if (ch === ',' && d === 0) n++; } return n; };
-  for (const x of contractTokens.filter((y) => y.group === 'shadow')) {
+  for (const x0 of contractTokens.filter((y) => y.group === 'shadow')) {
+    // A shadow with one value in both modes (--fd-shadow-object, empty until data-elevation="lifted") is a plain string.
+    const x = typeof x0.default === 'string' ? { ...x0, default: { light: x0.default, dark: x0.default } } : x0;
     const tk = t.shadow[x.name.replace(/^--fd-shadow-/, '')];
     assert.equal(tk.$value.length, layers(x.default.light), `${x.name} light layers`);
     if (tk.$extensions) assert.equal(tk.$extensions[DARK].length, layers(x.default.dark), `${x.name} dark layers`);
@@ -299,7 +301,7 @@ test('every required pairing is WCAG AA in light and dark, computed from the con
 test('Facet\'s own checker accepts content.json and its generator builds from it', { skip: !fs.existsSync(CLI) && 'Facet\'s command-line tool is not on this machine' }, () => {
   const out = execFileSync(process.execPath, [CLI, 'system', 'check', path.join(ROOT, 'facet/content.json')], { encoding: 'utf8' });
   assert.match(out, /^ok: Fire is a valid design system/);
-  if (FULL) assert.match(out, /142 components/);
+  if (FULL) assert.match(out, new RegExp(`${readJson('contract/catalog.json').components.length} components`));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-facet-'));
   try {
     const built = execFileSync(process.execPath, [CLI, 'system', 'build', path.join(ROOT, 'facet/content.json'), dir], { encoding: 'utf8' });

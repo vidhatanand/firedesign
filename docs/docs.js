@@ -9,6 +9,7 @@ const PAGES = [
     ['foundations', 'Foundations', 'swatch-book'],
     ['signature', 'Texture & frame', 'grid-3x3'],
     ['tweaks', 'Theming & tweaks', 'sliders-horizontal'],
+    ['looks', 'Looks', 'palette'],
     ['frameworks', 'Frameworks & checks', 'blocks'],
     ['writing', 'Writing', 'pencil'],
   ]],
@@ -20,11 +21,13 @@ const PAGES = [
     ['overlays', 'Overlays', 'layers'],
     ['data', 'Tables & data', 'table'],
     ['content', 'Cards & feedback', 'layout-grid'],
+    ['decisions', 'Decisions', 'list-checks'],
     ['charts', 'Charts', 'chart-column'],
     ['code', 'Code & logs', 'braces'],
     ['agent', 'Agent & AI', 'wand-sparkles'],
     ['documentation', 'Documentation', 'book-open'],
     ['chat', 'Chat', 'message-circle'],
+    ['email', 'Email', 'mail'],
     ['skeletons', 'Skeletons & loading', 'loader'],
     ['elements', 'Custom elements', 'blocks'],
   ]],
@@ -52,7 +55,7 @@ function buildChrome() {
   side.innerHTML = `
     <a class="doc-brand" href="index.html">
       <svg class="doc-brand-mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.6 3.2-.7 5-2.3 6.700C8 11 6.500 12.800 6.500 15.500a5.500 5.500 0 0 0 11 0c0-1.700-.6-3-1.400-4.200-.5 1.300-1.200 2-2.100 2.400.5-3.600-.3-8.200-2-11.200Z"/></svg>
-      Fire <small>0.6</small>
+      Fire <small>0.7</small>
     </a>
     <nav class="doc-nav">${PAGES.map(([group, items]) => `
       <p class="doc-nav-group fd-eyebrow">${group}</p>

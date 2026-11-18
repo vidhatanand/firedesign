@@ -1,5 +1,5 @@
 {
-  "fire": "0.6.2",
+  "fire": "0.7.0",
   "components": [
     {
       "id": "accordion",
@@ -459,6 +459,10 @@
             ""
           ],
           "data-marks": [
+            "",
+            "corners",
+            "crosses",
+            "dots",
             "none"
           ],
           "data-pad": [
@@ -1305,9 +1309,11 @@
         "fd-bars",
         "fd-bars-fill",
         "fd-bars-label",
+        "fd-bars-mark",
         "fd-bars-row",
         "fd-bars-track",
-        "fd-bars-value"
+        "fd-bars-value",
+        "fd-bars-was"
       ],
       "attributes": {
         "data-tone": [
@@ -1345,7 +1351,8 @@
         "purpose": "A list for a ranking: label left, a thin bar, the figure right in mono. It is plain CSS driven by one custom property per row, --value, a fraction from 0 to 1 of the longest row. Below 320px the bar drops under its label. The fill grows once when scrolled into view.",
         "useWhen": [
           "A ranking of a few to a dozen items with exact figures.",
-          "Parts of a total where order matters more than proportion."
+          "Parts of a total where order matters more than proportion.",
+          "Each figure is shown beside the previous period's (432, was 401)."
         ],
         "avoidWhen": [
           {
@@ -1427,6 +1434,14 @@
           {
             "class": "fd-bars-value",
             "role": "The figure, in mono."
+          },
+          {
+            "class": "fd-bars-mark",
+            "role": "A tick on the track at the previous value, --was on the same scale as --value."
+          },
+          {
+            "class": "fd-bars-was",
+            "role": "The previous value written after the figure (\"was 401\")."
           }
         ],
         "related": [
@@ -1680,6 +1695,11 @@
           "sm",
           "xl",
           "xs"
+        ],
+        "data-state": [
+          "match.",
+          "mismatch",
+          "partial"
         ],
         "data-variant": [
           "accent-soft",
@@ -2159,6 +2179,10 @@
           {
             "name": "flush",
             "how": "data-flush removes padding for tables and lists that run edge to edge"
+          },
+          {
+            "name": "selected",
+            "how": "aria-current=\"true\" (open beside a list) or aria-selected=\"true\" on a data-interactive card: an accent wash and edge"
           }
         ],
         "variants": [
@@ -2326,19 +2350,42 @@
         "fd-chart-tooltip-row",
         "fd-chart-tooltip-swatch",
         "fd-chart-tooltip-title",
-        "fd-chart-tooltip-value"
+        "fd-chart-tooltip-value",
+        "fd-quadrant-axis",
+        "fd-quadrant-axis-title",
+        "fd-quadrant-cell",
+        "fd-quadrant-corner",
+        "fd-quadrant-dot",
+        "fd-quadrant-frame",
+        "fd-quadrant-group",
+        "fd-quadrant-group-count",
+        "fd-quadrant-group-label",
+        "fd-quadrant-key",
+        "fd-quadrant-list",
+        "fd-quadrant-name",
+        "fd-quadrant-plot",
+        "fd-quadrant-point",
+        "fd-quadrant-row",
+        "fd-quadrant-row-name",
+        "fd-quadrant-row-values",
+        "fd-quadrant-rows",
+        "fd-quadrant-tick"
       ],
       "attributes": {
         "data-fd-chart": [
           "area",
           "bar",
           "line",
+          "quadrant",
           "stacked"
         ],
         "data-grid": [
           "dashed",
           "none",
           "solid"
+        ],
+        "data-labels": [
+          "none"
         ],
         "data-legend": [
           ""
@@ -2401,6 +2448,36 @@
           "data-shape": [
             "square"
           ]
+        },
+        "fd-quadrant-axis": {
+          "data-axis": [
+            "x",
+            "y"
+          ]
+        },
+        "fd-quadrant-cell": {
+          "data-corner": [
+            "bl",
+            "br",
+            "tl",
+            "tr"
+          ],
+          "data-tone": [
+            ""
+          ]
+        },
+        "fd-quadrant-group": {
+          "data-tone": [
+            ""
+          ]
+        },
+        "fd-quadrant-point": {
+          "data-active": [
+            ""
+          ],
+          "data-side": [
+            "start"
+          ]
         }
       },
       "stateAttributes": {
@@ -2429,12 +2506,13 @@
       "card": {
         "id": "chart",
         "job": "See how values change over time or between periods.",
-        "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table.",
+        "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table. A fifth type, quadrant, places points on two axes and names the four corners; on a phone it becomes a list grouped by corner.",
         "useWhen": [
           "A value moves continuously over time: use line, or area for volume.",
           "Discrete periods are compared: use bar, or stacked for a total and its parts.",
           "A number has a limit: draw a labelled threshold on the chart.",
-          "A live series should end in a pulsing dot."
+          "A live series should end in a pulsing dot.",
+          "A handful of things are sorted on two measures at once, such as cost against reliability: use quadrant."
         ],
         "avoidWhen": [
           {
@@ -2460,6 +2538,10 @@
           {
             "when": "Exact values to compare across many columns.",
             "instead": "table"
+          },
+          {
+            "when": "More than about a dozen points to place, or exact values matter more than position.",
+            "instead": "table"
           }
         ],
         "aka": [
@@ -2471,7 +2553,11 @@
           "graph",
           "time series",
           "plot",
-          "trend chart"
+          "trend chart",
+          "quadrant chart",
+          "scatter plot",
+          "bubble chart",
+          "2x2 matrix"
         ],
         "surfaces": [
           "app",
@@ -2496,6 +2582,10 @@
           {
             "name": "gap",
             "how": "a null value is a gap, not a zero"
+          },
+          {
+            "name": "phone",
+            "how": "quadrant below 520px of width: the plot gives way to a list grouped by corner"
           }
         ],
         "variants": [
@@ -2518,6 +2608,11 @@
             "attribute": "data-fd-chart",
             "value": "stacked",
             "useWhen": "A total and its parts; the tooltip adds a Total row."
+          },
+          {
+            "attribute": "data-fd-chart",
+            "value": "quadrant",
+            "useWhen": "Points on two axes with a midpoint on each, split into four named corners."
           },
           {
             "attribute": "data-grid",
@@ -2553,6 +2648,11 @@
             "attribute": "data-ring",
             "value": "bg",
             "useWhen": "The chart sits on the page colour, not a card."
+          },
+          {
+            "attribute": "data-labels",
+            "value": "none",
+            "useWhen": "A quadrant whose names would collide: the tooltip still names each point."
           }
         ],
         "parts": [
@@ -2603,6 +2703,22 @@
           {
             "class": "fd-chart-svg",
             "role": "The drawing surface."
+          },
+          {
+            "class": "fd-quadrant-plot",
+            "role": "The quadrant's field, with a dashed line at each midpoint."
+          },
+          {
+            "class": "fd-quadrant-point",
+            "role": "One point of a quadrant: a link, or a button; takes focus."
+          },
+          {
+            "class": "fd-quadrant-cell",
+            "role": "One corner of a quadrant; data-tone tints it."
+          },
+          {
+            "class": "fd-quadrant-list",
+            "role": "The phone fallback: the points as a list grouped by corner."
           }
         ],
         "related": [
@@ -2629,11 +2745,16 @@
           {
             "keys": "Escape",
             "does": "Hides the tooltip."
+          },
+          {
+            "keys": "Arrow keys (quadrant)",
+            "does": "Moves focus to the nearest point in that direction."
           }
         ],
         "example": "docs/charts.html#line",
         "provenance": [
           "docs/charts.html",
+          "docs/charts.html#quadrant",
           "fire/components/charts.css",
           "fire/js/charts.js"
         ],
@@ -4682,6 +4803,268 @@
       }
     },
     {
+      "id": "codes",
+      "name": "Codes",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-codes",
+      "classes": [
+        "fd-codes",
+        "fd-codes-actions",
+        "fd-codes-head",
+        "fd-codes-item",
+        "fd-codes-list",
+        "fd-codes-note",
+        "fd-codes-title"
+      ],
+      "attributes": {
+        "data-filename": [
+          "*"
+        ]
+      },
+      "partAttributes": {
+        "fd-codes-item": {
+          "data-used": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:copy",
+        "fd:download"
+      ],
+      "docs": "docs/forms.html#recovery-codes",
+      "card": {
+        "id": "codes",
+        "job": "Show one-time recovery codes once, with copy and download.",
+        "purpose": "A sunken card holding a two-column grid of codes, a title with Copy all and Download buttons, and a warning line. Copy all and Download use the codes not marked data-used, one per line; Download makes a text file through a Blob URL. Without script the buttons are hidden and the codes stay selectable text.",
+        "useWhen": [
+          "Two-step sign-in has just been set up and the person must save backup codes.",
+          "A set of codes is shown with some already used."
+        ],
+        "avoidWhen": [
+          {
+            "when": "One secret that is shown and hidden.",
+            "instead": "secret"
+          },
+          {
+            "when": "Entering a code.",
+            "instead": "otp"
+          },
+          {
+            "when": "A single value to copy.",
+            "instead": "copy-field"
+          }
+        ],
+        "aka": [
+          "backup codes",
+          "recovery codes",
+          "2FA codes",
+          "one-time codes",
+          "emergency codes"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "used",
+            "how": "data-used on the fd-codes-item; struck through and left out of copy and download"
+          },
+          {
+            "name": "ready",
+            "how": "data-ready on the root once the script has run; the buttons show then"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-filename",
+            "value": "*",
+            "useWhen": "The name of the downloaded file."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-codes",
+            "role": "The sunken card; carries data-fd-codes."
+          },
+          {
+            "class": "fd-codes-head",
+            "role": "The title and actions row."
+          },
+          {
+            "class": "fd-codes-title",
+            "role": "The card's heading."
+          },
+          {
+            "class": "fd-codes-actions",
+            "role": "Holds the copy and download buttons."
+          },
+          {
+            "class": "fd-codes-list",
+            "role": "The ordered list of codes."
+          },
+          {
+            "class": "fd-codes-item",
+            "role": "One code, in a code element."
+          },
+          {
+            "class": "fd-codes-note",
+            "role": "The warning line."
+          }
+        ],
+        "related": [
+          "otp",
+          "secret",
+          "copy-field",
+          "callout"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On Copy all or Download, runs it."
+          }
+        ],
+        "example": "docs/forms.html#recovery-codes",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "color",
+      "name": "Color",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-color",
+      "classes": [
+        "fd-color",
+        "fd-color-check",
+        "fd-color-check-name",
+        "fd-color-check-ratio",
+        "fd-color-check-verdict",
+        "fd-color-checks",
+        "fd-color-picker"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-color-check": {
+          "data-level": [
+            "fail",
+            "pass",
+            "warn"
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/forms.html#color",
+      "card": {
+        "id": "color",
+        "job": "Enter a colour with a picker or a hex code and see how it reads on the page.",
+        "purpose": "A native colour input beside a hex box. The box carries the name and posts #rrggbb as a plain field; the picker is inert until script runs. With script the two stay in step, short hex codes are completed, and a list shows the colour's contrast on the page and against the accent, measured live and worded as well as marked with an icon.",
+        "useWhen": [
+          "A brand or accent colour is entered by a person, as in branding or theme settings.",
+          "The chosen colour will sit on the page, so its legibility matters."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Choosing from a few preset colours.",
+            "instead": "swatch"
+          },
+          {
+            "when": "Showing a colour that cannot be edited.",
+            "instead": "swatch"
+          },
+          {
+            "when": "A whole palette of tokens.",
+            "instead": "tweaks"
+          }
+        ],
+        "aka": [
+          "colour picker",
+          "color picker",
+          "hex input",
+          "brand colour field"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the hex box, with a .fd-field-error"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the hex box and the picker"
+          },
+          {
+            "name": "contrast level",
+            "how": "data-level=\"pass|warn|fail\" on each fd-color-check"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-color",
+            "role": "The root; carries data-fd-color."
+          },
+          {
+            "class": "fd-color-picker",
+            "role": "The native colour input, with no name."
+          },
+          {
+            "class": "fd-color-checks",
+            "role": "The contrast list; carries data-fd-color-feedback."
+          },
+          {
+            "class": "fd-color-check",
+            "role": "One row: icon, name, ratio, verdict."
+          }
+        ],
+        "related": [
+          "swatch",
+          "input-group",
+          "field",
+          "tweaks"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between the picker and the hex box."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On the picker, opens the browser's colour dialog."
+          }
+        ],
+        "example": "docs/forms.html#color",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js",
+          "fire/js/palette-rules.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "column",
       "name": "Column",
       "family": "Layout",
@@ -4950,6 +5333,7 @@
         "fd-command-item-hint",
         "fd-command-item-label",
         "fd-command-list",
+        "fd-command-note",
         "fd-command-search"
       ],
       "attributes": {
@@ -4961,6 +5345,12 @@
         "fd-command-item": {
           "data-icon": [
             "*"
+          ]
+        },
+        "fd-command-note": {
+          "data-state": [
+            "error",
+            "loading"
           ]
         }
       },
@@ -4978,11 +5368,12 @@
       "card": {
         "id": "command",
         "job": "Jump to a page or run an action by typing, from anywhere.",
-        "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant.",
+        "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant. command.records() adds a group of found records, searched as you type.",
         "useWhen": [
           "An app has many pages and actions and power users want the keyboard.",
           "People should reach a recent run, a doc or a setting without navigating.",
-          "Actions need shortcuts and hints shown beside them."
+          "Actions need shortcuts and hints shown beside them.",
+          "A search should return records, such as runs, keys or monitors, beside pages and actions: register a records group."
         ],
         "avoidWhen": [
           {
@@ -5030,6 +5421,14 @@
           {
             "name": "empty",
             "how": "fd-command-empty is shown when nothing matches"
+          },
+          {
+            "name": "records loading",
+            "how": "aria-busy=\"true\" on the .fd-command-group[data-records]; a .fd-command-note says it is searching"
+          },
+          {
+            "name": "records failed",
+            "how": ".fd-command-note[data-state=\"error\"] in the records group"
           }
         ],
         "variants": [
@@ -5083,6 +5482,10 @@
           {
             "class": "fd-command-foot",
             "role": "A key legend row."
+          },
+          {
+            "class": "fd-command-note",
+            "role": "One quiet line in a records group: searching, or the error."
           }
         ],
         "related": [
@@ -5112,10 +5515,180 @@
         "example": "docs/overlays.html#command-palette",
         "provenance": [
           "docs/overlays.html",
+          "docs/shell.html#palette-records",
           "fire/components/overlays.css",
           "fire/js/overlays.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "commit",
+      "name": "Reason and commit",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-commit",
+      "classes": [
+        "fd-commit",
+        "fd-commit-actions",
+        "fd-commit-budget",
+        "fd-commit-effect",
+        "fd-commit-lock"
+      ],
+      "attributes": {
+        "data-fd-hold": [
+          "*"
+        ],
+        "data-fd-hold-in": [
+          "toast"
+        ],
+        "data-max-words": [
+          "*"
+        ],
+        "data-min-words": [
+          "*"
+        ]
+      },
+      "partAttributes": {
+        "fd-commit-lock": {
+          "data-icon": [
+            "*"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "committed",
+          "held",
+          "near",
+          "over"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:commit",
+        "fd:hold",
+        "fd:undo"
+      ],
+      "docs": "docs/decisions.html#commit",
+      "card": {
+        "id": "commit",
+        "job": "Take a reason and commit a decision with buttons named for their effect.",
+        "purpose": "A form with a line saying what each button does, a reason field with a word budget, the primary button named for its effect and a Decline that needs the reason too. It checks the reason, then fires fd:commit, or holds it first with data-fd-hold: inline, or in a toast with data-fd-hold-in=\"toast\" so a queue can move on. A visible fd-commit-lock disables the buttons and says who can decide.",
+        "useWhen": [
+          "A decision needs a reason that someone reads later: the audit log, the requester, the agent.",
+          "Approve and decline are both real answers and both need a why.",
+          "The viewer can read the case but not decide it, and must learn who can."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A yes or no with nothing to record, such as dismissing a tip.",
+            "instead": "button"
+          },
+          {
+            "when": "The action destroys something with history and needs the name typed.",
+            "instead": "confirm"
+          },
+          {
+            "when": "A general form that edits a record.",
+            "instead": "form"
+          }
+        ],
+        "aka": [
+          "approve reject",
+          "reason field",
+          "audit reason",
+          "decision form",
+          "sign off"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the textarea and the fd-field-error shown, when the reason is missing or outside its budget"
+          },
+          {
+            "name": "near or over budget",
+            "how": "data-state=\"near\" or \"over\" on fd-commit-budget"
+          },
+          {
+            "name": "locked",
+            "how": "a visible fd-commit-lock; the commit buttons are disabled and described by it"
+          },
+          {
+            "name": "held",
+            "how": "data-state=\"held\" while a hold runs; the actions give way to fd-hold"
+          },
+          {
+            "name": "committed",
+            "how": "data-state=\"committed\" once sent; reopen(form) undoes it after a failed send"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-hold",
+            "value": "*",
+            "useWhen": "Sending is hard to take back: hold the commit this many seconds with Undo."
+          },
+          {
+            "attribute": "data-fd-hold-in",
+            "value": "toast",
+            "useWhen": "The page moves on after a commit (a queue): hold it in a toast instead of in the form."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-commit",
+            "role": "The form (or a div inside another form)."
+          },
+          {
+            "class": "fd-commit-effect",
+            "role": "One line on what each button does."
+          },
+          {
+            "class": "fd-commit-budget",
+            "role": "The word count against data-min-words and data-max-words."
+          },
+          {
+            "class": "fd-commit-actions",
+            "role": "The commit buttons: type=\"submit\" with a value and data-verb."
+          },
+          {
+            "class": "fd-commit-lock",
+            "role": "Who can decide, when this viewer cannot."
+          }
+        ],
+        "related": [
+          "decision",
+          "draft",
+          "hold",
+          "textarea",
+          "button",
+          "toast"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a commit button: checks the reason, then commits or starts the hold."
+          },
+          {
+            "keys": "Escape",
+            "does": "While the hold runs: stops it and opens the form again."
+          }
+        ],
+        "example": "docs/decisions.html#commit",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -5419,6 +5992,10 @@
           {
             "when": "Revoking a key with an inline confirmation button.",
             "instead": "button"
+          },
+          {
+            "when": "The action has its own page, or must work without script.",
+            "instead": "confirm-inline"
           }
         ],
         "aka": [
@@ -5463,10 +6040,11 @@
           }
         ],
         "related": [
-          "dialog",
           "button",
-          "toast",
-          "sheet"
+          "confirm-inline",
+          "dialog",
+          "sheet",
+          "toast"
         ],
         "keyboard": [
           {
@@ -5485,6 +6063,127 @@
           "fire/js/overlays.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "confirm-inline",
+      "name": "Confirm Inline",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-confirm-inline",
+      "classes": [
+        "fd-confirm-inline",
+        "fd-confirm-inline-rule"
+      ],
+      "attributes": {
+        "data-confirm": [
+          "*"
+        ],
+        "data-fd-confirm-input": [
+          ""
+        ],
+        "data-state": [
+          "match",
+          "mismatch",
+          "partial"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/forms.html#confirm-inline",
+      "card": {
+        "id": "confirm-inline",
+        "job": "Make someone type a name on the page before a destructive button works.",
+        "purpose": "A plain form with a field, the phrase to type (fd-confirm-phrase) and a danger button. Without script the button is enabled and the server checks the posted text. With script the button stays disabled until the trimmed text equals the phrase, and a line under the field says it matches so far, differs at character n, or matches.",
+        "useWhen": [
+          "A destructive action has its own page: delete a workspace, approve a restore.",
+          "The action must also work, and be checked, with no script."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action starts from a row or a menu and a dialog is natural.",
+            "instead": "confirm"
+          },
+          {
+            "when": "A yes or no with nothing lost.",
+            "instead": "dialog"
+          },
+          {
+            "when": "The action can be undone.",
+            "instead": "toast"
+          }
+        ],
+        "aka": [
+          "type to confirm",
+          "typed confirmation",
+          "delete confirmation",
+          "danger zone",
+          "are you sure"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "idle",
+            "how": "data-state=\"idle\" on the form; nothing typed"
+          },
+          {
+            "name": "partial",
+            "how": "data-state=\"partial\"; the text so far is the start of the phrase"
+          },
+          {
+            "name": "mismatch",
+            "how": "data-state=\"mismatch\"; the rule line names the first wrong character"
+          },
+          {
+            "name": "match",
+            "how": "data-state=\"match\"; the button is enabled"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-confirm",
+            "value": "*",
+            "useWhen": "The phrase to type, on the form; an input may carry data-match instead."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-confirm-inline",
+            "role": "The form; carries data-fd-confirm-inline and data-confirm."
+          },
+          {
+            "class": "fd-confirm-inline-rule",
+            "role": "The line that says where the typed text stands; carries data-fd-confirm-rule."
+          }
+        ],
+        "related": [
+          "confirm",
+          "button",
+          "field",
+          "callout"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Sends the form when the text matches."
+          }
+        ],
+        "example": "docs/forms.html#confirm-inline",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -5782,6 +6481,9 @@
         "fd-calendar-title",
         "fd-calendar-weekday",
         "fd-daterange",
+        "fd-daterange-compare",
+        "fd-daterange-compare-dates",
+        "fd-daterange-compare-label",
         "fd-daterange-foot",
         "fd-daterange-main",
         "fd-daterange-preset",
@@ -5795,7 +6497,11 @@
         "fd-pick-name",
         "fd-pick-text"
       ],
-      "attributes": {},
+      "attributes": {
+        "data-compare": [
+          "*"
+        ]
+      },
       "partAttributes": {
         "fd-daterange-preset": {
           "data-preset": [
@@ -5803,7 +6509,10 @@
             "30d",
             "7d",
             "custom",
-            "month"
+            "lastmonth",
+            "month",
+            "quarter",
+            "year"
           ]
         }
       },
@@ -5836,7 +6545,7 @@
       "card": {
         "id": "date-picker",
         "job": "Choose a start and an end date, with presets for the usual ranges.",
-        "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs.",
+        "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end; the range previews as you hover, then Apply writes the label into the trigger and fires fd:change with ISO dates. Cancel restores the last applied range. Future days can be disabled for logs. With a compare band it becomes a period (see period).",
         "useWhen": [
           "A log, a chart or a report is filtered by a time range.",
           "People mostly want the same few ranges but sometimes a custom one."
@@ -5844,7 +6553,7 @@
         "avoidWhen": [
           {
             "when": "A single date in a form.",
-            "instead": "input"
+            "instead": "datefield"
           },
           {
             "when": "A time of day or a number.",
@@ -5887,7 +6596,13 @@
             "how": "data-today on today's cell, shown with an accent dot"
           }
         ],
-        "variants": [],
+        "variants": [
+          {
+            "attribute": "data-compare",
+            "value": "*",
+            "useWhen": "Starts a period on previous or year instead of none."
+          }
+        ],
         "parts": [
           {
             "class": "fd-daterange",
@@ -5924,13 +6639,27 @@
           {
             "class": "fd-daterange-foot",
             "role": "Cancel and Apply."
+          },
+          {
+            "class": "fd-daterange-compare",
+            "role": "The band under the calendar: Compared with radios and the comparison dates."
+          },
+          {
+            "class": "fd-daterange-compare-label",
+            "role": "The band's label."
+          },
+          {
+            "class": "fd-daterange-compare-dates",
+            "role": "The comparison dates as text."
           }
         ],
         "related": [
-          "popover",
+          "chart",
+          "datefield",
           "filter",
-          "segmented",
-          "chart"
+          "period",
+          "popover",
+          "segmented"
         ],
         "keyboard": [
           {
@@ -5957,6 +6686,420 @@
           "fire/js/overlays.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "datefield",
+      "name": "Datefield",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-datefield",
+      "classes": [
+        "fd-datefield",
+        "fd-datefield-foot",
+        "fd-datefield-panel"
+      ],
+      "attributes": {
+        "data-max-date": [
+          "*"
+        ],
+        "data-min-date": [
+          "*"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/forms.html#datefield",
+      "card": {
+        "id": "datefield",
+        "job": "Enter one date by typing it or picking it from a calendar.",
+        "purpose": "A text box that holds a date as YYYY-MM-DD, with a calendar button that opens the date range's month grid. The box posts the ISO date with no script; with script it reads other typed forms, checks data-min-date and data-max-date through setCustomValidity, and writes the ISO date back. Arrow keys open the calendar and move by day, week and month.",
+        "useWhen": [
+          "A form needs one date: pause until, expires on, start on.",
+          "The date must stay inside a range, such as no earlier than today."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A period with a start and an end.",
+            "instead": "date-picker"
+          },
+          {
+            "when": "A time of day, or a duration.",
+            "instead": "input"
+          },
+          {
+            "when": "A choice among a few named dates, such as tomorrow or next week.",
+            "instead": "segmented"
+          }
+        ],
+        "aka": [
+          "date input",
+          "date picker",
+          "datepicker",
+          "calendar field",
+          "date of",
+          "due date"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the input, with a .fd-field-error"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the input and the button"
+          },
+          {
+            "name": "ready",
+            "how": "data-ready on the root once the script has run; the calendar button is hidden until then"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-min-date",
+            "value": "*",
+            "useWhen": "No earlier date is allowed: an ISO date or today."
+          },
+          {
+            "attribute": "data-max-date",
+            "value": "*",
+            "useWhen": "No later date is allowed: an ISO date or today."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-datefield",
+            "role": "The root; carries data-fd-datefield and wraps an input group and the calendar popover."
+          },
+          {
+            "class": "fd-datefield-panel",
+            "role": "The calendar inside the popover; carries data-fd-datepanel."
+          },
+          {
+            "class": "fd-datefield-foot",
+            "role": "The Today and Clear buttons under the calendar."
+          }
+        ],
+        "related": [
+          "date-picker",
+          "input-group",
+          "popover",
+          "field",
+          "number"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow Down",
+            "does": "In the box, opens the calendar on the chosen day."
+          },
+          {
+            "keys": "Arrow keys",
+            "does": "In the calendar, move by day and week."
+          },
+          {
+            "keys": "Page Up, Page Down",
+            "does": "Move by month; with Shift, by year."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Pick the day and return to the box."
+          },
+          {
+            "keys": "Escape",
+            "does": "Close the calendar."
+          }
+        ],
+        "example": "docs/forms.html#datefield",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js",
+          "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "decision",
+      "name": "Decision brief",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-decision",
+      "classes": [
+        "fd-decision",
+        "fd-decision-actions",
+        "fd-decision-detail",
+        "fd-decision-facts",
+        "fd-decision-head",
+        "fd-decision-heading",
+        "fd-decision-label",
+        "fd-decision-lead",
+        "fd-decision-meta",
+        "fd-decision-outcome",
+        "fd-decision-outcome-title",
+        "fd-decision-part",
+        "fd-decision-parts",
+        "fd-decision-quote",
+        "fd-decision-title"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-decision-outcome": {
+          "data-icon": [
+            "*"
+          ],
+          "data-tone": [
+            "accent",
+            "danger",
+            "info",
+            "neutral",
+            "success",
+            "violet",
+            "warning"
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/decisions.html#brief",
+      "card": {
+        "id": "decision",
+        "job": "Show what a decision changes, who it touches, the evidence and who signs, so a person can decide in seconds.",
+        "purpose": "A card that asks the question as its title, then four numbered parts in reading order: the change, who it touches, the evidence, and who signs or what happens if nobody decides. The parts sit two by two and stack into one column when the brief is narrow. Once decided, an outcome strip at the foot says who decided, when, why, and until when Undo works.",
+        "useWhen": [
+          "A person must approve or decline something that costs money, grants access or ships a change.",
+          "An agent proposes an action and a person signs it.",
+          "A decided case is opened again from a link or the history, and the reader needs what was decided, not only that it was."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action is routine and the server can undo it.",
+            "instead": "toast"
+          },
+          {
+            "when": "The agent asks permission for one tool call in a run.",
+            "instead": "approval-bar"
+          },
+          {
+            "when": "The action deletes something with history and needs the name typed.",
+            "instead": "confirm"
+          },
+          {
+            "when": "The facts are a record's fields with no decision to make.",
+            "instead": "kv"
+          }
+        ],
+        "aka": [
+          "approval request",
+          "decision card",
+          "case page",
+          "review item",
+          "sign-off",
+          "change request",
+          "human in the loop"
+        ],
+        "surfaces": [
+          "app",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "record"
+        ],
+        "states": [
+          {
+            "name": "waiting",
+            "how": "an fd-status pill data-tone=\"warning\" in fd-decision-head; the title ends in a question mark"
+          },
+          {
+            "name": "decided",
+            "how": "an fd-decision-outcome after fd-decision-parts, with its title, the reason and Undo"
+          },
+          {
+            "name": "expired",
+            "how": "fd-decision-outcome data-tone=\"warning\": nobody decided in time"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-decision",
+            "role": "The card; an article labelled by its title."
+          },
+          {
+            "class": "fd-decision-head",
+            "role": "Kind tile, heading and status pill."
+          },
+          {
+            "class": "fd-decision-heading",
+            "role": "The eyebrow, the title and the meta line."
+          },
+          {
+            "class": "fd-decision-title",
+            "role": "The question, with the object and the amount."
+          },
+          {
+            "class": "fd-decision-meta",
+            "role": "Who asked, when, and when it expires, separated by dots."
+          },
+          {
+            "class": "fd-decision-parts",
+            "role": "The dl that holds the parts and numbers them."
+          },
+          {
+            "class": "fd-decision-part",
+            "role": "One part: a label, a lead line and at most one detail line."
+          },
+          {
+            "class": "fd-decision-label",
+            "role": "The part's numbered mono label (dt)."
+          },
+          {
+            "class": "fd-decision-lead",
+            "role": "The part's one line; may hold an fd-delta."
+          },
+          {
+            "class": "fd-decision-detail",
+            "role": "A muted line under the lead."
+          },
+          {
+            "class": "fd-decision-facts",
+            "role": "Evidence as name and value rows."
+          },
+          {
+            "class": "fd-decision-quote",
+            "role": "Someone's own words, set in quotes."
+          },
+          {
+            "class": "fd-decision-outcome",
+            "role": "What was decided, by whom and when; tinted by data-tone."
+          },
+          {
+            "class": "fd-decision-outcome-title",
+            "role": "Who decided and when: \"Approved by you just now\"."
+          },
+          {
+            "class": "fd-decision-actions",
+            "role": "Undo and the date it stops working."
+          }
+        ],
+        "related": [
+          "commit",
+          "draft",
+          "delta",
+          "impact",
+          "hold",
+          "queue"
+        ],
+        "keyboard": [],
+        "example": "docs/decisions.html#brief",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "delta",
+      "name": "Delta",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-delta",
+      "classes": [
+        "fd-delta",
+        "fd-delta-from",
+        "fd-delta-to"
+      ],
+      "attributes": {
+        "data-mono": [
+          ""
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/decisions.html#brief",
+      "card": {
+        "id": "delta",
+        "job": "Show a value before and after a change, with an arrow between them.",
+        "purpose": "An inline pair: the old value muted, an arrow read as \"to\", and the new value in label weight. Figures are tabular; data-mono sets identifiers such as scopes, plans and hosts in the mono face. Without a from part it shows only the new value.",
+        "useWhen": [
+          "A decision or a preview changes a number, a plan or a scope and both values matter.",
+          "A list of affected records each shows its old and new value."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The figure is a trend over time with a direction and a percentage.",
+            "instead": "stats"
+          },
+          {
+            "when": "Two versions of text or code are compared line by line.",
+            "instead": "diff"
+          }
+        ],
+        "aka": [
+          "before and after",
+          "from to",
+          "change value",
+          "was now"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-mono",
+            "value": "",
+            "useWhen": "The values are identifiers: scopes, plan names, hosts, versions."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-delta",
+            "role": "The pair."
+          },
+          {
+            "class": "fd-delta-from",
+            "role": "The value before, muted."
+          },
+          {
+            "class": "fd-delta-to",
+            "role": "The value after; the arrow is drawn before it."
+          }
+        ],
+        "related": [
+          "decision",
+          "impact",
+          "stats"
+        ],
+        "keyboard": [],
+        "example": "docs/decisions.html#brief",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -7828,6 +8971,152 @@
       }
     },
     {
+      "id": "draft",
+      "name": "Drafted text",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-draft",
+      "classes": [
+        "fd-draft",
+        "fd-draft-actions",
+        "fd-draft-by",
+        "fd-draft-text",
+        "fd-draft-used",
+        "fd-draft-when"
+      ],
+      "attributes": {
+        "data-fd-draft": [
+          "discard",
+          "use"
+        ],
+        "data-fd-draft-for": [
+          "*"
+        ]
+      },
+      "partAttributes": {
+        "fd-draft-by": {
+          "data-icon": [
+            "*"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "edited",
+          "used"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:accept",
+        "fd:close"
+      ],
+      "docs": "docs/decisions.html#draft",
+      "card": {
+        "id": "draft",
+        "job": "Offer words an agent wrote for a person, which stay the agent's until the person uses them.",
+        "purpose": "A dashed block naming the agent and who it drafted for, the text in quotes, and Use and Discard. Use copies the text into the reason field and focuses it; the block folds to one line that stays as provenance, and the field records data-fd-drafted used, then edited once changed. Discard folds it away. The agent never commits.",
+        "useWhen": [
+          "An agent drafted the reason or the answer for a decision a person signs.",
+          "A suggested reply or note must not be mistaken for the person's own words."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The agent's text is its answer in a conversation.",
+            "instead": "message"
+          },
+          {
+            "when": "The agent asks to run a tool.",
+            "instead": "approval-bar"
+          },
+          {
+            "when": "Short completions offered while someone types.",
+            "instead": "suggestions"
+          }
+        ],
+        "aka": [
+          "AI draft",
+          "suggested reason",
+          "agent suggestion",
+          "proposed text",
+          "copilot draft"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "waiting",
+            "how": "no data-state: the text in quotes with Use and Discard"
+          },
+          {
+            "name": "used",
+            "how": "data-state=\"used\", set by data-fd-draft=\"use\"; fd-draft-used shows"
+          },
+          {
+            "name": "edited",
+            "how": "data-state=\"edited\" once the person changes the words in the field"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-draft-for",
+            "value": "*",
+            "useWhen": "The field to fill is not the textarea of the enclosing fd-commit: give its id."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-draft",
+            "role": "The block, an aside labelled as a draft."
+          },
+          {
+            "class": "fd-draft-by",
+            "role": "The agent, who it drafted for, and an icon."
+          },
+          {
+            "class": "fd-draft-when",
+            "role": "When it was drafted."
+          },
+          {
+            "class": "fd-draft-text",
+            "role": "The drafted words, in quotes."
+          },
+          {
+            "class": "fd-draft-actions",
+            "role": "Buttons with data-fd-draft=\"use\" and \"discard\"."
+          },
+          {
+            "class": "fd-draft-used",
+            "role": "The line shown once the draft is used."
+          }
+        ],
+        "related": [
+          "commit",
+          "decision",
+          "message",
+          "textarea"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On Use: copies the draft into the field and moves focus there."
+          }
+        ],
+        "example": "docs/decisions.html#draft",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "empty",
       "name": "Empty",
       "family": "Content",
@@ -7839,6 +9128,7 @@
         "fd-empty-art",
         "fd-empty-hint",
         "fd-empty-icon",
+        "fd-empty-meta",
         "fd-empty-text",
         "fd-empty-title"
       ],
@@ -7871,7 +9161,8 @@
           "A list, table or page has no items yet and the next step is clear.",
           "A search or filter matches nothing; say what to change.",
           "A request failed and the reader can retry.",
-          "A feature is not on the plan; say which plan has it."
+          "A feature is not on the plan; say which plan has it.",
+          "One part of a page-state set (fd-states): no access, not found, switched off, link expired."
         ],
         "avoidWhen": [
           {
@@ -7962,6 +9253,10 @@
             "role": "A smaller aside, such as a keyboard tip."
           },
           {
+            "class": "fd-empty-meta",
+            "role": "A quiet line under the actions: a request ID, who can grant access or turn an area on, when a link expired."
+          },
+          {
             "class": "fd-empty-actions",
             "role": "The one or two actions that fix it."
           }
@@ -7970,7 +9265,8 @@
           "skeleton",
           "callout",
           "table",
-          "texture"
+          "texture",
+          "states"
         ],
         "keyboard": [],
         "example": "docs/content.html#empty",
@@ -9701,6 +10997,168 @@
       }
     },
     {
+      "id": "hold",
+      "name": "Held action",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-hold",
+      "classes": [
+        "fd-hold",
+        "fd-hold-count",
+        "fd-hold-note",
+        "fd-hold-ring",
+        "fd-hold-text",
+        "fd-hold-title",
+        "fd-hold-undo"
+      ],
+      "attributes": {
+        "data-seconds": [
+          "*"
+        ],
+        "data-tone": [
+          "accent",
+          "danger",
+          "info",
+          "neutral",
+          "success",
+          "violet",
+          "warning"
+        ]
+      },
+      "partAttributes": {
+        "fd-hold-ring": {
+          "data-size": [
+            "sm"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "running"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:commit",
+        "fd:hold",
+        "fd:undo"
+      ],
+      "docs": "docs/decisions.html#hold",
+      "card": {
+        "id": "hold",
+        "job": "Wait a few seconds before an action goes, with a countdown and Undo.",
+        "purpose": "A strip with a ring that drains with the time left, the action in words, a note that nothing has happened yet, and Undo. A commit with data-fd-hold or a button with data-fd-hold-for starts it; focus moves to Undo. Undo or Escape stops it and returns focus; the end fires fd:commit. Leaving the page sends it. Screen readers hear the start and the undo. toast.hold draws the same ring in a toast.",
+        "useWhen": [
+          "Sending is hard to take back: money, access, a message, a shipped change, a cancelled run.",
+          "A person commits in one press and deserves a moment to change their mind."
+        ],
+        "avoidWhen": [
+          {
+            "when": "It is already done and the server can reverse it.",
+            "instead": "toast"
+          },
+          {
+            "when": "A mistake destroys history and must not happen by one press.",
+            "instead": "confirm"
+          },
+          {
+            "when": "Work that runs for minutes with progress to watch.",
+            "instead": "progress"
+          }
+        ],
+        "aka": [
+          "undo send",
+          "countdown",
+          "grace period",
+          "delayed action",
+          "cancel window"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "running",
+            "how": "data-state=\"running\" while it counts; the trigger is disabled"
+          },
+          {
+            "name": "idle",
+            "how": "hidden until a hold starts, and again once it is undone or sent"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "The held action removes or stops something; a danger commit button sets it."
+          },
+          {
+            "attribute": "data-seconds",
+            "value": "*",
+            "useWhen": "The length of a hold started by data-fd-hold-for; 10 by default, 5 inside a dialog."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-hold",
+            "role": "The strip."
+          },
+          {
+            "class": "fd-hold-ring",
+            "role": "The countdown ring; data-size=\"sm\" in a toast."
+          },
+          {
+            "class": "fd-hold-count",
+            "role": "The whole seconds left, inside the ring."
+          },
+          {
+            "class": "fd-hold-text",
+            "role": "The title and the note."
+          },
+          {
+            "class": "fd-hold-title",
+            "role": "The action in progress: \"Approving the credit\"."
+          },
+          {
+            "class": "fd-hold-note",
+            "role": "That nothing has happened yet."
+          },
+          {
+            "class": "fd-hold-undo",
+            "role": "Stops the hold."
+          }
+        ],
+        "related": [
+          "commit",
+          "toast",
+          "confirm",
+          "decision"
+        ],
+        "keyboard": [
+          {
+            "keys": "Escape",
+            "does": "Stops the hold when focus is in it, in its form, or nowhere."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On Undo: stops the hold and returns focus to the button that started it."
+          }
+        ],
+        "example": "docs/decisions.html#hold",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js",
+          "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "hovercard",
       "name": "Hovercard",
       "family": "Overlays",
@@ -9993,6 +11451,214 @@
           "elements/src/icon.ts"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "impact",
+      "name": "Impact",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-impact",
+      "classes": [
+        "fd-impact",
+        "fd-impact-count",
+        "fd-impact-list",
+        "fd-impact-more",
+        "fd-impact-text"
+      ],
+      "attributes": {
+        "data-tone": [
+          "accent",
+          "danger",
+          "info",
+          "neutral",
+          "success",
+          "violet",
+          "warning"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/decisions.html#preview",
+      "card": {
+        "id": "impact",
+        "job": "Say how much a change will touch, before anyone commits it.",
+        "purpose": "A tinted block that leads with a count in figures (\"29 teams change\"), one line on how they change, a short list of the largest with their before and after values, and \"and 26 more\" with a link to all. data-tone warns when the reach is wide. It is the result of a preview, or part of a case whose change reaches beyond one record.",
+        "useWhen": [
+          "A change reaches more than the one thing on screen: a plan default, a crawl setting, a policy.",
+          "A preview must show its reach before the commit button appears."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The change touches one record, which the brief already names.",
+            "instead": "decision"
+          },
+          {
+            "when": "A warning with no figure and no list.",
+            "instead": "callout"
+          },
+          {
+            "when": "Figures to read without a decision.",
+            "instead": "stats"
+          }
+        ],
+        "aka": [
+          "blast radius",
+          "affected count",
+          "change preview",
+          "dry run result",
+          "who is affected"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "warning",
+            "useWhen": "The reach is wide or the change is hard to take back."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "The change removes access or data for those it touches."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "A neutral reach worth knowing, such as a default for new teams only."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-impact",
+            "role": "The block."
+          },
+          {
+            "class": "fd-impact-count",
+            "role": "The figure in bold and what it counts."
+          },
+          {
+            "class": "fd-impact-text",
+            "role": "One line on how they change."
+          },
+          {
+            "class": "fd-impact-list",
+            "role": "A few of them, each with an fd-delta or a figure."
+          },
+          {
+            "class": "fd-impact-more",
+            "role": "How many more, and a link to the full list."
+          }
+        ],
+        "related": [
+          "preview",
+          "delta",
+          "decision",
+          "callout"
+        ],
+        "keyboard": [],
+        "example": "docs/decisions.html#preview",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "initial",
+      "name": "Initial",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-initial",
+      "classes": [
+        "fd-initial"
+      ],
+      "attributes": {},
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/shell.html#initial-mark",
+      "card": {
+        "id": "initial",
+        "job": "Show an organisation's first letter as a dot-matrix mark where it has no logo.",
+        "purpose": "A drawn mark: the first letter of a name on a 5 by 7 grid of dots, lit dots in the box's colour and unlit ones faint. The same name always draws the same glyph and takes the same tone. It goes in a brand mark, tile or avatar through data-fd-initial, or as an SVG string from initial.js on a server or in an email.",
+        "useWhen": [
+          "An organisation, team or brand has no uploaded logo and needs a mark in the brand slot, a tile or an avatar.",
+          "An email or a server-rendered page needs the same mark: call initialMark() or initialRows(), no DOM needed.",
+          "A list of organisations should be told apart at a glance without anyone choosing a colour."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person's initials, or a box smaller than 28px.",
+            "instead": "avatar"
+          },
+          {
+            "when": "The thing has a real logo or a symbol: an icon, an image.",
+            "instead": "tile"
+          },
+          {
+            "when": "The product's own mark, or a logotype in the current colour.",
+            "instead": "brand"
+          }
+        ],
+        "aka": [
+          "generated logo",
+          "letter mark",
+          "initial avatar",
+          "identicon",
+          "dot matrix",
+          "placeholder logo",
+          "monogram"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "no script",
+            "how": "the host keeps its own letter, styled by the tile or avatar"
+          },
+          {
+            "name": "other character",
+            "how": "a first character that is not A to Z or 0 to 9 draws a diamond"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-initial",
+            "role": "The drawing: an svg in currentColor, sized by its box."
+          }
+        ],
+        "related": [
+          "tile",
+          "avatar",
+          "brand"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#initial-mark",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/initial.js",
+          "fire/js/shell.js",
+          "fire/components/shell.css"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -11018,12 +12684,17 @@
         "fd-list-row": {
           "data-unread": [
             ""
+          ],
+          "data-value": [
+            "*"
           ]
         }
       },
       "stateAttributes": {},
       "element": null,
-      "events": [],
+      "events": [
+        "fd:change"
+      ],
       "docs": "docs/data.html#lists",
       "card": {
         "id": "list",
@@ -11032,7 +12703,8 @@
         "useWhen": [
           "Members, integrations or files with a name, a line of detail and one action.",
           "An inbox where unread rows carry a dot.",
-          "A card of rows divided by hairlines."
+          "A card of rows divided by hairlines.",
+          "People choose one item from a short list of rich rows: role=\"listbox\" with role=\"option\" rows."
         ],
         "avoidWhen": [
           {
@@ -11077,6 +12749,10 @@
           {
             "name": "interactive",
             "how": "data-interactive on the list; every row is a link or button with hover and focus"
+          },
+          {
+            "name": "selected",
+            "how": "aria-current=\"true\" on the row whose record is open; aria-selected=\"true\" on a role=\"option\" row"
           }
         ],
         "variants": [
@@ -11167,7 +12843,8 @@
           "table",
           "card",
           "avatar",
-          "notification"
+          "notification",
+          "list-detail"
         ],
         "keyboard": [
           {
@@ -11177,14 +12854,156 @@
           {
             "keys": "Space",
             "does": "Presses a button row."
+          },
+          {
+            "keys": "Arrow Up, Arrow Down, Home, End",
+            "does": "In a role=\"listbox\" list: moves the selection, which follows focus."
           }
         ],
         "example": "docs/data.html#lists",
         "provenance": [
           "docs/data.html",
-          "fire/components/data.css"
+          "fire/components/data.css",
+          "fire/js/data.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "list-detail",
+      "name": "List and detail",
+      "family": "Data",
+      "kind": "component",
+      "root": "fd-list-detail",
+      "classes": [
+        "fd-list-detail",
+        "fd-list-detail-back",
+        "fd-list-detail-list",
+        "fd-list-detail-main"
+      ],
+      "attributes": {
+        "data-view": [
+          "detail",
+          "list"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change",
+        "fd:select"
+      ],
+      "docs": "docs/data.html#list-detail",
+      "card": {
+        "id": "list-detail",
+        "job": "Work through a queue: pick a record from a list and read or act on it beside the list.",
+        "purpose": "Two panes: a list of rows (buttons with data-value) and the record that is open. The open row has aria-current=\"true\" and the accent wash. Panels in the main pane with a matching data-detail are shown for you, or the page renders the record on fd:select. Below 760px of its own width one pane shows at a time (data-view=\"list|detail\"): focus moves to the record's heading, and the back button returns it to the row.",
+        "useWhen": [
+          "People decide or review records one after another: requests, approvals, failures, messages.",
+          "The list must stay in view while one record is open, and a phone shows the list first."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Each record needs its own page and address.",
+            "instead": "table"
+          },
+          {
+            "when": "The side pane is settings navigation.",
+            "instead": "subnav"
+          },
+          {
+            "when": "The detail is a short summary over the page.",
+            "instead": "sheet"
+          }
+        ],
+        "aka": [
+          "master-detail",
+          "list-detail",
+          "split view",
+          "inbox",
+          "queue",
+          "drill-down"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "aria-current=\"true\" on the open row"
+          },
+          {
+            "name": "list",
+            "how": "data-view=\"list\" (the default): below 760px only the list shows"
+          },
+          {
+            "name": "detail",
+            "how": "data-view=\"detail\": below 760px only the record shows, with fd-list-detail-back"
+          },
+          {
+            "name": "loading",
+            "how": "aria-busy=\"true\" on the root with skeletons in both panes"
+          },
+          {
+            "name": "empty",
+            "how": "an fd-empty in place of the whole layout"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-view",
+            "value": "detail",
+            "useWhen": "Rendering a page whose address names one record, so a phone opens on it."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-list-detail",
+            "role": "The root: two columns, one pane at a time below 760px of its own width."
+          },
+          {
+            "class": "fd-list-detail-list",
+            "role": "The list pane: a heading and an fd-list (or cards) of rows with data-value."
+          },
+          {
+            "class": "fd-list-detail-main",
+            "role": "The record pane: the back button and the record, or [data-detail] panels."
+          },
+          {
+            "class": "fd-list-detail-back",
+            "role": "The way back to the list, shown only when one pane shows; put it on an fd-back button."
+          }
+        ],
+        "related": [
+          "list",
+          "card",
+          "split",
+          "back",
+          "empty"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a row: opens its record; on a phone focus moves to the record's heading."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On the back button: returns to the list with focus on the open row."
+          }
+        ],
+        "example": "docs/data.html#list-detail",
+        "provenance": [
+          "docs/data.html",
+          "fire/components/data.css",
+          "fire/js/data.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -11566,6 +13385,7 @@
         "fd-log-level",
         "fd-log-mark",
         "fd-log-msg",
+        "fd-log-num",
         "fd-log-prompt",
         "fd-log-row",
         "fd-log-search",
@@ -11575,9 +13395,8 @@
         "fd-log-tone"
       ],
       "attributes": {
-        "data-fd-log-demo": [
-          "api",
-          "cli"
+        "data-anchor": [
+          "*"
         ],
         "data-fit": [
           ""
@@ -11587,6 +13406,9 @@
         ],
         "data-level": [
           "info"
+        ],
+        "data-lines": [
+          ""
         ],
         "data-variant": [
           "terminal"
@@ -11599,6 +13421,10 @@
         "fd-log-btn": {
           "data-action": [
             "*"
+          ],
+          "data-fd-log-demo": [
+            "api",
+            "cli"
           ]
         },
         "fd-log-filter": {
@@ -11642,7 +13468,9 @@
         ]
       },
       "element": null,
-      "events": [],
+      "events": [
+        "fd:select"
+      ],
       "docs": "docs/code.html#log",
       "card": {
         "id": "log",
@@ -11651,7 +13479,8 @@
         "useWhen": [
           "A job, a crawl or a deployment writes lines as it runs.",
           "One run's lines sit on its page: use data-fit.",
-          "A CLI session is shown as a terminal."
+          "A CLI session is shown as a terminal.",
+          "People link to a line of a finished log, or need to land on the first error."
         ],
         "avoidWhen": [
           {
@@ -11703,6 +13532,14 @@
           {
             "name": "copied",
             "how": "data-state=\"copied\" after a copy"
+          },
+          {
+            "name": "linked line",
+            "how": "aria-current=\"true\" on a fd-log-row, set from the address (#L42) or a chosen line number"
+          },
+          {
+            "name": "no errors",
+            "how": "the first-error button is disabled while no visible row has data-level=\"error\""
           }
         ],
         "variants": [
@@ -11755,6 +13592,16 @@
             "attribute": "data-tone",
             "value": "dim",
             "useWhen": "On a message span: quiet text."
+          },
+          {
+            "attribute": "data-lines",
+            "value": "",
+            "useWhen": "Number the rows; each number links to its line (#L42)."
+          },
+          {
+            "attribute": "data-anchor",
+            "value": "build",
+            "useWhen": "Several numbered logs on one page: line ids become build-L42."
           }
         ],
         "parts": [
@@ -11849,6 +13696,10 @@
           {
             "class": "fd-log-cursor",
             "role": "The blinking cursor."
+          },
+          {
+            "class": "fd-log-num",
+            "role": "A row's line number, a link to the row (added by code.js with data-lines)."
           }
         ],
         "related": [
@@ -11865,6 +13716,14 @@
           {
             "keys": "Enter, Space",
             "does": "Toggles a chip or Follow."
+          },
+          {
+            "keys": "Arrow Up, Arrow Down, Home, End",
+            "does": "On a line number: moves to the previous, next, first or last visible line."
+          },
+          {
+            "keys": "Enter",
+            "does": "On a line number: marks that line and writes it to the address."
           }
         ],
         "example": "docs/code.html#log",
@@ -13276,10 +15135,22 @@
           "data-align": [
             "center"
           ],
+          "data-column": [
+            "",
+            "lg",
+            "md",
+            "sm",
+            "xl",
+            "xs"
+          ],
           "data-grow": [
             ""
           ],
           "data-marks": [
+            "",
+            "corners",
+            "crosses",
+            "dots",
             "none"
           ],
           "data-pad": [
@@ -13307,7 +15178,8 @@
         "purpose": "The page holds a centred column with 1px rails; each fd-band is a horizontal strip, separated by hairlines that run edge to edge, with a crosshair where a line meets a rail. Bands set padding, surface and whether they grow. On phones the rails and marks drop away and only the hairlines remain.",
         "useWhen": [
           "Any screen in the app: one band for the title, one for the toolbar, one for the content.",
-          "A band needs a white or sunken surface, a different padding, or to stick under the top bar."
+          "A band needs a white or sunken surface, a different padding, or to stick under the top bar.",
+          "A public page needs a narrow column of text under a header band: data-column on the band."
         ],
         "avoidWhen": [
           {
@@ -13394,6 +15266,36 @@
             "attribute": "data-marks",
             "value": "none",
             "useWhen": "Keep the hairline and drop the crosshairs in a dense area."
+          },
+          {
+            "attribute": "data-column",
+            "value": "",
+            "useWhen": "A public or signed-out page: the band's content in a centred reading column of 560px under a header band."
+          },
+          {
+            "attribute": "data-column",
+            "value": "xs",
+            "useWhen": "A reading column of 320px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "sm",
+            "useWhen": "A reading column of 400px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "lg",
+            "useWhen": "A reading column of 640px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "xl",
+            "useWhen": "A reading column of 768px instead of 560px."
+          },
+          {
+            "attribute": "data-column",
+            "value": "md",
+            "useWhen": "The default reading column of 560px, written out."
           }
         ],
         "parts": [
@@ -13416,9 +15318,11 @@
         "keyboard": [],
         "example": "docs/shell.html#frame",
         "provenance": [
+          "GUIDE.md",
           "docs/shell.html",
+          "docs/shell.html#reading-column",
           "fire/components/shell.css",
-          "GUIDE.md"
+          "fire/layout.css"
         ],
         "since": "0.1.0"
       }
@@ -14110,6 +16014,113 @@
           "fire/components/shell.css"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "period",
+      "name": "Period",
+      "family": "Overlays",
+      "kind": "component",
+      "root": "fd-period",
+      "classes": [
+        "fd-period",
+        "fd-period-compare"
+      ],
+      "attributes": {},
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/overlays.html#period",
+      "card": {
+        "id": "period",
+        "job": "Choose a reporting period and what to compare it with.",
+        "purpose": "The trigger of a date range that has a compare band: presets and a calendar, then Compared with Nothing, Previous period or Same period last year. The trigger shows the range and, muted, the comparison dates. Apply fires fd:change with { start, end, preset, compare }, where compare is null or { mode, start, end }.",
+        "useWhen": [
+          "A report, chart or stats row shows a figure and how it changed against an earlier period.",
+          "Several screens share one period control."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Only the period matters, with no comparison.",
+            "instead": "date-picker"
+          },
+          {
+            "when": "One date.",
+            "instead": "datefield"
+          },
+          {
+            "when": "A fixed set of ranges and nothing custom.",
+            "instead": "segmented"
+          }
+        ],
+        "aka": [
+          "period picker",
+          "compare to",
+          "date range with comparison",
+          "previous period",
+          "comparison range",
+          "vs last period"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form",
+          "series"
+        ],
+        "states": [
+          {
+            "name": "no comparison",
+            "how": "data-compare=\"none\" or the Nothing radio; the trigger's compare label is empty and hidden"
+          },
+          {
+            "name": "pending",
+            "how": "data-pending in the calendar after the first click of a custom range"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-period",
+            "role": "On the fd-filter that triggers the popover."
+          },
+          {
+            "class": "fd-period-compare",
+            "role": "The muted \"vs\" part of the trigger; carries data-fd-daterange-compare-label."
+          }
+        ],
+        "related": [
+          "date-picker",
+          "filter",
+          "stats",
+          "chart"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys",
+            "does": "In the calendar, move by day and week."
+          },
+          {
+            "keys": "Page Up, Page Down",
+            "does": "Move by month; with Shift, by year."
+          },
+          {
+            "keys": "Arrow keys",
+            "does": "In the Compared with radios, move between modes."
+          },
+          {
+            "keys": "Escape",
+            "does": "Close without applying."
+          }
+        ],
+        "example": "docs/overlays.html#period",
+        "provenance": [
+          "docs/overlays.html",
+          "fire/components/overlays.css",
+          "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -14933,6 +16944,137 @@
       }
     },
     {
+      "id": "preview",
+      "name": "Preview then commit",
+      "family": "Content",
+      "kind": "pattern",
+      "root": "fd-preview",
+      "classes": [
+        "fd-preview",
+        "fd-preview-edit",
+        "fd-preview-result",
+        "fd-preview-stale"
+      ],
+      "attributes": {
+        "data-fd-preview-open": [
+          ""
+        ]
+      },
+      "partAttributes": {
+        "fd-preview-stale": {
+          "data-icon": [
+            "*"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "preview",
+          "stale"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:change",
+        "fd:open"
+      ],
+      "docs": "docs/decisions.html#preview",
+      "card": {
+        "id": "preview",
+        "job": "Edit a value, see what the change will touch, then commit it with a reason.",
+        "purpose": "A pattern for changes whose reach depends on what is typed. The edit fields come first with a Preview button; asking for a preview checks them, fires fd:open (fill the fd-impact then) and shows the result: the impact and an fd-commit. Changing a field afterwards marks the preview stale, hides the commit and says to preview again. It works inline or inside a dialog.",
+        "useWhen": [
+          "Changing a default, a limit or a policy that applies to many teams at once.",
+          "The person should see \"412 teams change\" before the commit button exists."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Nothing is edited and the reach is known: show it in the case.",
+            "instead": "impact"
+          },
+          {
+            "when": "A setting that affects only the person changing it.",
+            "instead": "setting"
+          },
+          {
+            "when": "A multi-step create flow.",
+            "instead": "dialog"
+          }
+        ],
+        "aka": [
+          "dry run",
+          "review changes",
+          "preview changes",
+          "change summary",
+          "impact preview"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "editing",
+            "how": "no data-state: the edit fields and the Preview button"
+          },
+          {
+            "name": "preview",
+            "how": "data-state=\"preview\": fd-preview-result shows"
+          },
+          {
+            "name": "stale",
+            "how": "data-state=\"stale\": a field changed after the preview; fd-preview-stale shows"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-preview-open",
+            "value": "",
+            "useWhen": "On the button that asks for the preview."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-preview",
+            "role": "The form that holds the edit and the result."
+          },
+          {
+            "class": "fd-preview-edit",
+            "role": "The fields and the Preview button."
+          },
+          {
+            "class": "fd-preview-stale",
+            "role": "The line that says the preview is out of date."
+          },
+          {
+            "class": "fd-preview-result",
+            "role": "The fd-impact and the fd-commit."
+          }
+        ],
+        "related": [
+          "impact",
+          "commit",
+          "dialog",
+          "delta"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "In an edit field: asks for the preview; it never commits."
+          }
+        ],
+        "example": "docs/decisions.html#preview",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "progress",
       "name": "Progress",
       "family": "Data",
@@ -15354,6 +17496,190 @@
       }
     },
     {
+      "id": "queue",
+      "name": "Decision queue",
+      "family": "Content",
+      "kind": "pattern",
+      "root": "fd-queue",
+      "classes": [
+        "fd-queue",
+        "fd-queue-age",
+        "fd-queue-back",
+        "fd-queue-case",
+        "fd-queue-count",
+        "fd-queue-group",
+        "fd-queue-group-label",
+        "fd-queue-item",
+        "fd-queue-list",
+        "fd-queue-meta",
+        "fd-queue-text",
+        "fd-queue-title"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-queue-age": {
+          "data-urgent": [
+            ""
+          ]
+        },
+        "fd-queue-case": {
+          "data-case": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-view": [
+          "case",
+          "list"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:select"
+      ],
+      "docs": "docs/decisions.html#queue",
+      "card": {
+        "id": "queue",
+        "job": "Work through what waits for a decision, one case at a time, beside the list.",
+        "purpose": "A pattern of a grouped list and the case it opens. Items show a kind tile, a two-line title, who asked and how long it waited. Picking one marks it current, shows its case and fires fd:select. Narrower than a list plus a readable case, it shows one at a time with a Queue button back. With fd-commit data-fd-hold-in=\"toast\", a committed case leaves at once while its toast counts down, and Undo returns it.",
+        "useWhen": [
+          "Several requests or agent proposals wait for one person: credits, hosts, access, changes.",
+          "A reviewer moves through items and should not lose their place."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The items are records to compare, sort or act on in bulk.",
+            "instead": "table"
+          },
+          {
+            "when": "One decision on a page of its own, reached from a link.",
+            "instead": "decision"
+          },
+          {
+            "when": "Sections of one settings area.",
+            "instead": "subnav"
+          }
+        ],
+        "aka": [
+          "inbox",
+          "review queue",
+          "needs you",
+          "approvals",
+          "master detail",
+          "list detail",
+          "triage"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "current",
+            "how": "aria-current=\"true\" on one fd-queue-item"
+          },
+          {
+            "name": "list or case",
+            "how": "data-view=\"list|case\" on fd-queue, which a narrow queue reads"
+          },
+          {
+            "name": "empty",
+            "how": "wrap it in fd-states and show data-when=\"empty\" when removeItem returns null"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-urgent",
+            "value": "",
+            "useWhen": "On fd-queue-age: the wait is close to a deadline."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-queue",
+            "role": "The list and the case side by side."
+          },
+          {
+            "class": "fd-queue-list",
+            "role": "The nav that holds the groups."
+          },
+          {
+            "class": "fd-queue-group",
+            "role": "One kind of request, a group labelled by its heading."
+          },
+          {
+            "class": "fd-queue-group-label",
+            "role": "The kind, and its count in fd-queue-count."
+          },
+          {
+            "class": "fd-queue-count",
+            "role": "How many items the group holds; removeItem keeps it right."
+          },
+          {
+            "class": "fd-queue-item",
+            "role": "One request: a button or a link with data-value."
+          },
+          {
+            "class": "fd-queue-text",
+            "role": "The title and the meta line."
+          },
+          {
+            "class": "fd-queue-title",
+            "role": "What is asked, in two lines at most."
+          },
+          {
+            "class": "fd-queue-meta",
+            "role": "Who asked, and one fact."
+          },
+          {
+            "class": "fd-queue-age",
+            "role": "How long it has waited, or when it is due."
+          },
+          {
+            "class": "fd-queue-case",
+            "role": "The open case; holds [data-case] panels when the page keeps them all."
+          },
+          {
+            "class": "fd-queue-back",
+            "role": "Returns a narrow queue to the list."
+          }
+        ],
+        "related": [
+          "decision",
+          "commit",
+          "states",
+          "split",
+          "subnav"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow Up, Arrow Down",
+            "does": "Moves between items."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Moves to the first or the last item."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Opens the item's case."
+          }
+        ],
+        "example": "docs/decisions.html#queue",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "radio",
       "name": "Radio",
       "family": "Forms",
@@ -15471,6 +17797,115 @@
           "fire/components/forms.css"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "reason",
+      "name": "Reason",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-reason",
+      "classes": [
+        "fd-reason",
+        "fd-reason-text",
+        "fd-reason-who",
+        "fd-reason-why"
+      ],
+      "attributes": {
+        "data-layout": [
+          "inline"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/forms.html#reason",
+      "card": {
+        "id": "reason",
+        "job": "Show why a control is off and who can turn it on.",
+        "purpose": "A control with a visible line under it (or beside it) giving the reason and the person or role who can change it, linked with aria-describedby. It works for buttons, switches and links made into buttons. Use aria-disabled=\"true\" instead of disabled to keep the control focusable; the script then stops its click.",
+        "useWhen": [
+          "A permission, plan or state turns a control off and the person needs to know what to do.",
+          "Keyboard users must hear the reason where they meet the control."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The reason only needs a hint on hover.",
+            "instead": "tooltip"
+          },
+          {
+            "when": "The whole section is unavailable.",
+            "instead": "callout"
+          },
+          {
+            "when": "A field is not editable but readable.",
+            "instead": "input"
+          }
+        ],
+        "aka": [
+          "disabled reason",
+          "locked control",
+          "why disabled",
+          "permission message",
+          "gated action"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "disabled",
+            "how": "disabled, or aria-disabled=\"true\" to stay focusable"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "inline",
+            "useWhen": "The reason sits beside the control."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-reason",
+            "role": "The wrapper around the control and its reason."
+          },
+          {
+            "class": "fd-reason-text",
+            "role": "The reason line; its id is the control's aria-describedby."
+          },
+          {
+            "class": "fd-reason-why",
+            "role": "The cause, in one sentence."
+          },
+          {
+            "class": "fd-reason-who",
+            "role": "Who can change it, by name or role."
+          }
+        ],
+        "related": [
+          "button",
+          "switch",
+          "tooltip",
+          "callout"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Reaches an aria-disabled control and reads its reason."
+          }
+        ],
+        "example": "docs/forms.html#reason",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -15910,7 +18345,11 @@
           "fire/layout.css",
           "fire/base.css"
         ],
-        "since": "0.1.0"
+        "since": "0.1.0",
+        "relation": {
+          "distinctFrom": "stack",
+          "because": "A row lays items side by side and wraps them; a stack puts them one under another with a gap."
+        }
       }
     },
     {
@@ -16043,6 +18482,156 @@
           "fire/js/agent.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "running",
+      "name": "Running",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-running",
+      "classes": [
+        "fd-running",
+        "fd-running-bar",
+        "fd-running-count",
+        "fd-running-dot",
+        "fd-running-item",
+        "fd-running-label",
+        "fd-running-list",
+        "fd-running-meta",
+        "fd-running-time",
+        "fd-running-title"
+      ],
+      "attributes": {
+        "data-fd-running": [
+          "*"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change",
+        "fd:keys"
+      ],
+      "docs": "docs/shell.html#running",
+      "card": {
+        "id": "running",
+        "job": "Show how many jobs are in progress and open the list from the top bar.",
+        "purpose": "A pill in the top bar with a pulsing dot and a count, that opens a popover of what is running: a title, the time so far, a line of detail and an optional progress bar, each row a link to the run. The count is the number of rows in the popover and follows them; with none the pill is hidden, so a quiet account has a quiet bar.",
+        "useWhen": [
+          "Work continues after the page that started it: crawls, agent runs, monitor checks, imports.",
+          "A person should find a long job from any screen without opening the page that started it."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A job finished, failed or needs a decision.",
+            "instead": "notification"
+          },
+          {
+            "when": "One job on the page you are on, with its own progress.",
+            "instead": "progress"
+          },
+          {
+            "when": "The health of the product itself.",
+            "instead": "service-status"
+          }
+        ],
+        "aka": [
+          "running jobs",
+          "activity indicator",
+          "background tasks",
+          "in progress",
+          "job tray",
+          "live runs"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "none running",
+            "how": "hidden; set by shell.js when the popover has no .fd-running-item"
+          },
+          {
+            "name": "open",
+            "how": "aria-expanded=\"true\" on the pill while its popover is open"
+          },
+          {
+            "name": "phone",
+            "how": "the label drops and the pill keeps the dot and the count"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-running",
+            "role": "The pill; a button that opens the popover. data-fd-running names the popover."
+          },
+          {
+            "class": "fd-running-dot",
+            "role": "The pulsing dot."
+          },
+          {
+            "class": "fd-running-count",
+            "role": "The number of rows in the popover."
+          },
+          {
+            "class": "fd-running-label",
+            "role": "The word 'running'; hidden on a phone."
+          },
+          {
+            "class": "fd-running-list",
+            "role": "The rows inside the popover."
+          },
+          {
+            "class": "fd-running-item",
+            "role": "One running job, a link to its run."
+          },
+          {
+            "class": "fd-running-title",
+            "role": "The job's name."
+          },
+          {
+            "class": "fd-running-time",
+            "role": "Time so far."
+          },
+          {
+            "class": "fd-running-meta",
+            "role": "One line of detail, such as the step or the page count."
+          },
+          {
+            "class": "fd-running-bar",
+            "role": "A progress bar; --value is 0 to 1."
+          }
+        ],
+        "related": [
+          "popover",
+          "notification",
+          "progress",
+          "service-status"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens the popover from the pill."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the popover and returns focus to the pill."
+          }
+        ],
+        "example": "docs/shell.html#running",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/shell.js",
+          "fire/components/shell.css",
+          "templates/shell.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -17062,6 +19651,143 @@
       }
     },
     {
+      "id": "service-status",
+      "name": "Service Status",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-service-status",
+      "classes": [
+        "fd-service-status",
+        "fd-service-status-label"
+      ],
+      "attributes": {
+        "data-icon": [
+          "*"
+        ],
+        "data-status": [
+          "",
+          "degraded",
+          "maintenance",
+          "operational",
+          "outage"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/shell.html#service-status",
+      "card": {
+        "id": "service-status",
+        "job": "Show whether the product is healthy: an icon when normal, a labelled pill when not.",
+        "purpose": "A link to the status page in the top bar. When operational it is an icon alone, with its label for assistive technology and a tooltip. When degraded, down or in maintenance it shows its label in a tone, so a problem is read where it matters. The page sets it with setServiceStatus(); the control fetches nothing itself.",
+        "useWhen": [
+          "People depend on the service and should see an incident without looking for a status page.",
+          "A top bar needs a quiet place for 'all good' that turns into words when it is not."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person's own job or resource is unhealthy.",
+            "instead": "status"
+          },
+          {
+            "when": "A message that must be read and dismissed.",
+            "instead": "banner"
+          },
+          {
+            "when": "How many jobs are running.",
+            "instead": "running"
+          }
+        ],
+        "aka": [
+          "system status",
+          "uptime indicator",
+          "incident indicator",
+          "health pill",
+          "status page link"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "operational",
+            "how": "data-status=\"operational\"; the icon alone"
+          },
+          {
+            "name": "degraded",
+            "how": "data-status=\"degraded\"; label in warning"
+          },
+          {
+            "name": "outage",
+            "how": "data-status=\"outage\"; label in danger"
+          },
+          {
+            "name": "maintenance",
+            "how": "data-status=\"maintenance\"; label in info"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-status",
+            "value": "operational",
+            "useWhen": "Everything works: the icon alone."
+          },
+          {
+            "attribute": "data-status",
+            "value": "degraded",
+            "useWhen": "Slower or partly failing."
+          },
+          {
+            "attribute": "data-status",
+            "value": "outage",
+            "useWhen": "The service is down."
+          },
+          {
+            "attribute": "data-status",
+            "value": "maintenance",
+            "useWhen": "Planned work is under way."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-service-status",
+            "role": "The link to the status page; data-status sets the look."
+          },
+          {
+            "class": "fd-service-status-label",
+            "role": "The words; visually hidden when operational, hidden on a phone otherwise (aria-label keeps the name)."
+          }
+        ],
+        "related": [
+          "status",
+          "running",
+          "banner",
+          "topbar"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Follows the link to the status page."
+          }
+        ],
+        "example": "docs/shell.html#service-status",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/shell.js",
+          "fire/components/shell.css",
+          "templates/shell.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "session-list",
       "name": "Session List",
       "family": "Agent",
@@ -17566,6 +20292,144 @@
       }
     },
     {
+      "id": "shortcuts",
+      "name": "Shortcuts",
+      "family": "Shell",
+      "kind": "component",
+      "root": "fd-shortcuts",
+      "classes": [
+        "fd-keys-hint",
+        "fd-shortcuts",
+        "fd-shortcuts-group",
+        "fd-shortcuts-keys",
+        "fd-shortcuts-label",
+        "fd-shortcuts-name",
+        "fd-shortcuts-row"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-keys-hint": {
+          "data-state": [
+            "open"
+          ],
+          "data-static": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/shell.html#go-keys",
+      "card": {
+        "id": "shortcuts",
+        "job": "Go to a page by keyboard and list every shortcut in a sheet.",
+        "purpose": "Keys are data attributes on controls: data-fd-keys=\"g l\" on a link makes G then L follow it, \"/\" opens search, \"?\" opens the sheet. While the first key waits, nav items show their key and a hint says a key is expected. The sheet is a dialog filled from the page each time it opens, so it never lists a key that does nothing.",
+        "useWhen": [
+          "People return to the same few pages all day: an app with a sidebar of destinations.",
+          "A product has several shortcuts and needs one place that lists them."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Jumping to anything by typing, including records.",
+            "instead": "command"
+          },
+          {
+            "when": "A shortcut hint on one control.",
+            "instead": "tooltip"
+          }
+        ],
+        "aka": [
+          "hotkeys",
+          "go-to keys",
+          "keyboard shortcuts",
+          "key bindings",
+          "shortcut sheet",
+          "cheat sheet",
+          "vim keys"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "waiting",
+            "how": "data-fd-keys-pending=\"g\" on <html> for 1.6 seconds after the first key; the hint shows data-state=\"open\""
+          },
+          {
+            "name": "skipped",
+            "how": "no key works in a field, in a modal, with Ctrl, Cmd or Alt, or on a hidden or disabled control"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-shortcuts",
+            "role": "The sheet's list, filled from the page."
+          },
+          {
+            "class": "fd-shortcuts-group",
+            "role": "One group: 'General', 'Go to'."
+          },
+          {
+            "class": "fd-shortcuts-label",
+            "role": "The group's name."
+          },
+          {
+            "class": "fd-shortcuts-row",
+            "role": "One shortcut: its name and its keys."
+          },
+          {
+            "class": "fd-shortcuts-name",
+            "role": "What the key does."
+          },
+          {
+            "class": "fd-shortcuts-keys",
+            "role": "The keys, as kbd elements."
+          },
+          {
+            "class": "fd-keys-hint",
+            "role": "The status line shown while a key waits for its second."
+          }
+        ],
+        "related": [
+          "command",
+          "dialog",
+          "sidebar",
+          "inline-code"
+        ],
+        "keyboard": [
+          {
+            "keys": "g then a letter",
+            "does": "Follows the control that carries that sequence."
+          },
+          {
+            "keys": "/",
+            "does": "Opens search."
+          },
+          {
+            "keys": "?",
+            "does": "Opens the shortcut sheet."
+          },
+          {
+            "keys": "Escape",
+            "does": "Drops a first key that is waiting."
+          }
+        ],
+        "example": "docs/shell.html#go-keys",
+        "provenance": [
+          "docs/shell.html",
+          "fire/js/shell.js",
+          "fire/components/shell.css",
+          "templates/shell.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "sidebar",
       "name": "Sidebar",
       "family": "Shell",
@@ -17581,6 +20445,7 @@
         "fd-nav-group",
         "fd-nav-hint",
         "fd-nav-item",
+        "fd-nav-key",
         "fd-nav-label",
         "fd-nav-sub",
         "fd-nav-text",
@@ -17611,6 +20476,11 @@
         },
         "fd-sidebar-toggle": {
           "data-icon-only": [
+            ""
+          ]
+        },
+        "fd-team-switch": {
+          "data-fd-menu-value": [
             ""
           ]
         }
@@ -19005,6 +21875,149 @@
       }
     },
     {
+      "id": "states",
+      "name": "Page states",
+      "family": "Content",
+      "kind": "pattern",
+      "root": "fd-states",
+      "classes": [
+        "fd-states"
+      ],
+      "attributes": {
+        "data-state": [
+          "empty",
+          "error",
+          "expired",
+          "filtered",
+          "loading",
+          "no-access",
+          "not-found",
+          "off",
+          "ready"
+        ],
+        "data-when": [
+          ""
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/content.html#page-states",
+      "card": {
+        "id": "states",
+        "job": "Show the one state a screen or a section is in: loading, ready, empty, error, no access and the rest.",
+        "purpose": "A pattern and a wrapper with no box of its own. Its direct children name the states they belong to in data-when; data-state on the wrapper shows them. Nine states: loading (skeletons), ready, empty (first use), filtered, error (with a request ID and Try again), no-access (who can grant it), not-found, off (who can turn it on) and expired. setState or a data-fd-set-state button switches it and fires fd:change.",
+        "useWhen": [
+          "Any screen or section that loads its own data.",
+          "A page reached from a link that can be gone, forbidden or out of date.",
+          "An area a team can switch off."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A table's own empty, loading and error rows inside its frame.",
+            "instead": "table"
+          },
+          {
+            "when": "A swap from skeleton to content with no other states.",
+            "instead": "skeleton"
+          },
+          {
+            "when": "A warning above content that loaded.",
+            "instead": "callout"
+          }
+        ],
+        "aka": [
+          "empty state",
+          "error state",
+          "zero state",
+          "no access",
+          "404",
+          "forbidden",
+          "feature off",
+          "expired link",
+          "page state"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "loading",
+            "how": "data-state=\"loading\"; the loading part holds skeletons and aria-busy=\"true\""
+          },
+          {
+            "name": "error",
+            "how": "data-state=\"error\"; an fd-empty data-tone=\"danger\" role=\"alert\" with an fd-empty-meta request ID"
+          },
+          {
+            "name": "no access",
+            "how": "data-state=\"no-access\"; an fd-empty-meta names who can grant it"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-state",
+            "value": "ready",
+            "useWhen": "The content shows; the default when data-state is absent."
+          },
+          {
+            "attribute": "data-state",
+            "value": "empty",
+            "useWhen": "First use: nothing exists yet; say what will appear and give the action."
+          },
+          {
+            "attribute": "data-state",
+            "value": "filtered",
+            "useWhen": "A filter or a search hides everything; offer Clear filters."
+          },
+          {
+            "attribute": "data-state",
+            "value": "not-found",
+            "useWhen": "The record in the address does not exist; link to its list."
+          },
+          {
+            "attribute": "data-state",
+            "value": "off",
+            "useWhen": "The area is switched off for this team; say who can turn it on."
+          },
+          {
+            "attribute": "data-state",
+            "value": "expired",
+            "useWhen": "A link ran out; say when, and how to get a new one."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-states",
+            "role": "The wrapper; it adds no box, so it can switch whole bands."
+          }
+        ],
+        "related": [
+          "empty",
+          "skeleton",
+          "loader",
+          "queue"
+        ],
+        "keyboard": [],
+        "example": "docs/content.html#page-states",
+        "provenance": [
+          "docs/content.html",
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "stats",
       "name": "Stats",
       "family": "Data",
@@ -19032,10 +22045,12 @@
           "data-dir": [
             "",
             "down",
+            "flat",
             "up"
           ],
           "data-tone": [
             "danger",
+            "neutral",
             "success",
             "warning"
           ]
@@ -19103,6 +22118,14 @@
           {
             "name": "delta down",
             "how": "data-dir=\"down\" on fd-stat-delta"
+          },
+          {
+            "name": "delta flat",
+            "how": "data-dir=\"flat\" on fd-stat-delta: a bar for no change"
+          },
+          {
+            "name": "status in the sub-line",
+            "how": "an fd-status (with an fd-status-note) inside fd-stat-sub takes the sub-line's size"
           }
         ],
         "variants": [
@@ -19140,6 +22163,16 @@
             "attribute": "data-tone",
             "value": "warning",
             "useWhen": "The change needs a look."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "On fd-stat-delta: a change that is neither good nor bad, such as more runs."
+          },
+          {
+            "attribute": "data-dir",
+            "value": "flat",
+            "useWhen": "On fd-stat-delta: no change since the last period."
           }
         ],
         "parts": [
@@ -19203,7 +22236,8 @@
       "kind": "component",
       "root": "fd-status",
       "classes": [
-        "fd-status"
+        "fd-status",
+        "fd-status-note"
       ],
       "attributes": {
         "data-icon": [
@@ -19237,10 +22271,11 @@
       "card": {
         "id": "status",
         "job": "Show the state of a run, a monitor or a key with a dot and a word.",
-        "purpose": "A dot and a word. Only a running item pulses, and only while it is running (data-live). The icon variant swaps the dot for a status icon that spins while live; the pill variant puts the state in a tinted pill.",
+        "purpose": "A dot and a word. Only a running item pulses, and only while it is running (data-live). The icon variant swaps the dot for a status icon that spins while live; the pill variant puts the state in a tinted pill. An fd-status-note after the word adds a short qualifier, muted behind a small dot (\"Succeeded · 1 flaky page\").",
         "useWhen": [
           "A row needs the state of a thing: Running, Passed, Failed, Paused.",
-          "A header shows the state of the page object as a tinted pill."
+          "A header shows the state of the page object as a tinted pill.",
+          "The state needs a two- or three-word qualifier: a count, a time, a region."
         ],
         "avoidWhen": [
           {
@@ -19328,6 +22363,10 @@
           {
             "class": "fd-status",
             "role": "The dot and the word."
+          },
+          {
+            "class": "fd-status-note",
+            "role": "A short qualifier after the state word: a count, a time or a place."
           }
         ],
         "related": [
@@ -19353,9 +22392,11 @@
       "root": "fd-steps",
       "classes": [
         "fd-step",
+        "fd-step-action",
         "fd-step-body",
         "fd-step-desc",
         "fd-step-marker",
+        "fd-step-owner",
         "fd-step-title",
         "fd-steps"
       ],
@@ -19365,6 +22406,9 @@
         ],
         "data-orientation": [
           "vertical"
+        ],
+        "data-variant": [
+          "tracker"
         ]
       },
       "partAttributes": {
@@ -19372,7 +22416,11 @@
           "data-state": [
             "current",
             "done",
-            "error"
+            "error",
+            "failed",
+            "running",
+            "skipped",
+            "waiting"
           ]
         }
       },
@@ -19384,11 +22432,13 @@
       "docs": "docs/navigation.html#steps",
       "card": {
         "id": "steps",
-        "job": "Show where someone is in a flow with a fixed order.",
-        "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set the position with data-current (0-based) or setStep(); buttons with data-fd-step=\"next|prev|n\" move it. The vertical orientation suits a setup checklist with descriptions. A step in error shows the reason under its title.",
+        "job": "Show where someone is in a flow with a fixed order, or how far live work or a record has got.",
+        "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. A wizard sets the position with data-current or setStep(). Live work marks each step running, failed, waiting or skipped, with an owner and one action per step. The tracker variant lays a record's stages across its page and turns vertical below 560px of its own width.",
         "useWhen": [
           "A setup or create flow has a fixed order: choose pages, schedule, notify, review.",
-          "A vertical list of tasks shows what is done and what comes next."
+          "A vertical list of tasks shows what is done and what comes next.",
+          "Work runs in steps on its own and each step reports how it went: a key rotation, a deploy, an import.",
+          "One record moves through stages (Proposed, Checked, Approved, Testing, Result) and its page shows where it is."
         ],
         "avoidWhen": [
           {
@@ -19406,6 +22456,14 @@
           {
             "when": "The path is a location hierarchy.",
             "instead": "breadcrumb"
+          },
+          {
+            "when": "Each event has a time and the order of events is the point.",
+            "instead": "timeline"
+          },
+          {
+            "when": "The work is a graph of stages with parallel jobs.",
+            "instead": "pipeline"
           }
         ],
         "aka": [
@@ -19413,7 +22471,11 @@
           "wizard",
           "progress steps",
           "timeline",
-          "onboarding steps"
+          "onboarding steps",
+          "lifecycle tracker",
+          "stage tracker",
+          "progress tracker",
+          "checklist with owners"
         ],
         "surfaces": [
           "app",
@@ -19435,6 +22497,22 @@
           {
             "name": "error",
             "how": "data-state=\"error\" on a step"
+          },
+          {
+            "name": "running",
+            "how": "data-state=\"running\": the accent marker with a turning arc"
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\": a cross on the danger tone; the description reads in danger text"
+          },
+          {
+            "name": "waiting",
+            "how": "data-state=\"waiting\": an hourglass on the warning tone, waiting on the person in fd-step-owner"
+          },
+          {
+            "name": "skipped",
+            "how": "data-state=\"skipped\": a dashed ring and a dash; setStep keeps it"
           }
         ],
         "variants": [
@@ -19442,6 +22520,11 @@
             "attribute": "data-orientation",
             "value": "vertical",
             "useWhen": "A list with descriptions, as in a getting-started panel."
+          },
+          {
+            "attribute": "data-variant",
+            "value": "tracker",
+            "useWhen": "The stages of one record across the top of its page; vertical below 560px of its own width."
           }
         ],
         "parts": [
@@ -19468,6 +22551,14 @@
           {
             "class": "fd-step-desc",
             "role": "Detail under the title."
+          },
+          {
+            "class": "fd-step-owner",
+            "role": "Who the step waits on: an fd-avatar and a name, under the title."
+          },
+          {
+            "class": "fd-step-action",
+            "role": "One small button or link after the body: what to do about the step now."
           }
         ],
         "related": [
@@ -19475,7 +22566,10 @@
           "checklist",
           "dialog",
           "progress",
-          "breadcrumb"
+          "breadcrumb",
+          "timeline",
+          "pipeline",
+          "avatar"
         ],
         "keyboard": [
           {
@@ -19704,6 +22798,142 @@
       }
     },
     {
+      "id": "swatch",
+      "name": "Swatch",
+      "family": "Forms",
+      "kind": "component",
+      "root": "fd-swatch",
+      "classes": [
+        "fd-swatch"
+      ],
+      "attributes": {
+        "data-empty": [
+          ""
+        ],
+        "data-shape": [
+          "round"
+        ],
+        "data-size": [
+          "lg",
+          "sm",
+          "xl",
+          "xs"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/forms.html#color",
+      "card": {
+        "id": "swatch",
+        "job": "Show a colour that is content, such as a brand colour or a series colour.",
+        "purpose": "A small square of a colour that belongs to the product's data, not to the theme. The colour comes from --fd-swatch-color, passed with data-fd-vars so no style attribute is needed. A checkerboard shows through translucent colours, data-empty marks no colour, and a button swatch with aria-pressed chooses one.",
+        "useWhen": [
+          "A brand, series or tag colour appears beside its name or hex value.",
+          "People choose one colour from a short list."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A status or a theme tone.",
+            "instead": "status"
+          },
+          {
+            "when": "The person must enter a colour.",
+            "instead": "color"
+          },
+          {
+            "when": "A chart series key.",
+            "instead": "legend"
+          }
+        ],
+        "aka": [
+          "colour chip",
+          "color chip",
+          "color swatch",
+          "color dot",
+          "brand colour"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "aria-pressed=\"true\" on a button swatch"
+          },
+          {
+            "name": "empty",
+            "how": "data-empty"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on a button swatch"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "xs",
+            "useWhen": "Inline with small text."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "Beside a label in a list."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A choice list of colours."
+          },
+          {
+            "attribute": "data-size",
+            "value": "xl",
+            "useWhen": "A preview of the brand colour."
+          },
+          {
+            "attribute": "data-shape",
+            "value": "round",
+            "useWhen": "A dot rather than a square."
+          },
+          {
+            "attribute": "data-empty",
+            "value": "",
+            "useWhen": "No colour is set."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-swatch",
+            "role": "The colour; a span, or a button when it can be chosen."
+          }
+        ],
+        "related": [
+          "color",
+          "status",
+          "legend",
+          "badge"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a button swatch, choose it."
+          }
+        ],
+        "example": "docs/forms.html#color",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "switch",
       "name": "Switch",
       "family": "Forms",
@@ -19872,6 +23102,11 @@
         "fd-table-foot",
         "fd-table-foot-actions",
         "fd-table-foot-info",
+        "fd-table-group",
+        "fd-table-group-count",
+        "fd-table-group-head",
+        "fd-table-group-title",
+        "fd-table-group-toggle",
         "fd-table-lead",
         "fd-table-link",
         "fd-table-rows",
@@ -19895,6 +23130,9 @@
           "lg",
           "md",
           "sm"
+        ],
+        "data-collapsible": [
+          ""
         ],
         "data-expand": [
           ""
@@ -19945,6 +23183,9 @@
           "data-select-all": [
             ""
           ],
+          "data-select-group": [
+            ""
+          ],
           "data-select-row": [
             ""
           ]
@@ -19952,6 +23193,24 @@
         "fd-table-empty": {
           "data-tone": [
             "danger"
+          ]
+        },
+        "fd-table-group": {
+          "data-state": [
+            "closed"
+          ]
+        },
+        "fd-table-group-count": {
+          "data-auto": [
+            ""
+          ]
+        },
+        "fd-table-group-head": {
+          "data-expand": [
+            ""
+          ],
+          "data-select": [
+            ""
           ]
         },
         "fd-table-lead": {
@@ -20019,17 +23278,20 @@
       "element": null,
       "events": [
         "fd:change",
+        "fd:close",
+        "fd:open",
         "fd:select"
       ],
       "docs": "docs/data.html#activity",
       "card": {
         "id": "table",
         "job": "Compare, sort and act on records laid out in rows and columns.",
-        "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
+        "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, grouped rows under heading rows that can open and close, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
         "useWhen": [
           "People compare the same fields across many records: logs, keys, invoices, runs.",
           "Rows need sorting, selection, bulk actions or an actions cell.",
-          "The same records must stay readable on a phone (add data-stack)."
+          "The same records must stay readable on a phone (add data-stack).",
+          "Records fall into a few kinds that share columns (keys by environment, monitors by site): one table with a heading row per group."
         ],
         "avoidWhen": [
           {
@@ -20047,13 +23309,20 @@
           {
             "when": "The numbers are a trend over time.",
             "instead": "chart"
+          },
+          {
+            "when": "Each group has different columns.",
+            "instead": "Use one table per group, each with its own heading."
           }
         ],
         "aka": [
           "data grid",
           "datagrid",
           "list view",
-          "activity log"
+          "activity log",
+          "grouped table",
+          "row groups",
+          "section rows"
         ],
         "surfaces": [
           "app",
@@ -20087,6 +23356,14 @@
           {
             "name": "expanded",
             "how": "tr[data-expanded] followed by a tr.fd-table-detail row"
+          },
+          {
+            "name": "group closed",
+            "how": "data-state=\"closed\" on a tbody.fd-table-group; its toggle has aria-expanded=\"false\" and only the heading shows"
+          },
+          {
+            "name": "group filtered out",
+            "how": "every row of a group carries hidden; the group's heading hides too"
           }
         ],
         "variants": [
@@ -20129,6 +23406,11 @@
             "attribute": "data-href",
             "value": "",
             "useWhen": "On a tr: the whole row opens a page; keep a real link in the row for keyboard and middle-click."
+          },
+          {
+            "attribute": "data-collapsible",
+            "value": "",
+            "useWhen": "Groups open and close: data.js turns each group heading into a toggle button."
           }
         ],
         "parts": [
@@ -20187,6 +23469,26 @@
           {
             "class": "fd-table-foot",
             "role": "The foot under the table: count or summary on the left, pagination and actions on the right."
+          },
+          {
+            "class": "fd-table-group",
+            "role": "A tbody holding one group: its heading row, then its rows."
+          },
+          {
+            "class": "fd-table-group-head",
+            "role": "The group's heading row, a th scope=\"rowgroup\" across the columns; no hover, never a link."
+          },
+          {
+            "class": "fd-table-group-title",
+            "role": "The group's name; it labels the tbody."
+          },
+          {
+            "class": "fd-table-group-count",
+            "role": "The number of rows in the group; data-auto keeps it to the rows shown."
+          },
+          {
+            "class": "fd-table-group-toggle",
+            "role": "The button in a heading that opens and closes the group (aria-expanded)."
           }
         ],
         "related": [
@@ -20209,6 +23511,10 @@
           {
             "keys": "Enter",
             "does": "Opens a row that carries data-href, or sorts the focused header."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On a group heading's toggle: opens or closes the group."
           }
         ],
         "example": "docs/data.html#activity",
@@ -20972,12 +24278,16 @@
           "y"
         ],
         "data-fd-ascii": [
+          "auto",
+          "bars",
+          "contour",
           "flame",
           "grid",
           "halftone",
           "orbit",
           "rain",
           "spark",
+          "stipple",
           "terrain",
           "waves"
         ],
@@ -20995,9 +24305,30 @@
           "left",
           "right"
         ],
+        "data-signature-mark": [
+          "chars",
+          "dashes",
+          "dots",
+          "plus",
+          "squares"
+        ],
+        "data-signature-marks": [
+          "corners",
+          "dots"
+        ],
+        "data-signature-ramp": [
+          "default",
+          "dense",
+          "glyph",
+          "rain",
+          "soft"
+        ],
         "data-style": [
           "chars",
-          "dots"
+          "dashes",
+          "dots",
+          "plus",
+          "squares"
         ],
         "data-tone": [
           "accent",
@@ -21734,6 +25065,9 @@
         "fd-toaster"
       ],
       "attributes": {
+        "data-held": [
+          ""
+        ],
         "data-static-demo": [
           ""
         ],
@@ -21770,16 +25104,22 @@
         ]
       },
       "element": null,
-      "events": [],
+      "events": [
+        "fd:commit",
+        "fd:hold",
+        "fd:undo"
+      ],
       "docs": "docs/overlays.html#toasts",
       "card": {
         "id": "toast",
         "job": "Confirm something that already happened, then get out of the way.",
-        "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise. It never asks a question. Toasts last 5 seconds, 8 for errors; loading lasts until settled. The stack is a polite live region.",
+        "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise; toast({ undo }) adds Undo; toast.hold counts down before anything is sent. It never asks a question. Toasts last 5 seconds, 8 for errors and Undo; loading lasts until settled. The stack is a polite live region.",
         "useWhen": [
           "An action finished and needs a quiet receipt: key copied, saved, deleted.",
           "Something finished elsewhere: a crawl completed, a webhook failed.",
-          "A long task needs a loading toast that turns into the result."
+          "A long task needs a loading toast that turns into the result.",
+          "It is done and the server can reverse it for a few seconds: toast({ undo }) gives Done · Undo.",
+          "The page moves on after a commit (a queue) and nothing may be sent for a few seconds: toast.hold."
         ],
         "avoidWhen": [
           {
@@ -21797,6 +25137,10 @@
           {
             "when": "A list of past events to read later.",
             "instead": "notification"
+          },
+          {
+            "when": "The person stays on the case while a commit waits.",
+            "instead": "hold"
           }
         ],
         "aka": [
@@ -21832,6 +25176,10 @@
           {
             "name": "loading",
             "how": "tone loading shows a spinner until toast.update or toast.promise settles"
+          },
+          {
+            "name": "held",
+            "how": "data-held, set by toast.hold: a countdown ring and Undo, no close button"
           }
         ],
         "variants": [
@@ -21869,6 +25217,11 @@
             "attribute": "data-tone",
             "value": "accent",
             "useWhen": "An accent receipt that is not a state."
+          },
+          {
+            "attribute": "data-held",
+            "value": "",
+            "useWhen": "Set by toast.hold: nothing has happened yet; it goes when the ring runs out."
           }
         ],
         "parts": [
@@ -21913,12 +25266,22 @@
           "callout",
           "banner",
           "dialog",
-          "notification"
+          "notification",
+          "hold",
+          "commit"
         ],
         "keyboard": [
           {
             "keys": "Tab",
             "does": "Reaches the action and close buttons of a toast."
+          },
+          {
+            "keys": "Ctrl+Z, Cmd+Z",
+            "does": "Outside a text field: presses Undo on the newest toast that has one."
+          },
+          {
+            "keys": "Escape",
+            "does": "Inside a held toast: presses its Undo."
           }
         ],
         "example": "docs/overlays.html#toasts",
@@ -22570,6 +25933,8 @@
       "classes": [
         "fd-tweaks",
         "fd-tweaks-body",
+        "fd-tweaks-chip",
+        "fd-tweaks-chips",
         "fd-tweaks-corner",
         "fd-tweaks-eyebrow",
         "fd-tweaks-face",
@@ -22581,6 +25946,12 @@
         "fd-tweaks-head",
         "fd-tweaks-label",
         "fd-tweaks-launcher",
+        "fd-tweaks-look",
+        "fd-tweaks-look-mark",
+        "fd-tweaks-look-name",
+        "fd-tweaks-look-sample",
+        "fd-tweaks-look-tile",
+        "fd-tweaks-looks",
         "fd-tweaks-palettes",
         "fd-tweaks-range",
         "fd-tweaks-readout",
@@ -23331,6 +26702,239 @@
       }
     }
   ],
+  "modules": [
+    {
+      "id": "email",
+      "name": "Email",
+      "module": "fire/email/email.js",
+      "exports": [
+        "emailColors",
+        "isRtl",
+        "renderEmail"
+      ],
+      "docs": "docs/email.html#examples",
+      "card": {
+        "id": "email",
+        "job": "Send a sign-in link, invitation, receipt or alert as an email that matches the product.",
+        "purpose": "A function, not a stylesheet: renderEmail({ theme, brand, preheader, blocks, locale }) returns an HTML part and a plain-text part. Colours come from the theme record as opaque hex, layout is presentation tables 560px wide with inline styles, dark mode is one prefers-color-scheme block, and the button works in Outlook. Nothing loads except the logo.",
+        "useWhen": [
+          "The product sends a transactional message: a sign-in link, a one-time code, an invitation, a receipt or an alert.",
+          "The email must carry the same palette as the app without a web font or a stylesheet."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The message is a marketing campaign with images and layouts a designer owns.",
+            "instead": "Use the email service's own template editor."
+          },
+          {
+            "when": "The news belongs inside the app, where the person is already looking.",
+            "instead": "toast"
+          },
+          {
+            "when": "The page is a screen in the browser, not a message.",
+            "instead": "screen"
+          }
+        ],
+        "aka": [
+          "transactional email",
+          "email template",
+          "html email",
+          "notification email"
+        ],
+        "surfaces": [
+          "email"
+        ],
+        "data": [
+          "text",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "no logo",
+            "how": "omit brand.logoUrl; a square in the accent colour carries the first letter of brand.name"
+          },
+          {
+            "name": "right to left",
+            "how": "locale \"ar\", \"he\", \"fa\" or \"ur\" sets dir=\"rtl\""
+          },
+          {
+            "name": "no fallback link",
+            "how": "fallback: false on a button block"
+          }
+        ],
+        "variants": [],
+        "parts": [],
+        "related": [],
+        "keyboard": [],
+        "example": "docs/email.html#examples",
+        "provenance": [
+          "fire/email/email.js",
+          "docs/email.html",
+          "scripts/test/email.test.mjs"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "initial-helpers",
+      "name": "Initial mark helpers",
+      "module": "fire/js/initial.js",
+      "exports": [
+        "INITIAL_TONES",
+        "initialChar",
+        "initialMark",
+        "initialRows",
+        "initialTone"
+      ],
+      "docs": "docs/shell.html#initial-mark",
+      "card": {
+        "id": "initial-helpers",
+        "job": "Draw an organisation's first-letter mark on a server or in an email, with no DOM.",
+        "purpose": "Pure functions from fire/js/initial.js: initialMark(name) returns the dot-matrix SVG as a string in currentColor, initialRows(name) returns seven strings of five 0 and 1 cells for a mail client that draws no SVG, and initialTone(name) returns the tone the name maps to. The same name always gives the same glyph and tone. In a page, data-fd-initial draws the same mark.",
+        "useWhen": [
+          "A server-rendered page, a PDF or an email needs the mark an organisation without a logo shows in the app.",
+          "The tone of a name is needed in code, for example to colour a row in a list you build yourself."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The page is in a browser and the markup is yours to write.",
+            "instead": "initial"
+          },
+          {
+            "when": "A person's initials in a box under 28px.",
+            "instead": "avatar"
+          }
+        ],
+        "aka": [
+          "generated logo function",
+          "initial mark function",
+          "placeholder logo",
+          "dot matrix letter"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "labelled",
+            "how": "initialMark(name, { label: true }) adds role=\"img\" and an aria-label"
+          },
+          {
+            "name": "other first character",
+            "how": "a character that is not A-Z or 0-9 draws a diamond"
+          }
+        ],
+        "variants": [],
+        "parts": [],
+        "related": [
+          "initial",
+          "avatar"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#initial-mark",
+        "provenance": [
+          "fire/js/initial.js",
+          "docs/shell.html"
+        ],
+        "since": "0.6.0"
+      }
+    },
+    {
+      "id": "theme-record",
+      "name": "Theme record",
+      "module": "fire/js/theme.js",
+      "exports": [
+        "CONTRACT",
+        "DEFAULT_RECORD",
+        "DIAL_CHOICES",
+        "DIAL_DEFAULTS",
+        "DIAL_RANGES",
+        "DIAL_TOKENS",
+        "FIRE_VERSION",
+        "FONT_TOKENS",
+        "INPUT_TOKENS",
+        "LABELS",
+        "MOTION",
+        "NEUTRALS",
+        "SIGNATURE_ATTRIBUTES",
+        "SIGNATURE_CHOICES",
+        "SIGNATURE_DEFAULT",
+        "SIGNATURE_RANGES",
+        "STRUCTURE_ATTRIBUTES",
+        "STRUCTURE_CHOICES",
+        "expandTheme",
+        "fromThemeRecord",
+        "paletteFrom",
+        "themeToCss",
+        "toThemeRecord",
+        "validateTheme"
+      ],
+      "docs": "docs/tweaks.html#records",
+      "card": {
+        "id": "theme-record",
+        "job": "Turn a product's whole look, one JSON record, into tokens, a stylesheet or a palette.",
+        "purpose": "A pure ES module, fire/js/theme.js, that runs in Node and in the browser. A theme record names a palette, a tone, a type set and the dials; validateTheme checks it, expandTheme returns its tokens and attributes, themeToCss writes a stylesheet, paletteFrom builds a palette from an accent or brand colours, and toThemeRecord and fromThemeRecord convert to and from the Tweaks panel's state.",
+        "useWhen": [
+          "A product stores its look as data and must apply it on the server, in a build step or in an email.",
+          "An agent or a design tool writes a theme and needs it checked before it is applied.",
+          "A strict content security policy forbids inline styles: write the record as a stylesheet with themeToCss."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A person is trying looks out in the browser.",
+            "instead": "tweaks"
+          },
+          {
+            "when": "A single token needs a different value on one page.",
+            "instead": "Set the custom property in your own stylesheet."
+          }
+        ],
+        "aka": [
+          "theme json",
+          "theme expander",
+          "design tokens json",
+          "brand theme",
+          "theme file"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "email"
+        ],
+        "data": [
+          "record"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "validateTheme(record) returns the problems; an unknown field is an error"
+          },
+          {
+            "name": "default",
+            "how": "a missing field is Fire's default; {} is the default look"
+          }
+        ],
+        "variants": [],
+        "parts": [],
+        "related": [
+          "tweaks"
+        ],
+        "keyboard": [],
+        "example": "docs/tweaks.html#records",
+        "provenance": [
+          "fire/js/theme.js",
+          "contract/theme.schema.json",
+          "docs/tweaks.html"
+        ],
+        "since": "0.6.0"
+      }
+    }
+  ],
   "classes": {
     "fd-accent-text": "text",
     "fd-accordion": "accordion",
@@ -23375,9 +26979,11 @@
     "fd-bars-fill": "bars",
     "fd-bars-label": "bars",
     "fd-bars-loader": "loader",
+    "fd-bars-mark": "bars",
     "fd-bars-row": "bars",
     "fd-bars-track": "bars",
     "fd-bars-value": "bars",
+    "fd-bars-was": "bars",
     "fd-body": "type",
     "fd-body-lg": "type",
     "fd-braille": "loader",
@@ -23664,6 +27270,20 @@
     "fd-codefield-head": "codefield",
     "fd-codefield-input": "codefield",
     "fd-codefield-lang": "codefield",
+    "fd-codes": "codes",
+    "fd-codes-actions": "codes",
+    "fd-codes-head": "codes",
+    "fd-codes-item": "codes",
+    "fd-codes-list": "codes",
+    "fd-codes-note": "codes",
+    "fd-codes-title": "codes",
+    "fd-color": "color",
+    "fd-color-check": "color",
+    "fd-color-check-name": "color",
+    "fd-color-check-ratio": "color",
+    "fd-color-check-verdict": "color",
+    "fd-color-checks": "color",
+    "fd-color-picker": "color",
     "fd-column": "column",
     "fd-combobox": "combobox",
     "fd-command": "command",
@@ -23678,7 +27298,13 @@
     "fd-command-item-hint": "command",
     "fd-command-item-label": "command",
     "fd-command-list": "command",
+    "fd-command-note": "command",
     "fd-command-search": "command",
+    "fd-commit": "commit",
+    "fd-commit-actions": "commit",
+    "fd-commit-budget": "commit",
+    "fd-commit-effect": "commit",
+    "fd-commit-lock": "commit",
     "fd-composer": "composer",
     "fd-composer-attachment": "composer",
     "fd-composer-attachment-meta": "composer",
@@ -23700,6 +27326,8 @@
     "fd-composer-tool": "composer",
     "fd-composer-tools": "composer",
     "fd-confirm": "confirm",
+    "fd-confirm-inline": "confirm-inline",
+    "fd-confirm-inline-rule": "confirm-inline",
     "fd-confirm-phrase": "confirm",
     "fd-context-meter": "composer",
     "fd-context-meter-ring": "composer",
@@ -23724,12 +27352,36 @@
     "fd-data-card-title": "data-card",
     "fd-data-card-toggle": "data-card",
     "fd-data-card-unit": "data-card",
+    "fd-datefield": "datefield",
+    "fd-datefield-foot": "datefield",
+    "fd-datefield-panel": "datefield",
     "fd-daterange": "date-picker",
+    "fd-daterange-compare": "date-picker",
+    "fd-daterange-compare-dates": "date-picker",
+    "fd-daterange-compare-label": "date-picker",
     "fd-daterange-foot": "date-picker",
     "fd-daterange-main": "date-picker",
     "fd-daterange-preset": "date-picker",
     "fd-daterange-presets": "date-picker",
     "fd-daterange-summary": "date-picker",
+    "fd-decision": "decision",
+    "fd-decision-actions": "decision",
+    "fd-decision-detail": "decision",
+    "fd-decision-facts": "decision",
+    "fd-decision-head": "decision",
+    "fd-decision-heading": "decision",
+    "fd-decision-label": "decision",
+    "fd-decision-lead": "decision",
+    "fd-decision-meta": "decision",
+    "fd-decision-outcome": "decision",
+    "fd-decision-outcome-title": "decision",
+    "fd-decision-part": "decision",
+    "fd-decision-parts": "decision",
+    "fd-decision-quote": "decision",
+    "fd-decision-title": "decision",
+    "fd-delta": "delta",
+    "fd-delta-from": "delta",
+    "fd-delta-to": "delta",
     "fd-dialog": "dialog",
     "fd-dialog-body": "dialog",
     "fd-dialog-close": "dialog",
@@ -23941,6 +27593,12 @@
     "fd-donut-track": "donut",
     "fd-dotgrid": "texture",
     "fd-dots": "loader",
+    "fd-draft": "draft",
+    "fd-draft-actions": "draft",
+    "fd-draft-by": "draft",
+    "fd-draft-text": "draft",
+    "fd-draft-used": "draft",
+    "fd-draft-when": "draft",
     "fd-dropzone": "file-upload",
     "fd-dropzone-hint": "file-upload",
     "fd-dropzone-icon": "file-upload",
@@ -23951,6 +27609,7 @@
     "fd-empty-art": "empty",
     "fd-empty-hint": "empty",
     "fd-empty-icon": "empty",
+    "fd-empty-meta": "empty",
     "fd-empty-text": "empty",
     "fd-empty-title": "empty",
     "fd-endpoint": "endpoint",
@@ -24035,6 +27694,13 @@
     "fd-heatgrid-scroll": "heatgrid",
     "fd-heatgrid-summary": "heatgrid",
     "fd-heatgrid-swatch": "heatgrid",
+    "fd-hold": "hold",
+    "fd-hold-count": "hold",
+    "fd-hold-note": "hold",
+    "fd-hold-ring": "hold",
+    "fd-hold-text": "hold",
+    "fd-hold-title": "hold",
+    "fd-hold-undo": "hold",
     "fd-hovercard": "hovercard",
     "fd-hovercard-head": "hovercard",
     "fd-hovercard-meta": "hovercard",
@@ -24042,6 +27708,12 @@
     "fd-hovercard-text": "hovercard",
     "fd-hovercard-title": "hovercard",
     "fd-icon": "icon",
+    "fd-impact": "impact",
+    "fd-impact-count": "impact",
+    "fd-impact-list": "impact",
+    "fd-impact-more": "impact",
+    "fd-impact-text": "impact",
+    "fd-initial": "initial",
     "fd-input": "input",
     "fd-input-affix": "input-group",
     "fd-input-group": "input-group",
@@ -24065,6 +27737,7 @@
     "fd-json-tools": "json",
     "fd-json-tree": "json",
     "fd-kbd": "inline-code",
+    "fd-keys-hint": "shortcuts",
     "fd-kv": "kv",
     "fd-kv-copy": "kv",
     "fd-kv-item": "kv",
@@ -24080,6 +27753,10 @@
     "fd-list-body": "list",
     "fd-list-chevron": "list",
     "fd-list-desc": "list",
+    "fd-list-detail": "list-detail",
+    "fd-list-detail-back": "list-detail",
+    "fd-list-detail-list": "list-detail",
+    "fd-list-detail-main": "list-detail",
     "fd-list-lead": "list",
     "fd-list-link": "list",
     "fd-list-meta": "list",
@@ -24105,6 +27782,7 @@
     "fd-log-level": "log",
     "fd-log-mark": "log",
     "fd-log-msg": "log",
+    "fd-log-num": "log",
     "fd-log-prompt": "log",
     "fd-log-row": "log",
     "fd-log-search": "log",
@@ -24179,6 +27857,7 @@
     "fd-nav-group": "sidebar",
     "fd-nav-hint": "sidebar",
     "fd-nav-item": "sidebar",
+    "fd-nav-key": "sidebar",
     "fd-nav-label": "sidebar",
     "fd-nav-sub": "sidebar",
     "fd-nav-text": "sidebar",
@@ -24232,6 +27911,8 @@
     "fd-panel-head": "panel",
     "fd-panel-title": "panel",
     "fd-pending": "loader",
+    "fd-period": "period",
+    "fd-period-compare": "period",
     "fd-pick": "date-picker",
     "fd-pick-check": "date-picker",
     "fd-pick-foot": "date-picker",
@@ -24297,6 +27978,10 @@
     "fd-popover-search": "popover",
     "fd-popover-title": "popover",
     "fd-popover-toolbar": "popover",
+    "fd-preview": "preview",
+    "fd-preview-edit": "preview",
+    "fd-preview-result": "preview",
+    "fd-preview-stale": "preview",
     "fd-progress": "progress",
     "fd-progress-bar": "progress",
     "fd-progress-center": "progress",
@@ -24309,6 +27994,37 @@
     "fd-progress-value": "progress",
     "fd-prose": "prose",
     "fd-qr": "qr",
+    "fd-quadrant-axis": "chart",
+    "fd-quadrant-axis-title": "chart",
+    "fd-quadrant-cell": "chart",
+    "fd-quadrant-corner": "chart",
+    "fd-quadrant-dot": "chart",
+    "fd-quadrant-frame": "chart",
+    "fd-quadrant-group": "chart",
+    "fd-quadrant-group-count": "chart",
+    "fd-quadrant-group-label": "chart",
+    "fd-quadrant-key": "chart",
+    "fd-quadrant-list": "chart",
+    "fd-quadrant-name": "chart",
+    "fd-quadrant-plot": "chart",
+    "fd-quadrant-point": "chart",
+    "fd-quadrant-row": "chart",
+    "fd-quadrant-row-name": "chart",
+    "fd-quadrant-row-values": "chart",
+    "fd-quadrant-rows": "chart",
+    "fd-quadrant-tick": "chart",
+    "fd-queue": "queue",
+    "fd-queue-age": "queue",
+    "fd-queue-back": "queue",
+    "fd-queue-case": "queue",
+    "fd-queue-count": "queue",
+    "fd-queue-group": "queue",
+    "fd-queue-group-label": "queue",
+    "fd-queue-item": "queue",
+    "fd-queue-list": "queue",
+    "fd-queue-meta": "queue",
+    "fd-queue-text": "queue",
+    "fd-queue-title": "queue",
     "fd-radio": "radio",
     "fd-radio-box": "radio",
     "fd-radio-desc": "radio",
@@ -24316,6 +28032,10 @@
     "fd-radio-text": "radio",
     "fd-rail-tip": "sidebar",
     "fd-rail-tip-hint": "sidebar",
+    "fd-reason": "reason",
+    "fd-reason-text": "reason",
+    "fd-reason-who": "reason",
+    "fd-reason-why": "reason",
     "fd-reasoning": "reasoning",
     "fd-reasoning-body": "reasoning",
     "fd-reasoning-label": "reasoning",
@@ -24339,6 +28059,16 @@
     "fd-run-steps-item": "run-steps",
     "fd-run-steps-label": "run-steps",
     "fd-run-steps-time": "run-steps",
+    "fd-running": "running",
+    "fd-running-bar": "running",
+    "fd-running-count": "running",
+    "fd-running-dot": "running",
+    "fd-running-item": "running",
+    "fd-running-label": "running",
+    "fd-running-list": "running",
+    "fd-running-meta": "running",
+    "fd-running-time": "running",
+    "fd-running-title": "running",
     "fd-schema": "schema",
     "fd-schema-children": "schema",
     "fd-schema-default": "schema",
@@ -24375,6 +28105,8 @@
     "fd-segmented-label": "segmented",
     "fd-segmented-thumb": "segmented",
     "fd-select": "select",
+    "fd-service-status": "service-status",
+    "fd-service-status-label": "service-status",
     "fd-session-list": "session-list",
     "fd-session-list-actions": "session-list",
     "fd-session-list-body": "session-list",
@@ -24405,6 +28137,12 @@
     "fd-sheet-section": "sheet",
     "fd-sheet-title": "sheet",
     "fd-shimmer": "skeleton",
+    "fd-shortcuts": "shortcuts",
+    "fd-shortcuts-group": "shortcuts",
+    "fd-shortcuts-keys": "shortcuts",
+    "fd-shortcuts-label": "shortcuts",
+    "fd-shortcuts-name": "shortcuts",
+    "fd-shortcuts-row": "shortcuts",
     "fd-sidebar": "sidebar",
     "fd-sidebar-body": "sidebar",
     "fd-sidebar-foot": "sidebar",
@@ -24502,12 +28240,16 @@
     "fd-stat-sub": "stats",
     "fd-stat-tile": "stats",
     "fd-stat-unit": "stats",
+    "fd-states": "states",
     "fd-stats": "stats",
     "fd-status": "status",
+    "fd-status-note": "status",
     "fd-step": "steps",
+    "fd-step-action": "steps",
     "fd-step-body": "steps",
     "fd-step-desc": "steps",
     "fd-step-marker": "steps",
+    "fd-step-owner": "steps",
     "fd-step-title": "steps",
     "fd-steps": "steps",
     "fd-stop-btn": "composer",
@@ -24519,6 +28261,7 @@
     "fd-suggestions": "suggestions",
     "fd-suggestions-item": "suggestions",
     "fd-suggestions-text": "suggestions",
+    "fd-swatch": "swatch",
     "fd-switch": "switch",
     "fd-switch-desc": "switch",
     "fd-switch-label": "switch",
@@ -24551,6 +28294,11 @@
     "fd-table-foot": "table",
     "fd-table-foot-actions": "table",
     "fd-table-foot-info": "table",
+    "fd-table-group": "table",
+    "fd-table-group-count": "table",
+    "fd-table-group-head": "table",
+    "fd-table-group-title": "table",
+    "fd-table-group-toggle": "table",
     "fd-table-lead": "table",
     "fd-table-link": "table",
     "fd-table-rows": "table",
@@ -24632,6 +28380,8 @@
     "fd-truncate": "text",
     "fd-tweaks": "tweaks",
     "fd-tweaks-body": "tweaks",
+    "fd-tweaks-chip": "tweaks",
+    "fd-tweaks-chips": "tweaks",
     "fd-tweaks-corner": "tweaks",
     "fd-tweaks-eyebrow": "tweaks",
     "fd-tweaks-face": "tweaks",
@@ -24643,6 +28393,12 @@
     "fd-tweaks-head": "tweaks",
     "fd-tweaks-label": "tweaks",
     "fd-tweaks-launcher": "tweaks",
+    "fd-tweaks-look": "tweaks",
+    "fd-tweaks-look-mark": "tweaks",
+    "fd-tweaks-look-name": "tweaks",
+    "fd-tweaks-look-sample": "tweaks",
+    "fd-tweaks-look-tile": "tweaks",
+    "fd-tweaks-looks": "tweaks",
     "fd-tweaks-palettes": "tweaks",
     "fd-tweaks-range": "tweaks",
     "fd-tweaks-readout": "tweaks",
@@ -24681,7 +28437,7 @@
   "elements": [
     {
       "tagName": "fd-chart",
-      "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
+      "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, quadrants, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart` for the cartesian types and the quadrant, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
       "attributes": [
         {
           "name": "area",
@@ -24693,7 +28449,7 @@
           "name": "data",
           "type": "FdChartData | undefined",
           "default": "",
-          "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
+          "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
         },
         {
           "name": "dot",
@@ -24723,7 +28479,13 @@
           "name": "height",
           "type": "number | undefined",
           "default": "",
-          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24)."
+          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24)."
+        },
+        {
+          "name": "hide-labels",
+          "type": "boolean",
+          "default": "false",
+          "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`)."
         },
         {
           "name": "invert",
@@ -24759,7 +28521,7 @@
           "name": "state",
           "type": "'loading' | 'empty' | undefined",
           "default": "",
-          "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
+          "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
         },
         {
           "name": "thickness",
@@ -24777,7 +28539,7 @@
           "name": "type",
           "type": "FdChartType",
           "default": "'line'",
-          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
+          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
         },
         {
           "name": "value",
@@ -24821,7 +28583,7 @@
           "name": "data",
           "type": "FdChartData | undefined",
           "attribute": "data",
-          "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
+          "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON."
         },
         {
           "name": "dot",
@@ -24851,7 +28613,13 @@
           "name": "height",
           "type": "number | undefined",
           "attribute": "height",
-          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24)."
+          "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24)."
+        },
+        {
+          "name": "hideLabels",
+          "type": "boolean",
+          "attribute": "hide-labels",
+          "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`)."
         },
         {
           "name": "invert",
@@ -24887,7 +28655,7 @@
           "name": "state",
           "type": "'loading' | 'empty' | undefined",
           "attribute": "state",
-          "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
+          "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state)."
         },
         {
           "name": "thickness",
@@ -24905,7 +28673,7 @@
           "name": "type",
           "type": "FdChartType",
           "attribute": "type",
-          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
+          "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three)."
         },
         {
           "name": "value",
@@ -25096,7 +28864,7 @@
     },
     {
       "tagName": "fd-texture",
-      "description": "A Fire generative character field: terrain, waves, orbit, rain, grid, flame, halftone or spark. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
+      "description": "A Fire generative field: terrain, waves, orbit, rain, grid, flame, halftone, spark, contour, stipple or bars, drawn in characters, dots, squares, plus signs or dashes. The element is\nthe field's root: it carries the markup form's `class=\"fd-ascii\"`, `data-fd-ascii=\"…\"`,\nthe other `data-*` attributes and `aria-hidden=\"true\"`, and Fire's texture module draws its canvas inside it and owns\nits size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced\nmotion). Being the field keeps Fire's layering rule, which puts a field between its container's background and its\ncontent, working as it does for the markup form. Changing a property re-reads the settings and redraws.\n\nThe field fills its nearest positioned ancestor, or flows at the field height with `inline`. It is decorative.",
       "attributes": [
         {
           "name": "animated",
@@ -25126,7 +28894,7 @@
           "name": "intensity",
           "type": "number | undefined",
           "default": "",
-          "description": "Luminance multiplier, default 1 (`data-intensity`)."
+          "description": "Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`."
         },
         {
           "name": "interactive",
@@ -25136,9 +28904,9 @@
         },
         {
           "name": "marks",
-          "type": "'chars' | 'dots' | undefined",
+          "type": "'chars' | 'dots' | 'squares' | 'plus' | 'dashes' | undefined",
           "default": "",
-          "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`)."
+          "description": "The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`."
         },
         {
           "name": "origin",
@@ -25148,9 +28916,9 @@
         },
         {
           "name": "pattern",
-          "type": "string",
-          "default": "'terrain'",
-          "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`)."
+          "type": "string | undefined",
+          "default": "",
+          "description": "The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`."
         },
         {
           "name": "ramp",
@@ -25175,6 +28943,12 @@
           "type": "'left' | 'right' | undefined",
           "default": "",
           "description": "Terrain: the side that rises, `right` (default) or `left` (`data-side`)."
+        },
+        {
+          "name": "signature",
+          "type": "'own' | undefined",
+          "default": "",
+          "description": "`own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`)."
         },
         {
           "name": "speed",
@@ -25224,7 +28998,7 @@
           "name": "intensity",
           "type": "number | undefined",
           "attribute": "intensity",
-          "description": "Luminance multiplier, default 1 (`data-intensity`)."
+          "description": "Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`."
         },
         {
           "name": "interactive",
@@ -25234,9 +29008,9 @@
         },
         {
           "name": "marks",
-          "type": "'chars' | 'dots' | undefined",
+          "type": "'chars' | 'dots' | 'squares' | 'plus' | 'dashes' | undefined",
           "attribute": "marks",
-          "description": "Draw `chars` (default) or `dots`, halftone discs (`data-style`)."
+          "description": "The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`."
         },
         {
           "name": "origin",
@@ -25246,9 +29020,9 @@
         },
         {
           "name": "pattern",
-          "type": "string",
+          "type": "string | undefined",
           "attribute": "pattern",
-          "description": "The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`)."
+          "description": "The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`."
         },
         {
           "name": "ramp",
@@ -25273,6 +29047,12 @@
           "type": "'left' | 'right' | undefined",
           "attribute": "side",
           "description": "Terrain: the side that rises, `right` (default) or `left` (`data-side`)."
+        },
+        {
+          "name": "signature",
+          "type": "'own' | undefined",
+          "attribute": "signature",
+          "description": "`own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`)."
         },
         {
           "name": "speed",
@@ -25301,6 +29081,14 @@
       "detail": "",
       "shapes": {}
     },
+    "fd:accept": {
+      "detail": "{ value: text }",
+      "shapes": {
+        "content": [
+          "{ value: text }"
+        ]
+      }
+    },
     "fd:action": {
       "detail": "{ action, message }",
       "shapes": {
@@ -25323,7 +29111,9 @@
         ],
         "content": [
           "{ open, value }",
-          "{ value: \"start\" | \"middle\" | \"end\" }"
+          "{ value: \"start\" | \"middle\" | \"end\" }",
+          "{ value: \"stale\" }",
+          "{ value, previous }"
         ],
         "core": [
           "{ value }"
@@ -25332,7 +29122,9 @@
           "{ source: 'selection', value, selected, rows }",
           "{ source: 'sort', value: { key, index, direction }, sort }",
           "{ source: 'filter', value, filter }",
-          "{ source: 'filters', value: [{ key, value }] }"
+          "{ source: 'filters', value: [{ key, value }] }",
+          "{ value, item }",
+          "{ source: 'view', value: 'list' | 'detail' }"
         ],
         "docsite": [
           "{ value }",
@@ -25340,7 +29132,9 @@
           "{ value: status }"
         ],
         "forms": [
-          "{ value }"
+          "{ value }",
+          "{ value, valid }",
+          "{ value, matched }"
         ],
         "nav": [
           "{ value, item }"
@@ -25350,7 +29144,9 @@
           "{ trigger }"
         ],
         "shell": [
-          "{ value: \"expanded\"|\"collapsed\" }"
+          "{ value: \"expanded\"|\"collapsed\" }",
+          "{ value: count }",
+          "{ value: status }"
         ],
         "texture": [
           "{ value: 'loading' | 'ready' }"
@@ -25364,10 +29160,21 @@
       "detail": "{ value: data-value or its text }",
       "shapes": {
         "content": [
-          "{ value: data-value or its text }"
+          "{ value: data-value or its text }",
+          "{ value: text }"
         ],
         "data": [
-          "{ target }"
+          "{ target }",
+          "{ group }"
+        ]
+      }
+    },
+    "fd:commit": {
+      "detail": "{ value, reason, drafted, verb }",
+      "shapes": {
+        "content": [
+          "{ value, reason, drafted, verb }",
+          "{ value, cause: \"time\" | \"pagehide\" }"
         ]
       }
     },
@@ -25394,6 +29201,14 @@
         ]
       }
     },
+    "fd:download": {
+      "detail": "{ filename, value }",
+      "shapes": {
+        "forms": [
+          "{ filename, value }"
+        ]
+      }
+    },
     "fd:files": {
       "detail": "{ files }",
       "shapes": {
@@ -25402,11 +29217,20 @@
         ]
       }
     },
+    "fd:hold": {
+      "detail": "{ value, seconds }",
+      "shapes": {
+        "content": [
+          "{ value, seconds }"
+        ]
+      }
+    },
     "fd:hover": {
       "detail": "{ index, label, values }",
       "shapes": {
         "charts": [
-          "{ index, label, values }"
+          "{ index, label, values }",
+          "{ index, name, x, y }"
         ]
       }
     },
@@ -25415,6 +29239,14 @@
       "shapes": {
         "forms": [
           "{ fields }"
+        ]
+      }
+    },
+    "fd:keys": {
+      "detail": "{ keys }",
+      "shapes": {
+        "shell": [
+          "{ keys }"
         ]
       }
     },
@@ -25434,7 +29266,14 @@
       "detail": "{ value, item }",
       "shapes": {
         "charts": [
-          "{ index, label, values }"
+          "{ index, label, values }",
+          "{ index, name, x, y, href }"
+        ],
+        "code": [
+          "{ value: line number, row }"
+        ],
+        "content": [
+          "{ value, item }"
         ],
         "core": [
           "{ value, item }"
@@ -25472,6 +29311,17 @@
     "fd:theme": {
       "detail": "",
       "shapes": {}
+    },
+    "fd:undo": {
+      "detail": "{ value }",
+      "shapes": {
+        "content": [
+          "{ value }"
+        ],
+        "overlays": [
+          "{ value: id }"
+        ]
+      }
     },
     "fd:valid": {
       "detail": "",
@@ -25867,6 +29717,11 @@
     "--fd-chart-axis",
     "--fd-chart-grid",
     "--fd-content-max",
+    "--fd-control-bg",
+    "--fd-control-bg-active",
+    "--fd-control-bg-hover",
+    "--fd-control-edge",
+    "--fd-control-edge-hover",
     "--fd-control-lg",
     "--fd-control-line",
     "--fd-control-line-hover",
@@ -25891,11 +29746,20 @@
     "--fd-ease-in-out",
     "--fd-ease-out",
     "--fd-ease-spring",
+    "--fd-eyebrow-case",
+    "--fd-eyebrow-font",
+    "--fd-eyebrow-ls",
+    "--fd-eyebrow-ls-tight",
+    "--fd-eyebrow-weight",
+    "--fd-field",
+    "--fd-field-hover",
     "--fd-fill",
     "--fd-fill-active",
     "--fd-fill-disabled",
     "--fd-fill-hover",
     "--fd-fill-subtle",
+    "--fd-flat-object",
+    "--fd-flat-page",
     "--fd-focus",
     "--fd-font-display",
     "--fd-font-mono",
@@ -25972,12 +29836,15 @@
     "--fd-row",
     "--fd-row-px",
     "--fd-scrim",
+    "--fd-section-label-font",
+    "--fd-section-label-ls",
     "--fd-shadow-accent",
     "--fd-shadow-composer",
     "--fd-shadow-inset",
     "--fd-shadow-inset-control",
     "--fd-shadow-lg",
     "--fd-shadow-md",
+    "--fd-shadow-object",
     "--fd-shadow-sm",
     "--fd-shadow-thumb",
     "--fd-shadow-xl",
@@ -26024,6 +29891,9 @@
     "--fd-success-solid",
     "--fd-success-text",
     "--fd-surface",
+    "--fd-surface-edge",
+    "--fd-surface-flush",
+    "--fd-surface-head",
     "--fd-surface-inverse",
     "--fd-surface-raised",
     "--fd-syntax-comment",
@@ -26095,9 +29965,19 @@
       "job": "Chat with /agent while it searches, reads and extracts in the open."
     },
     {
+      "path": "templates/answer.html",
+      "title": "Answer without signing in",
+      "job": "Approve or decline from an email link: a brief, a reason, a held send, then Undo."
+    },
+    {
       "path": "templates/api-keys.html",
       "title": "API keys",
       "job": "Create, scope, rotate and revoke keys without leaving the table."
+    },
+    {
+      "path": "templates/audit.html",
+      "title": "Audit log",
+      "job": "Who changed what and when, filtered by person, kind and a compared period, a day per group."
     },
     {
       "path": "templates/auth-centered.html",
@@ -26118,6 +29998,16 @@
       "path": "templates/catalog.html",
       "title": "Catalog",
       "job": "Browse data providers by category and open one to see what it returns."
+    },
+    {
+      "path": "templates/decision-case.html",
+      "title": "Decision case",
+      "job": "One wide-reaching change: the evidence, who it touches, a held commit, then the record."
+    },
+    {
+      "path": "templates/decisions.html",
+      "title": "Decisions",
+      "job": "Requests and agent proposals by kind, each case beside the list, with ten seconds to undo."
     },
     {
       "path": "templates/docs-api.html",
@@ -26185,19 +30075,39 @@
       "job": "Request on the left, response on the right, one page for every endpoint."
     },
     {
+      "path": "templates/proof.html",
+      "title": "Proof",
+      "job": "A shared, read-only result with its measure, before-and-after frames, the run log and the raw response."
+    },
+    {
       "path": "templates/provider.html",
       "title": "Provider",
       "job": "One provider in depth: endpoints, parameters and a live request."
     },
     {
+      "path": "templates/record.html",
+      "title": "Team record",
+      "job": "One team on one page: status, lifecycle, usage, requests and plan, each loading on its own."
+    },
+    {
       "path": "templates/settings.html",
       "title": "Settings",
-      "job": "Account, team, billing and notifications behind one side nav."
+      "job": "Grouped side nav with counts, a form that tracks unsaved changes, locked controls that say why, and features as switches."
     },
     {
       "path": "templates/shell-static.html",
       "title": "Shell, server-rendered",
       "job": "The whole app shell as plain markup, with no shell.js: copy it when a server renders your pages."
+    },
+    {
+      "path": "templates/status-admin.html",
+      "title": "Status page",
+      "job": "Post incident updates after a preview, set component states and schedule maintenance, with Undo."
+    },
+    {
+      "path": "templates/status.html",
+      "title": "Public status",
+      "job": "The public status page: overall state, each component's 90-day strip, open incidents and history."
     },
     {
       "path": "templates/support.html",

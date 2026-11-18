@@ -11,7 +11,22 @@
      1 accent · 2 ink · 3 info · 4 violet · 5 success · 6 warning
    data-tone  neutral | muted | accent | success | warning | danger | info | violet   (overrides the slot)
 
+   Quadrant: data-fd-chart="quadrant" on .fd-chart. Points sit on two axes, split into four corners by a midpoint on
+   each. The renderer draws the parts below; below 520px of width the plot gives way to a list grouped by corner.
+     fd-quadrant-frame   grid of the two axes and the plot (role="group")
+     fd-quadrant-axis    data-axis="x|y"; holds fd-quadrant-tick (data-at="min|mid|max") and fd-quadrant-axis-title
+     fd-quadrant-plot    the field, with a dashed line at each midpoint
+     fd-quadrant-cell    data-corner="tl|tr|bl|br"; data-tone tints the corner; holds fd-quadrant-corner (its name)
+     fd-quadrant-point   a link or a button, data-corner, data-tone, data-side="start" (name on the left),
+                         data-edge="top", data-active (tooltip open); holds fd-quadrant-dot and fd-quadrant-name
+     fd-quadrant-list    the phone fallback: fd-quadrant-group (data-corner, data-tone) > fd-quadrant-group-label,
+                         fd-quadrant-group-count, fd-quadrant-rows > fd-quadrant-row (fd-quadrant-row-name, -values);
+                         fd-quadrant-key names the values in a row
+   data-labels="none" hides the names beside the points. data-height sets the plot height (default 360).
+
    Blocks: fd-chart · fd-legend · fd-sparkline · fd-bars · fd-donut · fd-heatgrid
+           fd-bars-row[data-fd-vars="--value: 0.46; --was: 0.43"] with fd-bars-mark in the track and
+           <span class="fd-bars-was">was 401</span> in fd-bars-value: the previous value beside the current one
            fd-chart-tooltip · fd-chart-card · fd-chart-stat
    ========================================================================== */
 
@@ -50,6 +65,9 @@
   --fd-bars-value-w: 4.5rem;
   --fd-bars-row-h: 24px;
   --fd-bars-track-h: 4px;
+  --fd-bars-value-w-was: 9.5rem;        /* value column when rows show the previous value */
+  --fd-bars-mark-w: 2px;                /* the previous value's tick on the track */
+  --fd-bars-mark-h: 12px;
   /* donut */
   --fd-donut-size: 144px;
   --fd-donut-stroke: 8px;
@@ -71,6 +89,18 @@
   --fd-heatgrid-strip-max: 40px;        /* widest a day grows on a short range */
   /* chart card */
   --fd-chart-card-text-basis: 220px;
+  /* quadrant */
+  --fd-quadrant-h: 360px;               /* plot height; data-height overrides it */
+  --fd-quadrant-yaxis-w: 72px;          /* y axis: title column and ticks */
+  --fd-quadrant-xaxis-tick-h: 18px;     /* x axis: row of ticks above the title */
+  --fd-quadrant-dot-min: 10px;          /* a point with the least size */
+  --fd-quadrant-dot-max: 30px;          /* a point with the most size */
+  --fd-quadrant-inset-x: 28px;          /* the field's margin on each side: a point at an edge stays clear of it */
+  --fd-quadrant-inset-y: 44px;          /* ...and clear of the corner names */
+  --fd-quadrant-hit: 28px;              /* least size of a point's target */
+  --fd-quadrant-stroke: 1.5px;
+  --fd-quadrant-row-h: 44px;            /* a row of the phone list */
+  --fd-quadrant-tint: 7%;               /* how much a toned corner takes of its colour */
 }
 
 /* ---------- Series colour plumbing ---------- */
@@ -140,8 +170,8 @@
 /* Threshold: a dashed line with a small mono label sitting on it. */
 .fd-chart-threshold { fill: none; stroke: var(--fd-a40); stroke-width: 1; stroke-dasharray: 4 4; shape-rendering: crispEdges; }
 .fd-chart-threshold-label {
-  fill: var(--fd-text-3); font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs);
-  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; font-variant-numeric: tabular-nums;
+  fill: var(--fd-text-3); font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs);
+  letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); font-variant-numeric: tabular-nums;
 }
 .fd-chart-threshold[data-tone="danger"] { stroke: var(--fd-danger-solid); }
 .fd-chart-threshold-label[data-tone="danger"] { fill: var(--fd-danger-text); }
@@ -259,6 +289,17 @@ button.fd-legend-item:hover { color: var(--fd-text); }
   animation: fd-grow-x var(--fd-dur-5) var(--fd-ease-emphasized) both; animation-delay: calc(var(--_ch-i, 0) * var(--fd-chart-stagger));
 }
 .fd-bars-value { text-align: end; font-family: var(--fd-font-mono); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-variant-numeric: tabular-nums; color: var(--fd-text); }
+/* The previous value: a tick on the track at --was (0 to 1, the same scale as --value) and "was 401" after the figure. */
+.fd-bars:has(.fd-bars-was) { --_ch-value: var(--fd-bars-value-w-was); }
+.fd-bars-track:has(> .fd-bars-mark) { overflow: visible; }
+.fd-bars-mark {
+  position: absolute; top: 50%; inset-inline-start: calc(clamp(0, var(--was, 0), 1) * 100%);
+  width: var(--fd-bars-mark-w); height: var(--fd-bars-mark-h);
+  margin-inline-start: calc(var(--fd-bars-mark-w) / -2); translate: 0 -50%;
+  border-radius: var(--fd-radius-full); background: var(--fd-text-2);
+  box-shadow: 0 0 0 var(--fd-hairline) var(--fd-surface);
+}
+.fd-bars-was { margin-inline-start: var(--fd-space-1-5); color: var(--fd-text-3); white-space: nowrap; }
 .fd-bars[data-enter="pending"] .fd-bars-fill { animation-play-state: paused; }
 .fd-bars[data-enter="done"] .fd-bars-fill { animation: none; }
 .fd-bars-row:nth-child(2) { --_ch-i: 1; } .fd-bars-row:nth-child(3) { --_ch-i: 2; } .fd-bars-row:nth-child(4) { --_ch-i: 3; }
@@ -281,7 +322,7 @@ button.fd-legend-item:hover { color: var(--fd-text); }
 .fd-donut[data-active] .fd-donut-legend-item:not([data-active]) { opacity: 0.5; }
 .fd-donut-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: var(--fd-space-0-5); padding: calc(var(--_ch-t) + var(--fd-donut-pad)); text-align: center; pointer-events: none; }
 .fd-donut-figure { font-size: var(--fd-text-h3); line-height: var(--fd-lh-h3); letter-spacing: var(--fd-ls-h3); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fd-donut-caption { font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-donut-caption { font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fd-donut[data-compact] .fd-donut-center { padding: 0; }
 .fd-donut[data-compact] .fd-donut-figure { overflow: visible; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); letter-spacing: 0; font-weight: var(--fd-weight-regular); }
 .fd-donut[data-compact] .fd-donut-caption { display: none; }
@@ -348,8 +389,97 @@ button.fd-legend-item:hover { color: var(--fd-text); }
 /* A strip in a table cell can be narrower than a tooltip: keep the tooltip inside it, so the table never scrolls for it. */
 .fd-heatgrid[data-variant="strip"] > .fd-chart-tooltip { min-width: min(var(--fd-chart-tooltip-min), calc(100% - var(--fd-chart-tooltip-inset))); }
 
+/* ---------- Quadrant ---------- */
+.fd-chart[data-fd-chart="quadrant"] { container: fd-quadrant / inline-size; --_q-h: var(--fd-quadrant-h); }
+.fd-quadrant-frame {
+  display: grid; min-width: 0;
+  grid-template-columns: var(--fd-quadrant-yaxis-w) minmax(0, 1fr);
+  grid-template-rows: var(--_q-h) auto;
+  gap: var(--fd-space-2);
+}
+.fd-quadrant-axis { position: relative; min-width: 0; font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); color: var(--fd-chart-axis); font-variant-numeric: tabular-nums; }
+.fd-quadrant-axis[data-axis="y"] { grid-column: 1; grid-row: 1; }
+.fd-quadrant-axis[data-axis="x"] { grid-column: 2; grid-row: 2; padding-block-start: var(--fd-quadrant-xaxis-tick-h); }
+.fd-quadrant-tick { position: absolute; white-space: nowrap; }
+.fd-quadrant-axis[data-axis="x"] > .fd-quadrant-tick { inset-block-start: 0; inset-inline-start: calc(var(--fd-quadrant-inset-x) + var(--_q-at) * (100% - 2 * var(--fd-quadrant-inset-x))); translate: -50% 0; }
+.fd-quadrant-axis[data-axis="y"] > .fd-quadrant-tick { inset-block-start: calc(var(--fd-quadrant-inset-y) + var(--_q-at) * (100% - 2 * var(--fd-quadrant-inset-y))); inset-inline-end: 0; translate: 0 -50%; }
+.fd-quadrant-axis-title { font-family: var(--fd-font-sans); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); }
+.fd-quadrant-axis[data-axis="x"] > .fd-quadrant-axis-title { display: block; text-align: center; }
+.fd-quadrant-axis[data-axis="y"] > .fd-quadrant-axis-title { position: absolute; inset-block: 0; inset-inline-start: 0; display: grid; place-items: center; writing-mode: vertical-rl; rotate: 180deg; white-space: nowrap; }
+
+.fd-quadrant-plot {
+  grid-column: 2; grid-row: 1; position: relative; min-width: 0;
+  --_q-sx: calc(var(--fd-quadrant-inset-x) + var(--_q-mx) * (100% - 2 * var(--fd-quadrant-inset-x)));   /* a midpoint, as a length */
+  --_q-sy: calc(var(--fd-quadrant-inset-y) + var(--_q-my) * (100% - 2 * var(--fd-quadrant-inset-y)));
+  display: grid; grid-template-columns: var(--_q-sx) minmax(0, 1fr); grid-template-rows: var(--_q-sy) minmax(0, 1fr);
+  background: var(--fd-surface); border-radius: var(--fd-radius-lg); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-surface-edge);
+}
+.fd-quadrant-plot::before, .fd-quadrant-plot::after { content: ""; position: absolute; pointer-events: none; }
+.fd-quadrant-plot::before { inset-block: 0; inset-inline-start: var(--_q-sx); border-inline-start: var(--fd-hairline) dashed var(--fd-a24); }
+.fd-quadrant-plot::after { inset-inline: 0; inset-block-start: var(--_q-sy); border-block-start: var(--fd-hairline) dashed var(--fd-a24); }
+.fd-quadrant-cell { display: flex; min-width: 0; min-height: 0; padding: var(--fd-space-2) var(--fd-space-3); }
+.fd-quadrant-cell[data-tone] { background: color-mix(in srgb, var(--_ch-c) var(--fd-quadrant-tint), transparent); }
+.fd-quadrant-cell[data-corner="tl"] { border-start-start-radius: var(--fd-radius-lg); }
+.fd-quadrant-cell[data-corner="tr"] { border-start-end-radius: var(--fd-radius-lg); justify-content: flex-end; text-align: end; }
+.fd-quadrant-cell[data-corner="bl"] { border-end-start-radius: var(--fd-radius-lg); align-items: flex-end; }
+.fd-quadrant-cell[data-corner="br"] { border-end-end-radius: var(--fd-radius-lg); justify-content: flex-end; align-items: flex-end; text-align: end; }
+.fd-quadrant-corner { font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight); color: var(--fd-text-3); }
+
+.fd-quadrant-point {
+  --_ch-c: var(--fd-chart-2);
+  --_q-d: calc(var(--fd-quadrant-dot-min) + (var(--fd-quadrant-dot-max) - var(--fd-quadrant-dot-min)) * var(--_q-s, 0.3));
+  position: absolute; translate: -50% -50%;
+  inset-inline-start: calc(var(--fd-quadrant-inset-x) + var(--_q-x) * (100% - 2 * var(--fd-quadrant-inset-x)));
+  inset-block-start: calc(var(--fd-quadrant-inset-y) + var(--_q-y) * (100% - 2 * var(--fd-quadrant-inset-y)));
+  z-index: calc(1 + var(--_q-z, 0));
+  display: grid; place-items: center; inline-size: max(var(--_q-d), var(--fd-quadrant-hit)); block-size: max(var(--_q-d), var(--fd-quadrant-hit));
+  padding: 0; border: 0; border-radius: 50%; background: none; color: var(--fd-text-2); font: inherit; cursor: pointer;
+}
+.fd-quadrant-point:focus-visible { box-shadow: var(--fd-ring); }
+.fd-quadrant-point[data-active] { z-index: 30; }
+.fd-quadrant-dot {
+  display: block; inline-size: var(--_q-d); block-size: var(--_q-d); border-radius: 50%;
+  background: color-mix(in srgb, var(--_ch-c) 32%, var(--fd-surface)); box-shadow: inset 0 0 0 var(--fd-quadrant-stroke) var(--_ch-c);
+  transition: scale var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-quadrant-point:is(:hover, [data-active]) > .fd-quadrant-dot { scale: 1.18; background: color-mix(in srgb, var(--_ch-c) 52%, var(--fd-surface)); }
+.fd-quadrant-name {
+  position: absolute; inset-inline-start: calc(50% + var(--_q-d) / 2 + var(--fd-space-1)); inset-block-start: 50%; translate: 0 -50%;
+  white-space: nowrap; pointer-events: none; font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-2);
+}
+.fd-chart[data-labels="none"] .fd-quadrant-name { display: none; }
+.fd-quadrant-point[data-side="start"] > .fd-quadrant-name { inset-inline-start: auto; inset-inline-end: calc(50% + var(--_q-d) / 2 + var(--fd-space-1)); }
+
+/* The phone fallback: the same points, as a list grouped by corner. */
+.fd-quadrant-list { display: none; gap: var(--fd-space-5); min-width: 0; }
+.fd-quadrant-key { margin: 0; font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); color: var(--fd-text-3); }
+.fd-quadrant-group { display: grid; gap: var(--fd-space-1); min-width: 0; }
+.fd-quadrant-group-label {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--fd-space-3); margin: 0; padding-block-end: var(--fd-space-1-5);
+  border-block-end: var(--fd-hairline) solid var(--_ch-c-line, var(--fd-line-faint));
+  font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); font-weight: var(--fd-eyebrow-weight);
+  letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); color: var(--fd-text-3);
+}
+.fd-quadrant-group[data-tone] > .fd-quadrant-group-label { --_ch-c-line: var(--_ch-c); }
+.fd-quadrant-group-count { font-variant-numeric: tabular-nums; }
+.fd-quadrant-rows { display: grid; margin: 0; padding: 0; list-style: none; }
+.fd-quadrant-row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-4); min-height: var(--fd-quadrant-row-h);
+  padding-inline: var(--fd-space-2); margin-inline: calc(var(--fd-space-2) * -1); border-radius: var(--fd-radius-md);
+  color: var(--fd-text); text-decoration: none;
+}
+a.fd-quadrant-row:hover { background: var(--fd-fill); }
+a.fd-quadrant-row:focus-visible { box-shadow: var(--fd-ring-inset); }
+.fd-quadrant-row-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-quadrant-row-values { flex: none; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+@container fd-quadrant (max-width: 519.98px) {
+  .fd-quadrant-frame { display: none; }
+  .fd-quadrant-list { display: grid; }
+  .fd-chart[data-fd-chart="quadrant"] > .fd-chart-tooltip { display: none; }
+}
+
 /* ---------- Chart card ---------- */
-.fd-chart-card { display: flex; flex-direction: column; gap: var(--fd-space-5); min-width: 0; padding: var(--fd-space-5) var(--fd-space-6) var(--fd-space-6); background: var(--fd-surface); border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); }
+.fd-chart-card { display: flex; flex-direction: column; gap: var(--fd-space-5); min-width: 0; padding: var(--fd-space-5) var(--fd-space-6) var(--fd-space-6); background: var(--fd-surface); border: var(--fd-hairline) solid var(--fd-surface-edge); border-radius: var(--fd-radius-xl); box-shadow: var(--fd-shadow-object); }
 .fd-chart-card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--fd-space-3) var(--fd-space-6); }
 .fd-chart-card-text { flex: 1 1 var(--fd-chart-card-text-basis); display: grid; gap: var(--fd-space-0-5); min-width: 0; }
 .fd-chart-card-desc { margin: 0; color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
@@ -359,7 +489,7 @@ button.fd-legend-item:hover { color: var(--fd-text); }
 .fd-chart-card-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--fd-space-2) var(--fd-space-4); }
 
 /* ---------- Stat with sparkline ---------- */
-.fd-chart-stat { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--fd-space-4); min-width: 0; padding: var(--fd-space-4); background: var(--fd-surface); border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); }
+.fd-chart-stat { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--fd-space-4); min-width: 0; padding: var(--fd-space-4); background: var(--fd-surface); border: var(--fd-hairline) solid var(--fd-surface-edge); border-radius: var(--fd-radius-xl); box-shadow: var(--fd-shadow-object); }
 .fd-chart-stat-main { display: grid; gap: var(--fd-space-1); min-width: 0; }
 .fd-chart-stat-label { margin: 0; color: var(--fd-text-3); font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
 .fd-chart-stat-value { margin: 0; font-size: var(--fd-text-stat); line-height: var(--fd-lh-stat); letter-spacing: var(--fd-ls-stat); font-weight: var(--fd-weight-medium); font-variant-numeric: tabular-nums; }

@@ -362,6 +362,82 @@
     </ul>
   </section>
 
+  <!-- ===================== PERIOD WITH COMPARISON ===================== -->
+  <section class="doc-section" id="period">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Period with comparison</h2>
+      <p>The date range with a second question: compared with what. Reports and charts show the period and, beside it, the same figures for an earlier one. The trigger names both.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-height data-fd-vars="--h: var(--fd-size-sm)">
+      <div class="fd-filter fd-period">
+        <button class="fd-filter-trigger" type="button" data-fd-popover="pop-period" data-placement="bottom-end" aria-label="Choose a period"><i data-icon="calendar"></i><span class="fd-filter-value"><span data-fd-daterange-label>Last 7 days</span><span class="fd-period-compare" data-fd-daterange-compare-label>vs previous period</span></span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+      </div>
+      <div class="fd-popover" id="pop-period" popover data-size="auto" aria-label="Period">
+        <div class="fd-daterange" data-fd-daterange data-preset="7d" data-compare="previous" data-max="today">
+          <div class="fd-daterange-presets" role="group" aria-label="Presets">
+            <button class="fd-daterange-preset" type="button" data-preset="7d">Last 7 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="30d">Last 30 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="month">This month</button>
+            <button class="fd-daterange-preset" type="button" data-preset="lastmonth">Last month</button>
+            <button class="fd-daterange-preset" type="button" data-preset="quarter">This quarter</button>
+            <button class="fd-daterange-preset" type="button" data-preset="year">This year</button>
+            <button class="fd-daterange-preset" type="button" data-preset="custom">Custom</button>
+          </div>
+          <div class="fd-daterange-main"><div class="fd-calendar"></div></div>
+          <div class="fd-daterange-compare" role="radiogroup" aria-labelledby="pc1-label" data-fd-daterange-compare>
+            <span class="fd-daterange-compare-label" id="pc1-label">Compared with</span>
+            <div class="fd-options">
+              <label class="fd-radio"><input type="radio" name="pc1-mode" value="none"><span class="fd-radio-box"></span><span class="fd-radio-label">Nothing</span></label>
+              <label class="fd-radio"><input type="radio" name="pc1-mode" value="previous"><span class="fd-radio-box"></span><span class="fd-radio-label">Previous period</span></label>
+              <label class="fd-radio"><input type="radio" name="pc1-mode" value="year"><span class="fd-radio-box"></span><span class="fd-radio-label">Same period last year</span></label>
+            </div>
+            <span class="fd-daterange-compare-dates" data-fd-daterange-compare-dates></span>
+          </div>
+          <div class="fd-daterange-foot">
+            <span class="fd-daterange-summary" data-fd-daterange-summary></span>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-daterange-cancel>Cancel</button>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-daterange-apply>Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="center" data-surface="sunken">
+      <div class="fd-popover" data-static-demo data-size="auto" role="dialog" aria-label="Period (example)">
+        <div class="fd-daterange" data-fd-daterange data-preset="month" data-compare="year" data-max="today">
+          <div class="fd-daterange-presets" role="group" aria-label="Presets">
+            <button class="fd-daterange-preset" type="button" data-preset="7d">Last 7 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="30d">Last 30 days</button>
+            <button class="fd-daterange-preset" type="button" data-preset="month">This month</button>
+            <button class="fd-daterange-preset" type="button" data-preset="lastmonth">Last month</button>
+            <button class="fd-daterange-preset" type="button" data-preset="quarter">This quarter</button>
+            <button class="fd-daterange-preset" type="button" data-preset="year">This year</button>
+            <button class="fd-daterange-preset" type="button" data-preset="custom">Custom</button>
+          </div>
+          <div class="fd-daterange-main"><div class="fd-calendar"></div></div>
+          <div class="fd-daterange-compare" role="radiogroup" aria-labelledby="pc2-label" data-fd-daterange-compare>
+            <span class="fd-daterange-compare-label" id="pc2-label">Compared with</span>
+            <div class="fd-options">
+              <label class="fd-radio"><input type="radio" name="pc2-mode" value="none"><span class="fd-radio-box"></span><span class="fd-radio-label">Nothing</span></label>
+              <label class="fd-radio"><input type="radio" name="pc2-mode" value="previous"><span class="fd-radio-box"></span><span class="fd-radio-label">Previous period</span></label>
+              <label class="fd-radio"><input type="radio" name="pc2-mode" value="year"><span class="fd-radio-box"></span><span class="fd-radio-label">Same period last year</span></label>
+            </div>
+            <span class="fd-daterange-compare-dates" data-fd-daterange-compare-dates></span>
+          </div>
+          <div class="fd-daterange-foot">
+            <span class="fd-daterange-summary" data-fd-daterange-summary></span>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-daterange-cancel>Cancel</button>
+            <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-daterange-apply>Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The comparison is a mode, not a second calendar: <span class="fd-mono">previous</span> is the period of the same length just before the chosen one, <span class="fd-mono">year</span> is the same dates a year earlier, <span class="fd-mono">none</span> turns it off. The dates it works out are shown in the band, and again in the trigger, so nobody has to guess what a figure is compared with.</li>
+      <li>Apply fires <code class="fd-code">fd:change</code> with <code class="fd-code">{ start, end, preset, compare }</code> in <code class="fd-code">detail.value</code>, where <code class="fd-code">compare</code> is <code class="fd-code">null</code> or <code class="fd-code">{ mode, start, end }</code> (ISO dates). It also writes the range into <code class="fd-code">[data-fd-daterange-label]</code> and the comparison into <code class="fd-code">[data-fd-daterange-compare-label]</code> in the trigger, which is empty, and hidden, when there is none. Cancel restores both.</li>
+      <li>Presets beyond the date range's: <span class="fd-mono">lastmonth</span>, <span class="fd-mono">quarter</span> and <span class="fd-mono">year</span> (to date). Show the ones your data answers; choosing a day in the calendar makes it Custom.</li>
+    </ul>
+  </section>
+
   <!-- ===================== FILTER ===================== -->
   <section class="doc-section" id="filter">
     <div class="doc-section-head">

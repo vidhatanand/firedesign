@@ -9,7 +9,8 @@ Read in this order: this guide, then the live docs (`npm run dev`, open `/docs/i
 | You need | Where it is |
 |---|---|
 | Every component, with markup to copy | `docs/*.html` (each specimen has a "Markup" view) |
-| Full screens to start from | `templates/*.html` (app screens, sign-in split or centred, onboarding, a docs site, the shell as plain markup) |
+| Full screens to start from | `templates/*.html` (32: app screens, decisions, settings, audit, status pages, sign-in split or centred, onboarding, a docs site, the shell as plain markup) |
+| The part for a job | `npx fire find "<what you need>"` (section 8), or `contract/catalog.json` and `contract/index.json` |
 | The list of every class and attribute | `docs/_ref/VOCABULARY.md` |
 | The rules of the system | `DESIGN.md` |
 | The styles and behaviour themselves | `fire/` (the only folder a product ships) |
@@ -38,7 +39,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 | React and Next.js | `starters/next` | `fire-design/react`: `FireIcon`, `FireChart`, `FireCode`, `FireTexture`, `useFire`, `useFireEvent` |
 | Vue | `starters/vue-vite` | `fire-design/vue`: the plugin, the `v-fire` directive, `fireVueOptions()` for `vite.config` |
 
-Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.6.2"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
+Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.7.0"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
 
 - Behaviour attaches through `data-fd-*` attributes with listeners on `document`, so most components work on markup inserted later. After rendering new markup that contains icons, charts, textures or sliders, call `init(root)`:
 
@@ -55,7 +56,7 @@ init(containerElement);   // safe to call more than once
 
 ## 3. Build a screen
 
-1. **Start from the nearest template.** Open `templates/index.html`, pick the screen closest to what you need, and copy it. `templates/blank.html` is the empty app screen. A single task outside the app (sign in, a second step, consent, a result) is a centred screen: start from `templates/auth-centered.html`.
+1. **Start from the nearest template.** Open `templates/index.html`, pick the screen closest to what you need, and copy it. `templates/blank.html` is the empty app screen. A single task outside the app (sign in, a second step, consent, a result) is a centred screen: start from `templates/auth-centered.html`. Fire has templates for the screens products repeat: decisions and a single decision case, answering from an email link without signing in, a record hub (one team on one page), settings, an audit log, a status page and its admin, and a shared proof page. Every one of those opens each of its states (loading, empty, error, no access, and its own) from its Demo state band or from `?state=` in the address, so you can see and test them before you replace the demo content. Ask `npx fire find` before you build a screen of your own: it may already be one of these.
 2. **Keep the shell, replace the content.** `templates/shell.js` builds the sidebar, top bar, menus and command palette for the demo product. Copy it into your project and change its navigation, account and labels to your own. The page itself is:
 
 ```html
@@ -119,6 +120,12 @@ Grids, stacks and rows nest freely. If you are about to write a width, you are m
 | A list of free values (URLs, domains, emails) | `fd-tag-input` | A JSON array, or a comma-separated text box |
 | Names with values (scopes, headers, labels) | `fd-pairs` | A JSON object |
 | A secret | `fd-secret`; to type a new one, `fd-secret` with `data-mode="entry"` | A plain text input |
+| One date | `fd-datefield`: typed or picked from a calendar; it posts `YYYY-MM-DD`; `data-min-date` and `data-max-date` | `<input type="date">`, or a text box with the format in the hint |
+| A reporting period, with what to compare it with | `fd-period` (a filter trigger) opening an `fd-daterange` with `fd-daterange-compare` | Two date fields and a checkbox |
+| A colour (a brand or a series) | `fd-color`: a picker and a hex box, with its contrast on the page; `fd-swatch` to show one | A bare text box for a hex code |
+| A destructive action | Its own page or section with `fd-confirm-inline`: the person types the name before the red button works | A dialog that holds a form, or a button that deletes at once |
+| A control that is off | `fd-reason` around it: the control is `aria-disabled="true"` and a line says why and who can turn it on | A disabled control with no word of explanation |
+| One-time codes shown once (recovery codes) | `fd-codes`, with Copy all and Download | A text area, or a list the person screenshots |
 | Raw configuration, for experts only | `fd-codefield` with `data-fd-json` | An ordinary text area |
 
 A checkbox group posts one field per ticked box under the same name (`methods=email&methods=passkey`). If your server rejects repeated names, give each box its own name (`methods.email`, `methods.passkey`).
@@ -140,6 +147,8 @@ Never give a card title `fd-h3` and put `fd-setting` rows inside it at their pag
 
 **A value shown in a field's shape** (a sample in a preview, something read-only) is `<span class="fd-input">…</span>`; it lines up with real inputs.
 
+**Decisions.** When a person decides what a system or an agent may do, use the decisions family (`docs/decisions.html`) and not a dialog with two buttons. Show the brief (`fd-decision`: what changes, who it touches, the evidence, who signs), keep the reason as the person's own words (`fd-draft` offers an agent's draft, which stays the agent's until the person uses it), and name each button for its effect (`fd-commit`). A commit that can be taken back waits a few seconds with Undo (`data-fd-hold`, or `data-fd-hold-in="toast"` so the page can move on). `fd-queue` works through what waits, `fd-preview` shows what a change will touch before it is committed, and `fd-states` gives a screen one state at a time: loading, ready, empty, error, no access. Start from `templates/decisions.html` or `templates/decision-case.html`.
+
 ## 6. Theming and checks
 
 **Theme and character.** Everything visual is a variable.
@@ -148,12 +157,17 @@ Never give a card title `fd-h3` and put `fd-setting` rows inside it at their pag
 - `data-palette="volt"` (fifteen palettes; see `docs/tweaks.html`) recolours neutrals and accent together. A brand palette is one CSS block that sets about twenty variables; the page shows how.
 - `data-type="editorial"` (twelve type sets, all open source) changes the heading, interface and mono faces together.
 - `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
+- **Four structural dials** change how a page is built, not its colours: `data-surfaces="flat|outlined"`, `data-elevation="none|lifted"`, `data-controls="outlined|filled"`, `data-headings="upper|mono"`. The first value of each is the default and needs no attribute. They work through semantic tokens, so paint your own objects, fields, secondary controls and small labels with those tokens (`DESIGN.md` section 2).
+- **The signature** is one set of dials for the generated textures and frame marks: `data-signature-field`, `-mark`, `-cell`, `-ramp`, `-marks` and `-intensity` on `<html>` (`docs/signature.html`). `data-signature="own"` on one texture keeps its own options.
+- **A type set** can be a name, or a spec in the theme record: families from the font catalogue (`contract/fonts.json`, 53 open-licensed families), a heading weight and tracking, heading case, tabular figures. `validateTheme()` enforces the pairing rules. To use a family Fire does not ship, run `node node_modules/fire-design/scripts/fonts.mjs add "<family>"`: it copies or downloads the files and writes the `@font-face` and a metric-matched fallback into `./fonts/fonts.css`; import that after `fire.css`.
+- **The theme record** holds all of it as one JSON object: `palette`, `tone`, `type`, `dials` (corners, density, lines, text size, contrast, motion, texture and the four structural dials) and `signature`. Tweaks' "Copy theme" writes one; `fire/email/email.js` reads the same record, so an email matches the app.
+- **Start from a look.** Fire ships eight named looks, each a complete theme record (`contract/looks/named`, shown on `docs/looks.html`). Open any page with `?look=operator` to try one, pick the nearest in the Tweaks panel's Looks row, tune it, then keep the result with Copy theme.
 - **Your product's look is the default.** Declare it on `<html>` (`<html data-palette="graphite" data-type="editorial">`). The Tweaks panel and `fire/boot.js` treat the page's own palette and type set as the default: the page keeps them on load, Reset returns to them, and only what someone changes away from them is saved and restored on the next page. A product on Ember and Geist declares nothing. (`boot.js` notes the declared values in `data-fd-default-palette` / `data-fd-default-type` before it puts a saved look back; do not write those yourself.)
 - **Contrast is built in.** Every text step that carries information reaches 4.5:1 in every palette, light and dark, and the label on the accent and on status fills does too. Use `fd-muted` / `--fd-text-3` or stronger for anything someone reads; `--fd-text-4` is for placeholders and disabled text only. Make quiet things quiet with size, weight and case, not a fainter colour.
 - **Translated pages.** Fire's scripts write a few interface labels themselves (show and hide on a secret field, the sidebar and phone menu buttons, Copied, calendar months). Translate them with `data-label-<key>` on the component or any ancestor, or one dictionary for the page: `<script type="application/json" data-fd-labels>{"menu.open": "Menü öffnen"}</script>`. The keys are listed on `docs/writing.html`.
 - The Tweaks panel lets you try palettes, tone, typefaces, density, corners and motion on your real screens. Any `[data-fd-tweaks-open]` button opens it. Use "Copy CSS" to keep a look you like, then paste it after `fire.css`. Remove the trigger before shipping if end users should not have it.
 
-**Checks a project can run.** Both ship in the package and read only the catalogue:
+**Checks a project can run.** These ship in the package and read only the catalogue:
 
 - `node node_modules/fire-design/scripts/lint-markup.mjs "src/**/*.{html,tsx,jsx,vue,ts}"` reports unknown `fd-` classes, elements and icons, `data-*` values a component does not define, `style` attributes and props, raw colours and pixel sizes in markup, icon-only buttons without a name, and `<i data-icon>` in React or Vue code. It exits 1 on any error.
 - `node node_modules/fire-design/scripts/render-equal.mjs --ref <reference page> --cand <your page> --cand-root ".fd-page"` proves a screen renders like its reference (a Fire template, a Facet board): Fire nodes, computed styles and pixels, at 1440 and 375 wide, light and dark, in Chromium, WebKit and Firefox. It needs `playwright-core`, `pixelmatch` and `pngjs`.
@@ -210,6 +224,8 @@ File an issue in the Fire repository using the "Component or extension request" 
 ## 8. Instructions for an AI agent working in a project
 
 The rules an agent follows are in [AGENT-RULES.md](AGENT-RULES.md). They are kept in one file, in Fire, so that updating Fire updates the rules and the project's own instruction file never has to change.
+
+**Search before you compose.** Run `npx fire find "<what you need>"` (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`). It ranks Fire's components, patterns, templates and modules by what each is for, using the job and other names on every card, and prints the one to open. Narrow it with `--surface app|website|phone|email`, `--data record|list|series|form|text` and `--kind component|pattern|template|module`; `--json` is for scripts. Only when nothing fits, go to step 1 of section 7. To add a part to Fire itself, it must pass the near-duplicate gate (`node scripts/gate.mjs --probe <page>`) or its card must declare a `relation` to the part it resembles.
 
 Copy `AGENT-RULES.md` into the project beside this guide, then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`) and adjust the three paths:
 

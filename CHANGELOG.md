@@ -2,6 +2,17 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.6.2 — 18 Nov 2026
+
+**Facet export on Facet's new schema.** `facet/content.json` carries all 142 components with full cards and a
+`contract` field holding the theme record (`facet/theme.json`), and uses everything Facet now accepts: colour roles
+`raised`, `sunken` and `on-success`, `on-warning`, `on-danger`, `on-info` with their pairings at 4.5:1 in both
+themes; all 16 type steps with Fire's rem sizes and line heights, and tabular figures on `stat`; all 29 sizes; every
+shadow with all five layers, light and dark. `extras.json` lists `contract/custom-elements.json` and marks the two
+files Facet reads as `ds/catalog.json` and `ds/custom-elements.json`. The build asks `$FACET_CLI`, else Facet's
+design kit, else the old vendored Facet, and writes the 100-component variant only if Facet's checker rejects the
+full one. The README lists the misfits that remain.
+
 ## 0.6.1 — 18 Nov 2026
 
 - **Docs**: a Frameworks & checks page: the three starters and how to start from one, the React and Vue packages

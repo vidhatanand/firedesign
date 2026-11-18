@@ -175,3 +175,23 @@ export const GROUPS = [
 ];
 /** Names the Base and Layout lines both list: they belong to Layout (the later line names them as the primitives). */
 export const LAYOUT_PRIMITIVES = ['fd-stack', 'fd-row', 'fd-grid', 'fd-column', 'fd-grow'];
+
+/** Attributes whose value is free (a number, a name, text, an id): the single value "*" means any value. component id -> attributes. */
+export const FREE_ATTRIBUTES = {
+  codeblock: ['data-collapse'],        // collapsed height in px: "200", "240", "420" (code.js header)
+  doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
+  kv: ['data-copy'],                   // the text a row copies
+  menu: ['data-fd-submenu'],           // the id of the sub-menu
+  pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
+};
+
+/** Values the docs or module headers state for a state no selector styles, or the unwritten default of a styled attribute. component id -> attribute -> values. */
+export const DEFAULT_VALUES = {
+  dialog: { 'data-size': ['md'] },                 // overlays.css: 480px, "default"
+  sheet: { 'data-size': ['md'], 'data-side': ['right'] },   // docs/overlays.html: <dialog class="fd-sheet" data-side="right" data-size="md">; the CSS styles left and bottom
+  stats: { 'data-dir': ['up'] },                   // data.css: [data-dir] draws the up arrow, [data-dir="down"] flips it
+  log: { 'data-level': ['info'] },                 // code.css: only warn, error and debug have a dot colour; info is the default row
+  'chat-message': { 'data-state': ['delivered'] }, // docs/chat.html: state sending | sent | delivered | read | failed
+  message: { 'data-state': ['error'] },            // docs/agent.html: a failed assistant message
+  table: { 'data-state': ['error'] },              // docs/data.html: tr.fd-table-state data-state="error"
+};

@@ -15,10 +15,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
-import { ROOT, read, stripCss, topFiles, loadIconNames, attributeSheets, collectAttrValues } from './lib/source.mjs';
+import { ROOT, read, stripCss, topFiles, loadIconNames, attributeSheets, collectAttrValues, scriptAttrValues, scriptClasses, cssCommentValues } from './lib/source.mjs';
 import { parseVocabulary } from './lib/vocabulary.mjs';
 import { readModuleEvents, summariseEvents } from './lib/events.mjs';
-import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA } from './lib/catalog-assign.mjs';
+import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA, FREE_ATTRIBUTES, DEFAULT_VALUES } from './lib/catalog-assign.mjs';
 
 const OUT = path.join(ROOT, 'contract/catalog.json');
 const CARDS = path.join(ROOT, 'contract/cards');
@@ -147,6 +147,17 @@ export async function buildCatalog({ allowMissing = false } = {}) {
     classToId[cls] = byRoot.get(root).id;
   }
 
+  // Hook classes: scripts and module headers use them, CSS never styles them. They join the component of their longest prefix.
+  const hooks = [...scriptClasses()].filter((c) => !classSet.has(c)).sort();
+  const unplacedHooks = [];
+  for (const cls of hooks) {
+    const root = resolve(cls);
+    if (!root) { unplacedHooks.push(cls); continue; }
+    byRoot.get(root).classes.push(cls);
+    classToId[cls] = byRoot.get(root).id;
+  }
+  for (const c of byRoot.values()) c.classes.sort();
+
   // Attribute values the styles define in selectors that involve the component's classes.
   const known = collectAttrValues(attributeSheets({ docs: false }), { scope: 'compound' });
   const globalAttributes = {};
@@ -157,8 +168,43 @@ export async function buildCatalog({ allowMissing = false } = {}) {
       for (const [k, set] of known) if (k.startsWith(cls + '|')) { const a = k.slice(cls.length + 1); (attrs[a] ??= new Set()); set.forEach((v) => attrs[a].add(v)); }
       for (const k of known.flags.keys()) if (k.startsWith(cls + '|')) { const a = k.slice(cls.length + 1); attrs[a] ??= new Set(); }
     }
-    c.attributes = sortKeys(Object.fromEntries(Object.entries(attrs).map(([a, s]) => [a, [...s].sort()])));
+    c.attributes = Object.fromEntries(Object.entries(attrs).map(([a, s]) => [a, new Set(s)]));
   }
+  // More sources of allowed values: the layout attributes (any element), the vocabulary, the literals Fire's scripts
+  // read or compare, and the defaults the docs state for an unstyled value.
+  const byClass = (cls) => byRoot.get(resolve(cls));
+  for (const c of byRoot.values()) for (const [a, vals] of Object.entries(globalAttributes)) if (c.attributes[a]) vals.forEach((v) => c.attributes[a].add(v));
+  for (const { root, attr, values } of vocab.attrValues) {
+    const c = byClass(root);
+    if (c) { c.attributes[attr] ??= new Set(); values.forEach((v) => c.attributes[attr].add(v)); }
+  }
+  const scripts = scriptAttrValues();
+  for (const c of byRoot.values()) {
+    const mods = ['core', ...(c.id === 'icon' ? ['icons'] : []), ...(FAMILY_MODULES[c.family] || [])];
+    for (const a of Object.keys(c.attributes)) for (const mod of mods) scripts.get(mod)?.get(a)?.forEach((v) => c.attributes[a].add(v));
+  }
+  // Values a component sheet's header documents, for the components that sheet defines.
+  const classCount = new Map();   // class -> file -> rules; a class's home sheet is the one with most rules (fd-btn appears in code.css too)
+  for (const f of [path.join(ROOT, 'fire/base.css'), ...topFiles('fire/components', ['.css'])]) {
+    for (const rule of stripCss(read(f)).matchAll(/([^{}]+)\{/g)) for (const m of rule[1].matchAll(/\.(fd-[a-z0-9]+(?:-[a-z0-9]+)*)/g)) { const k = m[1]; if (!classCount.has(k)) classCount.set(k, new Map()); classCount.get(k).set(path.basename(f), (classCount.get(k).get(path.basename(f)) || 0) + 1); }
+  }
+  const classFile = new Map([...classCount].map(([k, files]) => [k, new Set([[...files].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0]])]));
+  const sheetValues = cssCommentValues();
+  for (const c of byRoot.values()) {
+    const files = new Set(c.classes.flatMap((cls) => [...(classFile.get(cls) || [])]));
+    for (const f of files) for (const [a, vals] of sheetValues.get(f) || []) if (c.attributes[a]) vals.forEach((v) => c.attributes[a].add(v));
+  }
+  for (const [id, attrs] of Object.entries(DEFAULT_VALUES)) {
+    const c = [...byRoot.values()].find((x) => x.id === id);
+    if (!c) { errors.push(`DEFAULT_VALUES: no component ${id}`); continue; }
+    for (const [a, vals] of Object.entries(attrs)) { c.attributes[a] ??= new Set(); vals.forEach((v) => c.attributes[a].add(v)); }
+  }
+  for (const [id, names] of Object.entries(FREE_ATTRIBUTES)) {
+    const c = [...byRoot.values()].find((x) => x.id === id);
+    if (!c) { errors.push(`FREE_ATTRIBUTES: no component ${id}`); continue; }
+    for (const a of names) c.attributes[a] = new Set(['*']);
+  }
+  for (const c of byRoot.values()) c.attributes = sortKeys(Object.fromEntries(Object.entries(c.attributes).map(([a, set]) => [a, set.has('*') ? ['*'] : [...set].sort()])));
 
   // Events: from each module's header, to the components of the families that module serves.
   const moduleEvents = readModuleEvents();
@@ -240,7 +286,7 @@ export async function buildCatalog({ allowMissing = false } = {}) {
     tokens: readTokens(),
     templates: readTemplates(),
   };
-  return { catalog, missing, errors };
+  return { catalog, missing, errors, unplacedHooks };
 }
 
 const serialise = (o) => JSON.stringify(o, null, 2) + '\n';
@@ -248,12 +294,13 @@ const serialise = (o) => JSON.stringify(o, null, 2) + '\n';
 async function main() {
   const args = new Set(process.argv.slice(2));
   const allowMissing = args.has('--allow-missing');
-  const { catalog, missing, errors } = await buildCatalog({ allowMissing });
+  const { catalog, missing, errors, unplacedHooks } = await buildCatalog({ allowMissing });
   if (errors.length) {
     console.error(`build-catalog: ${errors.length} error${errors.length > 1 ? 's' : ''}`);
     for (const e of errors) console.error('  ' + e);
     process.exit(1);
   }
+  if (unplacedHooks.length) console.log(`build-catalog: classes scripts mention that fit no component (not added): ${unplacedHooks.join(' ')}`);
   const files = [[OUT, serialise(catalog)]];
   if (allowMissing) files.push([MISSING, serialise({ note: 'Components that still need a card (generated by build-catalog.mjs --allow-missing).', count: missing.length, components: missing })]);
   if (args.has('--check')) {

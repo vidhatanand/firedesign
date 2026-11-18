@@ -57,6 +57,26 @@ test('unknown-attribute-value: only for attributes the catalogue lists for the c
   assert.deepEqual(rules('a.html', '<div class="app" data-size="huge"></div>'), []);
 });
 
+test('unknown-attribute-value: the value "*" takes any value', () => {
+  const star = structuredClone(JSON.parse(fs.readFileSync(catalogPath, 'utf8')));
+  star.components.find((c) => c.id === 'button').attributes['data-size'] = ['*'];
+  const any = prepareCatalog(star);
+  const ids = (text) => lintText('a.html', text, any).map((f) => f.rule);
+  assert.deepEqual(ids('<a class="fd-btn" data-size="huge"></a>'), []);
+  assert.deepEqual(ids('<a class="fd-btn" data-size="240"></a>'), []);
+  assert.deepEqual(ids('<a class="fd-btn" data-variant="nope"></a>'), ['unknown-attribute-value'], 'other attributes stay closed');
+  assert.deepEqual(rules('a.html', '<a class="fd-btn" data-size="huge"></a>'), ['unknown-attribute-value'], 'without "*" the value is rejected');
+});
+
+test('unknown-attribute-value: data-size on a drawn icon is the icon size, whatever class it carries', () => {
+  assert.deepEqual(rules('a.html', '<i class="fd-dialog" data-icon="x" data-size="14"></i>'), []);
+  assert.deepEqual(rules('a.html', '<div class="fd-dialog" data-size="14"></div>'), ['unknown-attribute-value']);
+});
+
+test('icon-only-name: a data-fd-tooltip names an icon-only button (overlays.js gives it the aria-label)', () => {
+  assert.deepEqual(rules('a.html', '<button data-icon-only data-fd-tooltip="Copy key"><i data-icon="x"></i></button>'), []);
+});
+
 test('unknown-element: unknown fd- tag fails, catalogued and ordinary tags pass', () => {
   assert.deepEqual(rules('a.html', '<fd-icon name="x"></fd-icon><my-thing></my-thing>'), []);
   assert.deepEqual(rules('a.html', '<fd-nothing></fd-nothing>'), ['unknown-element']);

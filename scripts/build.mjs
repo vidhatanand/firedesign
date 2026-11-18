@@ -17,6 +17,7 @@ const steps = [
   ['build-contract.mjs', check ? ['--check'] : []],
   ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card
   ['build-index.mjs', check ? ['--check'] : []],     // the search index, from the catalogue
+  ['gate.mjs', check ? ['--check', '--no-look'] : ['--no-look']],   // near-duplicates by structure and job (npm run gate adds the look)
   ['build-wrappers.mjs', check ? ['--check'] : [], { optional: true }],
   ['build-wrappers-vue.mjs', check ? ['--check'] : [], { optional: true }],
   ['build-facet.mjs', check ? ['--check'] : [], { optional: true }],

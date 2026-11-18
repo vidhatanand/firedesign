@@ -1,44 +1,265 @@
 <script setup lang="ts">
-import { overlays } from 'fire-design';
+import { computed, nextTick, onBeforeUnmount, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { $ as query, $$ as queryAll, content, forms, nav, overlays, texture } from 'fire-design';
 import type { FireEventMap } from 'fire-design';
+import { LOAD_MS, SIMULATE_LOAD } from '../demo';
 
-// Fire runs the tabs, the segmented controls, the dialogs and the forms of this screen from its markup. The page only
-// reacts to the events it cares about: a change of a switch or a segmented control confirms with a toast.
-function onChange(event: FireEventMap['fd:change']) {
-  const target = event.target as HTMLElement | null;
-  if (target?.closest('.fd-segmented, .fd-switch')) overlays.toast({ title: 'Saved', tone: 'neutral', duration: 1800 });
+// Fire runs the dialogs, menus, segmented controls, the dirty bar and the confirm-inline form of this screen from its
+// markup. What follows is the page's own behaviour, from templates/settings.html, kept to what an app would write:
+// the tab in the URL, one save for the team form, the feature switches (Done · Undo), the delete, and the demo states.
+const { toast } = overlays;
+// Fire's selector helpers, typed for HTML elements (everything this page looks up is one).
+const $ = <E extends HTMLElement = HTMLElement>(selector: string, root?: ParentNode) => query<E>(selector, root);
+const $$ = <E extends HTMLElement = HTMLElement>(selector: string, root?: ParentNode) => queryAll<E>(selector, root);
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const bind = (name: string, text: string) => $$(`[data-bind="${name}"]`).forEach((el) => { el.textContent = text; });
+const setBusy = (el: Element, on: boolean) => (on ? el.setAttribute('aria-busy', 'true') : el.removeAttribute('aria-busy'));
+// content.setState and the Undo option of toast() are in Fire's code but not in its type file yet.
+const setState = (content as unknown as { setState(el: Element, state: string): void }).setState;
+const toastUndo = toast as unknown as (options: Record<string, unknown>) => string;
+
+/** One inline error slot per field: shown in place of the hint. */
+function fieldError(input: HTMLElement, message: string) {
+  const slot = input.closest('.fd-field')?.querySelector<HTMLElement>(':scope > .fd-field-error');
+  if (!slot) return;
+  if (message) { slot.querySelector('span')!.textContent = message; slot.hidden = false; input.setAttribute('aria-invalid', 'true'); }
+  else { slot.hidden = true; input.removeAttribute('aria-invalid'); }
 }
+
+/** Ask before doing something hard to undo (the page's #dlg-confirm). Resolves true on confirm. */
+function confirmAction({ title, desc, label }: { title: string; desc: string; label: string }) {
+  const dialog = $<HTMLDialogElement>('#dlg-confirm')!;
+  $('[data-confirm-title]', dialog)!.textContent = title;
+  $('[data-confirm-desc]', dialog)!.textContent = desc;
+  $('[data-confirm-ok]', dialog)!.textContent = label;
+  return new Promise<boolean>((resolve) => {
+    dialog.addEventListener('fd:close', () => resolve(dialog.returnValue === 'ok'), { once: true });
+    overlays.openDialog(dialog);
+  });
+}
+
+// ---------------------------------------------------------------- The tab is in the URL (?tab=)
+const TABS = ['account', 'notifications', 'team', 'features', 'billing', 'data-sources', 'connected-apps', 'advanced'];
+const ALIASES: Record<string, string> = { sources: 'data-sources', datasources: 'data-sources', apps: 'connected-apps', connected: 'connected-apps' };
+const route = useRoute();
+const router = useRouter();
+const tab = computed(() => {
+  const value = String(route.query.tab ?? '');
+  const id = ALIASES[value] ?? value;
+  return TABS.includes(id) ? id : 'team';
+});
+function onTab(event: MouseEvent) {
+  const link = (event.target as Element).closest<HTMLElement>('[data-tab]');
+  if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
+  event.preventDefault();
+  void router.replace({ query: { ...route.query, tab: link.dataset.tab } }).then(() => nextTick(() => $(`#h-${tab.value}`)?.focus()));
+}
+
+// ---------------------------------------------------------------- Team: one form, one save (data-fd-dirty shows the bar)
+const SLUG = /^[a-z0-9-]{3,32}$/;
+const TAKEN = ['ember', 'admin', 'api', 'support'];
+const slugProblem = (value: string) => (!value ? '' : !SLUG.test(value) ? 'Use 3 to 32 lowercase letters, numbers or dashes.' : TAKEN.includes(value) ? `“${value}” is already taken. Try another slug.` : '');
+const teamFields = () => ({ form: $<HTMLFormElement>('#panel-team')!, name: $<HTMLInputElement>('#team-name')!, slug: $<HTMLInputElement>('#team-slug')! });
+function syncTeamForm() {
+  const { name, slug } = teamFields();
+  bind('slug-preview', slug.value || 'team_8fK2xQvLm');
+  fieldError(slug, slugProblem(slug.value));
+  fieldError(name, !name.value.trim() && 'touched' in name.dataset ? 'Enter a team name.' : '');
+}
+function onTeamInput(event: Event) {
+  if ((event.target as HTMLElement).matches('#team-name, #team-slug')) syncTeamForm();
+}
+/** Discard: the browser puts every field back to its default (the last saved value); then the form is clean again. */
+function onTeamReset() {
+  setTimeout(() => { delete teamFields().name.dataset.touched; syncTeamForm(); forms.markClean(teamFields().form); }, 0);
+}
+async function onTeamSave(event: SubmitEvent) {
+  const { form, name, slug } = teamFields();
+  const button = event.submitter as HTMLButtonElement | null;
+  if (button?.id !== 'team-save-all') return;
+  name.dataset.touched = '';
+  syncTeamForm();
+  const nameOk = name.value.trim().length > 0;
+  if (!nameOk || slugProblem(slug.value)) { (nameOk ? slug : name).focus(); return; }
+  if (button.getAttribute('aria-busy') === 'true') return;
+  setBusy(button, true);
+  await wait(700);
+  setBusy(button, false);
+  name.value = name.value.trim();
+  // What was saved becomes the default, so Discard returns to it.
+  for (const input of $$<HTMLInputElement>('input[name]', form)) { input.defaultValue = input.value; input.defaultChecked = input.checked; }
+  forms.markClean(form);
+  bind('team-changed-by', 'you, just now');
+  toast({ title: 'Team settings saved', description: 'Every member sees the change now.', tone: 'success' });
+}
+
+// ---------------------------------------------------------------- Features: grouped switches, Done · Undo
+const featureRows = () => $$<HTMLTableRowElement>('#features-table tr[data-feature]');
+function syncFeatures() {
+  const rows = featureRows();
+  const on = rows.filter((row) => $<HTMLInputElement>('input', row)!.checked).length;
+  const shown = rows.filter((row) => !row.hidden).length;
+  const q = $<HTMLInputElement>('#feature-search')!.value.trim();
+  bind('features-on', String(on));
+  $('#feature-count')!.textContent = q ? `${shown} of ${rows.length} match` : `${on} of ${rows.length} on`;
+  $('#features-wrap')!.hidden = shown === 0;
+  $('#features-none')!.hidden = shown !== 0;
+}
+function paintFeature(row: HTMLElement) {
+  const status = $('.fd-status', row);
+  if (!status) return;
+  const on = $<HTMLInputElement>('input', row)!.checked;
+  status.dataset.tone = on ? 'success' : 'neutral';
+  status.textContent = on ? 'On' : 'Off';
+}
+function onFeature(event: Event) {
+  const input = (event.target as Element).closest<HTMLInputElement>('input[role="switch"]');
+  if (!input) return;
+  const row = input.closest('tr')!;
+  const name = row.dataset.feature;
+  paintFeature(row);
+  syncFeatures();
+  toastUndo({
+    title: `${name} ${input.checked ? 'on' : 'off'}`,
+    description: input.checked ? 'Every key can use it now.' : 'Requests that ask for it now fail.',
+    tone: 'success', id: 'feature',
+    undo: async () => { await wait(300); input.checked = !input.checked; paintFeature(row); syncFeatures(); },
+    undone: `${name} is ${input.checked ? 'off' : 'on'} again`,
+  });
+}
+function onFeatureSearch(event: Event) {
+  const q = (event.target as HTMLInputElement).value.trim().toLowerCase();
+  featureRows().forEach((row) => { row.hidden = Boolean(q) && !row.textContent!.toLowerCase().includes(q); });
+  syncFeatures();
+}
+function onFeaturesClear() {
+  const search = $<HTMLInputElement>('#feature-search')!;
+  search.value = '';
+  search.dispatchEvent(new Event('input', { bubbles: true }));
+  search.focus();
+}
+
+// ---------------------------------------------------------------- Delete team (confirm-inline: Fire keeps the button off until the name matches) and leave
+function onDeleteTeam(event: SubmitEvent) {
+  const form = event.currentTarget as HTMLFormElement;
+  if (form.dataset.state !== 'match') return;
+  const button = $('[data-fd-confirm-submit]', form)!;
+  setBusy(button, true);
+  void toast.promise(wait(1200).then(() => { setBusy(button, false); form.reset(); $('#dt-confirm')!.dispatchEvent(new Event('input', { bubbles: true })); }), {
+    loading: 'Deleting Quarry Labs…', success: { title: 'Quarry Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' }, error: 'Could not delete the team',
+  });
+}
+async function onLeave(event: MouseEvent) {
+  if ((event.currentTarget as HTMLElement).getAttribute('aria-disabled') === 'true') return;
+  if (!await confirmAction({ title: 'Leave Quarry Labs?', desc: 'You lose access to its keys, runs and monitors at once. An admin can invite you again.', label: 'Leave team' })) return;
+  toast({ title: 'You left Quarry Labs', description: 'You were moved to your Personal team.', tone: 'neutral' });
+}
+
+// ---------------------------------------------------------------- Demo state: ?state=ready|loading|error|member
+// Member is the ready page as someone who can read but not change it: every control marked data-admin is disabled and
+// the who-can-edit lines turn into the reason.
+const STATES = ['ready', 'loading', 'error', 'member'];
+let pageState = 'ready';
+function setMember(on: boolean) {
+  const locked = [...$$<HTMLButtonElement>('[data-admin]'), ...$$<HTMLButtonElement>('#members-list .fd-list-trail .fd-btn')];
+  locked.forEach((el) => { el.disabled = on; });
+  $$('[data-member-only]').forEach((el) => { el.hidden = !on; });
+  $('#team-editors')!.hidden = on;
+  // A member can leave; the only owner cannot, and says why.
+  if (on) $('#leave-team')!.removeAttribute('aria-disabled'); else $('#leave-team')!.setAttribute('aria-disabled', 'true');
+  $('#leave-reason')!.hidden = on;
+  if (on) forms.markClean(teamFields().form);
+}
+function setPageState(value: string) {
+  pageState = STATES.includes(value) ? value : 'ready';
+  setState($('#settings-states')!, pageState === 'member' ? 'ready' : pageState);
+  setMember(pageState === 'member');
+  const item = $$<HTMLElement>('.fd-segmented-item', $('#state-switch')!).find((el) => el.dataset.value === pageState);
+  if (item) nav.selectSegment(item, { silent: true });
+  const query = { ...route.query };
+  if (pageState === 'ready') delete query.state; else query.state = pageState;
+  void router.replace({ query });
+}
+function onStateSwitch(event: FireEventMap['fd:change']) {
+  if (event.detail.value !== pageState) setPageState(String(event.detail.value));
+}
+/** Try again in the error state goes to loading (data-fd-set-state); the panel comes back after a moment. */
+function onStatesChange(event: FireEventMap['fd:change']) {
+  if (event.target !== event.currentTarget || event.detail.value !== 'loading' || pageState === 'loading') return;
+  setPageState('loading');
+  retry = window.setTimeout(() => { if (pageState === 'loading') setPageState('ready'); }, 700);
+}
+
+let retry = 0;
+let loaded = 0;
+onMounted(() => {
+  // The first paint: skeletons swap to content, as the template does (under VITE_FIRE_STATIC the screen stays as written).
+  if (SIMULATE_LOAD) loaded = window.setTimeout(() => ['members-wrap', 'billing-summary'].forEach((id) => texture.setLoading($(`#${id}`), false)), LOAD_MS);
+  const initial = String(route.query.state ?? '');
+  if (STATES.includes(initial) && initial !== 'ready') setPageState(initial);
+});
+onBeforeUnmount(() => { window.clearTimeout(loaded); window.clearTimeout(retry); });
 </script>
 
 <template>
-  <div class="fd-frame" @fd:change="onChange">
+  <div class="fd-frame">
 
-    <section class="fd-band fd-page-hero fd-rise">
-      <div class="fd-page-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain"></div></div>
-      <h1 class="fd-display">Settings</h1>
-      <p class="fd-page-hero-desc">Manage your team, billing and account preferences.</p>
+    <section class="fd-band fd-rise" data-pad="sm" aria-label="Page head">
+      <div class="fd-page-head">
+        <div class="fd-page-head-text">
+          <h1 class="fd-page-head-title">Settings</h1>
+          <p class="fd-page-head-desc">Your account, the Quarry Labs team and how it uses Ember.</p>
+        </div>
+        <div class="fd-page-head-actions">
+          <a class="fd-btn" data-variant="outline" href="audit.html"><svg class="fd-icon" data-icon="scroll-text" aria-hidden="true"><use href="#i-scroll-text"></use></svg><span>Audit log</span></a>
+        </div>
+      </div>
     </section>
 
     <section class="fd-band fd-rise" data-fd-vars="--fd-i: 1" data-pad="none" data-grow aria-label="Settings">
       <div class="fd-split" data-side="start">
 
         <aside class="fd-panel" aria-label="Settings sections">
-          <nav class="fd-subnav" aria-label="Settings">
-            <a class="fd-subnav-item" href="?tab=account" data-tab="account"><svg class="fd-icon" data-icon="user" aria-hidden="true"><use href="#i-user"></use></svg><span>Account</span></a>
-            <a class="fd-subnav-item" href="?tab=team" data-tab="team" aria-current="page"><svg class="fd-icon" data-icon="users" aria-hidden="true"><use href="#i-users"></use></svg><span>Team</span><span class="fd-subnav-meta" data-bind="member-count">4</span></a>
-            <a class="fd-subnav-item" href="?tab=billing" data-tab="billing"><svg class="fd-icon" data-icon="credit-card" aria-hidden="true"><use href="#i-credit-card"></use></svg><span>Billing</span></a>
-            <a class="fd-subnav-item" href="?tab=data-sources" data-tab="data-sources"><svg class="fd-icon" data-icon="database" aria-hidden="true"><use href="#i-database"></use></svg><span>Data sources</span></a>
-            <a class="fd-subnav-item" href="?tab=connected-apps" data-tab="connected-apps"><svg class="fd-icon" data-icon="plug" aria-hidden="true"><use href="#i-plug"></use></svg><span>Connected apps</span></a>
-            <a class="fd-subnav-item" href="?tab=notifications" data-tab="notifications"><svg class="fd-icon" data-icon="bell" aria-hidden="true"><use href="#i-bell"></use></svg><span>Notifications</span></a>
+          <!-- Three groups (you, the team, developers), split by separators. Counts say what is inside.
+               Below 760px of its own width the subnav becomes one scrolling strip. -->
+          <nav class="fd-subnav" aria-label="Settings" @click="onTab">
+            <a class="fd-subnav-item" href="?tab=account" data-tab="account" :aria-current="tab === 'account' ? 'page' : undefined"><svg class="fd-icon" data-icon="user" aria-hidden="true"><use href="#i-user"></use></svg><span>Account</span></a>
+            <a class="fd-subnav-item" href="?tab=notifications" data-tab="notifications" :aria-current="tab === 'notifications' ? 'page' : undefined"><svg class="fd-icon" data-icon="bell" aria-hidden="true"><use href="#i-bell"></use></svg><span>Notifications</span></a>
             <hr class="fd-subnav-sep">
-            <a class="fd-subnav-item" href="?tab=advanced" data-tab="advanced"><svg class="fd-icon" data-icon="settings-2" aria-hidden="true"><use href="#i-settings-2"></use></svg><span>Advanced</span></a>
+            <a class="fd-subnav-item" href="?tab=team" data-tab="team" :aria-current="tab === 'team' ? 'page' : undefined"><svg class="fd-icon" data-icon="users" aria-hidden="true"><use href="#i-users"></use></svg><span>Team</span><span class="fd-subnav-meta" data-bind="member-count">4</span></a>
+            <a class="fd-subnav-item" href="?tab=features" data-tab="features" :aria-current="tab === 'features' ? 'page' : undefined"><svg class="fd-icon" data-icon="toggle-left" aria-hidden="true"><use href="#i-toggle-left"></use></svg><span>Features</span><span class="fd-subnav-meta" data-bind="features-on">6</span></a>
+            <a class="fd-subnav-item" href="?tab=billing" data-tab="billing" :aria-current="tab === 'billing' ? 'page' : undefined"><svg class="fd-icon" data-icon="credit-card" aria-hidden="true"><use href="#i-credit-card"></use></svg><span>Billing</span></a>
+            <hr class="fd-subnav-sep">
+            <a class="fd-subnav-item" href="?tab=data-sources" data-tab="data-sources" :aria-current="tab === 'data-sources' ? 'page' : undefined"><svg class="fd-icon" data-icon="database" aria-hidden="true"><use href="#i-database"></use></svg><span>Data sources</span><span class="fd-subnav-meta" data-bind="sources-on">4</span></a>
+            <a class="fd-subnav-item" href="?tab=connected-apps" data-tab="connected-apps" :aria-current="tab === 'connected-apps' ? 'page' : undefined"><svg class="fd-icon" data-icon="plug" aria-hidden="true"><use href="#i-plug"></use></svg><span>Connected apps</span><span class="fd-subnav-meta" data-bind="apps-total">4</span></a>
+            <a class="fd-subnav-item" href="?tab=advanced" data-tab="advanced" :aria-current="tab === 'advanced' ? 'page' : undefined"><svg class="fd-icon" data-icon="settings-2" aria-hidden="true"><use href="#i-settings-2"></use></svg><span>Advanced</span></a>
           </nav>
         </aside>
 
         <div class="fd-split-main">
+        <div class="fd-states" id="settings-states" data-state="ready" @fd:change="onStatesChange">
+
+          <!-- Loading: the shape of a settings panel -->
+          <div class="fd-stack" data-gap="6" data-when="loading" aria-busy="true" aria-label="Loading settings">
+            <div class="fd-skeleton-text" data-lines="2"></div>
+            <div class="fd-skeleton-list" data-rows="5"></div>
+          </div>
+
+          <!-- Error -->
+          <div class="fd-empty" data-tone="danger" data-when="error" role="alert">
+            <span class="fd-empty-icon"><svg class="fd-icon" data-icon="triangle-alert" aria-hidden="true"><use href="#i-triangle-alert"></use></svg></span>
+            <h2 class="fd-empty-title">Couldn’t load settings</h2>
+            <p class="fd-empty-text">The request timed out after 10 seconds. Nothing you saved was lost.</p>
+            <div class="fd-empty-actions"><button class="fd-btn" type="button" data-fd-set-state="loading"><svg class="fd-icon" data-icon="refresh-cw" aria-hidden="true"><use href="#i-refresh-cw"></use></svg><span>Try again</span></button></div>
+            <p class="fd-empty-meta"><span>Request ID</span><code class="fd-code">req_5c81d0e2</code><button class="fd-btn" type="button" data-size="xs" data-variant="ghost" data-icon-only data-fd-copy="req_5c81d0e2" aria-label="Copy request ID"><svg class="fd-icon" data-icon="copy" aria-hidden="true"><use href="#i-copy"></use></svg></button></p>
+          </div>
+
+          <!-- Ready: one panel per subnav item -->
+          <div data-when="ready">
 
           <!-- ===================================================== Account -->
-          <section class="fd-stack" data-gap="1" id="panel-account" data-panel="account" aria-labelledby="h-account" hidden>
+          <section class="fd-stack" data-gap="1" id="panel-account" data-panel="account" aria-labelledby="h-account" :hidden="tab !== 'account'">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-account" tabindex="-1">Account</h2>
               <p class="fd-muted">Sign-in, appearance and privacy for <span class="fd-mono">maya@quarry.dev</span>.</p>
@@ -121,20 +342,20 @@ function onChange(event: FireEventMap['fd:change']) {
           </section>
 
           <!-- ===================================================== Team -->
-          <form class="fd-stack" data-gap="1" id="panel-team" data-panel="team" aria-labelledby="h-team" data-fd-dirty novalidate autocomplete="off">
+          <form class="fd-stack" data-gap="1" id="panel-team" data-panel="team" aria-labelledby="h-team" data-fd-dirty novalidate autocomplete="off" :hidden="tab !== 'team'" @input="onTeamInput" @reset="onTeamReset" @submit.prevent="onTeamSave">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-team" tabindex="-1">Team</h2>
               <p class="fd-muted" data-bind="team-summary">Quarry Labs · 4 members · 2 pending invites</p>
+              <!-- Who can edit: always on the page, so nobody finds out by trying -->
+              <p class="fd-row fd-small fd-muted" data-gap="1-5" id="team-editors"><svg class="fd-icon" data-size="14" data-icon="users" aria-hidden="true"><use href="#i-users"></use></svg><span>Owners and admins can edit. Last changed by <span data-bind="team-changed-by">Tomasz Nowak, Nov 12</span>.</span></p>
+              <p class="fd-row fd-small fd-muted" data-gap="1-5" id="team-viewer" data-member-only hidden><svg class="fd-icon" data-size="14" data-icon="lock" aria-hidden="true"><use href="#i-lock"></use></svg><span>You are a member, so you can read these settings. Ask Maya Reyes or Tomasz Nowak to change them.</span></p>
             </header>
             <div>
               <div class="fd-form-row" data-layout="stack">
                 <div class="fd-form-row-text"><label class="fd-form-row-label" for="team-name">Team name</label><span class="fd-form-row-desc">Shown on invoices and to the people you invite.</span></div>
                 <div class="fd-form-row-control">
                   <div class="fd-field">
-                    <div class="fd-input-pair">
-                      <input class="fd-input" id="team-name" name="name" value="Quarry Labs" maxlength="40" autocomplete="off" aria-describedby="team-name-error">
-                      <button type="button" class="fd-btn" id="team-name-save" disabled>Save</button>
-                    </div>
+                    <input class="fd-input" id="team-name" name="name" value="Quarry Labs" maxlength="40" autocomplete="off" aria-describedby="team-name-error" data-admin>
                     <p class="fd-field-error" id="team-name-error" hidden><svg class="fd-icon" data-size="14" data-icon="circle-alert" aria-hidden="true"><use href="#i-circle-alert"></use></svg><span>Enter a team name.</span></p>
                   </div>
                 </div>
@@ -144,12 +365,20 @@ function onChange(event: FireEventMap['fd:change']) {
                 <div class="fd-form-row-text"><label class="fd-form-row-label" for="team-slug">Team slug</label><span class="fd-form-row-desc">A vanity name for your team URLs. Leave it blank to use the team ID.</span></div>
                 <div class="fd-form-row-control">
                   <div class="fd-field">
-                    <div class="fd-input-pair">
-                      <input class="fd-input" id="team-slug" name="slug" value="quarry-labs" placeholder="e.g. quarry-labs" autocomplete="off" spellcheck="false" aria-describedby="team-slug-hint team-slug-error">
-                      <button type="button" class="fd-btn" id="team-slug-save" disabled>Save</button>
-                    </div>
+                    <input class="fd-input" id="team-slug" name="slug" value="quarry-labs" placeholder="e.g. quarry-labs" autocomplete="off" spellcheck="false" aria-describedby="team-slug-hint team-slug-error" data-admin>
                     <p class="fd-field-hint" id="team-slug-hint" data-mono>ember.dev/app/t/<span data-bind="slug-preview">quarry-labs</span>/usage</p>
                     <p class="fd-field-error" id="team-slug-error" hidden><svg class="fd-icon" data-size="14" data-icon="circle-alert" aria-hidden="true"><use href="#i-circle-alert"></use></svg><span>Use 3 to 32 lowercase letters, numbers or dashes.</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fd-form-row" data-layout="stack">
+                <div class="fd-form-row-text"><span class="fd-form-row-label" id="team-region-label">Default region</span><span class="fd-form-row-desc">Where new crawls and scrapes run unless a request names one.</span></div>
+                <div class="fd-form-row-control">
+                  <div class="fd-segmented" role="radiogroup" aria-labelledby="team-region-label" id="team-region">
+                    <label class="fd-segmented-item"><input type="radio" name="region" value="us-east" data-admin><span>US East</span></label>
+                    <label class="fd-segmented-item"><input type="radio" name="region" value="eu-west" checked data-admin><span>EU West</span></label>
+                    <label class="fd-segmented-item"><input type="radio" name="region" value="ap-south" data-admin><span>Asia Pacific</span></label>
                   </div>
                 </div>
               </div>
@@ -159,9 +388,9 @@ function onChange(event: FireEventMap['fd:change']) {
                 <div class="fd-form-row-control">
                   <div class="fd-field">
                     <div class="fd-input-pair">
-                      <input class="fd-input" type="email" id="invite-email" placeholder="Enter email address" autocomplete="off" aria-describedby="invite-hint">
+                      <input class="fd-input" type="email" id="invite-email" placeholder="Enter email address" autocomplete="off" aria-describedby="invite-hint" data-admin>
                       <label class="fd-select"><span class="fd-sr-only">Role</span>
-                        <select id="invite-role"><option>Member</option><option>Admin</option><option>Billing</option></select>
+                        <select id="invite-role" data-admin><option>Member</option><option>Admin</option><option>Billing</option></select>
                       </label>
                       <button type="button" class="fd-btn" id="invite-send" disabled><svg class="fd-icon" data-icon="mail" aria-hidden="true"><use href="#i-mail"></use></svg><span>Send invite</span></button>
                     </div>
@@ -188,19 +417,19 @@ function onChange(event: FireEventMap['fd:change']) {
                       <li class="fd-list-row" data-member="tomasz@quarry.dev">
                         <span class="fd-list-lead" data-shape="round" data-tone="info">TN</span>
                         <div class="fd-list-body"><span class="fd-list-title">Tomasz Nowak</span><span class="fd-list-desc">tomasz@quarry.dev</span></div>
-                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Tomasz Nowak</span><select data-role><option>Admin</option><option>Member</option><option>Billing</option></select></label></span>
+                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Tomasz Nowak</span><select data-role data-admin><option>Admin</option><option>Member</option><option>Billing</option></select></label></span>
                         <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Tomasz Nowak" data-fd-menu="menu-member" data-placement="bottom-end"><svg class="fd-icon" data-icon="ellipsis" aria-hidden="true"><use href="#i-ellipsis"></use></svg></button></span>
                       </li>
                       <li class="fd-list-row" data-member="amara@quarry.dev">
                         <span class="fd-list-lead" data-shape="round" data-tone="success">AO</span>
                         <div class="fd-list-body"><span class="fd-list-title">Amara Okafor</span><span class="fd-list-desc">amara@quarry.dev</span></div>
-                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Amara Okafor</span><select data-role><option>Admin</option><option selected>Member</option><option>Billing</option></select></label></span>
+                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Amara Okafor</span><select data-role data-admin><option>Admin</option><option selected>Member</option><option>Billing</option></select></label></span>
                         <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Amara Okafor" data-fd-menu="menu-member" data-placement="bottom-end"><svg class="fd-icon" data-icon="ellipsis" aria-hidden="true"><use href="#i-ellipsis"></use></svg></button></span>
                       </li>
                       <li class="fd-list-row" data-member="lukas@quarry.dev">
                         <span class="fd-list-lead" data-shape="round" data-tone="violet">LS</span>
                         <div class="fd-list-body"><span class="fd-list-title">Lukas Schmidt</span><span class="fd-list-desc">lukas@quarry.dev</span></div>
-                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Lukas Schmidt</span><select data-role><option>Admin</option><option>Member</option><option selected>Billing</option></select></label></span>
+                        <span class="fd-list-meta"><label class="fd-select" data-size="sm"><span class="fd-sr-only">Role for Lukas Schmidt</span><select data-role data-admin><option>Admin</option><option>Member</option><option selected>Billing</option></select></label></span>
                         <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions for Lukas Schmidt" data-fd-menu="menu-member" data-placement="bottom-end"><svg class="fd-icon" data-icon="ellipsis" aria-hidden="true"><use href="#i-ellipsis"></use></svg></button></span>
                       </li>
                       <li class="fd-list-row" data-invite="jun@northwind.dev" data-role-name="Member">
@@ -231,8 +460,13 @@ function onChange(event: FireEventMap['fd:change']) {
               </div>
 
               <div class="fd-setting" data-size="sm">
-                <div class="fd-setting-text"><h3 class="fd-setting-title">Leave team</h3><p class="fd-setting-desc">Leave Quarry Labs and lose access to its keys, runs and monitors. Owners must transfer ownership first.</p></div>
-                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="ghost" id="leave-team"><svg class="fd-icon" data-icon="log-out" aria-hidden="true"><use href="#i-log-out"></use></svg><span>Leave team</span></button></div>
+                <div class="fd-setting-text"><h3 class="fd-setting-title">Leave team</h3><p class="fd-setting-desc">Leave Quarry Labs and lose access to its keys, runs and monitors.</p></div>
+                <div class="fd-setting-control">
+                  <div class="fd-reason">
+                    <button class="fd-btn" type="button" data-variant="ghost" id="leave-team" aria-disabled="true" aria-describedby="leave-reason" @click="onLeave"><svg class="fd-icon" data-icon="log-out" aria-hidden="true"><use href="#i-log-out"></use></svg><span>Leave team</span></button>
+                    <p class="fd-reason-text" id="leave-reason"><svg class="fd-icon" data-icon="lock" aria-hidden="true"><use href="#i-lock"></use></svg><span><span class="fd-reason-why">You are the only owner.</span> <span class="fd-reason-who">Make another member an owner first.</span></span></p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -243,8 +477,106 @@ function onChange(event: FireEventMap['fd:change']) {
             </div>
           </form>
 
+          <!-- ===================================================== Features: a list of switches, grouped rows in one table -->
+          <section class="fd-stack" data-gap="4" id="panel-features" data-panel="features" aria-labelledby="h-features" :hidden="tab !== 'features'">
+            <header class="fd-stack" data-gap="1">
+              <h2 class="fd-h2" id="h-features" tabindex="-1">Features</h2>
+              <p class="fd-muted">What every key on Quarry Labs can use. A switch applies at once.</p>
+              <p class="fd-row fd-small fd-muted" data-gap="1-5"><svg class="fd-icon" data-size="14" data-icon="users" aria-hidden="true"><use href="#i-users"></use></svg><span>Owners and admins turn features on and off.</span></p>
+              <p class="fd-row fd-small fd-muted" data-gap="1-5" data-member-only hidden><svg class="fd-icon" data-size="14" data-icon="lock" aria-hidden="true"><use href="#i-lock"></use></svg><span>You are a member, so the switches are read-only. Ask Maya Reyes or Tomasz Nowak.</span></p>
+            </header>
+
+            <div class="fd-toolbar" aria-label="Find a feature">
+              <div class="fd-search fd-toolbar-search" data-variant="soft">
+                <svg class="fd-icon" data-icon="search" aria-hidden="true"><use href="#i-search"></use></svg>
+                <input class="fd-search-input" id="feature-search" type="search" placeholder="Screenshots" aria-label="Search features" autocomplete="off" @input="onFeatureSearch">
+                <button type="button" class="fd-search-clear" aria-label="Clear search"><svg class="fd-icon" data-icon="x" aria-hidden="true"><use href="#i-x"></use></svg></button>
+              </div>
+              <div class="fd-toolbar-end"><span class="fd-small fd-muted" id="feature-count" aria-live="polite">6 of 10 on</span></div>
+            </div>
+
+            <div class="fd-table-wrap" id="features-wrap">
+              <div class="fd-table-scroll">
+                <table class="fd-table" id="features-table" data-collapsible data-stack aria-label="Features by area" @change="onFeature">
+                  <thead>
+                    <tr><th>Feature</th><th data-col="sm" data-stack="hide">Status</th><th data-col="fit">On</th></tr>
+                  </thead>
+                  <tbody class="fd-table-group">
+                    <tr class="fd-table-group-head"><th scope="rowgroup" colspan="3"><span class="fd-table-group-title">Crawling</span><span class="fd-table-group-count" data-auto>4</span></th></tr>
+                    <tr data-feature="JavaScript rendering">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">JavaScript rendering</span><span class="fd-table-sub">Render pages in a browser before extracting. 1 extra credit a page.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="success">On</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="JavaScript rendering" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                    <tr data-feature="Stealth proxies">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Stealth proxies</span><span class="fd-table-sub">Retry blocked pages through residential proxies.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="success">On</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Stealth proxies" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                    <tr data-feature="Follow subdomains">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Follow subdomains</span><span class="fd-table-sub">Crawls may leave the start host for its subdomains.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="neutral">Off</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Follow subdomains" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                    <tr data-feature="Full-page screenshots">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Full-page screenshots</span><span class="fd-table-sub">Add a screenshot to every scrape result.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="neutral">Off</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Full-page screenshots" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                  </tbody>
+                  <tbody class="fd-table-group">
+                    <tr class="fd-table-group-head"><th scope="rowgroup" colspan="3"><span class="fd-table-group-title">Agents</span><span class="fd-table-group-count" data-auto>3</span></th></tr>
+                    <tr data-feature="Agent endpoint">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Agent endpoint</span><span class="fd-table-sub">Let keys call <span class="fd-mono">/agent</span> for research that takes many steps.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="success">On</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Agent endpoint" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                    <tr data-feature="Browser actions">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Browser actions</span><span class="fd-table-sub">Agents can click, type and scroll with <span class="fd-mono">/interact</span>.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="success">On</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Browser actions" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                    <tr data-feature="Ask before large runs">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Ask before large runs</span><span class="fd-table-sub">An agent pauses and asks before a run passes 200 credits.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="success">On</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Ask before large runs" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                  </tbody>
+                  <tbody class="fd-table-group">
+                    <tr class="fd-table-group-head"><th scope="rowgroup" colspan="3"><span class="fd-table-group-title">Monitors</span><span class="fd-table-group-count" data-auto>1</span></th></tr>
+                    <tr data-feature="Change history">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Change history</span><span class="fd-table-sub">Keep a diff of every change a monitor finds, for 90 days.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="success">On</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" checked aria-label="Change history" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                  </tbody>
+                  <tbody class="fd-table-group">
+                    <tr class="fd-table-group-head"><th scope="rowgroup" colspan="3"><span class="fd-table-group-title">Preview</span><span class="fd-table-group-count" data-auto>2</span></th></tr>
+                    <tr data-feature="Deep research">
+                      <td data-stack-title><div class="fd-table-two"><span class="fd-table-title">Deep research <span class="fd-badge" data-tone="violet">Preview</span></span><span class="fd-table-sub">Agents read up to 200 pages for one answer. May change.</span></div></td>
+                      <td data-stack="hide"><span class="fd-status" data-tone="neutral">Off</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" aria-label="Deep research" data-admin><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                    <tr data-feature="Schema extraction" data-locked>
+                      <td data-stack-title><div class="fd-stack" data-gap="1-5"><div class="fd-table-two"><span class="fd-table-title">Schema extraction</span><span class="fd-table-sub">Extract to a JSON schema you define, checked on every page.</span></div>
+                        <p class="fd-reason-text" id="reason-schema"><svg class="fd-icon" data-icon="lock" aria-hidden="true"><use href="#i-lock"></use></svg><span><span class="fd-reason-why">On the Standard plan.</span> <span class="fd-reason-who">Billing admins can upgrade.</span></span></p></div></td>
+                      <td data-stack="hide"><span class="fd-badge" data-variant="outline">Standard</span></td>
+                      <td><label class="fd-switch"><input type="checkbox" role="switch" disabled aria-label="Schema extraction" aria-describedby="reason-schema"><span class="fd-switch-track"></span></label></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="fd-empty" data-size="sm" id="features-none" hidden>
+              <span class="fd-empty-icon"><svg class="fd-icon" data-icon="search" aria-hidden="true"><use href="#i-search"></use></svg></span>
+              <h3 class="fd-empty-title">No feature matches</h3>
+              <p class="fd-empty-text">Try another word, like “proxies” or “agent”.</p>
+              <div class="fd-empty-actions"><button class="fd-btn" type="button" id="features-clear" @click="onFeaturesClear"><span>Clear search</span></button></div>
+            </div>
+          </section>
+
           <!-- ===================================================== Billing -->
-          <section class="fd-stack" data-gap="4" id="panel-billing" data-panel="billing" aria-labelledby="h-billing" hidden>
+          <section class="fd-stack" data-gap="4" id="panel-billing" data-panel="billing" aria-labelledby="h-billing" :hidden="tab !== 'billing'">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-billing" tabindex="-1">Billing</h2>
               <p class="fd-muted">Your plan, credits and payment method for Quarry Labs.</p>
@@ -524,7 +856,7 @@ function onChange(event: FireEventMap['fd:change']) {
           </section>
 
           <!-- ===================================================== Data sources -->
-          <section class="fd-stack" data-gap="5" id="panel-data-sources" data-panel="data-sources" aria-labelledby="h-data-sources" hidden>
+          <section class="fd-stack" data-gap="5" id="panel-data-sources" data-panel="data-sources" aria-labelledby="h-data-sources" :hidden="tab !== 'data-sources'">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-data-sources" tabindex="-1">Data sources</h2>
               <p class="fd-muted">Choose which catalog providers your agents can call and cap what each one can spend every month.</p>
@@ -630,7 +962,7 @@ function onChange(event: FireEventMap['fd:change']) {
           </section>
 
           <!-- ===================================================== Connected apps -->
-          <section class="fd-stack" data-gap="4" id="panel-connected-apps" data-panel="connected-apps" aria-labelledby="h-connected-apps" hidden>
+          <section class="fd-stack" data-gap="4" id="panel-connected-apps" data-panel="connected-apps" aria-labelledby="h-connected-apps" :hidden="tab !== 'connected-apps'">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-connected-apps" tabindex="-1">Connected apps</h2>
               <p class="fd-muted">MCP clients and OAuth apps that can use Ember on behalf of Quarry Labs.</p>
@@ -688,7 +1020,7 @@ function onChange(event: FireEventMap['fd:change']) {
           </section>
 
           <!-- ===================================================== Notifications -->
-          <section class="fd-stack" data-gap="1" id="panel-notifications" data-panel="notifications" aria-labelledby="h-notifications" hidden>
+          <section class="fd-stack" data-gap="1" id="panel-notifications" data-panel="notifications" aria-labelledby="h-notifications" :hidden="tab !== 'notifications'">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-notifications" tabindex="-1">Notifications</h2>
               <p class="fd-muted">Choose what reaches you and where. These settings are personal, so teammates keep their own.</p>
@@ -767,7 +1099,7 @@ function onChange(event: FireEventMap['fd:change']) {
           </section>
 
           <!-- ===================================================== Advanced -->
-          <section class="fd-stack" data-gap="1" id="panel-advanced" data-panel="advanced" aria-labelledby="h-advanced" hidden>
+          <section class="fd-stack" data-gap="1" id="panel-advanced" data-panel="advanced" aria-labelledby="h-advanced" :hidden="tab !== 'advanced'">
             <header class="fd-stack" data-gap="1">
               <h2 class="fd-h2" id="h-advanced" tabindex="-1">Advanced</h2>
               <p class="fd-muted">Webhooks, network access and data handling for Quarry Labs.</p>
@@ -838,6 +1170,12 @@ function onChange(event: FireEventMap['fd:change']) {
                 </div>
               </div>
 
+              <div class="fd-setting" data-align="start">
+                <div class="fd-setting-text"><h3 class="fd-setting-title" id="sso-title">Require single sign-on</h3><p class="fd-setting-desc">Members sign in through your identity provider only.</p></div>
+                <div class="fd-setting-control"><label class="fd-switch"><input type="checkbox" role="switch" disabled aria-labelledby="sso-title" aria-describedby="reason-sso"><span class="fd-switch-track"></span></label></div>
+                <p class="fd-reason-text" id="reason-sso"><svg class="fd-icon" data-icon="lock" aria-hidden="true"><use href="#i-lock"></use></svg><span><span class="fd-reason-why">Single sign-on is on the Scale plan.</span> <span class="fd-reason-who">Billing admins can upgrade.</span></span></p>
+              </div>
+
               <div class="fd-setting">
                 <div class="fd-setting-text"><h3 class="fd-setting-title">Data retention</h3><p class="fd-setting-desc">How long Ember keeps request logs and run output before deleting them.</p></div>
                 <div class="fd-setting-control"><label class="fd-select"><span class="fd-sr-only">Data retention</span>
@@ -858,21 +1196,43 @@ function onChange(event: FireEventMap['fd:change']) {
                 <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="outline" id="export-data"><svg class="fd-icon" data-icon="download" aria-hidden="true"><use href="#i-download"></use></svg><span>Export data</span></button></div>
               </div>
 
-              <div class="fd-setting" data-tone="danger">
+              <!-- Destructive, and on its own section: confirmed on the page, not in a dialog -->
+              <div class="fd-setting" data-tone="danger" data-align="start" id="delete-team-row">
                 <div class="fd-setting-text">
                   <div class="fd-row" data-align="start" data-gap="3">
                     <span class="fd-tile" data-size="44" data-tone="accent">QL</span>
                     <div>
-                      <h3 class="fd-setting-title">Delete team</h3>
+                      <h3 class="fd-setting-title" id="delete-team-title">Delete team</h3>
                       <p class="fd-setting-desc"><span class="fd-label">Quarry Labs</span> and its 4 API keys, 12 monitors and 30 days of logs will be permanently deleted. <strong>This cannot be undone.</strong></p>
                     </div>
                   </div>
                 </div>
-                <div class="fd-setting-control"><button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-open="dlg-delete-team">Delete</button></div>
+                <form class="fd-confirm-inline" method="dialog" id="delete-team" data-fd-confirm-inline data-confirm="quarry-labs" aria-labelledby="delete-team-title" @submit.prevent="onDeleteTeam">
+                  <div class="fd-field">
+                    <label class="fd-field-label" for="dt-confirm">Type <span class="fd-confirm-phrase">quarry-labs</span> to confirm</label>
+                    <input class="fd-input" id="dt-confirm" name="confirm" autocomplete="off" autocapitalize="off" spellcheck="false" required data-fd-confirm-input aria-describedby="dt-confirm-rule" data-admin>
+                    <p class="fd-confirm-inline-rule" id="dt-confirm-rule" data-fd-confirm-rule>Type it exactly as shown. Case counts.</p>
+                  </div>
+                  <div class="fd-form-actions"><button class="fd-btn" type="submit" data-variant="danger" data-fd-confirm-submit>Delete team</button></div>
+                </form>
               </div>
             </div>
           </section>
 
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fd-band" data-pad="sm" data-grow aria-label="Demo state">
+      <div class="fd-row" data-wrap data-justify="between">
+        <span class="fd-eyebrow">Demo state</span>
+        <div class="fd-segmented" data-size="sm" id="state-switch" role="radiogroup" aria-label="Page state" @fd:change="onStateSwitch">
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="ready">Loaded</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="member">As a member</button>
         </div>
       </div>
     </section>
@@ -1075,25 +1435,6 @@ c3bw-0fok  v6ie-2rnz</code></pre>
       <div class="fd-dialog-foot">
         <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
         <button class="fd-btn" type="submit" value="add" data-variant="primary"><span>Add endpoint</span></button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog class="fd-dialog fd-confirm" id="dlg-delete-team" data-size="sm" data-confirm="quarry-labs">
-    <form method="dialog">
-      <div class="fd-dialog-head">
-        <h2 class="fd-h3 fd-dialog-title">Delete Quarry Labs</h2>
-        <p class="fd-dialog-desc">This deletes the team, its 4 API keys, 12 monitors and 30 days of logs. Members lose access at once. You can’t undo this.</p>
-      </div>
-      <div class="fd-dialog-body">
-        <div class="fd-field">
-          <label class="fd-field-label" for="dt-confirm">Type <span class="fd-confirm-phrase">quarry-labs</span> to confirm</label>
-          <input class="fd-input" id="dt-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false">
-        </div>
-      </div>
-      <div class="fd-dialog-foot">
-        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
-        <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Delete team</span></button>
       </div>
     </form>
   </dialog>

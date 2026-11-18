@@ -10,6 +10,11 @@
    series element. Rules below turn that into --_ch-c, so a theme or accent change needs no re-render.
      1 accent · 2 ink · 3 info · 4 violet · 5 success · 6 warning
    data-tone  neutral | muted | accent | success | warning | danger | info | violet   (overrides the slot)
+   The six series colours come from the palette (fire/js/palettes.js derives them per palette and checks every pair
+   for colour-blind separation and each at 3:1); colour is never the only cue:
+   data-marks="dash" on .fd-chart (or "marks": "dash" in the JSON): line and area series 2–6 take a dash pattern each
+   (--fd-chart-dash-2…6; series 1, the accent, stays solid); the renderer marks those lines data-dash and draws the
+   legend and tooltip swatches as fd-chart-swatch-svg > fd-chart-swatch-dash (data-shape="dash") with the same dash.
 
    Quadrant: data-fd-chart="quadrant" on .fd-chart. Points sit on two axes, split into four corners by a midpoint on
    each. The renderer draws the parts below; below 520px of width the plot gives way to a list grouped by corner.
@@ -42,6 +47,13 @@
   --fd-chart-swatch-line: 2px;          /* line swatch thickness */
   --fd-chart-swatch-line-radius: calc(1px * var(--fd-radius-scale));
   --fd-chart-swatch-radius: calc(2px * var(--fd-radius-scale));
+  --fd-chart-swatch-dash-w: 16px;       /* a dashed line swatch: long enough to show the dash */
+  /* data-marks="dash": the dash of series 2–6, in SVG user units (px) */
+  --fd-chart-dash-2: 6 3;               /* long dash */
+  --fd-chart-dash-3: 0.5 3.5;           /* dots (round caps) */
+  --fd-chart-dash-4: 8 3 0.5 3;         /* dash, dot */
+  --fd-chart-dash-5: 2.5 2.5;           /* short dash */
+  --fd-chart-dash-6: 7 2.5 2 2.5;       /* long and short dash */
   /* tooltip */
   --fd-chart-tooltip-min: 148px;
   --fd-chart-tooltip-max: 300px;
@@ -148,6 +160,8 @@
 }
 .fd-chart[data-ring="bg"] { --_ch-ring: var(--fd-bg); }
 .fd-chart > script { display: none; }
+/* The visually hidden data table: a table ignores the 1px box of fd-sr-only and widens the page on a phone. */
+.fd-chart > table.fd-sr-only { display: block; }
 
 .fd-chart-plot {
   position: relative; display: block; min-width: 0;
@@ -204,6 +218,18 @@
   animation: fd-fade-in var(--fd-dur-5) var(--fd-ease-out) both; animation-delay: var(--fd-dur-3);
 }
 .fd-chart[data-enter="pending"] :is(.fd-chart-line, .fd-chart-col, .fd-chart-area, .fd-chart-live, .fd-chart-point) { animation-play-state: paused; }
+
+/* ---------- data-marks="dash": a dash per series, so colour is not the only cue ---------- */
+.fd-chart[data-marks="dash"] [data-s="2"] { --_ch-dash: var(--fd-chart-dash-2); }
+.fd-chart[data-marks="dash"] [data-s="3"] { --_ch-dash: var(--fd-chart-dash-3); }
+.fd-chart[data-marks="dash"] [data-s="4"] { --_ch-dash: var(--fd-chart-dash-4); }
+.fd-chart[data-marks="dash"] [data-s="5"] { --_ch-dash: var(--fd-chart-dash-5); }
+.fd-chart[data-marks="dash"] [data-s="6"] { --_ch-dash: var(--fd-chart-dash-6); }
+.fd-chart[data-marks="dash"] .fd-chart-line[data-dash] { stroke-dasharray: var(--_ch-dash, none); }
+.fd-chart[data-marks="dash"]:is([data-enter="pending"], [data-enter="run"]) .fd-chart-line[data-dash] { animation-name: fd-fade-in; }
+:is(.fd-legend-swatch, .fd-chart-tooltip-swatch)[data-shape="dash"] { width: var(--fd-chart-swatch-dash-w); height: var(--fd-chart-swatch-line); background: none; border-radius: 0; }
+.fd-chart-swatch-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fd-chart-swatch-dash { stroke: var(--_ch-c); stroke-width: 2; stroke-linecap: round; stroke-dasharray: var(--_ch-dash, none); }
 @media (prefers-reduced-motion: reduce) {
   .fd-chart-live-ring { animation: none; opacity: 0.24; transform: scale(1.8); }
 }

@@ -67,3 +67,28 @@ export declare function measure(tokens: TokenMap, name: string, context: string 
 export declare function paletteFailures(tokens: TokenMap, options?: { name?: string; modes?: ModeIndex[] }): string[];
 /** The least contrast --fd-focus keeps against every ground. */
 export declare const FOCUS_MIN: number;
+
+/** One status tone's measurements in one mode. */
+export interface StatusMeasure {
+  /** -text's worst ratio on the page, the well, the surfaces and its own -bg over them. */
+  text: number;
+  /** -contrast on -fill. */
+  label: number;
+  /** -line over the page, against the page. */
+  line: number;
+  /** The least ΔE (OKLab) of -solid and -fill from the accent. */
+  apart: number;
+  /** The ΔE it must reach. */
+  need: number;
+  /** True when the accent's hue is in the tone's family. */
+  family: boolean;
+  hue: number;
+  inRange: boolean;
+}
+/** The status and chart measurements of one palette map in one mode. */
+export declare function measureColours(tokens: TokenMap, m: ModeIndex): {
+  status: Record<'success' | 'warning' | 'danger' | 'info', StatusMeasure>;
+  chart: { series: string[]; short: number; worst: import('./palettes.js').ChartWorst; lead: boolean };
+};
+/** Every violation of the status and chart rules, as messages. [] when it passes. */
+export declare function colourFailures(tokens: TokenMap, options?: { name?: string; modes?: ModeIndex[] }): string[];

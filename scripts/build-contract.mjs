@@ -171,7 +171,8 @@ const GROUPS = [
 function groupOf(name) {
   // The ring's colour is set by each palette (an input) but stays with the ring in the focus group.
   if (name === '--fd-focus') return 'focus';
-  if (PALETTE_TOKENS.includes(name)) return 'palette';
+  // Status and chart colours are set by each palette too (inputs) but stay in their own groups.
+  if (PALETTE_TOKENS.includes(name) && !/^--fd-(success|warning|danger|info|chart)-/.test(name)) return 'palette';
   const hit = GROUPS.find(([re]) => re.test(name));
   if (!hit) throw new Error(`${name}: no group; add it to GROUPS in scripts/build-contract.mjs`);
   return hit[1];

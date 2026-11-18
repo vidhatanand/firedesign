@@ -21,6 +21,16 @@
 //                                         and equal to focusOf(): the accent when it reaches 3:1, else the accent text
 // The text steps are read from tokens.css and mixed exactly as the browser does: ink-wash at the step's alpha,
 // composited in sRGB over the background.
+// Status and chart colours (fire/js/palettes.js deriveColours, fire/js/palette-rules.js colourFailures), in every
+// preset, named look, toned sample and the random records scripts/looks-check.mjs renders:
+//   --fd-<tone>-text      4.5:1 on the page, the well, the surfaces and its own -bg over each
+//   --fd-<tone>-contrast  4.5:1 on --fd-<tone>-fill;  --fd-<tone>-line at least 1.25:1 on the page (never the only edge)
+//   apart                 solid and fill 0.10 ΔE (OKLab) from the accent when the accent is in the tone's family, else 0.05
+//   --fd-chart-1…6        3:1 on the page and the surface; every pair 0.10 ΔE apart in normal vision and 0.06 under
+//                         simulated protanopia, deuteranopia and tritanopia (Machado et al. 2009, severity 1.0),
+//                         neighbours 0.15 and 0.08; series 3–6 at chroma 0.09 or more, in light mode outside the yellow
+//                         band (70–128°); two chromatic series within 30° of hue 0.25 apart. Ember's status and chart
+//                         colours equal tokens.css and equal what the engine derives from ember.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,8 +51,10 @@ function build() {
     '   --------------------------------------------------------------------------',
     '   <html data-palette="volt">, or data-palette on any subtree. Each palette sets the colour tokens below as',
     '   light-dark() pairs, so data-theme keeps working inside it; the ink ladder, text steps, fills, accent washes',
-    '   and focus ring re-derive from them in tokens.css. With data-contrast="high" the lines step up in the',
-    '   palette\'s own hue.',
+    '   and focus ring re-derive from them in tokens.css. The status colours (--fd-success-*, -warning-*, -danger-*,',
+    '   -info-*) and the chart series (--fd-chart-1…6) are derived from each palette by the same engine and checked',
+    '   (contrast, distance from the accent, colour-blind separation). With data-contrast="high" the lines step up in',
+    '   the palette\'s own hue.',
     `   Palettes: ${PALETTES.map((p) => p.name).join(' · ')}`,
     '   ========================================================================== */',
     '',
@@ -50,7 +62,11 @@ function build() {
   for (const p of PALETTES) {
     out.push(`/* ${p.label}: ${p.note} */`);
     out.push(`[data-palette="${p.name}"] {`);
-    for (const key of PALETTE_TOKENS) out.push(`  ${key}: ${cssValue(p.tokens[key])};`);
+    for (const key of PALETTE_TOKENS) {
+      // Series 1 follows the accent where it is the accent (so a [data-accent] inside still leads the chart).
+      const same = key === '--fd-chart-1' && p.tokens[key].join() === p.tokens['--fd-accent'].join();
+      out.push(`  ${key}: ${same ? 'var(--fd-accent)' : cssValue(p.tokens[key])};`);
+    }
     out.push('}');
     out.push(`[data-palette="${p.name}"][data-contrast="high"],`);
     out.push(`[data-contrast="high"] [data-palette="${p.name}"] {`);
@@ -130,16 +146,29 @@ const plain = (o) => JSON.parse(JSON.stringify(o));
 const checkText = (tokens, name, context = '') => rules.checkText(tokens, name, context, fail, { ladder: LADDER_RESOLVED });
 const measure = (tokens, name, context) => rules.measure(tokens, name, context, fail);
 
-function check() {
+async function check() {
   // 0. palette-rules.js mixes the text steps exactly as tokens.css does.
   if (JSON.stringify(plain(TEXT_LADDER)) !== JSON.stringify(plain(LADDER_RESOLVED))) fail(`fire/js/palette-rules.js TEXT_LADDER differs from tokens.css: ${JSON.stringify(LADDER_RESOLVED)}`);
 
   // 1. Ember equals the literals in tokens.css.
   const rootTokens = { ...decls(block(':root')), ...decls(block(':root, [data-accent="ember"]')) };
   const ember = PALETTES.find((p) => p.name === 'ember');
+  // A status or chart token may point at another (--fd-success-fill: var(--fd-success-solid)); compare what it resolves to.
+  const resolvePair = (value) => {
+    const vm = value?.match(/^var\((--fd-[\w-]+)\)$/);
+    if (vm) return resolvePair(rootTokens[vm[1]]);
+    const lm = value?.match(/^light-dark\((.*)\)$/);
+    return lm ? args(lm[1]) : [value, value];
+  };
   for (const key of PALETTE_TOKENS) {
     const ours = cssValue(ember.tokens[key]);
-    if (rootTokens[key] !== ours) fail(`ember ${key}: engine "${ours}" ≠ tokens.css "${rootTokens[key]}"`);
+    if (rootTokens[key] === undefined) { fail(`ember ${key}: not declared on :root in tokens.css`); continue; }
+    if (cssValue(resolvePair(rootTokens[key])) !== ours) fail(`ember ${key}: engine "${ours}" ≠ tokens.css "${rootTokens[key]}"`);
+  }
+  // Ember's status colours are also what the engine derives from ember's twenty colours (the reference is a fixed point).
+  const emberDerived = engine.deriveColours(ember.tokens).tokens;
+  for (const key of engine.STATUS_TOKENS) {
+    if (emberDerived[key].join() !== ember.tokens[key].join()) fail(`ember ${key}: deriveColours gives ${emberDerived[key].join('/')}, not the tokens.css literal ${ember.tokens[key].join('/')}`);
   }
   for (const key of CONTRAST_TOKENS) {
     const ours = cssValue(ember.contrast[key]);
@@ -292,6 +321,7 @@ function check() {
 
   checkStructure();
   checkLooks();
+  await checkColours();
 
   if (errors.length) {
     console.error(`\nFAILED: ${errors.length} violation(s)\n${errors.slice(0, 60).map((e) => `  ✗ ${e}`).join('\n')}${errors.length > 60 ? `\n  … and ${errors.length - 60} more` : ''}`);
@@ -467,5 +497,64 @@ function labOf(hex) {
   return [Lv, C * Math.cos((h * Math.PI) / 180), C * Math.sin((h * Math.PI) / 180)];
 }
 
+/* ---------- 10. Status and chart colours ----------
+   Every preset (ember too: its chart literals in tokens.css are what the engine derives), every named
+   look as it is toned, a sample of tones on every preset, and the random records scripts/looks-check.mjs renders (its
+   seed and count), through colourFailures(). */
+async function checkColours() {
+  const cf = (tokens, name, opts = {}) => { for (const e of rules.colourFailures(tokens, { name, ...opts })) fail(e); };
+  const pct = (n) => (n * 100).toFixed(1).padStart(5);
+  console.log('\nstatus colours: solid light/dark and ΔE×100 from the accent (the minimum in brackets; * the accent is in the tone\'s family)');
+  for (const p of PALETTES) {
+    const rows = [0, 1].map((m) => rules.measureColours(p.tokens, m));
+    const cells = engine.STATUS_TONES.map((tone) => {
+      const [l, d] = rows.map((r) => r.status[tone]);
+      return `${tone} ${p.tokens[`--fd-${tone}-solid`].join('/')} ${pct(Math.min(l.apart, d.apart))}${l.family || d.family ? '*' : ' '}[${l.need * 100}]`;
+    });
+    console.log(`${p.name.padEnd(10)} ${cells.join('  ')}`);
+    cf(p.tokens, p.name);
+  }
+  console.log('\nchart series, worst per mode: ΔE×100 normal all/neighbours, colour-blind all/neighbours (want ≥ 10/15, 6/8), contrast on page and surface (≥ 3), chroma of 3–6 (≥ 0.09), nearest hues of two chromatic series (closer than 30° needs 25 apart)');
+  for (const p of PALETTES) {
+    const derived = engine.deriveColours(p.tokens);
+    for (const m of [0, 1]) {
+      const { chart } = rules.measureColours(p.tokens, m);
+      const w = chart.worst;
+      const how = derived.chart[m].fallback ? 'fallback set' : derived.chart[m].moved.length ? `moved ${derived.chart[m].moved.join(', ')}` : 'template';
+      console.log(`${(m ? '' : p.name).padEnd(10)} ${(m ? 'dark' : 'light').padEnd(6)} ${chart.series.join(' ')}  ${pct(w.normal)}/${pct(w.normalAdjacent)}  ${pct(w.cvd)}/${pct(w.cvdAdjacent)} (${w.cvdWhere.padEnd(17)}) ${w.contrast.toFixed(2)}  C ${w.chroma.toFixed(3)}  ${w.hueGap.toFixed(0).padStart(3)}°  ${chart.short > 1e-9 ? 'MISSES ' : ''}${how}`);
+      // A preset's chart set is what the engine derives (ember's is written in tokens.css as literals).
+      if (chart.series.join() !== derived.chart[m].colours.join()) fail(`${p.name} ${m ? 'dark' : 'light'}: chart set ${chart.series.join(' ')} is not what deriveColours gives (${derived.chart[m].colours.join(' ')})`);
+    }
+  }
+  // Toned samples on every preset, the named looks, the random records.
+  let maps = 0;
+  const sample = [{ hue: 90 }, { hue: -120 }, { hue: 180, vivid: 150 }, { vivid: 0 }, { light: 12, warmth: 100 }, { light: -12, warmth: -100 }, { hue: 45, vivid: 60 }];
+  for (const p of PALETTES) for (const tone of sample) { cf(toneTokens(p.tokens, { ...TONE_DEFAULT, ...tone }), `${p.name} tone ${JSON.stringify(tone)}`); maps++; }
+  const dir = path.join(ROOT, 'contract/looks/named');
+  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir).filter((x) => x.endsWith('.json')) : []) {
+    const { name, record } = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    const toned = { ...TONE_DEFAULT, ...(record.tone || {}) };
+    cf(toneTokens(engine.paletteTokens(record.palette), toned), `look ${name}`); maps++;
+  }
+  const looksCheck = await import(pathToFileURL(path.join(ROOT, 'scripts/looks-check.mjs')).href);
+  const theme = await import(pathToFileURL(path.join(ROOT, 'fire/js/theme.js')).href);
+  const records = looksCheck.randomCases(looksCheck.RANDOM_DEFAULT, looksCheck.SEED_DEFAULT);
+  const generated = [];
+  for (const { id, record } of records) {
+    const tone = { ...TONE_DEFAULT, ...(record.tone || {}) };
+    const untoned = Object.keys(TONE_DEFAULT).every((k) => tone[k] === TONE_DEFAULT[k]);
+    if (typeof record.palette === 'string' && untoned) continue; // a preset as it is: checked above
+    const base = typeof record.palette === 'string' ? engine.paletteTokens(record.palette) : theme.paletteFrom(record.palette).tokens;
+    const t = toneTokens(base, tone);
+    cf(t, `${id} (${typeof record.palette === 'string' ? record.palette : record.palette.from})`);
+    if (typeof record.palette !== 'string') {
+      const d = engine.deriveColours(t);
+      generated.push(`${id} ${d.chart.some((c) => c.fallback) ? 'fallback' : d.chart.some((c) => c.moved.length) ? 'moved' : 'template'}`);
+    }
+    maps++;
+  }
+  console.log(`\nstatus and chart rules: ${PALETTES.length} presets, ${maps} toned, named-look and looks-check maps (looks-check seed ${looksCheck.SEED_DEFAULT}, ${records.length} records; generated palettes: ${generated.join(' · ') || 'none'})`);
+}
+
 build();
-if (process.argv.includes('--check')) check();
+if (process.argv.includes('--check')) await check();

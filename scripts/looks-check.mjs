@@ -58,8 +58,10 @@ const argv = process.argv.slice(2);
 const opt = (name, fallback) => { const i = argv.indexOf(`--${name}`); return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : fallback; };
 const CHECK = argv.includes('--check');
 const VERBOSE = argv.includes('--verbose');
-const SEED = Number(opt('seed', 8));
-const RANDOM = Number(opt('random', 40));
+export const SEED_DEFAULT = 8;
+export const RANDOM_DEFAULT = 40;
+const SEED = Number(opt('seed', SEED_DEFAULT));
+const RANDOM = Number(opt('random', RANDOM_DEFAULT));
 const TEMPLATES = opt('templates', 'logs,settings,overview').split(',');
 const WIDTHS = opt('widths', '1440,375').split(',').map(Number);
 const JOBS = Math.max(1, Number(opt('jobs', 4)));
@@ -124,7 +126,7 @@ function randomRecord(rand) {
   return record;
 }
 
-function randomCases(count, seed) {
+export function randomCases(count, seed) {
   const rand = mulberry32(seed);
   const out = [];
   let tries = 0;
@@ -526,4 +528,5 @@ async function main() {
   if (CHECK && failures.length) process.exitCode = 1;
 }
 
-await main();
+// Run when called as a script; scripts/build-palettes.mjs imports randomCases to hold the same records to the colour rules.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) await main();

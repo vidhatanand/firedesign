@@ -274,7 +274,13 @@ export type PaletteToken =
   | '--fd-ink' | '--fd-ink-inverse' | '--fd-wash' | '--fd-ink-wash' | '--fd-bg' | '--fd-bg-sunken' | '--fd-surface'
   | '--fd-surface-raised' | '--fd-surface-inverse' | '--fd-scrim' | '--fd-thumb' | '--fd-line-faint' | '--fd-line'
   | '--fd-line-strong' | '--fd-accent' | '--fd-accent-hover' | '--fd-accent-contrast' | '--fd-accent-text'
-  | '--fd-accent-glow' | '--fd-focus';
+  | '--fd-accent-glow' | '--fd-focus' | StatusToken | ChartToken;
+/** A status tone the palettes derive (STATUS_TONES). */
+export type StatusTone = 'success' | 'warning' | 'danger' | 'info';
+/** The status colours a palette sets (STATUS_TOKENS): solid, text, bg, line, fill and contrast of each tone. */
+export type StatusToken = `--fd-${StatusTone}-${'solid' | 'text' | 'bg' | 'line' | 'fill' | 'contrast'}`;
+/** The chart series a palette sets (CHART_TOKENS). */
+export type ChartToken = '--fd-chart-1' | '--fd-chart-2' | '--fd-chart-3' | '--fd-chart-4' | '--fd-chart-5' | '--fd-chart-6';
 /** The lines high contrast replaces (CONTRAST_TOKENS). */
 export type ContrastToken = '--fd-line-faint' | '--fd-line' | '--fd-line-strong';
 /** A colour in light and dark mode. */

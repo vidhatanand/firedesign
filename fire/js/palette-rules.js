@@ -28,9 +28,28 @@
  *   checkText(tokens, name, context, fail, opts?)     the text rules; calls fail(message) per violation
  *   measure(tokens, name, context, fail, opts?)       the accent, ink and structure rules; returns the ratios
  *   paletteFailures(tokens, { name, modes })          every violation of a palette's token map, as messages
+ *   measureColours(tokens, m)                         the status and chart measurements in mode m (below)
+ *   colourFailures(tokens, { name, modes })           every violation of the status and chart rules, as messages
  *   opts: { ladder, modes }   modes defaults to [0, 1] (light, dark)
+ *
+ * The status and chart rules (COLOUR_RULES in palettes.js), in light and dark:
+ *   --fd-<tone>-text      4.5:1 on --fd-bg, --fd-bg-sunken, --fd-surface, --fd-surface-raised and on --fd-<tone>-bg
+ *                         over the page, the surface and the raised surface (a banner, a callout, a toast)
+ *   --fd-<tone>-contrast  4.5:1 on --fd-<tone>-fill
+ *   --fd-<tone>-line      1.25:1 on the page at least. Not 3:1: the line is never the only boundary of a status part
+ *                         (each also has its tinted -bg, its -text and an icon or a word), and ember's are 1.3–1.9:1.
+ *   apart                 --fd-<tone>-solid and -fill at least 0.10 ΔE (OKLab) from the accent when the accent's hue is
+ *                         in the tone's family, 0.05 otherwise; the solid's hue inside the tone's range
+ *   --fd-chart-1…6        each 3:1 on the page and the surface; series 1 the accent or the accent text; every pair at
+ *                         least 0.10 ΔE apart in normal vision and 0.06 under simulated protanopia, deuteranopia and
+ *                         tritanopia (Machado et al. 2009, severity 1.0); neighbours (1–2, 2–3 … 5–6) 0.15 and 0.08;
+ *                         series 3–6 at chroma 0.09 or more and, in light mode, outside the yellow band (70–128°);
+ *                         two chromatic series within 30° of hue 0.25 apart in normal vision
  */
-import { contrast, toOklch, parse, format, washOver, focusGrounds } from './palettes.js';
+import {
+  contrast, toOklch, parse, format, washOver, focusGrounds, deltaE, chartShortfall,
+  COLOUR_RULES, STATUS_HUES, STATUS_TONES,
+} from './palettes.js';
 
 export const TEXT_MIN = 4.5;    // text that carries information
 export const FAINT_MIN = 3;     // --fd-text-4: placeholders, disabled text, decoration
@@ -163,5 +182,60 @@ export function paletteFailures(tokens, { name = 'palette', modes = [0, 1] } = {
   const fail = (msg) => errors.push(msg);
   measure(tokens, name, '', fail, { modes });
   checkText(tokens, name, '', fail, { modes });
+  return errors;
+}
+
+/* ---------- Status and chart colours ---------- */
+const hueOf = (c) => toOklch(parse(c).rgb)[2];
+// One degree of slack: the gamut fit can turn a hue a fraction when it takes chroma away.
+const inRange = (h, [a, b]) => (a <= b ? h >= a - 1 && h <= b + 1 : h >= a - 1 || h <= b + 1);
+const STATUS_GROUNDS = ['--fd-bg', '--fd-bg-sunken', '--fd-surface', '--fd-surface-raised'];
+
+/** The status and chart measurements of one palette map in one mode. */
+export function measureColours(tokens, m) {
+  const v = (k) => tokens[k][m];
+  const status = {};
+  const accent = v('--fd-accent');
+  const [, aC, aH] = toOklch(parse(accent).rgb);
+  for (const tone of STATUS_TONES) {
+    const k = (part) => v(`--fd-${tone}-${part}`);
+    const tint = parse(k('bg'));
+    const tinted = ['--fd-bg', '--fd-surface', '--fd-surface-raised'].map((g) => over(format(tint.rgb), tint.alpha, v(g)));
+    const text = Math.min(...[...STATUS_GROUNDS.map(v), ...tinted].map((g) => contrast(k('text'), g)));
+    const label = contrast(k('contrast'), k('fill'));
+    const line = parse(k('line'));
+    const lineOnPage = contrast(over(format(line.rgb), line.alpha, v('--fd-bg')), v('--fd-bg'));
+    const fam = STATUS_HUES[tone].family;
+    const family = aC >= 0.02 && (fam[0] <= fam[1] ? aH >= fam[0] && aH <= fam[1] : aH >= fam[0] || aH <= fam[1]);   // exact, as the engine decides it
+    const apart = Math.min(deltaE(accent, k('solid')), deltaE(accent, k('fill')));
+    const need = family ? COLOUR_RULES.separation.family : COLOUR_RULES.separation.other;
+    status[tone] = { text, label, line: lineOnPage, apart, need, family, hue: hueOf(k('solid')), inRange: inRange(hueOf(k('solid')), STATUS_HUES[tone].range) };
+  }
+  const series = [1, 2, 3, 4, 5, 6].map((i) => v(`--fd-chart-${i}`));
+  const { short, worst } = chartShortfall(series, [v('--fd-bg'), v('--fd-surface')], undefined, m);
+  const lead = series[0] === accent || series[0] === v('--fd-accent-text');
+  return { status, chart: { series, short, worst, lead } };
+}
+
+/** Every violation of the status and chart rules, as messages. [] when it passes. */
+export function colourFailures(tokens, { name = 'palette', modes = [0, 1] } = {}) {
+  const errors = [];
+  const R = COLOUR_RULES;
+  for (const m of modes) {
+    const where = `${name} ${m ? 'dark' : 'light'}`;
+    const { status, chart: c } = measureColours(tokens, m);
+    for (const [tone, s] of Object.entries(status)) {
+      if (s.text < R.text) errors.push(`${where}: --fd-${tone}-text ${s.text.toFixed(2)} on the page, a surface or its own -bg < ${R.text}`);
+      if (s.label < R.label) errors.push(`${where}: --fd-${tone}-contrast on -fill ${s.label.toFixed(2)} < ${R.label}`);
+      if (s.line < R.lineFloor) errors.push(`${where}: --fd-${tone}-line ${s.line.toFixed(2)} on the page < ${R.lineFloor}`);
+      if (s.apart < s.need - 1e-6) errors.push(`${where}: --fd-${tone} is ${s.apart.toFixed(3)} from the accent < ${s.need}${s.family ? ' (the accent is in its family)' : ''}`);
+      if (!s.inRange) errors.push(`${where}: --fd-${tone}-solid hue ${s.hue.toFixed(1)}° is outside ${STATUS_HUES[tone].range.join('–')}°`);
+    }
+    if (!c.lead) errors.push(`${where}: --fd-chart-1 is neither the accent nor the accent text`);
+    if (c.short > 1e-9) {
+      const w = c.worst;
+      errors.push(`${where}: chart series miss the rules (contrast ${w.contrast.toFixed(2)}, normal ${w.normal.toFixed(3)} / neighbours ${w.normalAdjacent.toFixed(3)}, colour-blind ${w.cvd.toFixed(3)} at ${w.cvdWhere} / neighbours ${w.cvdAdjacent.toFixed(3)}, chroma ${w.chroma.toFixed(3)}, nearest hues ${w.hueGap.toFixed(0)}°${w.yellow.length ? `, series ${w.yellow.join(', ')} in the yellow band` : ''})`);
+    }
+  }
   return errors;
 }

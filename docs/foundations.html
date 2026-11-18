@@ -35,6 +35,19 @@
   .fx-motion[data-run] .fx-track > i { left: calc(100% - 24px); }
   .fx-mrow { display: grid; grid-template-columns: 220px minmax(0, 1fr); align-items: center; gap: 16px; font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); }
   .fx-theme { padding: 20px; border-radius: var(--fd-radius-xl); background: var(--fd-bg); color: var(--fd-text); border: 1px solid var(--fd-line-faint); display: grid; gap: 12px; align-content: start; }
+  .fx-pal { display: grid; gap: 4px; width: 100%; }
+  .fx-pal-row { display: grid; grid-template-columns: 88px auto minmax(0, 1fr); align-items: center; gap: 8px 20px; padding: 8px 12px; border-radius: var(--fd-radius-lg); background: var(--fd-bg); }
+  .fx-pal-row > b { font-weight: var(--fd-weight-label); font-size: var(--fd-text-sm); color: var(--fd-text); }
+  .fx-pal-group { display: flex; align-items: center; gap: 4px; }
+  .fx-pal-group + .fx-pal-group { padding-inline-start: 12px; box-shadow: inset 1px 0 0 var(--fd-line-faint); }
+  .fx-pal-sets { display: flex; flex-wrap: wrap; gap: 8px 12px; min-width: 0; }
+  .fx-c { display: block; width: 22px; height: 22px; border-radius: var(--fd-radius-sm); background: var(--c); }
+  .fx-c[data-wide] { width: 32px; }
+  .fx-cap { font-family: var(--fd-font-mono); font-size: 11px; color: var(--fd-text-3); margin-inline-end: 4px; }
+  .fx-specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; width: 100%; }
+  .fx-spec { display: grid; gap: 14px; align-content: start; min-width: 0; padding: 20px; border-radius: var(--fd-radius-xl); background: var(--fd-bg); color: var(--fd-text); border: 1px solid var(--fd-line-faint); }
+  .fx-spec .fd-row { flex-wrap: wrap; }
+  @media (max-width: 640px) { .fx-pal-row { grid-template-columns: minmax(0, 1fr); gap: 8px; } .fx-pal-group + .fx-pal-group { padding-inline-start: 0; box-shadow: none; } }
   @media (max-width: 640px) { .fx-type { grid-template-columns: minmax(0, 1fr); } .fx-mrow { grid-template-columns: minmax(0, 1fr); gap: 6px; } .fx-ladder { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
 </style>
 <script type="module" src="docs.js"></script>
@@ -150,6 +163,149 @@
       <p>Five tones, each with a solid for dots and fills, a text shade, a tinted background and a tinted line. Status colour describes an outcome; it is never decoration.</p>
     </div>
     <div class="doc-specimen"><div class="fx-swatches" id="status-grid"></div></div>
+  </section>
+
+  <section class="doc-section" id="status-chart">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Status and chart colours</h2>
+      <p>Every palette derives its own success, warning, danger and info, and its six chart series, from its accent, ink and page. The tones keep their meaning and lean toward the palette's temperature and energy; a tone in the accent's colour family moves until the two are told apart. Ember's values are the reference and do not change.</p>
+    </div>
+    <div class="doc-specimen" data-surface="surface"><div class="fx-pal" id="colour-palettes"></div></div>
+    <div class="doc-table-wrap">
+      <table class="doc-table" id="colour-distances">
+        <thead><tr><th>Palette</th><th>Status, nearest the accent</th><th>Series, colour-blind (all · neighbours)</th><th>Series, normal vision</th><th>Least contrast</th><th>Nearest hues</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="fx-specs">
+      <div class="fx-spec" data-palette="ember" data-colours-specimen="ember">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Ember</p><code class="fd-mono-sm fd-muted">data-palette="ember"</code></div>
+        <div class="fd-row" data-gap="2">
+          <span class="fd-badge" data-tone="success" data-dot>Active</span>
+          <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+          <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+          <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+        </div>
+        <div class="fd-banner" data-tone="danger" data-align="start">
+          <i data-icon="circle-alert"></i>
+          <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        </div>
+        <div class="fd-row" data-gap="2"><button class="fd-btn" data-variant="primary" type="button"><span>Run crawl</span></button><button class="fd-btn" data-variant="danger" type="button"><span>Revoke key</span></button><span class="fd-status" data-tone="success">Completed</span><span class="fd-status" data-tone="danger">Failed</span></div>
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels": ["Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14", "Nov 15", "Nov 16", "Nov 17", "Nov 18"], "series": [{"name": "/scrape", "values": [42, 46, 44, 51, 55, 53, 58, 61, 57, 63, 66, 64, 69, 72]}, {"name": "/crawl", "values": [30, 33, 36, 34, 38, 41, 39, 43, 46, 44, 47, 51, 49, 53]}, {"name": "/map", "values": [22, 20, 25, 27, 24, 29, 31, 28, 33, 35, 32, 36, 38, 37]}, {"name": "/search", "values": [14, 17, 15, 19, 21, 18, 23, 22, 26, 24, 28, 27, 30, 32]}, {"name": "/extract", "values": [8, 10, 12, 11, 13, 15, 14, 17, 16, 19, 18, 21, 20, 23]}, {"name": "/agent", "values": [2, 3, 5, 4, 6, 8, 7, 9, 11, 10, 12, 14, 13, 16]}], "yFormat": "compact", "unit": "k requests", "label": "Requests by endpoint, Nov 5 to Nov 18"}</script>
+        </div>
+        <p class="fd-small fd-muted">The default. Series 3 to 6 are teal, magenta, green and blue: apart for every reader, none olive.</p>
+      </div>
+      <div class="fx-spec" data-palette="forest" data-colours-specimen="forest">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Forest</p><code class="fd-mono-sm fd-muted">data-palette="forest"</code></div>
+        <div class="fd-row" data-gap="2">
+          <span class="fd-badge" data-tone="success" data-dot>Active</span>
+          <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+          <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+          <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+        </div>
+        <div class="fd-banner" data-tone="danger" data-align="start">
+          <i data-icon="circle-alert"></i>
+          <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        </div>
+        <div class="fd-row" data-gap="2"><button class="fd-btn" data-variant="primary" type="button"><span>Run crawl</span></button><button class="fd-btn" data-variant="danger" type="button"><span>Revoke key</span></button><span class="fd-status" data-tone="success">Completed</span><span class="fd-status" data-tone="danger">Failed</span></div>
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels": ["Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14", "Nov 15", "Nov 16", "Nov 17", "Nov 18"], "series": [{"name": "/scrape", "values": [42, 46, 44, 51, 55, 53, 58, 61, 57, 63, 66, 64, 69, 72]}, {"name": "/crawl", "values": [30, 33, 36, 34, 38, 41, 39, 43, 46, 44, 47, 51, 49, 53]}, {"name": "/map", "values": [22, 20, 25, 27, 24, 29, 31, 28, 33, 35, 32, 36, 38, 37]}, {"name": "/search", "values": [14, 17, 15, 19, 21, 18, 23, 22, 26, 24, 28, 27, 30, 32]}, {"name": "/extract", "values": [8, 10, 12, 11, 13, 15, 14, 17, 16, 19, 18, 21, 20, 23]}, {"name": "/agent", "values": [2, 3, 5, 4, 6, 8, 7, 9, 11, 10, 12, 14, 13, 16]}], "yFormat": "compact", "unit": "k requests", "label": "Requests by endpoint, Nov 5 to Nov 18"}</script>
+        </div>
+        <p class="fd-small fd-muted">A green accent: success steps lighter to stay 0.10 from it.</p>
+      </div>
+      <div class="fx-spec" data-palette="rose" data-colours-specimen="rose">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Rose</p><code class="fd-mono-sm fd-muted">data-palette="rose"</code></div>
+        <div class="fd-row" data-gap="2">
+          <span class="fd-badge" data-tone="success" data-dot>Active</span>
+          <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+          <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+          <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+        </div>
+        <div class="fd-banner" data-tone="danger" data-align="start">
+          <i data-icon="circle-alert"></i>
+          <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        </div>
+        <div class="fd-row" data-gap="2"><button class="fd-btn" data-variant="primary" type="button"><span>Run crawl</span></button><button class="fd-btn" data-variant="danger" type="button"><span>Revoke key</span></button><span class="fd-status" data-tone="success">Completed</span><span class="fd-status" data-tone="danger">Failed</span></div>
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels": ["Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14", "Nov 15", "Nov 16", "Nov 17", "Nov 18"], "series": [{"name": "/scrape", "values": [42, 46, 44, 51, 55, 53, 58, 61, 57, 63, 66, 64, 69, 72]}, {"name": "/crawl", "values": [30, 33, 36, 34, 38, 41, 39, 43, 46, 44, 47, 51, 49, 53]}, {"name": "/map", "values": [22, 20, 25, 27, 24, 29, 31, 28, 33, 35, 32, 36, 38, 37]}, {"name": "/search", "values": [14, 17, 15, 19, 21, 18, 23, 22, 26, 24, 28, 27, 30, 32]}, {"name": "/extract", "values": [8, 10, 12, 11, 13, 15, 14, 17, 16, 19, 18, 21, 20, 23]}, {"name": "/agent", "values": [2, 3, 5, 4, 6, 8, 7, 9, 11, 10, 12, 14, 13, 16]}], "yFormat": "compact", "unit": "k requests", "label": "Requests by endpoint, Nov 5 to Nov 18"}</script>
+        </div>
+        <p class="fd-small fd-muted">A rose accent: danger deepens and turns a little toward scarlet to stay apart.</p>
+      </div>
+      <div class="fx-spec" data-palette="ocean" data-colours-specimen="ocean">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Ocean</p><code class="fd-mono-sm fd-muted">data-palette="ocean"</code></div>
+        <div class="fd-row" data-gap="2">
+          <span class="fd-badge" data-tone="success" data-dot>Active</span>
+          <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+          <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+          <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+        </div>
+        <div class="fd-banner" data-tone="danger" data-align="start">
+          <i data-icon="circle-alert"></i>
+          <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        </div>
+        <div class="fd-row" data-gap="2"><button class="fd-btn" data-variant="primary" type="button"><span>Run crawl</span></button><button class="fd-btn" data-variant="danger" type="button"><span>Revoke key</span></button><span class="fd-status" data-tone="success">Completed</span><span class="fd-status" data-tone="danger">Failed</span></div>
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels": ["Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14", "Nov 15", "Nov 16", "Nov 17", "Nov 18"], "series": [{"name": "/scrape", "values": [42, 46, 44, 51, 55, 53, 58, 61, 57, 63, 66, 64, 69, 72]}, {"name": "/crawl", "values": [30, 33, 36, 34, 38, 41, 39, 43, 46, 44, 47, 51, 49, 53]}, {"name": "/map", "values": [22, 20, 25, 27, 24, 29, 31, 28, 33, 35, 32, 36, 38, 37]}, {"name": "/search", "values": [14, 17, 15, 19, 21, 18, 23, 22, 26, 24, 28, 27, 30, 32]}, {"name": "/extract", "values": [8, 10, 12, 11, 13, 15, 14, 17, 16, 19, 18, 21, 20, 23]}, {"name": "/agent", "values": [2, 3, 5, 4, 6, 8, 7, 9, 11, 10, 12, 14, 13, 16]}], "yFormat": "compact", "unit": "k requests", "label": "Requests by endpoint, Nov 5 to Nov 18"}</script>
+        </div>
+        <p class="fd-small fd-muted">A blue accent: info turns toward cyan and steps away in lightness.</p>
+      </div>
+      <div class="fx-spec" data-palette="midnight" data-colours-specimen="midnight">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Midnight</p><code class="fd-mono-sm fd-muted">data-palette="midnight"</code></div>
+        <div class="fd-row" data-gap="2">
+          <span class="fd-badge" data-tone="success" data-dot>Active</span>
+          <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+          <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+          <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+        </div>
+        <div class="fd-banner" data-tone="danger" data-align="start">
+          <i data-icon="circle-alert"></i>
+          <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        </div>
+        <div class="fd-row" data-gap="2"><button class="fd-btn" data-variant="primary" type="button"><span>Run crawl</span></button><button class="fd-btn" data-variant="danger" type="button"><span>Revoke key</span></button><span class="fd-status" data-tone="success">Completed</span><span class="fd-status" data-tone="danger">Failed</span></div>
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels": ["Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14", "Nov 15", "Nov 16", "Nov 17", "Nov 18"], "series": [{"name": "/scrape", "values": [42, 46, 44, 51, 55, 53, 58, 61, 57, 63, 66, 64, 69, 72]}, {"name": "/crawl", "values": [30, 33, 36, 34, 38, 41, 39, 43, 46, 44, 47, 51, 49, 53]}, {"name": "/map", "values": [22, 20, 25, 27, 24, 29, 31, 28, 33, 35, 32, 36, 38, 37]}, {"name": "/search", "values": [14, 17, 15, 19, 21, 18, 23, 22, 26, 24, 28, 27, 30, 32]}, {"name": "/extract", "values": [8, 10, 12, 11, 13, 15, 14, 17, 16, 19, 18, 21, 20, 23]}, {"name": "/agent", "values": [2, 3, 5, 4, 6, 8, 7, 9, 11, 10, 12, 14, 13, 16]}], "yFormat": "compact", "unit": "k requests", "label": "Requests by endpoint, Nov 5 to Nov 18"}</script>
+        </div>
+        <p class="fd-small fd-muted">Periwinkle: info moves; the series step in lightness as well as hue.</p>
+      </div>
+      <div class="fx-spec" data-palette="ember" data-colours-specimen="ember-dash">
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Ember, with data-marks="dash"</p><code class="fd-mono-sm fd-muted">data-palette="ember"</code></div>
+        <div class="fd-row" data-gap="2">
+          <span class="fd-badge" data-tone="success" data-dot>Active</span>
+          <span class="fd-badge" data-tone="warning" data-dot>Paused</span>
+          <span class="fd-badge" data-tone="danger" data-dot>Revoked</span>
+          <span class="fd-badge" data-tone="info"><i data-icon="zap"></i>Beta</span>
+        </div>
+        <div class="fd-banner" data-tone="danger" data-align="start">
+          <i data-icon="circle-alert"></i>
+          <span class="fd-banner-text">Payment failed. Your team is limited to 100 requests per day.</span>
+        </div>
+        <div class="fd-row" data-gap="2"><button class="fd-btn" data-variant="primary" type="button"><span>Run crawl</span></button><button class="fd-btn" data-variant="danger" type="button"><span>Revoke key</span></button><span class="fd-status" data-tone="success">Completed</span><span class="fd-status" data-tone="danger">Failed</span></div>
+        <div class="fd-chart" data-fd-chart="line" data-height="200" data-legend>
+          <script type="application/json">{"labels": ["Nov 05", "Nov 06", "Nov 07", "Nov 08", "Nov 09", "Nov 10", "Nov 11", "Nov 12", "Nov 13", "Nov 14", "Nov 15", "Nov 16", "Nov 17", "Nov 18"], "series": [{"name": "/scrape", "values": [42, 46, 44, 51, 55, 53, 58, 61, 57, 63, 66, 64, 69, 72]}, {"name": "/crawl", "values": [30, 33, 36, 34, 38, 41, 39, 43, 46, 44, 47, 51, 49, 53]}, {"name": "/map", "values": [22, 20, 25, 27, 24, 29, 31, 28, 33, 35, 32, 36, 38, 37]}, {"name": "/search", "values": [14, 17, 15, 19, 21, 18, 23, 22, 26, 24, 28, 27, 30, 32]}, {"name": "/extract", "values": [8, 10, 12, 11, 13, 15, 14, 17, 16, 19, 18, 21, 20, 23]}, {"name": "/agent", "values": [2, 3, 5, 4, 6, 8, 7, 9, 11, 10, 12, 14, 13, 16]}], "yFormat": "compact", "unit": "k requests", "label": "Requests by endpoint, Nov 5 to Nov 18", "marks": "dash"}</script>
+        </div>
+        <p class="fd-small fd-muted">Series 2 to 6 also take a dash each, so colour is not the only cue.</p>
+      </div>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Rule</th><th>Holds in every palette, light and dark</th></tr></thead>
+        <tbody>
+          <tr><td>Status hue</td><td>Inside the tone's range: success 135–160°, warning 65–95°, danger 22–33°, info 240–270° (OKLCH).</td></tr>
+          <tr><td>Apart from the accent</td><td>Solid and fill at least 0.10 ΔE (OKLab) from the accent when the accent is in the tone's family, 0.05 otherwise.</td></tr>
+          <tr><td>--fd-&lt;tone&gt;-text</td><td>4.5:1 on the page, the well, the surfaces and the tone's own tinted background.</td></tr>
+          <tr><td>--fd-&lt;tone&gt;-contrast</td><td>4.5:1 on the tone's fill.</td></tr>
+          <tr><td>Chart series</td><td>3:1 on the page and the surface. Every pair 0.10 apart, neighbours 0.15; under simulated protanopia, deuteranopia and tritanopia every pair 0.06 apart, neighbours 0.08.</td></tr>
+          <tr><td>Series colour</td><td>Series 3 to 6 carry chroma 0.09 or more. In the light scheme none is yellow (70–128°): it moves to ochre or green. Two series within 30° of hue are 0.25 apart, so none reads as another one darker.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>Colour-blind vision is simulated with Machado, Oliveira and Fernandes (2009) at full severity, on linear sRGB. Distances are OKLab ΔE; ×100 is the scale most tools print.</li>
+      <li>Status never relies on colour alone: badges and status dots carry a word, banners, callouts, toasts and field errors an icon and a sentence.</li>
+      <li>Charts carry a legend, a tooltip and a data table. Add <code class="fd-code">data-marks="dash"</code> to give line series 2 to 6 a dash each.</li>
+      <li><code class="fd-code">node scripts/build-palettes.mjs --check</code> holds every preset, toned palette and generated palette to these rules. In the light scheme no series sits in the yellow band, where a yellow dark enough for 3:1 turns olive: it moves to ochre or to green.</li>
+    </ul>
   </section>
 
   <section class="doc-section" id="type">
@@ -347,6 +503,21 @@
 </main>
 <script type="module">
   import { setIcon } from '../fire/js/icons.js';
+  import { PALETTES, STATUS_TONES } from '../fire/js/palettes.js';
+  import { measureColours } from '../fire/js/palette-rules.js';
+  const chip = (token, wide) => `<i class="fx-c"${wide ? ' data-wide' : ''} data-fd-vars="--c:var(${token})" title="${token}"></i>`;
+  document.getElementById('colour-palettes').innerHTML = PALETTES.map((p) => `<div class="fx-pal-row" data-palette="${p.name}"><b>${p.label}</b>`
+    + `<div class="fx-pal-group"><span class="fx-cap">accent</span>${chip('--fd-accent', true)}</div>`
+    + `<div class="fx-pal-sets"><div class="fx-pal-group"><span class="fx-cap">status</span>${STATUS_TONES.map((t) => chip(`--fd-${t}-solid`)).join('')}</div>`
+    + `<div class="fx-pal-group"><span class="fx-cap">series</span>${[1, 2, 3, 4, 5, 6].map((i) => chip(`--fd-chart-${i}`)).join('')}</div></div></div>`).join('');
+  const x100 = (n) => (n * 100).toFixed(1);
+  const r0 = (l, d) => `${Math.round(l.chart.worst.hueGap)}° · ${Math.round(d.chart.worst.hueGap)}°`;
+  document.querySelector('#colour-distances tbody').innerHTML = PALETTES.map((p) => {
+    const [l, d] = [0, 1].map((m) => measureColours(p.tokens, m));
+    const near = (r) => Math.min(...STATUS_TONES.map((t) => r.status[t].apart));
+    const pair = (f) => `${f(l)} · ${f(d)}`;
+    return `<tr><td>${p.label}</td><td>${pair((r) => x100(near(r)))}</td><td>${pair((r) => `${x100(r.chart.worst.cvd)}/${x100(r.chart.worst.cvdAdjacent)}`)}</td><td>${pair((r) => `${x100(r.chart.worst.normal)}/${x100(r.chart.worst.normalAdjacent)}`)}</td><td>${pair((r) => r.chart.worst.contrast.toFixed(2))}</td><td>${r0(l, d)}</td></tr>`;
+  }).join('');
   const sw = (name, token, note = '') => `<div class="fx-swatch"><div class="fx-chip" data-fd-vars="--c:var(${token})"></div><b>${name}${note ? ` <span class="fd-muted fx-note">· ${note}</span>` : ''}</b><code>${token}</code></div>`;
   const steps = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72, 88];
   document.getElementById('ladder').innerHTML = steps.map((s) => `<span data-fd-vars="--c:var(--fd-a${s})">${s}</span>`).join('');

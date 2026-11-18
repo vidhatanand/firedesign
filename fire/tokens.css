@@ -215,7 +215,11 @@
   /* Status. `-solid` for dots, lines, chart marks and icons; `-fill` for a fill that carries text (the danger
      button, a solid badge, a tile) with `-contrast` as its label at 4.5:1 or more; `-text` for words (AA on
      surfaces); `-bg` for tinted backgrounds; `-line` for tinted edges. Danger, info and violet keep a white label
-     on a fill a little darker than the solid; success and warning keep the solid and take a tinted near-black. */
+     on a fill a little darker than the solid; success and warning keep the solid and take a tinted near-black.
+     These are ember's. Every other palette derives its own success, warning, danger and info from them (fire/js/
+     palettes.js deriveColours, written to palettes.css): the hue leans toward the palette's temperature inside the
+     tone's range, chroma follows the palette's energy, and a tone whose colour family holds the accent moves until
+     it is 0.10 OKLab apart from it. Violet is not derived. build-palettes.mjs --check holds every rule. */
   --fd-success-solid: light-dark(#2fb457, #4ccd75);
   --fd-success-text: light-dark(#1a7a3a, #6fdc91);
   --fd-success-bg: light-dark(rgb(47 180 87 / 0.1), rgb(76 205 117 / 0.12));
@@ -251,13 +255,15 @@
   --fd-violet-fill: light-dark(#8456ef, #845bde);
   --fd-violet-contrast: #ffffff;
 
-  /* Categorical series for charts (ordered; the accent always leads). */
+  /* Categorical series for charts (ordered; the accent always leads). Ember's, as fire/js/palettes.js derives them for
+     every palette: series 3–6 around the accent, each 3:1 on the page and the surface, every pair apart in normal and
+     simulated colour-blind vision, no olive in the light scheme (build-palettes.mjs --check holds it). */
   --fd-chart-1: var(--fd-accent);
   --fd-chart-2: light-dark(#262626, #f5f5f5);
-  --fd-chart-3: light-dark(#2a6dfb, #5a8ffc);
-  --fd-chart-4: light-dark(#8a5cf6, #a07aff);
-  --fd-chart-5: light-dark(#2fb457, #4ccd75);
-  --fd-chart-6: light-dark(#e8a917, #f0c550);
+  --fd-chart-3: light-dark(#00786d, #00c5b6);
+  --fd-chart-4: light-dark(#b556b5, #c360bd);
+  --fd-chart-5: light-dark(#006517, #cbd549);
+  --fd-chart-6: light-dark(#2679dc, #549bff);
 
   /* Syntax (code blocks, JSON viewer). Deliberately few hues. */
   --fd-syntax-plain: var(--fd-text);

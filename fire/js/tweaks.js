@@ -25,7 +25,7 @@
  *                    the section's eyebrow carries .fd-tweaks-readout[data-tweaks-look]: the active look's name,
  *                    "Fire default" or "Custom" (any change after a look was applied)
  *                  .fd-segmented[data-tweak]           theme, density, lines, textSize, motion, surfaces, elevation, controls,
- *                                                      headings (nav.js drives them)
+ *                                                      headings, imagery (nav.js drives them)
  *                  .fd-tweaks-palettes[role=radiogroup][data-tweak=palette] > .fd-tweaks-swatch[role=radio][data-palette][data-value]
  *                  .fd-tweaks-faces[role=radiogroup][data-tweak=type]       > .fd-tweaks-face[role=radio][data-value]
  *                      .fd-tweaks-face-sample[data-type]  "Ag" set in that type set (the tokens resolve on the sample itself)
@@ -59,7 +59,9 @@
  *  elevation none · soft · lifted           data-elevation               semantic tokens each value moves)
  *  controls  soft · outlined · filled       data-controls
  *  headings  sentence · upper · mono        data-headings
- *            The first value of each (objects, soft, soft, sentence) leaves no attribute. A data-surfaces (…) a page declares
+ *  imagery   natural · mono · duotone · wash   data-imagery (0.8; the Pictures row, beside motion and texture): how the
+ *            site's pictures are treated (site.css); carried like the structural dials
+ *            The default of each (objects, soft, soft, sentence, natural) leaves no attribute. A data-surfaces (…) a page declares
  *            on <html> is the default, as for the palette; fire/boot.js keeps it in data-fd-default-surfaces (…).
  *  signature { field, mark, cell, ramp, marks, intensity }   data-signature-* on <html>, only where not the default (theme.js,
  *            texture.js, shell.css): the panel sets field, mark, marks and intensity; cell and ramp ride along from a theme record.
@@ -547,9 +549,10 @@ function markup() {
       inlineRow('controls', 'Controls', segmented('controls', [['soft', 'Soft'], ['outlined', 'Outlined'], ['filled', 'Filled']])),
       inlineRow('headings', 'Headings', segmented('headings', [['sentence', 'Sentence'], ['upper', 'Upper'], ['mono', 'Mono']])),
     ].join(''))}
-    ${section('motion', 'Motion and texture', [
+    ${section('motion', 'Motion, texture and pictures', [
       inlineRow('motion', 'Motion', segmented('motion', [['off', 'Off'], ['default', 'Default'], ['slow', 'Slow']])),
       sliderRow('texture', 'Texture', RANGES.texture),
+      inlineRow('imagery', 'Pictures', segmented('imagery', [['natural', 'Natural'], ['mono', 'Mono'], ['duotone', 'Duotone'], ['wash', 'Wash']])),
     ].join(''))}
     ${section('signature', 'Signature', [
       chips('signature.field', 'Field'),

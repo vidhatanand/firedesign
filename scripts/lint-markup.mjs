@@ -33,6 +33,8 @@
  *                            Silent where nothing is declared. --surface <name> sets the surface for files that declare
  *                            none; --no-surface turns the rule off. An unknown data-fd-surface value is an error
  *                            (unknown-attribute-value).
+ *   img-attrs                (a warning, 0.8) an <img> inside .fd-site without alt (alt="" for decoration), or without
+ *                            both width and height: the browser cannot hold its place before it loads, so the page shifts
  *
  * Each finding has file, line, column, rule, severity ("error" or "warning"), message and fix. Exit code 1 when there
  * is any error (warnings never change it), 2 on usage errors. --json: {catalog, files, errors, warnings, findings}.
@@ -52,7 +54,7 @@ const HOLE = '\u0001';
 const BAIL = Symbol('bail');
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 export const RULES = ['unknown-class', 'unknown-attribute-value', 'unknown-element', 'unknown-icon', 'no-style',
-  'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework', 'surface-mismatch'];
+  'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework', 'surface-mismatch', 'img-attrs'];
 export const SURFACES = ['app', 'website', 'phone', 'email'];
 
 const isWs = (c) => c === ' ' || c === '\n' || c === '\t' || c === '\r' || c === '\f';
@@ -492,7 +494,15 @@ export function lintText(file, text, rawCatalog, kind, opts = {}) {
           'warning');
       }
     }
-    if (!ev.selfClosing) surfaceStack.push({ tag, surface, flagged });
+    // a picture on a site: a text alternative, and its size so its place is held before it loads
+    const inSite = Boolean(parent?.site);
+    if (tag === 'img' && inSite && !ev.spread) {
+      const missing = ['alt', 'width', 'height'].filter((k) => !get(k));
+      if (missing.length) report(ev.at + 1, 'img-attrs', `<img> on a site without ${missing.join(', ')}`,
+        missing.includes('alt') ? 'add alt="…" that says what the picture shows (alt="" when it is decoration, as a backdrop is), and the picture\'s own width and height'
+          : 'add the picture\'s own width and height (its pixel size): the browser holds its place before it loads, so nothing moves', 'warning');
+    }
+    if (!ev.selfClosing) surfaceStack.push({ tag, surface, flagged, site: inSite || classTokens.some((c) => c.t === 'fd-site') });
 
     // data-* values the component defines
     for (const a of attrs) {

@@ -36,7 +36,7 @@
       <li>The Looks row at the top applies one of the eight <a class="fd-link" href="looks.html">named looks</a> whole and names the active one; any change after it reads Custom. <code class="fd-code">applyLook(name)</code> does the same from code.</li>
       <li>No trigger of your own? Put <code class="fd-code">data-fd-tweaks</code> on <code class="fd-code">&lt;html&gt;</code> and a round launcher appears bottom-left.</li>
       <li>Choices are saved in <code class="fd-code">localStorage["fd-tweaks"]</code> (only what differs from the default) and applied as soon as the module runs. Load <code class="fd-code">fire/boot.js</code> as a plain (non-module) script in <code class="fd-code">&lt;head&gt;</code>, before the stylesheet, and the saved look is on <code class="fd-code">&lt;html&gt;</code> before the first paint, so a reload never flashes the default. Reset leaves no attribute or inline style behind.</li>
-      <li>The page's own look is the default. A page that declares <code class="fd-code">data-palette</code>, <code class="fd-code">data-type</code> or a structural dial (<code class="fd-code">data-surfaces</code>, <code class="fd-code">data-elevation</code>, <code class="fd-code">data-controls</code>, <code class="fd-code">data-headings</code>) on <code class="fd-code">&lt;html&gt;</code> keeps it on load and after Reset, and only a choice away from it is saved; a page that declares nothing defaults to Ember and Geist. Before <code class="fd-code">fire/boot.js</code> restores a saved palette or type set it keeps the page's values in <code class="fd-code">data-fd-default-palette</code> and <code class="fd-code">data-fd-default-type</code>, so the panel still knows them; never write those by hand.</li>
+      <li>The page's own look is the default. A page that declares <code class="fd-code">data-palette</code>, <code class="fd-code">data-type</code> or a structural dial (<code class="fd-code">data-surfaces</code>, <code class="fd-code">data-elevation</code>, <code class="fd-code">data-controls</code>, <code class="fd-code">data-headings</code>) or <code class="fd-code">data-imagery</code> on <code class="fd-code">&lt;html&gt;</code> keeps it on load and after Reset, and only a choice away from it is saved; a page that declares nothing defaults to Ember and Geist. Before <code class="fd-code">fire/boot.js</code> restores a saved palette or type set it keeps the page's values in <code class="fd-code">data-fd-default-palette</code> and <code class="fd-code">data-fd-default-type</code>, so the panel still knows them; never write those by hand.</li>
       <li>Copy CSS gives you a block to paste into your product: the attributes for <code class="fd-code">&lt;html&gt;</code> and a <code class="fd-code">:root</code> rule with every overridden variable, toned palette colours included. A type set is just an attribute, so it needs <code class="fd-code">fire/typefaces.css</code> (already part of <code class="fd-code">fire.css</code>).</li>
       <li>Keyboard: Tab moves between controls, arrows move inside a group (the palette grid is 5 × 3 and the typeface grid 4 × 3), Escape closes the panel and returns focus to its trigger. On desktop the header drags; double-click it to dock again. Under 640px it is a bottom sheet.</li>
     </ul>
@@ -45,7 +45,7 @@
         <thead><tr><th>JavaScript</th><th>Does</th></tr></thead>
         <tbody>
           <tr><td>open(trigger) · close() · toggle(trigger)</td><td>Show or hide the panel. Focus returns to <code class="fd-code">trigger</code> on close.</td></tr>
-          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, type, tone, theme, density, corners, lines, textSize, contrast, motion, texture, surfaces, elevation, controls, headings, signature }</code>.</td></tr>
+          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, type, tone, theme, density, corners, lines, textSize, contrast, motion, texture, surfaces, elevation, controls, headings, imagery, signature }</code>.</td></tr>
           <tr><td>set(partial)</td><td>Merge and apply, for example <code class="fd-code">set({ palette: "paper", type: "editorial", tone: { warmth: 30 } })</code>. Unknown or out-of-range values are ignored or clamped.</td></tr>
           <tr><td>reset()</td><td>Everything back to the page's own look: its declared palette and type set, otherwise Ember and Geist.</td></tr>
           <tr><td>toCss()</td><td>The Copy CSS text for the current state.</td></tr>
@@ -818,6 +818,32 @@ node scripts/fonts.mjs add "Plus Jakarta Sans" --out public/fonts
       <li>Set them on <code class="fd-code">&lt;html&gt;</code>, or on any subtree as these specimens do. The first value of each needs no attribute; the Tweaks panel's Structure section sets them, remembers them and writes them into Copy CSS and Copy theme (<code class="fd-code">dials.surfaces</code>, <code class="fd-code">dials.elevation</code>, <code class="fd-code">dials.controls</code>, <code class="fd-code">dials.headings</code>).</li>
       <li>Components read semantic tokens the dials set: <code class="fd-code">--fd-surface-edge</code>, <code class="fd-code">--fd-surface-flush</code>, <code class="fd-code">--fd-surface-head</code>, <code class="fd-code">--fd-field</code>, <code class="fd-code">--fd-control-bg</code> and <code class="fd-code">--fd-control-edge</code> (with their hover steps), <code class="fd-code">--fd-shadow-object</code> beside the shadow scale, and <code class="fd-code">--fd-eyebrow-font</code>, <code class="fd-code">--fd-eyebrow-case</code>, <code class="fd-code">--fd-eyebrow-ls</code>. A component of your own that reads them follows every dial.</li>
       <li><code class="fd-code">node scripts/build-palettes.mjs --check</code> measures every text step on the grounds each surfaces and controls value makes, the outlined edges at 3:1 and the focus ring, in every palette, light and dark.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="imagery">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Pictures</h2>
+      <p>One dial treats every picture on a site the way the look wants it, so the same photograph reads as two companies under two looks. It moves only <code class="fd-code">fd-site-media</code> and the image ground (<a class="fd-link" href="site.html#pictures">Site foundation</a>).</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Attribute</th><th>Values</th><th>What it changes</th></tr></thead>
+        <tbody>
+          <tr><td>data-imagery</td><td>(natural) · mono · duotone · wash</td><td>As shot; greyscale with its contrast eased toward the page; a two-ink print, shadows in the ink and lights in a tint of the accent; the picture's colour turned down under a thin veil of the accent. A picture's own <code class="fd-code">data-treatment</code> wins.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained data-imagery="duotone">
+        <section class="fd-site-section" data-rhythm="tight"><div class="fd-site-container"><div class="fd-grid" data-cols="2" data-min="xs" data-gap="6">
+          <figure class="fd-site-media" data-ratio="photo"><img src="../templates/media/coast.jpg" alt="A shoreline from above, water meeting pale sand" width="1536" height="1024" loading="lazy" decoding="async"><figcaption>data-imagery="duotone" on the site: this picture follows it</figcaption></figure>
+          <figure class="fd-site-media" data-ratio="photo" data-treatment="natural"><img src="../templates/media/coast.jpg" alt="A shoreline from above, water meeting pale sand" width="1536" height="1024" loading="lazy" decoding="async"><figcaption>data-treatment="natural" on the picture wins</figcaption></figure>
+        </div></div></section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The Pictures row sits in the panel's Motion, texture and pictures section; a theme record carries it as <code class="fd-code">dials.imagery</code>, and a page that declares <code class="fd-code">data-imagery</code> on <code class="fd-code">&lt;html&gt;</code> keeps it as its default, as for the structural dials.</li>
     </ul>
   </section>
 

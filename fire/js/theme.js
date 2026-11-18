@@ -14,7 +14,8 @@
  *     "type": "geist",                          a type set name, or a type set spec (below)
  *     "dials": { "corners": 1, "density": "comfortable", "lines": 1, "textSize": "md",
  *                "contrast": "default", "motion": "default", "texture": 1,
- *                "surfaces": "objects", "elevation": "soft", "controls": "soft", "headings": "sentence" },
+ *                "surfaces": "objects", "elevation": "soft", "controls": "soft", "headings": "sentence",
+ *                "imagery": "natural" },
  *     "signature": { "field": "auto", "mark": "auto", "cell": "auto", "ramp": "auto", "marks": "crosses", "intensity": 1 },
  *     "brand": { "name"?, "mark"?, "logo"?, "logoDark"?, "href"? }         the product's brand (below)
  *   }
@@ -55,6 +56,8 @@
  *   The structural dials are attributes on <html> (tokens.css sets the semantic tokens for each value):
  *   surfaces  objects · flat · outlined → data-surfaces       elevation  soft · none · lifted → data-elevation
  *   controls  soft · outlined · filled → data-controls        headings   sentence · upper · mono → data-headings
+ *   imagery   natural · mono · duotone · wash → data-imagery   (0.8: how the site's pictures are treated, site.css; not
+ *             structure, but carried the same way: an attribute on <html>, none for the default)
  *   A named palette is data-palette; a toned or generated palette is written out as its colour tokens (PALETTE_TOKENS:
  *   its twenty colours, then the status and chart colours fire/js/palettes.js derives from them).
  *   A type set is data-type; a spec's families are written to --fd-font-display, --fd-font-sans and --fd-font-mono (each
@@ -89,17 +92,20 @@ import { paletteFailures } from './palette-rules.js';
 export const CONTRACT = 'fire/1';
 export const DIAL_DEFAULTS = Object.freeze({
   corners: 1, density: 'comfortable', lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
-  surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence',
+  surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence', imagery: 'natural',
 });
-/* The structural dials: how a page is built (objects, depth, controls, small labels), each an attribute on <html>. */
+/* The structural dials: how a page is built (objects, depth, controls, small labels), each an attribute on <html>;
+   imagery (how pictures are treated) travels with them the same way. */
 export const STRUCTURE_CHOICES = Object.freeze({
   surfaces: ['objects', 'flat', 'outlined'],
   elevation: ['none', 'soft', 'lifted'],
   controls: ['soft', 'outlined', 'filled'],
   headings: ['sentence', 'upper', 'mono'],
+  imagery: ['natural', 'mono', 'duotone', 'wash'],
 });
 export const STRUCTURE_ATTRIBUTES = Object.freeze({
   surfaces: 'data-surfaces', elevation: 'data-elevation', controls: 'data-controls', headings: 'data-headings',
+  imagery: 'data-imagery',
 });
 export const DIAL_CHOICES = Object.freeze({
   density: ['compact', 'comfortable', 'spacious'],

@@ -75,6 +75,7 @@ export const EXTRA_ROOTS = {
   'fd-site-footer': 'Website',
   'fd-site-posts': 'Website',
   'fd-site-article': 'Website',        // 0.8: the reading page of a post, a report or a research paper
+  'fd-site-media': 'Website',          // 0.8: a picture in a section (a part used inside sections: kind component)
 };
 
 /** Classes (and their dash-descendants) that are parts of another component: class -> root of the component.
@@ -128,9 +129,11 @@ export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd
 
 /** Families whose roots are website sections (kind `section`), except the roots that are PATTERNS (the foundation). */
 export const SECTION_FAMILIES = new Set(['Website']);
+/** Roots in a section family that are parts used inside sections, not sections (kind `component`). */
+export const SECTION_PARTS = new Set(['fd-site-media']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-site-media': 'Site picture', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {

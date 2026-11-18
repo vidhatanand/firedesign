@@ -1,0 +1,44 @@
+{
+  "id": "site-media",
+  "job": "Show a site's own photograph in a section, cropped to a set shape and treated by the look.",
+  "purpose": "A figure holding one img (its own width and height, so its place is held before it loads) and an optional caption. data-ratio crops it to a shape with object-fit cover, data-position keeps a side, data-frame gives it the media frame's hairline and radius. Its treatment (natural, mono, duotone, wash) comes from the look's imagery dial unless data-treatment sets its own: a filter and two blend layers, no script.",
+  "useWhen": [
+    "A picture beside the hero's headline, in a split, in the bento's large cell, as a post's cover or as a figure in an article.",
+    "Art that should sit with the look rather than as shot: the dial sets every picture on the site at once."
+  ],
+  "avoidWhen": [
+    { "when": "A picture a visitor supplied, an upload or an address from your data.", "instead": "doc-frame" },
+    { "when": "A screenshot or a specimen of the product.", "instead": "doc-frame" },
+    { "when": "Text set over the picture.", "instead": "Put the picture in .fd-site-backdrop on a section with data-ground=\"image\" (site)." },
+    { "when": "A report or a resource with no picture of its own.", "instead": "site-posts" }
+  ],
+  "aka": ["image", "picture", "photo", "figure", "cover image", "duotone", "art"],
+  "surfaces": ["website"],
+  "data": ["none"],
+  "states": [
+    { "name": "loading", "how": "before the picture arrives its place holds the ratio (data-ratio, or its width and height) on the sunken ground" }
+  ],
+  "variants": [
+    { "attribute": "data-ratio", "value": "wide", "useWhen": "A band across a column: 21:9." },
+    { "attribute": "data-ratio", "value": "photo", "useWhen": "A post's cover or a split's media: 4:3." },
+    { "attribute": "data-ratio", "value": "square", "useWhen": "A tile in a grid: 1:1." },
+    { "attribute": "data-ratio", "value": "portrait", "useWhen": "Beside a headline that runs several lines: 4:5." },
+    { "attribute": "data-ratio", "value": "tall", "useWhen": "A narrow column next to long text: 2:3." },
+    { "attribute": "data-position", "value": "start", "useWhen": "The subject sits at the start or the top of the picture." },
+    { "attribute": "data-position", "value": "center", "useWhen": "The subject is in the middle (the default)." },
+    { "attribute": "data-position", "value": "end", "useWhen": "The subject sits at the end or the bottom." },
+    { "attribute": "data-frame", "value": "", "useWhen": "The picture stands on its own and needs the media frame's edge." },
+    { "attribute": "data-treatment", "value": "natural", "useWhen": "This picture stays as shot whatever the look." },
+    { "attribute": "data-treatment", "value": "mono", "useWhen": "This picture in greyscale, eased toward the page." },
+    { "attribute": "data-treatment", "value": "duotone", "useWhen": "This picture as a two-ink print: shadows in the ink, lights in a tint of the accent." },
+    { "attribute": "data-treatment", "value": "wash", "useWhen": "This picture under a thin veil of the accent." }
+  ],
+  "parts": [
+    { "class": "fd-site-media", "role": "The figure: an img with alt, width and height, and an optional figcaption." }
+  ],
+  "related": ["site", "site-hero", "site-split", "site-features", "site-posts", "site-article", "doc-frame"],
+  "keyboard": [],
+  "example": "docs/site.html#pictures",
+  "provenance": ["fire/components/site.css", "docs/site.html", "docs/site-sections.html", "templates/media/README.md"],
+  "since": "0.8.0"
+}

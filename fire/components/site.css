@@ -13,8 +13,9 @@
      <header class="fd-site-header" data-layout="inline|centered">…</header>
      <main>
        <section class="fd-site-section fd-site-<type>" data-layout="…"
-                [data-ground="page|sunken|raised|inverse|accent|texture"] [data-rhythm="tight|loose"] [data-rule]>
+                [data-ground="page|sunken|raised|inverse|accent|texture|image"] [data-rhythm="tight|loose"] [data-rule]>
          [<div class="fd-ascii" aria-hidden="true"></div>]     the field behind a texture ground
+         [<div class="fd-site-backdrop"><img src alt="" width height></div>]   the picture behind an image ground
          <div class="fd-site-container" [data-width="narrow|full"]>
            <div class="fd-site-head" [data-align="start|center"] [data-layout="stack|split"]>
              <p class="fd-site-eyebrow">[<span class="fd-site-index">01</span>]Topic</p>
@@ -40,10 +41,42 @@
    .fd-site-shot      a contained product specimen made of Fire components, inside a .fd-doc-frame
    data-ground        page (default) · sunken · raised · inverse (the ink ground: the colour scheme flips inside it) ·
                       accent (accent fill, text in its contrast colour, focus ring in that colour too) ·
-                      texture (the page ground with an .fd-ascii behind and a scrim under the text)
+                      texture (the page ground with an .fd-ascii behind and a scrim under the text) ·
+                      image (0.8: a picture behind, below)
    data-rhythm        tight (half) · loose (one and a half) the block padding --fd-site-rhythm
    data-rule          a hairline at the section's top, as wide as the content
    Two neighbouring sections on the same ground share one rhythm between them, never two.
+
+   Pictures (0.8) — the site's own art. A picture a visitor supplied goes in fd-doc-frame[data-fd-src] (its address check).
+   <figure class="fd-site-media" [data-ratio="wide|photo|square|portrait|tall"] [data-position="start|center|end"]
+           [data-frame] [data-treatment="natural|mono|duotone|wash"]>
+     <img src alt width height loading="lazy" decoding="async">   width and height: the picture's own, so its place is
+     [<figcaption>…</figcaption>]                                  held before it loads
+   </figure>
+       data-ratio      the crop, held before the picture loads: wide 21:9 · photo 4:3 · square 1:1 · portrait 4:5 ·
+                       tall 2:3; none: the picture's own shape (from width and height). object-fit: cover
+       data-position   the side kept when the crop cuts: start (the inline start, or the top) · center · end
+       data-frame      the media frame's hairline and radius; without it, the bare picture with the theme's radius
+       It sits in the slots that take media: .fd-site-hero-media, .fd-site-split-media, .fd-site-features-media, a posts
+       entry's media (in place of .fd-site-posts-media), .fd-site-article-cover (it takes the cover's ratio) and the
+       article text (a figure; data-breakout widens it).
+   <section class="fd-site-section …" data-ground="image" [data-scrim="dark|light"] [data-treatment="…"]>
+     <div class="fd-site-backdrop" [data-position="start|center|end"]><img src alt="" width height fetchpriority="high"></div>
+     <div class="fd-site-container">…</div>
+   </section>
+       The picture covers the section; the text keeps 4.5:1 whatever the picture, by construction. data-scrim="dark"
+       (default): the section takes the dark scheme, the picture is darkened under the text column; "light": the
+       light scheme, the picture lightened. From desktop the head and its actions keep to one column
+       (--fd-site-image-measure) with the scrim at full strength over it and a thin veil elsewhere; below desktop the
+       picture is a band above the text, fading into the ground the text stands on. Text steps 2 and 3 are raised on
+       this ground. Built for head-led sections: the hero (start, center, stack, split) and the call to action (band;
+       its actions stack under the head).
+   data-treatment     on .fd-site-media or an image ground: natural (as shot) · mono (greyscale, contrast eased toward the
+                      page) · duotone (a two-ink print: shadows in the ink, lights in a
+                      tint of the accent, capped in lightness and chroma) · wash (the accent over the picture).
+                      CSS filters and blend layers only. The element's own value wins over the look's dial.
+   [data-imagery="natural|mono|duotone|wash"]   the dial on <html> (fire/js/theme.js dials.imagery, Tweaks): the
+                      treatment of every picture without its own data-treatment. natural, the default, sets nothing.
 
    Sections (each `section.fd-site-section.fd-site-<type>`; variants are data-layout unless noted)
    fd-site-header    inline | centered · data-scrolled (site.js) · data-state="open" (the sheet below desktop)
@@ -157,6 +190,33 @@
   --fd-site-thumb-w: 200px;            /* a list entry's frame at the end */
   --fd-site-thumb-w-sm: 136px;
   --fd-site-thumb-ratio-sm: 21 / 9;
+  /* pictures (0.8) */
+  --fd-site-ratio-wide: 21 / 9;
+  --fd-site-ratio-photo: 4 / 3;
+  --fd-site-ratio-square: 1;
+  --fd-site-ratio-portrait: 4 / 5;
+  --fd-site-ratio-tall: 2 / 3;
+  --fd-site-image-measure: clamp(480px, 30cqi + 300px, 720px);   /* image ground: the column the head and its actions
+                                       keep to from desktop (about 570px at 900 wide, 720px from 1400) */
+  --fd-site-image-pad: 48px;           /* the scrim holds its full strength this far past the column */
+  --fd-site-image-fade: 16cqi;         /* then thins to the veil over this distance */
+  --fd-site-image-scrim-dark: 66%;     /* the page colour over the picture under the text: every text step at 4.5:1 */
+  --fd-site-image-scrim-light: 72%;    /*   over a white picture (dark scrim) or a black one (light scrim) */
+  --fd-site-image-veil: 16%;           /* away from the text */
+  --fd-site-image-muted: 82%;          /* text step 3 on this ground (step 2 is --fd-a88) */
+  --fd-site-image-band: clamp(160px, 50cqi, 340px);   /* below desktop: the picture is a band above the text */
+  --fd-site-image-band-fade: 96px;     /* the band's lower edge fades into the ground */
+  --fd-site-mono-contrast: 0.9;        /* mono: greyscale, contrast eased */
+  --fd-site-mono-veil: 10%;            /*   and a little of the page colour over it */
+  --fd-site-duo-contrast: 1.4;         /* duotone: the grey picture's tones spread before they are mapped */
+  --fd-site-duo-bright: 0.96;
+  --fd-site-duo-accent: 55%;           /*   the lights' ink: this much accent, the rest page (light) or ink (dark), in OKLCH */
+  --fd-site-duo-l: 0.86;               /*   its lightness and chroma capped, so a picture never outshines the page */
+  --fd-site-duo-l-dark: 0.74;
+  --fd-site-duo-c: 0.1;
+  --fd-site-duo-scrim-saturate: 1.5;   /*   and keeps its colour under the image ground's scrim */
+  --fd-site-wash-saturate: 0.5;        /* wash: the picture's own colour turned down */
+  --fd-site-wash: 26%;                 /*   under this much accent */
 }
 
 /* Fluid type: computed where it is used, so a subtree with its own type set or density gets its own steps. */
@@ -843,10 +903,10 @@ body[data-site-shell=""] { visibility: hidden; animation: fd-site-reveal 0s var(
 .fd-site-split-media > .fd-site-posts-media .fd-site-posts-cover { --fd-site-cover-title: var(--fd-fluid-title); padding: clamp(var(--fd-space-6), 4cqi, var(--fd-space-12)); }
 /* list without a date in the rail (a blog): the title and summary lead, a small frame sits at the end */
 .fd-site-posts[data-layout="list"] .fd-site-posts-item:not(:has(> .fd-site-posts-date)) { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
-.fd-site-posts[data-layout="list"] .fd-site-posts-item:not(:has(> .fd-site-posts-date)) > :not(.fd-site-posts-media, .fd-badge) { grid-column: 1; }
-.fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-posts-media { grid-column: 2; grid-row: 1 / span 6; width: var(--fd-site-thumb-w); margin: 0; }
-.fd-site-posts[data-layout="list"] .fd-site-posts-item:has(> .fd-site-posts-media) .fd-site-posts-title { font-size: var(--fd-fluid-heading); line-height: var(--fd-fluid-heading-lh); letter-spacing: var(--fd-fluid-heading-ls); }
-.fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-posts-media + .fd-site-posts-kind { grid-row: 1; }
+.fd-site-posts[data-layout="list"] .fd-site-posts-item:not(:has(> .fd-site-posts-date)) > :not(.fd-site-posts-media, .fd-site-media, .fd-badge) { grid-column: 1; }
+.fd-site-posts[data-layout="list"] .fd-site-posts-item > :is(.fd-site-posts-media, .fd-site-media) { grid-column: 2; grid-row: 1 / span 6; width: var(--fd-site-thumb-w); margin: 0; }
+.fd-site-posts[data-layout="list"] .fd-site-posts-item:has(> .fd-site-posts-media, > .fd-site-media) .fd-site-posts-title { font-size: var(--fd-fluid-heading); line-height: var(--fd-fluid-heading-lh); letter-spacing: var(--fd-fluid-heading-ls); }
+.fd-site-posts[data-layout="list"] .fd-site-posts-item > :is(.fd-site-posts-media, .fd-site-media) + .fd-site-posts-kind { grid-row: 1; }
 /* the tools bar: kind, topic, search and the live count, all existing controls */
 .fd-site-posts-tools {
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-3) var(--fd-space-4);
@@ -1043,17 +1103,148 @@ sup:has(> .fd-site-notes-ref) { vertical-align: baseline; position: relative; in
 }
 @container fd-site (max-width: 899.98px) {
   .fd-site-footer[data-layout="columns"] > .fd-site-container:has(> .fd-site-footer-signup) { grid-template-columns: minmax(0, 1fr); }
-  .fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-posts-media { width: var(--fd-site-thumb-w-sm); }
+  .fd-site-posts[data-layout="list"] .fd-site-posts-item > :is(.fd-site-posts-media, .fd-site-media) { width: var(--fd-site-thumb-w-sm); }
   .fd-site-posts-tools > .fd-search { flex: 1 1 var(--fd-size-sm); }
 }
 @container fd-site (max-width: 639.98px) {
   .fd-site-posts[data-layout="list"] .fd-site-posts-item:not(:has(> .fd-site-posts-date)) { grid-template-columns: minmax(0, 1fr); }
-  .fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-posts-media { grid-column: 1; grid-row: auto; width: 100%; margin-block-end: var(--fd-space-2); order: -1; }
+  .fd-site-posts[data-layout="list"] .fd-site-posts-item > :is(.fd-site-posts-media, .fd-site-media) { grid-column: 1; grid-row: auto; width: 100%; margin-block-end: var(--fd-space-2); order: -1; }
   .fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-posts-media:has(> .fd-ascii) { aspect-ratio: var(--fd-site-thumb-ratio-sm); }
-  .fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-posts-media + .fd-site-posts-kind { grid-row: auto; }
+  .fd-site-posts[data-layout="list"] .fd-site-posts-item > :is(.fd-site-posts-media, .fd-site-media) + .fd-site-posts-kind { grid-row: auto; }
   .fd-site-posts-tools > :is(.fd-search, .fd-select) { flex: 1 1 100%; }
   .fd-site-posts-tools > .fd-select > select { width: 100%; }
   .fd-site-posts-count { margin-inline-start: 0; }
+}
+
+/* ==========================================================================
+   Pictures (0.8): a picture in a section (fd-site-media), a picture as a section's ground, and the treatments
+   ========================================================================== */
+/* The treatment travels as five private properties on the media or the backdrop: a filter on the picture and two
+   layers over it, each a colour and a blend mode. They are reset on every picture, so one never inherits another's. */
+.fd-site-media, .fd-site-backdrop {
+  --_site-pos: 50% 50%;
+  --_site-tr-filter: none;
+  --_site-tr-a: transparent; --_site-tr-a-mode: normal;
+  --_site-tr-b: transparent; --_site-tr-b-mode: normal;
+}
+.fd-site-media {
+  --_site-radius: var(--fd-radius-lg);
+  position: relative; isolation: isolate;
+  display: grid; grid-template-columns: minmax(0, 1fr); align-content: start;
+  min-width: 0; margin: 0;
+}
+.fd-site-media > img {
+  grid-area: 1 / 1; display: block; width: 100%; height: auto;
+  object-fit: cover; object-position: var(--_site-pos);
+  border-radius: var(--_site-radius); background: var(--fd-bg-sunken);
+  filter: var(--_site-tr-filter);
+}
+.fd-site-media::before, .fd-site-media::after { content: ""; grid-area: 1 / 1; border-radius: var(--_site-radius); pointer-events: none; }
+.fd-site-media::before { z-index: 1; background: var(--_site-tr-a); mix-blend-mode: var(--_site-tr-a-mode); }
+.fd-site-media::after { z-index: 2; background: var(--_site-tr-b); mix-blend-mode: var(--_site-tr-b-mode); }
+.fd-site-media > figcaption {
+  grid-row: 2; margin-block-start: var(--fd-space-3);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty;
+}
+.fd-site-media[data-ratio="wide"] { --_site-ratio: var(--fd-site-ratio-wide); }
+.fd-site-media[data-ratio="photo"] { --_site-ratio: var(--fd-site-ratio-photo); }
+.fd-site-media[data-ratio="square"] { --_site-ratio: var(--fd-site-ratio-square); }
+.fd-site-media[data-ratio="portrait"] { --_site-ratio: var(--fd-site-ratio-portrait); }
+.fd-site-media[data-ratio="tall"] { --_site-ratio: var(--fd-site-ratio-tall); }
+.fd-site-media:is([data-ratio="wide"], [data-ratio="photo"], [data-ratio="square"], [data-ratio="portrait"], [data-ratio="tall"]) > img { aspect-ratio: var(--_site-ratio); }
+:is(.fd-site-media, .fd-site-backdrop)[data-position="start"] { --_site-pos: 0% 0%; }
+:is(.fd-site-media, .fd-site-backdrop)[data-position="center"] { --_site-pos: 50% 50%; }
+:is(.fd-site-media, .fd-site-backdrop)[data-position="end"] { --_site-pos: 100% 100%; }
+:is(.fd-site-media, .fd-site-backdrop)[data-position="start"]:dir(rtl) { --_site-pos: 100% 0%; }
+:is(.fd-site-media, .fd-site-backdrop)[data-position="end"]:dir(rtl) { --_site-pos: 0% 100%; }
+/* data-frame: the media frame's radius and hairline (drawn just outside the picture, so no treatment layer covers it) */
+.fd-site-media[data-frame] { --_site-radius: var(--fd-radius-xl); }
+.fd-site-media[data-frame] > img { box-shadow: 0 0 0 var(--fd-hairline) var(--fd-line-faint); }
+
+/* In the slots that take media */
+.fd-site-posts-item > .fd-site-media { margin-block-end: var(--fd-space-3); }
+.fd-site-posts[data-layout="list"] .fd-site-posts-item > .fd-site-media { margin: 0; }
+.fd-site-article > .fd-site-article-cover:has(> .fd-site-media) { aspect-ratio: auto; overflow: visible; border-radius: 0; background: none; box-shadow: none; }
+.fd-site-article-cover > .fd-site-media { --_site-ratio: var(--fd-site-article-cover-ratio); --_site-radius: var(--fd-radius-2xl); }
+.fd-site-article-cover > .fd-site-media > img { aspect-ratio: var(--_site-ratio); }
+.fd-site-article-text > .fd-site-media > figcaption { margin-block-start: var(--fd-space-2-5); }
+
+/* The treatments. natural is the reset above. */
+:is([data-imagery="mono"] .fd-site-media:not([data-treatment]), .fd-site-media[data-treatment="mono"]),
+:is([data-imagery="mono"] .fd-site-section[data-ground="image"]:not([data-treatment]), .fd-site-section[data-ground="image"][data-treatment="mono"]) > .fd-site-backdrop {
+  --_site-tr-filter: grayscale(1) contrast(var(--fd-site-mono-contrast));
+  --_site-tr-b: color-mix(in srgb, var(--fd-bg) var(--fd-site-mono-veil), transparent);
+}
+/* duotone: a two-ink print. The grey picture is multiplied by the lights' ink, a tint of the accent (the accent mixed
+   toward the page in OKLCH, its lightness and chroma capped so a picture never outshines the page), then screened
+   with the shadows' ink: the theme's ink in the light scheme, the page in the dark one, so dark stays dark in both. */
+:is([data-imagery="duotone"] .fd-site-media:not([data-treatment]), .fd-site-media[data-treatment="duotone"]),
+:is([data-imagery="duotone"] .fd-site-section[data-ground="image"]:not([data-treatment]), .fd-site-section[data-ground="image"][data-treatment="duotone"]) > .fd-site-backdrop {
+  --_site-tr-filter: grayscale(1) contrast(var(--fd-site-duo-contrast)) brightness(var(--fd-site-duo-bright));
+  --_site-tr-a: light-dark(
+    oklch(from color-mix(in oklch, var(--fd-accent) var(--fd-site-duo-accent), var(--fd-bg)) min(l, var(--fd-site-duo-l)) min(c, var(--fd-site-duo-c)) h),
+    oklch(from color-mix(in oklch, var(--fd-accent) var(--fd-site-duo-accent), var(--fd-ink)) min(l, var(--fd-site-duo-l-dark)) min(c, var(--fd-site-duo-c)) h));
+  --_site-tr-a-mode: multiply;
+  --_site-tr-b: light-dark(var(--fd-ink), var(--fd-bg)); --_site-tr-b-mode: screen;
+}
+:is([data-imagery="wash"] .fd-site-media:not([data-treatment]), .fd-site-media[data-treatment="wash"]),
+:is([data-imagery="wash"] .fd-site-section[data-ground="image"]:not([data-treatment]), .fd-site-section[data-ground="image"][data-treatment="wash"]) > .fd-site-backdrop {
+  --_site-tr-filter: saturate(var(--fd-site-wash-saturate));
+  --_site-tr-a: color-mix(in srgb, var(--fd-accent) var(--fd-site-wash), transparent);
+}
+.fd-site-media[data-treatment="natural"], .fd-site-section[data-ground="image"][data-treatment="natural"] > .fd-site-backdrop { --_site-tr-filter: none; }
+
+/* ---------- The image ground ---------- */
+.fd-site-section[data-ground="image"] {
+  --_site-scrim: var(--fd-site-image-scrim-dark);
+  --fd-text-2: var(--fd-a88);
+  --fd-text-3: light-dark(color-mix(in srgb, var(--fd-ink-wash) var(--fd-site-image-muted), transparent), color-mix(in srgb, var(--fd-ink-wash) var(--fd-site-image-muted), transparent));
+  color-scheme: dark; isolation: isolate; overflow: clip;
+}
+.fd-site-section[data-ground="image"][data-scrim="dark"] { color-scheme: dark; }
+.fd-site-section[data-ground="image"][data-scrim="light"] { --_site-scrim: var(--fd-site-image-scrim-light); color-scheme: light; }
+.fd-site-backdrop { position: absolute; inset: 0; z-index: -2; overflow: clip; pointer-events: none; background: var(--fd-bg-sunken); }
+.fd-site-backdrop > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--_site-pos); filter: var(--_site-tr-filter); }
+.fd-site-backdrop::before, .fd-site-backdrop::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+.fd-site-backdrop::before { z-index: 1; background: var(--_site-tr-a); mix-blend-mode: var(--_site-tr-a-mode); }
+.fd-site-backdrop::after { z-index: 2; background: var(--_site-tr-b); mix-blend-mode: var(--_site-tr-b-mode); }
+/* the scrim: the section's page colour, full strength over the text column and its pad, thinning to the veil */
+.fd-site-section[data-ground="image"]::after {
+  --_site-solid: color-mix(in srgb, var(--fd-bg) var(--_site-scrim), transparent);
+  --_site-thin: color-mix(in srgb, var(--fd-bg) var(--fd-site-image-veil), transparent);
+  --_site-col: calc(max(var(--_site-gutter), (100% - var(--fd-site-max)) / 2) + var(--fd-site-image-measure) + var(--fd-site-image-pad));
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(to right, var(--_site-solid) 0%, var(--_site-solid) var(--_site-col), var(--_site-thin) calc(var(--_site-col) + var(--fd-site-image-fade)));
+}
+.fd-site-section[data-ground="image"]:dir(rtl)::after {
+  background: linear-gradient(to left, var(--_site-solid) 0%, var(--_site-solid) var(--_site-col), var(--_site-thin) calc(var(--_site-col) + var(--fd-site-image-fade)));
+}
+.fd-site-section[data-ground="image"]:is(.fd-site-hero[data-layout="center"], :has(> .fd-site-container > .fd-site-head[data-align="center"]))::after {
+  --_site-half: calc(var(--fd-site-image-measure) / 2 + var(--fd-site-image-pad));
+  background: linear-gradient(to right, var(--_site-thin) calc(50% - var(--_site-half) - var(--fd-site-image-fade)), var(--_site-solid) calc(50% - var(--_site-half)), var(--_site-solid) calc(50% + var(--_site-half)), var(--_site-thin) calc(50% + var(--_site-half) + var(--fd-site-image-fade)));
+}
+/* under the scrim a duotone keeps its colour: darkening alone would turn the accent toward mud */
+:is([data-imagery="duotone"] .fd-site-section[data-ground="image"]:not([data-treatment]), .fd-site-section[data-ground="image"][data-treatment="duotone"])::after {
+  -webkit-backdrop-filter: saturate(var(--fd-site-duo-scrim-saturate)); backdrop-filter: saturate(var(--fd-site-duo-scrim-saturate));
+}
+/* the head and its actions keep to the column the scrim covers */
+.fd-site-section[data-ground="image"] > .fd-site-container > :is(.fd-site-head, .fd-site-head-actions) { max-inline-size: var(--fd-site-image-measure); }
+.fd-site-section[data-ground="image"]:is(.fd-site-hero[data-layout="center"], :has(> .fd-site-container > .fd-site-head[data-align="center"])) > .fd-site-container > :is(.fd-site-head, .fd-site-head-actions) { margin-inline: auto; }
+.fd-site-cta[data-layout="band"][data-ground="image"] > .fd-site-container { grid-template-columns: minmax(0, 1fr); row-gap: var(--fd-space-8); }
+.fd-site-cta[data-layout="band"][data-ground="image"] > .fd-site-container > .fd-site-head-actions { margin-block-start: 0; }
+/* below desktop: the picture is a band above the text, fading into the ground the text stands on */
+@container fd-site (max-width: 899.98px) {
+  .fd-site-section[data-ground="image"] { padding-block-start: calc(var(--_site-pt) + var(--fd-site-image-band)); }
+  .fd-site-backdrop {
+    inset: 0 0 auto; height: calc(var(--_site-pt) + var(--fd-site-image-band));
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fd-site-image-band-fade)), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - var(--fd-site-image-band-fade)), transparent);
+  }
+  .fd-site-section[data-ground="image"]::after,
+  .fd-site-section[data-ground="image"]:dir(rtl)::after,
+  .fd-site-section[data-ground="image"]:is(.fd-site-hero[data-layout="center"], :has(> .fd-site-container > .fd-site-head[data-align="center"]))::after {
+    inset: 0 0 auto; height: calc(var(--_site-pt) + var(--fd-site-image-band)); background: var(--_site-thin);
+  }
 }
 
 /* ==========================================================================

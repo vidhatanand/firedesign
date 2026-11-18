@@ -21,11 +21,12 @@ test('catalog.json validates against catalog.schema.json', () => {
   assert.ok(validate(catalog), JSON.stringify(validate.errors?.slice(0, 5), null, 1));
 });
 
-test('website sections: every Website root is kind "section" except the foundation, which is a pattern', () => {
+test('website sections: every Website root is kind "section" except the foundation, which is a pattern, and the parts used inside sections', () => {
   const site = catalog.components.filter((c) => c.family === 'Website');
-  assert.equal(site.length, 18);   // 0.8: fd-site-article
+  assert.equal(site.length, 19);   // 0.8: fd-site-article, fd-site-media
   const foundation = ['site', 'site-container', 'site-head'];
-  for (const c of site) assert.equal(c.kind, foundation.includes(c.id) ? 'pattern' : 'section', c.id);
+  const parts = ['site-media'];   // 0.8: a picture used inside sections (SECTION_PARTS)
+  for (const c of site) assert.equal(c.kind, foundation.includes(c.id) ? 'pattern' : parts.includes(c.id) ? 'component' : 'section', c.id);
   for (const c of site) assert.deepEqual(c.card.surfaces, ['website'], `${c.id} is tagged website only`);
 });
 

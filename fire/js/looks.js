@@ -36,7 +36,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "flat",
         "elevation": "soft",
         "controls": "soft",
-        "headings": "sentence"
+        "headings": "sentence",
+        "imagery": "natural"
       },
       "signature": {
         "field": "contour",
@@ -67,6 +68,7 @@ export const LOOKS = Object.freeze([
       "elevation": "soft",
       "controls": "soft",
       "headings": "sentence",
+      "imagery": "natural",
       "signature": {
         "field": "contour",
         "mark": "dots",
@@ -122,7 +124,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "outlined",
         "elevation": "none",
         "controls": "outlined",
-        "headings": "mono"
+        "headings": "mono",
+        "imagery": "duotone"
       },
       "signature": {
         "field": "rain",
@@ -153,6 +156,7 @@ export const LOOKS = Object.freeze([
       "elevation": "none",
       "controls": "outlined",
       "headings": "mono",
+      "imagery": "duotone",
       "signature": {
         "field": "rain",
         "mark": "chars",
@@ -175,6 +179,7 @@ export const LOOKS = Object.freeze([
       "data-elevation": "none",
       "data-controls": "outlined",
       "data-headings": "mono",
+      "data-imagery": "duotone",
       "data-signature-field": "rain",
       "data-signature-mark": "chars",
       "data-signature-ramp": "rain",
@@ -211,7 +216,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "flat",
         "elevation": "none",
         "controls": "outlined",
-        "headings": "sentence"
+        "headings": "sentence",
+        "imagery": "mono"
       },
       "signature": {
         "field": "halftone",
@@ -242,6 +248,7 @@ export const LOOKS = Object.freeze([
       "elevation": "none",
       "controls": "outlined",
       "headings": "sentence",
+      "imagery": "mono",
       "signature": {
         "field": "halftone",
         "mark": "dots",
@@ -264,6 +271,7 @@ export const LOOKS = Object.freeze([
       "data-surfaces": "flat",
       "data-elevation": "none",
       "data-controls": "outlined",
+      "data-imagery": "mono",
       "data-signature-field": "halftone",
       "data-signature-mark": "dots",
       "data-signature-ramp": "soft",
@@ -302,7 +310,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "objects",
         "elevation": "lifted",
         "controls": "filled",
-        "headings": "sentence"
+        "headings": "sentence",
+        "imagery": "natural"
       },
       "signature": {
         "field": "orbit",
@@ -333,6 +342,7 @@ export const LOOKS = Object.freeze([
       "elevation": "lifted",
       "controls": "filled",
       "headings": "sentence",
+      "imagery": "natural",
       "signature": {
         "field": "orbit",
         "mark": "dots",
@@ -390,7 +400,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "objects",
         "elevation": "none",
         "controls": "soft",
-        "headings": "upper"
+        "headings": "upper",
+        "imagery": "wash"
       },
       "signature": {
         "field": "bars",
@@ -421,6 +432,7 @@ export const LOOKS = Object.freeze([
       "elevation": "none",
       "controls": "soft",
       "headings": "upper",
+      "imagery": "wash",
       "signature": {
         "field": "bars",
         "mark": "squares",
@@ -442,6 +454,7 @@ export const LOOKS = Object.freeze([
       "data-text-size": "sm",
       "data-elevation": "none",
       "data-headings": "upper",
+      "data-imagery": "wash",
       "data-signature-field": "bars",
       "data-signature-mark": "squares",
       "data-signature-ramp": "dense",
@@ -478,7 +491,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "objects",
         "elevation": "lifted",
         "controls": "filled",
-        "headings": "upper"
+        "headings": "upper",
+        "imagery": "duotone"
       },
       "signature": {
         "field": "flame",
@@ -509,6 +523,7 @@ export const LOOKS = Object.freeze([
       "elevation": "lifted",
       "controls": "filled",
       "headings": "upper",
+      "imagery": "duotone",
       "signature": {
         "field": "flame",
         "mark": "chars",
@@ -529,6 +544,7 @@ export const LOOKS = Object.freeze([
       "data-elevation": "lifted",
       "data-controls": "filled",
       "data-headings": "upper",
+      "data-imagery": "duotone",
       "data-signature-field": "flame",
       "data-signature-mark": "chars",
       "data-signature-ramp": "default",
@@ -565,7 +581,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "flat",
         "elevation": "soft",
         "controls": "filled",
-        "headings": "sentence"
+        "headings": "sentence",
+        "imagery": "wash"
       },
       "signature": {
         "field": "waves",
@@ -596,6 +613,7 @@ export const LOOKS = Object.freeze([
       "elevation": "soft",
       "controls": "filled",
       "headings": "sentence",
+      "imagery": "wash",
       "signature": {
         "field": "waves",
         "mark": "dots",
@@ -616,6 +634,7 @@ export const LOOKS = Object.freeze([
       "data-density": "spacious",
       "data-surfaces": "flat",
       "data-controls": "filled",
+      "data-imagery": "wash",
       "data-signature-field": "waves",
       "data-signature-mark": "dots",
       "data-signature-ramp": "soft",
@@ -704,7 +723,8 @@ export const LOOKS = Object.freeze([
         "surfaces": "outlined",
         "elevation": "none",
         "controls": "outlined",
-        "headings": "sentence"
+        "headings": "sentence",
+        "imagery": "mono"
       },
       "signature": {
         "field": "auto",
@@ -735,6 +755,7 @@ export const LOOKS = Object.freeze([
       "elevation": "none",
       "controls": "outlined",
       "headings": "sentence",
+      "imagery": "mono",
       "signature": {
         "field": "auto",
         "mark": "auto",
@@ -758,6 +779,7 @@ export const LOOKS = Object.freeze([
       "data-surfaces": "outlined",
       "data-elevation": "none",
       "data-controls": "outlined",
+      "data-imagery": "mono",
       "data-signature-marks": "none"
     },
     "props": {

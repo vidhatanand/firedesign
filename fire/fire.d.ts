@@ -837,6 +837,8 @@ export interface FireEventMap {
   'fd:keys': CustomEvent<{ keys: string }>;
   /** A recovery-codes list was downloaded (data-filename, default "recovery-codes.txt"); value is the file's text. */
   'fd:download': CustomEvent<{ filename: string; value: string }>;
+  /** The set of a .fd-filters (combined filter) changed. On the root. */
+  'fd:filter': CustomEvent<FilterSetDetail>;
 }
 
 declare global {
@@ -1256,6 +1258,40 @@ export declare namespace data {
   export function showDetail(root: HTMLElement, value: string | number | Element, options?: { focus?: boolean }): HTMLElement | null;
   /** Back to the list (one pane at a time); focus returns to the open row unless focus is false. */
   export function showList(root: HTMLElement, options?: { focus?: boolean }): void;
+}
+
+/** The kind of a combined filter's field (data-kind). */
+export type FilterKind = 'one' | 'many' | 'date' | 'text' | 'flag';
+/** One filter of a combined filter. */
+export interface FilterEntry {
+  /** The field's data-field (and the items' data-<field>). */
+  field: string;
+  /** is | not (one and many) · contains (text) · is (date, flag). */
+  op: 'is' | 'not' | 'contains';
+  /** data-value strings; a custom date range as "start/end"; a text field its words; a flag none. */
+  values: string[];
+  /** Absent in a set passed to setFilters() is fine: the field's own kind is used. */
+  kind?: FilterKind;
+  /** A date filter's range as ISO dates. */
+  range?: { start: string; end: string };
+}
+/** fd:filter detail. */
+export interface FilterSetDetail {
+  filters: FilterEntry[];
+  source: 'menu' | 'search' | 'chip' | 'clear' | 'url' | 'api';
+}
+
+/** The combined filter (.fd-filters): one button, a menu of fields, a panel of values per field, chips. */
+export declare namespace filters {
+  export function init(root?: ParentNode): void;
+  /** The filters that are set, in the order of the fields. */
+  export function getFilters(root: ElementRef): FilterEntry[];
+  /** Replace the whole set; fires fd:filter (source "api") unless silent. */
+  export function setFilters(root: ElementRef, filters?: FilterEntry[], options?: { silent?: boolean; source?: FilterSetDetail['source'] }): void;
+  /** Remove every filter; fires fd:filter (source "clear") unless silent. */
+  export function clearFilters(root: ElementRef, options?: { silent?: boolean }): void;
+  /** Whether a record passes a set: { status: 'failed', labels: ['bug'], cached: true, date: '2026-11-14' }. now: the day date presets count back from. */
+  export function matches(filters: FilterEntry[], record: Record<string, unknown>, options?: { now?: string }): boolean;
 }
 
 /** Accordion, disclosure, dismissible callouts, card scroller, removable badges. */

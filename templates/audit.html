@@ -37,11 +37,50 @@
               <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
               <kbd class="fd-kbd">/</kbd>
             </div>
-            <div class="fd-filter" data-default="Anyone">
-              <button class="fd-filter-trigger" type="button" data-fd-popover="pop-who" data-placement="bottom-start"><i data-icon="user"></i><span class="fd-filter-value" data-fd-filter-label data-empty="Anyone">Anyone</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
-            </div>
-            <div class="fd-filter" data-default="All kinds">
-              <button class="fd-filter-trigger" type="button" data-fd-popover="pop-kind" data-placement="bottom-start"><i data-icon="list-filter"></i><span class="fd-filter-value" data-fd-filter-label data-empty="All kinds">All kinds</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+            <div class="fd-filters" id="audit-filters" data-fd-for="#audit-table">
+              <button class="fd-btn fd-filters-add" type="button" data-fd-menu="audit-filter-menu"><i data-icon="list-filter"></i><span>Filter</span></button>
+              <div class="fd-menu fd-filters-menu" id="audit-filter-menu" popover aria-label="Filter the audit log">
+                <p class="fd-menu-label">People</p>
+                <button class="fd-menu-item" type="button" data-field="who" data-kind="many" data-fd-submenu="audit-f-who"><i data-icon="user"></i><span class="fd-menu-item-label">Who</span></button>
+                <div class="fd-menu fd-filters-panel" id="audit-f-who" popover>
+                    <button class="fd-menu-item" type="button" data-value="maya"><span class="fd-avatar" data-size="20" data-tone="accent">MR</span><span class="fd-menu-item-label">Maya Reyes</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="tomasz"><span class="fd-avatar" data-size="20" data-tone="info">TN</span><span class="fd-menu-item-label">Tomasz Nowak</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="amara"><span class="fd-avatar" data-size="20" data-tone="success">AO</span><span class="fd-menu-item-label">Amara Okafor</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="lukas"><span class="fd-avatar" data-size="20" data-tone="violet">LS</span><span class="fd-menu-item-label">Lukas Schmidt</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="key-prod"><i data-icon="key-round"></i><span class="fd-menu-item-label">Production crawler key</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="key-ci"><i data-icon="key-round"></i><span class="fd-menu-item-label">CI key</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="agent"><i data-icon="wand-sparkles"></i><span class="fd-menu-item-label">Ember agent</span><span class="fd-filters-count"></span></button>
+                </div>
+                <hr class="fd-menu-sep">
+                <p class="fd-menu-label">Change</p>
+                <button class="fd-menu-item" type="button" data-field="kind" data-kind="many" data-fd-submenu="audit-f-kind"><i data-icon="list-filter"></i><span class="fd-menu-item-label">Kind</span></button>
+                <div class="fd-menu fd-filters-panel" id="audit-f-kind" popover>
+                    <button class="fd-menu-item" type="button" data-value="key-created"><span class="fd-status" data-tone="accent"></span><span class="fd-menu-item-label">Key created</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="key-revoked"><span class="fd-status" data-tone="danger"></span><span class="fd-menu-item-label">Key revoked</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="member-invited"><span class="fd-status" data-tone="info"></span><span class="fd-menu-item-label">Member invited</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="member-removed"><span class="fd-status" data-tone="danger"></span><span class="fd-menu-item-label">Member removed</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="role"><span class="fd-status" data-tone="warning"></span><span class="fd-menu-item-label">Role changed</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="setting"><span class="fd-status" data-tone="neutral"></span><span class="fd-menu-item-label">Setting changed</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="limit"><span class="fd-status" data-tone="warning"></span><span class="fd-menu-item-label">Limit raised</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="webhook"><span class="fd-status" data-tone="neutral"></span><span class="fd-menu-item-label">Webhook added</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="export"><span class="fd-status" data-tone="neutral"></span><span class="fd-menu-item-label">Export downloaded</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="signin"><span class="fd-status" data-tone="neutral"></span><span class="fd-menu-item-label">Sign-in</span><span class="fd-filters-count"></span></button>
+                </div>
+                <button class="fd-menu-item" type="button" data-field="target" data-kind="text" data-fd-submenu="audit-f-target"><i data-icon="target"></i><span class="fd-menu-item-label">Target</span></button>
+                <div class="fd-menu fd-filters-panel" id="audit-f-target" popover>
+                  <input class="fd-input" type="text" placeholder="team.retention" aria-label="Target contains" autocomplete="off">
+                </div>
+                <button class="fd-menu-item" type="button" data-field="access" data-kind="flag"><i data-icon="shield"></i><span class="fd-menu-item-label">Access changes</span><span class="fd-filters-count"></span></button>
+                <hr class="fd-menu-sep">
+                <p class="fd-menu-label">Where</p>
+                <button class="fd-menu-item" type="button" data-field="source" data-kind="one" data-fd-submenu="audit-f-source"><i data-icon="monitor"></i><span class="fd-menu-item-label">Source</span></button>
+                <div class="fd-menu fd-filters-panel" id="audit-f-source" popover>
+                    <button class="fd-menu-item" type="button" data-value="dashboard"><i data-icon="monitor"></i><span class="fd-menu-item-label">Dashboard</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="api"><i data-icon="code"></i><span class="fd-menu-item-label">API</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="cli"><i data-icon="terminal"></i><span class="fd-menu-item-label">CLI</span><span class="fd-filters-count"></span></button>
+                    <button class="fd-menu-item" type="button" data-value="agent"><i data-icon="wand-sparkles"></i><span class="fd-menu-item-label">Agent</span><span class="fd-filters-count"></span></button>
+                </div>
+              </div>
             </div>
             <div class="fd-toolbar-end">
               <div class="fd-filter fd-period">
@@ -49,7 +88,6 @@
               </div>
             </div>
           </div>
-          <div class="fd-filter-applied" id="audit-applied" aria-label="Applied filters" hidden></div>
         </div>
       </section>
 
@@ -161,42 +199,7 @@
     </div>
   </div>
 
-  <!-- Filter popovers -->
-  <div class="fd-popover" id="pop-who" popover data-fd-filter-list data-filter="who" data-size="sm" aria-label="Filter by who">
-    <label class="fd-popover-search"><i data-icon="search"></i><input type="search" placeholder="Filter people and keys" aria-label="Filter people and keys" data-fd-filter-search autocomplete="off"></label>
-    <div class="fd-popover-body">
-      <div class="fd-checklist" aria-label="People, keys and the agent">
-        <div class="fd-checklist-item" data-value="maya"><span class="fd-checklist-label">Maya Reyes</span><span class="fd-checklist-count">8</span></div>
-        <div class="fd-checklist-item" data-value="tomasz"><span class="fd-checklist-label">Tomasz Nowak</span><span class="fd-checklist-count">5</span></div>
-        <div class="fd-checklist-item" data-value="amara"><span class="fd-checklist-label">Amara Okafor</span><span class="fd-checklist-count">2</span></div>
-        <div class="fd-checklist-item" data-value="lukas"><span class="fd-checklist-label">Lukas Schmidt</span><span class="fd-checklist-count">3</span></div>
-        <div class="fd-checklist-item" data-value="key-prod"><span class="fd-checklist-label">Production crawler key</span><span class="fd-checklist-count">2</span></div>
-        <div class="fd-checklist-item" data-value="key-ci"><span class="fd-checklist-label">CI key</span><span class="fd-checklist-count">2</span></div>
-        <div class="fd-checklist-item" data-value="agent"><span class="fd-checklist-label">Ember agent</span><span class="fd-checklist-count">3</span></div>
-      </div>
-      <p class="fd-checklist-empty" hidden>Nobody matches “<span data-fd-filter-query></span>”</p>
-    </div>
-    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
-  </div>
-
-  <div class="fd-popover" id="pop-kind" popover data-fd-filter-list data-filter="kind" data-size="sm" aria-label="Filter by kind">
-    <div class="fd-popover-body">
-      <div class="fd-checklist" aria-label="Kinds of event">
-        <div class="fd-checklist-item" data-value="key-created"><span class="fd-checklist-label">Key created</span><span class="fd-checklist-count">3</span></div>
-        <div class="fd-checklist-item" data-value="key-revoked"><span class="fd-checklist-label">Key revoked</span><span class="fd-checklist-count">1</span></div>
-        <div class="fd-checklist-item" data-value="member-invited"><span class="fd-checklist-label">Member invited</span><span class="fd-checklist-count">2</span></div>
-        <div class="fd-checklist-item" data-value="member-removed"><span class="fd-checklist-label">Member removed</span><span class="fd-checklist-count">1</span></div>
-        <div class="fd-checklist-item" data-value="role"><span class="fd-checklist-label">Role changed</span><span class="fd-checklist-count">2</span></div>
-        <div class="fd-checklist-item" data-value="setting"><span class="fd-checklist-label">Setting changed</span><span class="fd-checklist-count">5</span></div>
-        <div class="fd-checklist-item" data-value="limit"><span class="fd-checklist-label">Limit raised</span><span class="fd-checklist-count">3</span></div>
-        <div class="fd-checklist-item" data-value="webhook"><span class="fd-checklist-label">Webhook added</span><span class="fd-checklist-count">2</span></div>
-        <div class="fd-checklist-item" data-value="export"><span class="fd-checklist-label">Export downloaded</span><span class="fd-checklist-count">4</span></div>
-        <div class="fd-checklist-item" data-value="signin"><span class="fd-checklist-label">Sign-in</span><span class="fd-checklist-count">4</span></div>
-      </div>
-    </div>
-    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
-  </div>
-
+  <!-- The period -->
   <div class="fd-popover" id="pop-period" popover data-size="auto" aria-label="Period">
     <div class="fd-daterange" data-fd-daterange data-preset="7d" data-compare="previous" data-max="today">
       <div class="fd-daterange-presets" role="group" aria-label="Presets">
@@ -255,7 +258,7 @@
 </main>
 
 <script type="module">
-  import { init, overlays, nav, content, copyText, reducedMotion } from '../fire/fire.js';
+  import { init, overlays, nav, content, filters as filtering, copyText, reducedMotion } from '../fire/fire.js';
 
   const { toast, openDialog } = overlays;
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -265,7 +268,7 @@
   const states = $('#audit-states');
   const switcher = $('#state-switch');
   const search = $('#audit-search');
-  const applied = $('#audit-applied');
+  const filterRoot = $('#audit-filters');
   const exportBtn = $('#audit-export');
 
   /* ---------- Fixtures: the demo data is fixed to Wednesday, Nov 18, 2026, 4:40 PM ---------- */
@@ -395,7 +398,7 @@
     const rows = EVENTS.filter((e) => e.day === day);
     return `<tbody class="fd-table-group" data-day="${day}">
       <tr class="fd-table-group-head"><th scope="rowgroup" colspan="5"><span class="fd-table-group-title">${dayTitle(day)}</span><span class="fd-table-group-count" data-auto>${rows.length}</span></th></tr>
-      ${rows.map((e) => `<tr data-value="${e.id}" data-href="#${e.id}">
+      ${rows.map((e) => `<tr data-value="${e.id}" data-href="#${e.id}" data-who="${e.who}" data-kind="${e.kind}" data-source="${e.source.toLowerCase()}" data-target="${esc(e.target)}"${ACCESS.has(e.kind) ? ' data-access' : ''}>
         <td data-sort-value="${e.at}">${clock(e.at)}</td>
         <td data-sort-value="${esc(WHO[e.who].name)}">${whoCell(e.who)}</td>
         <td data-stack-title>${esc(e.action)}</td>
@@ -409,19 +412,19 @@
   const rows = $$('tr[data-value]', table);
 
   /* ---------- Filters, search and the period ---------- */
-  const filters = { who: [], kind: [], period: periodOf({ preset: '7d' }) };
+  // The combined filter (#audit-filters) hides the rows it does not match; the search and the period are the page's own,
+  // written on the rows as data-fd-out. The strip counts from the same data with filters.matches().
+  const filters = { period: periodOf({ preset: '7d' }) };
   let query = '';
-  const LABEL = { who: Object.fromEntries(Object.entries(WHO).map(([k, w]) => [k, w.sub === 'API key' ? `${w.name} key` : w.name])), kind: Object.fromEntries(Object.entries(KIND).map(([k, v]) => [k, v.label])) };
-  const TOKEN = { who: 'Who', kind: 'Kind' };
 
   const inRange = (e, r) => r && e.day >= r.start && e.day <= r.end;
-  function matches(e) {
-    if (filters.who.length && !filters.who.includes(e.who)) return false;
-    if (filters.kind.length && !filters.kind.includes(e.kind)) return false;
+  const record = (e) => ({ who: e.who, kind: e.kind, source: e.source.toLowerCase(), target: e.target, access: ACCESS.has(e.kind) });
+  const searched = (e) => {
     const q = query.trim().toLowerCase();
     return !q || `${e.action} ${e.target} ${WHO[e.who].name} ${KIND[e.kind].label} ${e.source}`.toLowerCase().includes(q);
-  }
-  const isFiltered = () => Boolean(query.trim() || filters.who.length || filters.kind.length);
+  };
+  const matches = (e) => searched(e) && filtering.matches(filtering.getFilters(filterRoot), record(e));
+  const isFiltered = () => Boolean(query.trim() || filtering.getFilters(filterRoot).length);
 
   function stat(name, figure, now, before, sub) {
     const tile = $(`[data-stat="${name}"]`, $('#audit-stats'));
@@ -440,8 +443,8 @@
     let shown = 0;
     for (const tr of rows) {
       const e = byId.get(tr.dataset.value);
-      tr.hidden = !(inRange(e, period) && matches(e));
-      if (!tr.hidden) shown += 1;
+      tr.toggleAttribute('data-fd-out', !(inRange(e, period) && searched(e)));
+      if (inRange(e, period) && matches(e)) shown += 1;
     }
     const current = EVENTS.filter((e) => inRange(e, period) && matches(e));
     const before = period.compare ? EVENTS.filter((e) => inRange(e, period.compare) && matches(e)) : null;
@@ -460,32 +463,13 @@
     else if (state === 'filtered' && shown) show('ready');
   }
 
-  function renderTokens() {
-    const tokens = ['who', 'kind'].flatMap((key) => filters[key].map((value) => [key, value]));
-    applied.hidden = tokens.length === 0;
-    applied.innerHTML = tokens.map(([key, value]) =>
-      `<span class="fd-filter-token"><span class="fd-filter-token-key">${TOKEN[key]}</span><span class="fd-filter-token-value">${esc(LABEL[key][value])}</span><button class="fd-filter-token-remove" type="button" aria-label="Remove ${TOKEN[key]}: ${esc(LABEL[key][value])}"><i data-icon="x" data-size="12"></i></button></span>`).join('')
-      + '<button class="fd-btn-text" type="button" data-filter-clear-all>Clear all</button>';
-    init(applied);
-  }
-
   search.addEventListener('input', () => { query = search.value; apply(); });
+  filterRoot.addEventListener('fd:filter', () => apply());
 
   document.addEventListener('fd:change', (event) => {
     const el = event.target;
     if (!(el instanceof Element)) return;
-    if (el.matches('[data-fd-filter-list]')) { filters[el.dataset.filter] = event.detail.value; renderTokens(); apply(); return; }
     if (el.matches('[data-fd-daterange]')) { filters.period = periodOf(event.detail.value); apply(); return; }
-    if (el === applied && event.detail.source === 'filters') {
-      // A token was removed (or Clear all): untick the matching items in each popover.
-      const left = new Set(event.detail.value.map((t) => `${t.key}:${t.value}`));
-      for (const key of ['who', 'kind']) {
-        for (const value of [...filters[key]]) {
-          if (!left.has(`${TOKEN[key]}:${LABEL[key][value]}`)) $(`#pop-${key} .fd-checklist-item[data-value="${CSS.escape(value)}"]`)?.click();
-        }
-      }
-      return;
-    }
     if (el === switcher && event.detail.value !== states.dataset.state) choose(event.detail.value);
     if (el === states) sync(event.detail.value);
   });
@@ -493,13 +477,12 @@
   function clearFilters() {
     search.value = '';
     query = '';
-    for (const key of ['who', 'kind']) $(`#pop-${key} [data-fd-filter-clear]`)?.click();
+    filtering.clearFilters(filterRoot, { silent: true });
     if (filters.period.preset !== '7d' || !filters.period.compare) {
       $('#pop-period [data-preset="7d"]').click();
       $('#pop-period input[value="previous"]').click();
       $('#pop-period [data-fd-daterange-apply]').click();
     }
-    renderTokens();
     apply();
   }
   $('#audit-clear').addEventListener('click', () => { clearFilters(); if (states.dataset.state === 'filtered') show('ready'); search.focus(); });

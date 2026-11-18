@@ -21,6 +21,7 @@ export const EXTRA_ROOTS = {
   'fd-data-card': 'Data',
   'fd-feature-row': 'Content',
   'fd-file': 'Forms',                  // an uploaded file row (fd-filelist is its list)
+  'fd-filters': 'Data',                 // the combined filter: one button, a menu of fields, chips (0.8)
   'fd-glyph': 'Texture & loading',
   'fd-initial': 'Shell',               // a dot-matrix mark drawn from a name's first letter
   'fd-list-detail': 'Data',           // a list beside the record it opens (one pane at a time on a phone)
@@ -130,7 +131,7 @@ export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd
 export const SECTION_FAMILIES = new Set(['Website']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-filters': 'Combined filter', 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {
@@ -155,7 +156,7 @@ export const FAMILY_PAGES = {
 
 /** The behaviour module whose header documents the events of a family. */
 export const FAMILY_MODULES = {
-  Agent: ['agent'], Chat: ['chat'], Charts: ['charts'], Code: ['code'], Content: ['content'], Data: ['data'],
+  Agent: ['agent'], Chat: ['chat'], Charts: ['charts'], Code: ['code'], Content: ['content'], Data: ['data', 'filters'],
   Documentation: ['docsite'], Forms: ['forms'], Navigation: ['nav'], Overlays: ['overlays'], Shell: ['shell'],
   'Texture & loading': ['texture'], Tweaks: ['tweaks'], Website: ['site'],
 };
@@ -243,7 +244,7 @@ export const FREE_ATTRIBUTES = {
   doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
   kv: ['data-copy'],                   // the text a row copies
   list: ['data-value'],                // a row's record id: the option a listbox list selects, the record a list-and-detail row opens
-  menu: ['data-fd-submenu', 'data-fd-when', 'data-fd-unless'], // the id of the sub-menu; the words an item needs, or must not find, in a row's data-fd-flags (overlays.js header)
+  menu: ['data-fd-submenu', 'data-fd-when', 'data-fd-unless', 'data-value'], // the id of the sub-menu; the words an item needs, or must not find, in a row's data-fd-flags (overlays.js header); an item's value (overlays.js: data-value="7d"; filters.js: a value to filter by)
   'doc-frame': ['data-fd-src', 'data-fd-hosts', 'data-fd-alt'], // a picture frame's address, the hosts besides the page's that may serve it, its description (docsite.js header)
   pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
   running: ['data-fd-running'],        // the id of the popover whose rows the pill counts

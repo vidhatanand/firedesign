@@ -1,5 +1,6 @@
 /* ==========================================================================
-   Website — the grammar for public pages: a layout foundation and fourteen section types.
+   Website — the grammar for public pages: a layout foundation and fifteen section types
+   (the fifteenth, fd-site-article, and the listing and sign-up behaviour of fd-site-posts and fd-site-cta came in 0.8).
    Fire ships no block library. A section supplies layout and rhythm only; every control, list, table and card in it
    is an existing Fire component. Variants differ in structure, never in decoration: a site is told apart by its look
    (palette, type set, signature texture, dials) and by how its sections are composed.
@@ -103,10 +104,41 @@
    fd-site-compare   (default) | versus · data-show="1–4" (site.js, phone: the plan column shown) ·
                      parts: -tabs (an fd-tabs), -table (an fd-table-wrap), -yes, -no
    fd-site-faq       list | split | columns · parts: -list (dl), -item, -question, -answer
-   fd-site-cta       band | card | split · parts: -panel (card), -form, -done
-   fd-site-footer    columns | compact | wordmark · parts: -brand, -text, -cols, -col, -col-title, -legal, -wordmark
+   fd-site-cta       band | card | split · parts: -panel (card), -form, -consent, -done
+                     The sign-up form (0.8; one form, three places: cta split, .fd-site-footer-signup, an article's foot):
+                     form.fd-site-cta-form > .fd-field (input[type=email] [data-error-type] [data-error-failed], the submit
+                     button, .fd-field-hint, .fd-field-error) · p.fd-site-cta-consent (what the address is used for) ·
+                     p.fd-site-cta-done[role=status] with data-state sent or subscribed (the line shown in that state)
+                     data-state on the form (site.js), one of: invalid, busy, sent, subscribed, failed; none is idle ·
+                     invalid: aria-invalid and the error · busy: aria-busy on the button, the input read-only ·
+                     sent, subscribed: the field gives way to its -done line · failed: the field stays, the error is an alert
+   fd-site-footer    columns | compact | wordmark · parts: -brand, -text, -cols, -col, -col-title, -legal, -wordmark,
+                     -signup (columns: an optional sign-up column holding a -col-title, a -text and the sign-up form)
    fd-site-posts     list | grid | featured · parts: -list, -item, -date (time), -title (its link covers the item),
                      -summary, -media; a tag is an fd-badge
+                     list without a -date in an item: no date rail; the title and summary lead, a -media frame at the end
+                     Entry parts (0.8): -kind (a kind label) · -meta (the format line: authors, date, "PDF · 24 pages") ·
+                     -cover in a -media frame (a document's cover drawn in type; data-ground="inverse|raised") > -kind,
+                     -cover-title, an optional .fd-ascii
+                     The listing (0.8; behaviour in site.js): -item[data-kind="report"][data-tags="pricing monitoring"] ·
+                     -tools (a bar of existing controls, each with data-filter="kind|q|<tag group>": an fd-chip-nav or
+                     fd-tabs, a select, an fd-search) · -count[data-noun][role=status] ("12 of 30 resources") ·
+                     data-page-size="12" on the section (pages: an empty nav.fd-pagination after the list, or a
+                     button[data-more]) · an .fd-empty after the list for no matches, with a button[data-clear] ·
+                     data-address on the section (the filters and page in the address)
+   fd-site-article   plain | aside | cover · data-side="start|end" (aside: the rail's side) · an article element with
+                     fd-site-section; the reading page of a post, a report or a research paper
+                     parts: -head > (.fd-breadcrumb, .fd-site-eyebrow, -title (the h1), -standfirst, -meta, -actions, an
+                     optional .fd-kv: the key facts, at the head's end on desktop) · -cover (cover: the signature texture or
+                     an fd-doc-frame, wide) · -body > (-aside: details.fd-disclosure, aside only, open on desktop and a
+                     closed disclosure below it) + -text (with .fd-prose[data-size="lg"]) · -foot (ruled rows)
+                     [data-breakout] on a child of -text: it spans wider than the measure (a figure, a table, a pull quote,
+                     the findings)
+                     fd-site-authors > -item > (.fd-avatar), -name, -role (role or affiliation): the byline, also in -meta
+                     of a posts entry
+                     fd-site-notes (ol; li#note-n focus targets) · in the text sup > a.fd-site-notes-ref#ref-n
+                     [aria-describedby] · in a note a.fd-site-notes-back[aria-label] (back to its reference)
+                     fd-site-refs (ol: references with a hanging indent)
 
    Motion: nothing scroll-driven, no entrance on scroll, no parallax. Only the logo marquee, the header's scrolled
    state, and the hover, press and accordion motion Fire's components already have.

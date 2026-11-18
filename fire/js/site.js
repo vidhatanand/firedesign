@@ -59,7 +59,7 @@
  * Events (bubbling): fd:open / fd:close (the header's sheet), fd:change (pricing period, compare column, listing,
  *   sign-up state), fd:submit (sign-up, cancelable), fd:copy (copy link).
  * API: init(root), openHeader(header), closeHeader(header, { focus }), setPeriod(section, period), showPlan(section, n),
- *      filterPosts(section, filters, { page, push }), setSignup(form, state)
+ *      filterPosts(section, filters, { page, push, replace, focus, silent }), setSignup(form, state, { silent })
  */
 import { $, $$, on, once, emit, reducedMotion, focusables, copyText, label } from './core.js';
 import { validateControl } from './forms.js';

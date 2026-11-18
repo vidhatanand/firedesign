@@ -63,7 +63,7 @@ const { html, text } = renderEmail({
   <section class="doc-section" id="blocks">
     <div class="doc-section-head">
       <h2 class="fd-h3">Blocks</h2>
-      <p>Eight blocks cover the messages a product sends. URLs are https, http, mailto or tel; everything else is rejected, and every value is escaped.</p>
+      <p>Eleven blocks cover the messages a product sends: eight for a transactional message, and three (section, story, list) for a newsletter issue. URLs are https, http, mailto or tel; everything else is rejected, and every value is escaped.</p>
     </div>
     <table class="doc-table">
       <thead><tr><th>Block</th><th>Fields</th><th>Use it for</th></tr></thead>
@@ -76,6 +76,9 @@ const { html, text } = renderEmail({
         <tr><td><code class="fd-code">divider</code></td><td></td><td>A rule between parts of one message.</td></tr>
         <tr><td><code class="fd-code">note</code></td><td><code class="fd-code">text</code>, <code class="fd-code">title</code></td><td>An aside: “Not you? Ignore this email.”</td></tr>
         <tr><td><code class="fd-code">footer</code></td><td><code class="fd-code">lines</code>, <code class="fd-code">links</code></td><td>Below the card: the sender’s address, privacy and help links.</td></tr>
+        <tr><td><code class="fd-code">section</code></td><td><code class="fd-code">title</code></td><td>A newsletter’s group of stories (“Shipped”): a small uppercase label over a rule, an <code class="fd-code">h2</code>. In the text part, the title in capitals, underlined with <code class="fd-code">=</code>.</td></tr>
+        <tr><td><code class="fd-code">story</code></td><td><code class="fd-code">title</code>, <code class="fd-code">text</code>, <code class="fd-code">href</code>, <code class="fd-code">kind</code>, <code class="fd-code">label</code></td><td>One item of an issue: an optional kind (“Release”), the title as a link (<code class="fd-code">h3</code> under a section, <code class="fd-code">h2</code> without one), one paragraph, and a link line that names where it goes (<code class="fd-code">label</code>, default “Read more”).</td></tr>
+        <tr><td><code class="fd-code">list</code></td><td><code class="fd-code">items</code> (each a string, or an array of strings and <code class="fd-code">{ text, href }</code>), <code class="fd-code">ordered</code></td><td>A short list: “Also this month”. A bulleted list, or numbered with <code class="fd-code">ordered: true</code>.</td></tr>
       </tbody>
     </table>
   </section>
@@ -96,6 +99,69 @@ const { html, text } = renderEmail({
       </div>
     </div>
     <p class="fd-small fd-muted">The examples are the files in <code class="fd-code">docs/assets/email/</code>, written by <code class="fd-code">node fire/email/build-examples.mjs</code>; a test fails when they differ from a fresh render.</p>
+  </section>
+
+  <section class="doc-section" id="newsletter">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">A newsletter issue</h2>
+      <p>The section, story and list blocks make a monthly issue: sections group short stories, each a title, one paragraph and a link. Left: the HTML part in the Ember palette. Right: its plain-text part. The same content is the sample issue on <code class="fd-code">templates/site-newsletter.html</code>.</p>
+    </div>
+    <div class="em-pair">
+      <div class="em-frame">
+        <iframe src="assets/email/newsletter-ember.html" title="Newsletter issue, Ember palette" sandbox></iframe>
+        <p class="fd-small fd-muted">Palette <code class="fd-code">ember</code>, the <code class="fd-code">newsletter</code> example of <code class="fd-code">fire/email/examples.mjs</code></p>
+      </div>
+      <div class="em-frame">
+        <figure class="fd-codeblock em-text">
+          <pre class="fd-codeblock-body"><code>Ember Dispatch, November 2026
+
+What shipped in Ember this month, what we measured across the pages our monitors watch, and one customer story. Four minutes to read.
+
+SHIPPED
+=======
+
+Release: Monitors are generally available
+Point a monitor at any URL, choose what counts as a change, and get a signed webhook with the diff. Checks run every 5 minutes to every 7 days, at 1 credit a check.
+Read the release notes: https://ember.example/changelog#v2-14-0
+
+Release: Typed JSON in the Python and Node SDKs
+Pass a Pydantic model or a Zod schema to formats and get a typed object back, or a reason why a field is missing.
+See the SDK changes: https://ember.example/changelog#v2-13-2
+
+MEASURED
+========
+
+Report: 61% of pricing pages changed in 18 months
+We watched 4,120 public pricing pages every 6 hours from May 2025 to October 2026. 2,513 of them changed at least once; 38% of all changes raised a price.
+Read the pricing page index: https://ember.example/resources/pricing-page-index-2026
+
+FROM CUSTOMERS
+==============
+
+Customer story: Fourteen scrapers became three API calls
+Quarry Labs moved its price indexes to Ember in six weeks. Crawl spend fell from $19,100 in July to $12,600 in October.
+Read the Quarry Labs story: https://ember.example/customers/quarry-labs
+
+ALSO THIS MONTH
+===============
+
+- Stealth proxies: time to first byte fell from 2.1 s to 1.3 s.
+- Spend caps now work per API key.
+- The median scrape is 842 ms. How we got there (https://ember.example/blog/median-842-ms).
+
+Read this issue on the web:
+https://ember.example/newsletter/2026-11
+
+-- 
+You get this because you subscribed at ember.example. One email on the first Tuesday of each month.
+Ember, Inc. 548 Market St, San Francisco
+Unsubscribe: https://ember.example/newsletter/unsubscribe?u=d41f
+Past issues: https://ember.example/newsletter
+Privacy: https://ember.example/privacy</code></pre>
+        </figure>
+        <p class="fd-small fd-muted">The plain-text part, <code class="fd-code">docs/assets/email/newsletter-ember.txt</code></p>
+      </div>
+    </div>
   </section>
 
   <section class="doc-section" id="text">

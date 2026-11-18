@@ -29427,6 +29427,108 @@
         ],
         "since": "0.6.0"
       }
+    },
+    {
+      "id": "transitions",
+      "name": "Page transitions",
+      "module": "fire/js/transitions.js",
+      "exports": [
+        "TRANSITION_KINDS",
+        "init",
+        "motionAllowed",
+        "transition"
+      ],
+      "docs": "docs/transitions.html#demo",
+      "card": {
+        "id": "transitions",
+        "job": "Move from one page to the next with the chrome held still and only the content changing.",
+        "purpose": "A stylesheet and a helper, not a component. Under <html data-fd-transition> the sidebar, top bar and other chrome keep their own names and do not fade, while the page fades (fade), slides along the inline axis (slide) or stays (none). transition(update, { kind, direction }) sets the attribute while it runs, for a single-page route change. A multi-page site opts in by linking fire/transitions.css, setting the attribute and marking its module scripts blocking=\"render\".",
+        "useWhen": [
+          "A multi-page site or the Ember templates should feel like one app when a link is followed.",
+          "A single-page app swaps a route and the shell should stay put.",
+          "A phone drill-down should slide forward and reverse on back."
+        ],
+        "avoidWhen": [
+          {
+            "when": "One part of a page changes in place: a tab panel, a filter result, a skeleton becoming content.",
+            "instead": "skeleton"
+          },
+          {
+            "when": "A surface appears over the page, such as a dialog, a sheet or a menu.",
+            "instead": "dialog"
+          },
+          {
+            "when": "The page must swap at once, for example a sign-out.",
+            "instead": "Set data-fd-transition=\"none\" on the link."
+          }
+        ],
+        "aka": [
+          "view transition",
+          "route transition",
+          "page animation",
+          "navigation animation",
+          "crossfade"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "no support",
+            "how": "the browser has no View Transitions: the page loads as usual and transition() calls update at once"
+          },
+          {
+            "name": "reduced motion",
+            "how": "prefers-reduced-motion: reduce opts no page in; transition() only calls update"
+          },
+          {
+            "name": "motion none",
+            "how": "the motion dial at none (--fd-motion 0): the durations are zero and transition() only calls update"
+          },
+          {
+            "name": "back",
+            "how": "data-fd-direction=\"back\" on <html> while a slide runs; set by the module, never by hand"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-transition",
+            "value": "fade",
+            "useWhen": "Pages at one level of the app; the default."
+          },
+          {
+            "attribute": "data-fd-transition",
+            "value": "slide",
+            "useWhen": "A phone drill-down that goes deeper and back."
+          },
+          {
+            "attribute": "data-fd-transition",
+            "value": "none",
+            "useWhen": "A page or a single link that must swap at once."
+          }
+        ],
+        "parts": [],
+        "related": [
+          "sidebar",
+          "topbar",
+          "page",
+          "tweaks"
+        ],
+        "keyboard": [],
+        "example": "docs/transitions.html#demo",
+        "provenance": [
+          "fire/js/transitions.js",
+          "fire/components/transitions.css",
+          "docs/transitions.html",
+          "scripts/test/transitions.test.mjs"
+        ],
+        "since": "0.8.0"
+      }
     }
   ],
   "classes": {

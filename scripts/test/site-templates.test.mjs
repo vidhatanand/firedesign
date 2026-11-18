@@ -38,7 +38,7 @@ test('site templates: each has a complete website card that names its sections a
     assert.ok(c.sections.length >= 4 && c.sections.every((s) => s.section && s.variant && s.why), `${slug}: sections with variant and why`);
     assert.ok(catalog.templates.some((t) => t.path === c.example && t.job), `${slug}: in templates/index.html`);
     const html = read(c.example);
-    assert.match(html, /<html lang="en" data-fd-surface="website">/, `${slug}: declares the website surface`);
+    assert.match(html, /<html lang="en" data-fd-surface="website"[ >]/, `${slug}: declares the website surface`);
     assert.ok(!/\sstyle=/.test(html), `${slug}: no style attribute`);
     for (const state of askedStates(c)) assert.ok(html.includes(`'${state}'`), `${slug}: the page handles ?state=${state}`);
     const hero = html.match(/fd-site-hero" data-layout="([a-z]+)"/)?.[1];

@@ -3506,6 +3506,40 @@
       }
     },
     {
+      "name": "Grow",
+      "purpose": "A flex-grow helper: put it on the child of a row or stack that should absorb the remaining space, pushing its siblings to the ends. On an fd-divider it makes a rule that fills the row.\nSurfaces: app, website, phone. Kind: layout.",
+      "variants": [],
+      "states": [],
+      "paths": [
+        "fire/base.css",
+        "docs/shell.html"
+      ],
+      "usage": "Let one child take the space left over in a row. Also called: spacer, flex-grow, fill, push apart.",
+      "do": [
+        "A title should push its actions to the far end of a row.",
+        "A rule must fill the space on either side of an \"or\"."
+      ],
+      "dont": [
+        "Children should spread evenly. Use Row.",
+        "Children are equal columns. Use Grid.",
+        "A band must fill the height of a centred screen. The data-grow attribute on the shell band; see the shell docs."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "grow",
+            "description": "The class on the child that grows."
+          }
+        ],
+        "example": "<cc-component name=\"Grow\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Stats",
       "purpose": "A row of figures joined into one bordered group and divided by hairlines. Each tile is an eyebrow, a figure and a muted line; add a delta, a meter or sparkline, a unit or a quiet action. The delta tone is the meaning, not the direction. Tiles wrap on their own; data-variant=\"cards\" makes each tile its own card.\nSurfaces: app, website. Kind: component.",
       "variants": [
@@ -3695,40 +3729,6 @@
           }
         ],
         "example": "<cc-component name=\"Divider\"></cc-component>"
-      }
-    },
-    {
-      "name": "Grow",
-      "purpose": "A flex-grow helper: put it on the child of a row or stack that should absorb the remaining space, pushing its siblings to the ends. On an fd-divider it makes a rule that fills the row.\nSurfaces: app, website, phone. Kind: layout.",
-      "variants": [],
-      "states": [],
-      "paths": [
-        "fire/base.css",
-        "docs/shell.html"
-      ],
-      "usage": "Let one child take the space left over in a row. Also called: spacer, flex-grow, fill, push apart.",
-      "do": [
-        "A title should push its actions to the far end of a row.",
-        "A rule must fill the space on either side of an \"or\"."
-      ],
-      "dont": [
-        "Children should spread evenly. Use Row.",
-        "Children are equal columns. Use Grid.",
-        "A band must fill the height of a centred screen. The data-grow attribute on the shell band; see the shell docs."
-      ],
-      "api": {
-        "props": [],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's content, given as the children of <cc-component>."
-          },
-          {
-            "name": "grow",
-            "description": "The class on the child that grows."
-          }
-        ],
-        "example": "<cc-component name=\"Grow\">Content</cc-component>"
       }
     },
     {
@@ -8624,6 +8624,214 @@
       }
     },
     {
+      "name": "Empty",
+      "purpose": "A centred block with an icon or texture, a title, one sentence and one or two actions. It covers a first-use empty state, a search with no match, an error that stopped a load, a feature the plan lacks and being offline. Size sm fits cards and tables; lg fills a page.\nSurfaces: app, website, phone. Kind: component.",
+      "variants": [
+        "size-sm",
+        "size-lg",
+        "tone-danger",
+        "tone-warning",
+        "tone-success"
+      ],
+      "states": [
+        "empty"
+      ],
+      "paths": [
+        "fire/components/content.css",
+        "docs/content.html"
+      ],
+      "usage": "Say what will appear here and give the one action that fills it. Also called: blank slate, zero state, no results, no data, placeholder, empty state, first run.",
+      "do": [
+        "A list, table or page has no items yet and the next step is clear.",
+        "A search or filter matches nothing; say what to change.",
+        "A request failed and the reader can retry.",
+        "A feature is not on the plan; say which plan has it.",
+        "One part of a page-state set (fd-states): no access, not found, switched off, link expired."
+      ],
+      "dont": [
+        "The message is a warning above content that exists. Use Callout.",
+        "Data is on its way. Use Skeleton.",
+        "A chart has no data in the range. Use Chart.",
+        "A table needs the same states inside its frame. Use Table."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "size",
+            "type": "enum",
+            "values": [
+              "lg",
+              "sm"
+            ],
+            "required": false,
+            "description": "Sets data-size. Inside a card, a popover or a table."
+          },
+          {
+            "name": "tone",
+            "type": "enum",
+            "values": [
+              "accent",
+              "danger",
+              "info",
+              "neutral",
+              "success",
+              "violet",
+              "warning"
+            ],
+            "required": false,
+            "description": "Sets data-tone. Empty state: something failed or is destructive."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "empty",
+            "description": "The block."
+          },
+          {
+            "name": "empty-icon",
+            "description": "The icon tile."
+          },
+          {
+            "name": "empty-art",
+            "description": "A texture slot behind the text that fades to the edges."
+          },
+          {
+            "name": "empty-title",
+            "description": "What is missing."
+          },
+          {
+            "name": "empty-text",
+            "description": "What will appear, in one sentence."
+          },
+          {
+            "name": "empty-hint",
+            "description": "A smaller aside, such as a keyboard tip."
+          },
+          {
+            "name": "empty-meta",
+            "description": "A quiet line under the actions: a request ID, who can grant access or turn an area on, when a link expired."
+          },
+          {
+            "name": "empty-actions",
+            "description": "The one or two actions that fix it."
+          }
+        ],
+        "example": "<cc-component name=\"Empty\" size=\"sm\" tone=\"danger\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Skeleton",
+      "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button and tile. Presets for cards, grids, tables, stats, charts, lists, threads, forms, a hero and a whole page fill themselves from an empty element. Skeletons are aria-hidden; set aria-busy on the container.\nSurfaces: app, website, phone. Kind: component.",
+      "variants": [
+        "bars",
+        "square",
+        "tone-accent",
+        "size-display",
+        "size-h1",
+        "size-h2",
+        "size-h3",
+        "size-lead",
+        "size-label",
+        "size-mono",
+        "size-caption",
+        "size-eyebrow",
+        "size-stat"
+      ],
+      "states": [
+        "loading"
+      ],
+      "paths": [
+        "fire/components/skeleton.css",
+        "docs/skeletons.html"
+      ],
+      "usage": "Hold a place for content that is loading, with the same shape as the real thing. Also called: loading placeholder, shimmer, ghost loader, content loader, loading state, placeholder blocks.",
+      "do": [
+        "A region has a known layout and its data is on the way.",
+        "A route paints for the first time and the page needs rail, top bar and table in place.",
+        "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false)."
+      ],
+      "dont": [
+        "A small control or one line of text. Use Loader.",
+        "Navigation between pages. Use Pagebar.",
+        "The request failed; say what failed. Use Empty.",
+        "The page is empty on purpose. Use Empty."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "skeleton",
+            "description": "A bare block."
+          },
+          {
+            "name": "skeleton-text",
+            "description": "Text lines of varied widths that end at 60%; data-lines sets how many."
+          },
+          {
+            "name": "skeleton-title",
+            "description": "A title bar at a type role."
+          },
+          {
+            "name": "skeleton-avatar",
+            "description": "A round block; data-size sets the diameter."
+          },
+          {
+            "name": "skeleton-button",
+            "description": "A button block."
+          },
+          {
+            "name": "skeleton-tile",
+            "description": "A rounded tile."
+          },
+          {
+            "name": "skeleton-card",
+            "description": "A card preset; on an fd-card the card supplies the frame."
+          },
+          {
+            "name": "skeleton-grid",
+            "description": "A grid of cards; data-count."
+          },
+          {
+            "name": "skeleton-table",
+            "description": "A table; data-rows and data-cols."
+          },
+          {
+            "name": "skeleton-stat",
+            "description": "Stat tiles; data-count."
+          },
+          {
+            "name": "skeleton-chart",
+            "description": "Axes, gridlines and a faint series."
+          },
+          {
+            "name": "skeleton-list",
+            "description": "Rows of avatar, two lines and an action."
+          },
+          {
+            "name": "skeleton-thread",
+            "description": "A saved agent session loading."
+          },
+          {
+            "name": "skeleton-form",
+            "description": "Labels, field frames and actions."
+          },
+          {
+            "name": "skeleton-hero",
+            "description": "A page hero."
+          },
+          {
+            "name": "skeleton-page",
+            "description": "A whole first paint: rail, top bar, hero, toolbar and table."
+          }
+        ],
+        "example": "<cc-component name=\"Skeleton\"></cc-component>"
+      }
+    },
+    {
       "name": "Texture",
       "purpose": "Fire's signature: letters and punctuation whose density follows a generated field, at very low contrast (under 1.6:1) and always decorative. A field fills its positioned parent behind the content. Fields are seeded by name so a page always looks the same, animate at 12 frames a second where they should, pause off-screen and stand still under reduced motion. Also holds dot grids, registration marks, grain and glyphs.\nSurfaces: app, website. Kind: component.",
       "variants": [
@@ -8841,143 +9049,36 @@
       }
     },
     {
-      "name": "Skeleton",
-      "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button and tile. Presets for cards, grids, tables, stats, charts, lists, threads, forms, a hero and a whole page fill themselves from an empty element. Skeletons are aria-hidden; set aria-busy on the container.\nSurfaces: app, website, phone. Kind: component.",
+      "name": "Callout",
+      "purpose": "A tinted message with an icon, a title, a short body and usually one action. It belongs to the content around it. Tone sets the meaning: neutral, accent, success, warning, danger, info, violet. It can be dismissed, and a dismissal can be remembered.\nSurfaces: app, website, phone. Kind: component.",
       "variants": [
-        "bars",
-        "square",
-        "tone-accent",
-        "size-display",
-        "size-h1",
-        "size-h2",
-        "size-h3",
-        "size-lead",
-        "size-label",
-        "size-mono",
-        "size-caption",
-        "size-eyebrow",
-        "size-stat"
-      ],
-      "states": [
-        "loading"
-      ],
-      "paths": [
-        "fire/components/skeleton.css",
-        "docs/skeletons.html"
-      ],
-      "usage": "Hold a place for content that is loading, with the same shape as the real thing. Also called: loading placeholder, shimmer, ghost loader, content loader, loading state, placeholder blocks.",
-      "do": [
-        "A region has a known layout and its data is on the way.",
-        "A route paints for the first time and the page needs rail, top bar and table in place.",
-        "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false)."
-      ],
-      "dont": [
-        "A small control or one line of text. Use Loader.",
-        "Navigation between pages. Use Pagebar.",
-        "The request failed; say what failed. Use Empty.",
-        "The page is empty on purpose. Use Empty."
-      ],
-      "api": {
-        "props": [],
-        "parts": [
-          {
-            "name": "skeleton",
-            "description": "A bare block."
-          },
-          {
-            "name": "skeleton-text",
-            "description": "Text lines of varied widths that end at 60%; data-lines sets how many."
-          },
-          {
-            "name": "skeleton-title",
-            "description": "A title bar at a type role."
-          },
-          {
-            "name": "skeleton-avatar",
-            "description": "A round block; data-size sets the diameter."
-          },
-          {
-            "name": "skeleton-button",
-            "description": "A button block."
-          },
-          {
-            "name": "skeleton-tile",
-            "description": "A rounded tile."
-          },
-          {
-            "name": "skeleton-card",
-            "description": "A card preset; on an fd-card the card supplies the frame."
-          },
-          {
-            "name": "skeleton-grid",
-            "description": "A grid of cards; data-count."
-          },
-          {
-            "name": "skeleton-table",
-            "description": "A table; data-rows and data-cols."
-          },
-          {
-            "name": "skeleton-stat",
-            "description": "Stat tiles; data-count."
-          },
-          {
-            "name": "skeleton-chart",
-            "description": "Axes, gridlines and a faint series."
-          },
-          {
-            "name": "skeleton-list",
-            "description": "Rows of avatar, two lines and an action."
-          },
-          {
-            "name": "skeleton-thread",
-            "description": "A saved agent session loading."
-          },
-          {
-            "name": "skeleton-form",
-            "description": "Labels, field frames and actions."
-          },
-          {
-            "name": "skeleton-hero",
-            "description": "A page hero."
-          },
-          {
-            "name": "skeleton-page",
-            "description": "A whole first paint: rail, top bar, hero, toolbar and table."
-          }
-        ],
-        "example": "<cc-component name=\"Skeleton\"></cc-component>"
-      }
-    },
-    {
-      "name": "Empty",
-      "purpose": "A centred block with an icon or texture, a title, one sentence and one or two actions. It covers a first-use empty state, a search with no match, an error that stopped a load, a feature the plan lacks and being offline. Size sm fits cards and tables; lg fills a page.\nSurfaces: app, website, phone. Kind: component.",
-      "variants": [
-        "size-sm",
-        "size-lg",
-        "tone-danger",
+        "tone-info",
+        "tone-success",
         "tone-warning",
-        "tone-success"
+        "tone-danger",
+        "tone-accent",
+        "tone-violet",
+        "tone-neutral",
+        "size-sm"
       ],
       "states": [
-        "empty"
+        "hover"
       ],
       "paths": [
         "fire/components/content.css",
         "docs/content.html"
       ],
-      "usage": "Say what will appear here and give the one action that fills it. Also called: blank slate, zero state, no results, no data, placeholder, empty state, first run.",
+      "usage": "Tell the reader what happened and what to do, next to the content it is about. Also called: alert, notice, admonition, inline message, info box, hint box, message bar.",
       "do": [
-        "A list, table or page has no items yet and the next step is clear.",
-        "A search or filter matches nothing; say what to change.",
-        "A request failed and the reader can retry.",
-        "A feature is not on the plan; say which plan has it.",
-        "One part of a page-state set (fd-states): no access, not found, switched off, link expired."
+        "A form or section needs a warning, a tip or a result right beside it.",
+        "An error has a cause and a next step the reader can take.",
+        "A limit is close: credits at 90%, crawl depth capped on the plan."
       ],
       "dont": [
-        "The message is a warning above content that exists. Use Callout.",
-        "Data is on its way. Use Skeleton.",
-        "A chart has no data in the range. Use Chart.",
-        "A table needs the same states inside its frame. Use Table."
+        "The message affects the whole account and fits in one line. Use Banner.",
+        "The message confirms something that just happened and should fade away. Use Toast.",
+        "A field has an invalid value. Use Field.",
+        "A list or table has nothing to show. Use Empty."
       ],
       "api": {
         "props": [
@@ -8985,11 +9086,10 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "lg",
               "sm"
             ],
             "required": false,
-            "description": "Sets data-size. Inside a card, a popover or a table."
+            "description": "Sets data-size. A single-line callout: title and text run together."
           },
           {
             "name": "tone",
@@ -9004,7 +9104,7 @@
               "warning"
             ],
             "required": false,
-            "description": "Sets data-tone. Empty state: something failed or is destructive."
+            "description": "Sets data-tone. Callout: neutral news or guidance."
           }
         ],
         "parts": [
@@ -9013,39 +9113,35 @@
             "description": "Slot: the component's content, given as the children of <cc-component>."
           },
           {
-            "name": "empty",
-            "description": "The block."
+            "name": "callout",
+            "description": "The container."
           },
           {
-            "name": "empty-icon",
-            "description": "The icon tile."
+            "name": "callout-icon",
+            "description": "The leading icon."
           },
           {
-            "name": "empty-art",
-            "description": "A texture slot behind the text that fades to the edges."
+            "name": "callout-content",
+            "description": "Wraps title and body."
           },
           {
-            "name": "empty-title",
-            "description": "What is missing."
+            "name": "callout-title",
+            "description": "The one-line headline."
           },
           {
-            "name": "empty-text",
-            "description": "What will appear, in one sentence."
+            "name": "callout-body",
+            "description": "The explanation."
           },
           {
-            "name": "empty-hint",
-            "description": "A smaller aside, such as a keyboard tip."
+            "name": "callout-actions",
+            "description": "The action row."
           },
           {
-            "name": "empty-meta",
-            "description": "A quiet line under the actions: a request ID, who can grant access or turn an area on, when a link expired."
-          },
-          {
-            "name": "empty-actions",
-            "description": "The one or two actions that fix it."
+            "name": "callout-dismiss",
+            "description": "The close button."
           }
         ],
-        "example": "<cc-component name=\"Empty\" size=\"sm\" tone=\"danger\">Content</cc-component>"
+        "example": "<cc-component name=\"Callout\" size=\"sm\" tone=\"info\">Content</cc-component>"
       }
     },
     {
@@ -9249,102 +9345,6 @@
           }
         ],
         "example": "<cc-component name=\"Status\" variant=\"icon\" size=\"sm\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Callout",
-      "purpose": "A tinted message with an icon, a title, a short body and usually one action. It belongs to the content around it. Tone sets the meaning: neutral, accent, success, warning, danger, info, violet. It can be dismissed, and a dismissal can be remembered.\nSurfaces: app, website, phone. Kind: component.",
-      "variants": [
-        "tone-info",
-        "tone-success",
-        "tone-warning",
-        "tone-danger",
-        "tone-accent",
-        "tone-violet",
-        "tone-neutral",
-        "size-sm"
-      ],
-      "states": [
-        "hover"
-      ],
-      "paths": [
-        "fire/components/content.css",
-        "docs/content.html"
-      ],
-      "usage": "Tell the reader what happened and what to do, next to the content it is about. Also called: alert, notice, admonition, inline message, info box, hint box, message bar.",
-      "do": [
-        "A form or section needs a warning, a tip or a result right beside it.",
-        "An error has a cause and a next step the reader can take.",
-        "A limit is close: credits at 90%, crawl depth capped on the plan."
-      ],
-      "dont": [
-        "The message affects the whole account and fits in one line. Use Banner.",
-        "The message confirms something that just happened and should fade away. Use Toast.",
-        "A field has an invalid value. Use Field.",
-        "A list or table has nothing to show. Use Empty."
-      ],
-      "api": {
-        "props": [
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "sm"
-            ],
-            "required": false,
-            "description": "Sets data-size. A single-line callout: title and text run together."
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "danger",
-              "info",
-              "neutral",
-              "success",
-              "violet",
-              "warning"
-            ],
-            "required": false,
-            "description": "Sets data-tone. Callout: neutral news or guidance."
-          }
-        ],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's content, given as the children of <cc-component>."
-          },
-          {
-            "name": "callout",
-            "description": "The container."
-          },
-          {
-            "name": "callout-icon",
-            "description": "The leading icon."
-          },
-          {
-            "name": "callout-content",
-            "description": "Wraps title and body."
-          },
-          {
-            "name": "callout-title",
-            "description": "The one-line headline."
-          },
-          {
-            "name": "callout-body",
-            "description": "The explanation."
-          },
-          {
-            "name": "callout-actions",
-            "description": "The action row."
-          },
-          {
-            "name": "callout-dismiss",
-            "description": "The close button."
-          }
-        ],
-        "example": "<cc-component name=\"Callout\" size=\"sm\" tone=\"info\">Content</cc-component>"
       }
     },
     {

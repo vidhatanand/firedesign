@@ -1,0 +1,347 @@
+{
+  "$description": "Fire's export rules as data: how one piece of Fire markup is written in Lit, React/Next.js and Vue so that it renders the same DOM. spec/EXPORT.md is the prose form; every rule here carries the id of its row there (A1, F3, M2, …). An exporter reads this file; it never guesses a rule that is not here.",
+  "schema": {
+    "version": "Integer. Bumped when a key changes meaning.",
+    "fire": "The Fire version these rules describe.",
+    "targets": "Target id → { name, versions: { package: exact version the rules were verified against }, notes }. Target ids: html, lit, react, vue. React rules also cover Next.js (App Router).",
+    "verification": "Experiment id → what was run. Every rule's `check` lists experiment ids, 'R' (read from source) or 'A' (assumption the starters must prove).",
+    "placeholders": "Names used inside templates: {name} attribute name, {value} literal string value, {expr} an expression in the target's language, {cond} a boolean expression, {json} an expression giving JSON text, {event} an fd:* event name, {handler} a function expression, {ref} a React ref, {children} rendered children, {list} a list expression, {as} the loop variable, {tag} an element name, {key} a key expression.",
+    "helpers": "Functions the exporter writes once per export into `fire-export.(js|ts)` and imports where a template names them. Value: name → { source, use }.",
+    "attributes": {
+      "rename": "target → { html attribute name → name to write }. Applies on HTML and SVG elements; not on custom elements (see customElementNames).",
+      "customElementNames": "target → rule for attribute names on custom elements (fd-*, any tag with a hyphen).",
+      "htmlBooleans": "HTML boolean attributes (their presence is the value). Per target, `present` is how a present boolean is written statically, `bound` how a state-dependent one is written. React's prop name comes from rename.",
+      "presence": "Attributes Fire uses by presence alone (written with no value, value \"\"): any data-* or aria-* written with no value, plus `popover`. `present` and `bound` per target.",
+      "string": "Attributes with a string value: static and bound templates per target.",
+      "optional": "An attribute that may be absent: bound template per target that drops it for undefined/null.",
+      "enumeratedNotBoolean": "Attributes React does not treat as boolean although HTML allows them bare; write the value explicitly.",
+      "forbidden": "Attributes and constructs never written in any target, with the reason."
+    },
+    "text": "Text and whitespace rules: id → { rule, perTarget, check }.",
+    "fields": "Form fields not controlled by the framework: id → { markup, lit, react, vue, check }.",
+    "specialElements": "Elements frameworks treat specially: id → { match (CSS selector or description), lit, react, vue, why, check }.",
+    "svg": "SVG rules: React renames are in attributes.rename.react; this lists the remaining rules.",
+    "icons": "The icon rule: what is forbidden, the element form, the exact static SVG form (a template with {name}, {size}, {class}, {rest}), the sprite.",
+    "customElements": "Fire's custom elements: registration, attributes vs properties per target, typing, compiler options.",
+    "events": "fd:* events: names, binding templates per target, what does not work.",
+    "lifecycle": "When init(root) runs: id → { when, lit, react, vue, check }.",
+    "ownership": {
+      "fireOwnedAttributes": "Attributes Fire writes after init; frameworks write their first value only and never bind them to changing state.",
+      "fireOwnedAttributePatterns": "Regular expressions for Fire-owned attribute names.",
+      "filledContainers": "Components whose children Fire inserts, replaces or moves: { selector, fire (what Fire does), rule (what the framework does), check }.",
+      "fireWrittenFields": "Fields whose value or checked state Fire writes: never controlled in React; prefer fd:change over v-model in Vue."
+    },
+    "next": "Next.js server rendering and hydration rules: id → { rule, check }, plus `layout` and `runtime` code templates.",
+    "theme": "Theme record application per target.",
+    "csp": "Strict Content Security Policy per target.",
+    "labels": "Translation rules.",
+    "facet": "Facet board constructs → per-target templates. `confirm: true` marks shapes to confirm with the Facet session.",
+    "renderEqual": "Normalisations render-equal must apply for these rules to hold: id → description."
+  },
+  "version": 1,
+  "fire": "0.6.0",
+  "targets": {
+    "html": { "name": "Plain HTML", "versions": {}, "notes": "Fire markup as in docs/ and templates/." },
+    "lit": { "name": "Lit", "versions": { "lit": "3.3.3" }, "notes": "Light DOM components (createRenderRoot() { return this; })." },
+    "react": { "name": "React and Next.js", "versions": { "react": "19.3.1", "react-dom": "19.3.1", "next": "16.4.6" }, "notes": "Next.js App Router with Turbopack; JSX compiled by SWC in Next, which rejects namespaced attribute names." },
+    "vue": { "name": "Vue", "versions": { "vue": "3.5.45", "vite": "8.3.8", "@vitejs/plugin-vue": "6.0.11" }, "notes": "Single-file components, single-page app; server rendering (Nuxt) is out of scope." }
+  },
+  "verification": {
+    "E1": "React: 72 markup cases, renderToStaticMarkup and createRoot (development build) in Chromium; DOM, property probes and warnings compared.",
+    "E2": "React: 42 HTML and 40 SVG attribute renames rendered on the server without warnings.",
+    "E3": "React: renderToString then hydrateRoot with Fire's boot.js and fire.js, 9 orders; hydration and recoverable errors recorded.",
+    "E4": "React: Fire changes the DOM, then React re-renders (drawn icon, secret, tabs, keyed remount, growing list).",
+    "E5": "React controlled input and Vue v-model against a value set in code followed by an input event.",
+    "E6": "Vue: 47 single-file components built with Vite (production, whitespace preserve, no isCustomElement) and run in Chromium; same templates through @vue/server-renderer.",
+    "E7": "Vue: v-fire directive (mounted, updated) with Fire's modules; re-render, v-if removal, keyed remount.",
+    "E8": "Lit: 22 template cases with render() (development build) and Fire alongside (menu state, icons, events).",
+    "E9": "Next.js 16.4.6: production build and development server; proxy.ts nonce CSP, boot.js in head, Fire loaded in a client effect, re-init after route change, hydration warnings with and without suppressHydrationWarning, namespaced JSX under SWC.",
+    "E10": "Strict policy script-src 'self'; style-src 'self' on the Vue production build and on the Lit page with Fire running: no violations.",
+    "E11": "A sprite marked hidden and <use> references to it render in Chromium, Firefox and WebKit.",
+    "E12": "Vue compileTemplate output: $index as a v-for alias stays local; @fd:select compiles to the key \"onFd:select\".",
+    "R": "Read from Fire's source (fire/js) or Facet's (vendor/facet/src), not run.",
+    "A": "Assumption the starters must prove."
+  },
+  "placeholders": ["{name}", "{value}", "{expr}", "{cond}", "{json}", "{event}", "{handler}", "{ref}", "{children}", "{list}", "{as}", "{tag}", "{key}"],
+  "helpers": {
+    "jsonForScript": { "source": "export const jsonForScript = (value) => JSON.stringify(value).replace(/</g, '\\\\u003c');", "use": "Text of every <script type=\"application/json\"> the exporter writes (M2, N5)." },
+    "ccAttr": { "source": "export const ccAttr = (v) => (v === false || v == null ? undefined : v === true ? '' : String(v));", "use": "Facet whole-hole attribute values (B4)." },
+    "ccText": { "source": "export const ccText = (v) => (v == null || typeof v === 'boolean' ? '' : String(v));", "use": "Facet text holes (B3, B5)." },
+    "ccTruthy": { "source": "export const ccTruthy = (v) => (Array.isArray(v) ? v.length > 0 : Boolean(v));", "use": "Facet cc-if (B2) and boolean live properties (B6)." }
+  },
+  "attributes": {
+    "rename": {
+      "html": {},
+      "lit": {},
+      "vue": {},
+      "react": {
+        "class": "className", "for": "htmlFor", "tabindex": "tabIndex", "readonly": "readOnly",
+        "maxlength": "maxLength", "minlength": "minLength", "colspan": "colSpan", "rowspan": "rowSpan",
+        "autocomplete": "autoComplete", "autocapitalize": "autoCapitalize", "autofocus": "autoFocus",
+        "spellcheck": "spellCheck", "contenteditable": "contentEditable", "inputmode": "inputMode",
+        "enterkeyhint": "enterKeyHint", "novalidate": "noValidate", "formnovalidate": "formNoValidate",
+        "formaction": "formAction", "enctype": "encType", "datetime": "dateTime", "crossorigin": "crossOrigin",
+        "referrerpolicy": "referrerPolicy", "fetchpriority": "fetchPriority", "srcset": "srcSet", "accesskey": "accessKey",
+        "popovertarget": "popoverTarget", "popovertargetaction": "popoverTargetAction", "accept-charset": "acceptCharset",
+        "http-equiv": "httpEquiv", "allowfullscreen": "allowFullScreen", "playsinline": "playsInline", "usemap": "useMap",
+        "itemprop": "itemProp", "itemscope": "itemScope", "itemtype": "itemType", "nomodule": "noModule", "charset": "charSet",
+        "cellpadding": "cellPadding", "cellspacing": "cellSpacing",
+        "xlink:href": "xlinkHref", "xml:space": "xmlSpace", "xmlns:xlink": "xmlnsXlink",
+        "alignment-baseline": "alignmentBaseline", "baseline-shift": "baselineShift", "clip-path": "clipPath", "clip-rule": "clipRule",
+        "color-interpolation": "colorInterpolation", "color-interpolation-filters": "colorInterpolationFilters",
+        "dominant-baseline": "dominantBaseline", "fill-opacity": "fillOpacity", "fill-rule": "fillRule", "flood-color": "floodColor",
+        "flood-opacity": "floodOpacity", "font-family": "fontFamily", "font-size": "fontSize", "font-style": "fontStyle",
+        "font-weight": "fontWeight", "image-rendering": "imageRendering", "letter-spacing": "letterSpacing",
+        "lighting-color": "lightingColor", "marker-end": "markerEnd", "marker-mid": "markerMid", "marker-start": "markerStart",
+        "paint-order": "paintOrder", "pointer-events": "pointerEvents", "shape-rendering": "shapeRendering", "stop-color": "stopColor",
+        "stop-opacity": "stopOpacity", "stroke-dasharray": "strokeDasharray", "stroke-dashoffset": "strokeDashoffset",
+        "stroke-linecap": "strokeLinecap", "stroke-linejoin": "strokeLinejoin", "stroke-miterlimit": "strokeMiterlimit",
+        "stroke-opacity": "strokeOpacity", "stroke-width": "strokeWidth", "text-anchor": "textAnchor",
+        "text-decoration": "textDecoration", "text-rendering": "textRendering", "transform-origin": "transformOrigin",
+        "vector-effect": "vectorEffect", "word-spacing": "wordSpacing", "writing-mode": "writingMode"
+      },
+      "rule": "A1, A2, A11, A13, A15, S2, S4",
+      "notes": { "react": "rowSpan only on td/th (React drops it elsewhere). Prefer href over xlink:href on <use>." },
+      "check": ["E1", "E2"]
+    },
+    "customElementNames": {
+      "lit": "as in HTML",
+      "vue": "as in HTML",
+      "react": "as in HTML; className and class both write class; htmlFor is NOT mapped (it writes htmlfor), so write for. Data goes through properties (customElements.properties).",
+      "check": ["E1"]
+    },
+    "htmlBooleans": {
+      "names": ["hidden", "disabled", "checked", "open", "inert", "readonly", "required", "autofocus", "multiple", "selected", "novalidate", "formnovalidate", "allowfullscreen", "playsinline", "nomodule", "itemscope", "reversed", "default", "defer", "async", "loop", "muted", "controls", "autoplay"],
+      "present": { "html": "{name}", "lit": "{name}", "vue": "{name}", "react": "{name}" },
+      "bound": { "lit": "?{name}=${{cond}}", "vue": ":{name}=\"{cond}\"", "react": "{name}={{cond}}" },
+      "never": { "react": "{name}=\"\" (React reads an empty string as false and drops the attribute)" },
+      "fieldStateOverrides": { "checked": "F2", "selected": "F3", "autofocus": "A3 (React writes no attribute on the client; render-equal R6)" },
+      "rule": "A3, A4",
+      "check": ["E1", "E6", "E8"]
+    },
+    "presence": {
+      "match": "data-* or aria-* written with no value or value \"\" in Fire markup, and popover written bare",
+      "present": { "html": "{name}", "lit": "{name}", "vue": "{name}", "react": "{name}=\"\"" },
+      "bound": { "lit": "?{name}=${{cond}}", "vue": ":{name}=\"{cond} ? '' : null\"", "react": "{name}={{cond} ? '' : undefined}" },
+      "never": { "react": "bare {name} (renders {name}=\"true\") or {name}={false} (renders \"false\", which still matches [{name}])", "vue": ":{name}=\"false\" (renders \"false\")", "lit": "{name}=${false} (renders \"false\")" },
+      "rule": "A7, A8, A12",
+      "check": ["E1", "E6", "E8"]
+    },
+    "string": {
+      "static": { "html": "{name}=\"{value}\"", "lit": "{name}=\"{value}\"", "vue": "{name}=\"{value}\"", "react": "{name}=\"{value}\"" },
+      "bound": { "lit": "{name}=${{expr}}", "vue": ":{name}=\"{expr}\"", "react": "{name}={{expr}}" },
+      "booleanValues": "aria-* with a boolean expression: all targets write \"true\"/\"false\" (React and Vue convert; in Lit write String({expr})).",
+      "rule": "A5, A6, A9, A16",
+      "check": ["E1", "E6", "E8"]
+    },
+    "optional": {
+      "bound": { "lit": "{name}=${{expr} ?? nothing}", "vue": ":{name}=\"{expr}\"", "react": "{name}={{expr}}" },
+      "why": "Lit renders undefined and null as an empty attribute; React and Vue drop the attribute for undefined and null.",
+      "rule": "A10",
+      "check": ["E1", "E6", "E8"]
+    },
+    "enumeratedNotBoolean": {
+      "popover": { "react": "popover=\"\" or popover=\"auto\" | \"manual\"; React drops popover={true}" },
+      "contenteditable": { "react": "contentEditable=\"true\"" },
+      "spellcheck": { "react": "spellCheck=\"false\" or {false}" },
+      "hidden=until-found": { "react": "unsupported: React writes hidden=\"\"" },
+      "rule": "A12, A19",
+      "check": ["E1"]
+    },
+    "forbidden": [
+      { "what": "style attribute, JSX style={…}, Vue :style, Vue v-show (writes style=\"display: none\"), Lit styleMap", "instead": "data-fd-vars for custom properties; hidden or v-if for visibility", "rule": "A17, P4" },
+      { "what": "inline event handler attributes (onclick=\"…\")", "instead": "the target's event binding", "rule": "A18, P4" },
+      { "what": "<i data-icon> in Lit, React or Vue code", "instead": "icons.element or icons.staticSvg", "rule": "I1, I2" },
+      { "what": "open on a Fire <dialog>", "instead": "overlays.openDialog(ref) or a [data-fd-dialog-open] trigger", "rule": "M4" },
+      { "what": "inline <script> other than type=\"application/json\"", "instead": "a module", "rule": "P4" }
+    ]
+  },
+  "text": {
+    "T1": { "rule": "Whitespace containing a newline between inline elements renders as one space in HTML.", "lit": "kept as written", "react": "write {' '} where the HTML has it", "vue": "plugin option compilerOptions.whitespace: 'preserve'", "check": ["E1", "E6", "E8"] },
+    "T2": { "rule": "<pre> keeps its line breaks.", "lit": "as written", "react": "<pre>{'…'}</pre>: one string literal with \\n", "vue": "as written", "check": ["E1", "E6"] },
+    "T3": { "rule": "Named entities (&nbsp; &rarr; &amp;) are the same text in every target.", "check": ["E1", "E6"] },
+    "T4": { "rule": "HTML comments: kept by Lit, dropped by JSX and by Vue production builds; render-equal ignores them.", "check": ["E1", "E6"] },
+    "T5": { "rule": "Text from a value: Lit and Vue print booleans as words, React prints nothing; null and undefined print nothing everywhere. Facet holes go through ccText.", "lit": "${{expr}}", "react": "{{expr}}", "vue": "{{ {expr} }}", "check": ["E1", "E6", "E8"] }
+  },
+  "fields": {
+    "F1": { "markup": "<input value=\"…\">", "lit": "value=\"{value}\" or value=${{expr}}", "react": "defaultValue=\"{value}\"", "vue": "value=\"{value}\" or :value=\"{expr}\"", "check": ["E1", "E6", "E8"] },
+    "F2": { "markup": "<input type=\"checkbox|radio\" checked>", "lit": "checked or ?checked=${{cond}}", "react": "defaultChecked or defaultChecked={{cond}}", "vue": "checked or :checked=\"{cond}\"", "check": ["E1", "E6", "E8"] },
+    "F3": { "markup": "<select> … <option value=\"b\" selected>", "lit": "selected on the option, or ?selected=${{cond}}", "react": "<select defaultValue=\"b\"> (array when multiple); no selected on <option>", "vue": "selected on the option, or :selected=\"{cond}\"; never :value on <select>", "check": ["E1", "E6", "E8"] },
+    "F4": { "markup": "<textarea>text</textarea>", "lit": "static text, or .value=${{expr}} (no expressions inside <textarea>)", "react": "defaultValue={'text'}", "vue": "static text or {{ {expr} }} inside; never :value", "check": ["E1", "E6", "E8"] },
+    "F5": { "markup": "<input type=\"range\" min max step value>", "lit": "as written", "react": "min, max, step, then defaultValue", "vue": "as written", "check": ["E1", "E6"] },
+    "F6": { "markup": "<input type=\"hidden\" name value>", "react": "defaultValue", "lit": "as written", "vue": "as written", "check": ["E1"] },
+    "F7": { "markup": "a field the framework controls", "lit": ".value=${{expr}} @input=${{handler}}", "react": "value={{expr}} onChange={{handler}}", "vue": "v-model=\"{expr}\"", "only": "fields not in ownership.fireWrittenFields", "why": "React's onChange ignores a value Fire sets in code and later restores its own; Vue v-model follows the input event Fire sends.", "check": ["E5"] }
+  },
+  "specialElements": {
+    "M1": { "match": "template", "lit": "static content in html`` is fine; with data: <template {attrs} .innerHTML=${{json}}></template>; no expressions inside", "react": "<template {attrs} dangerouslySetInnerHTML={{ __html: {json} }} />", "vue": "<template {attrs} v-html=\"{json}\"></template>", "why": "Framework-rendered children go to childNodes, not .content.", "check": ["E1", "E6", "E8"] },
+    "M2": { "match": "script[type=\"application/json\"] inside a component", "lit": "<script type=\"application/json\">${jsonForScript({expr})}</script> or static", "react": "<script type=\"application/json\" dangerouslySetInnerHTML={{ __html: jsonForScript({expr}) }} />", "vue": "<component is=\"script\" type=\"application/json\" v-text=\"jsonForScript({expr})\"></component>", "why": "React children text with </script breaks hydration; Vue drops <script> from templates (production) or fails the build (development).", "check": ["E1", "E3", "E6", "E8"] },
+    "M3": { "match": "script[type=\"application/json\"][data-fd-labels]", "lit": "in index.html", "react": "in the root layout <head>, data-fd-labels=\"\" and dangerouslySetInnerHTML", "vue": "in index.html", "check": ["E9"] },
+    "M4": { "match": "dialog.fd-dialog, dialog.fd-sheet, dialog.fd-command", "rule": "never write or bind open; open with overlays.openDialog(ref) or [data-fd-dialog-open]", "check": ["E1", "R"] },
+    "M5": { "match": "details", "rule": "open only as the start value; Fire writes open and data-state; listen for fd:change", "check": ["E1", "R"] },
+    "M6": { "match": "input[type=range], select, textarea", "rule": "see fields F5, F3, F4" },
+    "M7": { "match": ".fd-table-wrap > table", "rule": "write .fd-table-wrap > .fd-table-scroll > table", "why": "Fire wraps a bare table with replaceWith; the framework then loses the table's parent.", "check": ["R"] },
+    "M8": { "match": ".fd-prose > table", "rule": "write <div class=\"fd-doc-table\" tabindex=\"0\" role=\"region\" aria-label=\"{caption or Table}\"> around it", "check": ["R"] },
+    "M9": { "match": "a submenu .fd-menu opened from a menu item", "rule": "write it inside its parent .fd-menu", "why": "Fire moves it there with append", "check": ["R"] }
+  },
+  "svg": {
+    "S1": { "rule": "viewBox, d, x, y, width, height, fill, stroke, aria-hidden, data-* unchanged in every target", "check": ["E1"] },
+    "S2": { "rule": "hyphenated presentation attributes: camelCase in React (attributes.rename.react), unchanged elsewhere", "check": ["E1", "E2"] },
+    "S3": { "rule": "<use href=\"#id\"> unchanged; prefer href to xlink:href", "check": ["E1"] },
+    "S5": { "rule": "Lit: <svg> inside html`` gets the SVG namespace from the HTML parser; the svg tag function is not needed", "check": ["E8"] },
+    "S6": { "rule": "no style attribute on SVG", "check": [] }
+  },
+  "icons": {
+    "forbidden": "i[data-icon] in Lit, React and Vue code",
+    "why": "Fire replaces the <i> with an <svg>: React crashes removing it (removeChild), Vue throws removing it with v-if and leaves the icon, Lit attribute bindings on it go stale.",
+    "check": ["E4", "E7", "E8"],
+    "element": { "tag": "fd-icon", "from": { "data-icon": "name", "data-size": "size" }, "passThrough": "every other attribute", "confirm": "attribute names come from contract/custom-elements.json (elements package)" },
+    "staticSvg": {
+      "template": "<svg class=\"fd-icon{class}\"{size} data-icon=\"{name}\" aria-hidden=\"true\"{rest}><use href=\"#i-{name}\"></use></svg>",
+      "class": " followed by the <i>'s classes, or empty",
+      "size": " data-size=\"{data-size}\" when the <i> has data-size, else empty",
+      "rest": "every other attribute of the <i> except data-icon, data-size and class, in order; an aria-hidden among them replaces the default",
+      "react": "<svg className=\"fd-icon{class}\"{size} data-icon=\"{name}\" aria-hidden=\"true\"{rest}><use href=\"#i-{name}\" /></svg>",
+      "rename": "change data-icon and href together; Fire's observer also corrects href from data-icon",
+      "check": ["E1", "E4", "R"]
+    },
+    "sprite": {
+      "id": "fd-icon-sprite",
+      "clientOnly": "fire.js (icons.js) prepends it to <body> when it loads",
+      "serverRendered": "<svg id=\"fd-icon-sprite\" hidden aria-hidden=\"true\">…every symbol from ICONS as <symbol id=\"i-{name}\" viewBox=\"0 0 24 24\">{paths}</symbol>…</svg> in the root layout body; Fire then skips its own",
+      "source": "import { ICONS } from 'fire-design/fire/js/icons.js' (safe on the server)",
+      "check": ["E11", "R", "A"]
+    }
+  },
+  "customElements": {
+    "elements": ["fd-icon", "fd-chart", "fd-code", "fd-texture"],
+    "registration": { "rule": "import 'fire-design/elements' before the first render; registering twice is a no-op", "lit": "main.ts", "react": "module top of the client component that renders the element, or use wrappers/react", "vue": "main.ts before app.mount()", "next": "client components only", "check": ["E1", "E6", "A"] },
+    "attributes": { "rule": "strings and numbers the manifest lists as attributes", "lit": "{name}=\"{value}\"", "react": "{name}=\"{value}\"", "vue": "{name}=\"{value}\"", "check": ["E1", "E6"] },
+    "properties": {
+      "rule": "data the manifest lists as properties (.data on fd-chart, .code on fd-code)",
+      "lit": ".{name}=${{expr}}",
+      "react": "the wrapper component from wrappers/react ({Name} {name}={{expr}}), or a ref: useEffect(() => { {ref}.current.{name} = {expr}; }, [{expr}])",
+      "vue": ":{name}=\"{expr}\" once registered; :{name}.prop=\"{expr}\" or .{name}=\"{expr}\" works before registration",
+      "withoutRegistration": { "react": "writes {name}=\"[object Object]\" as an attribute", "vue": "writes {name}=\"[object Object]\" as an attribute" },
+      "server": { "react": "strings, numbers and true become attributes; objects and functions are left out" },
+      "check": ["E1", "E6", "E8"]
+    },
+    "typing": { "lit": "HTMLElementTagNameMap in fire/elements.d.ts", "react": "wrappers/react prop types; IntrinsicElements augmentation exported by the wrappers", "vue": "GlobalComponents declared by wrappers/vue", "check": ["A"] },
+    "vueCompilerOptions": { "rule": "vite.config: vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('fd-'), whitespace: 'preserve' } } }); app.config.compilerOptions affects only templates compiled at run time", "check": ["E6"] }
+  },
+  "events": {
+    "names": ["fd:open", "fd:close", "fd:change", "fd:select", "fd:copy", "fd:submit", "fd:stop", "fd:action", "fd:files", "fd:invalid", "fd:valid", "fd:dirty", "fd:confirm", "fd:rotate", "fd:hover", "fd:theme", "fd:accent"],
+    "bubbles": true,
+    "cancelable": true,
+    "bind": {
+      "html": "element.addEventListener('{event}', {handler})",
+      "lit": "@{event}=${{handler}}",
+      "react": "useFireEvent({ref}, '{event}', {handler})",
+      "reactWithoutWrapper": "useEffect(() => { const el = {ref}.current; el.addEventListener('{event}', {handler}); return () => el.removeEventListener('{event}', {handler}); }, [{handler}])",
+      "vue": "@{event}=\"{handler}\"",
+      "vueObject": "v-on=\"{ '{event}': {handler} }\""
+    },
+    "notWorking": {
+      "react": "on{event}={…} does not compile under SWC (Next: \"JSX Namespace is disabled\"); {...{ 'on{event}': fn }} works only on custom elements on the client",
+      "vue": "@{event} on a Vue component is a component emit, not a DOM listener (A)"
+    },
+    "check": ["E1", "E6", "E8", "E9", "E12"]
+  },
+  "lifecycle": {
+    "L1": { "when": "after the first mount", "lit": "firstUpdated() { init(this); }", "react": "useFire({ref}): useEffect(() => { init({ref}.current); })", "vue": "v-fire: mounted(el) { init(el); }", "check": ["E4", "E7"] },
+    "L2": { "when": "after an update that inserts or replaces Fire markup (lists, key changes, v-if)", "lit": "updated() { init(this); }", "react": "useFire's effect runs after every commit (no dependency list)", "vue": "v-fire: updated(el) { init(el); }", "check": ["E4", "E7"] },
+    "L3": { "when": "after a route change", "lit": "the router outlet calls init(outlet) after rendering", "react": "the root layout's client component: useEffect(() => { import('fire-design').then((f) => f.init(document)); }, [usePathname()])", "vue": "router.afterEach(() => nextTick(() => init(document)))", "check": ["E9", "A"] },
+    "L4": { "when": "after inserting HTML by hand", "all": "init(container)", "check": ["R"] },
+    "L5": { "when": "never before hydration", "react": "Fire running before hydrateRoot makes React rebuild the tree, losing Fire's changes; load Fire inside useEffect", "check": ["E3"] },
+    "L6": { "when": "always", "rule": "Fire markup lives in light DOM: Fire's listeners are delegated on document and use event.target.closest()", "lit": "createRenderRoot() { return this; }", "check": ["R", "A"] },
+    "L7": { "when": "unmount", "rule": "no teardown; Fire has no destroy function", "check": ["R"] },
+    "idempotent": "init(root) is a no-op for elements it has seen (once, keyed on the element); the forms and texture modules also enhance inserted markup through their own observers"
+  },
+  "ownership": {
+    "rule": "Write the value the Fire markup shows, never bind these to changing state; change Fire's state through Fire's API, the trigger, or a key remount (O1)",
+    "check": ["E3", "E4", "E7", "E8"],
+    "fireOwnedAttributes": ["id", "role", "tabindex", "type", "popover", "hidden", "inert", "data-state", "aria-expanded", "aria-selected", "aria-checked", "aria-pressed", "aria-current", "aria-controls", "aria-labelledby", "aria-describedby", "aria-haspopup", "aria-busy", "aria-invalid", "aria-valuenow", "aria-valuemin", "aria-valuemax", "aria-valuetext", "aria-activedescendant", "aria-label", "data-indicator", "data-thumb", "data-overflow", "data-enter", "data-side", "data-align", "data-active", "data-ready", "data-value"],
+    "fireOwnedAttributePatterns": ["^data-fd-"],
+    "scope": "These are Fire-owned on the elements Fire manages (component roots, triggers, panels, items); aria-label only where the element had none.",
+    "filledContainers": [
+      { "selector": "i[data-icon]", "fire": "replaced with an <svg>", "rule": "icons.element or icons.staticSvg", "check": ["E4", "E7", "E8"] },
+      { "selector": ".fd-secret, .fd-copy-field, [data-fd-secret], [data-fd-copy-field]", "fire": "rewrites .fd-secret-value into the masked start and end; a framework text update shows the secret unmasked", "rule": "key on the value", "check": ["E4"] },
+      { "selector": ".fd-codeblock > .fd-codeblock-body > code", "fire": "innerHTML replaced with highlighted lines", "rule": "fd-code with .code, or key", "check": ["R"] },
+      { "selector": ".fd-json", "fire": "innerHTML replaced with the tree (its JSON script removed)", "rule": "key", "check": ["R"] },
+      { "selector": "[data-fd-chart], .fd-sparkline, .fd-donut, .fd-heatgrid", "fire": "appends plot, legend and table, or clears all but the JSON script", "rule": "fd-chart with .data when data changes; static markup when it never changes", "check": ["E9", "R"] },
+      { "selector": "[data-fd-ascii], .fd-glyph, .fd-braille, .fd-dots, .fd-bars-loader, .fd-skeleton-text, .fd-skeleton-card, .fd-skeleton-grid, .fd-skeleton-table, .fd-skeleton-stat, .fd-skeleton-chart, .fd-skeleton-list, .fd-skeleton-thread, .fd-skeleton-form, .fd-skeleton-hero, .fd-skeleton-page", "fire": "appends a canvas or frames, or fills itself when empty", "rule": "render it empty; fd-texture for ascii fields", "check": ["R"] },
+      { "selector": ".fd-diff", "fire": "removes .fd-diff-src, builds head and body", "rule": "key", "check": ["R"] },
+      { "selector": ".fd-otp, [data-fd-otp], [data-fd-tag-input], [data-fd-pairs], [data-fd-combobox]", "fire": "removes the authored input or textarea, builds boxes, tokens, rows and a hidden carrier", "rule": "key; read fd:change", "check": ["R"] },
+      { "selector": ".fd-slider", "fire": "inserts <output> after the input, appends ticks", "rule": "key when data-labels changes", "check": ["R"] },
+      { "selector": ".fd-kv-value[data-copy]", "fire": "moves its children into .fd-kv-text, appends a copy button", "rule": "key", "check": ["R"] },
+      { "selector": ".fd-endpoint-path, .fd-doc-endpoint-url", "fire": "rewrites text into parameter spans", "rule": "key", "check": ["R"] },
+      { "selector": "[data-fd-daterange] .fd-calendar", "fire": "rebuilt on every init", "rule": "render it empty", "check": ["R"] },
+      { "selector": ".fd-progress-steps", "fire": "replaced when the step count changes", "rule": "render it empty", "check": ["R"] },
+      { "selector": ".fd-chat, .fd-chat-log, .fd-chat-msg, .fd-thread[data-fd-demo], [data-fd-playground] tbody", "fire": "builds or rewrites the conversation or rows", "rule": "JSON data (M2) and key", "check": ["R"] },
+      { "selector": ".fd-command", "fire": "re-appends items when filtering; label children replaced with <mark>", "rule": "static items or key", "check": ["R"] },
+      { "selector": ".fd-log", "fire": "appends a jump button; message text replaced with <mark> while filtering", "rule": "append lines only", "check": ["R"] },
+      { "selector": ".fd-tabs, .fd-segmented, .fd-toc, .fd-toc-list", "fire": "appends or prepends an indicator, thumb or marker", "rule": "items may change; L2 keeps it right", "check": ["E4"] },
+      { "selector": ".fd-checkbox-box, .fd-choice-mark", "fire": "inserts the check SVG when none", "rule": "render it empty", "check": ["R"] },
+      { "selector": ".fd-prose > h2, .fd-prose > h3, .fd-prose > h4, .fd-toc-list[data-fd-doc-toc], .fd-doc-otp-list", "fire": "adds anchors and ids, fills empty lists", "rule": "static content", "check": ["R"] },
+      { "selector": ".fd-table-wrap > table, .fd-prose > table, nested .fd-menu", "fire": "wrapped or moved", "rule": "M7, M8, M9", "check": ["R"] }
+    ],
+    "fireWrittenFields": [".fd-search-input", "[data-fd-filter-list] input", ".fd-number input", ".fd-slider input", ".fd-segmented input[type=radio]", ".fd-otp input", "[data-fd-tag-input] input", "[data-fd-combobox] input", "[data-fd-pairs] input", ".fd-composer textarea", ".fd-chat textarea", ".fd-command input", "[data-fd-confirm-input]", ".fd-dialog form[data-reset] :is(input, select, textarea)", "input[data-fd-checkall]", ".fd-table input[type=checkbox]", "input[data-indeterminate]", ".fd-secret[data-mode=entry] input"],
+    "fieldRule": { "react": "defaultValue / defaultChecked; read fd:change or the submitted form (F7)", "vue": "prefer @fd:change over v-model", "lit": "attribute value for the start; read fd:change", "check": ["E5"] }
+  },
+  "next": {
+    "N1": { "rule": "Server components render plain Fire markup; Fire's modules load in the browser only, after hydration: import('fire-design') inside useEffect in a client component", "check": ["E3", "E9"] },
+    "N2": { "rule": "boot.js: a blocking <script src=\"/fire/boot.js\" nonce={nonce} /> in the root layout <head>, served from public/fire/boot.js (copied from node_modules/fire-design/fire/boot.js before build); not next/script", "check": ["E9", "A"] },
+    "N3": { "rule": "<html {...themeAttributes} suppressHydrationWarning>", "check": ["E9"] },
+    "N4": { "rule": "suppressHydrationWarning on every server-rendered element with data-fd-vars", "check": ["E3", "E9"] },
+    "N5": { "rule": "JSON scripts via dangerouslySetInnerHTML and jsonForScript", "check": ["E3"] },
+    "N6": { "rule": "import 'fire-design/css' in app/layout.tsx; TypeScript needs declare module 'fire-design/css' (or a types entry for ./css)", "check": ["E9"] },
+    "N7": { "rule": "elements and wrappers/react in client components only", "check": ["A"] },
+    "N8": { "rule": "<FireSprite /> in the root layout body (icons.sprite.serverRendered)", "check": ["E11", "A"] },
+    "layout": "import 'fire-design/css';\nimport './fire-theme.css';\nimport { headers } from 'next/headers';\nimport { FireRuntime } from './fire-runtime';\nimport { FireSprite } from './fire-sprite';\nimport { jsonForScript } from './fire-export';\nimport labels from './labels.json';\nimport { theme } from './theme';\n\nexport default async function RootLayout({ children }: { children: React.ReactNode }) {\n  const nonce = (await headers()).get('x-nonce') ?? undefined;\n  return (\n    <html lang=\"en\" {...theme} suppressHydrationWarning>\n      <head>\n        <script src=\"/fire/boot.js\" nonce={nonce} />\n        <script type=\"application/json\" data-fd-labels=\"\" dangerouslySetInnerHTML={{ __html: jsonForScript(labels) }} />\n      </head>\n      <body>\n        <FireSprite />\n        {children}\n        <FireRuntime />\n      </body>\n    </html>\n  );\n}\n",
+    "runtime": "'use client';\nimport { useEffect } from 'react';\nimport { usePathname } from 'next/navigation';\nexport function FireRuntime() {\n  const pathname = usePathname();\n  useEffect(() => {\n    let live = true;\n    import('fire-design').then((fire) => { if (live) fire.init(document); });\n    return () => { live = false; };\n  }, [pathname]);\n  return null;\n}\n",
+    "proxy": "import { NextResponse, type NextRequest } from 'next/server';\nexport function proxy(request: NextRequest) {\n  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');\n  const dev = process.env.NODE_ENV === 'development';\n  const csp = [\"default-src 'self'\", `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? \" 'unsafe-eval'\" : ''}`, `style-src 'self'${dev ? \" 'unsafe-inline'\" : ''}`, \"img-src 'self' data:\", \"font-src 'self'\", \"object-src 'none'\", \"base-uri 'self'\", \"frame-ancestors 'none'\"].join('; ');\n  const headers = new Headers(request.headers);\n  headers.set('x-nonce', nonce);\n  headers.set('Content-Security-Policy', csp);\n  const response = NextResponse.next({ request: { headers } });\n  response.headers.set('Content-Security-Policy', csp);\n  return response;\n}\nexport const config = { matcher: [{ source: '/((?!_next/static|_next/image|favicon.ico|fire/).*)' }] };\n"
+  },
+  "theme": {
+    "H1": { "rule": "a build step writes themeToCss(record, { selector }) to a .css file loaded after fire.css; expandTheme(record).attributes go on <html>; never a run-time <style> element", "check": ["A"] },
+    "H2": { "target": "html", "rule": "<link rel=\"stylesheet\" href=\"fire/fire.css\"><link rel=\"stylesheet\" href=\"theme.css\"> and the attributes on <html>", "check": ["A"] },
+    "H3": { "target": "lit, vue", "rule": "import 'fire-design/css'; import './fire-theme.css'; in main.ts; attributes on <html> in index.html", "check": ["A"] },
+    "H4": { "target": "react", "rule": "the same imports in app/layout.tsx; attributes spread on <html> (N3)", "check": ["A"] },
+    "H5": { "rule": "a look chosen at run time goes through setTheme, setDensity and tweaks.js; boot.js restores it before first paint", "check": ["R"] }
+  },
+  "csp": {
+    "P1": { "target": "html, lit, vue (production)", "policy": "script-src 'self'; style-src 'self'", "rule": "works: Vite emits external module scripts and stylesheet links; Fire uses CSSOM setProperty; JSON scripts need no nonce", "check": ["E10"] },
+    "P2": { "target": "vite dev server", "policy": "style-src 'unsafe-inline' in development only", "check": ["A"] },
+    "P3": { "target": "react (Next.js)", "policy": "script-src 'self' 'nonce-…' 'strict-dynamic'; style-src 'self' (production)", "rule": "nonce per request from proxy.ts (next.proxy); routes become dynamic; development adds 'unsafe-eval' and style-src 'unsafe-inline'", "check": ["E9", "A"] },
+    "P4": { "target": "all", "rule": "no style, :style, v-show, styleMap, inline handlers, eval, or inline <script> other than application/json", "check": [] }
+  },
+  "labels": {
+    "X1": { "rule": "data-label-<key> (dots in the key become hyphens) on a component, an ancestor or <html>; a plain data-* attribute in every target; read each time Fire writes the label", "check": ["R"] },
+    "X2": { "rule": "the data-fd-labels dictionary is in the document before Fire writes its first label; parsed once", "lit": "index.html <head>", "vue": "index.html <head>", "react": "root layout <head> (M3)", "check": ["E9", "R"] }
+  },
+  "facet": {
+    "source": "vendor/facet/src/runtime/render.ts, logic.ts, components.ts, cli/board-rules.ts (read only)",
+    "B1": { "board": "<cc-for list=\"{{{list}}}\" as=\"{as}\">{children}</cc-for>", "lit": "${({list} ?? []).map(({as}, $index) => html`{children}`)}", "react": "{({list} ?? []).map(({as}, $index) => (<Fragment key={$index}>{children}</Fragment>))}", "vue": "<template v-for=\"({as}, $index) in ({list} ?? [])\" :key=\"$index\">{children}</template>", "notes": "positional like the board; a non-list is an error; $index in scope", "check": ["R", "E12"] },
+    "B2": { "board": "<cc-if value=\"{{{expr}}}\">{children}</cc-if>", "lit": "${ccTruthy({expr}) ? html`{children}` : nothing}", "react": "{ccTruthy({expr}) ? (<>{children}</>) : null}", "vue": "<template v-if=\"ccTruthy({expr})\">{children}</template>", "check": ["R"] },
+    "B3": { "board": "{{a.b}} in text", "path": "a.b → a?.b", "lit": "${ccText({expr})}", "react": "{ccText({expr})}", "vue": "{{ ccText({expr}) }}", "check": ["R"] },
+    "B4": { "board": "{name}=\"{{{expr}}}\"", "lit": "{name}=${ccAttr({expr}) ?? nothing}", "react": "{name}={ccAttr({expr})}", "vue": ":{name}=\"ccAttr({expr})\"", "notes": "React applies attributes.rename", "check": ["R"] },
+    "B5": { "board": "{name}=\"a {{{expr}}} b\"", "lit": "{name}=\"a ${ccText({expr})} b\"", "react": "{name}={`a ${ccText({expr})} b`}", "vue": ":{name}=\"`a ${ccText({expr})} b`\"", "check": ["R"] },
+    "B6": { "board": "value, checked or selected with a whole hole", "lit": ".value=${ccText({expr})} / .checked=${ccTruthy({expr})}", "react": "value={ccText({expr})} with onChange={the board's input handler}, else readOnly", "vue": ":value=\"ccText({expr})\" @input=\"{handler}\"", "confirm": true, "check": ["R"] },
+    "B7": { "board": "on{event}=\"{{{handler}}}\" (name lowercased; doubleclick → dblclick; onfd:select → fd:select); called with (event, loopLocals)", "lit": "@{event}=${(e) => logic.{handler}(e, { {locals} })}", "react": "on{Event}={(e) => logic.{handler}(e, { {locals} })}; fd:* through events.bind.react", "vue": "@{event}=\"(e) => logic.{handler}(e, { {locals} })\"", "check": ["R"] },
+    "B8": { "board": "<cc-import name=\"{Name}\" {kebab-attr}=\"{{{expr}}}\">", "lit": "<{prefix}-{kebab-name} .{camelAttr}=${{expr}}>", "react": "<{Name} {camelAttr}={{expr}} />", "vue": "<{Name} :{kebab-attr}=\"{expr}\" />", "confirm": "Lit tag prefix", "check": ["R"] },
+    "B9": { "board": "<cc-component name=\"{Component}\" {props}>{children}</cc-component>", "all": "the Fire markup that the component card's api maps the props to, written by the rules above; on-* props are handlers (B7)", "confirm": "the card api shape comes from build-facet.mjs", "check": ["R"] },
+    "B10": { "board": "<script type=\"text/x-cc-board\"> class Board extends BoardLogic { values(); state; setState(); mounted(); props; tweaks }", "lit": "a light-DOM LitElement holding logic = new Board(props, tweaks); setState → requestUpdate(); mounted() in firstUpdated", "react": "useBoard(Board, props, tweaks): the instance in useRef, setState bumps a counter; mounted() in useEffect([])", "vue": "useBoard with a shallowRef version; mounted() in onMounted", "confirm": true, "check": ["R"] },
+    "B11": { "board": "literal lists and objects in the starting state or values()", "all": "moved to {Name}.sample.(ts|js) and imported as the starting state", "confirm": true },
+    "B12": { "board": "data-tweaks on the logic script", "all": "component props with the tweak defaults", "confirm": true },
+    "B13": { "board": "<cc-head>", "all": "dropped; a board that needs its own CSS is not exportable", "confirm": true }
+  },
+  "renderEqual": {
+    "R1": "Ignore comments, including framework markers (<!-- -->, <!--[-->, <!--?lit$…$-->).",
+    "R2": "Outside <pre> and <textarea>: collapse whitespace runs to one space; whitespace-only text between block or flex children counts as absent.",
+    "R3": "Attributes compared as a set, names in lowercase, order ignored.",
+    "R4": "class compared as a set of tokens.",
+    "R5": "Form state compared through properties (value, checked, selected, open), not attributes or a textarea's text child.",
+    "R6": "Ignore autofocus.",
+    "R7": "data-fd-vars is removed by Fire; compare the custom properties it set (computed styles).",
+    "R8": "Ignore #fd-icon-sprite and framework root and wrapper elements.",
+    "R9": "Fire-generated ids (fd-… counters) and the aria-* attributes that reference them: compare the referenced element, not the id string."
+  }
+}

@@ -15,7 +15,8 @@
  *                  <button class="fd-btn-text fd-tweaks-reset" data-tweaks-action="reset">Reset</button>
  *                  <button class="fd-btn" data-icon-only data-tweaks-action="close" aria-label="Close tweaks">
  *                <div class="fd-tweaks-body"> sections of .fd-tweaks-row; every control carries data-tweak="<key>":
- *                  .fd-segmented[data-tweak]           theme, density, lines, textSize, motion (nav.js drives them)
+ *                  .fd-segmented[data-tweak]           theme, density, lines, textSize, motion, surfaces, elevation, controls,
+ *                                                      headings (nav.js drives them)
  *                  .fd-tweaks-palettes[role=radiogroup][data-tweak=palette] > .fd-tweaks-swatch[role=radio][data-palette][data-value]
  *                  .fd-tweaks-faces[role=radiogroup][data-tweak=type]       > .fd-tweaks-face[role=radio][data-value]
  *                      .fd-tweaks-face-sample[data-type]  "Ag" set in that type set (the tokens resolve on the sample itself)
@@ -45,6 +46,12 @@
  *  contrast  default · high                 data-contrast="high"
  *  motion    off · default · slow           --fd-motion 0 · 1 · 1.75
  *  texture   0…1.5 (step .05)               --fd-texture
+ *  surfaces  objects · flat · outlined      data-surfaces on <html>     (the Structure section; tokens.css sets the
+ *  elevation none · soft · lifted           data-elevation               semantic tokens each value moves)
+ *  controls  soft · outlined · filled       data-controls
+ *  headings  sentence · upper · mono        data-headings
+ *            The first value of each (objects, soft, soft, sentence) leaves no attribute. A data-surfaces (…) a page declares
+ *            on <html> is the default, as for the palette; fire/boot.js keeps it in data-fd-default-surfaces (…).
  *  signature { field, mark, cell, ramp, marks, intensity }   data-signature-* on <html>, only where not the default (theme.js,
  *            texture.js, shell.css): the panel sets field, mark, marks and intensity; cell and ramp ride along from a theme record.
  *            A data-signature-* a page declares on <html> is the default, as for the palette.
@@ -62,7 +69,10 @@ import {
   getPalette, paletteTokens, toneTokens, cssValue, oklch,
 } from './palettes.js';
 import { TYPEFACES, DEFAULT_TYPEFACE, getTypeface } from './typefaces.js';
-import { toThemeRecord, SIGNATURE_DEFAULT, SIGNATURE_CHOICES, SIGNATURE_RANGES, SIGNATURE_ATTRIBUTES } from './theme.js';
+import {
+  toThemeRecord, SIGNATURE_DEFAULT, SIGNATURE_CHOICES, SIGNATURE_RANGES, SIGNATURE_ATTRIBUTES,
+  DIAL_DEFAULTS, STRUCTURE_CHOICES, STRUCTURE_ATTRIBUTES,
+} from './theme.js';
 
 /* ==========================================================================
    State
@@ -79,7 +89,9 @@ const CHOICES = {
   textSize: ['sm', 'md', 'lg'],
   contrast: ['default', 'high'],
   motion: ['off', 'default', 'slow'],
+  ...STRUCTURE_CHOICES,
 };
+const STRUCTURE = Object.keys(STRUCTURE_ATTRIBUTES);
 const RANGES = { corners: [0, 2, 0.125], texture: [0, 1.5, 0.05], 'signature.intensity': [...SIGNATURE_RANGES.intensity, 0.05] };
 const snap = (v, [min, max, step]) => clamp(Math.round(v / step) * step, min, max);
 /* Every inline custom property this module may write on <html>. */
@@ -122,14 +134,23 @@ function declaredSignature() {
   }
   return out;
 }
+/* A structural dial the page declares on <html> (data-surfaces="flat") is its default, kept by boot.js the same way. */
+function declaredStructure(key) {
+  const name = STRUCTURE_ATTRIBUTES[key];
+  const kept = `data-fd-default-${name.slice(5)}`;
+  const value = root.hasAttribute(kept) ? root.getAttribute(kept) : root.getAttribute(name);
+  return STRUCTURE_CHOICES[key].includes(value) ? value : DIAL_DEFAULTS[key];
+}
 const PAGE = Object.freeze({
   palette: declared('palette', PALETTES, DEFAULT_PALETTE),
   type: declared('type', TYPEFACES, DEFAULT_TYPEFACE),
   signature: Object.freeze(declaredSignature()),
+  ...Object.fromEntries(STRUCTURE.map((k) => [k, declaredStructure(k)])),
 });
 const DEFAULTS = Object.freeze({
   palette: PAGE.palette, type: PAGE.type, tone: TONE_DEFAULT, theme: 'system', density: 'comfortable', corners: 1, lines: 1,
   textSize: 'md', contrast: 'default', motion: 'default', texture: 1, signature: PAGE.signature,
+  ...Object.fromEntries(STRUCTURE.map((k) => [k, PAGE[k]])),
 });
 /* Storage can throw (private mode, sandboxed frames): every access stays inside the try. */
 const store = {
@@ -154,7 +175,7 @@ function sanitize(input = {}) {
       if (v !== undefined) s.signature[k] = v;
     }
   }
-  for (const k of ['theme', 'density', 'textSize', 'contrast', 'motion']) if (CHOICES[k].includes(input[k])) s[k] = input[k];
+  for (const k of ['theme', 'density', 'textSize', 'contrast', 'motion', ...STRUCTURE]) if (CHOICES[k].includes(input[k])) s[k] = input[k];
   if (CHOICES.lines.includes(Number(input.lines))) s.lines = Number(input.lines);
   for (const k of Object.keys(RANGES)) {
     const v = Number(input[k]);
@@ -188,6 +209,14 @@ function inlineProps(s) {
   return out;
 }
 
+/** The structural dials as attributes on <html>: a value other than Fire's default, or any value when the page declared
+ *  another default (data-surfaces="objects" then replaces the page's own). */
+function structureAttrs(s) {
+  const out = {};
+  for (const k of STRUCTURE) if (s[k] !== DIAL_DEFAULTS[k] || PAGE[k] !== DIAL_DEFAULTS[k]) out[STRUCTURE_ATTRIBUTES[k]] = s[k];
+  return out;
+}
+
 /** The signature as attributes on <html>: the dials that differ from Fire's own default (so "auto" leaves none). */
 function signatureAttrs(sig = SIGNATURE_DEFAULT) {
   const out = {};
@@ -205,6 +234,8 @@ function apply(s) {
   attr('data-contrast', s.contrast === 'high' ? 'high' : null);
   const sigAttrs = signatureAttrs(s.signature);
   for (const name of Object.values(SIGNATURE_ATTRIBUTES)) attr(name, sigAttrs[name] ?? null);
+  const structAttrs = structureAttrs(s);
+  for (const name of Object.values(STRUCTURE_ATTRIBUTES)) attr(name, structAttrs[name] ?? null);
   if (getTheme() !== s.theme) setTheme(s.theme);
   if ((root.getAttribute('data-density') || 'comfortable') !== s.density) setDensity(s.density);
   const props = inlineProps(s);
@@ -230,6 +261,7 @@ function flush() {
   if (state.contrast === 'high') attrs['data-contrast'] = 'high';
   // A dial the page declared and the state has moved (even back to auto) is written out, so boot.js can put it back.
   for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (state.signature[k] !== PAGE.signature[k]) attrs[name] = String(state.signature[k]);
+  for (const [k, name] of Object.entries(STRUCTURE_ATTRIBUTES)) if (state[k] !== PAGE[k]) attrs[name] = state[k];
   const props = inlineProps(state);
   store.set(BOOT_KEY, Object.keys(attrs).length || Object.keys(props).length ? JSON.stringify({ attrs, props }) : null);
 }
@@ -288,7 +320,8 @@ const MINUS = '−';
 const fmtX = (v) => `${Number(v.toFixed(3))}×`;
 
 function summary(s = state) {
-  return `${s.palette}${isDefaultTone(s.tone) ? '' : ' (toned)'} · ${s.type === DEFAULT_TYPEFACE ? '' : `${s.type} · `}${s.density} · ${fmtX(s.corners)}`;
+  const structure = STRUCTURE.filter((k) => s[k] !== DIAL_DEFAULTS[k]).map((k) => ` · ${s[k]} ${k}`).join('');
+  return `${s.palette}${isDefaultTone(s.tone) ? '' : ' (toned)'} · ${s.type === DEFAULT_TYPEFACE ? '' : `${s.type} · `}${s.density} · ${fmtX(s.corners)}${structure}`;
 }
 
 /** A ready-to-paste block: the attributes to set on <html>, then :root with every overridden custom property. */
@@ -302,6 +335,7 @@ export function toCss(s = state) {
   if (s.textSize !== 'md') attrs.push(`data-text-size="${s.textSize}"`);
   if (s.contrast === 'high') attrs.push('data-contrast="high"');
   for (const [name, value] of Object.entries(signatureAttrs(s.signature))) attrs.push(`${name}="${value}"`);
+  for (const [name, value] of Object.entries(structureAttrs(s))) attrs.push(`${name}="${value}"`);
   const notes = [`On <html>: ${attrs.length ? attrs.join(' ') : 'nothing (default attributes)'}`];
   if (s.palette !== DEFAULT_PALETTE && !toned) notes.push('data-palette needs fire/palettes.css.');
   if (s.type !== DEFAULT_TYPEFACE) notes.push('Type sets need fire/typefaces.css (part of fire.css).');
@@ -436,6 +470,12 @@ function markup() {
       `<div class="fd-tweaks-row"><div class="fd-tweaks-row-head"><span class="fd-tweaks-label" id="fd-tw-type-label">Typeface</span><span class="fd-tweaks-readout" data-tweaks-typeface>${esc(typeFaces(getTypeface(state.type)))}</span></div>${typefaces()}</div>`,
       inlineRow('textSize', 'Text size', segmented('textSize', [['sm', 'S', 'Small'], ['md', 'M', 'Medium'], ['lg', 'L', 'Large']])),
       `<label class="fd-switch" data-size="sm" data-label="start"><input type="checkbox" role="switch" data-tweak="contrast"${state.contrast === 'high' ? ' checked' : ''}><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-tweaks-label">High contrast</span></span></label>`,
+    ].join(''))}
+    ${section('structure', 'Structure', [
+      inlineRow('surfaces', 'Surfaces', segmented('surfaces', [['objects', 'Objects'], ['flat', 'Flat'], ['outlined', 'Outlined']])),
+      inlineRow('elevation', 'Elevation', segmented('elevation', [['none', 'None'], ['soft', 'Soft'], ['lifted', 'Lifted']])),
+      inlineRow('controls', 'Controls', segmented('controls', [['soft', 'Soft'], ['outlined', 'Outlined'], ['filled', 'Filled']])),
+      inlineRow('headings', 'Headings', segmented('headings', [['sentence', 'Sentence'], ['upper', 'Upper'], ['mono', 'Mono']])),
     ].join(''))}
     ${section('motion', 'Motion and texture', [
       inlineRow('motion', 'Motion', segmented('motion', [['off', 'Off'], ['default', 'Default'], ['slow', 'Slow']])),

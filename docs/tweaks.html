@@ -20,7 +20,7 @@
   <header class="doc-hero">
     <p class="fd-eyebrow">Foundations</p>
     <h1 class="fd-display">Theming and tweaks</h1>
-    <p class="doc-lede">Fire's whole look runs on variables: fifteen palettes recolour every neutral and the accent, tone bends whichever palette you pick, twelve type sets change the voice of the headings and the interface, and a handful of scales set density, corners, lines, text size and motion. The Tweaks panel turns all of it into live controls.</p>
+    <p class="doc-lede">Fire's whole look runs on variables: fifteen palettes recolour every neutral and the accent, tone bends whichever palette you pick, twelve type sets change the voice of the headings and the interface, a handful of scales set density, corners, lines, text size and motion, and four structural dials decide what surfaces, shadows, controls and small labels look like. The Tweaks panel turns all of it into live controls.</p>
   </header>
 
   <section class="doc-section" id="panel">
@@ -35,7 +35,7 @@
       <li>Any element with <code class="fd-code">data-fd-tweaks-open</code> toggles the panel and carries its <code class="fd-code">aria-expanded</code> state. The docs top bar has one.</li>
       <li>No trigger of your own? Put <code class="fd-code">data-fd-tweaks</code> on <code class="fd-code">&lt;html&gt;</code> and a round launcher appears bottom-left.</li>
       <li>Choices are saved in <code class="fd-code">localStorage["fd-tweaks"]</code> (only what differs from the default) and applied as soon as the module runs. Load <code class="fd-code">fire/boot.js</code> as a plain (non-module) script in <code class="fd-code">&lt;head&gt;</code>, before the stylesheet, and the saved look is on <code class="fd-code">&lt;html&gt;</code> before the first paint, so a reload never flashes the default. Reset leaves no attribute or inline style behind.</li>
-      <li>The page's own look is the default. A page that declares <code class="fd-code">data-palette</code> or <code class="fd-code">data-type</code> on <code class="fd-code">&lt;html&gt;</code> keeps it on load and after Reset, and only a choice away from it is saved; a page that declares nothing defaults to Ember and Geist. Before <code class="fd-code">fire/boot.js</code> restores a saved palette or type set it keeps the page's values in <code class="fd-code">data-fd-default-palette</code> and <code class="fd-code">data-fd-default-type</code>, so the panel still knows them; never write those by hand.</li>
+      <li>The page's own look is the default. A page that declares <code class="fd-code">data-palette</code>, <code class="fd-code">data-type</code> or a structural dial (<code class="fd-code">data-surfaces</code>, <code class="fd-code">data-elevation</code>, <code class="fd-code">data-controls</code>, <code class="fd-code">data-headings</code>) on <code class="fd-code">&lt;html&gt;</code> keeps it on load and after Reset, and only a choice away from it is saved; a page that declares nothing defaults to Ember and Geist. Before <code class="fd-code">fire/boot.js</code> restores a saved palette or type set it keeps the page's values in <code class="fd-code">data-fd-default-palette</code> and <code class="fd-code">data-fd-default-type</code>, so the panel still knows them; never write those by hand.</li>
       <li>Copy CSS gives you a block to paste into your product: the attributes for <code class="fd-code">&lt;html&gt;</code> and a <code class="fd-code">:root</code> rule with every overridden variable, toned palette colours included. A type set is just an attribute, so it needs <code class="fd-code">fire/typefaces.css</code> (already part of <code class="fd-code">fire.css</code>).</li>
       <li>Keyboard: Tab moves between controls, arrows move inside a group (the palette grid is 5 × 3 and the typeface grid 4 × 3), Escape closes the panel and returns focus to its trigger. On desktop the header drags; double-click it to dock again. Under 640px it is a bottom sheet.</li>
     </ul>
@@ -44,7 +44,7 @@
         <thead><tr><th>JavaScript</th><th>Does</th></tr></thead>
         <tbody>
           <tr><td>open(trigger) · close() · toggle(trigger)</td><td>Show or hide the panel. Focus returns to <code class="fd-code">trigger</code> on close.</td></tr>
-          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, type, tone, theme, density, corners, lines, textSize, contrast, motion, texture }</code>.</td></tr>
+          <tr><td>get()</td><td>The full state: <code class="fd-code">{ palette, type, tone, theme, density, corners, lines, textSize, contrast, motion, texture, surfaces, elevation, controls, headings, signature }</code>.</td></tr>
           <tr><td>set(partial)</td><td>Merge and apply, for example <code class="fd-code">set({ palette: "paper", type: "editorial", tone: { warmth: 30 } })</code>. Unknown or out-of-range values are ignored or clamped.</td></tr>
           <tr><td>reset()</td><td>Everything back to the page's own look: its declared palette and type set, otherwise Ember and Geist.</td></tr>
           <tr><td>toCss()</td><td>The Copy CSS text for the current state.</td></tr>
@@ -674,6 +674,150 @@ node scripts/fonts.mjs add "Plus Jakarta Sans" --out public/fonts
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="doc-section" id="structure">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Structure</h2>
+      <p>Four dials change how a page is built rather than its colours: what an object is, how things float, how secondary controls look and the voice of small labels. Combine a few values to get a very different product from the same markup and no CSS of your own.</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Attribute</th><th>Values</th><th>What it changes</th></tr></thead>
+        <tbody>
+          <tr><td>data-surfaces</td><td>(objects) · flat · outlined</td><td>Objects are white with a hairline on an off-white page. Flat tints cards, tables and inputs and drops their edges, so fill alone separates them. Outlined gives the page and its objects one colour and draws the edges, with inputs edged at 3:1.</td></tr>
+          <tr><td>data-elevation</td><td>none · (soft) · lifted</td><td>None removes every shadow; menus, dialogs and thumbs take an edge instead. Lifted deepens the shadows of floating and raised things and lifts cards, tables and form sections off the page.</td></tr>
+          <tr><td>data-controls</td><td>(soft) · outlined · filled</td><td>The secondary button, the soft select, the soft search and the filter trigger: the 4% ink wash, an edge at 3:1 on a clear fill, or a stronger wash. The primary button keeps its depth in every value.</td></tr>
+          <tr><td>data-headings</td><td>(sentence) · upper · mono</td><td>The small labels: eyebrows, column headers, keys, stat labels and group labels. Sentence keeps mono capitals for eyebrows and sans capitals for the sidebar's groups; upper sets them all in tracked sans capitals; mono sets them all in the mono face, as written.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="doc-sub">Surfaces</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack">
+        <span class="doc-specimen-label">objects</span>
+        <div class="fd-card">
+          <div class="fd-card-head"><div class="fd-card-heading"><h4 class="fd-title">Production key</h4><p class="fd-card-desc">Last used 2 minutes ago</p></div></div>
+          <input class="fd-input" value="production-crawler" aria-label="Key name">
+          <div class="fd-row" data-wrap><button class="fd-btn" data-variant="primary" type="button">Save</button><button class="fd-btn" type="button">Cancel</button></div>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surfaces="flat">
+        <span class="doc-specimen-label">data-surfaces="flat"</span>
+        <div class="fd-card">
+          <div class="fd-card-head"><div class="fd-card-heading"><h4 class="fd-title">Production key</h4><p class="fd-card-desc">Last used 2 minutes ago</p></div></div>
+          <input class="fd-input" value="production-crawler" aria-label="Key name">
+          <div class="fd-row" data-wrap><button class="fd-btn" data-variant="primary" type="button">Save</button><button class="fd-btn" type="button">Cancel</button></div>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-surfaces="outlined">
+        <span class="doc-specimen-label">data-surfaces="outlined"</span>
+        <div class="fd-card">
+          <div class="fd-card-head"><div class="fd-card-heading"><h4 class="fd-title">Production key</h4><p class="fd-card-desc">Last used 2 minutes ago</p></div></div>
+          <input class="fd-input" value="production-crawler" aria-label="Key name">
+          <div class="fd-row" data-wrap><button class="fd-btn" data-variant="primary" type="button">Save</button><button class="fd-btn" type="button">Cancel</button></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Elevation</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack" data-elevation="none">
+        <span class="doc-specimen-label">data-elevation="none"</span>
+        <div class="fd-menu" data-static-demo role="menu" aria-label="Monitor">
+          <button class="fd-menu-item" role="menuitem" type="button"><i data-icon="pause"></i><span class="fd-menu-item-label">Pause monitor</span></button>
+          <button class="fd-menu-item" role="menuitem" type="button"><i data-icon="copy"></i><span class="fd-menu-item-label">Duplicate</span></button>
+        </div>
+        <div class="fd-segmented" role="radiogroup" aria-label="Range">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="7d" type="button">7 days</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="30d" type="button">30 days</button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack">
+        <span class="doc-specimen-label">soft</span>
+        <div class="fd-menu" data-static-demo role="menu" aria-label="Monitor">
+          <button class="fd-menu-item" role="menuitem" type="button"><i data-icon="pause"></i><span class="fd-menu-item-label">Pause monitor</span></button>
+          <button class="fd-menu-item" role="menuitem" type="button"><i data-icon="copy"></i><span class="fd-menu-item-label">Duplicate</span></button>
+        </div>
+        <div class="fd-segmented" role="radiogroup" aria-label="Range">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="7d" type="button">7 days</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="30d" type="button">30 days</button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-elevation="lifted">
+        <span class="doc-specimen-label">data-elevation="lifted"</span>
+        <div class="fd-menu" data-static-demo role="menu" aria-label="Monitor">
+          <button class="fd-menu-item" role="menuitem" type="button"><i data-icon="pause"></i><span class="fd-menu-item-label">Pause monitor</span></button>
+          <button class="fd-menu-item" role="menuitem" type="button"><i data-icon="copy"></i><span class="fd-menu-item-label">Duplicate</span></button>
+        </div>
+        <div class="fd-segmented" role="radiogroup" aria-label="Range">
+          <button class="fd-segmented-item" role="radio" aria-checked="true" data-value="7d" type="button">7 days</button>
+          <button class="fd-segmented-item" role="radio" aria-checked="false" data-value="30d" type="button">30 days</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Controls</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code>
+        <span class="doc-specimen-label">soft</span>
+        <button class="fd-btn" data-variant="primary" type="button"><i data-icon="plus"></i><span>New monitor</span></button>
+        <button class="fd-btn" type="button"><i data-icon="download"></i><span>Export CSV</span></button>
+        <div class="fd-filter">
+          <button class="fd-filter-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><i data-icon="funnel"></i><span class="fd-filter-value">All endpoints</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-controls="outlined">
+        <span class="doc-specimen-label">data-controls="outlined"</span>
+        <button class="fd-btn" data-variant="primary" type="button"><i data-icon="plus"></i><span>New monitor</span></button>
+        <button class="fd-btn" type="button"><i data-icon="download"></i><span>Export CSV</span></button>
+        <div class="fd-filter">
+          <button class="fd-filter-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><i data-icon="funnel"></i><span class="fd-filter-value">All endpoints</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+        </div>
+      </div>
+      <div class="doc-specimen" data-code data-controls="filled">
+        <span class="doc-specimen-label">data-controls="filled"</span>
+        <button class="fd-btn" data-variant="primary" type="button"><i data-icon="plus"></i><span>New monitor</span></button>
+        <button class="fd-btn" type="button"><i data-icon="download"></i><span>Export CSV</span></button>
+        <div class="fd-filter">
+          <button class="fd-filter-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><i data-icon="funnel"></i><span class="fd-filter-value">All endpoints</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="doc-sub">Headings</h3>
+    <div class="doc-pair">
+      <div class="doc-specimen" data-code data-layout="stack">
+        <span class="doc-specimen-label">sentence</span>
+        <p class="fd-eyebrow">Last run</p>
+        <dl class="fd-kv" data-cols="2">
+          <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value">/crawl</dd></div>
+          <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value">48</dd></div>
+        </dl>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-headings="upper">
+        <span class="doc-specimen-label">data-headings="upper"</span>
+        <p class="fd-eyebrow">Last run</p>
+        <dl class="fd-kv" data-cols="2">
+          <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value">/crawl</dd></div>
+          <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value">48</dd></div>
+        </dl>
+      </div>
+      <div class="doc-specimen" data-code data-layout="stack" data-headings="mono">
+        <span class="doc-specimen-label">data-headings="mono"</span>
+        <p class="fd-eyebrow">Last run</p>
+        <dl class="fd-kv" data-cols="2">
+          <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value">/crawl</dd></div>
+          <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value">48</dd></div>
+        </dl>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Set them on <code class="fd-code">&lt;html&gt;</code>, or on any subtree as these specimens do. The first value of each needs no attribute; the Tweaks panel's Structure section sets them, remembers them and writes them into Copy CSS and Copy theme (<code class="fd-code">dials.surfaces</code>, <code class="fd-code">dials.elevation</code>, <code class="fd-code">dials.controls</code>, <code class="fd-code">dials.headings</code>).</li>
+      <li>Components read semantic tokens the dials set: <code class="fd-code">--fd-surface-edge</code>, <code class="fd-code">--fd-surface-flush</code>, <code class="fd-code">--fd-surface-head</code>, <code class="fd-code">--fd-field</code>, <code class="fd-code">--fd-control-bg</code> and <code class="fd-code">--fd-control-edge</code> (with their hover steps), <code class="fd-code">--fd-shadow-object</code> beside the shadow scale, and <code class="fd-code">--fd-eyebrow-font</code>, <code class="fd-code">--fd-eyebrow-case</code>, <code class="fd-code">--fd-eyebrow-ls</code>. A component of your own that reads them follows every dial.</li>
+      <li><code class="fd-code">node scripts/build-palettes.mjs --check</code> measures every text step on the grounds each surfaces and controls value makes, the outlined edges at 3:1 and the focus ring, in every palette, light and dark.</li>
+    </ul>
   </section>
 
   <section class="doc-section" id="custom">

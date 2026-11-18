@@ -11,6 +11,8 @@
    Accent:   data-accent="ember | volt | iris | ocean | forest | ink"
    Density:  data-density="comfortable | compact | spacious"
    Palette:  data-palette="<name>" (fire/palettes.css) · Contrast: data-contrast="high" · Text: data-text-size="sm | lg"
+   Structure: data-surfaces="flat | outlined" · data-elevation="none | lifted" · data-controls="outlined | filled"
+             · data-headings="upper | mono" (the default of each needs no attribute; see "Structure" below)
    ========================================================================== */
 
 @font-face {
@@ -281,6 +283,21 @@
   --fd-shadow-composer: 0 1px 2px light-dark(rgb(0 0 0 / 0.03), rgb(0 0 0 / 0.4)), 0 8px 24px -12px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.6));
   /* Pressed-in wells. */
   --fd-shadow-inset: inset 0 1px 2px light-dark(rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.5));
+  /* The drop of an object on the page (a card, a table, a form section): none until data-elevation="lifted". */
+  --fd-shadow-object: 0 0 0 0 rgb(0 0 0 / 0);
+}
+
+/* Small labels: eyebrows, column headers, keys, group labels in menus and lists; data-headings moves them.
+   Redeclared on [data-type] so a type set on any element hands its mono face to the labels inside it. */
+:root, [data-type] {
+  --fd-eyebrow-font: var(--fd-font-mono);
+  --fd-eyebrow-case: uppercase;
+  --fd-eyebrow-ls: var(--fd-ls-eyebrow);     /* the tracked labels: column headers, keys, menu groups */
+  --fd-eyebrow-ls-tight: 0em;                /* the eyebrow itself, stat and decision labels: untracked */
+  --fd-eyebrow-weight: var(--fd-weight-regular);
+  /* Section labels: the sidebar's group labels ("Playground", "Account"), in the sans, in capitals. */
+  --fd-section-label-font: var(--fd-font-sans);
+  --fd-section-label-ls: var(--fd-ls-caps);
 }
 
 /* ---------- Accent ----------------------------------------------------------
@@ -403,6 +420,18 @@
   --fd-fill-disabled: var(--fd-a3);
   --fd-chart-grid: var(--fd-a8);
   --fd-chart-axis: var(--fd-text-3);
+
+  /* Structure: what the structural dials (below) move. Components read these, never the dial attributes. */
+  --fd-surface-edge: var(--fd-line-faint);   /* the edge of an object: a card, a table, a form section */
+  --fd-surface-flush: var(--fd-bg);          /* an object that sits flush with the page: an interactive card */
+  --fd-surface-head: var(--fd-bg);           /* the head strip of an object: a table's header row */
+  --fd-field: var(--fd-surface);             /* inside an input */
+  --fd-field-hover: color-mix(in srgb, var(--fd-surface) 55%, var(--fd-bg-sunken));
+  --fd-control-bg: var(--fd-fill);           /* the secondary button, the soft select, the filter trigger */
+  --fd-control-bg-hover: var(--fd-fill-hover);
+  --fd-control-bg-active: var(--fd-fill-active);
+  --fd-control-edge: transparent;            /* their edge: none while controls are soft */
+  --fd-control-edge-hover: transparent;
 }
 
 /* ---------- Scaled tokens ----------
@@ -481,6 +510,113 @@
   --fd-line-strong: light-dark(#b0b0b0, #5a5a5a);
   --fd-control-line: var(--fd-a20);
   --fd-control-line-hover: var(--fd-a32);
+}
+
+/* ==========================================================================
+   Structure: four dials that change how a page is built, not its colours.
+   Each is an attribute on <html> (or any subtree) with three values; the first is Fire's default and needs no
+   attribute. They set the semantic tokens above, so components follow without a selector of their own.
+     data-surfaces   objects · flat · outlined     white objects with a hairline on an off-white page · tinted areas,
+                                                   no edges, separation by fill · drawn boxes: page and surface one
+                                                   colour, visible edges, inputs edged at 3:1
+     data-elevation  soft · none · lifted          today's short shadows · no shadows (floating things take an edge)
+                                                   · deeper shadows, and objects lift off the page
+     data-controls   soft · outlined · filled      the 4% ink wash · an edge at 3:1 on a clear fill · a stronger wash
+                                                   (the primary button keeps its depth in every value)
+     data-headings   sentence · upper · mono       mono capitals for eyebrows, sans capitals for the sidebar's group
+                                                   labels · every small label in tracked sans capitals · every small
+                                                   label in the mono, as written
+   scripts/build-palettes.mjs --check measures every text step on the grounds each value makes, in every palette.
+   ========================================================================== */
+
+/* A surfaces value moves the page and surface colours themselves. Overriding a palette colour on the element that sets
+   it would refer to itself, so the element with the attribute (and every palette inside it) names the pair it was
+   given, and its children take the new pair from those names. Everything a component paints sits inside <body>, a
+   child of <html>; a toned palette's inline colours on <html> feed the names like any other. */
+[data-surfaces="flat"],
+[data-surfaces="flat"] [data-palette] {
+  /* Light: the page takes the surface's white and objects the page's tint, the darkest ground a palette's accent text
+     is held to. Dark: the default pair already separates by fill. */
+  --fd-flat-page: light-dark(var(--fd-surface), var(--fd-bg));
+  --fd-flat-object: light-dark(var(--fd-bg), var(--fd-surface));
+}
+[data-surfaces="flat"] > *,
+[data-surfaces="flat"] [data-palette] > * {
+  --fd-bg: var(--fd-flat-page);
+  --fd-surface: var(--fd-flat-object);
+  --fd-surface-edge: transparent;
+  --fd-surface-flush: var(--fd-surface);
+  --fd-surface-head: color-mix(in srgb, var(--fd-wash) 3%, var(--fd-surface));
+  --fd-field: var(--fd-a5);
+  --fd-field-hover: var(--fd-a7);
+  --fd-control-line: transparent;
+  --fd-control-line-hover: var(--fd-a8);
+  --fd-ring: 0 0 0 2px var(--fd-bg), 0 0 0 4px var(--fd-focus);
+}
+[data-surfaces="outlined"] > *,
+[data-surfaces="outlined"] [data-palette] > * {
+  --fd-bg: var(--fd-surface);
+  --fd-surface-edge: var(--fd-line-strong);
+  --fd-surface-flush: var(--fd-bg);
+  --fd-surface-head: var(--fd-bg);
+  --fd-control-line: var(--fd-text-4);         /* 3:1 on every ground: the input's edge is how it is found */
+  --fd-control-line-hover: var(--fd-text-3);
+  --fd-ring: 0 0 0 2px var(--fd-bg), 0 0 0 4px var(--fd-focus);
+}
+
+[data-elevation="none"] {
+  --fd-shadow-xs: 0 0 0 0 transparent;
+  --fd-shadow-sm: 0 0 0 0 transparent;
+  --fd-shadow-md: 0 0 0 0 transparent;
+  /* Floating things keep an edge instead of a shadow. */
+  --fd-shadow-lg: 0 0 0 var(--fd-hairline) var(--fd-line-strong);
+  --fd-shadow-xl: 0 0 0 var(--fd-hairline) var(--fd-line-strong);
+  --fd-shadow-thumb: 0 0 0 var(--fd-hairline) var(--fd-line-strong);
+  --fd-shadow-inset-control: inset 0 0 0 0 transparent;
+  --fd-shadow-composer: 0 0 0 0 transparent;
+  --fd-shadow-inset: inset 0 0 0 0 transparent;
+  --fd-shadow-object: 0 0 0 0 transparent;
+}
+[data-elevation="lifted"] {
+  --fd-shadow-xs: 0 1px 2px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.5)), 0 1px 1px light-dark(rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.3));
+  --fd-shadow-sm: 0 2px 4px -1px light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.55)), 0 1px 2px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0.4));
+  --fd-shadow-md: 0 10px 24px -6px light-dark(rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.6)), 0 3px 6px -3px light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.5));
+  --fd-shadow-lg: 0 0 0 1px light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.1)), 0 24px 48px -12px light-dark(rgb(0 0 0 / 0.24), rgb(0 0 0 / 0.8)), 0 8px 16px -8px light-dark(rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.6));
+  --fd-shadow-xl: 0 0 0 1px light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.1)), 0 48px 96px -24px light-dark(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.85)), 0 16px 32px -12px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.6));
+  --fd-shadow-thumb: 0 0 0 0.5px light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.12)), 0 2px 4px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.55)), 0 4px 10px -2px light-dark(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.45));
+  --fd-shadow-composer: 0 2px 4px light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.45)), 0 16px 40px -16px light-dark(rgb(0 0 0 / 0.16), rgb(0 0 0 / 0.7));
+  --fd-shadow-object: 0 1px 2px light-dark(rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.4)), 0 8px 20px -10px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.6));
+}
+
+/* The control tokens derive from the ink ladder, which every palette redeclares. */
+[data-controls="outlined"],
+[data-controls="outlined"] [data-palette] {
+  --fd-control-bg: transparent;
+  --fd-control-bg-hover: var(--fd-fill);
+  --fd-control-bg-active: var(--fd-fill-hover);
+  --fd-control-edge: var(--fd-text-4);         /* 3:1 on every ground */
+  --fd-control-edge-hover: var(--fd-text-3);
+}
+[data-controls="filled"],
+[data-controls="filled"] [data-palette] {
+  --fd-control-bg: var(--fd-a7);              /* hover stops at a8: muted text on it keeps 4.5:1 on the sunken well */
+  --fd-control-bg-hover: var(--fd-a8);
+  --fd-control-bg-active: var(--fd-a10);
+}
+
+[data-headings="upper"],
+[data-headings="upper"] [data-type] {
+  --fd-eyebrow-font: var(--fd-font-sans);
+  --fd-eyebrow-ls: var(--fd-ls-eyebrow);
+  --fd-eyebrow-ls-tight: var(--fd-ls-eyebrow);
+  --fd-eyebrow-weight: var(--fd-weight-medium);
+}
+[data-headings="mono"],
+[data-headings="mono"] [data-type] {
+  --fd-eyebrow-case: none;
+  --fd-eyebrow-ls: 0em;
+  --fd-section-label-font: var(--fd-font-mono);
+  --fd-section-label-ls: 0em;
 }
 
 /* ---------- Text size: scales everything set in rem ---------- */

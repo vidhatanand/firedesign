@@ -280,6 +280,8 @@ function check() {
   console.log(`\nwarmth ±100, chroma added to the light page: ${warmthReport.join(' · ')}`);
   console.log(`\ntone sweep: ${swept} toned maps checked (${tones.length - 1} tones × ${PALETTES.length} palettes × 2 contrast levels)`);
 
+  checkStructure();
+
   if (errors.length) {
     console.error(`\nFAILED: ${errors.length} violation(s)\n${errors.slice(0, 60).map((e) => `  ✗ ${e}`).join('\n')}${errors.length > 60 ? `\n  … and ${errors.length - 60} more` : ''}`);
     process.exitCode = 1;
@@ -287,6 +289,132 @@ function check() {
     console.log('\nok: every rule holds; ember matches tokens.css; a zero tone is the identity.');
   }
 }
+
+/* ---------- 8. The structural dials (tokens.css, data-surfaces and data-controls) ----------
+   Every palette, light and dark, default and high contrast, under every surfaces value combined with every controls
+   value: the text steps on every ground the pair makes (page, sunken, surface, raised; the neutral fill, the field,
+   the head strip and the control's rest and hover fills on each), accent text on the page and surface; the control
+   edges the outlined values draw (an input's under outlined surfaces, a secondary control's under outlined controls)
+   at 3:1 on every ground; and the focus ring: its accent band against the page-coloured gap and against the surface
+   it sits on, never lower than under the default surfaces (and at 3:1 wherever the default reaches it). Elevation and
+   headings change no colour. The values are read from tokens.css, so the check follows the CSS. */
+/* surfaces: the element with the attribute names the pair it was given, its children take the new pair from those
+   names (tokens.css says why); controls: one block. */
+const STRUCTURE_SELECTORS = {
+  surfaces: (v) => [`[data-surfaces="${v}"], [data-surfaces="${v}"] [data-palette]`, `[data-surfaces="${v}"] > *, [data-surfaces="${v}"] [data-palette] > *`],
+  controls: (v) => [`[data-controls="${v}"], [data-controls="${v}"] [data-palette]`],
+};
+const blockOr = (selectors) => Object.assign({}, ...selectors.map((sel) => (RULES.some(([s]) => s === sel) ? decls(block(sel)) : {})));
+/** A colour token in one mode, over a palette map: { hex } when opaque, { base, alpha } when a wash, null when transparent. */
+function layerOf(value, m, tokens, table) {
+  let mm;
+  if (value === 'transparent') return null;
+  if ((mm = value.match(/^var\((--fd-[\w-]+)\)$/))) {
+    const name = mm[1];
+    if (name in table) return layerOf(table[name], m, tokens, table);
+    if (tokens[name]) return { hex: tokens[name][m] };
+    throw new Error(`structure check: ${name} is not declared`);
+  }
+  if ((mm = value.match(/^light-dark\((.*)\)$/))) return layerOf(args(mm[1])[m], m, tokens, table);
+  if ((mm = value.match(/^color-mix\(in srgb, var\((--fd-[\w-]+)\) ([\d.]+)%, transparent\)$/))) {
+    const inner = layerOf(`var(${mm[1]})`, m, tokens, table);
+    return inner.hex ? { base: inner.hex, alpha: Number(mm[2]) / 100 } : { base: inner.base, alpha: inner.alpha * Number(mm[2]) / 100 };
+  }
+  if ((mm = value.match(/^color-mix\(in srgb, var\((--fd-[\w-]+)\) ([\d.]+)%, var\((--fd-[\w-]+)\)\)$/))) {
+    const a = layerOf(`var(${mm[1]})`, m, tokens, table);
+    const b = layerOf(`var(${mm[3]})`, m, tokens, table);
+    return { hex: rules.over(a.hex ?? a.base, (a.alpha ?? 1) * Number(mm[2]) / 100, b.hex) };
+  }
+  throw new Error(`structure check: cannot resolve "${value}"`);
+}
+const onto = (layer, ground) => (layer === null ? ground : layer.hex ?? rules.over(layer.base, layer.alpha, ground));
+
+function checkStructure() {
+  const SURFACES = ['objects', 'flat', 'outlined'];
+  const CONTROLS = ['soft', 'outlined', 'filled'];
+  const worst = {};
+  const note = (key, value, where) => { if (!worst[key] || value < worst[key].value) worst[key] = { value, where }; };
+  let maps = 0;
+  for (const p of PALETTES) {
+    for (const level of ['default', 'high']) {
+      const ladder = level === 'high' ? { ...LADDER, ...HIGH } : LADDER;
+      const base = engine.paletteTokens(p.name, { contrast: level });
+      // The default surfaces' focus ring, per mode: the floor for the other values.
+      const floor = [];
+      for (const surfaces of SURFACES) {
+        const sTable = { ...ladder, ...blockOr(STRUCTURE_SELECTORS.surfaces(surfaces)) };
+        for (const controls of CONTROLS) {
+          const table = { ...sTable, ...blockOr(STRUCTURE_SELECTORS.controls(controls)) };
+          // The surface pair the value makes, as the browser resolves it on <html>.
+          const tokens = { ...base };
+          // Both are resolved against the pair the parent gave (the names hold it), as the browser does one element down.
+          const parent = Object.fromEntries(Object.entries(table).filter(([k]) => k !== '--fd-bg' && k !== '--fd-surface'));
+          for (const key of ['--fd-bg', '--fd-surface']) {
+            if (key in table) tokens[key] = [0, 1].map((m) => layerOf(table[key], m, base, parent).hex);
+          }
+          for (const m of [0, 1]) {
+            const mode = m ? 'dark' : 'light';
+            const where = `${p.name} ${mode}${level === 'high' ? ' high contrast' : ''} surfaces=${surfaces} controls=${controls}`;
+            const v = (k) => tokens[k][m];
+            const lay = (name) => layerOf(`var(${name})`, m, tokens, parent);
+            const grounds = [];
+            for (const b of rules.BASES) {
+              const g = v(b);
+              const short = rules.BASE_SHORT[b];
+              grounds.push([short, g]);
+              for (const name of ['--fd-fill', '--fd-field', '--fd-field-hover', '--fd-control-bg', '--fd-control-bg-hover']) {
+                const l = lay(name);
+                if (l && !l.hex) grounds.push([`${name.slice(5)}/${short}`, onto(l, g)]);
+              }
+            }
+            for (const name of ['--fd-field', '--fd-field-hover', '--fd-surface-head']) {
+              const l = lay(name);
+              if (l?.hex && !grounds.some(([, g]) => g === l.hex)) grounds.push([name.slice(5), l.hex]);
+            }
+            for (const s of TEXT_STEPS) {
+              const step = LADDER_RESOLVED[level][s];
+              const min = s === '--fd-text-4' ? FAINT_MIN : TEXT_MIN;
+              for (const [label, g] of grounds) {
+                const c = contrast(rules.over(v(step.base), step.alpha[m], g), g);
+                note(`${s}${s === '--fd-text-4' ? ' (3:1)' : ''}`, c, `${where} on ${label}`);
+                if (c < min) fail(`${where}: ${s} ${c.toFixed(2)} on ${label} < ${min}`);
+              }
+            }
+            for (const k of ['--fd-bg', '--fd-surface']) {
+              for (const g of [v(k), washOver(v('--fd-accent'), v(k))]) {
+                const c = contrast(v('--fd-accent-text'), g);
+                note('--fd-accent-text', c, `${where} on ${k.slice(5)}`);
+                if (c < TEXT_MIN) fail(`${where}: accent-text ${c.toFixed(2)} on ${k.slice(5)} < ${TEXT_MIN}`);
+              }
+            }
+            // Edges that identify a control: 3:1 against every ground the control can sit on.
+            for (const [name, on] of [['--fd-control-line', surfaces === 'outlined'], ['--fd-control-edge', controls === 'outlined']]) {
+              if (!on) continue;
+              const l = lay(name);
+              for (const [label, g] of grounds.filter(([label]) => !label.includes('/') || label.startsWith('fill/'))) {
+                const c = contrast(onto(l, g), g);
+                note(`${name} (3:1, outlined)`, c, `${where} on ${label}`);
+                if (c < NONTEXT_MIN) fail(`${where}: ${name} ${c.toFixed(2)} on ${label} < ${NONTEXT_MIN}`);
+              }
+            }
+            // Focus: the accent band against the page-coloured gap and the surface the control sits on.
+            if (controls === 'soft') {
+              const ring = Math.min(contrast(v('--fd-accent'), v('--fd-bg')), contrast(v('--fd-accent'), v('--fd-surface')));
+              if (surfaces === 'objects') floor[m] = ring;
+              note('focus ring', ring, where);
+              const want = Math.min(floor[m], NONTEXT_MIN);
+              if (ring < want - 0.005) fail(`${where}: the focus ring reaches ${ring.toFixed(2)}:1 on the page or a surface, under the default's ${floor[m].toFixed(2)}`);
+            }
+            maps++;
+          }
+        }
+      }
+    }
+  }
+  console.log(`\nstructural dials: ${maps} maps (${PALETTES.length} palettes × 2 modes × 2 contrast levels × ${SURFACES.length} surfaces × ${CONTROLS.length} controls); worst ratio per rule:`);
+  for (const [key, { value, where }] of Object.entries(worst)) console.log(`  ${key.padEnd(34)} ${value.toFixed(2)}  ${where}`);
+}
+const NONTEXT_MIN = 3;
 
 function labOf(hex) {
   const [Lv, C, h] = toOklch(parse(hex).rgb);

@@ -5,8 +5,9 @@
 //   --out <dir>                             write to (or check) <dir> instead of facet/ (used by the tests)
 //
 // Two variants, and the build writes the richest the installed Facet accepts. It probes with Facet's own checker
-// (`node <cli.js> system check <file>`, read-only; the path is $FACET_CLI or ../codecrystal/vendor/facet/dist/cli.js):
-//   full      all components with full cards, plus a top-level `contract` field holding facet/theme.json exactly
+// (`node <cli.js> system check <file>`, read-only; the path is $FACET_CLI, else ../design-kit/dist/cli.js, else the old vendored ../codecrystal/vendor/facet/dist/cli.js):
+//   full      all components with full cards, a top-level `contract` field holding facet/theme.json exactly, and every token
+//             Facet's 0.6.2 schema takes (extra colour roles, 16 type steps in rem with numeric figures, 5-layer light and dark shadows, all sizes)
 //   fallback  100 components chosen by the curated rule, cut to the richest detail level that fits 128 KiB, no `contract`
 // With no CLI found the fallback is written and said so. The variant and the Facet build that validated it go in
 // extras.json ("facet") and README.md. With --check and no CLI, the variant recorded in extras.json is rebuilt.
@@ -75,11 +76,13 @@ const opaquePair = (t, base) => {
 /* ==========================================================================
    Dimensions and names
    ========================================================================== */
-const DIM = /^(0|-?\d{1,4}(\.\d{1,3})?(px|rem|em))$/;
+// Facet's dimension: rem takes four decimals, px and em three. The fallback (the 0.6.1 Facet) takes three for all.
+const DIM = /^(0|-?(\d{1,4}(\.\d{1,4})?rem|\d{1,4}(\.\d{1,3})?(px|em)))$/;
+const DIM_FALLBACK = /^(0|-?\d{1,4}(\.\d{1,3})?(px|rem|em))$/;
 const fmt = (n) => String(Math.round(n * 1000) / 1000);
-function dim(v) {
+function dim(v, full = false) {
   v = String(v).trim();
-  if (DIM.test(v)) return v;
+  if ((full ? DIM : DIM_FALLBACK).test(v)) return v;
   const m = /^(-?[\d.]+)(px|rem|em)$/.exec(v);
   if (!m) throw new Error(`not a Facet dimension: ${v}`);
   const px = m[2] === 'px' ? +m[1] : +m[1] * 16;
@@ -97,117 +100,20 @@ const cut = (s, n) => {
 };
 const sentence = (s) => { s = String(s).trim(); return /[.!?]$/.test(s) ? s : s + '.'; };
 
-/* aliases: Facet's generated custom property → the Fire token that holds the same value (extras.json) */
-const ALIASES = {};
-const alias = (facetVar, fireToken) => { ALIASES[facetVar] = fireToken; };
-
-/* ==========================================================================
-   tokens.color: roles, palette
-   ========================================================================== */
 const roleSpec = contract.facet.roles;
-const OPTIONAL_STATUS = ['success', 'warning', 'danger', 'info'];
-const color = {};
-const colorRole = (role, light, dark, description) => {
-  color[role] = { $type: 'color', $value: light, $description: description, $extensions: { [DARK]: dark } };
-};
-const describe = {
-  background: 'Fire --fd-bg: the page.', surface: 'Fire --fd-surface: cards, panels and inputs.',
-  text: 'Fire --fd-ink: body text and headings.',
-  muted: 'Fire --fd-text-3 (an alpha token) laid over --fd-bg, so the value is opaque.',
-  primary: 'Fire --fd-accent: the accent fill (Ember orange).',
-  'on-primary': 'Fire --fd-accent-contrast: the label on the accent fill.',
-  border: 'Fire --fd-line: hairlines and dividers.', focus: 'Fire --fd-focus: the focus ring colour.',
-  link: 'Fire --fd-accent-text: accent text on the page, darkened to pass 4.5:1.',
-  success: 'Fire --fd-success-fill.', warning: 'Fire --fd-warning-fill.', danger: 'Fire --fd-danger-fill.', info: 'Fire --fd-info-fill.',
-};
-for (const role of ['background', 'surface', 'text', 'muted', 'primary', 'on-primary']) {
-  const r = roleSpec[role];
-  colorRole(role, r.light, r.dark, describe[role]);
-  alias(`--color-${role}`, r.token);
-}
-// Facet's accent role has no Fire counterpart (Fire has one accent): it repeats the primary and Facet may change it.
-colorRole('accent', roleSpec.primary.light, roleSpec.primary.dark, 'Fire has one accent, so this repeats primary; Facet may set another.');
-for (const role of ['border', 'success', 'warning', 'danger', 'focus', 'info', 'link']) {
-  const r = roleSpec[role];
-  colorRole(role, r.light, r.dark, describe[role]);
-  alias(`--color-${role}`, r.token);
-}
-const ROLE_ORDER = ['background', 'surface', 'text', 'muted', 'primary', 'on-primary', 'accent', 'border', 'success', 'warning', 'danger', 'focus', 'info', 'link'];
-const colorOrdered = Object.fromEntries(ROLE_ORDER.map((r) => [r, color[r]]));
-// The roles Fire's contract fills that Facet has no role for (the labels on status fills).
-const DROPPED_ROLES = Object.keys(roleSpec).filter((r) => !ROLE_ORDER.includes(r)).sort();
-
-const PALETTE_TOKENS = [
-  ...contract.tokens.filter((t) => t.group === 'palette').map((t) => t.name),
-  ...['success', 'warning', 'danger', 'info', 'violet'].flatMap((t) => ['solid', 'text', 'bg', 'line'].map((k) => `--fd-${t}-${k}`)),
-  ...['--fd-chart-2', '--fd-chart-3', '--fd-chart-4', '--fd-chart-5', '--fd-chart-6'],
-  ...contract.tokens.filter((t) => t.group === 'syntax').map((t) => t.name),
-  ...contract.tokens.filter((t) => t.group === 'accent-wash').map((t) => t.name),
-  '--fd-text-2', '--fd-text-4', '--fd-text-5', '--fd-fill', '--fd-fill-hover', '--fd-fill-active',
-];
-const palette = {};
-for (const name of [...new Set(PALETTE_TOKENS)]) {
-  const t = tok(name);
-  const p = pair(t);
-  const l = hexA(parseColor(p.light)), d = hexA(parseColor(p.dark));
-  palette[strip(name)] = { $type: 'color', $value: l, ...(l === d ? {} : { $extensions: { [DARK]: d } }) };
-  alias(`--palette-${strip(name)}`, name);
-}
-
-/* ==========================================================================
-   tokens.font, typography
-   ========================================================================== */
-const families = (name) => tok(name).default.split(',').map((s) => s.trim().replace(/^"|"$/g, ''));
-const font = { family: {
-  body: { $type: 'fontFamily', $value: families('--fd-font-sans') },
-  display: { $type: 'fontFamily', $value: families('--fd-font-display') },
-  mono: { $type: 'fontFamily', $value: families('--fd-font-mono') },
-} };
-alias('--font-body', '--fd-font-sans'); alias('--font-display', '--fd-font-display'); alias('--font-mono', '--fd-font-mono');
-
-const val = (name) => String(tok(name).default);
-const weight = (n) => Number(val(`--fd-weight-${n}`));
-// step → [size token, line-height token, letter-spacing token | null, weight, family]. 14 of Fire's 16 sizes.
-const TYPE = {
-  display: ['display', 'display', 'display', 'display', 'display'],
-  '3xl': ['3xl', '3xl', null, 'display', 'display'],
-  h1: ['h1', 'h1', 'h1', 'display', 'display'],
-  h2: ['h2', 'h2', 'h2', 'display', 'display'],
-  h3: ['h3', 'h3', 'h3', 'label', 'display'],
-  xl: ['xl', 'xl', null, 'regular', 'body'],
-  title: ['title', 'title', 'title', 'label', 'body'],
-  lg: ['lg', 'lg', 'lg', 'regular', 'body'],
-  md: ['md', 'md', null, 'regular', 'body'],
-  sm: ['sm', 'sm', null, 'regular', 'body'],
-  xs: ['xs', 'xs', null, 'regular', 'body'],
-  '2xs': ['2xs', '2xs', null, 'regular', 'body'],
-  '3xs': ['3xs', '2xs', null, 'regular', 'body'],
-  stat: ['stat', 'stat', 'stat', 'medium', 'body'],
-};
-const typography = {};
-for (const [step, [size, lh, ls, w, fam]] of Object.entries(TYPE)) {
-  const fs_ = dim(val(`--fd-text-${size}`));
-  typography[step] = {
-    $type: 'typography',
-    $value: {
-      fontFamily: `{font.family.${fam}}`, fontSize: fs_,
-      lineHeight: ratio3(pxOf(dim(val(`--fd-lh-${lh}`))) / pxOf(fs_)),
-      fontWeight: weight(w), letterSpacing: ls ? dim(val(`--fd-ls-${ls}`)) : '0',
-    },
-  };
-  alias(`--typography-${step}`, `--fd-text-${size}`);
-}
-const TYPE_DROPPED = ['--fd-text-compose (15px, the composer input)', '--fd-text-4xs (9px)'];
-
-/* ==========================================================================
-   Space, radius, shadow, breakpoint, motion, layers, icons, sizes, focus, state
-   ========================================================================== */
 const group = (g, exclude = []) => contract.tokens.filter((t) => t.group === g && !exclude.includes(t.name));
-const space = {}, radius = {};
-for (const t of group('space')) { const n = strip(t.name).replace(/^space-/, ''); space[n] = { $type: 'dimension', $value: dim(t.default) }; alias(`--space-${n}`, t.name); }
-for (const t of group('radius')) { const n = strip(t.name).replace(/^radius-/, ''); radius[n] = { $type: 'dimension', $value: dim(t.default) }; alias(`--radius-${n}`, t.name); }
+const val = (name) => String(tok(name).default);
 
-// Shadows: light values (Facet's shadow has no dark value). Layers are split on top-level commas.
+// The CSS the build reads: component states, the file a component lives in, and how often a token is used.
+const cssFiles = [
+  ...['tokens', 'palettes', 'typefaces', 'base', 'layout'].map((n) => `fire/${n}.css`),
+  ...fs.readdirSync(path.join(ROOT, 'fire/components')).filter((f) => f.endsWith('.css')).sort().map((f) => `fire/components/${f}`),
+];
+const cssText = new Map(cssFiles.map((f) => [f, read(f).replace(/\/\*[\s\S]*?\*\//g, '')]));
+const allCss = [...cssText.values()].join('\n');
+const useCount = (name) => (allCss.match(new RegExp(`var\\(${name}(?![\\w-])`, 'g')) || []).length;
+
+// Shadows: layers split on top-level commas.
 function splitTop(s) {
   const out = []; let depth = 0, cur = '';
   for (const ch of s) {
@@ -226,8 +132,8 @@ function layerOf(s) {
   const [x, y, blur, spread = '0'] = nums;
   return { inset, x, y, blur, spread, color: parseColor(m[2]) };
 }
-// More than four layers: merge the last two layers of the same kind and colour into one (the smaller offset,
-// blur and spread of the two, the alpha of their composition: 1 - (1 - a)(1 - b)).
+// The fallback variant only: more than four layers, merge the last two layers of the same kind and colour into one
+// (the smaller offset, blur and spread of the two, the alpha of their composition: 1 - (1 - a)(1 - b)).
 function fold(layers) {
   const notes = [];
   while (layers.length > 4) {
@@ -239,83 +145,230 @@ function fold(layers) {
   }
   return notes;
 }
-const shadow = {};
-const SHADOW_FOLDED = [];
-for (const t of group('shadow')) {
-  const n = strip(t.name).replace(/^shadow-/, '');
-  const layers = splitTop(pair(t).light).map(layerOf);
-  const was = layers.length;
-  if (fold(layers).length) SHADOW_FOLDED.push(`${t.name} (${was} layers to 4)`);
-  shadow[n] = { $type: 'shadow', $value: layers.map((l) => ({ color: hexA(l.color), offsetX: dim(l.x), offsetY: dim(l.y), blur: dim(l.blur), spread: dim(l.spread), inset: l.inset })) };
-  alias(`--shadow-${n}`, t.name);
-}
 
-const breakpoint = { tablet: { $type: 'dimension', $value: '641px' }, desktop: { $type: 'dimension', $value: '900px' } };
-
-const ms = (v) => { const m = /^([\d.]+)(ms|s)$/.exec(v); return `${Math.round(m[2] === 's' ? m[1] * 1000 : +m[1])}ms`; };
-const duration = {};
-for (const n of ['1', '2', '3', '4', '5']) { duration[n] = { $type: 'duration', $value: ms(val(`--fd-dur-${n}`)) }; alias(`--duration-${n}`, `--fd-dur-${n}`); }
-duration.stagger = { $type: 'duration', $value: ms(val('--fd-stagger')) }; alias('--duration-stagger', '--fd-stagger');
-const easing = {};
-for (const n of ['out', 'in-out', 'in', 'emphasized', 'spring']) {
-  const m = /cubic-bezier\(([^)]*)\)/.exec(val(`--fd-ease-${n}`));
-  easing[n] = { $type: 'cubicBezier', $value: m[1].split(',').map(Number) };
-  alias(`--easing-${n}`, `--fd-ease-${n}`);
-}
-const zIndex = {};
-for (const t of group('layer')) { const n = strip(t.name).replace(/^z-/, ''); zIndex[n] = { $type: 'number', $value: Number(t.default) }; alias(`--z-index-${n}`, t.name); }
-const iconSize = {};
-for (const [n, name] of [['xs', '--fd-icon-xs'], ['sm', '--fd-icon-sm'], ['md', '--fd-icon'], ['lg', '--fd-icon-lg'], ['xl', '--fd-icon-xl']]) {
-  iconSize[n] = { $type: 'dimension', $value: dim(val(name)) }; alias(`--icon-size-${n}`, name);
-}
-
-// size: Facet allows 12. Fire has 35 pixel sizes; keep the touch target plus the 11 most referenced by the CSS.
-const cssFiles = [
-  ...['tokens', 'palettes', 'typefaces', 'base', 'layout'].map((n) => `fire/${n}.css`),
-  ...fs.readdirSync(path.join(ROOT, 'fire/components')).filter((f) => f.endsWith('.css')).sort().map((f) => `fire/components/${f}`),
-];
-const cssText = new Map(cssFiles.map((f) => [f, read(f).replace(/\/\*[\s\S]*?\*\//g, '')]));
-const allCss = [...cssText.values()].join('\n');
-const useCount = (name) => (allCss.match(new RegExp(`var\\(${name}(?![\\w-])`, 'g')) || []).length;
-const SIZE_CANDIDATES = group('size').filter((t) => t.type === 'dimension' && /px$/.test(t.default) && !/^--fd-icon/.test(t.name)).map((t) => ({ name: t.name, uses: useCount(t.name) }));
-SIZE_CANDIDATES.sort((a, b) => b.uses - a.uses || (a.name < b.name ? -1 : 1));
-const SIZE_KEPT = SIZE_CANDIDATES.slice(0, 11);
-const SIZE_DROPPED = SIZE_CANDIDATES.slice(11);
-const size = { touch: { $type: 'dimension', $value: '40px', $description: 'The default control on a coarse pointer (Fire grows --fd-control-md to 40px there).' } };
-for (const c of [...SIZE_KEPT].sort((a, b) => (a.name < b.name ? -1 : 1))) {
-  size[strip(c.name)] = { $type: 'dimension', $value: dim(val(c.name)) };
-  alias(`--size-${strip(c.name)}`, c.name);
-}
-
-const focusRing = {
-  width: { $type: 'dimension', $value: '2px' }, offset: { $type: 'dimension', $value: '2px' },
-  style: { $type: 'strokeStyle', $value: 'solid' }, color: { $type: 'color', $value: '{color.focus}' },
-};
-
-// state: Fire's hover, selected and disabled washes laid over the surface (Facet needs opaque-looking colours per role).
-const surf = surfacePair();
-const washOn = (name) => opaquePair(tok(name), surf);
-const hoverPrimary = pair(tok('--fd-accent-hover'));
-const stateTokens = {
-  hover: {
-    primary: { $type: 'color', $value: hoverPrimary.light, $extensions: { [DARK]: hoverPrimary.dark } },
-    surface: { $type: 'color', $value: washOn('--fd-fill-hover').light, $extensions: { [DARK]: washOn('--fd-fill-hover').dark } },
-  },
-  selected: { surface: { $type: 'color', $value: washOn('--fd-accent-12').light, $extensions: { [DARK]: washOn('--fd-accent-12').dark } } },
-  disabled: { surface: { $type: 'color', $value: washOn('--fd-fill-disabled').light, $extensions: { [DARK]: washOn('--fd-fill-disabled').dark } } },
-};
+const ROLE_ORDER_FALLBACK = ['background', 'surface', 'text', 'muted', 'primary', 'on-primary', 'accent', 'border', 'success', 'warning', 'danger', 'focus', 'info', 'link'];
+const ROLE_ORDER_FULL = ['background', 'surface', 'raised', 'sunken', 'text', 'muted', 'primary', 'on-primary', 'accent', 'border', 'success', 'on-success', 'warning', 'on-warning', 'danger', 'on-danger', 'focus', 'info', 'on-info', 'link'];
+const TONES = ['success', 'warning', 'danger', 'info'];
+const MAX_SIZES_FALLBACK = 12;
 
 /* ==========================================================================
-   Pairings: the required five, link on background, and extra roles that pass in both modes
+   The tokens, pairings and notes of one variant. `full` uses everything Facet's schema now accepts: the extra roles,
+   all 16 type steps with Fire's rem line heights and rem sizes, tabular figures, every size, and every shadow layer
+   in both themes. The fallback is what the 0.6.1 Facet accepted.
    ========================================================================== */
-const roleVal = (role, mode) => (mode === 'light' ? color[role].$value : color[role].$extensions[DARK]);
-const need = { text: 4.5, large_text: 3, ui: 3 };
-const passes = (f, b, usage) => ['light', 'dark'].every((m) => contrast(roleVal(f, m), roleVal(b, m)) >= need[usage]);
-const REQUIRED = [['text', 'background', 'text'], ['text', 'surface', 'text'], ['muted', 'background', 'text'], ['on-primary', 'primary', 'text'], ['focus', 'background', 'ui'], ['link', 'background', 'text']];
-const EXTRA = [['muted', 'surface', 'text'], ['link', 'surface', 'text'], ['primary', 'background', 'ui'], ['danger', 'background', 'ui'], ['info', 'background', 'ui'], ['success', 'background', 'ui'], ['warning', 'background', 'ui'], ['border', 'background', 'ui'], ['primary', 'surface', 'ui']];
-for (const [f, b, u] of REQUIRED) if (!passes(f, b, u)) throw new Error(`required pairing ${f} on ${b} (${u}) fails WCAG AA in a mode`);
-const PAIR_DROPPED = EXTRA.filter(([f, b, u]) => !passes(f, b, u));
-const pairings = [...REQUIRED, ...EXTRA.filter(([f, b, u]) => passes(f, b, u))].map(([foreground, background, usage]) => ({ foreground, background, usage }));
+function tokenSet(full) {
+  const ALIASES = {};
+  const alias = (facetVar, fireToken) => { ALIASES[facetVar] = fireToken; };
+  const d = (v) => dim(v, full);
+
+  /* ---- tokens.color: roles ---- */
+  const color = {};
+  const colorRole = (role, light, dark, description) => {
+    color[role] = { $type: 'color', $value: light, $description: description, $extensions: { [DARK]: dark } };
+  };
+  const describe = {
+    background: 'Fire --fd-bg: the page.', surface: 'Fire --fd-surface: cards, panels and inputs.',
+    raised: 'Fire --fd-surface-raised: a surface above a card (popovers, menus).', sunken: 'Fire --fd-bg-sunken: a recessed area below the page (wells, code blocks).',
+    text: 'Fire --fd-ink: body text and headings.',
+    muted: 'Fire --fd-text-3 (an alpha token) laid over --fd-bg, so the value is opaque.',
+    primary: 'Fire --fd-accent: the accent fill (Ember orange).',
+    'on-primary': 'Fire --fd-accent-contrast: the label on the accent fill.',
+    border: 'Fire --fd-line: hairlines and dividers.', focus: 'Fire --fd-focus: the focus ring colour.',
+    link: 'Fire --fd-accent-text: accent text on the page, darkened to pass 4.5:1.',
+    success: 'Fire --fd-success-fill.', warning: 'Fire --fd-warning-fill.', danger: 'Fire --fd-danger-fill.', info: 'Fire --fd-info-fill.',
+    'on-success': 'Fire --fd-success-contrast: the label on the success fill.', 'on-warning': 'Fire --fd-warning-contrast: the label on the warning fill.',
+    'on-danger': 'Fire --fd-danger-contrast: the label on the danger fill.', 'on-info': 'Fire --fd-info-contrast: the label on the info fill.',
+  };
+  for (const role of ['background', 'surface', 'text', 'muted', 'primary', 'on-primary']) {
+    const r = roleSpec[role];
+    colorRole(role, r.light, r.dark, describe[role]);
+    alias(`--color-${role}`, r.token);
+  }
+  // Facet's accent role has no Fire counterpart (Fire has one accent): it repeats the primary and Facet may change it.
+  colorRole('accent', roleSpec.primary.light, roleSpec.primary.dark, 'Fire has one accent, so this repeats primary; Facet may set another.');
+  for (const role of ['border', 'success', 'warning', 'danger', 'focus', 'info', 'link']) {
+    const r = roleSpec[role];
+    colorRole(role, r.light, r.dark, describe[role]);
+    alias(`--color-${role}`, r.token);
+  }
+  const roleTokens = {};
+  if (full) {
+    for (const [role, token] of [['raised', '--fd-surface-raised'], ['sunken', '--fd-bg-sunken']]) {
+      const p = pair(tok(token));
+      colorRole(role, hex(parseColor(p.light)), hex(parseColor(p.dark)), describe[role]);
+      alias(`--color-${role}`, token); roleTokens[role] = token;
+    }
+    for (const tone of TONES) {
+      const r = roleSpec[`on-${tone}`];
+      colorRole(`on-${tone}`, r.light, r.dark, describe[`on-${tone}`]);
+      alias(`--color-on-${tone}`, r.token);
+    }
+  }
+  const ROLE_ORDER = full ? ROLE_ORDER_FULL : ROLE_ORDER_FALLBACK;
+  const colorOrdered = Object.fromEntries(ROLE_ORDER.map((r) => [r, color[r]]));
+  // The roles Fire's contract fills that this variant has no role for.
+  const DROPPED_ROLES = Object.keys(roleSpec).filter((r) => !ROLE_ORDER.includes(r)).sort();
+
+  /* ---- tokens.palette ---- */
+  const PALETTE_TOKENS = [
+    ...contract.tokens.filter((t) => t.group === 'palette').map((t) => t.name),
+    ...['success', 'warning', 'danger', 'info', 'violet'].flatMap((t) => ['solid', 'text', 'bg', 'line'].map((k) => `--fd-${t}-${k}`)),
+    ...['--fd-chart-2', '--fd-chart-3', '--fd-chart-4', '--fd-chart-5', '--fd-chart-6'],
+    ...contract.tokens.filter((t) => t.group === 'syntax').map((t) => t.name),
+    ...contract.tokens.filter((t) => t.group === 'accent-wash').map((t) => t.name),
+    '--fd-text-2', '--fd-text-4', '--fd-text-5', '--fd-fill', '--fd-fill-hover', '--fd-fill-active',
+  ];
+  const palette = {};
+  for (const name of [...new Set(PALETTE_TOKENS)]) {
+    const t = tok(name);
+    const p = pair(t);
+    const l = hexA(parseColor(p.light)), dk = hexA(parseColor(p.dark));
+    palette[strip(name)] = { $type: 'color', $value: l, ...(l === dk ? {} : { $extensions: { [DARK]: dk } }) };
+    alias(`--palette-${strip(name)}`, name);
+  }
+
+  /* ---- tokens.font, typography ---- */
+  const families = (name) => tok(name).default.split(',').map((s) => s.trim().replace(/^"|"$/g, ''));
+  const font = { family: {
+    body: { $type: 'fontFamily', $value: families('--fd-font-sans') },
+    display: { $type: 'fontFamily', $value: families('--fd-font-display') },
+    mono: { $type: 'fontFamily', $value: families('--fd-font-mono') },
+  } };
+  // Fire sets no figure style on the page: proportional is the default, and tabular figures are asked for per use
+  // (.fd-stat and .fd-num, the numeric columns of tables and charts).
+  if (full) font.numeric = 'proportional';
+  alias('--font-body', '--fd-font-sans'); alias('--font-display', '--fd-font-display'); alias('--font-mono', '--fd-font-mono');
+
+  const weight = (n) => Number(val(`--fd-weight-${n}`));
+  // step → [size token, line-height token, letter-spacing token | null, weight, family, numeric]
+  const TYPE = {
+    display: ['display', 'display', 'display', 'display', 'display'],
+    '3xl': ['3xl', '3xl', null, 'display', 'display'],
+    h1: ['h1', 'h1', 'h1', 'display', 'display'],
+    h2: ['h2', 'h2', 'h2', 'display', 'display'],
+    h3: ['h3', 'h3', 'h3', 'label', 'display'],
+    xl: ['xl', 'xl', null, 'regular', 'body'],
+    title: ['title', 'title', 'title', 'label', 'body'],
+    lg: ['lg', 'lg', 'lg', 'regular', 'body'],
+    md: ['md', 'md', null, 'regular', 'body'],
+    sm: ['sm', 'sm', null, 'regular', 'body'],
+    xs: ['xs', 'xs', null, 'regular', 'body'],
+    '2xs': ['2xs', '2xs', null, 'regular', 'body'],
+    '3xs': ['3xs', '2xs', null, 'regular', 'body'],
+    stat: ['stat', 'stat', 'stat', 'medium', 'body', 'tabular'],
+  };
+  // The two sizes the fallback leaves out. Fire sets no line height for either; its CSS pairs the composer size
+  // with --fd-lh-lg (agent.css) and the smallest with --fd-lh-2xs.
+  const TYPE_FULL_ONLY = { compose: ['compose', 'lg', null, 'regular', 'body'], '4xs': ['4xs', '2xs', null, 'regular', 'body'] };
+  const typeSteps = full ? { ...TYPE, ...TYPE_FULL_ONLY } : TYPE;
+  const typography = {};
+  for (const [step, [size, lh, ls, w, fam, numeric]] of Object.entries(typeSteps)) {
+    const fs_ = d(val(`--fd-text-${size}`));
+    const lhTok = val(`--fd-lh-${lh}`);
+    typography[step] = {
+      $type: 'typography',
+      $value: {
+        fontFamily: `{font.family.${fam}}`, fontSize: fs_,
+        lineHeight: full ? lhTok : ratio3(pxOf(dim(lhTok)) / pxOf(fs_)),
+        fontWeight: weight(w), letterSpacing: ls ? d(val(`--fd-ls-${ls}`)) : '0',
+        ...(full && numeric ? { numeric } : {}),
+      },
+    };
+    alias(`--typography-${step}`, `--fd-text-${size}`);
+  }
+  const TYPE_DROPPED = full ? [] : ['--fd-text-compose (15px, the composer input)', '--fd-text-4xs (9px)'];
+
+  /* ---- space, radius, shadow, breakpoint, motion, layers, icons, sizes, focus, state ---- */
+  const space = {}, radius = {};
+  for (const t of group('space')) { const n = strip(t.name).replace(/^space-/, ''); space[n] = { $type: 'dimension', $value: d(t.default) }; alias(`--space-${n}`, t.name); }
+  for (const t of group('radius')) { const n = strip(t.name).replace(/^radius-/, ''); radius[n] = { $type: 'dimension', $value: d(t.default) }; alias(`--radius-${n}`, t.name); }
+
+  const shadow = {};
+  const SHADOW_FOLDED = [];
+  const layerJson = (l) => ({ color: hexA(l.color), offsetX: d(l.x), offsetY: d(l.y), blur: d(l.blur), spread: d(l.spread), inset: l.inset });
+  for (const t of group('shadow')) {
+    const n = strip(t.name).replace(/^shadow-/, '');
+    const p = pair(t);
+    const light = splitTop(p.light).map(layerOf);
+    if (full) {
+      const dark = splitTop(p.dark).map(layerOf);
+      if (Math.max(light.length, dark.length) > 5) throw new Error(`${t.name} has more than 5 layers`);
+      const same = JSON.stringify(light.map(layerJson)) === JSON.stringify(dark.map(layerJson));
+      shadow[n] = { $type: 'shadow', $value: light.map(layerJson), ...(same ? {} : { $extensions: { [DARK]: dark.map(layerJson) } }) };
+    } else {
+      const was = light.length;
+      if (fold(light).length) SHADOW_FOLDED.push(`${t.name} (${was} layers to 4)`);
+      shadow[n] = { $type: 'shadow', $value: light.map(layerJson) };
+    }
+    alias(`--shadow-${n}`, t.name);
+  }
+
+  const breakpoint = { tablet: { $type: 'dimension', $value: '641px' }, desktop: { $type: 'dimension', $value: '900px' } };
+
+  const ms = (v) => { const m = /^([\d.]+)(ms|s)$/.exec(v); return `${Math.round(m[2] === 's' ? m[1] * 1000 : +m[1])}ms`; };
+  const duration = {};
+  for (const n of ['1', '2', '3', '4', '5']) { duration[n] = { $type: 'duration', $value: ms(val(`--fd-dur-${n}`)) }; alias(`--duration-${n}`, `--fd-dur-${n}`); }
+  duration.stagger = { $type: 'duration', $value: ms(val('--fd-stagger')) }; alias('--duration-stagger', '--fd-stagger');
+  const easing = {};
+  for (const n of ['out', 'in-out', 'in', 'emphasized', 'spring']) {
+    const m = /cubic-bezier\(([^)]*)\)/.exec(val(`--fd-ease-${n}`));
+    easing[n] = { $type: 'cubicBezier', $value: m[1].split(',').map(Number) };
+    alias(`--easing-${n}`, `--fd-ease-${n}`);
+  }
+  const zIndex = {};
+  for (const t of group('layer')) { const n = strip(t.name).replace(/^z-/, ''); zIndex[n] = { $type: 'number', $value: Number(t.default) }; alias(`--z-index-${n}`, t.name); }
+  const iconSize = {};
+  for (const [n, name] of [['xs', '--fd-icon-xs'], ['sm', '--fd-icon-sm'], ['md', '--fd-icon'], ['lg', '--fd-icon-lg'], ['xl', '--fd-icon-xl']]) {
+    iconSize[n] = { $type: 'dimension', $value: d(val(name)) }; alias(`--icon-size-${n}`, name);
+  }
+
+  // size: the fallback keeps the touch target plus the 11 most referenced pixel sizes (Facet allowed 12); the full
+  // variant keeps every pixel size (Facet allows 48).
+  const SIZE_CANDIDATES = group('size').filter((t) => t.type === 'dimension' && /px$/.test(t.default) && !/^--fd-icon/.test(t.name)).map((t) => ({ name: t.name, uses: useCount(t.name) }));
+  SIZE_CANDIDATES.sort((a, b) => b.uses - a.uses || (a.name < b.name ? -1 : 1));
+  const SIZE_KEPT = full ? SIZE_CANDIDATES : SIZE_CANDIDATES.slice(0, MAX_SIZES_FALLBACK - 1);
+  const SIZE_DROPPED = full ? [] : SIZE_CANDIDATES.slice(MAX_SIZES_FALLBACK - 1);
+  const size = { touch: { $type: 'dimension', $value: '40px', $description: 'The default control on a coarse pointer (Fire grows --fd-control-md to 40px there).' } };
+  for (const c of [...SIZE_KEPT].sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    size[strip(c.name)] = { $type: 'dimension', $value: d(val(c.name)) };
+    alias(`--size-${strip(c.name)}`, c.name);
+  }
+
+  const focusRing = {
+    width: { $type: 'dimension', $value: '2px' }, offset: { $type: 'dimension', $value: '2px' },
+    style: { $type: 'strokeStyle', $value: 'solid' }, color: { $type: 'color', $value: '{color.focus}' },
+  };
+
+  // state: Fire's hover, selected and disabled washes laid over the surface (Facet needs opaque-looking colours per role).
+  const surf = pair(tok('--fd-surface'));
+  const washOn = (name) => opaquePair(tok(name), surf);
+  const hoverPrimary = pair(tok('--fd-accent-hover'));
+  const stateTokens = {
+    hover: {
+      primary: { $type: 'color', $value: hoverPrimary.light, $extensions: { [DARK]: hoverPrimary.dark } },
+      surface: { $type: 'color', $value: washOn('--fd-fill-hover').light, $extensions: { [DARK]: washOn('--fd-fill-hover').dark } },
+    },
+    selected: { surface: { $type: 'color', $value: washOn('--fd-accent-12').light, $extensions: { [DARK]: washOn('--fd-accent-12').dark } } },
+    disabled: { surface: { $type: 'color', $value: washOn('--fd-fill-disabled').light, $extensions: { [DARK]: washOn('--fd-fill-disabled').dark } } },
+  };
+
+  /* ---- pairings: the required five, link on background, the new roles' text pairings, and extras that pass in both modes ---- */
+  const roleVal = (role, mode) => (mode === 'light' ? color[role].$value : color[role].$extensions[DARK]);
+  const need = { text: 4.5, large_text: 3, ui: 3 };
+  const passes = (f, b, u) => ['light', 'dark'].every((m) => contrast(roleVal(f, m), roleVal(b, m)) >= need[u]);
+  const REQUIRED = [['text', 'background', 'text'], ['text', 'surface', 'text'], ['muted', 'background', 'text'], ['on-primary', 'primary', 'text'], ['focus', 'background', 'ui'], ['link', 'background', 'text'],
+    ...(full ? [['text', 'raised', 'text'], ['text', 'sunken', 'text'], ...TONES.map((t) => [`on-${t}`, t, 'text'])] : [])];
+  const EXTRA = [['muted', 'surface', 'text'], ['link', 'surface', 'text'], ['primary', 'background', 'ui'], ['danger', 'background', 'ui'], ['info', 'background', 'ui'], ['success', 'background', 'ui'], ['warning', 'background', 'ui'], ['border', 'background', 'ui'], ['primary', 'surface', 'ui']];
+  for (const [f, b, u] of REQUIRED) if (!passes(f, b, u)) throw new Error(`required pairing ${f} on ${b} (${u}) fails WCAG AA in a mode`);
+  const PAIR_DROPPED = EXTRA.filter(([f, b, u]) => !passes(f, b, u));
+  const pairings = [...REQUIRED, ...EXTRA.filter(([f, b, u]) => passes(f, b, u))].map(([foreground, background, usage]) => ({ foreground, background, usage }));
+
+  const roleMap = Object.fromEntries(ROLE_ORDER.filter((r) => roleSpec[r] || roleTokens[r]).map((r) => [r, roleSpec[r] ? roleSpec[r].token : roleTokens[r]]));
+  return {
+    full, ALIASES, ROLE_ORDER, colorOrdered, DROPPED_ROLES, palette, font, typography, TYPE_DROPPED, space, radius, shadow, SHADOW_FOLDED,
+    breakpoint, duration, easing, zIndex, iconSize, size, SIZE_CANDIDATES, SIZE_KEPT, SIZE_DROPPED, focusRing, stateTokens, pairings, PAIR_DROPPED, roleMap,
+  };
+}
 
 /* ==========================================================================
    Voice (WRITING.md sections 1, 6 and 7)
@@ -537,15 +590,16 @@ return { components, noCard, propNotes, droppedStates };
 /* ==========================================================================
    content.json
    ========================================================================== */
-const buildContent = (components, contractRecord) => ({
+const buildContent = (T, components, contractRecord) => ({
   name: 'Fire',
   platform: 'web_app',
   source: 'proposed',
   summary: `Fire ${catalog.fire}: a design system for developer, agent and AI products, in its default look (the Ember palette, Geist and Geist Mono). Plain HTML and CSS are the contract: classes fd-*, variants and states through data-* and ARIA, tokens --fd-*. Light and dark values are exact; this content is generated from contract/fire-contract.json and contract/catalog.json, so edit the theme record (facet/theme.json), not these tokens.`,
   tokens: {
-    color: colorOrdered, palette, font, typography, space, radius, shadow, breakpoint, duration, easing, zIndex, iconSize, size, focusRing, state: stateTokens,
+    color: T.colorOrdered, palette: T.palette, font: T.font, typography: T.typography, space: T.space, radius: T.radius, shadow: T.shadow, breakpoint: T.breakpoint,
+    duration: T.duration, easing: T.easing, zIndex: T.zIndex, iconSize: T.iconSize, size: T.size, focusRing: T.focusRing, state: T.stateTokens,
   },
-  pairings,
+  pairings: T.pairings,
   motion: {
     reduced_motion: 'remove',
     notes: 'Fire collapses every duration through one token: under prefers-reduced-motion it sets --fd-motion to 0 and --fd-press-scale to 1, and each duration is the token times --fd-motion, so nothing animates. Looping spinners and shimmers stop with it.',
@@ -566,7 +620,9 @@ const themeRecord = { contract: recordContract, fire: FIRE_VERSION, ...recordRes
 /* ==========================================================================
    Which variant: ask the installed Facet
    ========================================================================== */
-const CLI = process.env.FACET_CLI || '../codecrystal/vendor/facet/dist/cli.js';
+// $FACET_CLI when set (even if it names nothing: then there is no Facet to ask), else the first of the two known builds that exists.
+const CLI_CANDIDATES = process.env.FACET_CLI ? [process.env.FACET_CLI] : ['../design-kit/dist/cli.js', '../codecrystal/vendor/facet/dist/cli.js'];
+const CLI = CLI_CANDIDATES.find((c) => fs.existsSync(c)) || CLI_CANDIDATES[0];
 const cliFound = fs.existsSync(CLI);
 // A name for the Facet build: its MANIFEST.json commit when the CLI sits in a vendored tree, else the CLI file's hash.
 function facetId() {
@@ -584,13 +640,14 @@ function facetAccepts(doc) {
     return { ok: r.status === 0, why: String(r.stderr || r.stdout || '').trim().split('\n')[0] };
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
-const buildFull = () => { const b = buildComponents(FULL_LEVEL, ranked); return { built: b, content: buildContent(b.components, themeRecord), level: FULL_LEVEL, levelNo: null }; };
+const T_FULL = tokenSet(true), T_FALLBACK = tokenSet(false);
+const buildFull = () => { const b = buildComponents(FULL_LEVEL, ranked); return { T: T_FULL, built: b, content: buildContent(T_FULL, b.components, themeRecord), level: FULL_LEVEL, levelNo: null }; };
 function buildFallback() {
   const carried = ranked.slice(0, MAX_COMPONENTS);
   for (let n = 0; n < LEVELS.length; n++) {
     const b = buildComponents(LEVELS[n], carried);
-    const c = buildContent(b.components, null);
-    if (Buffer.byteLength(JSON.stringify(c)) <= MAX_BYTES) return { built: b, content: c, level: LEVELS[n], levelNo: n };
+    const c = buildContent(T_FALLBACK, b.components, null);
+    if (Buffer.byteLength(JSON.stringify(c)) <= MAX_BYTES) return { T: T_FALLBACK, built: b, content: c, level: LEVELS[n], levelNo: n };
   }
   throw new Error('content.json does not fit 128 KiB even at the smallest level');
 }
@@ -611,14 +668,19 @@ if (cliFound) {
   probeNote = 'no Facet CLI on this machine; the committed variant is rebuilt as recorded';
 } else {
   variant = 'fallback'; chosen = buildFallback();
-  probeNote = `no Facet CLI found (set FACET_CLI or install ${CLI}); the fallback is written and no Facet build validated it`;
+  probeNote = `no Facet CLI found (set FACET_CLI to a Facet dist/cli.js, or install one at ${CLI_CANDIDATES.join(' or ')}); the fallback is written and no Facet build validated it`;
   console.warn(`build-facet: ${probeNote}`);
 }
-const { built, content, level: LV, levelNo } = chosen;
+const { T, built, content, level: LV, levelNo } = chosen;
+const { ROLE_ORDER, DROPPED_ROLES, palette, typography, size, pairings, ALIASES, SHADOW_FOLDED, SIZE_CANDIDATES, SIZE_KEPT, SIZE_DROPPED, TYPE_DROPPED } = T;
 const { components, noCard, propNotes, droppedStates } = built;
 const carriedIds = new Set(components.map((c) => c.name));
 const excluded = ranked.filter((c) => !carriedIds.has(pascal(c.id)));
 const contentBytes = Buffer.byteLength(JSON.stringify(content));
+// Facet's own caps, in compact bytes (Facet measures canonical bytes, which are close): the document without the components, the components, the contract.
+const { components: _inv, ...docRest } = content;
+const docBytes = Buffer.byteLength(JSON.stringify(docRest)), compBytes = Buffer.byteLength(JSON.stringify(components));
+const contractBytes = content.contract ? Buffer.byteLength(JSON.stringify(content.contract)) : 0;
 const facetRecord = { variant, components: components.length, contract: variant === 'full', validatedBy, checker: 'facet system check' };
 
 /* ==========================================================================
@@ -649,7 +711,8 @@ const PURPOSE = [
   [/^fire\/js\//, 'A behaviour or data module that fire.js imports.'],
   [/^fire\/LICENSE-/, 'Licence text of bundled code (Lit in elements.js, Lucide icons).'],
   [/^contract\/fire-contract\.json$/, 'Every global token with tier, type, group, default and Facet role.'],
-  [/^contract\/catalog\.json$/, 'Components, classes, attribute values, elements, events, icons and cards: what the lint and agents read.'],
+  [/^contract\/catalog\.json$/, 'Components, classes, attribute values, elements, events, icons and cards: what the lint and agents read; Facet carries it as ds/catalog.json.'],
+  [/^contract\/custom-elements\.json$/, 'Custom Elements Manifest of Fire\'s elements (tags, attributes, events); Facet carries it as ds/custom-elements.json.'],
   [/^contract\/theme\.schema\.json$/, 'JSON Schema of the theme record Facet stores.'],
 ];
 const extraPaths = [
@@ -659,12 +722,15 @@ const extraPaths = [
   'fire/boot.js', 'fire/fire.js', 'fire/elements.js',
   ...fs.readdirSync(path.join(ROOT, 'fire/js')).filter((f) => f.endsWith('.js')).sort().map((f) => `fire/js/${f}`),
   'fire/LICENSE-lit.txt', 'fire/LICENSE-lucide.txt',
-  'contract/fire-contract.json', 'contract/catalog.json', 'contract/theme.schema.json',
+  'contract/fire-contract.json', 'contract/catalog.json', 'contract/custom-elements.json', 'contract/theme.schema.json',
 ].filter((f, i, a) => a.indexOf(f) === i && fs.existsSync(path.join(ROOT, f)));
+// Where Facet reads these two from the canvas it builds: the folder ds/ (Facet's generated files live there too).
+const DS_PATHS = { 'contract/catalog.json': 'ds/catalog.json', 'contract/custom-elements.json': 'ds/custom-elements.json' };
 const files = extraPaths.map((p) => {
   const buf = fs.readFileSync(path.join(ROOT, p));
   const row = { path: p, purpose: PURPOSE.find(([re]) => re.test(p))[1], size: buf.length, sha256: sha256(buf) };
   if (/^fire\/fonts\/.*\.woff2$/.test(p)) row.required = /geist/.test(p);
+  if (DS_PATHS[p]) row.ds = DS_PATHS[p];
   return row;
 });
 const bundleSha256 = sha256(files.map((f) => `${f.sha256}  ${f.path}\n`).join(''));
@@ -673,7 +739,7 @@ const extras = {
   description: 'The files a Facet system carries beside the generated content: copy them as they are, under the same relative paths. fire/ stays copyable on its own (load boot.js, fire.css and fire.js); the contract files are for the lint and the exporter.',
   facet: facetRecord,
   bundleSha256, totalBytes: files.reduce((n, f) => n + f.size, 0),
-  roleMap: Object.fromEntries(ROLE_ORDER.filter((r) => roleSpec[r]).map((r) => [r, roleSpec[r].token])),
+  roleMap: T.roleMap,
   aliases: Object.fromEntries(Object.entries(ALIASES).sort(([a], [b]) => (a < b ? -1 : 1))),
   files,
 };
@@ -708,7 +774,7 @@ w('## How Facet should consume it');
 w();
 w(`1. **Opt in with the contract field.** A Facet system that follows Fire stores \`{ "contract": "fire/1", "record": <theme record> }\` (as \`theme.json\`), not the generated tokens. Facet calls \`expandTheme(record)\` from \`fire/js/theme.js\` (pure ES module, runs in Node and the browser) for tokens, and \`themeToCss(record)\` for a stylesheet a strict CSP allows. \`content.json\` is what Facet shows and validates for the default record${variant === 'full' ? ' (its \`contract\` field is that record, the same bytes as \`theme.json\`)' : ''}; for any other record Facet regenerates it the same way (palette, type set and dials change, the scales do not).`);
 w(`2. **Pin the release.** Fire ${catalog.fire}, git tag \`${extras.tag}\` (\`github:vidhatanand/firedesign#${extras.tag}\`). The extras bundle hash is \`${bundleSha256}\` (SHA-256 of the lines "sha256  path" of \`extras.json\` files, in order). A Facet system records the tag and the bundle hash, and verifies each file's hash before an export is offered.`);
-w('3. **Carry the extras.** Copy every `extras.json` file to the same relative path in the canvas or the export. Fonts marked `required: false` belong to the other type sets (`data-type`); a system on Geist needs only the required ones, and may drop the rest and the matching @font-face rules.');
+w('3. **Carry the extras.** Copy every `extras.json` file to the same relative path in the canvas or the export. Fonts marked `required: false` belong to the other type sets (`data-type`); a system on Geist needs only the required ones, and may drop the rest and the matching @font-face rules. Two files have a `ds` field: `contract/catalog.json` and `contract/custom-elements.json` are the ones Facet reads from the canvas as `ds/catalog.json` and `ds/custom-elements.json`.');
 w('4. **Use the aliases.** `aliases` maps each custom property Facet generates (`--color-primary`, `--space-4`, `--shadow-md`, ...) to the Fire token with the same value, so a Facet-generated sheet can be written as `--color-primary: var(--fd-accent)` and follow the theme. Fire\'s tokens stay the source: Facet\'s `component` references should name Facet tokens only where an alias exists.');
 w('5. **Components.** Each component is `<cc-component name="Button" variant="primary">`; its props are the data attributes of the Fire markup (`variant` is `data-variant`, `iconOnly` is `data-icon-only`) and the exporter writes the Fire class (`root` in the catalogue) plus those attributes. A `children` part marks a component that takes content. Facet runs `scripts/lint-markup.mjs` on the export and `scripts/render-equal.mjs` against the board.');
 w();
@@ -729,21 +795,31 @@ w();
 }
 w('## Where Fire\'s model did not fit Facet\'s');
 w();
-w(`- **Accent role.** Facet requires an \`accent\` colour; Fire has one accent. \`accent\` repeats \`primary\` and Facet may set another.`);
-w(`- **Status labels.** Facet has no label role for a status fill (Fire's ${DROPPED_ROLES.join(', ')}), so the contrast of Fire's labels on status fills is not in \`pairings\`. The fills are the roles; the labels stay in \`fire-contract.json\`.`);
+w('- **Accent role.** Facet requires an `accent` colour; Fire has one accent. `accent` repeats `primary` and Facet may set another.');
+if (variant === 'full') {
+  w('- **Surface and status roles.** `raised` (Fire `--fd-surface-raised`), `sunken` (`--fd-bg-sunken`) and the four `on-<tone>` roles (`--fd-<tone>-contrast`, the label on `--fd-<tone>-fill`) are carried, each with its text pairing at 4.5:1 in both themes (`text` on `raised`, `text` on `sunken`, `on-<tone>` on `<tone>`). Fire has no secondary colour, so `secondary` and `on-secondary` are not written.');
+} else {
+  w(`- **Status labels.** The fallback has no label role for a status fill (Fire's ${DROPPED_ROLES.join(', ')}) and no \`raised\` or \`sunken\`, so the contrast of Fire's labels on status fills is not in \`pairings\`. The fills are the roles; the labels stay in \`fire-contract.json\`.`);
+}
 w('- **Alpha colours.** Roles must be opaque: `muted` is `--fd-text-3` laid over `--fd-bg` in each mode (the contract does the same). `palette` and `state` keep the alpha as 8-digit hex (accent washes, fills, status backgrounds, lines), rounded to 1/255; state colours that Facet shows as a role (`hover.surface`, `selected.surface`, `disabled.surface`) are laid over `--fd-surface`.');
-w(`- **Dark mode.** Facet's \`org.codecrystal.dark\` extension carries dark colours. Shadows have no dark value: \`shadow\` holds the light layers; Fire's dark shadows are stronger (Facet should take them from the theme record).`);
-w(`- **Shadow layers.** Facet allows 4 layers per shadow; \`--fd-shadow-accent\` has 5. ${SHADOW_FOLDED.length ? `Folded: ${SHADOW_FOLDED.join(', ')}: the last two outer layers (blur 1px and 0.5px, the same colour) became one layer with the smaller one's offset and blur and the alpha of both together, 1 - (1 - 0.14)(1 - 0.2) = 0.312.` : 'None needed folding.'} Fire's focus ring is a two-layer shadow; Facet's \`focusRing\` holds its 2px width and 2px offset.`);
-w(`- **Sizes.** Facet allows 12 \`size\` tokens, Fire has ${SIZE_CANDIDATES.length} pixel sizes. Kept: \`touch\` (40px, the default control on a coarse pointer; below the 44px Facet recommends, so its accessibility report shows an advisory) and the 11 most referenced by var() in Fire's CSS: ${SIZE_KEPT.map((c) => `${strip(c.name)} (${c.uses})`).join(', ')}. Left out: ${SIZE_DROPPED.map((c) => strip(c.name)).join(', ')}. Icon sizes are in \`iconSize\`.`);
-w(`- **Type scale.** Facet allows 16 steps; Fire has 16 sizes. Left out: ${TYPE_DROPPED.join(', ')}. \`3xs\` borrows \`--fd-lh-2xs\` (Fire sets no line height for it). Line heights are the ratio of Fire's line height to its size. Body is \`md\` (14px, 1.43), so Facet's accessibility report shows advisories for body size and line height; Fire sets text 14px on purpose.`);
-w('- **Letter spacing and rem.** Facet dimensions allow three decimals; sizes such as 0.8125rem become 13px.');
+if (variant === 'full') {
+  w('- **Shadows.** Every shadow keeps all its layers (up to 5; `--fd-shadow-accent` has 5) in the light value, and Fire\'s stronger dark layers go in the shadow\'s `org.codecrystal.dark` extension. Nothing is folded. Fire\'s focus ring is a two-layer shadow; Facet\'s `focusRing` holds its 2px width and 2px offset.');
+  w(`- **Sizes.** All ${SIZE_CANDIDATES.length} of Fire's pixel sizes are carried, plus \`touch\` (40px, the default control on a coarse pointer; below the 44px Facet recommends, so its accessibility report shows an advisory). Icon sizes are in \`iconSize\`. Sizes in \`ch\` (\`--fd-measure\`) and unitless ones (\`--fd-icon-stroke\`) are not dimensions Facet takes.`);
+  w('- **Type scale.** All 16 of Fire\'s type sizes are steps, with Fire\'s sizes and line heights in rem and its letter spacing in em, as the CSS writes them. Fire sets no line height for `3xs` and `4xs` (the build uses `--fd-lh-2xs`, as chat.css does for `3xs`) or for `compose` (it uses `--fd-lh-lg`, as agent.css does). Body is `md` (14px, 1.25rem), so Facet\'s accessibility report shows advisories for body size and line height; Fire sets text 14px on purpose.');
+  w('- **Numeric figures.** `font.numeric` is `proportional`: Fire sets no figure style on the page. Tabular figures are asked for per use (`.fd-stat`, `.fd-num`, numeric columns, chart labels), and the one type step built for numbers, `stat`, carries `numeric: tabular`. Fire uses tabular figures in 12 component sheets for columns of numbers; those are component rules, not type steps, and are not repeated here.');
+} else {
+  w('- **Dark mode.** Facet\'s `org.codecrystal.dark` extension carries dark colours. In the fallback, shadows have no dark value: `shadow` holds the light layers; Fire\'s dark shadows are stronger (Facet should take them from the theme record).');
+  w(`- **Shadow layers.** The fallback allows 4 layers per shadow; \`--fd-shadow-accent\` has 5. ${SHADOW_FOLDED.length ? `Folded: ${SHADOW_FOLDED.join(', ')}: the last two outer layers (blur 1px and 0.5px, the same colour) became one layer with the smaller one's offset and blur and the alpha of both together, 1 - (1 - 0.14)(1 - 0.2) = 0.312.` : 'None needed folding.'}`);
+  w(`- **Sizes.** The fallback allows 12 \`size\` tokens, Fire has ${SIZE_CANDIDATES.length} pixel sizes. Kept: \`touch\` (40px) and the 11 most referenced by var() in Fire's CSS: ${SIZE_KEPT.map((c) => `${strip(c.name)} (${c.uses})`).join(', ')}. Left out: ${SIZE_DROPPED.map((c) => strip(c.name)).join(', ')}.`);
+  w(`- **Type scale.** The fallback carries 14 of Fire's 16 type sizes. Left out: ${TYPE_DROPPED.join(', ')}. \`3xs\` borrows \`--fd-lh-2xs\`. Line heights are the ratio of Fire's line height to its size, and sizes such as 0.8125rem become 13px (three decimals, px).`);
+}
 w('- **Breakpoints.** Facet\'s breakpoints are min-width and mobile first; Fire writes `max-width: 640px` for the phone layout and `min-width: 900px` for the wide one. `tablet` is 641px (where the wide layout starts) and `desktop` is 900px. `responsive` overrides are not written: Fire\'s phone overrides (smaller display and h1, 16px gutter) are max-width rules that a mobile-first override cannot say without inverting the base values.');
 w('- **Durations.** `duration` holds the five interaction durations and the stagger. The looping durations (spin 0.7s, shimmer 1.6s, pulse 1.8s, blink 1.1s, dots 1.2s) are left out: they are ambient loops, not transitions, and would make Facet report durations above 500ms. Reduced motion is `remove`: Fire sets `--fd-motion` to 0 and every duration is the token times that.');
 w('- **Dials and density.** Corners, density, line weight, text size, contrast, motion and texture are theme-record dials, not tokens Facet can model; they travel in `theme.json`.');
 w(`- **Component states.** Facet takes any lower-case state name, and a web app must cover empty, loading, error and disabled. Card states map to a short vocabulary (${STATE_ORDER.join(', ')}); names that no pattern takes are dropped (${droppedStates.size} of them, mostly transient or per-component states such as closing, dragover, masked or sending; for example ${[...droppedStates].sort().slice(0, 8).join(', ')}). States are also read from the CSS selectors that carry the component's class (:hover, :focus, [disabled], [aria-invalid], [aria-busy], [aria-pressed], :checked, [open]); that is a heuristic, not a card.`);
 w('- **Props.** Fire attributes with values are `enum` props; attributes with no value are `boolean`. `data-state`, `data-fill` and `data-fd-instant` are not props (state is set by the page; the others are layout toggles). Enums with more than 32 values would be strings; ' + (propNotes.length ? `affected: ${propNotes.join('; ')}.` : 'none are.') + ' `children` is Facet\'s own name, so no prop is called that; a `children` part says the component takes content. Components that take none are listed in the build script (`VOID`).');
 w('- **Examples.** Each `api.example` is a `<cc-component>` tag with the first value of the first two enums, not Fire markup: the docs sections that show the real markup are named in the card (`example`) and in `paths`.');
-if (variant === 'full') w(`- **Size.** ${(contentBytes / 1024).toFixed(1)} KiB compact for ${components.length} components, inside the limits the installed Facet accepts.`);
+if (variant === 'full') w(`- **Size.** ${components.length} components: ${(docBytes / 1024).toFixed(1)} KiB for the document without them (cap 128 KiB), ${(compBytes / 1024).toFixed(1)} KiB for the components (cap 768 KiB) and ${(contractBytes / 1024).toFixed(1)} KiB for the contract (cap 16 KiB), compact bytes; Facet measures canonical bytes, which the installed Facet accepted. Text is cut only where a field overruns its length cap.`);
 else w(`- **Size.** A Facet content document may not exceed 128 KiB, and ${MAX_COMPONENTS} full cards do not fit. The build takes the richest of ${LEVELS.length} levels whose document fits in ${MAX_BYTES / 1024} KiB: this one is level ${levelNo} (${(contentBytes / 1024).toFixed(1)} KiB compact). At this level an entry keeps a purpose of up to ${LV.purpose} characters, ${LV.usage ? `usage up to ${LV.usage}` : 'no usage line'}, up to ${LV.items} do and ${LV.items} don't lines of up to ${LV.item} characters, up to ${LV.parts} parts (descriptions up to ${LV.part}), up to ${LV.props} props, up to ${LV.variants} variants, ${LV.prop ? `prop descriptions up to ${LV.prop}` : 'no prop descriptions'} and ${LV.paths} path${LV.paths === 1 ? '' : 's'}. Longer text is cut at a word and ends with an ellipsis; the complete cards are in \`contract/catalog.json\`, which is carried in the extras. Level 0 is the richest; the level moves when cards are written.`);
 w();
 const readme = md.join('\n') + '\n';

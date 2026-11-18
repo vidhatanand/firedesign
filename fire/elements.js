@@ -798,12 +798,16 @@ var FdChart = class extends FireElement {
     this.#drawn = false;
   }
   static {
-    /** @internal */
-    this.fire = [charts.init];
+    /** @internal None: `prepare()` runs `charts.init` itself, so that it can tell whether it drew. */
+    this.fire = [];
   }
   #drawn;
   get #family() {
     return CARTESIAN.has(this.type) ? "cartesian" : this.type;
+  }
+  /** Whether the chart reads its data from a JSON script (a sparkline and a progress ring read attributes). */
+  get #scripted() {
+    return this.#family !== "sparkline" && !(this.#family === "donut" && this.variant === "progress");
   }
   /** @internal */
   rootClass() {
@@ -844,38 +848,58 @@ var FdChart = class extends FireElement {
   structure() {
     return `${this.#family}|${this.variant ?? ""}`;
   }
-  /** @internal The config the markup form would read: the data, and data-state when the data names no state. */
+  /**
+   * @internal The config the markup form would read: the data, and the `state` property when the data names no state.
+   * Never the element's own `data-state`: charts.js writes the state it drew there (`ready`, `empty`), so reading it
+   * back would keep a chart drawn before its data arrived empty for good.
+   */
   #config() {
     const config = this.data && !Array.isArray(this.data) ? { ...this.data } : {};
-    const state = this.dataset.state;
-    if (!config.state && state && state !== "ready") config.state = state;
+    if (!config.state && this.state) config.state = this.state;
     return config;
   }
-  /** @internal */
+  /**
+   * @internal A fresh render: the chart is drawn from the element's properties, whenever Fire's `init` ran. A
+   * component that calls `init(parent)` before this element's first update (Lit's `firstUpdated`, Vue's `mounted`)
+   * makes charts.js draw it early from what the element had written by then, and mark it as seen; drawing it here
+   * again makes the result the same as when `init` runs after.
+   */
   prepare() {
     if (this.#drawn) [...this.children].forEach((child) => child.remove());
     this.#drawn = true;
     const family = this.#family;
-    if (family === "sparkline" || family === "donut" && this.variant === "progress") return;
-    syncConfig(this, this.data);
-    if (family === "cartesian") charts.render(this, this.#config());
+    if (this.#scripted) syncConfig(this, this.data);
+    if (family === "cartesian") {
+      charts.render(this, this.#config());
+      charts.init(this);
+      return;
+    }
+    const watch = new MutationObserver(() => {
+    });
+    watch.observe(this, { childList: true });
+    charts.init(this);
+    const drew = watch.takeRecords().length > 0;
+    watch.disconnect();
+    if (!drew) this.#draw();
   }
   /** @internal */
   refresh(_changed) {
+    if (this.#scripted) syncConfig(this, this.data);
+    this.#draw();
+  }
+  /** @internal Draw (again) from the attributes and the config script, which are in step with the properties. */
+  #draw() {
     switch (this.#family) {
       case "sparkline":
         charts.sparkline(this);
         break;
       case "donut":
-        if (this.variant !== "progress") syncConfig(this, this.data);
         charts.donut(this);
         break;
       case "heatgrid":
-        syncConfig(this, this.data);
         charts.heatgrid(this);
         break;
       default:
-        syncConfig(this, this.data);
         charts.render(this, this.#config());
     }
   }

@@ -1,8 +1,7 @@
 // `npm run check`: proves that the starter renders Fire's screens the way Fire's own templates do.
 //
 //   1. builds the app for production (typecheck, bundle sizes) with the starter's look, then once more with Ember's
-//      look and without the policy (`--mode compare`): the reference pages are Ember's, so both sides of a
-//      comparison need the same palette, and render-equal adds a <style> element that the policy blocks
+//      look (in .check/dist): the reference pages are Ember's, so both sides of a comparison need the same palette
 //   2. serves both builds (with a fallback to index.html, as a host would) and Fire's repository (the references)
 //      on free ports
 //   3. render-equal.mjs compares each screen's `.fd-page` with its template: structure, computed styles, pixels,
@@ -48,30 +47,13 @@ const run = (cmd, args, options = {}) => spawnSync(cmd, args, { cwd: root, stdio
 const reports = diffDir ? path.resolve(diffDir) : fs.mkdtempSync(path.join(os.tmpdir(), 'fire-check-'));
 fs.mkdirSync(reports, { recursive: true });
 
-/**
- * Differences that are not differences in what Fire draws (render-equal 0.6 reports them, and should normalise them):
- *  - ids Fire generates from a counter (`fd-area-13` against `fd-area-3`): a chart takes a new number every time it
- *    is drawn, and the reference page draws it more often (its shell builds itself and the chart redraws on each resize)
- *  - an SVG coordinate that differs by less than half a pixel, from the same cause (the last draw measured a plot
- *    that was a fraction of a pixel wider)
- * Everything else, and every pixel, still counts.
- */
-const COUNTER = /fd-[a-z]+-\d+/;
-function tolerated(d) {
-  const blank = (v) => String(v).replace(new RegExp(COUNTER, 'g'), '#');
-  if ((d.kind === 'attribute' || d.kind === 'style') && COUNTER.test(String(d.ref)) && blank(d.ref) === blank(d.cand)) return true;
-  if (d.kind === 'attribute' && ['x', 'y', 'cx', 'cy'].includes(d.property) && Math.abs(parseFloat(d.ref) - parseFloat(d.cand)) < 0.5) return true;
-  return false;
-}
-
 function judge(name, report) {
   console.log(`\n== render-equal: ${name}  (${engines}; ${widths}; ${themes})`);
   for (const run of report.runs) {
-    const real = [...run.structure, ...run.styles].filter((d) => !tolerated(d));
-    const skipped = run.structure.length + run.styles.length - real.length;
+    const real = [...run.structure, ...run.styles];
     const pixels = run.pixels?.sizeMismatch ? `size ${run.pixels.ref} vs ${run.pixels.cand}` : `pixels ${((run.pixels?.ratio ?? 1) * 100).toFixed(4)}%`;
     const ok = !run.errors.length && !real.length && run.pixels && run.pixels.ratio <= report.options.maxPixelRatio;
-    console.log(`${ok ? 'ok  ' : 'FAIL'} ${run.engine} ${run.width} ${run.theme}: ${run.nodes.ref}/${run.nodes.cand} nodes, ${real.length} differences${skipped ? ` (+${skipped} tolerated)` : ''}, ${pixels}`);
+    console.log(`${ok ? 'ok  ' : 'FAIL'} ${run.engine} ${run.width} ${run.theme}: ${run.nodes.ref}/${run.nodes.cand} nodes, ${real.length} differences, ${pixels}`);
     for (const e of run.errors) console.log(`     ${e}`);
     for (const d of real.slice(0, 8)) console.log(`     ${d.kind} ${d.path.slice(-110)}${d.property ? ` [${d.property}]` : ''}: ${JSON.stringify(d.ref)} -> ${JSON.stringify(d.cand)}`);
     if (!ok) fail(`render-equal ${name} ${run.engine} ${run.width} ${run.theme}`);
@@ -87,7 +69,7 @@ if (!process.argv.includes('--skip-build')) {
   if (run('npm', ['run', 'build']).status) { console.error('build failed'); process.exit(1); }
   console.log('\n== build: production, Ember\'s look (for the comparison)');
   run('node', ['scripts/prepare.mjs', '--theme', path.join(fire, 'contract/looks/ember.json')]);
-  const built = run('npx', ['vite', 'build', '--mode', 'compare', '--outDir', checkDist, '--emptyOutDir', '--logLevel', 'warn']);
+  const built = run('npx', ['vite', 'build', '--outDir', checkDist, '--emptyOutDir', '--logLevel', 'warn']);
   run('node', ['scripts/prepare.mjs']); // back to the starter's own look
   if (built.status) { console.error('build failed'); process.exit(1); }
 }
@@ -95,16 +77,11 @@ if (!process.argv.includes('--skip-build')) {
 /* ------------------------------------------------------------------ 2. servers */
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.png': 'image/png' };
-/**
- * Both sides of a comparison run timers (skeletons that clear after 600 ms, a first-visit dialog at 800 ms, chart
- * entrances), and render-equal samples a page as soon as `data-fd-ready` is set, which Fire does at DOMContentLoaded.
- * The check's servers therefore hold `data-fd-ready` back until the pages have settled. Only HTML served for the
- * comparison gets this; the app itself is unchanged.
- */
-const SETTLE_MS = 2500;
-const HOLD = `<script>document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){var d=document.documentElement.dataset;delete d.fdReady;setTimeout(function(){d.fdReady=''},${SETTLE_MS})},0)})</script>`;
+/** Both sides run timers (skeletons that clear after 600 ms, a first-visit dialog at 800 ms); render-equal waits for
+ *  each page to settle (spec R13), up to this long. */
+const READY_TIMEOUT_MS = 6000;
 
-function serve(dir, { fallback = false, hold = false } = {}) {
+function serve(dir, { fallback = false } = {}) {
   const server = http.createServer((req, res) => {
     const pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     let file = path.join(dir, pathname);
@@ -113,8 +90,7 @@ function serve(dir, { fallback = false, hold = false } = {}) {
     if (!fs.existsSync(file) && fallback && !path.extname(pathname)) file = path.join(dir, 'index.html');
     if (!fs.existsSync(file)) { res.writeHead(404).end('not found'); return; }
     res.writeHead(200, { 'content-type': TYPES[path.extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-store' });
-    if (hold && file.endsWith('.html')) res.end(fs.readFileSync(file, 'utf8').replace('<head>', `<head>${HOLD}`));
-    else fs.createReadStream(file).pipe(res);
+    fs.createReadStream(file).pipe(res);
   });
   return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({
     origin: `http://127.0.0.1:${server.address().port}`,
@@ -122,8 +98,8 @@ function serve(dir, { fallback = false, hold = false } = {}) {
   })));
 }
 const app = await serve(realDist, { fallback: true });       // the production build: the browser run
-const compare = await serve(checkDist, { fallback: true, hold: true });  // Ember's look, no policy: render-equal
-const ref = await serve(fire, { hold: true });
+const compare = await serve(checkDist, { fallback: true });  // Ember's look, with the policy: render-equal
+const ref = await serve(fire);
 console.log(`\nApp ${app.origin}   App with Ember's look ${compare.origin}   Fire (references) ${ref.origin}`);
 
 try {
@@ -133,7 +109,7 @@ try {
     const result = await capture(process.execPath, [path.join(fire, 'scripts/render-equal.mjs'),
       '--ref', `${ref.origin}/templates/${name}.html`, '--ref-root', '.fd-page',
       '--cand', `${compare.origin}/${name}`, '--cand-root', '.fd-page',
-      '--widths', widths, '--themes', themes, '--engines', engines, '--ready-timeout', String(SETTLE_MS + 4000),
+      '--widths', widths, '--themes', themes, '--engines', engines, '--ready-timeout', String(READY_TIMEOUT_MS),
       '--json', out, ...(diffDir ? ['--diff-dir', path.join(diffDir, name)] : [])]);
     if (!fs.existsSync(out)) { process.stdout.write(result.output); fail(`render-equal ${name} did not finish`); continue; }
     judge(name, JSON.parse(fs.readFileSync(out, 'utf8')));

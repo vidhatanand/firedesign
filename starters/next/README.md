@@ -72,10 +72,5 @@ that its screens render the same as Fire's templates.
 Every server is closed before it exits; reports and pixel diffs go to `.check/`. Options: `--engines`, `--widths`,
 `--themes`, `--screens`, `--skip-build`, `--skip-dev`, `--skip-render`.
 
-Some steps carry workarounds marked `WORKAROUND` in `scripts/check.mjs`, each to remove when its fix lands:
-render-equal reaches the app through a proxy that drops the CSP header and defines Next's `next-route-announcer`;
-Fire's generated ids (`fd-tab-4`, `url(#fd-area-13)`) are accepted when they are only renumbered; a run is retried
-(up to four times) when the template was captured mid-change (its 600 ms skeleton swap, or the overview chart's redraw
-after shell.js mounts); Chromium's report of the centred frame's auto margin as `0px` during the overview's skeletons is set
-aside; WebKit's CSP report for every `<select>` is set aside; and two lint findings that contradict the spec
-(`data-x=""` in JSX, `data-icon` on the SVG icon) are set aside.
+One allowance remains, from the spec (P1): in WebKit, the CSP report Playwright's WebKit makes for every `<select>`
+under a strict `style-src` (with its console error) is set aside and counted; any other violation fails.

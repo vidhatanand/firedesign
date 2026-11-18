@@ -149,7 +149,7 @@ and Lit templates (ARCHITECTURE section 7).
 
 | Id | Form | Markup | Use |
 |---|---|---|---|
-| I1 | **Element** | `<fd-icon name="search"></fd-icon>`, with `size` for Fire's `data-size` and other attributes passed through. The attribute names are those in `contract/custom-elements.json` (to confirm with the elements package). | Icons whose name changes, or anywhere a component is easier to write |
+| I1 | **Element** | `<fd-icon icon="search"></fd-icon>`, with `size` (12, 14, 16, 20, 24, 32) for Fire's `data-size`. Other attributes stay on the element, which is the icon's root (`class="fd-icon"`, `data-icon`, `aria-hidden="true"`). The names are those in `contract/custom-elements.json`: the attribute is `icon`, not `name`, and the lint reports `<fd-icon name>`, which draws nothing. | Icons whose name changes, or anywhere a component is easier to write |
 | I2 | **Static SVG**: exactly what Fire draws for `<i data-icon="search">` | `<svg class="fd-icon" data-icon="search" aria-hidden="true"><use href="#i-search"></use></svg>` | Fixed icons. Server-rendered HTML. |
 
 How I2 is built from `<i data-icon="N" data-size="S" class="C" …rest>`:
@@ -168,7 +168,7 @@ itself. Fire then skips adding its own, because `injectSprite` checks for the id
 sprite stays out of layout without a `style` attribute. [E11]
 
 ```jsx
-// app/fire-sprite.tsx: a server component; icons.js only touches the DOM inside guarded functions
+// app/fire-sprite.tsx: a server component; icons.js only touches the DOM inside guarded functions (typed by icons.d.ts)
 import { ICONS } from 'fire-design/fire/js/icons.js';
 const symbols = Object.entries(ICONS).map(([n, p]) => `<symbol id="i-${n}" viewBox="0 0 24 24">${p}</symbol>`).join('');
 export function FireSprite() {
@@ -183,7 +183,7 @@ That the full sprite renders in Next without warnings is for the starter to prov
 
 | Id | Rule | Lit | React | Vue | Check |
 |---|---|---|---|---|---|
-| C1 | **Registration before first render.** `import 'fire-design/elements'` once, at the entry point. In Next, do it in a client module. Registering twice does nothing. | `import 'fire-design/elements'` in `main.ts` | in the client component that renders the element, at module top; or use `wrappers/react` | in `main.ts` before `app.mount()` | E1, E6 |
+| C1 | **Registration before first render.** `import 'fire-design/elements'` once, at the entry point, in the browser only. Registering twice does nothing. | `import 'fire-design/elements'` in `main.ts` | use `fire-design/react` (its components register the elements in the browser only); or `import('fire-design/elements')` in an effect. **Not a static import at the top of a client module in Next**: client components are rendered on the server too, and `elements.js` touches `HTMLElement` and `document` as it loads, which crashes the server render. | in `main.ts` before `app.mount()` | E1, E6, Next starter |
 | C2 | **Attributes**: strings and numbers that the manifest lists as attributes | `label="Sales"` | `label="Sales"` (rendered on the server too) | `label="Sales"` | E1, E6 |
 | C3 | **Properties**: data (`.data` on `fd-chart`, `.code` on `fd-code`) | `.data=${obj}` (an instance property set before the upgrade is applied when the element defines itself) | the wrapper `<FireChart data={obj} />` (`@lit/react`), or a ref: `ref.current.data = obj` in an effect | `:data="obj"` when the element is registered (C1). `:data.prop="obj"` or `.data="obj"` sets the property even before registration. | E1, E6, E8 |
 | C4 | What goes wrong without C1 | — | React 19 writes `data="[object Object]"` as an attribute when the property does not exist yet | Vue writes `data="[object Object]"` | E1, E6 |
@@ -214,12 +214,12 @@ enhance markup inserted later, through their own observers. Everything else need
 
 | Id | When | Lit | React | Vue | Check |
 |---|---|---|---|---|---|
-| L1 | After the first mount | the light-DOM base calls `init(this)` in `firstUpdated()` | `useFire(ref)`: `init(ref.current)` in `useEffect` | `v-fire` directive: `mounted(el) { init(el) }` | E4, E7 |
-| L2 | After an update that inserts or replaces Fire markup: lists, `key` changes, `v-if`, routes | `updated()` calls `init(this)` again | `useFire` runs after every commit of its component (no dependency list) | `updated(el) { init(el) }` | E4, E7 |
+| L1 | After the first mount | the light-DOM base calls `init(this)` in `firstUpdated()` (or `updated()`). It need not wait for child elements' `updateComplete`: an `fd-chart` that `init` reaches before its first update draws from its properties when that update runs, the same drawing as when `init` runs after. | `useFire(ref)`: `init(ref.current)` in `useEffect` | `v-fire` directive: `mounted(el) { init(el) }` | E4, E7 |
+| L2 | After an update that inserts or replaces Fire markup: lists, `key` changes, `v-if`, routes | `updated()` calls `init(this)` again, at once (as L1) | `useFire` runs after every commit of its component (no dependency list) | `updated(el) { init(el) }` | E4, E7 |
 | L3 | After a route change | a router outlet calls `init(outlet)` after it renders | the client component in the root layout runs `init(document)` in an effect keyed on `usePathname()` | `router.afterEach(() => nextTick(() => init(document)))` [A] | E9 |
 | L4 | After inserting HTML by hand (`innerHTML`, `insertAdjacentHTML`) | `init(container)` | same | same | R |
 | L5 | Never before hydration | — | Fire running before `hydrateRoot` changes the server markup. React then rebuilds the tree on the client, and Fire's changes are lost (the `<i>` comes back undrawn). | — | E3 |
-| L6 | Light DOM only | Fire's listeners are delegated on `document` and use `event.target.closest(…)`. Inside a shadow root the target is retargeted, so Fire markup must live in light DOM: `createRenderRoot() { return this; }`. | | | R, [A] |
+| L6 | Light DOM only | Fire's listeners are delegated on `document` and use `event.target.closest(…)`. Inside a shadow root the target is retargeted, so Fire markup must live in light DOM: `createRenderRoot() { return this; }`. A component's host element inside `.fd-page` is a node of its own for `render-equal` (R12): either each screen renders its own `.fd-page` and the hosts take `display: contents` (the Lit starter), or the check runs `render-equal --transparent '<host selectors>'`. | | | R, [A] |
 | L7 | Teardown | Fire has no destroy function. Removed elements stop mattering because the listeners are delegated. | | | R |
 
 ## 10. Ownership: what Fire writes, and what the framework must leave alone
@@ -281,12 +281,12 @@ container's `key` (`:key` in Vue, `keyed()` in Lit) and let L2 run `init`, or us
 |---|---|---|
 | N1 | Server components render plain Fire markup (sections 1 to 6) and no Fire script. Fire's modules load **in the browser only, after hydration**: a client component calls `import('fire-design')` inside `useEffect` (L5). | E3, E9 |
 | N2 | `boot.js` is a classic, blocking `<script src>` in the root layout's `<head>`, served from `public/fire/boot.js` (copied from `node_modules/fire-design/fire/boot.js` before the build), with the request's `nonce`. It runs before the body is parsed, so the saved theme, density and tweaks are on `<html>` in the first paint. Do not use `next/script` here: `beforeInteractive` does not block parsing. | E9 (served HTML: no `async`, nonce present); `next/script` behaviour [A] |
-| N3 | `<html>` carries the theme attributes and `suppressHydrationWarning`, because `boot.js` rewrites its attributes before React hydrates. Without it, development logs an attribute mismatch. | E9 |
-| N4 | Every server-rendered element with `data-fd-vars` carries `suppressHydrationWarning`. `boot.js` moves the value into a custom property and removes the attribute before hydration. The warning is only for development and does not cause a re-render. | E3, E9 |
+| N3 | `<html>` carries the theme attributes and `suppressHydrationWarning`, because `boot.js` rewrites its attributes before React hydrates. Without it, development logs an attribute mismatch. Next 16's development server logs **attribute** mismatches to the browser console, but **text and structure** mismatches only to its overlay and its terminal (as `[browser] …` lines): a hydration check must read both. | E9, Next starter |
+| N4 | Every server-rendered element with `data-fd-vars` carries `suppressHydrationWarning`. `boot.js` moves the value into a custom property and removes the attribute before hydration. The warning is only for development and does not cause a re-render. As N3, a check reads the console and the dev server's output. | E3, E9 |
 | N5 | JSON scripts use `dangerouslySetInnerHTML` with `jsonForScript` (M2). Children text that holds `</script` makes hydration fail. | E3 |
-| N6 | Fire's CSS: `import 'fire-design/css'` in `app/layout.tsx`. Turbopack follows the `@import`s and the font URLs, and emits `<link>` tags. TypeScript 6 and 7 reject the side-effect import without a declaration: `declare module 'fire-design/css';` (or the package gives `./css` a `types` entry). | E9 |
-| N7 | Elements (`fd-chart` and the others) and `wrappers/react` are used in client components only. `fire-design/elements` registers on import and needs `customElements`. | [A] |
-| N8 | The sprite: `<FireSprite />` in the root layout's `<body>` (section 6). | E11, [A] |
+| N6 | Fire's CSS: `import 'fire-design/css'` in `app/layout.tsx`. Turbopack follows the `@import`s and the font URLs, and emits `<link>` tags. TypeScript 6 and 7 reject the side-effect import without a declaration: `declare module 'fire-design/css';` (or the package gives `./css` a `types` entry). Turbopack lowers `light-dark()` like Vite does (P5): give the app a browserslist of the browsers that understand it, `"browserslist": ["chrome >= 123", "edge >= 123", "firefox >= 120", "safari >= 17.5"]` in `package.json`. | E9, Next starter |
+| N7 | Elements (`fd-chart` and the others) and `wrappers/react` are used in client components only. `fire-design/elements` registers on import and needs `customElements` and `document`, so it is never imported statically, even in a client module (C1): use `fire-design/react`, or `import('fire-design/elements')` in an effect. | Next starter |
+| N8 | The sprite: `<FireSprite />` in the root layout's `<body>` (section 6). `fire-design/fire/js/icons.js` is typed by `fire/js/icons.d.ts` (`ICONS`, `icon`, `upgradeIcons`, `initIcons`, `setIcon`). `@types/react` lists `hidden` for HTML elements only, so the `<svg hidden>` needs `declare module 'react' { interface SVGAttributes<T> { hidden?: boolean } }` until it does. | E11, Next starter |
 
 ```tsx
 // app/layout.tsx (server component)
@@ -340,17 +340,18 @@ export function FireRuntime() {
 | H1 | All | A build step runs `themeToCss(record, { selector })` from `fire-design/theme` and **writes a `.css` file**. The page loads it after `fire.css`, so its tokens win at equal specificity. `expandTheme(record).attributes` (`data-palette`, `data-density`, …) go on `<html>`. Never inject a `<style>` element at run time: a strict CSP blocks it. | [A] (`theme.js` is built by the theme package) |
 | H2 | Plain | `<link rel="stylesheet" href="fire/fire.css"><link rel="stylesheet" href="theme.css">`, with the attributes written on `<html>` | [A] |
 | H3 | Lit, Vue (Vite) | `import 'fire-design/css'; import './fire-theme.css';` in `main.ts`, with the attributes on `<html>` in `index.html` | [A] |
-| H4 | Next.js | The import pair in `app/layout.tsx`, with the attributes spread on `<html>` (N3). Turbopack keeps import order for CSS. | order [A] |
+| H4 | Next.js | The import pair in `app/layout.tsx`, with the attributes spread on `<html>` (N3). Turbopack keeps import order for CSS. The browserslist of N6 keeps `light-dark()` in the theme file as written. | order [A] |
 | H5 | All | A look chosen at run time (Tweaks, a user setting) goes through Fire's own API (`setTheme`, `setDensity`, and `tweaks.js`). `boot.js` restores it before the first paint. The page's own attributes stay the defaults. | R |
 
 ## 13. Strict Content Security Policy
 
 | Id | Target | Policy and rule | Check |
 |---|---|---|---|
-| P1 | Plain, Lit and Vue production builds | `script-src 'self'; style-src 'self'` works. Vite's build emits external module scripts and stylesheet links only. Fire's custom properties use CSSOM `setProperty`, which a CSP does not block. JSON data scripts are not executed and need no nonce. | E10 |
+| P1 | Plain, Lit and Vue production builds | `script-src 'self'; style-src 'self'` works. Vite's build emits external module scripts and stylesheet links only. Fire's custom properties use CSSOM `setProperty`, which a CSP does not block. JSON data scripts are not executed and need no nonce. **WebKit artefact**: Playwright's WebKit reports every `<select>` under a strict `style-src` as a `style-src-attr` violation (empty sample) with a console error that begins "Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline'", even on a bare page holding only a `<select>`. A starter's CSP check may ignore that report, by that exact message only, in WebKit only. | E10, starters |
 | P2 | Vite development server | Injects `<style>` elements for CSS, so development needs `style-src 'unsafe-inline'`. Production does not. | [A] |
 | P3 | Next.js | `proxy.ts` makes a nonce per request and sets `Content-Security-Policy: script-src 'self' 'nonce-…' 'strict-dynamic'; style-src 'self'; …` on the request (for Next to read) and on the response. Next adds the nonce to its own scripts, and the layout adds it to `boot.js`. Routes become dynamic. Development also needs `'unsafe-eval'` and `style-src 'unsafe-inline'`. | E9 (production: no violations with `style-src 'self'`; development policy [A]) |
 | P4 | All | Generated code never holds `style`, `:style`, `v-show`, `styleMap`, inline handlers, `eval`, or inline `<script>` other than `type="application/json"`. | rule |
+| P5 | Lit, Vue (Vite) | P1's companion: `build.cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5']` in `vite.config`, the browsers that understand `light-dark()`. With Vite's default CSS target, lightningcss lowers every `light-dark()` into a custom-property toggle that follows the page's theme only, so a `color-scheme` override (a light-only QR figure in a dark page) turns dark. Next.js and Turbopack lower CSS through their own browserslist: the Next starter must check the same figure. | Lit starter; Next [A] |
 
 ## 14. Translations
 
@@ -397,10 +398,15 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
 | R6 | Ignore `autofocus`. | A3 |
 | R7 | `data-fd-vars` is gone once Fire has run. Compare the custom properties it set, through computed styles. | A14 |
 | R8 | Ignore `#fd-icon-sprite` (where it sits and whether it is `hidden`), and the framework's root and wrapper elements. | I2, N8 |
-| R9 | Ids that Fire generates (`fd-…` counters) and the attributes that point at them (`aria-controls`, `aria-labelledby`, `aria-describedby`): compare the element pointed to, not the id string. | O1 |
+| R9 | Ids that Fire generates (`core.js` `id()`: `fd-area-d`, `fd-dialog-title-a`, an `fd-` prefix and a base-36 counter), ids that only `url(#…)` or `href="#…"` inside the same `<svg>` reference, and the frameworks' generated ids: renamed in the document order of the elements that carry them, with every reference (`for`, `aria-controls`, `aria-labelledby`, `aria-describedby` and the other id lists, `popovertarget`, `href="#…"`, `url(#…)` in attributes and computed styles). The element pointed to is compared, not the id string. | O1 |
+| R10 | SVG geometry: `x`, `y`, `width`, `height`, `cx`, `cy`, `r`, `rx`, `ry`, `x1`…`y2` and the numbers in `d`, `points`, `transform` and `viewBox` are equal within 0.5 px (a chart redrawn at a plot a fraction of a pixel wider). | charts |
+| R11 | Margins count only when the two boxes (relative to the root) differ by more than 0.5 px. Chromium can report a stale computed `auto` margin after a late layout change while the box is in place. | Vue starter |
+| R12 | `--transparent <selector>` (repeatable) treats matching elements as wrappers, inside Fire nodes too: a component's host element. | L6 |
+| R13 | Capture a settled page: wait until there has been no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms (up to the ready timeout), so a chart redrawn after load or a skeleton swapped at 600 ms is captured in its final state on both sides. Wait only for Fire's own (`fd-`) elements to be defined: a framework's (Next's `next-route-announcer`) may never be. The page's Content Security Policy is bypassed for the capture (the freeze stylesheet is inline); the policy is checked by the starters' own browser pass. | starters |
 
 ## 17. Verified, and left to the starters
 
+- **Confirmed from `contract/custom-elements.json`**: the `fd-icon` and `fd-chart` attribute names (I1, C2).
 - **Verified by experiment** (E1–E12): every rule in sections 1–6 and 8; C1–C6 and C8; L1, L2, L3 (Next), L5; O1;
   O2 for icons, secrets, tabs and keyed remounts; O3's React and Vue behaviour; N1–N6; P1, and P3 in production; X2 in
   Next; the sprite marked `hidden`.
@@ -414,6 +420,5 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
   - H1–H4: the theme files and CSS order. These wait on `theme.js`.
   - P2, and P3's development policy.
   - V5.
-  - The `fd-icon` and `fd-chart` attribute names, which wait on `contract/custom-elements.json`.
   - Vue with server rendering (Nuxt) is out of scope. `@vue/server-renderer` writes nothing for `v-text` on
     `<component is="script">` and escapes quotes inside script text [E6]. Such pages should use element properties for data.

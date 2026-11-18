@@ -239,6 +239,7 @@ export function render(el, config = {}) {
   buildLegend(el, st);
   armEnter(el);
   draw(el, st);
+  watchFonts();
   return el;
 }
 
@@ -1250,8 +1251,29 @@ function bindGlobal() {
     const index = item.dataset.series != null ? Number(item.dataset.series) : items.indexOf(item);
     toggleSeries(host, index);
   });
-  // Fonts change tick widths, so lay every chart out again once they have loaded.
-  document.fonts?.ready?.then(() => { for (const el of live) { const st = states.get(el); if (st && el.isConnected && st.config) draw(el, st); } });
+  document.fonts?.addEventListener?.('loadingdone', relayoutForFonts);
+  watchFonts();
+}
+
+/* Fonts change tick widths, so every drawn chart is laid out again each time fonts finish loading: not only the page's
+   first fonts, because in a single-page app a chart is often drawn later, while the fonts its labels use are still
+   loading. Both signals are used (`loadingdone`, and `ready` for the loads under way when a chart is drawn: engines
+   differ in which arrives); a relayout runs only when more faces have loaded since the last one, so they never draw
+   twice for the same fonts. */
+let fontsLoaded = -1;
+let fontsAwaited = null;
+function relayoutForFonts() {
+  let loaded = 0;
+  document.fonts.forEach((face) => { if (face.status === 'loaded') loaded++; });
+  if (loaded === fontsLoaded) return;
+  fontsLoaded = loaded;
+  for (const el of live) { const st = states.get(el); if (st && el.isConnected && st.config) draw(el, st); }
+}
+function watchFonts() {
+  const ready = document.fonts?.ready;
+  if (!ready || ready === fontsAwaited) return;
+  fontsAwaited = ready;
+  ready.then(relayoutForFonts);
 }
 
 export function init(root = document) {

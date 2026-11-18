@@ -190,6 +190,13 @@ export const FREE_ATTRIBUTES = {
   button: ['data-action'],             // the page's name for what the button does (agent.js: run, copy-result; pages: retry, export)
   log: ['data-action'],                // code.js handles wrap and download; a page adds its own (replay)
 };
+/* An icon name is free text (the lint's unknown-icon rule checks it against catalog.icons). The drawn icon,
+ * svg.fd-icon[data-icon] (EXPORT I2), takes it on the icon's root; rules such as `.fd-badge > i[data-icon]` give it to
+ * the components below, on their root or on the part a drawn icon may carry, where it would otherwise allow only the
+ * bare attribute. data-icon-fill stays a presence flag (`.fd-icon[data-icon-fill]`). */
+for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline']) {
+  (FREE_ATTRIBUTES[id] ??= []).push('data-icon');
+}
 
 /** Values the docs or module headers state for a state no selector styles, or the unwritten default of a styled attribute.
  *  Key: a component id (the value is the component's own) or a class (the value is that part's). -> attribute -> values. */

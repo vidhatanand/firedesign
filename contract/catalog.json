@@ -1491,10 +1491,11 @@
       "card": {
         "id": "brand",
         "job": "Sign a surface with the product mark and name, an uploaded logo or a wordmark.",
-        "purpose": "The brand is a mark and a name, set in a 40px row. A customer logo can replace the mark as an image of 24px, or a wide logo can replace both (up to 160px wide; it cannot shrink to the rail). A wordmark is an SVG in the current colour, for a caption or a line of text.",
+        "purpose": "The brand is a mark and a name, set in a 40px row. A customer logo can replace the mark as an image of 24px, or a wide logo can replace both (up to 160px wide; it cannot shrink to the rail). A wordmark is an SVG in the current colour, for a caption or a line of text. A product sets its brand once, as JSON in a data-fd-brand script or with setBrand(), and every fd-brand on the page is filled from it: the name, a picture mark or the initial of the name, a logo with a dark variant, the link.",
         "useWhen": [
           "The top of the sidebar or a centred screen needs the product identity.",
-          "A page says \"Powered by\" with a small wordmark."
+          "A page says \"Powered by\" with a small wordmark.",
+          "A product white-labels itself: one record of name, mark and logo fills the sidebar, the top bar, the auth screens and the docs bar."
         ],
         "avoidWhen": [
           {
@@ -1526,7 +1527,16 @@
         "data": [
           "none"
         ],
-        "states": [],
+        "states": [
+          {
+            "name": "filled",
+            "how": "data-fd-brand JSON on a script (the page) or on a container (what is inside it), or setBrand(brand)"
+          },
+          {
+            "name": "kept as written",
+            "how": "data-fd-brand-keep on the brand; setBrand and data-fd-brand leave it alone"
+          }
+        ],
         "variants": [
           {
             "attribute": "data-size",
@@ -1576,7 +1586,8 @@
         "example": "docs/shell.html#brand",
         "provenance": [
           "docs/shell.html",
-          "fire/components/shell.css"
+          "fire/components/shell.css",
+          "fire/js/shell.js"
         ],
         "since": "0.1.0"
       }
@@ -8516,6 +8527,27 @@
         "fd-doc-frame-play"
       ],
       "attributes": {
+        "data-fd-alt": [
+          "*"
+        ],
+        "data-fd-hosts": [
+          "*"
+        ],
+        "data-fd-src": [
+          "*"
+        ],
+        "data-ratio": [
+          "photo",
+          "square",
+          "wide"
+        ],
+        "data-state": [
+          "",
+          "failed",
+          "loaded",
+          "loading",
+          "refused"
+        ],
         "data-zoom": [
           ""
         ]
@@ -8529,15 +8561,18 @@
       },
       "stateAttributes": {},
       "element": null,
-      "events": [],
+      "events": [
+        "fd:change"
+      ],
       "docs": "docs/documentation.html#prose",
       "card": {
         "id": "doc-frame",
-        "job": "Show a screenshot, video or diagram in a captioned frame that can open larger.",
-        "purpose": "A figure with a media area, an optional caption and a placeholder when there is no image yet. With data-zoom, activating the media opens a dialog with a copy of it. The 16:9 ratio is a preference: a placeholder that holds more grows to fit it, and nothing is clipped.",
+        "job": "Show a screenshot, video, diagram or a supplied picture in a captioned frame that can open larger.",
+        "purpose": "A figure with a media area, an optional caption and a placeholder when there is no image yet. With data-zoom, activating the media opens a dialog with a copy of it. The 16:9 ratio is a preference: a placeholder that holds more grows to fit it. With data-fd-src it loads a supplied picture: the address passes safeImageUrl() first, the ratio is held, and a tile with an icon and a line stands in when there is none, it is refused or it fails.",
         "useWhen": [
           "A docs page shows a screen of the product or a demo video.",
-          "A figure needs a caption and the option to look closer."
+          "A figure needs a caption and the option to look closer.",
+          "A person's own picture (a screenshot of a problem, an upload) is shown from an address the page does not control."
         ],
         "avoidWhen": [
           {
@@ -8559,10 +8594,15 @@
           "media frame",
           "image with caption",
           "video frame",
-          "lightbox"
+          "lightbox",
+          "picture frame",
+          "image with fallback",
+          "safe image",
+          "user image"
         ],
         "surfaces": [
-          "website"
+          "website",
+          "app"
         ],
         "data": [
           "none"
@@ -8571,6 +8611,26 @@
           {
             "name": "zoomable",
             "how": "data-zoom; the media gets a zoom-in cursor"
+          },
+          {
+            "name": "empty",
+            "how": "data-state=\"empty\"; data-fd-src is empty, so the tile says there is no picture"
+          },
+          {
+            "name": "loading",
+            "how": "data-state=\"loading\" and aria-busy while the picture is requested; the ratio is already held"
+          },
+          {
+            "name": "loaded",
+            "how": "data-state=\"loaded\"; the picture shows, and data-zoom works"
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\"; the address was allowed and the picture did not load"
+          },
+          {
+            "name": "refused",
+            "how": "data-state=\"refused\"; the address failed safeImageUrl(), so nothing was requested"
           }
         ],
         "variants": [
@@ -8583,6 +8643,21 @@
             "attribute": "data-ratio",
             "value": "wide",
             "useWhen": "A 21:9 placeholder for a wide banner screenshot."
+          },
+          {
+            "attribute": "data-fd-src",
+            "value": "*",
+            "useWhen": "The frame loads a picture from an address; it is checked first."
+          },
+          {
+            "attribute": "data-ratio",
+            "value": "photo",
+            "useWhen": "A 4:3 frame for a photo or an upload."
+          },
+          {
+            "attribute": "data-ratio",
+            "value": "square",
+            "useWhen": "A 1:1 frame."
           }
         ],
         "parts": [
@@ -8611,7 +8686,8 @@
           "doc",
           "prose",
           "dialog",
-          "chat-lightbox"
+          "chat-lightbox",
+          "file-upload"
         ],
         "keyboard": [
           {
@@ -8627,7 +8703,8 @@
         "provenance": [
           "docs/documentation.html",
           "fire/components/docsite.css",
-          "fire/js/docsite.js"
+          "fire/js/docsite.js",
+          "fire/js/content.js"
         ],
         "since": "0.1.0"
       }
@@ -9856,8 +9933,10 @@
       "root": "fd-dropzone",
       "classes": [
         "fd-dropzone",
+        "fd-dropzone-actions",
         "fd-dropzone-hint",
         "fd-dropzone-icon",
+        "fd-dropzone-preview",
         "fd-dropzone-text",
         "fd-dropzone-title",
         "fd-file",
@@ -9871,8 +9950,12 @@
         "fd-filelist"
       ],
       "attributes": {
+        "data-fd-file-clear": [
+          ""
+        ],
         "data-layout": [
-          "inline"
+          "inline",
+          "logo"
         ]
       },
       "partAttributes": {},
@@ -9892,11 +9975,12 @@
       "docs": "docs/forms.html#dropzone",
       "card": {
         "id": "file-upload",
-        "job": "Add files by dropping them or browsing.",
-        "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Dragging over it turns the line accent. Accepted files appear as rows in fd-filelist with progress, status and size. fd:files is cancelable so your app can run the upload and report progress with setFileProgress(); data-max-mb and accept reject files that do not fit.",
+        "job": "Add files by dropping them or browsing; one image as a settings row for a logo.",
+        "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Accepted files appear as rows with progress, status and size. fd:files is cancelable so your app can run the upload and report with setFileProgress(); data-max-mb and accept reject files that do not fit. With data-layout=\"logo\" it is one row for a single image: preview, Upload, Remove, a progress bar and a field error. Fire uploads nothing.",
         "useWhen": [
           "People attach one or several files, such as a sitemap, a CSV or a document.",
-          "Upload progress and per-file errors should show as rows."
+          "Upload progress and per-file errors should show as rows.",
+          "A team uploads its logo or another single image in a settings row, with a preview and a way to remove it."
         ],
         "avoidWhen": [
           {
@@ -9904,7 +9988,7 @@
             "instead": "input"
           },
           {
-            "when": "The upload is an image avatar.",
+            "when": "The upload is a person's profile photo that is cropped to a circle.",
             "instead": "avatar"
           },
           {
@@ -9917,7 +10001,10 @@
           "file picker",
           "file input",
           "drag and drop upload",
-          "attachment"
+          "attachment",
+          "logo upload",
+          "logo field",
+          "image upload row"
         ],
         "surfaces": [
           "app",
@@ -9943,6 +10030,10 @@
           {
             "name": "done",
             "how": "data-state=\"done\" on a file row"
+          },
+          {
+            "name": "logo error",
+            "how": "data-state=\"error\" on a data-layout=\"logo\" row, with the reason in the field's .fd-field-error"
           }
         ],
         "variants": [
@@ -9950,6 +10041,11 @@
             "attribute": "data-layout",
             "value": "inline",
             "useWhen": "A compact one-line dropzone in a form row."
+          },
+          {
+            "attribute": "data-layout",
+            "value": "logo",
+            "useWhen": "A single image with a preview, Upload and Remove, in a settings row."
           }
         ],
         "parts": [
@@ -10008,6 +10104,14 @@
           {
             "class": "fd-file-bar",
             "role": "The progress bar."
+          },
+          {
+            "class": "fd-dropzone-preview",
+            "role": "The logo row's preview tile: the current picture, or the initial tile."
+          },
+          {
+            "class": "fd-dropzone-actions",
+            "role": "The logo row's Upload and Remove buttons."
           }
         ],
         "related": [
@@ -13899,6 +14003,12 @@
           "example",
           "lang"
         ],
+        "data-fd-unless": [
+          "*"
+        ],
+        "data-fd-when": [
+          "*"
+        ],
         "data-static-demo": [
           ""
         ],
@@ -13913,6 +14023,9 @@
           ]
         },
         "fd-menu-item": {
+          "data-fd-else": [
+            "disable"
+          ],
           "data-fd-submenu": [
             "*"
           ],
@@ -13954,11 +14067,12 @@
       "card": {
         "id": "menu",
         "job": "Pick an action or a choice from a short list that belongs to one trigger.",
-        "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or sub-menus. Arrow keys move, typing jumps to an item, Escape returns focus to the trigger. Selecting fires a cancelable fd:select; checkbox and radio items fire fd:change. Danger items sit last, below a separator.",
+        "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or sub-menus. Arrow keys move, typing jumps to an item, Escape returns focus to the trigger. Selecting fires a cancelable fd:select; checkbox and radio items fire fd:change. Danger items sit last, below a separator. One menu can serve every row of a table or list: items carry data-fd-when or data-fd-unless and the row carries data-fd-flags, so each row shows only the items that apply.",
         "useWhen": [
           "A row or a header has a set of actions behind a \"more\" button.",
           "Switching team, workspace or environment: use the switcher variant.",
-          "Choosing columns or one sort order from a short list."
+          "Choosing columns or one sort order from a short list.",
+          "Rows share one menu but not every action fits every row (Resume only on paused rows)."
         ],
         "avoidWhen": [
           {
@@ -14016,6 +14130,10 @@
           {
             "name": "keep open",
             "how": "data-keep-open on an item or the menu"
+          },
+          {
+            "name": "nothing to show",
+            "how": "every item gated out: the menu stays shut and the opener gets aria-disabled=\"true\" and data-fd-empty"
           }
         ],
         "variants": [
@@ -14038,6 +14156,21 @@
             "attribute": "data-icon",
             "value": "",
             "useWhen": "An item with a leading icon."
+          },
+          {
+            "attribute": "data-fd-when",
+            "value": "*",
+            "useWhen": "Show this item only on rows whose data-fd-flags hold one of the words."
+          },
+          {
+            "attribute": "data-fd-unless",
+            "value": "*",
+            "useWhen": "Hide this item on rows whose data-fd-flags hold any of the words."
+          },
+          {
+            "attribute": "data-fd-else",
+            "value": "disable",
+            "useWhen": "Dim a gated item instead of hiding it."
           }
         ],
         "parts": [
@@ -14125,6 +14258,10 @@
           {
             "keys": "Escape",
             "does": "Closes and returns focus to the trigger."
+          },
+          {
+            "keys": "Arrow keys",
+            "does": "Skip items hidden for this row."
           }
         ],
         "example": "docs/overlays.html#menus",
@@ -18793,6 +18930,7 @@
       "root": "fd-screen",
       "classes": [
         "fd-screen",
+        "fd-screen-foot",
         "fd-screen-head",
         "fd-screen-note"
       ],
@@ -18810,10 +18948,11 @@
       "card": {
         "id": "screen",
         "job": "Centre one task on a page of its own, outside the shell.",
-        "purpose": "A centred column at a readable width for sign in, a second step, consent or a result. The brand leads, one card holds the task, and one quiet line closes it. Navigation stays off these screens. For a result such as link sent or signed out, lead with a 44px tile whose tone says what happened.",
+        "purpose": "A centred column at a readable width for sign in, a second step, consent or a result. The brand leads, one card holds the task, and one quiet line closes it. A legal foot (copyright, terms, privacy, a language or status link) sits in a band after it. Navigation stays off these screens. For a result such as link sent or signed out, lead with a 44px tile whose tone says what happened.",
         "useWhen": [
           "The person does one thing before entering the app: sign in, verify, consent, finish a flow.",
-          "A result stands alone: link sent, signed out, run stopped."
+          "A result stands alone: link sent, signed out, run stopped.",
+          "The page carries a legal line: copyright, terms, privacy, language or status links."
         ],
         "avoidWhen": [
           {
@@ -18866,6 +19005,10 @@
           {
             "class": "fd-screen-note",
             "role": "One small centred line under the card, or inside it for a last word."
+          },
+          {
+            "class": "fd-screen-foot",
+            "role": "The legal row under the screen: copyright and links in a centred row that wraps."
           }
         ],
         "related": [
@@ -27737,8 +27880,10 @@
     "fd-draft-used": "draft",
     "fd-draft-when": "draft",
     "fd-dropzone": "file-upload",
+    "fd-dropzone-actions": "file-upload",
     "fd-dropzone-hint": "file-upload",
     "fd-dropzone-icon": "file-upload",
+    "fd-dropzone-preview": "file-upload",
     "fd-dropzone-text": "file-upload",
     "fd-dropzone-title": "file-upload",
     "fd-empty": "empty",
@@ -28220,6 +28365,7 @@
     "fd-schema-type": "schema",
     "fd-schema-value": "schema",
     "fd-screen": "screen",
+    "fd-screen-foot": "screen",
     "fd-screen-head": "screen",
     "fd-screen-note": "screen",
     "fd-scroller": "scroller",
@@ -29270,9 +29416,12 @@
         "docsite": [
           "{ value }",
           "{ value: \"yes\" | \"no\" | \"sent\" }",
+          "{ value: state }",
           "{ value: status }"
         ],
         "forms": [
+          "{ value: [file] }",
+          "{ value: [] }",
           "{ value }",
           "{ value, valid }",
           "{ value, matched }"
@@ -29351,9 +29500,10 @@
       }
     },
     "fd:files": {
-      "detail": "{ files }",
+      "detail": "{ files, rows: [] }",
       "shapes": {
         "forms": [
+          "{ files, rows: [] }",
           "{ files }"
         ]
       }
@@ -29578,6 +29728,7 @@
     "bug",
     "building-2",
     "calendar",
+    "calendar-check",
     "calendar-clock",
     "calendar-range",
     "camera",
@@ -29816,6 +29967,7 @@
     "wifi-off",
     "workflow",
     "wrap-text",
+    "wrench",
     "x",
     "zap",
     "zoom-in",

@@ -227,11 +227,13 @@
 }
 .fd-codeblock[data-lines] .fd-codeblock-line::before { content: counter(fd-line); }
 .fd-codeblock-line[data-hl] { background-color: var(--fd-accent-8); box-shadow: inset var(--fd-code-rule-bold) 0 0 var(--fd-accent); }
+.fd-codeblock-line[data-hl]:dir(rtl) { box-shadow: inset calc(var(--fd-code-rule-bold) * -1) 0 0 var(--fd-accent); }
 .fd-codeblock-line[data-hl]::before {
   background-image: linear-gradient(var(--fd-accent-8), var(--fd-accent-8));
   box-shadow: inset var(--fd-code-rule-bold) 0 0 var(--fd-accent);
   color: var(--fd-accent-text);
 }
+.fd-codeblock-line[data-hl]:dir(rtl)::before { box-shadow: inset calc(var(--fd-code-rule-bold) * -1) 0 0 var(--fd-accent); }
 
 /* Wrap */
 .fd-codeblock[data-wrap] .fd-codeblock-body > code { width: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -541,7 +543,7 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
 .fd-log-search > input:hover { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong); }
 .fd-log-search > input:focus { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-accent), 0 0 0 var(--fd-code-halo) var(--fd-accent-16); border-radius: var(--fd-radius-md); }
 .fd-log-search > input::-webkit-search-cancel-button { -webkit-appearance: none; }
-.fd-log-filters { display: flex; align-items: center; gap: var(--fd-space-0-5); }
+.fd-log-filters { display: flex; align-items: center; flex-wrap: wrap; gap: var(--fd-space-0-5); min-width: 0; max-width: 100%; }
 .fd-log-filter, .fd-log-follow {
   display: inline-flex; align-items: center; gap: var(--fd-space-1-5); flex: none;
   height: var(--fd-control-sm); padding: 0 var(--fd-space-2); border-radius: var(--fd-radius-md);
@@ -658,6 +660,7 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
 .fd-log-num:focus-visible { box-shadow: var(--fd-ring); }
 /* The linked line: an accent start bar on every row, and the accent wash unless the row is an error. */
 .fd-log .fd-log-row[aria-current="true"] { box-shadow: inset var(--fd-code-rule-bold) 0 0 0 var(--fd-accent); }
+.fd-log .fd-log-row[aria-current="true"]:dir(rtl) { box-shadow: inset calc(var(--fd-code-rule-bold) * -1) 0 0 0 var(--fd-accent); }
 .fd-log .fd-log-row[aria-current="true"]:not([data-level="error"]),
 .fd-log .fd-log-row[aria-current="true"]:not([data-level="error"]):hover { background: var(--fd-accent-12); }
 .fd-log .fd-log-row[aria-current="true"] .fd-log-num { color: var(--fd-accent-text); }

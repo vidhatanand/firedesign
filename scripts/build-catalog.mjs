@@ -20,7 +20,7 @@ import { ROOT, read, stripCss, topFiles, loadIconNames, attributeSheets, collect
 import { sourceEvidence, scriptWrites, scriptValues } from './lib/evidence.mjs';
 import { parseVocabulary } from './lib/vocabulary.mjs';
 import { readModuleEvents, summariseEvents } from './lib/events.mjs';
-import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA, FREE_ATTRIBUTES, DEFAULT_VALUES, STATE_ATTRIBUTES, LAYOUT_ATTRIBUTES } from './lib/catalog-assign.mjs';
+import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA, FREE_ATTRIBUTES, DEFAULT_VALUES, STATE_ATTRIBUTES, LAYOUT_ATTRIBUTES, MODULES } from './lib/catalog-assign.mjs';
 
 const OUT = path.join(ROOT, 'contract/catalog.json');
 const CARDS = path.join(ROOT, 'contract/cards');
@@ -316,7 +316,9 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   const components = [...byRoot.values()].sort((a, b) => a.id.localeCompare(b.id));
   const missing = [];
   const cardProblems = [];   // variants that name a value the catalogue does not list: errors, or listed in _missing.json with --allow-missing
-  for (const id of cards.keys()) if (!ids.has(id)) errors.push(`cards/${id}.json: no component has the id "${id}"`);
+  const moduleIds = new Set(MODULES.map((m) => m.id));
+  for (const id of cards.keys()) if (!ids.has(id) && !moduleIds.has(id)) errors.push(`cards/${id}.json: no component or module has the id "${id}"`);
+  for (const id of moduleIds) if (ids.has(id)) errors.push(`module ${id} shares its id with a component`);
   for (const c of components) {
     const card = cards.get(c.id);
     if (!card) { missing.push({ id: c.id, family: c.family, docs: c.docs }); continue; }
@@ -342,10 +344,29 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   if (cardProblems.length && !allowMissing) errors.push(...cardProblems);
   if (missing.length && !allowMissing) errors.push(`${missing.length} components have no card (run with --allow-missing to build without them); first: ${missing.slice(0, 5).map((m) => m.id).join(', ')}`);
 
+  // Modules: JS-only parts (MODULES in scripts/lib/catalog-assign.mjs), each with a card. Exports come from the source.
+  const jsModules = [];
+  for (const m of MODULES) {
+    const file = path.join(ROOT, m.module);
+    if (!fs.existsSync(file)) { errors.push(`module ${m.id}: ${m.module} does not exist`); continue; }
+    const src = read(file);
+    const exp = new Set();
+    for (const x of src.matchAll(/^export\s+(?:async\s+)?(?:const|let|function\*?|class)\s+([A-Za-z_$][\w$]*)/gm)) exp.add(x[1]);
+    for (const x of src.matchAll(/^export\s*\{([^}]*)\}/gm)) for (const n of x[1].split(',')) { const name = n.trim().split(/\s+as\s+/).pop(); if (name) exp.add(name); }
+    const card = cards.get(m.id);
+    if (!card) { errors.push(`module ${m.id}: no card (contract/cards/${m.id}.json)`); continue; }
+    for (const r of card.related) if (!ids.has(r)) errors.push(`cards/${m.id}.json: related "${r}" is not a component`);
+    if (!anchors.has(card.example)) errors.push(`cards/${m.id}.json: example ${card.example} is not a docs section`);
+    if (!card.provenance.includes(m.module)) errors.push(`cards/${m.id}.json: provenance must name ${m.module}`);
+    jsModules.push({ id: m.id, name: m.name, module: m.module, exports: [...exp].sort(), docs: card.example, card });
+  }
+  jsModules.sort((a, b) => a.id.localeCompare(b.id));
+
   const pkg = JSON.parse(read(path.join(ROOT, 'package.json')));
   const catalog = {
     fire: pkg.version.replace(/-.*$/, ''),
     components: components.map((c) => ({ id: c.id, name: c.name, family: c.family, kind: c.kind, root: c.root, classes: c.classes, attributes: c.attributes, partAttributes: c.partAttributes, stateAttributes: c.stateAttributes, element: c.element, events: c.events, docs: c.docs, ...(c.card ? { card: c.card } : {}) })),
+    modules: jsModules,
     classes: sortKeys(classToId),
     elements,
     events,

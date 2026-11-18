@@ -1,6 +1,6 @@
 <template>
   <div class="fd-table" :class="{ 'fd-table-wrap': wrap }" data-density="compact">
-    <button class="fd-btn" data-icon-only :aria-label="label"><fd-icon name="x" /></button>
+    <button class="fd-btn" data-icon-only :aria-label="label"><fd-icon icon="x" /></button>
     <span>{{ a < b ? 'x' : "y" }}</span>
   </div>
 </template>

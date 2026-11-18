@@ -20,16 +20,18 @@
  *   unknown-attribute-value  a data-* value the component does not define (only for attributes the catalogue lists
  *                            for a component the element belongs to, through its classes or its tag)
  *   unknown-element          an `fd-` element (tag) that the catalogue does not list
- *   unknown-icon             an icon name that is not in the catalogue: data-icon, <fd-icon name>, <use href="#i-…">
+ *   unknown-icon             an icon name that is not in the catalogue: data-icon, <fd-icon icon>, <use href="#i-…">;
+ *                            also <fd-icon name>, which the element does not read (its attribute is `icon`)
  *   no-style                 any style attribute or style prop (style=, :style=, v-bind:style=, .style=)
  *   no-raw-color             a hex/rgb()/hsl()/oklch()… colour (or a named colour in fill/stroke/color…) in an attribute
  *   no-raw-px                a pixel size (`12px`) in an attribute
  *   icon-only-name           data-icon-only without aria-label, aria-labelledby, data-fd-tooltip or visible text
- *   no-i-icon-in-framework   <i data-icon> in .jsx/.tsx/.vue (use <fd-icon name="…"> or the SVG form)
+ *   no-i-icon-in-framework   <i data-icon> in .jsx/.tsx/.vue (use <fd-icon icon="…"> or the SVG form)
  *
  * Each finding has file, line, column, rule, message and fix. Exit code 1 when there is any error, 2 on usage errors.
  *
- * An attribute whose catalogue values are ["*"] takes any value.
+ * An attribute whose catalogue values are ["*"] takes any value. `data-x=""` counts as the bare `data-x` (the JSX
+ * spelling, EXPORT A7) where the attribute takes no value.
  *
  * Catalogue fields read: components[].{id, classes, attributes, partAttributes, stateAttributes, element}, classes, icons, and the tag names of
  * components[].element and elements[].{tagName|tag|name}.
@@ -464,7 +466,10 @@ export function lintText(file, text, rawCatalog, kind) {
         const defs = [c?.attributes?.[a.key], c?.stateAttributes?.[a.key], ...classTokens.map(({ t }) => c?.partAttributes?.[t]?.[a.key])];
         for (const def of defs) if (Array.isArray(def)) listed = (listed || []).concat(def);
       }
-      if (listed && !listed.includes('*') && !listed.includes(a.value)) {   // "*" in the catalogue: any value
+      // `data-x=""` is the bare `data-x` (JSX must write presence attributes so, spec A7): fine where the attribute
+      // takes no value (an empty list, or only the bare form).
+      const presenceOnly = listed && listed.every((v) => v === '');
+      if (listed && !listed.includes('*') && !listed.includes(a.value) && !(a.value === '' && presenceOnly)) {   // "*" in the catalogue: any value
         const s = nearest(a.value, listed);
         report(a.valueAt ?? a.at, 'unknown-attribute-value', `${a.key}="${a.value}" is not defined for ${[...comps].join('/')}`,
           `${s ? `did you mean "${s}"? ` : ''}allowed: ${listed.map((v) => `"${v}"`).join(', ')}`);
@@ -480,8 +485,11 @@ export function lintText(file, text, rawCatalog, kind) {
     const di = get('data-icon');
     if (di && !di.dynamic && di.value) checkIcon(di.value, di.valueAt ?? di.at);
     if (tag === 'fd-icon') {
-      const nm = get('name');
-      if (nm && !nm.dynamic && nm.value) checkIcon(nm.value, nm.valueAt ?? nm.at);
+      const ic = get('icon');
+      if (ic && !ic.dynamic && ic.value) checkIcon(ic.value, ic.valueAt ?? ic.at);
+      const nm = get('name');   // fd-icon's attribute is `icon` (elements/src/icon.ts); a `name` draws nothing
+      if (nm && !ic) report(nm.at, 'unknown-icon', '<fd-icon> has no name attribute, so it draws nothing',
+        `use <fd-icon icon="${nm.value && !nm.dynamic ? nm.value : '…'}">`);
     }
     if (tag === 'use') {
       for (const a of attrs) {
@@ -490,7 +498,7 @@ export function lintText(file, text, rawCatalog, kind) {
     }
     if (tag === 'i' && di && framework) {
       report(di.at, 'no-i-icon-in-framework', '<i data-icon> is drawn by Fire\'s boot script, which framework rendering does not run',
-        `use <fd-icon name="${di.value && !di.dynamic ? di.value : '…'}"></fd-icon> (or the inline SVG <use href="#i-…"> form)`);
+        `use <fd-icon icon="${di.value && !di.dynamic ? di.value : '…'}"></fd-icon> (or the inline SVG <use href="#i-…"> form)`);
     }
 
     // style

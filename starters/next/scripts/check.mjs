@@ -14,7 +14,6 @@
 //      flight) must be reported, or the check fails: it proves the check catches one.
 //   5. render-equal on each screen: templates/<name>.html (.fd-page) against the route (.fd-page), widths 1440 and 375,
 //      light and dark, Chromium, WebKit and Firefox: no structural or style difference, pixels under its default limit.
-//      (Through a proxy, and with Fire's generated ids compared as R9 says: see the WORKAROUND notes below.)
 //   6. lint-markup over the starter's source.
 // Every server is closed before exit. Exit code 1 on any failure.
 //
@@ -22,7 +21,6 @@
 //          --skip-build (reuse .next-check)  --skip-dev  --skip-render
 import { spawn, spawnSync } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, rmSync } from 'node:fs';
-import http from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -208,11 +206,11 @@ async function browserPass(base) {
           problems.push(`behaviour: ${String(e.message || e).split('\n')[0]}`);
         }
         const csp = await page.evaluate(() => window.__fireCheck?.csp ?? []).catch(() => []);
-        // WORKAROUND: WebKit quirk. Playwright's WebKit reports every <select> under a strict style-src as a
+        // WebKit artefact (spec/EXPORT.md P1): Playwright's WebKit reports every <select> under a strict style-src as a
         // style-src-attr violation (empty sample), with a console error "Refused to apply a stylesheet…", even on a
         // bare page holding nothing but a <select>; Chromium and Firefox report nothing. A <select> that React creates
-        // during a client-side navigation is reported against the document (not yet connected). Those pairs are set
-        // aside and counted; any other violation or console error fails.
+        // during a client-side navigation is reported against the document (not yet connected). Those pairs, and only
+        // those, are set aside in WebKit and counted; any other violation or console error fails.
         let quirks = engineName === 'webkit' ? csp.filter((v) => v.selectQuirk).length : 0;
         for (const v of csp) if (!(quirks && v.selectQuirk)) problems.push(`CSP violation: ${v.text}`);
         if (quirks) {
@@ -277,63 +275,6 @@ async function hydrationPass(base, serverLog) {
 }
 
 /* ---------------------------------------------------------------- 5. render-equal */
-// WORKAROUND: Fire fix pending (render-equal). render-equal reaches the app through this proxy, which
-//  (a) drops the Content-Security-Policy header: render-equal freezes animations with Playwright's addStyleTag (an
-//      inline <style>), which the strict policy blocks, and it does not set bypassCSP. The policy itself is checked in
-//      the browser pass above, on the app directly;
-//  (b) defines <next-route-announcer> (Next's route announcer, never registered as a custom element) before Next
-//      creates it: render-equal waits up to 1 s for every undefined custom element, so a Next page would be captured
-//      a second later than the template, after the screens' 600 ms skeleton swap.
-// Remove the proxy once render-equal sets bypassCSP and ignores framework elements.
-const DEFINE_ANNOUNCER = "<script>customElements.get('next-route-announcer')||customElements.define('next-route-announcer',class extends HTMLElement{})</script>";
-function renderEqualProxy(target) {
-  const server = http.createServer((req, res) => {
-    const headers = { ...req.headers, 'accept-encoding': 'identity' };
-    const upstream = http.request({ host: '127.0.0.1', port: target, path: req.url, method: req.method, headers }, (up) => {
-      const out = { ...up.headers };
-      delete out['content-security-policy'];
-      if (!String(up.headers['content-type'] || '').startsWith('text/html')) { res.writeHead(up.statusCode, out); up.pipe(res); return; }
-      let body = '';
-      up.setEncoding('utf8');
-      up.on('data', (d) => { body += d; });
-      up.on('end', () => {
-        body = body.replace('<head>', `<head>${DEFINE_ANNOUNCER}`);
-        delete out['content-length'];
-        res.writeHead(up.statusCode, out).end(body);
-      });
-    });
-    upstream.on('error', () => { res.writeHead(502).end(); });
-    req.pipe(upstream);
-  });
-  return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve({
-    port: server.address().port,
-    close: () => new Promise((r) => { server.closeAllConnections(); server.close(() => r()); }),
-  })));
-}
-
-// WORKAROUND: Fire fix pending (render-equal R9). Fire's own counters (fd-tab-4, fd-dialog-title-5, fd-area-13 in a
-// fill="url(#…)") depend on how many ids the rest of the page used, and the template's shell (templates/shell.js) uses
-// more than this one. A run whose only differences are such ids is accepted when the renaming is one-to-one across the
-// run (so every reference still points at the matching element), and the count is reported.
-const FIRE_ID = /^fd-[a-z]+(?:-[a-z]+)*-[0-9a-z]+$/;
-const idTokens = (v) => [...String(v).matchAll(/url\(["']?#([^"')]+)["']?\)/g)].map((m) => m[1]).concat(/url\(/.test(v) ? [] : String(v).split(/\s+/));
-function fireIdsOnly(diffs) {
-  const fwd = new Map(), back = new Map();
-  for (const d of diffs) {
-    if (!['attribute', 'style'].includes(d.kind) || typeof d.ref !== 'string' || typeof d.cand !== 'string') return false;
-    if (d.ref.replace(/fd-[a-z-]+-[0-9a-z]+/g, '#') !== d.cand.replace(/fd-[a-z-]+-[0-9a-z]+/g, '#')) return false;
-    const r = idTokens(d.ref), c = idTokens(d.cand);
-    if (r.length !== c.length) return false;
-    for (let i = 0; i < r.length; i++) {
-      if (r[i] === c[i]) continue;
-      if (!FIRE_ID.test(r[i]) || !FIRE_ID.test(c[i]) || r[i].replace(/-[0-9a-z]+$/, '') !== c[i].replace(/-[0-9a-z]+$/, '')) return false;
-      if ((fwd.get(r[i]) ?? c[i]) !== c[i] || (back.get(c[i]) ?? r[i]) !== r[i]) return false;
-      fwd.set(r[i], c[i]); back.set(c[i], r[i]);
-    }
-  }
-  return true;
-}
-
 // One render-equal call; returns its runs (or an error string).
 async function renderEqualRuns(app, fire, name, engines, widths, themes, tag) {
   const json = path.join(OUT, `render-equal-${name}${tag}.json`);
@@ -344,52 +285,23 @@ async function renderEqualRuns(app, fire, name, engines, widths, themes, tag) {
     '--json', json, '--diff-dir', path.join(OUT, `diff-${name}${tag}`)]);
   if (!existsSync(json)) return `no report (exit ${r.status})\n${r.out.slice(-2000)}`;
   const report = JSON.parse(readFileSync(json, 'utf8'));
-  for (const x of report.runs) {
-    // WORKAROUND: Chromium quirk in the reference. While templates/overview.html shows its skeletons, Chromium reports
-    // the centred .fd-frame's auto inline margins as 0px through getComputedStyle, although the frame sits at the same
-    // place (same box, same pixels); after the skeleton swap it reports 24px, as it does for the app. Only that pair
-    // is set aside, and only when the run's pixels are identical.
-    const quirk = (d) => d.kind === 'style' && /(^|> )div\.fd-frame\[0\]$/.test(d.path) && ['margin-left', 'margin-right'].includes(d.property) && d.ref === '0px';
-    x.autoMargin = x.pixels && !x.pixels.sizeMismatch && x.pixels.diffPixels === 0 ? x.styles.filter(quirk).length : 0;
-    if (x.autoMargin) x.styles = x.styles.filter((d) => !quirk(d));
-    const diffs = [...x.structure, ...x.styles];
-    x.renumbered = diffs.length && fireIdsOnly(diffs) ? diffs.length : 0;
-    if (x.renumbered) { x.structure = []; x.styles = []; }
-    x.limit = report.options.maxPixelRatio;
-    x.good = !x.errors.length && !x.structure.length && !x.styles.length && !!x.pixels && !x.pixels.sizeMismatch && x.pixels.ratio <= x.limit;
-  }
+  for (const x of report.runs) x.limit = report.options.maxPixelRatio;
   return report.runs;
 }
 
-// WORKAROUND: Fire fix pending (render-equal waits for no quiet period). The reference pages are captured mid-change
-// now and then: the templates switch from skeletons to content 600 ms after Fire starts, and templates/overview.html
-// draws its chart before shell.js mounts the shell, then redraws it about 190 ms after load, close to when
-// render-equal captures it (so the template sometimes shows its stale 690 px drawing; the app's is the final 686 px).
-// A failed run is retried on its own, up to four times; the retries are reported.
 async function renderEqual(app, fire) {
   const summary = [];
   for (const name of opts.screens) {
-    let runs = await renderEqualRuns(app, fire, name, opts.engines.join(','), opts.widths, opts.themes, '');
+    const runs = await renderEqualRuns(app, fire, name, opts.engines.join(','), opts.widths, opts.themes, '');
     if (typeof runs === 'string') { fail(`render-equal ${name}: ${runs}`); continue; }
-    for (let i = 0; i < runs.length; i++) {
-      let x = runs[i];
-      x.retries = 0;
-      for (let k = 1; !x.good && k <= 4; k++) {
-        const again = await renderEqualRuns(app, fire, name, x.engine, x.width, x.theme, `-retry-${x.engine}-${x.width}-${x.theme}-${k}`);
-        if (typeof again === 'string') break;
-        again[0].retries = k;
-        runs[i] = x = again[0];
-      }
-    }
     for (const x of runs) {
-      const renumbered = x.renumbered;
       const limit = x.limit;
       const structural = x.structure.length;
       const px = x.pixels ? (x.pixels.sizeMismatch ? `size ${x.pixels.ref.join('x')} vs ${x.pixels.cand.join('x')}` : `${(x.pixels.ratio * 100).toFixed(4)}%`) : 'n/a';
       const good = !x.errors.length && !structural && !x.styles.length && x.pixels && !x.pixels.sizeMismatch && x.pixels.ratio <= limit;
       const line = `render-equal ${name} ${x.engine} ${x.width} ${x.theme}: ${x.nodes.ref}/${x.nodes.cand} nodes, ${structural} structural, `
-        + `${x.styles.length} style, pixels ${px}${renumbered ? ` (${renumbered} Fire ids renumbered, R9 workaround)` : ''}${x.retries ? ` (retry ${x.retries})` : ''}${x.autoMargin ? ' (Chromium auto-margin quirk set aside)' : ''}`;
-      summary.push({ name, engine: x.engine, width: x.width, theme: x.theme, good, structural, styles: x.styles.length, px, renumbered, retries: x.retries });
+        + `${x.styles.length} style, pixels ${px}`;
+      summary.push({ name, engine: x.engine, width: x.width, theme: x.theme, good, structural, styles: x.styles.length, px });
       if (good) ok(line);
       else {
         const first = [...x.errors, ...x.structure, ...x.styles].slice(0, 6)
@@ -404,7 +316,7 @@ async function renderEqual(app, fire) {
 /* ---------------------------------------------------------------- main */
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-let prod, dev, fire, proxy;
+let prod, dev, fire;
 try {
   if (!flag('skip-build')) {
     const prep = run(process.execPath, ['scripts/prepare-fire.mjs'], { FIRE_LOOK: 'ember' });
@@ -426,10 +338,7 @@ try {
   await browserPass(appBase);
   let summary = [];
   if (!flag('skip-render')) {
-    proxy = await renderEqualProxy(prodPort);
-    summary = await renderEqual(`http://127.0.0.1:${proxy.port}`, fireBase);
-    await proxy.close();
-    proxy = null;
+    summary = await renderEqual(appBase, fireBase);
   }
   await stopNext(prod);
 
@@ -442,11 +351,7 @@ try {
     await stopNext(dev);
   }
 
-  // WORKAROUND: Fire fix pending (lint-markup and the catalogue). Two findings contradict spec/EXPORT.md and are set
-  // aside (and counted): `data-x=""`, the JSX spelling of a presence attribute that rule A7 requires (the lint skips the
-  // bare HTML form but checks "" against the value list), and data-icon on the static SVG icon form (rule I2), whose
-  // catalogue value list is empty until it becomes "*". Everything else fails the check.
-  // Its report goes to a file: a large report written to a pipe is cut short when the lint exits.
+  // lint-markup over app/. Its report goes to a file: a large report written to a pipe is cut short when the lint exits.
   const lintFile = path.join(OUT, 'lint-markup.json');
   const fd = openSync(lintFile, 'w');
   const lint = spawnSync(process.execPath, [path.join(REPO, 'scripts/lint-markup.mjs'), '--json', 'app'], { cwd: HERE, stdio: ['ignore', fd, 'pipe'], encoding: 'utf8' });
@@ -455,16 +360,13 @@ try {
   try { findings = JSON.parse(readFileSync(lintFile, 'utf8')).findings; } catch { findings = null; }
   if (!findings) fail(`lint-markup app: no report (exit ${lint.status})\n${lint.stderr}`);
   else {
-    const pending = (f) => f.rule === 'unknown-attribute-value' && (/^data-[a-z-]+="" /.test(f.message) || /^data-icon="/.test(f.message));
-    const real = findings.filter((f) => !pending(f));
-    const aside = findings.length - real.length;
-    if (real.length) fail(`lint-markup app: ${real.length} error(s)\n${real.map((f) => `       ${f.file}:${f.line}:${f.col} ${f.rule} ${f.message}`).join('\n')}`);
-    else ok(`lint-markup app: 0 errors${aside ? ` (${aside} findings set aside: JSX presence attributes and data-icon, Fire fix pending)` : ''}`);
+    if (findings.length) fail(`lint-markup app: ${findings.length} error(s)\n${findings.map((f) => `       ${f.file}:${f.line}:${f.col} ${f.rule} ${f.message}`).join('\n')}`);
+    else ok('lint-markup app: 0 errors');
   }
 
   if (summary.length) {
     const bad = summary.filter((s) => !s.good).length;
-    console.log(`render-equal: ${summary.length} runs, ${bad} failed, ${summary.filter((x) => x.renumbered).length} needed the R9 workaround, ${summary.filter((x) => x.good && x.retries).length} passed on a retry`);
+    console.log(`render-equal: ${summary.length} runs, ${bad} failed`);
   }
 } catch (e) {
   fail(String(e.stack || e));
@@ -474,7 +376,6 @@ try {
   if (prod) await stopNext(prod);
   if (dev) await stopNext(dev);
   if (fire) await fire.close();
-  if (proxy) await proxy.close();
   run(process.execPath, ['scripts/prepare-fire.mjs']); // back to the starter's own look
 }
 console.log(failures.length ? `\nCHECK FAILED: ${failures.length} problem(s)` : '\nCHECK PASSED');

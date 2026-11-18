@@ -84,3 +84,62 @@ test('compareTrees: ids that look generated are renamed, others are compared lit
   const d = compareTrees([el('email')], [el('mail')]);
   assert.deepEqual(d.map((x) => [x.kind, x.property, x.ref, x.cand]), [['attribute', 'id', 'email', 'mail']]);
 });
+
+test('--transparent: a component host inside a Fire node is a difference, unless its selector is given', () => {
+  let r = run('chromium', page('hosted.html'), ['--widths', '1440', '--themes', 'light']);
+  assert.equal(r.status, 1);
+  assert.ok(kinds(r.report).includes('extra') || kinds(r.report).includes('missing'), r.stdout);
+  r = run('chromium', page('hosted.html'), ['--widths', '1440', '--themes', 'light', '--transparent', 'card-body']);
+  assert.equal(r.status, 0, r.stdout);
+  assert.equal(r.report.options.transparent, 'card-body');
+});
+
+const node = (tag, attrs = {}, children = [], extra = {}) => ({ t: 'el', tag, classes: [], attrs, styles: {}, children, ...extra });
+
+test('compareTrees: Fire\'s generated ids and every reference to them are renamed, references after the element they point at (R9)', () => {
+  // A dialog titled by an id from core.js id('fd-dialog-title'); two renders number it differently.
+  const dialog = (n, label = n) => [node('dialog', { class: 'fd-dialog', 'aria-labelledby': `fd-dialog-title-${label}`, 'aria-describedby': 'fd-dialog-desc-1' }, [
+    node('h2', { id: `fd-dialog-title-${n}` }), node('p', { id: 'fd-dialog-desc-1' }), node('label', { for: `fd-field-${n}` }), node('input', { id: `fd-field-${n}` }),
+    node('button', { popovertarget: `fd-popover-${n}` }), node('div', { id: `fd-popover-${n}`, popover: '' })])];
+  assert.deepEqual(compareTrees(dialog('a'), dialog('1f')), []);
+  // pointing at another element is still a difference
+  const d = compareTrees(dialog('a'), dialog('1f', 'zz'));
+  assert.deepEqual(d.map((x) => x.property), ['aria-labelledby']);
+  // authored ids are compared literally
+  assert.equal(compareTrees([node('div', { id: 'logs' })], [node('div', { id: 'log' })]).length, 1);
+});
+
+test('compareTrees: chart gradient ids, their url(#…) references and ids local to one SVG are renamed (R9)', () => {
+  const chart = (grad, clip, style = grad) => [node('svg', { class: 'fd-chart-svg', viewBox: '0 0 100 40' }, [
+    node('defs', {}, [node('linearGradient', { id: grad }), node('clipPath', { id: clip })]),
+    node('path', { class: 'fd-chart-area', fill: `url(#${grad})`, 'clip-path': `url("#${clip}")`, d: 'M0 0L10 10' }, [], { styles: { fill: `url("http://127.0.0.1:1/x#${style}")` } }),
+    node('use', { href: `#${clip}` })])];
+  assert.deepEqual(compareTrees(chart('fd-area-13', 'plot-7'), chart('fd-area-3', 'plot-2', 'fd-area-3')), []);
+  // an id that something outside the SVG also references is not local: compared literally
+  const outside = (clip) => [...chart('fd-area-1', clip), node('a', { href: `#${clip}` })];
+  assert.ok(compareTrees(outside('plot-7'), outside('plot-2')).some((x) => x.property === 'id'));
+});
+
+test('compareTrees: SVG geometry is equal within 0.5 px, other attributes and larger moves are not (R10)', () => {
+  const svg = (x, d, width = '20') => [node('svg', { viewBox: '0 0 664.2 40', width }, [node('rect', { x, y: '4', width: '2', height: '8' }), node('path', { d })])];
+  assert.deepEqual(compareTrees(svg('664.2', 'M26 172.5H946L332.67 44'), svg('664.13', 'M26.3 172.1H945.6L332.5 44')), []);
+  assert.deepEqual(compareTrees(svg('664.2', 'M0 0'), svg('664.8', 'M0 0')).map((x) => x.property), ['x']);
+  assert.deepEqual(compareTrees(svg('1', 'M0 0L1 1'), svg('1', 'M0 0H1')).map((x) => x.property), ['d']);
+  // outside an SVG, width is compared literally
+  assert.equal(compareTrees([node('img', { width: '20' })], [node('img', { width: '20.2' })]).length, 1);
+});
+
+test('compareTrees: a margin difference counts only when the boxes differ by more than 0.5 px (R11)', () => {
+  const frame = (margin, box) => [node('div', { class: 'fd-frame' }, [], { classes: ['fd-frame'], styles: { 'margin-left': margin, 'margin-right': margin, width: '1200px' }, box })];
+  assert.deepEqual(compareTrees(frame('24px', [120, 0, 1200, 500]), frame('0px', [120.3, 0, 1200, 500])), []);
+  const d = compareTrees(frame('24px', [144, 0, 1200, 500]), frame('0px', [120, 0, 1200, 500]));
+  assert.deepEqual(d.map((x) => x.property).sort(), ['margin-left', 'margin-right']);
+});
+
+test('settle and CSP: a page that changes 600 ms after load and runs an animation under a strict policy is captured settled and frozen (R13)', () => {
+  const r = run('chromium', page('late.html'), ['--widths', '1440', '--themes', 'light']);
+  assert.equal(r.status, 0, r.stdout);
+  assert.equal(r.report.summary.structuralDifferences + r.report.summary.styleDifferences, 0);
+  const { cand } = r.report.runs[0].settle;
+  assert.ok(cand.quiet && cand.ms >= 400, JSON.stringify(cand));
+});

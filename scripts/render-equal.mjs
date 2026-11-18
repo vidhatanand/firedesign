@@ -5,19 +5,26 @@
  *   node scripts/render-equal.mjs --ref <url|path> --cand <url|path> [--ref-root <sel>] [--cand-root <sel>]
  *        [--widths 1440,375] [--themes light,dark] [--engines chromium] [--max-pixel-ratio 0.001]
  *        [--json out.json] [--diff-dir dir] [--ready-timeout 3000] [--pixel-threshold 0.1] [--verbose]
+ *        [--transparent <selector>]…
  *
  * --ref / --cand: an http(s):// or file:// URL, or a file/directory path. Paths are served from a temporary static
  * server on a free port (127.0.0.1), rooted at the closest common parent of all given paths, and closed on exit.
  * Roots default to `body`. Engines: chromium, firefox, webkit (playwright-core must be installed with the browsers;
  * pixelmatch and pngjs are needed too).
  *
- * For every engine x width x theme, both pages are loaded, <html data-theme> is set, animations and transitions are
- * frozen (an injected stylesheet), and the script waits for fonts, for defined custom elements, and for
- * `document.documentElement.dataset.fdReady` when the page has it (or loads a fire/boot/elements script). Then:
+ * For every engine x width x theme, both pages are loaded (with the page's Content Security Policy bypassed, so the
+ * freeze stylesheet applies; a page's policy is for its own checks), <html data-theme> is set, animations and
+ * transitions are frozen (an injected stylesheet), and the script waits for fonts, for Fire's custom elements (`fd-`
+ * tags) to be defined, and for `document.documentElement.dataset.fdReady` when the page has it (or loads a
+ * fire/boot/elements script). Then it waits until the page is quiet (R13): no DOM mutation, no change of the root's
+ * box and no pending timeout of the page of 2 s or less, for 400 ms, up to --ready-timeout (a run that never settles
+ * is captured at the timeout and says so). Then:
  *
  *  (a) structure: the tree of "Fire nodes" under each root. A Fire node is an element with an `fd-` class or an `fd-`
  *      tag; everything inside a Fire node is kept (elements and text). Elements outside any Fire node with no `fd-`
- *      class (framework wrappers, app shells) are transparent: their Fire descendants are hoisted. Comments and
+ *      class (framework wrappers, app shells) are transparent: their Fire descendants are hoisted. Elements that match
+ *      a --transparent selector (repeatable; a component's host element, say `screen-logs, logs-detail`) are
+ *      transparent too, inside Fire nodes as well: their children take their place. Comments and
  *      whitespace-only text are ignored; adjacent text is merged and whitespace collapsed. Compared per node: tag, `fd-`
  *      classes, attributes, text. Siblings are aligned by longest common subsequence, so one moved element shows
  *      up as one `missing` plus one `extra`, a changed text as `text`, a changed class list as `classes`.
@@ -25,11 +32,21 @@
  *        data-reactroot, data-reactid, data-react-checksum, data-v-* (Vue scoped styles, data-v-app),
  *        data-server-rendered, data-allow-mismatch, data-svelte-h, data-astro-cid-*, data-nextjs-*, data-lit-*,
  *        data-hk, defer-hydration, ng-version, ng-reflect-*, ng-server-context, _ngcontent-*, _nghost-*.
- *      Generated ids are renamed to ~gen1, ~gen2… in order of first use (in id, for, aria-labelledby, -describedby,
- *      -controls, -owns, -activedescendant, -errormessage, -details, -flowto, list, form, popovertarget, headers) when
- *      they look generated: React `:r1:`, `«r1»`, `_r_1_`; Vue `v-0`; `radix-…`, `headlessui-…`, `react-aria…`,
- *      `mui-…`, `ember123`, `lit-id…`, `svelte-…`, `uid-…`. Other ids are compared literally.
+ *      Generated ids are renamed to ~gen1, ~gen2… in document order of the elements that carry them (then ids that
+ *      are only referenced, in order of first use), in id and in every reference to them: for, aria-labelledby,
+ *      -describedby, -controls, -owns, -activedescendant, -errormessage, -details, -flowto, list, form,
+ *      popovertarget, headers, an href or xlink:href of `#id`, and `url(#id)` in any attribute or computed style
+ *      (spec/EXPORT.md R9). Generated means:
+ *      Fire's counters from core.js id() (`fd-area-d`, `fd-dialog-title-a`: `fd-`, words, a base-36 counter); an id
+ *      defined inside an <svg> that only `url(#…)` or `href="#…"` inside that same <svg> references (a gradient, a
+ *      clip path); React `:r1:`, `«r1»`, `_r_1_`; Vue `v-0`; `radix-…`, `headlessui-…`, `react-aria…`, `mui-…`,
+ *      `ember123`, `lit-id…`, `svelte-…`, `uid-…`. Other ids are compared literally.
+ *      SVG geometry (R10): inside an <svg>, x, y, width, height, cx, cy, r, rx, ry, x1, y1, x2, y2 and the numbers in
+ *      d, points, transform and viewBox are equal when every number is within 0.5 px and the rest of the value is the
+ *      same (a chart drawn again at a plot a fraction of a pixel wider).
  *  (b) computed styles of matched nodes: a fixed list of layout, box, type and colour properties (PROPS below).
+ *      Margins (R11) count only when the two boxes (relative to the root) differ by more than 0.5 px: engines can
+ *      report a stale computed `auto` margin after a late layout change while the box is where it should be.
  *  (c) pixels: a screenshot of each root, same size required; the ratio of differing pixels (pixelmatch) must not
  *      exceed --max-pixel-ratio.
  *
@@ -71,7 +88,16 @@ const IGNORED_ATTRS = [/^data-reactroot$/, /^data-reactid$/, /^data-react-checks
 const ID_ATTRS = new Set(['id', 'for', 'aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'aria-activedescendant',
   'aria-errormessage', 'aria-details', 'aria-flowto', 'list', 'form', 'popovertarget', 'headers']);
 const GENERATED_ID = [/^:r[0-9a-z]+:$/, /^«[0-9a-z]+»$/, /^_r_[0-9a-z]+_$/, /^v-\d+$/, /^radix-/, /^headlessui-/, /^react-aria/,
-  /^mui-/, /^ember\d+$/, /^lit-id/, /^svelte-/, /^uid-/];
+  /^mui-/, /^ember\d+$/, /^lit-id/, /^svelte-/, /^uid-/,
+  /^fd-[a-z]+(?:-[a-z]+)*-[0-9a-z]+$/];   // Fire: core.js id(prefix), a base-36 counter after an fd- prefix
+const HREF_ATTRS = new Set(['href', 'xlink:href']);
+/** url(#id) in an attribute or a computed style; a computed value may carry the page's URL before the `#`. */
+const URL_REF = /url\(\s*(["']?)([^"')]*?)#([^"')\s]+)\1\s*\)/g;
+/** Attributes of SVG elements compared with a tolerance (R10), lowercase. */
+const GEOMETRY = new Set(['x', 'y', 'width', 'height', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2', 'd', 'points', 'transform', 'viewbox']);
+const NUMBER = /[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
+const GEOMETRY_TOLERANCE = 0.5;
+const MARGINS = new Set(['margin-top', 'margin-right', 'margin-bottom', 'margin-left']);
 
 const FREEZE_CSS = '*,*::before,*::after{animation:none!important;animation-delay:0s!important;transition:none!important;' +
   'transition-delay:0s!important;scroll-behavior:auto!important;caret-color:transparent!important}';
@@ -135,18 +161,40 @@ export async function resolveTargets(values) {
 
 /* ------------------------------------------------------------------ page side */
 
-async function preparePage(page, theme, readyTimeout) {
+/** A timer the page sets for this long or less is waited for before the capture (a skeleton swap, a first-visit dialog). */
+const SETTLE_TIMERS_MS = 2000;
+/** The page is quiet when nothing has changed for this long (R13). */
+const QUIET_MS = 400;
+
+// Runs in the page before its own scripts: keeps the page's pending short timeouts, so the capture can wait for them.
+function settleRecorder(limit) {
+  const timeout = window.setTimeout.bind(window);
+  const clear = window.clearTimeout.bind(window);
+  const pending = new Set();
+  window.setTimeout = function setTimeout(fn, delay, ...args) {
+    if (typeof fn !== 'function' || (Number(delay) || 0) > limit) return timeout(fn, delay, ...args);
+    const id = timeout((...a) => { pending.delete(id); fn(...a); }, delay, ...args);
+    pending.add(id);
+    return id;
+  };
+  window.clearTimeout = function clearTimeout(id) { pending.delete(id); return clear(id); };
+  Object.defineProperty(window, '__fdSettle', { value: { timeout, pending } });
+}
+
+async function preparePage(page, theme, readyTimeout, rootSel) {
   await page.evaluate(async (timeout) => {
+    const wait = (ms) => new Promise((r) => (window.__fdSettle?.timeout ?? setTimeout)(r, ms));
     const de = document.documentElement;
     const ready = () => { const v = de.dataset.fdReady; return v !== undefined && v !== 'false' && v !== '0'; };
     const scripts = [...document.scripts];
     if (ready() || scripts.some((s) => /fire|boot|elements/i.test(s.src))) {
       const t0 = performance.now();
-      while (!ready() && performance.now() - t0 < timeout) await new Promise((r) => setTimeout(r, 50));
+      while (!ready() && performance.now() - t0 < timeout) await wait(50);
     }
+    // Fire's own elements only: a framework's elements (Next's next-route-announcer) may never be defined.
     if (scripts.length) {
-      const undef = [...new Set([...document.querySelectorAll('*')].map((e) => e.localName).filter((n) => n.includes('-') && !customElements.get(n)))];
-      await Promise.all(undef.map((n) => Promise.race([customElements.whenDefined(n), new Promise((r) => setTimeout(r, Math.min(timeout, 1000)))])));
+      const undef = [...new Set([...document.querySelectorAll('*')].map((e) => e.localName).filter((n) => n.startsWith('fd-') && !customElements.get(n)))];
+      await Promise.all(undef.map((n) => Promise.race([customElements.whenDefined(n), wait(Math.min(timeout, 1000))])));
     }
   }, readyTimeout);
   await page.addStyleTag({ content: FREEZE_CSS });
@@ -155,12 +203,36 @@ async function preparePage(page, theme, readyTimeout) {
     await document.fonts.ready;
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
   });
+  // R13: settle. Wait until the DOM has not changed, the root's box has not moved and no short timer of the page is
+  // pending for QUIET_MS, up to the ready timeout: a chart redrawn after load, a skeleton swapped at 600 ms.
+  return page.evaluate(async ({ timeout, sel, quiet }) => {
+    const wait = (ms) => new Promise((r) => (window.__fdSettle?.timeout ?? setTimeout)(r, ms));
+    const pending = window.__fdSettle?.pending ?? new Set();
+    const root = document.querySelector(sel) ?? document.documentElement;
+    const box = () => { const b = root.getBoundingClientRect(); return `${b.x} ${b.y} ${b.width} ${b.height}`; };
+    const t0 = performance.now();
+    let last = t0;
+    let seen = box();
+    const observer = new MutationObserver(() => { last = performance.now(); });
+    observer.observe(document, { subtree: true, childList: true, attributes: true, characterData: true });
+    while (performance.now() - t0 < timeout) {
+      await wait(50);
+      const now = box();
+      if (now !== seen || pending.size) { seen = now; last = performance.now(); }
+      if (performance.now() - last >= quiet) break;
+    }
+    observer.disconnect();
+    return { ms: Math.round(performance.now() - t0), quiet: performance.now() - last >= quiet };
+  }, { timeout: readyTimeout, sel: rootSel, quiet: QUIET_MS });
 }
 
 // Runs in the page. Returns the tree of Fire nodes under `sel`.
-function extractInPage({ sel, props }) {
+function extractInPage({ sel, props, transparent }) {
   const root = document.querySelector(sel);
   if (!root) return { error: `root not found: ${sel}` };
+  try { if (transparent) root.matches(transparent); } catch { return { error: `bad --transparent selector: ${transparent}` }; }
+  const origin = root.getBoundingClientRect();
+  const r2 = (v) => Math.round(v * 100) / 100;
   const SKIP = new Set(['script', 'style', 'link', 'meta', 'template', 'noscript', 'title', 'head']);
   const isFire = (el) => el.localName.startsWith('fd-') || [...el.classList].some((c) => c.startsWith('fd-'));
   const make = (el) => {
@@ -169,7 +241,9 @@ function extractInPage({ sel, props }) {
     for (const p of props) styles[p] = cs.getPropertyValue(p);
     const attrs = {};
     for (const a of el.attributes) attrs[a.name] = a.value;
-    return { t: 'el', tag: el.localName, classes: [...el.classList].filter((c) => c.startsWith('fd-')).sort(), attrs, styles, children: [] };
+    const b = el.getBoundingClientRect();
+    const box = [r2(b.left - origin.left), r2(b.top - origin.top), r2(b.width), r2(b.height)];
+    return { t: 'el', tag: el.localName, classes: [...el.classList].filter((c) => c.startsWith('fd-')).sort(), attrs, styles, box, children: [] };
   };
   const walk = (node, inFire, out) => {
     for (const ch of node.childNodes) {
@@ -180,6 +254,7 @@ function extractInPage({ sel, props }) {
         }
       } else if (ch.nodeType === 1) {
         if (SKIP.has(ch.localName)) continue;
+        if (transparent && ch.matches(transparent)) { walk(ch, inFire, out); continue; }
         if (inFire || isFire(ch)) { const n = make(ch); out.push(n); walk(ch, true, n.children); } else walk(ch, false, out);
       }
     }
@@ -193,17 +268,61 @@ function extractInPage({ sel, props }) {
 
 const num = (v) => v.replace(/-?\d*\.\d+/g, (m) => String(Math.round(parseFloat(m) * 100) / 100));
 
-export function normalizeTree(nodes) {
-  const gen = new Map();
-  const canon = (name, value) => {
-    if (!ID_ATTRS.has(name)) return value;
-    return value.split(/\s+/).map((tok) => {
-      if (!GENERATED_ID.some((re) => re.test(tok))) return tok;
-      if (!gen.has(tok)) gen.set(tok, `~gen${gen.size + 1}`);
-      return gen.get(tok);
-    }).join(' ');
+/** The ids a value points at: id references (for, aria-*…), `#id` in href, and url(#id) anywhere. */
+function referencedIds(name, value) {
+  const out = [];
+  if (ID_ATTRS.has(name) && name !== 'id') out.push(...value.split(/\s+/).filter(Boolean));
+  else if (HREF_ATTRS.has(name) && value.startsWith('#')) out.push(value.slice(1));
+  for (const m of value.matchAll(URL_REF)) out.push(m[3]);
+  return out;
+}
+
+/** Ids defined inside an <svg> that only url(#…) or href="#…" inside that same <svg> point at (gradients, clip paths). */
+function svgLocalIds(nodes) {
+  const defined = new Map();   // id -> the outermost <svg> it is defined in
+  const refs = new Map();      // id -> the outermost <svg> of each reference (-1 outside any)
+  let count = 0;
+  const visit = (list, svg) => {
+    for (const n of list) {
+      if (n.t !== 'el') continue;
+      const here = svg < 0 && n.tag === 'svg' ? count++ : svg;
+      for (const [k, v] of Object.entries(n.attrs)) {
+        if (k === 'id') { if (svg >= 0) defined.set(v, svg); continue; }
+        for (const id of referencedIds(k, v)) (refs.get(id) ?? refs.set(id, []).get(id)).push(here);
+      }
+      for (const v of Object.values(n.styles ?? {})) for (const m of v.matchAll(URL_REF)) (refs.get(m[3]) ?? refs.set(m[3], []).get(m[3])).push(here);
+      visit(n.children, here);
+    }
   };
-  const fix = (list) => {
+  visit(nodes, -1);
+  return new Set([...defined].filter(([id, svg]) => refs.get(id)?.length && refs.get(id).every((at) => at === svg)).map(([id]) => id));
+}
+
+export function normalizeTree(nodes) {
+  const local = svgLocalIds(nodes);
+  const generated = (tok) => local.has(tok) || GENERATED_ID.some((re) => re.test(tok));
+  const gen = new Map();
+  const rename = (tok) => {
+    if (!gen.has(tok)) gen.set(tok, `~gen${gen.size + 1}`);
+    return gen.get(tok);
+  };
+  // The elements that carry ids are numbered first, in document order, so a reference is renamed after the element it
+  // points at: one wrong reference is one difference. Ids referenced but not defined under the root come after.
+  const number = (list) => {
+    for (const n of list) {
+      if (n.t !== 'el') continue;
+      if (n.attrs.id && generated(n.attrs.id)) rename(n.attrs.id);
+      number(n.children);
+    }
+  };
+  number(nodes);
+  const urls = (value) => value.replace(URL_REF, (m, q, before, id) => (generated(id) ? `url(#${rename(id)})` : m));
+  const canon = (name, value) => {
+    if (ID_ATTRS.has(name)) return value.split(/\s+/).map((tok) => (generated(tok) ? rename(tok) : tok)).join(' ');
+    if (HREF_ATTRS.has(name) && value.startsWith('#') && generated(value.slice(1))) return `#${rename(value.slice(1))}`;
+    return value.includes('url(') ? urls(value) : value;
+  };
+  const fix = (list, inSvg) => {
     const out = [];
     for (const n of list) {
       if (n.t === 'text') {
@@ -211,19 +330,29 @@ export function normalizeTree(nodes) {
         if (text) out.push({ t: 'text', text });
         continue;
       }
+      const svg = inSvg || n.tag === 'svg';
       const attrs = {};
-      for (const [k, v] of Object.entries(n.attrs)) {
+      for (const k of Object.keys(n.attrs).sort()) {
         if (IGNORED_ATTRS.some((re) => re.test(k))) continue;
-        attrs[k] = canon(k, v);
+        attrs[k] = canon(k, n.attrs[k]);
       }
       const styles = {};
-      for (const [k, v] of Object.entries(n.styles)) styles[k] = num(v);
-      out.push({ ...n, attrs, styles, children: fix(n.children) });
+      for (const [k, v] of Object.entries(n.styles)) styles[k] = num(v.includes('url(') ? urls(v) : v);
+      out.push({ ...n, attrs, styles, svg, children: fix(n.children, svg) });
     }
     return out;
   };
-  return fix(nodes);
+  return fix(nodes, false);
 }
+
+/** Two values of an SVG geometry attribute: the same apart from numbers, and every number within the tolerance. */
+export function sameGeometry(a, b) {
+  if (a == null || b == null) return a === b;
+  if (a.replace(NUMBER, '#') !== b.replace(NUMBER, '#')) return false;
+  const x = a.match(NUMBER) ?? [], y = b.match(NUMBER) ?? [];
+  return x.length === y.length && x.every((v, i) => Math.abs(parseFloat(v) - parseFloat(y[i])) <= GEOMETRY_TOLERANCE);
+}
+const isGeometry = (n, name) => n.svg && GEOMETRY.has(name.toLowerCase());
 
 // Alignment signature: the node's whole content (tag, classes, attributes, descendants, text), without styles, so two
 // identical-looking siblings that swap places are one missing plus one extra rather than a cascade of changes.
@@ -232,7 +361,8 @@ function sig(n) {
   if (n.t === 'text') return `#text:${n.text}`;
   let v = sigCache.get(n);
   if (!v) {
-    v = `${n.tag}|${n.classes.join('.')}|${JSON.stringify(Object.entries(n.attrs).sort())}|(${n.children.map(sig).join(',')})`;
+    const attrs = Object.entries(n.attrs).map(([k, a]) => [k, isGeometry(n, k) ? a.replace(NUMBER, '#') : a]).sort();
+    v = `${n.tag}|${n.classes.join('.')}|${JSON.stringify(attrs)}|(${n.children.map(sig).join(',')})`;
     sigCache.set(n, v);
   }
   return v;
@@ -258,10 +388,14 @@ function describe(n) { return n.t === 'text' ? JSON.stringify(n.text) : `<${n.ta
 function diffNodes(r, c, p, out) {
   if (r.classes.join(' ') !== c.classes.join(' ')) out.push({ kind: 'classes', path: p, property: 'class', ref: r.classes.join(' '), cand: c.classes.join(' ') });
   for (const k of new Set([...Object.keys(r.attrs), ...Object.keys(c.attrs)])) {
-    if (r.attrs[k] !== c.attrs[k]) out.push({ kind: 'attribute', path: p, property: k, ref: r.attrs[k] ?? null, cand: c.attrs[k] ?? null });
+    if (r.attrs[k] === c.attrs[k] || (isGeometry(r, k) && sameGeometry(r.attrs[k], c.attrs[k]))) continue;
+    out.push({ kind: 'attribute', path: p, property: k, ref: r.attrs[k] ?? null, cand: c.attrs[k] ?? null });
   }
+  // R11: a margin that differs while the box sits in the same place is the engine's stale computed value.
+  const sameBox = r.box && c.box && r.box.every((v, i) => Math.abs(v - c.box[i]) <= GEOMETRY_TOLERANCE);
   for (const k of PROPS) {
-    if (r.styles[k] !== c.styles[k]) out.push({ kind: 'style', path: p, property: k, ref: r.styles[k] ?? null, cand: c.styles[k] ?? null });
+    if (r.styles[k] === c.styles[k] || (sameBox && MARGINS.has(k))) continue;
+    out.push({ kind: 'style', path: p, property: k, ref: r.styles[k] ?? null, cand: c.styles[k] ?? null });
   }
   diffLists(r.children, c.children, p, out);
 }
@@ -309,16 +443,17 @@ const countNodes = (list) => list.reduce((s, n) => s + (n.t === 'el' ? 1 + count
 
 /* ------------------------------------------------------------------ runner */
 
-async function load(deps, ctxOptions, url, root, theme, readyTimeout, wantShot) {
+async function load(deps, ctxOptions, url, root, theme, readyTimeout, wantShot, transparent) {
   const context = await deps.browser.newContext(ctxOptions);
   try {
+    await context.addInitScript(settleRecorder, SETTLE_TIMERS_MS);
     const page = await context.newPage();
     await page.goto(url, { waitUntil: 'load' });
-    await preparePage(page, theme, readyTimeout);
-    const tree = await page.evaluate(extractInPage, { sel: root, props: PROPS });
+    const settle = await preparePage(page, theme, readyTimeout, root);
+    const tree = await page.evaluate(extractInPage, { sel: root, props: PROPS, transparent });
     let shot = null;
     if (!tree.error && wantShot) shot = await page.locator(root).first().screenshot({ animations: 'disabled', caret: 'hide' });
-    return { tree, shot };
+    return { tree, shot, settle };
   } finally { await context.close(); }
 }
 
@@ -346,21 +481,25 @@ export async function run(opts) {
   const PNG = png.PNG || png.default?.PNG;
   const pwx = pw.default || pw;
 
+  const transparent = [opts.transparent ?? []].flat().filter(Boolean).join(', ') || null;
   const targets = await resolveTargets([opts.ref, opts.cand]);
   const [refUrl, candUrl] = targets.urls;
   const report = { ref: refUrl, cand: candUrl, refRoot: opts.refRoot, candRoot: opts.candRoot,
-    options: { widths: opts.widths, themes: opts.themes, engines: opts.engines, maxPixelRatio: opts.maxPixelRatio }, runs: [], summary: null, ok: true };
+    options: { widths: opts.widths, themes: opts.themes, engines: opts.engines, maxPixelRatio: opts.maxPixelRatio, transparent }, runs: [], summary: null, ok: true };
   try {
     for (const engine of opts.engines) {
       if (!pwx[engine]) throw new Error(`unknown engine ${engine}`);
       const browser = await pwx[engine].launch();
       try {
         for (const width of opts.widths) for (const theme of opts.themes) {
-          const ctxOptions = { viewport: { width, height: 900 }, colorScheme: theme, reducedMotion: 'reduce', deviceScaleFactor: 1 };
+          // bypassCSP: the freeze stylesheet is an inline <style>, which a page's strict policy would block. The policy
+          // itself is for the page's own checks.
+          const ctxOptions = { viewport: { width, height: 900 }, colorScheme: theme, reducedMotion: 'reduce', deviceScaleFactor: 1, bypassCSP: true };
           const deps = { browser };
-          const r = await load(deps, ctxOptions, refUrl, opts.refRoot, theme, opts.readyTimeout, true);
-          const c = await load(deps, ctxOptions, candUrl, opts.candRoot, theme, opts.readyTimeout, true);
-          const runRes = { engine, width, theme, structure: [], styles: [], pixels: null, nodes: { ref: 0, cand: 0 }, errors: [], ok: true };
+          const r = await load(deps, ctxOptions, refUrl, opts.refRoot, theme, opts.readyTimeout, true, transparent);
+          const c = await load(deps, ctxOptions, candUrl, opts.candRoot, theme, opts.readyTimeout, true, transparent);
+          const runRes = { engine, width, theme, structure: [], styles: [], pixels: null, nodes: { ref: 0, cand: 0 }, errors: [], ok: true,
+            settle: { ref: r.settle, cand: c.settle } };
           if (r.tree.error) runRes.errors.push(`ref: ${r.tree.error}`);
           if (c.tree.error) runRes.errors.push(`cand: ${c.tree.error}`);
           if (!runRes.errors.length) {
@@ -396,7 +535,8 @@ export function summarize(report, verbose = false) {
   const lines = [];
   for (const r of report.runs) {
     const px = r.pixels ? (r.pixels.sizeMismatch ? `size ${r.pixels.ref.join('x')} vs ${r.pixels.cand.join('x')}` : `pixels ${(r.pixels.ratio * 100).toFixed(4)}%`) : 'pixels n/a';
-    lines.push(`${r.ok ? 'ok  ' : 'FAIL'} ${r.engine} ${r.width} ${r.theme}: ${r.nodes.ref}/${r.nodes.cand} nodes, ${r.structure.length} structure, ${r.styles.length} style, ${px}`);
+    const restless = ['ref', 'cand'].filter((k) => r.settle?.[k] && !r.settle[k].quiet).map((k) => `${k} not quiet after ${r.settle[k].ms} ms`);
+    lines.push(`${r.ok ? 'ok  ' : 'FAIL'} ${r.engine} ${r.width} ${r.theme}: ${r.nodes.ref}/${r.nodes.cand} nodes, ${r.structure.length} structure, ${r.styles.length} style, ${px}${restless.length ? ` (${restless.join(', ')})` : ''}`);
     for (const e of r.errors) lines.push(`     ${e}`);
     const all = [...r.structure, ...r.styles];
     for (const d of all.slice(0, verbose ? all.length : 12)) {
@@ -413,7 +553,7 @@ export function summarize(report, verbose = false) {
 
 function parseArgs(argv) {
   const o = { ref: null, cand: null, refRoot: 'body', candRoot: 'body', widths: [1440, 375], themes: ['light', 'dark'], engines: ['chromium'],
-    maxPixelRatio: 0.001, json: null, diffDir: null, readyTimeout: 3000, pixelThreshold: 0.1, verbose: false };
+    maxPixelRatio: 0.001, json: null, diffDir: null, readyTimeout: 3000, pixelThreshold: 0.1, verbose: false, transparent: [] };
   const list = (v) => v.split(',').map((x) => x.trim()).filter(Boolean);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -432,6 +572,7 @@ function parseArgs(argv) {
       case '--ready-timeout': o.readyTimeout = Number(val()); break;
       case '--pixel-threshold': o.pixelThreshold = Number(val()); break;
       case '--verbose': o.verbose = true; break;
+      case '--transparent': o.transparent.push(val()); break;
       case '-h': case '--help': o.help = true; break;
       default: throw new Error(`unknown option ${a}`);
     }
@@ -443,7 +584,7 @@ async function main(argv) {
   let o;
   try { o = parseArgs(argv); } catch (e) { console.error(`render-equal: ${e.message}`); return 2; }
   if (o.help || !o.ref || !o.cand) {
-    console.error('usage: node scripts/render-equal.mjs --ref <url|path> --cand <url|path> [--ref-root sel] [--cand-root sel] [--widths 1440,375] [--themes light,dark] [--engines chromium] [--max-pixel-ratio 0.001] [--json out.json]');
+    console.error('usage: node scripts/render-equal.mjs --ref <url|path> --cand <url|path> [--ref-root sel] [--cand-root sel] [--widths 1440,375] [--themes light,dark] [--engines chromium] [--max-pixel-ratio 0.001] [--json out.json] [--transparent sel]');
     return o.help ? 0 : 2;
   }
   if (o.widths.some((w) => !(w > 0)) || o.themes.some((t) => !['light', 'dark'].includes(t))) { console.error('render-equal: bad --widths or --themes'); return 2; }

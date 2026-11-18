@@ -85,14 +85,13 @@ customElements.define('screen-example', ScreenExample);
 
 Three things to know when it fails or when you change a screen:
 
-- The templates are Ember's, so the comparison uses a second build with Ember's look and without the policy
-  (`vite build --mode compare`, in `.check/dist`). render-equal adds a `<style>` element to freeze animations, which
-  the policy would block. The browser run uses the real build, so the policy is tested where it applies.
-- Both sides run timers (skeletons clear after 600 ms, the overview's first-visit dialog opens at 800 ms), so the
-  check's servers hold back `data-fd-ready` for 2.5 s after load. The app is not changed for this.
-- Ids that Fire numbers itself (`fd-area-13`) and SVG coordinates that differ by under half a pixel are reported as
-  "tolerated", not as failures: a chart takes a new number each time it is drawn, and the reference page draws it more
-  often. Everything else, and every pixel, counts.
+- The templates are Ember's, so the comparison uses a second build with Ember's look (in `.check/dist`), policy
+  included: render-equal bypasses a page's policy for its own freeze stylesheet, and the browser run tests the policy.
+- Both sides run timers (skeletons clear after 600 ms, the overview's first-visit dialog opens at 800 ms);
+  render-equal waits until each page is quiet before it compares (spec R13).
+- render-equal itself treats ids that Fire numbers (`fd-area-13`) by the element they point at, and SVG coordinates
+  within half a pixel as equal (spec R9, R10): a chart takes a new number each time it is drawn, and the reference
+  page draws it more often. Everything else, and every pixel, counts.
 
 Options: `--only logs`, `--engines chromium`, `--widths 1440`, `--themes light`, `--skip-build`, and
 `--diff-dir .check/diff` to keep the JSON reports and diff images.

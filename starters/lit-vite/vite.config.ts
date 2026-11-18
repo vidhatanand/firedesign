@@ -21,17 +21,13 @@ const CSP = [
 ].join('; ');
 
 function fireHtml(): Plugin {
-  let comparing = false;
   return {
     name: 'fire-html',
-    // `npm run check` builds once with `--mode compare`, without the policy: render-equal freezes animations by
-    // adding a <style> element, which the policy rightly blocks. The browser run in the check uses the real build.
-    configResolved(config) { comparing = config.mode === 'compare'; },
     transformIndexHtml: {
       order: 'pre',
       handler(html, ctx) {
         const onHtml = Object.entries(theme as Record<string, string>).map(([name, value]) => ` ${name}="${value}"`).join('');
-        const policy = ctx.server || comparing ? '' : `    <meta http-equiv="Content-Security-Policy" content="${CSP}" />\n`;
+        const policy = ctx.server ? '' : `    <meta http-equiv="Content-Security-Policy" content="${CSP}" />\n`;
         return html.replace('<html lang="en">', `<html lang="en"${onHtml}>`).replace('<!-- csp -->\n', policy);
       },
     },

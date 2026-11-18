@@ -194,7 +194,7 @@
     "forbidden": "i[data-icon] in Lit, React and Vue code",
     "why": "Fire replaces the <i> with an <svg>: React crashes removing it (removeChild), Vue throws removing it with v-if and leaves the icon, Lit attribute bindings on it go stale.",
     "check": ["E4", "E7", "E8"],
-    "element": { "tag": "fd-icon", "from": { "data-icon": "name", "data-size": "size" }, "passThrough": "every other attribute", "confirm": "attribute names come from contract/custom-elements.json (elements package)" },
+    "element": { "tag": "fd-icon", "from": { "data-icon": "icon", "data-size": "size" }, "passThrough": "every other attribute stays on the element, which is the icon's root (class fd-icon, data-icon, aria-hidden)", "confirm": "attribute names from contract/custom-elements.json: icon (not name) and size; lint-markup reports <fd-icon name>, which draws nothing" },
     "staticSvg": {
       "template": "<svg class=\"fd-icon{class}\"{size} data-icon=\"{name}\" aria-hidden=\"true\"{rest}><use href=\"#i-{name}\"></use></svg>",
       "class": " followed by the <i>'s classes, or empty",
@@ -214,7 +214,7 @@
   },
   "customElements": {
     "elements": ["fd-icon", "fd-chart", "fd-code", "fd-texture"],
-    "registration": { "rule": "import 'fire-design/elements' before the first render; registering twice is a no-op", "lit": "main.ts", "react": "module top of the client component that renders the element, or use wrappers/react", "vue": "main.ts before app.mount()", "next": "client components only", "check": ["E1", "E6", "A"] },
+    "registration": { "rule": "import 'fire-design/elements' before the first render, in the browser only; registering twice is a no-op", "lit": "main.ts", "react": "use wrappers/react (fire-design/react registers in the browser only), or import('fire-design/elements') in an effect; never a static import at the top of a client module: Next renders client components on the server too, and elements.js touches HTMLElement and document as it loads", "vue": "main.ts before app.mount()", "next": "client components only", "check": ["E1", "E6", "A"] },
     "attributes": { "rule": "strings and numbers the manifest lists as attributes", "lit": "{name}=\"{value}\"", "react": "{name}=\"{value}\"", "vue": "{name}=\"{value}\"", "check": ["E1", "E6"] },
     "properties": {
       "rule": "data the manifest lists as properties (.data on fd-chart, .code on fd-code)",
@@ -247,12 +247,12 @@
     "check": ["E1", "E6", "E8", "E9", "E12"]
   },
   "lifecycle": {
-    "L1": { "when": "after the first mount", "lit": "firstUpdated() { init(this); }", "react": "useFire({ref}): useEffect(() => { init({ref}.current); })", "vue": "v-fire: mounted(el) { init(el); }", "check": ["E4", "E7"] },
-    "L2": { "when": "after an update that inserts or replaces Fire markup (lists, key changes, v-if)", "lit": "updated() { init(this); }", "react": "useFire's effect runs after every commit (no dependency list)", "vue": "v-fire: updated(el) { init(el); }", "check": ["E4", "E7"] },
+    "L1": { "when": "after the first mount", "lit": "firstUpdated() (or updated()) { init(this); }, without waiting for child elements: fd-chart draws from its properties whenever init ran", "react": "useFire({ref}): useEffect(() => { init({ref}.current); })", "vue": "v-fire: mounted(el) { init(el); }", "check": ["E4", "E7"] },
+    "L2": { "when": "after an update that inserts or replaces Fire markup (lists, key changes, v-if)", "lit": "updated() { init(this); }, at once", "react": "useFire's effect runs after every commit (no dependency list)", "vue": "v-fire: updated(el) { init(el); }", "check": ["E4", "E7"] },
     "L3": { "when": "after a route change", "lit": "the router outlet calls init(outlet) after rendering", "react": "the root layout's client component: useEffect(() => { import('fire-design').then((f) => f.init(document)); }, [usePathname()])", "vue": "router.afterEach(() => nextTick(() => init(document)))", "check": ["E9", "A"] },
     "L4": { "when": "after inserting HTML by hand", "all": "init(container)", "check": ["R"] },
     "L5": { "when": "never before hydration", "react": "Fire running before hydrateRoot makes React rebuild the tree, losing Fire's changes; load Fire inside useEffect", "check": ["E3"] },
-    "L6": { "when": "always", "rule": "Fire markup lives in light DOM: Fire's listeners are delegated on document and use event.target.closest()", "lit": "createRenderRoot() { return this; }", "check": ["R", "A"] },
+    "L6": { "when": "always", "rule": "Fire markup lives in light DOM: Fire's listeners are delegated on document and use event.target.closest()", "lit": "createRenderRoot() { return this; }", "renderEqual": "a component's host element inside .fd-page is a node of its own: screens render their own .fd-page with hosts at display: contents, or render-equal runs with --transparent <host selectors> (R12)", "check": ["R", "A"] },
     "L7": { "when": "unmount", "rule": "no teardown; Fire has no destroy function", "check": ["R"] },
     "idempotent": "init(root) is a no-op for elements it has seen (once, keyed on the element); the forms and texture modules also enhance inserted markup through their own observers"
   },
@@ -290,12 +290,12 @@
   "next": {
     "N1": { "rule": "Server components render plain Fire markup; Fire's modules load in the browser only, after hydration: import('fire-design') inside useEffect in a client component", "check": ["E3", "E9"] },
     "N2": { "rule": "boot.js: a blocking <script src=\"/fire/boot.js\" nonce={nonce} /> in the root layout <head>, served from public/fire/boot.js (copied from node_modules/fire-design/fire/boot.js before build); not next/script", "check": ["E9", "A"] },
-    "N3": { "rule": "<html {...themeAttributes} suppressHydrationWarning>", "check": ["E9"] },
-    "N4": { "rule": "suppressHydrationWarning on every server-rendered element with data-fd-vars", "check": ["E3", "E9"] },
+    "N3": { "rule": "<html {...themeAttributes} suppressHydrationWarning>", "devLogs": "Next 16 dev logs attribute hydration mismatches to the browser console, text and structure mismatches only to its overlay and terminal ([browser] lines): a check reads both", "check": ["E9"] },
+    "N4": { "rule": "suppressHydrationWarning on every server-rendered element with data-fd-vars; a check reads the console and the dev server output (N3)", "check": ["E3", "E9"] },
     "N5": { "rule": "JSON scripts via dangerouslySetInnerHTML and jsonForScript", "check": ["E3"] },
-    "N6": { "rule": "import 'fire-design/css' in app/layout.tsx; TypeScript needs declare module 'fire-design/css' (or a types entry for ./css)", "check": ["E9"] },
-    "N7": { "rule": "elements and wrappers/react in client components only", "check": ["A"] },
-    "N8": { "rule": "<FireSprite /> in the root layout body (icons.sprite.serverRendered)", "check": ["E11", "A"] },
+    "N6": { "rule": "import 'fire-design/css' in app/layout.tsx; TypeScript needs declare module 'fire-design/css' (or a types entry for ./css). Turbopack lowers light-dark() too: package.json \"browserslist\": [\"chrome >= 123\", \"edge >= 123\", \"firefox >= 120\", \"safari >= 17.5\"]", "check": ["E9"] },
+    "N7": { "rule": "elements and wrappers/react in client components only; never a static import of fire-design/elements (C1): fire-design/react, or import('fire-design/elements') in an effect", "check": [] },
+    "N8": { "rule": "<FireSprite /> in the root layout body (icons.sprite.serverRendered); fire/js/icons.d.ts types fire-design/fire/js/icons.js; @types/react lacks hidden on SVG: augment SVGAttributes with hidden?: boolean", "check": ["E11"] },
     "layout": "import 'fire-design/css';\nimport './fire-theme.css';\nimport { headers } from 'next/headers';\nimport { FireRuntime } from './fire-runtime';\nimport { FireSprite } from './fire-sprite';\nimport { jsonForScript } from './fire-export';\nimport labels from './labels.json';\nimport { theme } from './theme';\n\nexport default async function RootLayout({ children }: { children: React.ReactNode }) {\n  const nonce = (await headers()).get('x-nonce') ?? undefined;\n  return (\n    <html lang=\"en\" {...theme} suppressHydrationWarning>\n      <head>\n        <script src=\"/fire/boot.js\" nonce={nonce} />\n        <script type=\"application/json\" data-fd-labels=\"\" dangerouslySetInnerHTML={{ __html: jsonForScript(labels) }} />\n      </head>\n      <body>\n        <FireSprite />\n        {children}\n        <FireRuntime />\n      </body>\n    </html>\n  );\n}\n",
     "runtime": "'use client';\nimport { useEffect } from 'react';\nimport { usePathname } from 'next/navigation';\nexport function FireRuntime() {\n  const pathname = usePathname();\n  useEffect(() => {\n    let live = true;\n    import('fire-design').then((fire) => { if (live) fire.init(document); });\n    return () => { live = false; };\n  }, [pathname]);\n  return null;\n}\n",
     "proxy": "import { NextResponse, type NextRequest } from 'next/server';\nexport function proxy(request: NextRequest) {\n  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');\n  const dev = process.env.NODE_ENV === 'development';\n  const csp = [\"default-src 'self'\", `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? \" 'unsafe-eval'\" : ''}`, `style-src 'self'${dev ? \" 'unsafe-inline'\" : ''}`, \"img-src 'self' data:\", \"font-src 'self'\", \"object-src 'none'\", \"base-uri 'self'\", \"frame-ancestors 'none'\"].join('; ');\n  const headers = new Headers(request.headers);\n  headers.set('x-nonce', nonce);\n  headers.set('Content-Security-Policy', csp);\n  const response = NextResponse.next({ request: { headers } });\n  response.headers.set('Content-Security-Policy', csp);\n  return response;\n}\nexport const config = { matcher: [{ source: '/((?!_next/static|_next/image|favicon.ico|fire/).*)' }] };\n"
@@ -304,14 +304,15 @@
     "H1": { "rule": "a build step writes themeToCss(record, { selector }) to a .css file loaded after fire.css; expandTheme(record).attributes go on <html>; never a run-time <style> element", "check": ["A"] },
     "H2": { "target": "html", "rule": "<link rel=\"stylesheet\" href=\"fire/fire.css\"><link rel=\"stylesheet\" href=\"theme.css\"> and the attributes on <html>", "check": ["A"] },
     "H3": { "target": "lit, vue", "rule": "import 'fire-design/css'; import './fire-theme.css'; in main.ts; attributes on <html> in index.html", "check": ["A"] },
-    "H4": { "target": "react", "rule": "the same imports in app/layout.tsx; attributes spread on <html> (N3)", "check": ["A"] },
+    "H4": { "target": "react", "rule": "the same imports in app/layout.tsx; attributes spread on <html> (N3); the browserslist of N6 keeps light-dark() as written", "check": ["A"] },
     "H5": { "rule": "a look chosen at run time goes through setTheme, setDensity and tweaks.js; boot.js restores it before first paint", "check": ["R"] }
   },
   "csp": {
-    "P1": { "target": "html, lit, vue (production)", "policy": "script-src 'self'; style-src 'self'", "rule": "works: Vite emits external module scripts and stylesheet links; Fire uses CSSOM setProperty; JSON scripts need no nonce", "check": ["E10"] },
+    "P1": { "target": "html, lit, vue (production)", "policy": "script-src 'self'; style-src 'self'", "rule": "works: Vite emits external module scripts and stylesheet links; Fire uses CSSOM setProperty; JSON scripts need no nonce", "webkitArtefact": "Playwright's WebKit reports every <select> under a strict style-src as a style-src-attr violation (empty sample) with a console error that begins \"Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline'\", even on a bare page; a starter's CSP check may ignore that report, by that exact message only, in WebKit only", "check": ["E10"] },
     "P2": { "target": "vite dev server", "policy": "style-src 'unsafe-inline' in development only", "check": ["A"] },
     "P3": { "target": "react (Next.js)", "policy": "script-src 'self' 'nonce-…' 'strict-dynamic'; style-src 'self' (production)", "rule": "nonce per request from proxy.ts (next.proxy); routes become dynamic; development adds 'unsafe-eval' and style-src 'unsafe-inline'", "check": ["E9", "A"] },
-    "P4": { "target": "all", "rule": "no style, :style, v-show, styleMap, inline handlers, eval, or inline <script> other than application/json", "check": [] }
+    "P4": { "target": "all", "rule": "no style, :style, v-show, styleMap, inline handlers, eval, or inline <script> other than application/json", "check": [] },
+    "P5": { "target": "lit, vue (Vite); next (N6)", "rule": "build.cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5'] in vite.config (P1's companion). Vite's default target makes lightningcss lower light-dark() into a theme-only toggle, which breaks color-scheme overrides (a light-only QR figure turns dark). Next.js and Turbopack: a browserslist in package.json (N6)", "check": [] }
   },
   "labels": {
     "X1": { "rule": "data-label-<key> (dots in the key become hyphens) on a component, an ancestor or <html>; a plain data-* attribute in every target; read each time Fire writes the label", "check": ["R"] },
@@ -342,6 +343,10 @@
     "R6": "Ignore autofocus.",
     "R7": "data-fd-vars is removed by Fire; compare the custom properties it set (computed styles).",
     "R8": "Ignore #fd-icon-sprite and framework root and wrapper elements.",
-    "R9": "Fire-generated ids (fd-… counters) and the aria-* attributes that reference them: compare the referenced element, not the id string."
+    "R9": "Generated ids (Fire's core.js id(): fd-<words>-<base-36 counter>; ids that only url(#…) or href=\"#…\" inside the same <svg> reference; framework ids) are renamed in the document order of the elements that carry them, with every reference (for, the aria-* id lists, popovertarget, href=\"#…\", url(#…) in attributes and computed styles): compare the referenced element, not the id string.",
+    "R10": "SVG geometry (x, y, width, height, cx, cy, r, rx, ry, x1…y2, and the numbers in d, points, transform, viewBox) is equal within 0.5 px.",
+    "R11": "Margins count only when the two boxes (relative to the root) differ by more than 0.5 px (Chromium can report a stale computed auto margin).",
+    "R12": "--transparent <selector> (repeatable) treats matching elements as wrappers, inside Fire nodes too (a component's host element).",
+    "R13": "Capture a settled page: no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms, up to the ready timeout; wait only for fd- elements to be defined; the page's CSP is bypassed for the capture (the starters check the policy in their own browser pass)."
   }
 }

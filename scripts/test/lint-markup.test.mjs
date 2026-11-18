@@ -57,6 +57,18 @@ test('unknown-attribute-value: only for attributes the catalogue lists for the c
   assert.deepEqual(rules('a.html', '<div class="app" data-size="huge"></div>'), []);
 });
 
+test('unknown-attribute-value: JSX `data-x=""` is the bare presence form where the attribute takes no value (A7)', () => {
+  const raw = structuredClone(JSON.parse(fs.readFileSync(catalogPath, 'utf8')));
+  const button = raw.components.find((c) => c.id === 'button');
+  Object.assign(button.attributes, { 'data-block': [''], 'data-wide': [] });
+  const cat = prepareCatalog(raw);
+  const ids = (file, text) => lintText(file, text, cat).map((f) => f.rule);
+  assert.deepEqual(ids('a.tsx', 'const a = <button className="fd-btn" data-block="" data-wide="" />;'), []);
+  assert.deepEqual(ids('a.html', '<button class="fd-btn" data-block data-wide></button>'), []);
+  assert.deepEqual(ids('a.tsx', 'const a = <button className="fd-btn" data-wide="yes" data-size="" />;'), ['unknown-attribute-value', 'unknown-attribute-value'],
+    'a value where none is defined, and "" where values are defined, are still reported');
+});
+
 test('unknown-attribute-value: the value "*" takes any value', () => {
   const star = structuredClone(JSON.parse(fs.readFileSync(catalogPath, 'utf8')));
   star.components.find((c) => c.id === 'button').attributes['data-size'] = ['*'];
@@ -78,14 +90,19 @@ test('icon-only-name: a data-fd-tooltip names an icon-only button (overlays.js g
 });
 
 test('unknown-element: unknown fd- tag fails, catalogued and ordinary tags pass', () => {
-  assert.deepEqual(rules('a.html', '<fd-icon name="x"></fd-icon><my-thing></my-thing>'), []);
+  assert.deepEqual(rules('a.html', '<fd-icon icon="x"></fd-icon><my-thing></my-thing>'), []);
   assert.deepEqual(rules('a.html', '<fd-nothing></fd-nothing>'), ['unknown-element']);
 });
 
-test('unknown-icon: data-icon, fd-icon name and use href', () => {
-  assert.deepEqual(rules('a.html', '<i data-icon="home"></i><fd-icon name="trash"></fd-icon><svg><use href="#i-search"/></svg><svg><use xlink:href="#i-x"/></svg>'), []);
-  assert.deepEqual(rules('a.html', '<i data-icon="homee"></i><fd-icon name="zip"></fd-icon><svg><use href="#i-nada"/></svg><use href="#other"/>'),
+test('unknown-icon: data-icon, fd-icon icon and use href', () => {
+  assert.deepEqual(rules('a.html', '<i data-icon="home"></i><fd-icon icon="trash"></fd-icon><svg><use href="#i-search"/></svg><svg><use xlink:href="#i-x"/></svg>'), []);
+  assert.deepEqual(rules('a.html', '<i data-icon="homee"></i><fd-icon icon="zip"></fd-icon><svg><use href="#i-nada"/></svg><use href="#other"/>'),
     ['unknown-icon', 'unknown-icon', 'unknown-icon']);
+  // fd-icon's attribute is `icon` (elements/src/icon.ts); a `name` draws nothing, so it is reported, with the fix.
+  const named = lint('a.ts', 'html`<fd-icon name="search"></fd-icon><fd-icon icon=${n}></fd-icon>`');
+  assert.deepEqual(named.map((f) => f.rule), ['unknown-icon']);
+  assert.match(named[0].fix, /<fd-icon icon="search">/);
+  assert.match(lint('a.tsx', 'const a = <i data-icon="home" />;')[0].fix, /<fd-icon icon="home">/);
 });
 
 test('no-style: attribute, JSX prop, Vue binding and Lit attribute', () => {
@@ -112,7 +129,7 @@ test('icon-only-name: aria-label, aria-labelledby or visible text satisfy it', (
   assert.deepEqual(rules('a.html', '<button data-icon-only><i data-icon="x"></i><span>Close</span></button>'), []);
   assert.deepEqual(rules('a.html', '<button data-icon-only><i data-icon="x"></i></button>'), ['icon-only-name']);
   assert.deepEqual(rules('a.html', '<button data-icon-only>\n  <i data-icon="x"></i>\n</button><button data-icon-only="false"></button>'), ['icon-only-name']);
-  assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only><fd-icon name="x" /></button>;'), ['icon-only-name']);
+  assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only><fd-icon icon="x" /></button>;'), ['icon-only-name']);
   assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only>{label}</button>;'), []);
   assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only {...rest} />;'), []);
 });

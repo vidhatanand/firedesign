@@ -5,8 +5,7 @@
 //      is written in (the sample screens otherwise simulate a first load with timers); then puts the starter's look back
 //   2. serves the build (single-page fallback) and Fire's repository root (../..) on two free ports. The reference
 //      templates are served WITHOUT their inline demo scripts (they simulate loading and run Ember's demo logic, which a
-//      framework app replaces), with shell.js loaded before fire.js (the shell is there when Fire first draws), and with
-//      links to the three screens as router paths (settings.html → /settings)
+//      framework app replaces), and with links to the three screens as router paths (settings.html → /settings)
 //   3. for each screen runs scripts/render-equal.mjs (.fd-page against .fd-page; 1440 and 375 wide; light and dark;
 //      Chromium, WebKit and Firefox)
 //   4. loads each screen in Chromium and fails on any Content Security Policy violation or console error, after using
@@ -73,19 +72,15 @@ try {
   }
   console.log('bundle sizes (bytes):', JSON.stringify(sizes));
 
-  // 2. servers
-  // The build as it ships (CSP meta in place), and the same build without the meta for render-equal: that script injects a
-  // <style> element to freeze animations, which the policy rightly blocks. The CSP run in step 4 uses the shipped one.
-  const app = (stripPolicy) => async (req, res) => {
+  // 2. servers: the build as it ships (CSP meta in place; render-equal bypasses it for its freeze stylesheet, and the
+  // CSP run in step 4 checks it)
+  const app = async (req, res) => {
     const url = new URL(req.url, 'http://x');
     let file = path.join(dist, decodeURIComponent(url.pathname));
     if (!file.startsWith(dist) || !existsSync(file) || statSync(file).isDirectory()) file = path.join(dist, 'index.html');
-    let body = await readFile(file);
-    if (stripPolicy && file.endsWith('index.html')) body = body.toString().replace(/<meta http-equiv="Content-Security-Policy"[^>]*>/, '');
-    send(res, file, body);
+    send(res, file, await readFile(file));
   };
-  const appPort = await listen(app(false));
-  const renderPort = await listen(app(true));
+  const appPort = await listen(app);
   const refPort = await listen(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     const file = path.join(fireRoot, decodeURIComponent(url.pathname));
@@ -93,9 +88,6 @@ try {
     if (/\/templates\/(overview|logs|settings)\.html$/.test(file)) {
       const html = (await readFile(file, 'utf8'))
         .replace(/<script type="module">[\s\S]*?<\/script>/g, '')
-        // shell.js wraps the page in the app shell; load it before fire.js, as an app that renders its shell first does, so
-        // that Fire draws the charts once at their final width (otherwise they are drawn at full width, then redrawn)
-        .replace(/(<script type="module" src="\.\.\/fire\/fire\.js"><\/script>)(\s*)(<script type="module" src="\.\/shell\.js"><\/script>)/, '$3$2$1')
         .replace(/href="(overview|logs|settings)\.html(#[^"]*)?"/g, (m, name, hash) => `href="/${name}${hash ?? ''}"`);
       send(res, file, html);
       return;
@@ -104,7 +96,7 @@ try {
   });
 
   if (process.argv.includes('--serve')) {
-    console.log(`serving: reference http://127.0.0.1:${refPort}/templates/<name>.html, app http://127.0.0.1:${renderPort}/<route> (policy off), http://127.0.0.1:${appPort}/<route> (policy on). Ctrl-C to stop.`);
+    console.log(`serving: reference http://127.0.0.1:${refPort}/templates/<name>.html, app http://127.0.0.1:${appPort}/<route>. Ctrl-C to stop.`);
     await new Promise(() => {});
   }
 
@@ -112,7 +104,7 @@ try {
   for (const { name, route } of SCREENS) {
     console.log(`\nrender-equal ${name}: templates/${name}.html .fd-page  vs  ${route} .fd-page`);
     const args = [path.join(fireRoot, 'scripts/render-equal.mjs'), '--ref', `http://127.0.0.1:${refPort}/templates/${name}.html`, '--ref-root', '.fd-page',
-      '--cand', `http://127.0.0.1:${renderPort}${route}`, '--cand-root', '.fd-page', '--widths', '1440,375', '--themes', 'light,dark', '--engines', ENGINES];
+      '--cand', `http://127.0.0.1:${appPort}${route}`, '--cand-root', '.fd-page', '--widths', '1440,375', '--themes', 'light,dark', '--engines', ENGINES];
     if (option('--diff-dir')) args.push('--diff-dir', path.join(option('--diff-dir'), name));
     if (option('--json')) args.push('--json', path.join(option('--json'), `${name}.json`));
     const r = await new Promise((resolve) => {

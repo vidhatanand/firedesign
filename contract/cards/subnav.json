@@ -1,0 +1,111 @@
+{
+  "id": "subnav",
+  "job": "Move between settings pages from a side column.",
+  "purpose": "The side navigation inside settings: a 280px column of 40px rows. When it cannot sit beside the content (a container under 760px) it turns into a row of pills that scrolls sideways. Links navigate; buttons get aria-current=\"true\" on click. fd:change fires on selection.",
+  "useWhen": [
+    "A settings or account area has four or more pages and a column beside them.",
+    "The list stays visible while the page content changes."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The whole app needs navigation.",
+      "instead": "sidebar"
+    },
+    {
+      "when": "The items are views of one object.",
+      "instead": "tabs"
+    },
+    {
+      "when": "The links jump within one long page.",
+      "instead": "toc"
+    },
+    {
+      "when": "The items are categories in a catalogue.",
+      "instead": "chip-nav"
+    }
+  ],
+  "aka": [
+    "settings nav",
+    "side nav",
+    "secondary navigation",
+    "vertical nav",
+    "local navigation"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "current",
+      "how": "aria-current=\"page\" on a link, aria-current=\"true\" on a button"
+    },
+    {
+      "name": "overflowing",
+      "how": "data-overflow on the pill row, set by nav.js"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-overflow",
+      "value": "start",
+      "useWhen": "Pills are clipped at the start."
+    },
+    {
+      "attribute": "data-overflow",
+      "value": "end",
+      "useWhen": "Pills are clipped at the end."
+    },
+    {
+      "attribute": "data-overflow",
+      "value": "both",
+      "useWhen": "Pills are clipped at both ends."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-subnav",
+      "role": "The column."
+    },
+    {
+      "class": "fd-subnav-item",
+      "role": "One page; a link or a button."
+    },
+    {
+      "class": "fd-subnav-meta",
+      "role": "A small count or badge at the end of the row."
+    },
+    {
+      "class": "fd-subnav-sep",
+      "role": "A divider between groups."
+    }
+  ],
+  "related": [
+    "sidebar",
+    "tabs",
+    "toc",
+    "chip-nav",
+    "split"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Moves between items."
+    },
+    {
+      "keys": "Enter",
+      "does": "Follows a link or selects a button item."
+    }
+  ],
+  "example": "docs/navigation.html#subnav",
+  "provenance": [
+    "docs/navigation.html",
+    "fire/components/nav.css",
+    "fire/js/nav.js"
+  ],
+  "since": "0.1.0"
+}

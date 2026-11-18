@@ -1,0 +1,107 @@
+{
+  "id": "chip-nav",
+  "job": "Browse a catalogue by category.",
+  "purpose": "A category strip, lighter than tabs: no underline, just ink. The selected chip turns weight 450 and its width is reserved up front so neighbours never shift. Link chips mark the current category with aria-current=\"page\"; button chips are single-select with aria-pressed and fire fd:change. It scrolls sideways and fades at the clipped edge.",
+  "useWhen": [
+    "A catalogue, gallery or template list is narrowed by category.",
+    "There are more categories than a segmented control holds."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The items switch views of one object.",
+      "instead": "tabs"
+    },
+    {
+      "when": "There are two to five exclusive options.",
+      "instead": "segmented"
+    },
+    {
+      "when": "The filters combine and apply together.",
+      "instead": "filter"
+    },
+    {
+      "when": "The items are settings pages.",
+      "instead": "subnav"
+    }
+  ],
+  "aka": [
+    "category chips",
+    "filter chips",
+    "pill nav",
+    "category strip",
+    "chip group"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "current",
+      "how": "aria-current=\"page\" on a link chip, or aria-pressed=\"true\" on a button chip"
+    },
+    {
+      "name": "overflowing",
+      "how": "data-overflow=\"start|end|both\", set by nav.js"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-overflow",
+      "value": "start",
+      "useWhen": "Content is clipped at the start."
+    },
+    {
+      "attribute": "data-overflow",
+      "value": "end",
+      "useWhen": "Content is clipped at the end."
+    },
+    {
+      "attribute": "data-overflow",
+      "value": "both",
+      "useWhen": "Content is clipped at both ends."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-chip-nav",
+      "role": "The strip."
+    },
+    {
+      "class": "fd-chip",
+      "role": "One category; a link or a button."
+    },
+    {
+      "class": "fd-chip-count",
+      "role": "A count after the label."
+    }
+  ],
+  "related": [
+    "tabs",
+    "segmented",
+    "filter",
+    "subnav",
+    "tag"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Moves between chips."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Select a button chip; Enter follows a link chip."
+    }
+  ],
+  "example": "docs/navigation.html#chip-nav",
+  "provenance": [
+    "docs/navigation.html",
+    "fire/components/nav.css",
+    "fire/js/nav.js"
+  ],
+  "since": "0.1.0"
+}

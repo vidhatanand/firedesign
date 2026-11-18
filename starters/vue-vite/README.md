@@ -30,7 +30,7 @@ written as Vue single-file components from Fire's own templates, and proves the 
 2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.7.0"`.
 3. `npm install`, then `npm run dev` (it runs `npm run theme` first), or `npm run build`.
 4. Remove `scripts/check.mjs` and the `check` script if you do not compare against Fire's templates. Keep
-   `npm run lint:markup`.
+   `npm run lint:markup` and `npm run lint:css`.
 
 To change the look, edit `look.json` (or copy another record from `fire-design/contract/looks`) and run `npm run theme`.
 
@@ -41,7 +41,7 @@ on both sides) and with `VITE_FIRE_STATIC=1` (the screens stay in the state thei
 simulate a first load with timers). It serves the build and Fire's repository root, then for each screen runs
 `render-equal`: `.fd-page` of the template against `.fd-page` of the route, at 1440 and 375 wide, light and dark, in
 Chromium, WebKit and Firefox. It loads each screen in Chromium and fails on a CSP violation or a console message, and
-runs `lint-markup` on `src`. It restores the starter's look and closes every server before it exits.
+runs `lint-markup` and `lint-css` on `src`. It restores the starter's look and closes every server before it exits.
 
 Two things differ on purpose: the templates are served **without their inline demo scripts** (they simulate loading and
 Ember's demo logic, which the app replaces), and links between the three screens are router paths (`/settings`, not

@@ -41,7 +41,7 @@ index.html                 loads boot.js (classic script, first) and src/main.ts
 theme.json                 the look of the app (a theme record)
 scripts/prepare.mjs        theme.json -> src/fire-theme.css; copies boot.js into public/fire
 scripts/check.mjs          npm run check
-scripts/lint.mjs           npm run lint:markup
+scripts/lint.mjs           npm run lint:markup, npm run lint:css
 src/main.ts                imports, in order: Fire's CSS, the theme, Fire's elements, Fire's behaviours, the components
 src/app.css                the one rule that hides the custom elements from layout
 src/lib/fire-light.ts      FireLight: the base class of every component
@@ -81,7 +81,7 @@ customElements.define('screen-example', ScreenExample);
 2. A **browser run** on the production build visits every route by URL and by clicking, and fails on any console
    error, uncaught error, failed request or Content Security Policy violation. It also tries search, the row menu
    with its toast, the detail sheet, tabs, a confirm dialog, the elements and the phone menu.
-3. **lint-markup** checks `src/` against Fire's catalogue (`npm run lint:markup` runs it alone).
+3. **lint-markup** checks `src/` against Fire's catalogue (`npm run lint:markup` runs it alone), and **lint-css** checks the starter's own CSS and tokens against Fire's token contract (`npm run lint:css`).
 
 Three things to know when it fails or when you change a screen:
 

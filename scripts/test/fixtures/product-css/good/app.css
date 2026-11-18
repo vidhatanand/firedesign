@@ -1,0 +1,30 @@
+/* Acme's own components, built on Fire's tokens and classes. */
+.acme-hero {
+  display: grid;
+  gap: var(--fd-space-4);
+  padding: var(--acme-card-pad);
+  border: var(--fd-hairline) solid var(--fd-line);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-surface);
+  color: var(--acme-ink);
+  box-shadow: var(--fd-shadow-md);
+  transition: transform var(--fd-dur-2) var(--fd-ease-out), box-shadow var(--fd-dur-2) var(--fd-ease-out);
+}
+.acme-hero:hover { transform: translateY(calc(var(--fd-space-1) * -1)); }
+.acme-hero__title { font-size: var(--fd-text-h2); line-height: 1.15; color: transparent; background: linear-gradient(var(--fd-accent), var(--acme-brand-wash)); background-clip: text; }
+.acme-hero__code { background: var(--acme-code-bg); font-family: var(--fd-font-mono); border-radius: var(--fd-radius-sm); }
+
+/* placing a Fire part is fine */
+.acme-hero .fd-btn { margin-inline-start: auto; align-self: end; }
+.acme-hero > .fd-badge { order: -1; grid-column: 1 / -1; }
+.fd-page { max-width: var(--acme-page-max); }
+.acme-rail .fd-card { width: var(--fd-size-md); display: none; }
+
+.acme-sidebar { inline-size: var(--acme-sidebar); }
+.acme-stats { --fd-cols: 4; --_gap: var(--fd-space-2); gap: var(--_gap); }
+.acme-meter::after { width: calc(var(--acme-progress) * 100%); height: calc(var(--fd-space-1) * 2); content: "10px #fff"; }
+.acme-card:focus-visible { outline: var(--fd-hairline) solid var(--fd-focus); }
+
+@media (min-width: 48rem) { .acme-hero { grid-template-columns: 1fr 1fr; } }
+@media (prefers-reduced-motion: reduce) { .acme-hero { transition: none; } }
+@keyframes acme-rise { from { opacity: 0; transform: translateY(var(--fd-space-2)); } to { opacity: 1; transform: none; } }

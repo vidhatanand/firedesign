@@ -5,9 +5,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { ROOT, read, blank, topFiles, cssFiles, stripCss, loadIconNames, attributeSheets, collectAttrValues } from './lib/source.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const AS_JSON = process.argv.includes('--json');
 const CHECKS = ['icons', 'colors', 'classes', 'ids', 'links', 'tokens', 'literals', 'inline', 'attrs', 'sizes'];
 const LEVELS = { icons: 'ERROR', colors: 'WARN', classes: 'WARN', ids: 'ERROR', links: 'ERROR', tokens: 'ERROR', literals: 'WARN', inline: 'WARN', attrs: 'WARN', sizes: 'INFO' };
@@ -16,9 +15,6 @@ const findings = []; // { check, level, file, line, message }
 // ---------- helpers ----------
 const rel = p => (path.isAbsolute(p) ? path.relative(ROOT, p).split(path.sep).join('/') : p);
 const add = (check, level, file, line, message) => findings.push({ check, level, file: rel(file), line, message });
-const read = p => fs.readFileSync(p, 'utf8');
-// Replace every non-newline char with a space: keeps length, indices and line numbers intact.
-const blank = s => s.replace(/[^\n]/g, ' ');
 
 // Returns idx => 1-based line number, using precomputed line starts.
 function lineFinder(text) {
@@ -32,14 +28,6 @@ function lineFinder(text) {
     }
     return lo + 1;
   };
-}
-
-// Files directly inside one folder (not recursive), by extension. Absolute paths, sorted.
-function topFiles(dir, exts) {
-  return fs.readdirSync(path.join(ROOT, dir))
-    .filter(n => exts.some(x => n.endsWith(x)))
-    .sort()
-    .map(n => path.join(ROOT, dir, n));
 }
 
 // Every file under the given folders (recursive), by extension. Absolute paths, sorted.
@@ -56,34 +44,13 @@ function walk(dirs, exts) {
   return out.sort();
 }
 
-const cssFiles = () => [path.join(ROOT, 'fire/base.css'), ...topFiles('fire/components', ['.css'])].filter(f => fs.existsSync(f));
 const htmlFiles = () => [...topFiles('docs', ['.html']), ...topFiles('templates', ['.html'])];
 const jsFiles = () => [...topFiles('fire/js', ['.js']), path.join(ROOT, 'templates/shell.js')];
-
-// Blank url("data:...") values and CSS comments, preserving positions.
-function stripCss(t) {
-  return t
-    .replace(/url\(\s*(?:"data:[^"]*"|'data:[^']*'|data:[^)]*)\s*\)/gi, blank)
-    .replace(/\/\*[\s\S]*?\*\//g, blank);
-}
 
 // Blank the contents of <template> and <script> blocks.
 const stripBlocks = t => t.replace(/<(template|script)\b[\s\S]*?<\/\1\s*>/gi, blank);
 
 // ---------- 1. icons ----------
-async function loadIconNames() {
-  const file = path.join(ROOT, 'fire/js/icons.js');
-  try {
-    const mod = await import(pathToFileURL(file).href);
-    return new Set(Object.keys(mod.ICONS));
-  } catch {
-    // Module could not be imported (e.g. it touches `document`): read the keys from the text instead.
-    const text = read(file);
-    const body = text.slice(text.indexOf('export const ICONS'));
-    return new Set([...body.matchAll(/"([^"\\]+)"\s*:\s*"/g)].map(m => m[1]));
-  }
-}
-
 async function checkIcons() {
   const names = await loadIconNames();
   // Only literal names are checked; a name built at runtime (concatenation, interpolation) is skipped.
@@ -307,24 +274,9 @@ function checkInline() {
 // the values the styles define for that component. A value nobody defines (data-align="end" before it existed)
 // renders as if the attribute were absent, and nothing says so.
 function checkAttrs() {
-  const sheets = [...cssFiles(), ...['fire/layout.css', 'fire/tokens.css', 'fire/palettes.css', 'fire/typefaces.css', 'docs/docs.css'].map(f => path.join(ROOT, f))].filter(f => fs.existsSync(f));
   const PRIMITIVES = new Set(['fd-stack', 'fd-row', 'fd-grid', 'fd-column']);
   const DEFAULTS = { 'data-size': ['md'], 'data-theme': ['system'], 'data-density': ['comfortable'], 'data-palette': ['ember'], 'data-text-size': ['md'] };
-  const known = new Map();   // "class|attr" or "*|attr" -> Set(values)
-  const note = (ctx, attr, value) => { const k = `${ctx}|${attr}`; if (!known.has(k)) known.set(k, new Set()); known.get(k).add(value); };
-  for (const f of sheets) {
-    const text = stripCss(read(f));
-    for (const rule of text.matchAll(/([^{}]+)\{/g)) {
-      for (const selector of rule[1].split(/,(?![^()[\]]*[)\]])/)) {
-        const attrs = [...selector.matchAll(/\[(data-[a-z0-9-]+)[~|^$*]?="([^"]*)"\]/g)];
-        if (!attrs.length) continue;
-        const classes = [...selector.matchAll(/\.(fd-[a-z0-9-]+)/g)].map(m => m[1]);
-        // Only fire/layout.css defines attributes for any element; a class-less selector elsewhere is page chrome.
-        const contexts = classes.length ? classes : (f.endsWith('layout.css') ? ['*'] : []);
-        for (const [, attr, value] of attrs) for (const ctx of contexts) note(ctx, attr, value);
-      }
-    }
-  }
+  const known = collectAttrValues(attributeSheets());   // "class|attr" or "*|attr" -> Set(values), shared with the catalogue build
   const files = ['templates', 'docs'].flatMap(d => fs.readdirSync(path.join(ROOT, d)).filter(f => /\.(html|js)$/.test(f)).map(f => `${d}/${f}`));
   for (const f of files) {
     const text = read(f);

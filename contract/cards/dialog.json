@@ -1,0 +1,50 @@
+{
+  "id": "dialog",
+  "job": "Stop the page until the person finishes or dismisses one task.",
+  "purpose": "A native dialog opened with showModal(): the page behind is washed out and blurred, focus moves into it and returns to the trigger. Escape, a close button and a backdrop click close it, and fd:close fires once per close whichever way it ended. Below 640px it becomes a bottom sheet you can drag down. Multi-step flows use sections with data-step.",
+  "useWhen": [
+    "The task must finish or be dismissed before the page makes sense again: create a key, choose providers.",
+    "A short form needs its own focus, with confirm and cancel at the foot.",
+    "A flow has two or three steps, such as create then show the secret once."
+  ],
+  "avoidWhen": [
+    { "when": "A destructive action needs the person to type a name before it runs.", "instead": "confirm" },
+    { "when": "The content is a side panel the person may leave open while working.", "instead": "sheet" },
+    { "when": "The content is a short list of actions on one trigger.", "instead": "menu" },
+    { "when": "The content is a summary or a small picker that closes on outside click.", "instead": "popover" },
+    { "when": "The message is feedback after an action and needs no decision.", "instead": "toast" }
+  ],
+  "aka": ["modal", "popup", "lightbox", "overlay"],
+  "surfaces": ["app", "website", "phone"],
+  "data": ["form", "text", "none"],
+  "states": [
+    { "name": "open", "how": "openDialog(id), a trigger with data-fd-dialog-open=\"id\", or showModal()" },
+    { "name": "persistent", "how": "data-static on the dialog keeps backdrop clicks from closing it" },
+    { "name": "reset on open", "how": "data-reset on the dialog resets its forms each time it opens" },
+    { "name": "step", "how": "section[data-step] with buttons [data-fd-dialog-step=\"next|prev|name\"]" },
+    { "name": "busy step", "how": "data-fd-dialog-step-delay=\"600\" on the step button" }
+  ],
+  "variants": [
+    { "attribute": "data-size", "value": "sm", "useWhen": "A confirmation or a one-field form (400px)." },
+    { "attribute": "data-size", "value": "lg", "useWhen": "A form with several fields or a short list (640px)." },
+    { "attribute": "data-size", "value": "xl", "useWhen": "A picker with a toolbar and a grid (800px)." }
+  ],
+  "parts": [
+    { "class": "fd-dialog", "role": "The dialog element." },
+    { "class": "fd-dialog-head", "role": "Title and description." },
+    { "class": "fd-dialog-title", "role": "The heading; focus lands here when the body has no field." },
+    { "class": "fd-dialog-desc", "role": "One sentence under the title." },
+    { "class": "fd-dialog-body", "role": "The scrolling content; edge shadows show when it overflows." },
+    { "class": "fd-dialog-foot", "role": "The actions: cancel first, the confirming button last." },
+    { "class": "fd-dialog-close", "role": "The corner close button; carries data-fd-dialog-close." },
+    { "class": "fd-dialog-dots", "role": "Step dots in a multi-step dialog." }
+  ],
+  "related": ["confirm", "sheet", "popover", "menu", "toast", "button"],
+  "keyboard": [
+    { "keys": "Escape", "does": "Closes the dialog." },
+    { "keys": "Tab", "does": "Moves between controls inside the dialog; focus does not leave it." }
+  ],
+  "example": "docs/overlays.html#dialogs",
+  "provenance": ["docs/overlays.html", "fire/components/overlays.css", "fire/js/overlays.js"],
+  "since": "0.1.0"
+}

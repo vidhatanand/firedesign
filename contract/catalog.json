@@ -201,7 +201,69 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/navigation.html#wayfinding"
+      "docs": "docs/navigation.html#wayfinding",
+      "card": {
+        "id": "back",
+        "job": "Return to the one obvious previous place.",
+        "purpose": "A link with a left arrow and a label such as \"Back to dashboard\". The arrow travels a few pixels on hover. Use it when there is one place to return to, not a hierarchy.",
+        "useWhen": [
+          "A detail or a result screen has one parent to return to.",
+          "A phone screen needs a way back to its list."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The screen is several levels deep.",
+            "instead": "breadcrumb"
+          },
+          {
+            "when": "The action cancels or dismisses a task in a dialog.",
+            "instead": "button"
+          },
+          {
+            "when": "The history is a flow.",
+            "instead": "steps"
+          }
+        ],
+        "aka": [
+          "back link",
+          "return link",
+          "go back",
+          "up navigation"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-back",
+            "role": "The link."
+          }
+        ],
+        "related": [
+          "breadcrumb",
+          "page-head",
+          "button"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Follows the link."
+          }
+        ],
+        "example": "docs/navigation.html#wayfinding",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "badge",
@@ -369,7 +431,74 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/navigation.html#wayfinding"
+      "docs": "docs/navigation.html#wayfinding",
+      "card": {
+        "id": "breadcrumb",
+        "job": "Show where this screen sits and jump to a parent.",
+        "purpose": "A list of links ending in the current page. Use it when a screen is several levels deep, such as a run inside a monitor. The last item is a span with aria-current=\"page\". Wrap it in nav with aria-label=\"Breadcrumb\".",
+        "useWhen": [
+          "A screen is three or more levels deep and people need to go up to any parent.",
+          "The hierarchy is fixed: workspace, project, item."
+        ],
+        "avoidWhen": [
+          {
+            "when": "There is one obvious place to return to.",
+            "instead": "back"
+          },
+          {
+            "when": "The path is a flow in a set order.",
+            "instead": "steps"
+          },
+          {
+            "when": "Content is paged.",
+            "instead": "pagination"
+          }
+        ],
+        "aka": [
+          "path",
+          "trail",
+          "hierarchy nav",
+          "location"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "current",
+            "how": "aria-current=\"page\" on the last item"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-breadcrumb",
+            "role": "The nav; holds an ol of li items."
+          }
+        ],
+        "related": [
+          "back",
+          "steps",
+          "page-head",
+          "topbar"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between the links."
+          }
+        ],
+        "example": "docs/navigation.html#wayfinding",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "button",
@@ -1163,7 +1292,117 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#checkbox"
+      "docs": "docs/forms.html#checkbox",
+      "card": {
+        "id": "checkbox",
+        "job": "Tick one or more options, or a yes that saves with the form.",
+        "purpose": "16px box with a 4px radius and one hairline. Checked fills with the accent and draws a tick; indeterminate draws a dash. The label is part of the control, so the whole line is the target. data-fd-checkall on a parent shows indeterminate and ticks or clears its children.",
+        "useWhen": [
+          "Several options may be chosen from a fixed set.",
+          "A yes or no is saved with the rest of the form, not at once.",
+          "A select-all parent controls a group of children."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A setting takes effect the moment it changes.",
+            "instead": "switch"
+          },
+          {
+            "when": "Exactly one of a few options is chosen.",
+            "instead": "radio"
+          },
+          {
+            "when": "Each option needs a title, a sentence or a price.",
+            "instead": "choice"
+          },
+          {
+            "when": "A table row is selected; use the table's own selection.",
+            "instead": "table"
+          }
+        ],
+        "aka": [
+          "tick box",
+          "check box",
+          "tickbox",
+          "multi-select"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "checked",
+            "how": "checked on the input"
+          },
+          {
+            "name": "indeterminate",
+            "how": "input.indeterminate = true, or data-fd-checkall on a parent"
+          },
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the input"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-checkbox",
+            "role": "The label that wraps the input."
+          },
+          {
+            "class": "fd-checkbox-box",
+            "role": "The drawn box; forms.js adds the tick and dash."
+          },
+          {
+            "class": "fd-checkbox-text",
+            "role": "Wraps the label and description."
+          },
+          {
+            "class": "fd-checkbox-label",
+            "role": "The visible label."
+          },
+          {
+            "class": "fd-checkbox-desc",
+            "role": "A sentence under the label."
+          },
+          {
+            "class": "fd-check-tick",
+            "role": "The tick path inside the box."
+          },
+          {
+            "class": "fd-check-dash",
+            "role": "The dash path for indeterminate."
+          }
+        ],
+        "related": [
+          "radio",
+          "switch",
+          "choice",
+          "field"
+        ],
+        "keyboard": [
+          {
+            "keys": "Space",
+            "does": "Toggles the focused checkbox."
+          }
+        ],
+        "example": "docs/forms.html#checkbox",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "checklist",
@@ -1210,7 +1449,114 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/navigation.html#chip-nav"
+      "docs": "docs/navigation.html#chip-nav",
+      "card": {
+        "id": "chip-nav",
+        "job": "Browse a catalogue by category.",
+        "purpose": "A category strip, lighter than tabs: no underline, just ink. The selected chip turns weight 450 and its width is reserved up front so neighbours never shift. Link chips mark the current category with aria-current=\"page\"; button chips are single-select with aria-pressed and fire fd:change. It scrolls sideways and fades at the clipped edge.",
+        "useWhen": [
+          "A catalogue, gallery or template list is narrowed by category.",
+          "There are more categories than a segmented control holds."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The items switch views of one object.",
+            "instead": "tabs"
+          },
+          {
+            "when": "There are two to five exclusive options.",
+            "instead": "segmented"
+          },
+          {
+            "when": "The filters combine and apply together.",
+            "instead": "filter"
+          },
+          {
+            "when": "The items are settings pages.",
+            "instead": "subnav"
+          }
+        ],
+        "aka": [
+          "category chips",
+          "filter chips",
+          "pill nav",
+          "category strip",
+          "chip group"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "current",
+            "how": "aria-current=\"page\" on a link chip, or aria-pressed=\"true\" on a button chip"
+          },
+          {
+            "name": "overflowing",
+            "how": "data-overflow=\"start|end|both\", set by nav.js"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-overflow",
+            "value": "start",
+            "useWhen": "Content is clipped at the start."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "end",
+            "useWhen": "Content is clipped at the end."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "both",
+            "useWhen": "Content is clipped at both ends."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-chip-nav",
+            "role": "The strip."
+          },
+          {
+            "class": "fd-chip",
+            "role": "One category; a link or a button."
+          },
+          {
+            "class": "fd-chip-count",
+            "role": "A count after the label."
+          }
+        ],
+        "related": [
+          "tabs",
+          "segmented",
+          "filter",
+          "subnav",
+          "tag"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between chips."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Select a button chip; Enter follows a link chip."
+          }
+        ],
+        "example": "docs/navigation.html#chip-nav",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css",
+          "fire/js/nav.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "choice",
@@ -1234,7 +1580,120 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#choice"
+      "docs": "docs/forms.html#choice",
+      "card": {
+        "id": "choice",
+        "job": "Choose from options that each need a title and a sentence.",
+        "purpose": "A selectable card over a real radio or checkbox. Selected is one accent hairline, a faint accent wash and a check. Put the whole decision in the card: a title, one sentence and at most one figure on the right. Lay out as a list for a few options or as a grid (data-layout=\"grid\") for scannable sets.",
+        "useWhen": [
+          "Plans, permission levels or modes where each option needs explaining.",
+          "Each option has a price or one key figure.",
+          "Several of a fixed set may be picked, with enough to say about each (checkbox inside)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The options are plain labels.",
+            "instead": "radio"
+          },
+          {
+            "when": "The options are plain labels and several may be ticked.",
+            "instead": "checkbox"
+          },
+          {
+            "when": "The choice filters what is shown and has no explanation.",
+            "instead": "segmented"
+          },
+          {
+            "when": "The card opens something instead of selecting.",
+            "instead": "card"
+          }
+        ],
+        "aka": [
+          "option card",
+          "selectable card",
+          "radio card",
+          "plan picker",
+          "tile select"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "checked on the input inside"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the input"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "grid",
+            "useWhen": "Many cards that people scan side by side."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-choice-group",
+            "role": "Groups cards; carries role=\"radiogroup\" for single choice."
+          },
+          {
+            "class": "fd-choice",
+            "role": "The label that wraps the input."
+          },
+          {
+            "class": "fd-choice-mark",
+            "role": "The check mark."
+          },
+          {
+            "class": "fd-choice-body",
+            "role": "Holds title and description."
+          },
+          {
+            "class": "fd-choice-title",
+            "role": "The option name."
+          },
+          {
+            "class": "fd-choice-desc",
+            "role": "One sentence about it."
+          },
+          {
+            "class": "fd-choice-meta",
+            "role": "A figure on the right, such as a price."
+          }
+        ],
+        "related": [
+          "radio",
+          "checkbox",
+          "segmented",
+          "card"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys",
+            "does": "Native: move between the radio cards of a group."
+          },
+          {
+            "keys": "Space",
+            "does": "Selects or toggles the focused card."
+          }
+        ],
+        "example": "docs/forms.html#choice",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "codeblock",
@@ -1315,7 +1774,101 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#codefield"
+      "docs": "docs/forms.html#codefield",
+      "card": {
+        "id": "codefield",
+        "job": "Edit raw code or JSON that has to be valid.",
+        "purpose": "A text area in the code face with a head showing the language and an optional Format button. Tab inserts two spaces. data-fd-json checks the value on blur and on submit and writes the parser's reason and line into the field's error. Without script it is a plain text area. It is for the few places raw code is the input, never a stand-in for a control that fits better.",
+        "useWhen": [
+          "An expert overrides configuration by hand and the value is JSON.",
+          "The input is code and needs checking: a template, a schema, a config override."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is a list, a map or a choice that a control fits.",
+            "instead": "tag-input"
+          },
+          {
+            "when": "The value is a map of names to values.",
+            "instead": "pairs"
+          },
+          {
+            "when": "The text is prose.",
+            "instead": "textarea"
+          },
+          {
+            "when": "The code is shown, not edited.",
+            "instead": "codeblock"
+          }
+        ],
+        "aka": [
+          "code editor",
+          "JSON editor",
+          "config editor",
+          "monospace textarea"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "invalid JSON",
+            "how": "aria-invalid=\"true\" with the reason in .fd-field-error, set by data-fd-json"
+          },
+          {
+            "name": "ready",
+            "how": "data-ready set by the script; the Format button shows"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-codefield",
+            "role": "The wrapper."
+          },
+          {
+            "class": "fd-codefield-head",
+            "role": "Row with the language and the Format button."
+          },
+          {
+            "class": "fd-codefield-lang",
+            "role": "The language label."
+          },
+          {
+            "class": "fd-codefield-input",
+            "role": "The text area."
+          }
+        ],
+        "related": [
+          "textarea",
+          "pairs",
+          "tag-input",
+          "codeblock",
+          "field"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Inserts two spaces."
+          },
+          {
+            "keys": "Escape, then Tab",
+            "does": "Leaves the field."
+          }
+        ],
+        "example": "docs/forms.html#codefield",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.4.0"
+      }
     },
     {
       "id": "column",
@@ -1340,7 +1893,98 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#layout"
+      "docs": "docs/foundations.html#layout",
+      "card": {
+        "id": "column",
+        "job": "Keep a narrow block readable on a wide page.",
+        "purpose": "A bounded column with a maximum width (data-size xs, sm, md, lg or xl) that stays centred when data-align=\"center\". Use it so text and forms stop at a readable measure while the page stays wide.",
+        "useWhen": [
+          "A form, an article or an empty state sits on a wide page and should not stretch.",
+          "A page has one main column in the middle."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A form should set its own width.",
+            "instead": "form"
+          },
+          {
+            "when": "A main area has a side panel.",
+            "instead": "split"
+          },
+          {
+            "when": "Content is in equal columns.",
+            "instead": "grid"
+          }
+        ],
+        "aka": [
+          "container",
+          "content width",
+          "measure",
+          "centered column",
+          "max width"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "xs",
+            "useWhen": "A very narrow block."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A narrow block, such as a sign-in card."
+          },
+          {
+            "attribute": "data-size",
+            "value": "md",
+            "useWhen": "A reading width."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A wide reading column."
+          },
+          {
+            "attribute": "data-size",
+            "value": "xl",
+            "useWhen": "The widest column."
+          },
+          {
+            "attribute": "data-align",
+            "value": "center",
+            "useWhen": "The column sits in the middle of the page."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-column",
+            "role": "The container."
+          }
+        ],
+        "related": [
+          "stack",
+          "form",
+          "split",
+          "screen"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#layout",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/base.css",
+          "fire/layout.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "combobox",
@@ -1369,7 +2013,113 @@
         "fd:open",
         "fd:select"
       ],
-      "docs": "docs/forms.html#combobox"
+      "docs": "docs/forms.html#combobox",
+      "card": {
+        "id": "combobox",
+        "job": "Pick from a long list by typing to filter it.",
+        "purpose": "A text field with a listbox that uses the Popover API, so it layers above everything and closes on outside clicks. Type to filter, arrow keys to move, Enter to choose. Options are role=\"option\" rows with an optional icon, description and mono meta. The multiple variant keeps choices as removable tokens. Fires fd:open, fd:close, fd:select and fd:change.",
+        "useWhen": [
+          "The list is long enough that people need to type to find an item.",
+          "Each option needs an icon, a description or a meta label (a model, a team member).",
+          "Several items may be chosen and shown as tokens (data-multiple)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The list is short and plain.",
+            "instead": "select"
+          },
+          {
+            "when": "People may enter values that are not on a list.",
+            "instead": "tag-input"
+          },
+          {
+            "when": "The choice runs a command or jumps to a page.",
+            "instead": "command"
+          },
+          {
+            "when": "The options are two to four visible labels.",
+            "instead": "segmented"
+          }
+        ],
+        "aka": [
+          "autocomplete",
+          "typeahead",
+          "combo box",
+          "searchable select",
+          "multiselect",
+          "dropdown search"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form",
+          "list"
+        ],
+        "states": [
+          {
+            "name": "open",
+            "how": "data-state=\"open\" on the wrapper; the listbox is shown"
+          },
+          {
+            "name": "multiple",
+            "how": "data-multiple on the wrapper; choices become tokens"
+          },
+          {
+            "name": "no match",
+            "how": "data-empty=\"No matches\" text shows when the filter finds nothing"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-combobox",
+            "role": "The wrapper; carries data-fd-combobox and data-name."
+          }
+        ],
+        "related": [
+          "listbox",
+          "select",
+          "input-group",
+          "tag-input",
+          "command"
+        ],
+        "keyboard": [
+          {
+            "keys": "ArrowDown",
+            "does": "Opens the list, then moves to the next option."
+          },
+          {
+            "keys": "ArrowUp",
+            "does": "Opens the list at the last option, then moves up."
+          },
+          {
+            "keys": "Enter",
+            "does": "Chooses the active option, or closes the list."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the list."
+          },
+          {
+            "keys": "Tab",
+            "does": "Closes the list and moves on."
+          },
+          {
+            "keys": "Backspace",
+            "does": "In multiple mode with an empty field: removes the last token."
+          }
+        ],
+        "example": "docs/forms.html#combobox",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "command",
@@ -1533,7 +2283,117 @@
       "events": [
         "fd:copy"
       ],
-      "docs": "docs/forms.html#secret"
+      "docs": "docs/forms.html#secret",
+      "card": {
+        "id": "copy-field",
+        "job": "Show a value people copy, such as an address or an ID.",
+        "purpose": "A read-only value with a copy button, in the same field shape. Copy always copies the whole data-value, and a check shows for a moment (fd:copy). data-mask=\"end\" keeps the readable start and the last few characters with dots between; it stays masked with no reveal button, so leave the button out when nobody may see the value.",
+        "useWhen": [
+          "A webhook URL, endpoint, ID or an invite link is shown for copying.",
+          "An address is recognised by its last characters (data-mask=\"end\")."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is secret and may be revealed or rotated.",
+            "instead": "secret"
+          },
+          {
+            "when": "The value is a command or code with several lines.",
+            "instead": "snippet"
+          },
+          {
+            "when": "The value is editable.",
+            "instead": "input-group"
+          },
+          {
+            "when": "The copy button sits inside a field people also type in.",
+            "instead": "input-group"
+          }
+        ],
+        "aka": [
+          "copy to clipboard",
+          "copy input",
+          "read-only field",
+          "clipboard field"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "record",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "copied",
+            "how": "data-state=\"copied\" for a moment after the copy"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-mask",
+            "value": "end",
+            "useWhen": "Show the start up to data-mask-from, eight dots and the last few characters."
+          },
+          {
+            "attribute": "data-mask",
+            "value": "partial",
+            "useWhen": "Keep the first and last eight characters."
+          },
+          {
+            "attribute": "data-mask",
+            "value": "full",
+            "useWhen": "Show only dots."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-copy-field",
+            "role": "The wrapper; carries data-fd-secret and data-value."
+          },
+          {
+            "class": "fd-copy-field-label",
+            "role": "An optional label inside the field."
+          },
+          {
+            "class": "fd-copy-field-value",
+            "role": "The drawn value."
+          },
+          {
+            "class": "fd-copy-field-start",
+            "role": "The part that shortens with an ellipsis."
+          },
+          {
+            "class": "fd-copy-field-end",
+            "role": "The part that is never cut off."
+          },
+          {
+            "class": "fd-copy-field-actions",
+            "role": "The copy button."
+          }
+        ],
+        "related": [
+          "secret",
+          "snippet",
+          "codeblock",
+          "input-group"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On the copy button: copies the value."
+          }
+        ],
+        "example": "docs/forms.html#secret",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "data-card",
@@ -1859,7 +2719,71 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#screen"
+      "docs": "docs/shell.html#screen",
+      "card": {
+        "id": "divider",
+        "job": "Separate two groups with a hairline.",
+        "purpose": "A one-pixel rule in the faint line colour. data-vertical makes it a vertical rule that stretches to the height of a row. With fd-grow it fills a row on either side of a word such as \"or\".",
+        "useWhen": [
+          "Two groups in a toolbar or a menu need a quiet break.",
+          "A row reads \"or\" between two rules."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Rows in a list need lines between them.",
+            "instead": "list"
+          },
+          {
+            "when": "A card needs a boundary.",
+            "instead": "card"
+          },
+          {
+            "when": "Form fields group under a title.",
+            "instead": "form-section"
+          }
+        ],
+        "aka": [
+          "separator",
+          "rule",
+          "hr",
+          "hairline"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-vertical",
+            "value": "",
+            "useWhen": "A rule between items of a row, as in a top bar."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-divider",
+            "role": "The rule."
+          }
+        ],
+        "related": [
+          "row",
+          "grow",
+          "toolbar",
+          "menu"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#screen",
+        "provenance": [
+          "docs/shell.html",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "doc",
@@ -2332,7 +3256,79 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/buttons.html#groups"
+      "docs": "docs/buttons.html#groups",
+      "card": {
+        "id": "fab",
+        "job": "Keep one primary action in reach while the page scrolls.",
+        "purpose": "A 48px round accent button with a soft shadow that floats at a screen corner: a support chat, scroll to bottom. It grows slightly on hover and shrinks on press. Position it with your own layout; it has no label, so give it aria-label.",
+        "useWhen": [
+          "One action is useful on every part of a long screen, such as opening support.",
+          "A phone screen has one main create action that must stay visible."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action belongs in a toolbar or a footer.",
+            "instead": "button"
+          },
+          {
+            "when": "The launcher opens a chat window.",
+            "instead": "chat-launcher"
+          },
+          {
+            "when": "There are several actions.",
+            "instead": "menu"
+          },
+          {
+            "when": "An action is part of a form.",
+            "instead": "button"
+          }
+        ],
+        "aka": [
+          "floating action button",
+          "FAB",
+          "floating button",
+          "speed dial",
+          "support bubble"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "disabled",
+            "how": "disabled"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-fab",
+            "role": "The round button; holds one icon."
+          }
+        ],
+        "related": [
+          "button",
+          "chat-launcher",
+          "menu"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Activates the button."
+          }
+        ],
+        "example": "docs/buttons.html#groups",
+        "provenance": [
+          "docs/buttons.html",
+          "fire/components/button.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "feature-list",
@@ -2422,7 +3418,132 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#affixes"
+      "docs": "docs/forms.html#affixes",
+      "card": {
+        "id": "field",
+        "job": "Give a control a label, a hint and room for one error.",
+        "purpose": "The wrapper around one control: a label row, the control, a hint and an error slot. The hint gives way to the error when it appears, so a field never grows two lines of small print. Mark required fields with data-required on the label, not a red star. Errors are announced because the control points at them with aria-describedby.",
+        "useWhen": [
+          "Any input, textarea, select or custom control that needs a visible label.",
+          "A control needs help text, a character counter or an error message under it.",
+          "An API parameter form is generated from a schema (data-variant=\"schema\")."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Several fields make one titled group in a long create or edit form.",
+            "instead": "form-section"
+          },
+          {
+            "when": "A setting is a label and a control on one row.",
+            "instead": "setting"
+          },
+          {
+            "when": "A switch or checkbox carries its own label text.",
+            "instead": "checkbox"
+          }
+        ],
+        "aka": [
+          "form group",
+          "form control",
+          "form item",
+          "label and input"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "required",
+            "how": "data-required on .fd-field-label"
+          },
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the control, text in .fd-field-error, aria-describedby pointing at it"
+          },
+          {
+            "name": "over limit",
+            "how": "data-state=\"limit\" on the counter; \"near\" as it approaches maxlength"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "schema",
+            "useWhen": "A label that is a mono parameter name with a quiet type, generated from an API schema."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-field",
+            "role": "The wrapper."
+          },
+          {
+            "class": "fd-field-head",
+            "role": "Row holding the label, the optional tag and the info button."
+          },
+          {
+            "class": "fd-field-label",
+            "role": "The label; carries data-required."
+          },
+          {
+            "class": "fd-field-req",
+            "role": "The required marker beside a label."
+          },
+          {
+            "class": "fd-field-tag",
+            "role": "A muted word such as \"optional\"."
+          },
+          {
+            "class": "fd-field-info",
+            "role": "The (i) button beside the label; takes data-fd-tooltip."
+          },
+          {
+            "class": "fd-field-hint",
+            "role": "Help text under the control; gives way to the error."
+          },
+          {
+            "class": "fd-field-error",
+            "role": "The single error message; hidden until needed."
+          },
+          {
+            "class": "fd-field-foot",
+            "role": "Row under the control for hint and counter."
+          },
+          {
+            "class": "fd-field-counter",
+            "role": "Live character count for a control with maxlength."
+          },
+          {
+            "class": "fd-field-name",
+            "role": "Schema variant: the parameter name."
+          },
+          {
+            "class": "fd-field-type",
+            "role": "Schema variant: the parameter type."
+          }
+        ],
+        "related": [
+          "input",
+          "textarea",
+          "select",
+          "form",
+          "form-section",
+          "setting"
+        ],
+        "keyboard": [],
+        "example": "docs/forms.html#field",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "file-upload",
@@ -2467,7 +3588,147 @@
         "fd:change",
         "fd:files"
       ],
-      "docs": "docs/forms.html#dropzone"
+      "docs": "docs/forms.html#dropzone",
+      "card": {
+        "id": "file-upload",
+        "job": "Add files by dropping them or browsing.",
+        "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Dragging over it turns the line accent. Accepted files appear as rows in fd-filelist with progress, status and size. fd:files is cancelable so your app can run the upload and report progress with setFileProgress(); data-max-mb and accept reject files that do not fit.",
+        "useWhen": [
+          "People attach one or several files, such as a sitemap, a CSV or a document.",
+          "Upload progress and per-file errors should show as rows."
+        ],
+        "avoidWhen": [
+          {
+            "when": "One small file is chosen as part of a plain form and no progress is needed.",
+            "instead": "input"
+          },
+          {
+            "when": "The upload is an image avatar.",
+            "instead": "avatar"
+          },
+          {
+            "when": "Files are only listed, not added.",
+            "instead": "list"
+          }
+        ],
+        "aka": [
+          "dropzone",
+          "file picker",
+          "file input",
+          "drag and drop upload",
+          "attachment"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form",
+          "list"
+        ],
+        "states": [
+          {
+            "name": "dragover",
+            "how": "data-state=\"dragover\" while files are dragged over it"
+          },
+          {
+            "name": "uploading",
+            "how": "data-state=\"uploading\" on a file row"
+          },
+          {
+            "name": "error",
+            "how": "data-state=\"error\" on a file row, with a reason in .fd-file-status"
+          },
+          {
+            "name": "done",
+            "how": "data-state=\"done\" on a file row"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "inline",
+            "useWhen": "A compact one-line dropzone in a form row."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-dropzone",
+            "role": "The drop area; a label around the file input."
+          },
+          {
+            "class": "fd-dropzone-icon",
+            "role": "The icon that lifts on drag."
+          },
+          {
+            "class": "fd-dropzone-text",
+            "role": "Wraps title and hint."
+          },
+          {
+            "class": "fd-dropzone-title",
+            "role": "The instruction."
+          },
+          {
+            "class": "fd-dropzone-hint",
+            "role": "Accepted types and size."
+          },
+          {
+            "class": "fd-filelist",
+            "role": "The list of files."
+          },
+          {
+            "class": "fd-file",
+            "role": "One file row."
+          },
+          {
+            "class": "fd-file-icon",
+            "role": "The file type icon."
+          },
+          {
+            "class": "fd-file-main",
+            "role": "Holds the name and meta."
+          },
+          {
+            "class": "fd-file-name",
+            "role": "The file name."
+          },
+          {
+            "class": "fd-file-meta",
+            "role": "Size and status line."
+          },
+          {
+            "class": "fd-file-size",
+            "role": "The size."
+          },
+          {
+            "class": "fd-file-status",
+            "role": "Progress, ready or the reason it failed."
+          },
+          {
+            "class": "fd-file-bar",
+            "role": "The progress bar."
+          }
+        ],
+        "related": [
+          "input",
+          "progress",
+          "field",
+          "list"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "Opens the file browser."
+          }
+        ],
+        "example": "docs/forms.html#dropzone",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "filter",
@@ -2546,7 +3807,159 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#create-key"
+      "docs": "docs/forms.html#create-key",
+      "card": {
+        "id": "form",
+        "job": "Lay out fields and actions in a form that stays readable.",
+        "purpose": "The form container: it stops at a readable width on its own (data-size sm, lg or full) and holds rows, columns and an actions bar. fd-form-row puts a label and what it does on the left and the control on the right; fd-form-cols fills the body in columns. Actions align right with the primary last; a destructive action sits alone at the left. data-fd-dirty shows a sticky unsaved-changes bar.",
+        "useWhen": [
+          "A settings or create page holds several fields with a Save action.",
+          "Changes should trigger an unsaved-changes bar (data-fd-dirty, data-variant=\"sticky\")."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A long form has titled groups that people scan.",
+            "instead": "form-section"
+          },
+          {
+            "when": "One setting is a label and a control on a row of a list.",
+            "instead": "setting"
+          },
+          {
+            "when": "A short form belongs in a modal.",
+            "instead": "dialog"
+          },
+          {
+            "when": "The form is a chat message.",
+            "instead": "composer"
+          }
+        ],
+        "aka": [
+          "settings form",
+          "form layout",
+          "form container",
+          "edit form"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "dirty",
+            "how": "data-dirty on a form with data-fd-dirty; shows the sticky actions"
+          },
+          {
+            "name": "validated",
+            "how": "data-fd-validate on the form; fd:invalid and fd:valid fire"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A narrow form such as an invite or a sign-in."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A form with a wider measure."
+          },
+          {
+            "attribute": "data-size",
+            "value": "full",
+            "useWhen": "A form made of sections that set their own width."
+          },
+          {
+            "attribute": "data-align",
+            "value": "start",
+            "useWhen": "A row whose control aligns to the top of its text, as for a tall control."
+          },
+          {
+            "attribute": "data-align",
+            "value": "between",
+            "useWhen": "On the actions bar: a destructive action at one end and the primary at the other."
+          },
+          {
+            "attribute": "data-layout",
+            "value": "stack",
+            "useWhen": "Rows stack their control under the text at every width."
+          },
+          {
+            "attribute": "data-variant",
+            "value": "sticky",
+            "useWhen": "The actions float as an unsaved-changes bar."
+          },
+          {
+            "attribute": "data-inline-mobile",
+            "value": "",
+            "useWhen": "A row keeps its label and a small control (a switch) side by side on phones."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-form",
+            "role": "The form."
+          },
+          {
+            "class": "fd-form-row",
+            "role": "One setting: text left, control right."
+          },
+          {
+            "class": "fd-form-row-text",
+            "role": "Holds label and description."
+          },
+          {
+            "class": "fd-form-row-label",
+            "role": "The row label."
+          },
+          {
+            "class": "fd-form-row-desc",
+            "role": "What the row does."
+          },
+          {
+            "class": "fd-form-row-control",
+            "role": "The control."
+          },
+          {
+            "class": "fd-form-cols",
+            "role": "Columns of fields that fill the body."
+          },
+          {
+            "class": "fd-form-actions",
+            "role": "The action bar."
+          },
+          {
+            "class": "fd-form-actions-text",
+            "role": "Text shown beside the actions, such as \"Unsaved changes\"."
+          }
+        ],
+        "related": [
+          "field",
+          "form-section",
+          "setting",
+          "button",
+          "dialog"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "Submits the form from a text input."
+          }
+        ],
+        "example": "docs/forms.html#rows",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js",
+          "templates/form.html"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "form-section",
@@ -2572,7 +3985,97 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#form-sections"
+      "docs": "docs/forms.html#form-sections",
+      "card": {
+        "id": "form-section",
+        "job": "Group the fields of a long form under a title.",
+        "purpose": "One titled group in a long create or edit form: a narrow head with a title and one line on the left (it stays in view while the body scrolls) and the fields on a white surface beside it. Below about 720px of form width the head stacks above the body. Use it inside a form with data-size=\"full\".",
+        "useWhen": [
+          "A create or edit form has more than one group: Basics, Callbacks, Access, Advanced.",
+          "People should scan titles and skip what they do not need."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The form is short.",
+            "instead": "form"
+          },
+          {
+            "when": "A card holds a single setting with a control.",
+            "instead": "setting"
+          },
+          {
+            "when": "The groups are steps in a flow.",
+            "instead": "steps"
+          }
+        ],
+        "aka": [
+          "fieldset",
+          "form group",
+          "settings section",
+          "form card"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "stack",
+            "useWhen": "The head stays above the body at every width."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A narrower body."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A wider body."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-form-section",
+            "role": "The group."
+          },
+          {
+            "class": "fd-form-section-head",
+            "role": "Holds title and description."
+          },
+          {
+            "class": "fd-form-section-title",
+            "role": "The title."
+          },
+          {
+            "class": "fd-form-section-desc",
+            "role": "One sentence under the title."
+          },
+          {
+            "class": "fd-form-section-body",
+            "role": "The white surface holding the fields."
+          }
+        ],
+        "related": [
+          "form",
+          "field",
+          "setting",
+          "steps"
+        ],
+        "keyboard": [],
+        "example": "docs/forms.html#form-sections",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "templates/form.html"
+        ],
+        "since": "0.4.0"
+      }
     },
     {
       "id": "grid",
@@ -2586,7 +4089,66 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#layout"
+      "docs": "docs/foundations.html#layout",
+      "card": {
+        "id": "grid",
+        "job": "Lay out equal columns that fill the width and reflow.",
+        "purpose": "An auto-filling grid. data-min sets the narrowest column (a size token from 4xs to 6xl, or full), data-cols the most columns, and data-span on a child covers several columns (or full). It drops columns on narrow screens by itself, so markup never sets a width.",
+        "useWhen": [
+          "Cards, stats or fields sit in equal columns that should reflow on phones.",
+          "One child needs to span several columns (data-span)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Children are in one line or one column.",
+            "instead": "row"
+          },
+          {
+            "when": "Children are a list of cards that wrap with their own sizes.",
+            "instead": "The card grid class fd-card-grid in the content docs."
+          },
+          {
+            "when": "A form has columns of fields.",
+            "instead": "form"
+          }
+        ],
+        "aka": [
+          "columns",
+          "card grid",
+          "responsive grid",
+          "layout grid",
+          "masonry"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-grid",
+            "role": "The container."
+          }
+        ],
+        "related": [
+          "row",
+          "stack",
+          "column",
+          "card"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#layout",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/layout.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "grow",
@@ -2600,7 +4162,64 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#screen"
+      "docs": "docs/shell.html#screen",
+      "card": {
+        "id": "grow",
+        "job": "Let one child take the space left over in a row.",
+        "purpose": "A flex-grow helper: put it on the child of a row or stack that should absorb the remaining space, pushing its siblings to the ends. On an fd-divider it makes a rule that fills the row.",
+        "useWhen": [
+          "A title should push its actions to the far end of a row.",
+          "A rule must fill the space on either side of an \"or\"."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Children should spread evenly.",
+            "instead": "row"
+          },
+          {
+            "when": "Children are equal columns.",
+            "instead": "grid"
+          },
+          {
+            "when": "A band must fill the height of a centred screen.",
+            "instead": "The data-grow attribute on the shell band; see the shell docs."
+          }
+        ],
+        "aka": [
+          "spacer",
+          "flex-grow",
+          "fill",
+          "push apart"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-grow",
+            "role": "The class on the child that grows."
+          }
+        ],
+        "related": [
+          "row",
+          "stack",
+          "divider"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#screen",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "heatgrid",
@@ -2747,7 +4366,164 @@
       },
       "element": "fd-icon",
       "events": [],
-      "docs": null
+      "docs": null,
+      "card": {
+        "id": "icon",
+        "job": "Draw a small symbol beside a label or on a button.",
+        "purpose": "A 16px line icon from Fire's sprite, written as <i data-icon=\"name\"> and drawn once at start (or as the fd-icon element with icon=\"name\"). Sizes are 12, 14, 16, 20, 24 or 32 (plus sm and lg); tone sets its colour. It is decorative: name the control that holds it with a label. Change it with setIcon(el, name).",
+        "useWhen": [
+          "A button, menu item or status needs a symbol to scan faster.",
+          "An empty state or a tile needs one glyph."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The symbol is the only content and no label exists.",
+            "instead": "Add an aria-label or data-fd-tooltip to the control that holds it."
+          },
+          {
+            "when": "A person's image is needed.",
+            "instead": "avatar"
+          },
+          {
+            "when": "A brand mark is needed.",
+            "instead": "brand"
+          },
+          {
+            "when": "A tile with a coloured background holds the glyph.",
+            "instead": "tile"
+          }
+        ],
+        "aka": [
+          "glyph",
+          "symbol",
+          "pictogram",
+          "svg icon",
+          "lucide"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "filled",
+            "how": "data-icon-fill on icons that have a filled form"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "12",
+            "useWhen": "Inside a dense chip or a badge."
+          },
+          {
+            "attribute": "data-size",
+            "value": "14",
+            "useWhen": "Beside small text."
+          },
+          {
+            "attribute": "data-size",
+            "value": "16",
+            "useWhen": "The default beside body text and in buttons."
+          },
+          {
+            "attribute": "data-size",
+            "value": "20",
+            "useWhen": "A larger toolbar or a list row."
+          },
+          {
+            "attribute": "data-size",
+            "value": "24",
+            "useWhen": "A prominent control or an empty state."
+          },
+          {
+            "attribute": "data-size",
+            "value": "28",
+            "useWhen": "A tile or a header."
+          },
+          {
+            "attribute": "data-size",
+            "value": "32",
+            "useWhen": "A hero or a large empty state."
+          },
+          {
+            "attribute": "data-size",
+            "value": "36",
+            "useWhen": "The largest icon, as a lone symbol."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "The small step of the icon scale."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "The large step of the icon scale."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "The icon marks the brand colour."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "A quiet icon."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "success",
+            "useWhen": "A positive state."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "warning",
+            "useWhen": "Something needs attention."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "A destructive or failed state."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "A neutral note."
+          },
+          {
+            "attribute": "data-nudge",
+            "value": "up-right",
+            "useWhen": "An arrow that moves a little on hover, for an external link."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-icon",
+            "role": "The icon element or SVG."
+          }
+        ],
+        "related": [
+          "button",
+          "tile",
+          "badge",
+          "tooltip"
+        ],
+        "keyboard": [],
+        "example": "docs/elements.html#icon",
+        "provenance": [
+          "docs/elements.html",
+          "docs/foundations.html",
+          "fire/js/icons.js",
+          "elements/src/icon.ts"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "inline-code",
@@ -2772,7 +4548,112 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#layout"
+      "docs": "docs/foundations.html#layout",
+      "card": {
+        "id": "inline-code",
+        "job": "Mark a command, a path or a key inside a sentence.",
+        "purpose": "Inline code in the mono face on a faint fill (fd-code), with a tone for status words, and a keyboard key cap (fd-kbd). Use it for identifiers, flags, file names and shortcuts that a person might copy or press, never for emphasis.",
+        "useWhen": [
+          "A sentence names a file, a flag, an endpoint or a value.",
+          "A shortcut is shown as a key cap (fd-kbd), as in a search hint."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The code is several lines or needs copying.",
+            "instead": "codeblock"
+          },
+          {
+            "when": "A command is shown to run.",
+            "instead": "snippet"
+          },
+          {
+            "when": "The words are emphasis.",
+            "instead": "text"
+          },
+          {
+            "when": "A status is shown.",
+            "instead": "badge"
+          }
+        ],
+        "aka": [
+          "code",
+          "kbd",
+          "keyboard key",
+          "monospace",
+          "key cap",
+          "code span"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "A code span in the accent colour."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "A quiet code span."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "success",
+            "useWhen": "A passed value."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "warning",
+            "useWhen": "A value that needs a look."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "A failed value."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "An informational value."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "loading",
+            "useWhen": "A value still in progress."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-code",
+            "role": "An inline code span."
+          },
+          {
+            "class": "fd-kbd",
+            "role": "A keyboard key cap."
+          }
+        ],
+        "related": [
+          "codeblock",
+          "snippet",
+          "text",
+          "type"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#layout",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "input",
@@ -2810,7 +4691,133 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#affixes"
+      "docs": "docs/forms.html#affixes",
+      "card": {
+        "id": "input",
+        "job": "Type one line of text, a URL, a key or a number.",
+        "purpose": "The native input in Fire's field skin: a white surface, a 1px line drawn inside the box so nothing shifts between states, 36px tall. Hover darkens the line, focus swaps it for the accent and adds a halo, aria-invalid turns it danger. It also works as a span in the same shape to show a value people read but do not edit.",
+        "useWhen": [
+          "The value is a short line of free text: a name, an email, a URL, a slug.",
+          "People paste or compare characters, so a mono face helps (data-mono): keys, paths, regular expressions.",
+          "A read-only value must line up with real inputs (a span with the same class)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is a number people nudge up or down.",
+            "instead": "number"
+          },
+          {
+            "when": "The value is a long answer over several lines.",
+            "instead": "textarea"
+          },
+          {
+            "when": "The value is one of a fixed set.",
+            "instead": "select"
+          },
+          {
+            "when": "The value is a secret or a new password.",
+            "instead": "secret"
+          },
+          {
+            "when": "A prefix, unit or button sits inside the field.",
+            "instead": "input-group"
+          },
+          {
+            "when": "The value is a list of URLs, domains or emails.",
+            "instead": "tag-input"
+          }
+        ],
+        "aka": [
+          "text field",
+          "text box",
+          "text input",
+          "textfield"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\""
+          },
+          {
+            "name": "disabled",
+            "how": "disabled"
+          },
+          {
+            "name": "read-only",
+            "how": "readonly; keeps normal text on a quieter fill so it can be selected and copied"
+          },
+          {
+            "name": "static value",
+            "how": "a span or output with class fd-input; takes no focus and does not post"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "Dense toolbars and table filters (28px)."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A primary field on a sign-in or onboarding screen."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "value",
+            "useWhen": "The typed value is an identifier but the placeholder is prose."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "key",
+            "useWhen": "Keys and names are mono; used by pairs rows."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "both",
+            "useWhen": "Value and placeholder are set in the mono face."
+          },
+          {
+            "attribute": "data-fit",
+            "value": "",
+            "useWhen": "A short value such as a port or a code; the width follows the size attribute."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-input",
+            "role": "The input, or a span or output in its shape."
+          },
+          {
+            "class": "fd-input-pair",
+            "role": "A field and a button side by side; stacks on phones."
+          }
+        ],
+        "related": [
+          "field",
+          "textarea",
+          "input-group",
+          "number",
+          "search",
+          "select"
+        ],
+        "keyboard": [],
+        "example": "docs/forms.html#input",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "input-group",
@@ -2846,7 +4853,130 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#affixes"
+      "docs": "docs/forms.html#affixes",
+      "card": {
+        "id": "input-group",
+        "job": "Put an icon, prefix, unit or button inside one field.",
+        "purpose": "One field with affixes: the group carries the single hairline and focus halo, and a bare fd-input lives inside it. Affixes are an icon, a text prefix, a unit, a chevron or a small ghost button one step below the field size. The same group holds the input of a combobox.",
+        "useWhen": [
+          "A fixed part of a URL, a currency or a unit sits beside the value (https://, USD, ms).",
+          "A button belongs to the value inside the field: copy, show, apply.",
+          "An icon or a chevron marks what the field is."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The field and a button are two separate actions side by side.",
+            "instead": "input"
+          },
+          {
+            "when": "The field is a search with a clear button.",
+            "instead": "search"
+          },
+          {
+            "when": "The value is a number with steppers.",
+            "instead": "number"
+          },
+          {
+            "when": "The field picks from a list.",
+            "instead": "combobox"
+          }
+        ],
+        "aka": [
+          "input with addon",
+          "prefix input",
+          "adornment",
+          "affix"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the inner input"
+          },
+          {
+            "name": "entry",
+            "how": "data-mode=\"entry\" on a secret group; see secret"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-kind",
+            "value": "tag",
+            "useWhen": "A chip prefix or suffix for the part of a URL people should not retype."
+          },
+          {
+            "attribute": "data-kind",
+            "value": "text",
+            "useWhen": "A plain muted prefix or suffix such as https://."
+          },
+          {
+            "attribute": "data-kind",
+            "value": "unit",
+            "useWhen": "A unit in mono after a number: ms, MB, requests."
+          },
+          {
+            "attribute": "data-kind",
+            "value": "action",
+            "useWhen": "A ghost button inside the field."
+          },
+          {
+            "attribute": "data-kind",
+            "value": "chevron",
+            "useWhen": "A chevron that opens a list; used by the combobox."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A dense field (28px)."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A larger field."
+          },
+          {
+            "attribute": "data-fit",
+            "value": "",
+            "useWhen": "A short value; the width follows the input's size attribute."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "both",
+            "useWhen": "The value is an identifier."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-input-group",
+            "role": "The field box."
+          },
+          {
+            "class": "fd-input-affix",
+            "role": "An icon, text, unit, chevron or button at either end."
+          }
+        ],
+        "related": [
+          "input",
+          "combobox",
+          "search",
+          "number",
+          "secret"
+        ],
+        "keyboard": [],
+        "example": "docs/forms.html#affixes",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "json",
@@ -3042,7 +5172,134 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#combobox"
+      "docs": "docs/forms.html#combobox",
+      "card": {
+        "id": "listbox",
+        "job": "Show a list of options a person can choose from.",
+        "purpose": "The option list a combobox opens, and the list inside any picker: fd-option rows with a check for the selected one, an optional description and mono meta, group labels and an empty message. The active row is marked with data-active. It is a popover that falls back to an absolute panel where the Popover API is missing.",
+        "useWhen": [
+          "Building a picker or menu whose rows are choices with state (selected, active).",
+          "Rows need a description, an icon or a mono meta beside the label."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A user needs a ready-made field with typing and filtering.",
+            "instead": "combobox"
+          },
+          {
+            "when": "The rows are actions, not choices.",
+            "instead": "menu"
+          },
+          {
+            "when": "The rows are plain choices from a short list.",
+            "instead": "select"
+          },
+          {
+            "when": "The rows are checkboxes or radios in a form.",
+            "instead": "checkbox"
+          }
+        ],
+        "aka": [
+          "option list",
+          "dropdown list",
+          "picker list",
+          "suggestions list"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "active row",
+            "how": "data-active on .fd-option"
+          },
+          {
+            "name": "selected",
+            "how": "aria-selected=\"true\" on .fd-option"
+          },
+          {
+            "name": "fallback position",
+            "how": "data-fallback where popover is unsupported"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-side",
+            "value": "top",
+            "useWhen": "The list opens above its field, when there is no room below."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-listbox",
+            "role": "The panel; a popover."
+          },
+          {
+            "class": "fd-listbox-label",
+            "role": "A group heading."
+          },
+          {
+            "class": "fd-options",
+            "role": "The list of rows, also used for checkbox groups."
+          },
+          {
+            "class": "fd-option",
+            "role": "One choice; carries data-value."
+          },
+          {
+            "class": "fd-option-main",
+            "role": "Holds label and description."
+          },
+          {
+            "class": "fd-option-label",
+            "role": "The option name."
+          },
+          {
+            "class": "fd-option-desc",
+            "role": "A sentence about it."
+          },
+          {
+            "class": "fd-option-meta",
+            "role": "Mono text at the end."
+          },
+          {
+            "class": "fd-option-check",
+            "role": "The check on the selected option."
+          },
+          {
+            "class": "fd-listbox-empty",
+            "role": "The message when no option matches."
+          }
+        ],
+        "related": [
+          "combobox",
+          "select",
+          "menu",
+          "command"
+        ],
+        "keyboard": [
+          {
+            "keys": "ArrowDown, ArrowUp",
+            "does": "Move the active option when it belongs to a combobox."
+          },
+          {
+            "keys": "Enter",
+            "does": "Chooses the active option."
+          }
+        ],
+        "example": "docs/forms.html#combobox",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "loader",
@@ -3180,7 +5437,128 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#switch"
+      "docs": "docs/forms.html#switch",
+      "card": {
+        "id": "matrix",
+        "job": "Set one switch for each category and channel in a grid.",
+        "purpose": "A category by channel grid: a mono header row, one row per category and a fixed-width column per channel (data-cols 1 to 6). Each cell holds a switch or checkbox with an aria-label that names both the row and the column.",
+        "useWhen": [
+          "Notification settings: events down the side, email, browser and phone across the top.",
+          "Permissions by role or by resource where every cell is on or off."
+        ],
+        "avoidWhen": [
+          {
+            "when": "There is one column of independent settings.",
+            "instead": "setting"
+          },
+          {
+            "when": "The grid shows data, not controls.",
+            "instead": "table"
+          },
+          {
+            "when": "Only one switch matters.",
+            "instead": "switch"
+          }
+        ],
+        "aka": [
+          "notification table",
+          "permission grid",
+          "preference matrix",
+          "switch table"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-cols",
+            "value": "1",
+            "useWhen": "One channel column."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "2",
+            "useWhen": "Two channel columns, such as email and browser."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "3",
+            "useWhen": "Three channel columns."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "4",
+            "useWhen": "Four channel columns."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "5",
+            "useWhen": "Five channel columns."
+          },
+          {
+            "attribute": "data-cols",
+            "value": "6",
+            "useWhen": "Six channel columns; the most that fit."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-matrix",
+            "role": "The grid."
+          },
+          {
+            "class": "fd-matrix-head",
+            "role": "The header row with channel names."
+          },
+          {
+            "class": "fd-matrix-row",
+            "role": "One category row."
+          },
+          {
+            "class": "fd-matrix-text",
+            "role": "Holds the row label and description."
+          },
+          {
+            "class": "fd-matrix-label",
+            "role": "The category name."
+          },
+          {
+            "class": "fd-matrix-desc",
+            "role": "A sentence under the category."
+          },
+          {
+            "class": "fd-matrix-cell",
+            "role": "One control per channel."
+          }
+        ],
+        "related": [
+          "switch",
+          "checkbox",
+          "table",
+          "setting"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves through the controls row by row."
+          },
+          {
+            "keys": "Space",
+            "does": "Flips the focused switch or checkbox."
+          }
+        ],
+        "example": "docs/forms.html#switch",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "menu",
@@ -3449,7 +5827,127 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/forms.html#number"
+      "docs": "docs/forms.html#number",
+      "card": {
+        "id": "number",
+        "job": "Enter a number and nudge it up or down.",
+        "purpose": "A number input with steppers inside the field. Hold a stepper to repeat; steppers disable at min and max. Arrow keys and typing still work. fd:change fires with the new value.",
+        "useWhen": [
+          "The value is a count or an amount with limits: retries, page depth, seats.",
+          "People change it by small steps more than they type it."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value sits on a scale and exact digits matter less than position.",
+            "instead": "slider"
+          },
+          {
+            "when": "The number has a unit that should show beside it.",
+            "instead": "input-group"
+          },
+          {
+            "when": "The value is an ID, a phone number or a code of digits.",
+            "instead": "input"
+          },
+          {
+            "when": "The code is sent to the person and entered once.",
+            "instead": "otp"
+          }
+        ],
+        "aka": [
+          "stepper",
+          "spinner",
+          "quantity input",
+          "numeric input"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "at limit",
+            "how": "a stepper is disabled when the value reaches min or max"
+          },
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the input"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A dense row (28px)."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A larger field."
+          },
+          {
+            "attribute": "data-block",
+            "value": "",
+            "useWhen": "The control fills its row."
+          },
+          {
+            "attribute": "data-fit",
+            "value": "",
+            "useWhen": "A short number; the width follows the input."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "both",
+            "useWhen": "Digits compared character by character."
+          },
+          {
+            "attribute": "data-mode",
+            "value": "entry",
+            "useWhen": "The field is a plain typed value in a form."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-number",
+            "role": "The wrapper."
+          },
+          {
+            "class": "fd-number-input",
+            "role": "The native number input."
+          },
+          {
+            "class": "fd-number-step",
+            "role": "The minus and plus buttons (data-fd-step=\"-1\" or \"1\")."
+          }
+        ],
+        "related": [
+          "slider",
+          "input",
+          "input-group",
+          "field"
+        ],
+        "keyboard": [
+          {
+            "keys": "ArrowUp, ArrowDown",
+            "does": "Native: raise or lower the value by step."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On a stepper: changes the value; holding repeats."
+          }
+        ],
+        "example": "docs/forms.html#number",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "otp",
@@ -3477,7 +5975,112 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/forms.html#otp"
+      "docs": "docs/forms.html#otp",
+      "card": {
+        "id": "otp",
+        "job": "Enter a short code from a message or an app.",
+        "purpose": "Six single-character boxes that behave as one field. Typing advances, Backspace steps back, arrow keys move, and pasting fills every box; SMS autofill lands in the first. fd:change fires on every edit with { value, complete }: verify when complete is true. In a posted form it keeps one named input and a hidden input carries the whole code.",
+        "useWhen": [
+          "A verification code arrives by SMS, email or an authenticator app.",
+          "A code of fixed length is typed or pasted once (data-length, data-type)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is a number people adjust.",
+            "instead": "number"
+          },
+          {
+            "when": "The value is a long key or token.",
+            "instead": "secret"
+          },
+          {
+            "when": "The text has variable length.",
+            "instead": "input"
+          }
+        ],
+        "aka": [
+          "verification code",
+          "PIN input",
+          "one-time password",
+          "2FA code",
+          "code input"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the boxes; set by your app after a wrong code"
+          },
+          {
+            "name": "complete",
+            "how": "fd:change detail.complete is true"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the inputs"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A compact code field."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A sign-in or checkout step where the code is the one task."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-otp",
+            "role": "The wrapper; carries data-fd-otp and data-length."
+          },
+          {
+            "class": "fd-otp-sep",
+            "role": "A separator between groups of boxes."
+          }
+        ],
+        "related": [
+          "secret",
+          "number",
+          "input",
+          "field"
+        ],
+        "keyboard": [
+          {
+            "keys": "Backspace",
+            "does": "Clears the box, or steps back to the previous one."
+          },
+          {
+            "keys": "Delete",
+            "does": "Clears the box."
+          },
+          {
+            "keys": "ArrowLeft, ArrowRight",
+            "does": "Move between boxes."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Jump to the first or last box."
+          }
+        ],
+        "example": "docs/forms.html#otp",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "page",
@@ -3597,7 +6200,103 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/navigation.html#pagination"
+      "docs": "docs/navigation.html#pagination",
+      "card": {
+        "id": "pagination",
+        "job": "Move through a list that is split into pages.",
+        "purpose": "A count on the left and joined previous and next buttons on the right: \"Page 1 of 12\" or \"Showing 51-100 of 2,481\". The numbered variant adds page numbers and gaps for people who jump to a page they remember.",
+        "useWhen": [
+          "A log, table or result list is split into pages of fixed size.",
+          "People move forward and back far more often than they jump."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Content loads as people scroll.",
+            "instead": "Load more as the list ends; no component is needed."
+          },
+          {
+            "when": "The items are steps in a flow.",
+            "instead": "steps"
+          },
+          {
+            "when": "The views are different objects.",
+            "instead": "tabs"
+          }
+        ],
+        "aka": [
+          "pager",
+          "paging",
+          "page navigation",
+          "prev next"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [
+          {
+            "name": "current page",
+            "how": "aria-current=\"page\" on a numbered page"
+          },
+          {
+            "name": "at the end",
+            "how": "disabled on the previous or next button"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "numbered",
+            "useWhen": "People jump to a page they remember."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-pagination",
+            "role": "The bar."
+          },
+          {
+            "class": "fd-pagination-info",
+            "role": "The count text."
+          },
+          {
+            "class": "fd-pagination-pages",
+            "role": "The numbered buttons."
+          },
+          {
+            "class": "fd-pagination-page",
+            "role": "One page number."
+          },
+          {
+            "class": "fd-pagination-gap",
+            "role": "The ellipsis between ranges."
+          }
+        ],
+        "related": [
+          "table",
+          "button",
+          "list"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between the buttons."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Go to the page."
+          }
+        ],
+        "example": "docs/navigation.html#pagination",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "pairs",
@@ -3632,7 +6331,135 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#pairs"
+      "docs": "docs/forms.html#pairs",
+      "card": {
+        "id": "pairs",
+        "job": "Edit a set of names with values as rows.",
+        "purpose": "For OAuth scopes and their labels, request headers, environment variables. Each pair is a row with its own remove button. Without script it is a text area of \"name = value\" lines; with it, rows and one hidden input post the same lines or a JSON object (data-format=\"json\"). A name used twice marks both invalid and stops the form posting.",
+        "useWhen": [
+          "The value is a map: scopes, headers, labels, environment variables.",
+          "The server stores an object and nobody should type JSON."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is a flat list.",
+            "instead": "tag-input"
+          },
+          {
+            "when": "The value is one setting with a fixed name.",
+            "instead": "field"
+          },
+          {
+            "when": "The data is a table people read and sort.",
+            "instead": "table"
+          },
+          {
+            "when": "Raw config is the actual input.",
+            "instead": "codefield"
+          }
+        ],
+        "aka": [
+          "key-value editor",
+          "key value input",
+          "headers editor",
+          "env vars editor",
+          "map editor"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "duplicate name",
+            "how": "aria-invalid=\"true\" on both names and data-invalid on the group"
+          },
+          {
+            "name": "read-only",
+            "how": "readonly on the source text area"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-mono",
+            "value": "key",
+            "useWhen": "Names are identifiers and values are prose, as in scopes."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "value",
+            "useWhen": "Values are identifiers and names are prose."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "both",
+            "useWhen": "Both columns are identifiers, as in headers."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A compact editor."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A larger editor."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-pairs",
+            "role": "The wrapper; carries data-fd-pairs."
+          },
+          {
+            "class": "fd-pairs-head",
+            "role": "The column headings."
+          },
+          {
+            "class": "fd-pairs-row",
+            "role": "One pair."
+          },
+          {
+            "class": "fd-pairs-key",
+            "role": "The name input."
+          },
+          {
+            "class": "fd-pairs-value",
+            "role": "The value input."
+          },
+          {
+            "class": "fd-pairs-add",
+            "role": "The add-row button."
+          }
+        ],
+        "related": [
+          "tag-input",
+          "field",
+          "codefield",
+          "kv"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "In a name: moves to its value. In a value: adds a row below."
+          },
+          {
+            "keys": "Backspace",
+            "does": "In an empty name and value: removes the row."
+          }
+        ],
+        "example": "docs/forms.html#pairs",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.4.0"
+      }
     },
     {
       "id": "panel",
@@ -3953,7 +6780,107 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#radio"
+      "docs": "docs/forms.html#radio",
+      "card": {
+        "id": "radio",
+        "job": "Choose exactly one option from a few.",
+        "purpose": "A native radio with an accent ring and a dot that scales in with a slight spring. Group the options in role=\"radiogroup\" with a label. The label is part of the control. It is for one choice from two to four plain options saved with the form.",
+        "useWhen": [
+          "One of 2 to 4 options is saved with the form and each has a short label.",
+          "Options should all stay visible so people compare them."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Two options behave like on and off.",
+            "instead": "switch"
+          },
+          {
+            "when": "Each option needs a title, a sentence or a price.",
+            "instead": "choice"
+          },
+          {
+            "when": "The options filter or switch what is shown right here.",
+            "instead": "segmented"
+          },
+          {
+            "when": "There are more than four or five options.",
+            "instead": "select"
+          }
+        ],
+        "aka": [
+          "radio button",
+          "option button",
+          "single choice"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "checked",
+            "how": "checked on the input"
+          },
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\""
+          },
+          {
+            "name": "disabled",
+            "how": "disabled"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-radio",
+            "role": "The label that wraps the input."
+          },
+          {
+            "class": "fd-radio-box",
+            "role": "The drawn ring and dot."
+          },
+          {
+            "class": "fd-radio-text",
+            "role": "Wraps label and description."
+          },
+          {
+            "class": "fd-radio-label",
+            "role": "The visible label."
+          },
+          {
+            "class": "fd-radio-desc",
+            "role": "A sentence under the label."
+          }
+        ],
+        "related": [
+          "checkbox",
+          "switch",
+          "choice",
+          "segmented",
+          "select"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys",
+            "does": "Native: move between the radios of a group and select."
+          },
+          {
+            "keys": "Space",
+            "does": "Selects the focused radio."
+          }
+        ],
+        "example": "docs/forms.html#radio",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "reasoning",
@@ -4038,7 +6965,116 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#theming"
+      "docs": "docs/foundations.html#theming",
+      "card": {
+        "id": "row",
+        "job": "Put things side by side with even space.",
+        "purpose": "A horizontal flex box. data-gap sets the space, data-wrap lets children wrap, data-justify spreads them (between, center, end) and data-align lines them up across the row (start, end, baseline, stretch). Put fd-grow on the child that takes the leftover space. Use data-align=\"end\" for a field with a button beside it.",
+        "useWhen": [
+          "Children sit on one line: a title and its actions, a field and a button.",
+          "A toolbar or a footer lines up controls with a gap."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Children stack vertically.",
+            "instead": "stack"
+          },
+          {
+            "when": "Children form equal columns that reflow.",
+            "instead": "grid"
+          },
+          {
+            "when": "A field and a button are one value.",
+            "instead": "input-group"
+          },
+          {
+            "when": "Buttons join into one control.",
+            "instead": "button"
+          }
+        ],
+        "aka": [
+          "hstack",
+          "flex row",
+          "horizontal layout",
+          "inline layout"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "wrapping",
+            "how": "data-wrap on the row"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-align",
+            "value": "start",
+            "useWhen": "Children align to the top of the row."
+          },
+          {
+            "attribute": "data-align",
+            "value": "end",
+            "useWhen": "Children align to the bottom, so a button lines up with an input and not its label."
+          },
+          {
+            "attribute": "data-align",
+            "value": "baseline",
+            "useWhen": "Text of different sizes shares a baseline."
+          },
+          {
+            "attribute": "data-align",
+            "value": "stretch",
+            "useWhen": "Children fill the row's height."
+          },
+          {
+            "attribute": "data-justify",
+            "value": "between",
+            "useWhen": "First child at one end, last at the other."
+          },
+          {
+            "attribute": "data-justify",
+            "value": "center",
+            "useWhen": "Children centred in the row."
+          },
+          {
+            "attribute": "data-justify",
+            "value": "end",
+            "useWhen": "Children at the end, as actions."
+          },
+          {
+            "attribute": "data-wrap",
+            "value": "",
+            "useWhen": "Children wrap to a new line when the row is narrow."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-row",
+            "role": "The container."
+          }
+        ],
+        "related": [
+          "stack",
+          "grid",
+          "grow",
+          "toolbar"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#theming",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/layout.css",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "run-steps",
@@ -4173,7 +7209,118 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/forms.html#search"
+      "docs": "docs/forms.html#search",
+      "card": {
+        "id": "search",
+        "job": "Search a list or a page by typing.",
+        "purpose": "An input with a leading icon. The clear button appears as soon as there is text and the key hint steps aside. data-fd-search-hotkey focuses the first visible search on \"/\" or on Cmd/Ctrl+K. The soft variant sits in toolbars next to filters; the white one suits a page whose main job is search.",
+        "useWhen": [
+          "People filter or find items in a list, table or document.",
+          "A page has one main search that a keyboard shortcut should reach."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The search runs commands or jumps between pages from anywhere.",
+            "instead": "command"
+          },
+          {
+            "when": "The value is any other kind of text.",
+            "instead": "input"
+          },
+          {
+            "when": "The person picks from a known list while typing.",
+            "instead": "combobox"
+          }
+        ],
+        "aka": [
+          "search box",
+          "search bar",
+          "filter input",
+          "searchfield"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "has text",
+            "how": "the clear button shows and the key hint hides"
+          },
+          {
+            "name": "hotkey",
+            "how": "data-fd-search-hotkey on the input, or =\"mod+k\""
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "soft",
+            "useWhen": "In a toolbar beside filters, where a white field would be loud."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A compact toolbar (28px)."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A search that is the main job of the page."
+          },
+          {
+            "attribute": "data-fit",
+            "value": "",
+            "useWhen": "A short search that sizes to its content."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-search",
+            "role": "The field box."
+          },
+          {
+            "class": "fd-search-input",
+            "role": "The native search input."
+          },
+          {
+            "class": "fd-search-clear",
+            "role": "The clear button; shows when there is text."
+          }
+        ],
+        "related": [
+          "input",
+          "command",
+          "filter",
+          "toolbar",
+          "combobox"
+        ],
+        "keyboard": [
+          {
+            "keys": "/",
+            "does": "Focuses the first visible search marked data-fd-search-hotkey."
+          },
+          {
+            "keys": "Cmd+K, Ctrl+K",
+            "does": "Focuses it when the hotkey is \"mod+k\"."
+          },
+          {
+            "keys": "Escape",
+            "does": "Clears the text; with no text, leaves the field."
+          }
+        ],
+        "example": "docs/forms.html#search",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "secret",
@@ -4216,7 +7363,141 @@
         "fd:copy",
         "fd:rotate"
       ],
-      "docs": "docs/forms.html#secret"
+      "docs": "docs/forms.html#secret",
+      "card": {
+        "id": "secret",
+        "job": "Show or enter a secret that stays masked until asked.",
+        "purpose": "Keys and signing secrets stay masked until someone asks. Reveal swaps in the real value, copy confirms with a check, and rotate hands the decision to your app (fd:rotate; set the new value with setSecret). Copy always copies the real value. With data-mode=\"entry\" it is a password-style input for typing a new secret: no stored value, no copy, and it masks again on submit.",
+        "useWhen": [
+          "An API key or signing secret is shown with reveal and copy.",
+          "A person types a new password or key (data-mode=\"entry\").",
+          "A key must be rotated from the page."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is not sensitive and only needs copying.",
+            "instead": "copy-field"
+          },
+          {
+            "when": "A command or snippet is copied from a code block.",
+            "instead": "snippet"
+          },
+          {
+            "when": "A one-time code is typed in.",
+            "instead": "otp"
+          },
+          {
+            "when": "The secret is shown once on creation.",
+            "instead": "dialog"
+          }
+        ],
+        "aka": [
+          "password field",
+          "API key field",
+          "token field",
+          "masked input",
+          "reveal field"
+        ],
+        "surfaces": [
+          "app",
+          "website"
+        ],
+        "data": [
+          "form",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "masked",
+            "how": "data-state=\"masked\", the default"
+          },
+          {
+            "name": "revealed",
+            "how": "data-state=\"revealed\""
+          },
+          {
+            "name": "copied",
+            "how": "data-state=\"copied\" for a moment after copy"
+          },
+          {
+            "name": "entry",
+            "how": "data-mode=\"entry\" with a named input.fd-secret-input"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-mask",
+            "value": "partial",
+            "useWhen": "Keep the first and last eight characters so keys stay recognisable."
+          },
+          {
+            "attribute": "data-mask",
+            "value": "full",
+            "useWhen": "A secret that identifies nothing."
+          },
+          {
+            "attribute": "data-mask",
+            "value": "end",
+            "useWhen": "Show the start and the last few characters, masked even with no reveal button."
+          },
+          {
+            "attribute": "data-mode",
+            "value": "entry",
+            "useWhen": "Type a new secret in a form."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "Draw attention to a key shown once after creating it."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-secret",
+            "role": "The wrapper; carries data-fd-secret and data-value."
+          },
+          {
+            "class": "fd-secret-value",
+            "role": "The drawn value."
+          },
+          {
+            "class": "fd-secret-start",
+            "role": "The part that shortens with an ellipsis."
+          },
+          {
+            "class": "fd-secret-end",
+            "role": "The part that is never cut off."
+          },
+          {
+            "class": "fd-secret-input",
+            "role": "The password input in entry mode."
+          },
+          {
+            "class": "fd-secret-actions",
+            "role": "The reveal, copy and rotate buttons (data-fd-field-action)."
+          }
+        ],
+        "related": [
+          "copy-field",
+          "input",
+          "field",
+          "otp",
+          "dialog"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On reveal, copy or rotate: runs the action."
+          }
+        ],
+        "example": "docs/forms.html#secret",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "segmented",
@@ -4250,7 +7531,151 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/navigation.html#segmented"
+      "docs": "docs/navigation.html#segmented",
+      "card": {
+        "id": "segmented",
+        "job": "Pick one of two to five options that change what you see here.",
+        "purpose": "A radio group drawn as a track with a white thumb that slides to the chosen option: audience, state filter, theme. Items may be buttons with role=\"radio\", toggle buttons with aria-pressed, links, or labels around native radios in a form (so it posts). A track narrower than its options scrolls sideways. fd:change carries the item's data-value.",
+        "useWhen": [
+          "Two to five mutually exclusive options change the view in place: All, Mine, Archived.",
+          "A mode or theme is set, and each option is short.",
+          "A form needs a choice of two to four short options and should post (labels around radios)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "There are more than five options, or an option goes to another page.",
+            "instead": "tabs"
+          },
+          {
+            "when": "The options are categories to browse.",
+            "instead": "chip-nav"
+          },
+          {
+            "when": "A setting is on or off.",
+            "instead": "switch"
+          },
+          {
+            "when": "Options need a sentence each.",
+            "instead": "choice"
+          },
+          {
+            "when": "The list is long.",
+            "instead": "select"
+          }
+        ],
+        "aka": [
+          "segmented button",
+          "button group toggle",
+          "toggle group",
+          "pill switcher",
+          "view toggle",
+          "radio buttons"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "aria-checked=\"true\", aria-pressed=\"true\" or aria-current on the item"
+          },
+          {
+            "name": "empty",
+            "how": "data-empty on the thumb when nothing is selected"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the item"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "In a toolbar or a dense row."
+          },
+          {
+            "attribute": "data-icon-only",
+            "value": "",
+            "useWhen": "Each item is an icon with an aria-label."
+          },
+          {
+            "attribute": "data-block",
+            "value": "",
+            "useWhen": "Items share the row equally; keep labels short."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "The selected icon takes the accent colour."
+          },
+          {
+            "attribute": "data-variant",
+            "value": "grouped",
+            "useWhen": "Several labelled groups share one track."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-segmented",
+            "role": "The track; role=\"radiogroup\"."
+          },
+          {
+            "class": "fd-segmented-item",
+            "role": "One option."
+          },
+          {
+            "class": "fd-segmented-thumb",
+            "role": "The sliding white thumb; added by nav.js."
+          },
+          {
+            "class": "fd-segmented-group",
+            "role": "A labelled group of items in the grouped variant."
+          },
+          {
+            "class": "fd-segmented-label",
+            "role": "The group label."
+          },
+          {
+            "class": "fd-segmented-count",
+            "role": "A count after an item label."
+          }
+        ],
+        "related": [
+          "tabs",
+          "chip-nav",
+          "radio",
+          "switch",
+          "select",
+          "viewswitch"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys",
+            "does": "Move the selection to the next or previous option (radio mode)."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Select the first or last option."
+          },
+          {
+            "keys": "Tab",
+            "does": "Reaches the selected option."
+          }
+        ],
+        "example": "docs/navigation.html#segmented",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css",
+          "fire/js/nav.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "select",
@@ -4277,7 +7702,110 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#select"
+      "docs": "docs/forms.html#select",
+      "card": {
+        "id": "select",
+        "job": "Choose one option from a list in a native menu.",
+        "purpose": "A native select in Fire's skin, so the picker, typeahead and the mobile wheel all keep working. The wrapper carries the size and variant; the select inside is untouched. Soft by default like the secondary button; outline beside inputs in a form.",
+        "useWhen": [
+          "One value comes from a list of roughly 5 to 15 plain labels: country, region, time zone.",
+          "The control must use the platform picker, such as on phones."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The list is long enough that people need to type to find an item, or each option needs an icon or description.",
+            "instead": "combobox"
+          },
+          {
+            "when": "There are two to four options that fit side by side.",
+            "instead": "segmented"
+          },
+          {
+            "when": "Two options act like on and off.",
+            "instead": "switch"
+          },
+          {
+            "when": "The person may choose several.",
+            "instead": "checkbox"
+          }
+        ],
+        "aka": [
+          "dropdown",
+          "drop-down",
+          "picker",
+          "native select"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the select"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the select"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "outline",
+            "useWhen": "Beside inputs in a form, where it should look like a field."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A dense toolbar (28px)."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A larger form field."
+          },
+          {
+            "attribute": "data-block",
+            "value": "",
+            "useWhen": "The select fills its row."
+          },
+          {
+            "attribute": "data-fit",
+            "value": "",
+            "useWhen": "The width follows the longest option."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-select",
+            "role": "The wrapper; holds the native select."
+          }
+        ],
+        "related": [
+          "combobox",
+          "segmented",
+          "radio",
+          "field",
+          "listbox"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys, typing",
+            "does": "Native select behaviour: open, move, jump by letter."
+          }
+        ],
+        "example": "docs/forms.html#select",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "session-list",
@@ -4561,7 +8089,106 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/forms.html#slider"
+      "docs": "docs/forms.html#slider",
+      "card": {
+        "id": "slider",
+        "job": "Pick a position on a scale by dragging.",
+        "purpose": "A styled native range input, so touch, arrow keys, Home/End and Page keys work. The accent fills to the thumb and a value bubble shows while dragging or when focused by keyboard. data-labels on the wrapper gives named stops with clickable ticks. Show the value in the label row so people do not guess from the thumb.",
+        "useWhen": [
+          "The value is a position on a scale and a rough setting is enough: effort, volume, depth.",
+          "Named stops such as Low, Medium, High suit the choice (data-variant=\"steps\")."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The exact number matters.",
+            "instead": "number"
+          },
+          {
+            "when": "There are two to four named options with no scale.",
+            "instead": "segmented"
+          },
+          {
+            "when": "Progress is shown, not set.",
+            "instead": "progress"
+          }
+        ],
+        "aka": [
+          "range",
+          "range input",
+          "scrubber",
+          "track bar"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "dragging",
+            "how": "data-dragging on the wrapper while the thumb is held"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled on the range input"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-variant",
+            "value": "steps",
+            "useWhen": "A few named stops with clickable ticks (data-labels)."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-slider",
+            "role": "The wrapper; forms.js sets --fd-slider-p."
+          },
+          {
+            "class": "fd-slider-bubble",
+            "role": "The value shown above the thumb while dragging."
+          },
+          {
+            "class": "fd-slider-ticks",
+            "role": "Clickable stop labels under the track."
+          },
+          {
+            "class": "fd-slider-value",
+            "role": "A visible value mirrored from the input."
+          }
+        ],
+        "related": [
+          "number",
+          "segmented",
+          "progress",
+          "field"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow keys",
+            "does": "Native: change by step."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Jump to min or max."
+          },
+          {
+            "keys": "PageUp, PageDown",
+            "does": "Change by a larger step."
+          }
+        ],
+        "example": "docs/forms.html#slider",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "snippet",
@@ -4724,7 +8351,86 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/shell.html#split"
+      "docs": "docs/shell.html#split",
+      "card": {
+        "id": "stack",
+        "job": "Put things one above another with even space.",
+        "purpose": "A vertical flex box. Space comes from data-gap on the parent (steps 0 to 24); data-align sets how children line up across it. It sets no width or height. Stacks, rows and grids nest freely.",
+        "useWhen": [
+          "Children sit one above another: a heading, text and a button.",
+          "Fields or cards in a column need one consistent gap."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Children sit side by side.",
+            "instead": "row"
+          },
+          {
+            "when": "Children form equal columns that fill the width.",
+            "instead": "grid"
+          },
+          {
+            "when": "A form needs its measure and rows.",
+            "instead": "form"
+          },
+          {
+            "when": "You are about to write a margin or a pixel gap.",
+            "instead": "Set data-gap on the stack instead."
+          }
+        ],
+        "aka": [
+          "vstack",
+          "column layout",
+          "vertical layout",
+          "flex column"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-align",
+            "value": "start",
+            "useWhen": "Children keep their own width and sit at the start."
+          },
+          {
+            "attribute": "data-align",
+            "value": "center",
+            "useWhen": "Children are centred across the stack."
+          },
+          {
+            "attribute": "data-align",
+            "value": "end",
+            "useWhen": "Children sit at the end."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-stack",
+            "role": "The container."
+          }
+        ],
+        "related": [
+          "row",
+          "grid",
+          "column",
+          "grow"
+        ],
+        "keyboard": [],
+        "example": "docs/shell.html#split",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/layout.css",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "stats",
@@ -4841,7 +8547,116 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/navigation.html#steps"
+      "docs": "docs/navigation.html#steps",
+      "card": {
+        "id": "steps",
+        "job": "Show where someone is in a flow with a fixed order.",
+        "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set the position with data-current (0-based) or setStep(); buttons with data-fd-step=\"next|prev|n\" move it. The vertical orientation suits a setup checklist with descriptions. A step in error shows the reason under its title.",
+        "useWhen": [
+          "A setup or create flow has a fixed order: choose pages, schedule, notify, review.",
+          "A vertical list of tasks shows what is done and what comes next."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Views can be visited in any order.",
+            "instead": "tabs"
+          },
+          {
+            "when": "A flow lives in a dialog and needs dots only.",
+            "instead": "dialog"
+          },
+          {
+            "when": "The items are a list people tick off.",
+            "instead": "checklist"
+          },
+          {
+            "when": "The path is a location hierarchy.",
+            "instead": "breadcrumb"
+          }
+        ],
+        "aka": [
+          "stepper",
+          "wizard",
+          "progress steps",
+          "timeline",
+          "onboarding steps"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "done",
+            "how": "data-state=\"done\" on a step"
+          },
+          {
+            "name": "current",
+            "how": "data-state=\"current\" on a step; aria-current=\"step\""
+          },
+          {
+            "name": "error",
+            "how": "data-state=\"error\" on a step"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-orientation",
+            "value": "vertical",
+            "useWhen": "A list with descriptions, as in a getting-started panel."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-steps",
+            "role": "The ordered list."
+          },
+          {
+            "class": "fd-step",
+            "role": "One step; carries data-state."
+          },
+          {
+            "class": "fd-step-marker",
+            "role": "The number, check or warning mark."
+          },
+          {
+            "class": "fd-step-body",
+            "role": "Holds title and description."
+          },
+          {
+            "class": "fd-step-title",
+            "role": "The step name."
+          },
+          {
+            "class": "fd-step-desc",
+            "role": "Detail under the title."
+          }
+        ],
+        "related": [
+          "tabs",
+          "checklist",
+          "dialog",
+          "progress",
+          "breadcrumb"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a step button: moves to that step."
+          }
+        ],
+        "example": "docs/navigation.html#steps",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css",
+          "fire/js/nav.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "subnav",
@@ -4866,7 +8681,118 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/navigation.html#subnav"
+      "docs": "docs/navigation.html#subnav",
+      "card": {
+        "id": "subnav",
+        "job": "Move between settings pages from a side column.",
+        "purpose": "The side navigation inside settings: a 280px column of 40px rows. When it cannot sit beside the content (a container under 760px) it turns into a row of pills that scrolls sideways. Links navigate; buttons get aria-current=\"true\" on click. fd:change fires on selection.",
+        "useWhen": [
+          "A settings or account area has four or more pages and a column beside them.",
+          "The list stays visible while the page content changes."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The whole app needs navigation.",
+            "instead": "sidebar"
+          },
+          {
+            "when": "The items are views of one object.",
+            "instead": "tabs"
+          },
+          {
+            "when": "The links jump within one long page.",
+            "instead": "toc"
+          },
+          {
+            "when": "The items are categories in a catalogue.",
+            "instead": "chip-nav"
+          }
+        ],
+        "aka": [
+          "settings nav",
+          "side nav",
+          "secondary navigation",
+          "vertical nav",
+          "local navigation"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "current",
+            "how": "aria-current=\"page\" on a link, aria-current=\"true\" on a button"
+          },
+          {
+            "name": "overflowing",
+            "how": "data-overflow on the pill row, set by nav.js"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-overflow",
+            "value": "start",
+            "useWhen": "Pills are clipped at the start."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "end",
+            "useWhen": "Pills are clipped at the end."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "both",
+            "useWhen": "Pills are clipped at both ends."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-subnav",
+            "role": "The column."
+          },
+          {
+            "class": "fd-subnav-item",
+            "role": "One page; a link or a button."
+          },
+          {
+            "class": "fd-subnav-meta",
+            "role": "A small count or badge at the end of the row."
+          },
+          {
+            "class": "fd-subnav-sep",
+            "role": "A divider between groups."
+          }
+        ],
+        "related": [
+          "sidebar",
+          "tabs",
+          "toc",
+          "chip-nav",
+          "split"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between items."
+          },
+          {
+            "keys": "Enter",
+            "does": "Follows a link or selects a button item."
+          }
+        ],
+        "example": "docs/navigation.html#subnav",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css",
+          "fire/js/nav.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "suggestions",
@@ -4910,7 +8836,128 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#switch"
+      "docs": "docs/forms.html#switch",
+      "card": {
+        "id": "switch",
+        "job": "Turn a setting on or off, with the change applying at once.",
+        "purpose": "A real checkbox with role=\"switch\": off is a faint ink track, on is the accent. The thumb slides with a slight spring and stretches while pressed. A switch has no Save button. A setting that cannot be turned off is shown locked, with the reason beside it.",
+        "useWhen": [
+          "A setting takes effect the moment it flips: notifications, a feature flag, a preference.",
+          "The label reads as a state: \"Email me when a run fails\"."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The change needs confirming or saves with a form.",
+            "instead": "checkbox"
+          },
+          {
+            "when": "There are three or more states.",
+            "instead": "segmented"
+          },
+          {
+            "when": "One option of several is chosen and the other is not \"off\".",
+            "instead": "radio"
+          },
+          {
+            "when": "A grid of categories by channels needs a switch in every cell.",
+            "instead": "matrix"
+          }
+        ],
+        "aka": [
+          "toggle",
+          "toggle switch",
+          "on/off",
+          "lightswitch"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "on",
+            "how": "checked on the input"
+          },
+          {
+            "name": "locked",
+            "how": "data-locked on the switch, with a fd-switch-lock reason"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "In dense rows and tables."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A larger touch target on a settings page."
+          },
+          {
+            "attribute": "data-label",
+            "value": "start",
+            "useWhen": "The label sits before the track, as in a row with the control at the end."
+          },
+          {
+            "attribute": "data-locked",
+            "value": "",
+            "useWhen": "The setting cannot be changed; say why in fd-switch-lock."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-switch",
+            "role": "The label that wraps the input."
+          },
+          {
+            "class": "fd-switch-track",
+            "role": "The track and thumb."
+          },
+          {
+            "class": "fd-switch-text",
+            "role": "Wraps label and description."
+          },
+          {
+            "class": "fd-switch-label",
+            "role": "The visible label."
+          },
+          {
+            "class": "fd-switch-desc",
+            "role": "A sentence under the label."
+          },
+          {
+            "class": "fd-switch-lock",
+            "role": "The reason a locked switch cannot change."
+          }
+        ],
+        "related": [
+          "checkbox",
+          "radio",
+          "matrix",
+          "setting"
+        ],
+        "keyboard": [
+          {
+            "keys": "Space",
+            "does": "Flips the focused switch."
+          }
+        ],
+        "example": "docs/forms.html#switch",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "table",
@@ -5248,7 +9295,139 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/navigation.html#tabs"
+      "docs": "docs/navigation.html#tabs",
+      "card": {
+        "id": "tabs",
+        "job": "Switch between views of the same object.",
+        "purpose": "Underline tabs on a hairline; the accent underline slides between them. Buttons with role=\"tab\" and aria-controls get the full pattern: arrow keys move and select, panels show and hide. Links with aria-current=\"page\" are route tabs. A strip that overflows scrolls sideways, fades the clipped edge and keeps the selected tab in view. fd:change carries { value }.",
+        "useWhen": [
+          "One object has several views: the output formats of a run, the sections of a record.",
+          "Each view is a panel on this page, or a route under the same object (route tabs)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Options filter or toggle what is shown and there are two to five of them.",
+            "instead": "segmented"
+          },
+          {
+            "when": "The items are categories to browse in a catalogue.",
+            "instead": "chip-nav"
+          },
+          {
+            "when": "The links move between settings pages in a column.",
+            "instead": "subnav"
+          },
+          {
+            "when": "The views are steps in a fixed order.",
+            "instead": "steps"
+          },
+          {
+            "when": "The sections are stacked and each opens in place.",
+            "instead": "accordion"
+          }
+        ],
+        "aka": [
+          "tab bar",
+          "tab strip",
+          "tabbed view",
+          "tablist",
+          "underline tabs"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "aria-selected=\"true\" on a tab; aria-current=\"page\" on a route tab"
+          },
+          {
+            "name": "disabled",
+            "how": "disabled or aria-disabled=\"true\" on a tab"
+          },
+          {
+            "name": "overflowing",
+            "how": "data-overflow=\"start|end|both\", set by nav.js"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "Tabs inside a card or a panel (36px)."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "start",
+            "useWhen": "Content is clipped at the start."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "end",
+            "useWhen": "Content is clipped at the end."
+          },
+          {
+            "attribute": "data-overflow",
+            "value": "both",
+            "useWhen": "Content is clipped at both ends."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-tabs",
+            "role": "The tablist."
+          },
+          {
+            "class": "fd-tab",
+            "role": "One tab; a button or a link."
+          },
+          {
+            "class": "fd-tab-count",
+            "role": "A count pill after the label."
+          },
+          {
+            "class": "fd-tabs-indicator",
+            "role": "The sliding underline; added by nav.js."
+          },
+          {
+            "class": "fd-tab-panel",
+            "role": "The panel a tab controls; hidden when not selected."
+          }
+        ],
+        "related": [
+          "segmented",
+          "chip-nav",
+          "subnav",
+          "steps",
+          "accordion"
+        ],
+        "keyboard": [
+          {
+            "keys": "ArrowRight, ArrowLeft",
+            "does": "Move to the next or previous tab and select it (reversed in right-to-left text; wraps)."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Select the first or last tab."
+          },
+          {
+            "keys": "Tab",
+            "does": "Moves into the panel from the selected tab."
+          }
+        ],
+        "example": "docs/navigation.html#tabs",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css",
+          "fire/js/nav.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "tag",
@@ -5312,7 +9491,131 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/forms.html#tags"
+      "docs": "docs/forms.html#tags",
+      "card": {
+        "id": "tag-input",
+        "job": "Enter a free-form list of values, one token each.",
+        "purpose": "A field that turns typed values into removable tokens. Enter or a comma adds one, Backspace on an empty field removes the last, and pasted lists split on commas and new lines. Without script it is a text area with one value per line; with it, one hidden input posts the same lines, or a JSON array with data-format=\"json\". data-pattern flags bad values, data-max caps the count.",
+        "useWhen": [
+          "The list is free text: domains, IP ranges, emails, keywords, redirect URIs.",
+          "The server stores a list, and nobody should type JSON."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The values come from a fixed list.",
+            "instead": "combobox"
+          },
+          {
+            "when": "Each entry has a name and a value.",
+            "instead": "pairs"
+          },
+          {
+            "when": "There is one value.",
+            "instead": "input"
+          },
+          {
+            "when": "The text is a paragraph.",
+            "instead": "textarea"
+          }
+        ],
+        "aka": [
+          "chips input",
+          "token field",
+          "multi-value input",
+          "tags field",
+          "email list"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form",
+          "list"
+        ],
+        "states": [
+          {
+            "name": "invalid value",
+            "how": "a token with data-invalid; data-pattern sets the rule"
+          },
+          {
+            "name": "full",
+            "how": "data-max stops adding past a count"
+          },
+          {
+            "name": "new token",
+            "how": "data-new on a token as it is added"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-mono",
+            "value": "both",
+            "useWhen": "Tokens are identifiers such as domains or CIDR ranges."
+          },
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A dense row (28px)."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A larger field."
+          },
+          {
+            "attribute": "data-mode",
+            "value": "entry",
+            "useWhen": "The field posts inside a plain form through its named text area."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-tag-input",
+            "role": "The field box; carries data-fd-tag-input."
+          },
+          {
+            "class": "fd-tag-input-field",
+            "role": "The typing input."
+          },
+          {
+            "class": "fd-token",
+            "role": "One value."
+          },
+          {
+            "class": "fd-token-label",
+            "role": "The value text."
+          },
+          {
+            "class": "fd-token-remove",
+            "role": "The remove button on a token."
+          }
+        ],
+        "related": [
+          "pairs",
+          "combobox",
+          "textarea",
+          "field"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, comma",
+            "does": "Adds the typed value as a token."
+          },
+          {
+            "keys": "Backspace",
+            "does": "On an empty field: removes the last token."
+          }
+        ],
+        "example": "docs/forms.html#tags",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "text",
@@ -5341,7 +9644,125 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#theming"
+      "docs": "docs/foundations.html#theming",
+      "card": {
+        "id": "text",
+        "job": "Change the tone or length of a piece of text.",
+        "purpose": "Small text helpers: muted, faint and second-step colours (fd-muted, fd-faint, fd-text-2), status text colours, a link style (fd-link; data-quiet hides its underline until hover), single-line truncation and a two or three line clamp. They set colour and clipping, never size.",
+        "useWhen": [
+          "A line is secondary: a hint, a timestamp, a caption.",
+          "A name must truncate with an ellipsis, or a description clamps to two or three lines.",
+          "A link sits inside a sentence."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The text needs a size or weight.",
+            "instead": "type"
+          },
+          {
+            "when": "A status needs a dot and a label.",
+            "instead": "status"
+          },
+          {
+            "when": "A short label needs a fill.",
+            "instead": "badge"
+          },
+          {
+            "when": "The text is an action.",
+            "instead": "button"
+          }
+        ],
+        "aka": [
+          "muted text",
+          "secondary text",
+          "truncate",
+          "line clamp",
+          "text colour",
+          "link"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "A link that takes the body ink colour instead of the accent."
+          },
+          {
+            "attribute": "data-quiet",
+            "value": "",
+            "useWhen": "A link whose underline shows only on hover."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-muted",
+            "role": "The second-step text colour."
+          },
+          {
+            "class": "fd-faint",
+            "role": "The third-step colour for placeholders and decoration."
+          },
+          {
+            "class": "fd-text-2",
+            "role": "The second ink step."
+          },
+          {
+            "class": "fd-accent-text",
+            "role": "Accent-coloured text."
+          },
+          {
+            "class": "fd-success-text",
+            "role": "Success-coloured text."
+          },
+          {
+            "class": "fd-warning-text",
+            "role": "Warning-coloured text."
+          },
+          {
+            "class": "fd-danger-text",
+            "role": "Danger-coloured text."
+          },
+          {
+            "class": "fd-link",
+            "role": "A link inside a sentence."
+          },
+          {
+            "class": "fd-truncate",
+            "role": "One line with an ellipsis."
+          },
+          {
+            "class": "fd-clamp-2",
+            "role": "Two lines, then an ellipsis."
+          },
+          {
+            "class": "fd-clamp-3",
+            "role": "Three lines, then an ellipsis."
+          }
+        ],
+        "related": [
+          "type",
+          "inline-code",
+          "status",
+          "badge",
+          "button"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#theming",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "textarea",
@@ -5375,7 +9796,110 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/forms.html#textarea"
+      "docs": "docs/forms.html#textarea",
+      "card": {
+        "id": "textarea",
+        "job": "Write an answer that runs over several lines.",
+        "purpose": "The input's skin on a native textarea. rows sets the starting height; data-fd-autogrow makes it grow with the text up to eight lines (data-max-rows changes that), then scroll. A counter in the field footer shows the limit when maxlength is set.",
+        "useWhen": [
+          "The answer is a sentence or more: a description, a prompt, a note.",
+          "The text length varies a lot and the field should grow with it (data-fd-autogrow)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The value is one line.",
+            "instead": "input"
+          },
+          {
+            "when": "The text is code or JSON that needs checking.",
+            "instead": "codefield"
+          },
+          {
+            "when": "The value is a list with one item per line that should show as items.",
+            "instead": "tag-input"
+          },
+          {
+            "when": "The value is names with values, one pair per line.",
+            "instead": "pairs"
+          }
+        ],
+        "aka": [
+          "multiline input",
+          "text area",
+          "comment box",
+          "message box"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "form",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\""
+          },
+          {
+            "name": "auto-growing",
+            "how": "data-fd-autogrow, optional data-max-rows=\"8\""
+          },
+          {
+            "name": "disabled",
+            "how": "disabled"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-size",
+            "value": "sm",
+            "useWhen": "A compact note field in a dense panel."
+          },
+          {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "A main writing area."
+          },
+          {
+            "attribute": "data-resize",
+            "value": "none",
+            "useWhen": "The layout cannot take a drag handle."
+          },
+          {
+            "attribute": "data-fd-autogrow",
+            "value": "",
+            "useWhen": "Grows with its text, so people see all they wrote."
+          },
+          {
+            "attribute": "data-mono",
+            "value": "both",
+            "useWhen": "Identifiers or config text, such as a list of paths."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-textarea",
+            "role": "The textarea."
+          }
+        ],
+        "related": [
+          "field",
+          "input",
+          "codefield",
+          "tag-input"
+        ],
+        "keyboard": [],
+        "example": "docs/forms.html#textarea",
+        "provenance": [
+          "docs/forms.html",
+          "fire/components/forms.css",
+          "fire/js/forms.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "texture",
@@ -5625,7 +10149,104 @@
       "events": [
         "fd:change"
       ],
-      "docs": "docs/navigation.html#toc"
+      "docs": "docs/navigation.html#toc",
+      "card": {
+        "id": "toc",
+        "job": "List the sections of a long page and follow the reader.",
+        "purpose": "An \"On this page\" list beside long reference content. With data-fd-scrollspy a marker follows the scroll and the current item gets aria-current=\"true\". Items are anchors to section ids; data-level=\"2\" indents sub-sections. fd:change fires when the current section changes.",
+        "useWhen": [
+          "A long documentation or reference page has several sections.",
+          "People jump to a section and need to know where they are."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The links go to other pages.",
+            "instead": "subnav"
+          },
+          {
+            "when": "The views replace each other.",
+            "instead": "tabs"
+          },
+          {
+            "when": "The page is short.",
+            "instead": "Leave it out; headings are enough."
+          }
+        ],
+        "aka": [
+          "table of contents",
+          "on this page",
+          "anchor links",
+          "scrollspy",
+          "page outline"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "current",
+            "how": "aria-current=\"true\" on the item for the section in view"
+          },
+          {
+            "name": "no match",
+            "how": "data-empty on the marker when no section is active"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-level",
+            "value": "2",
+            "useWhen": "A sub-section, indented under its parent."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-toc",
+            "role": "The nav."
+          },
+          {
+            "class": "fd-toc-title",
+            "role": "The heading, such as \"On this page\"."
+          },
+          {
+            "class": "fd-toc-list",
+            "role": "Holds the items and the marker."
+          },
+          {
+            "class": "fd-toc-item",
+            "role": "One anchor link."
+          },
+          {
+            "class": "fd-toc-marker",
+            "role": "The moving bar beside the current item."
+          }
+        ],
+        "related": [
+          "subnav",
+          "tabs",
+          "doc-frame"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "Moves between items."
+          },
+          {
+            "keys": "Enter",
+            "does": "Jumps to the section."
+          }
+        ],
+        "example": "docs/navigation.html#toc",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/components/nav.css",
+          "fire/js/nav.js"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "toolbar",
@@ -5876,7 +10497,168 @@
       },
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#type"
+      "docs": "docs/foundations.html#type",
+      "card": {
+        "id": "type",
+        "job": "Set the size and weight of a heading, label or body text.",
+        "purpose": "The type scale in Geist and Geist Mono: display, h1 to h3, title, label, body, small, caption, mono and eyebrow. 450 is the house weight. A page has one display title; sections use fd-h3; cards use fd-title. Mono is for identifiers, keys, paths and units, never for sentences. Figures use tabular numerals (fd-num).",
+        "useWhen": [
+          "Any heading, label or paragraph needs a step on the scale.",
+          "A number must not jitter in a column or counter (fd-num).",
+          "A machine-readable value needs the mono face."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Only the colour or length changes.",
+            "instead": "text"
+          },
+          {
+            "when": "A key or command sits inside a sentence.",
+            "instead": "inline-code"
+          },
+          {
+            "when": "A heading belongs to a card, form section or page head.",
+            "instead": "page-head"
+          }
+        ],
+        "aka": [
+          "typography",
+          "heading",
+          "font size",
+          "type scale",
+          "text styles",
+          "headline"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "accent",
+            "useWhen": "Text in the accent colour."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "Text in the quiet ink."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "success",
+            "useWhen": "A positive figure."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "warning",
+            "useWhen": "A figure that needs attention."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "A failed figure."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "An informational figure."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "violet",
+            "useWhen": "A secondary data hue."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "loading",
+            "useWhen": "A figure still loading."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "inverse",
+            "useWhen": "Text on an inverse fill."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-display",
+            "role": "The page title; one per page."
+          },
+          {
+            "class": "fd-h1",
+            "role": "Level 1 heading."
+          },
+          {
+            "class": "fd-h2",
+            "role": "Level 2 heading; a section of the page."
+          },
+          {
+            "class": "fd-h3",
+            "role": "Level 3 heading."
+          },
+          {
+            "class": "fd-title",
+            "role": "A card title."
+          },
+          {
+            "class": "fd-label",
+            "role": "A label or a setting name."
+          },
+          {
+            "class": "fd-body-lg",
+            "role": "Large body text."
+          },
+          {
+            "class": "fd-body",
+            "role": "Body text."
+          },
+          {
+            "class": "fd-small",
+            "role": "Small text."
+          },
+          {
+            "class": "fd-caption",
+            "role": "A caption."
+          },
+          {
+            "class": "fd-mono",
+            "role": "Mono face for identifiers."
+          },
+          {
+            "class": "fd-mono-sm",
+            "role": "Small mono."
+          },
+          {
+            "class": "fd-eyebrow",
+            "role": "A small mono label above a heading."
+          },
+          {
+            "class": "fd-num",
+            "role": "Tabular numerals."
+          }
+        ],
+        "related": [
+          "text",
+          "inline-code",
+          "page-head",
+          "card"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#type",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/base.css",
+          "fire/tokens.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "use-agent",
@@ -5915,7 +10697,77 @@
       "attributes": {},
       "element": null,
       "events": [],
-      "docs": "docs/foundations.html#layout"
+      "docs": "docs/foundations.html#layout",
+      "card": {
+        "id": "utilities",
+        "job": "Hide text from sight but keep it for screen readers, or add a small motion.",
+        "purpose": "Four helpers: fd-sr-only hides content visually and keeps it for assistive technology; fd-fade and fd-rise play a short entrance (reduced-motion safe); fd-cq makes an element a container for container queries.",
+        "useWhen": [
+          "A control or heading needs a name that sighted users read from context (fd-sr-only).",
+          "Content that loads in should fade or rise into place (fd-fade, fd-rise)."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A tooltip should show a label to everyone.",
+            "instead": "tooltip"
+          },
+          {
+            "when": "A visible hidden-until-needed region is needed.",
+            "instead": "accordion"
+          },
+          {
+            "when": "An icon button needs a name.",
+            "instead": "icon"
+          }
+        ],
+        "aka": [
+          "visually hidden",
+          "screen reader only",
+          "a11y helper",
+          "entrance animation",
+          "container query"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-sr-only",
+            "role": "Visually hidden, read by screen readers."
+          },
+          {
+            "class": "fd-fade",
+            "role": "Fades in."
+          },
+          {
+            "class": "fd-rise",
+            "role": "Rises into place while fading in."
+          },
+          {
+            "class": "fd-cq",
+            "role": "Makes the element a size container."
+          }
+        ],
+        "related": [
+          "icon",
+          "tooltip",
+          "text"
+        ],
+        "keyboard": [],
+        "example": "docs/foundations.html#layout",
+        "provenance": [
+          "docs/foundations.html",
+          "fire/base.css"
+        ],
+        "since": "0.1.0"
+      }
     },
     {
       "id": "verified",

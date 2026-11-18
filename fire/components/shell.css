@@ -1021,4 +1021,17 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   .fd-running-label { display: none; }
   .fd-service-status:not([data-status="operational"]) > .fd-service-status-label { display: none; }
   .fd-service-status:not([data-status="operational"]) { padding-inline: 0; }
+  /* A phone's top bar has room for what needs attention, not for what is normal: a service that is fine is not shown. */
+  .fd-topbar .fd-service-status[data-status="operational"] { display: none; }
+}
+/* Narrow phones: the team switch keeps its tile and drops its name, so the indicators and the menu button fit. */
+@container fd-app (max-width: 419.98px) {
+  .fd-topbar .fd-team-switch > [data-fd-menu-value] {
+    position: absolute; inline-size: var(--fd-base-sr-size); block-size: var(--fd-base-sr-size); margin: calc(var(--fd-base-sr-size) * -1); overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+}
+/* The narrowest phones: a service problem outranks the count of running work. */
+@container fd-app (max-width: 359.98px) {
+  .fd-topbar-actions:has(> .fd-service-status:not([data-status="operational"])) > .fd-running { display: none; }
+  .fd-topbar-actions { gap: var(--fd-space-1); }
 }

@@ -49,6 +49,22 @@
 .doc-cat-count { font-size: var(--fd-text-sm); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
 #cat-list[hidden], #cat-empty[hidden], #cat-error[hidden] { display: none; }
 @media (max-width: 600px) { #cat-list .fd-list-trail { grid-column: 2; grid-row: 3; justify-self: start; margin: var(--fd-space-1-5) 0 0; } }
+/* Pictures on the catalogue: a thumbnail opens the large picture in a dialog; the Pictures switch swaps the compact list for a grid (view=pictures). */
+.doc-cat-view { display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-4); }
+.doc-cat-thumb { position: relative; z-index: 1; display: block; flex: none; padding: 0; overflow: hidden; border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-md); background: var(--fd-bg-sunken); cursor: zoom-in; }
+.doc-cat-thumb:focus-visible { box-shadow: var(--fd-ring); }
+.doc-cat-thumb > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.fd-list-lead.doc-cat-thumb { width: 72px; height: 48px; border-radius: var(--fd-radius-md); }
+.doc-cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: var(--fd-space-4); margin: var(--fd-space-4) 0 0; padding: 0; list-style: none; }
+.doc-cat-grid[hidden] { display: none; }
+.doc-cat-card { display: grid; align-content: start; gap: var(--fd-space-2); min-width: 0; }
+.doc-cat-card .doc-cat-thumb { width: 100%; aspect-ratio: 3 / 2; border-radius: var(--fd-radius-lg); }
+.doc-cat-card-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--fd-space-1-5); }
+.doc-cat-card-title > a { color: var(--fd-text); font-weight: var(--fd-weight-label); text-decoration: none; }
+.doc-cat-card-title > a:hover { text-decoration: underline; }
+.doc-cat-card-kind { font-size: var(--fd-text-xs); color: var(--fd-text-3); }
+.doc-cat-card-job { margin: 0; font-size: var(--fd-text-sm); color: var(--fd-text-3); }
+.doc-cat-large { display: block; max-width: 100%; height: auto; margin-inline: auto; border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-md); }
 .doc-sub { margin-top: 12px; font-size: var(--fd-text-md); font-weight: var(--fd-weight-label); }
 
 .doc-specimen {

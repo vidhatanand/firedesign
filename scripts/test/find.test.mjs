@@ -152,7 +152,9 @@ test('contract/index.json is current and complete', () => {
   for (const e of idx.entries) {
     for (const k of ['id', 'kind', 'name', 'family', 'job', 'aka', 'surfaces', 'data', 'use', 'not', 'docs']) assert.ok(e[k] !== undefined, `${e.id}.${k}`);
     assert.ok(e.surfaces.length && e.data.length && e.docs, e.id);
+    assert.equal(e.picture, undefined, `${e.id}: the picture path is not written on each entry`);
   }
+  assert.deepEqual(idx.pictures, { path: 'contract/pictures/{kind}/{id}.png', none: ['module'] }, 'the picture rule is written once at the top');
   assert.ok(render(idx).length / 4 < 25000, 'the whole index stays readable in one pass');
 });
 

@@ -198,9 +198,9 @@
 /* ---------- Popup: a card that grows out of the launcher ---------- */
 .fd-chat[data-mode="popup"] {
   inset-inline-end: var(--fd-space-5);
-  inset-block-end: calc(var(--fd-space-5) + var(--_cht-launch) + var(--fd-space-4));
+  inset-block-end: calc(var(--fd-space-5) + var(--_cht-launch) + var(--fd-space-4) + var(--fd-tabbar-space));
   width: min(var(--fd-chat-popup-w), 100% - 2 * var(--fd-space-5));
-  height: min(var(--fd-chat-popup-h), 100dvh - 2 * var(--fd-space-5) - var(--_cht-launch) - var(--fd-space-4));
+  height: min(var(--fd-chat-popup-h), 100dvh - 2 * var(--fd-space-5) - var(--_cht-launch) - var(--fd-space-4) - var(--fd-tabbar-space));
   border-radius: var(--fd-radius-3xl);
   box-shadow: var(--fd-shadow-xl);
   transform-origin: 100% 100%;
@@ -272,7 +272,7 @@
    ========================================================================== */
 /* Zero specificity, so a launcher that is already placed (the shell's .fd-app-fab) keeps its own position. */
 :where(.fd-chat-launcher) { position: relative; isolation: isolate; }
-.fd-chat-launcher[data-float] { position: fixed; inset-inline-end: var(--fd-space-5); inset-block-end: var(--fd-space-5); z-index: var(--fd-z-sticky); }
+.fd-chat-launcher[data-float] { position: fixed; inset-inline-end: var(--fd-space-5); inset-block-end: calc(var(--fd-space-5) + var(--fd-tabbar-space)); z-index: var(--fd-z-sticky); }
 .fd-chat-launcher[data-contained] { position: absolute; }
 .fd-chat-launcher-icon {
   position: absolute; inset: 0; display: grid; place-items: center;
@@ -295,7 +295,7 @@
 .fd-chat-teaser {
   position: fixed; z-index: var(--fd-z-sticky);
   inset-inline-end: calc(var(--fd-space-5) + var(--_cht-launch, var(--fd-chat-launch)) + var(--fd-space-3));
-  inset-block-end: var(--fd-space-5);
+  inset-block-end: calc(var(--fd-space-5) + var(--fd-tabbar-space));
   display: flex; align-items: flex-start; gap: var(--fd-space-2-5);
   width: max-content; max-width: min(var(--fd-chat-teaser-w), 100vw - var(--fd-chat-teaser-gutter));
   padding: var(--fd-space-2-5) var(--fd-space-2) var(--fd-space-2-5) var(--fd-space-3);

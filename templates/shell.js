@@ -6,7 +6,7 @@
  *     <script type="module" src="./shell.js"></script>
  *
  * On load the page's <main> is wrapped in the full shell: sidebar (nav, usage card, account),
- * top bar, phone menu and the support button. Or call it yourself:
+ * top bar, phone menu, the phone tab bar (0.8: Overview, Logs, Decisions, Usage and More, shown under 640px) and the support button. Or call it yourself:
  *
  *   import { mountShell } from './shell.js';
  *   mountShell({ active: 'scrape', title: 'Scrape a page' });
@@ -219,6 +219,18 @@ export function renderMobileNav({ active = '', prefix = 'ember', open = false } 
 </div>`;
 }
 
+/** The phone tab bar (0.8): the destinations people use most, and "More" for the rest (it opens the menu sheet). */
+export const TABBAR = ['overview', 'logs', 'decisions', 'usage'];
+export function renderTabbar({ active = '', prefix = 'ember', mobileOpen = false } = {}) {
+  const byId = Object.fromEntries(flatNav().map((n) => [n.id, n]));
+  const labels = { logs: 'Logs' };
+  const links = TABBAR.map((id) => `<a class="fd-tabbar-item" href="${esc(byId[id].href)}"${current(id === active)}>${i(byId[id].icon)}<span class="fd-tabbar-label">${esc(labels[id] || byId[id].label)}</span></a>`).join('\n  ');
+  return `<nav class="fd-tabbar" aria-label="Primary">
+  ${links}
+  <button class="fd-tabbar-item" type="button" data-fd-mobile-nav aria-controls="${prefix}-mobile-nav" aria-expanded="${mobileOpen}">${i('ellipsis')}<span class="fd-tabbar-label">More</span></button>
+</nav>`;
+}
+
 /* ---------- Overlays: rendered once, shared by every control in the shell ---------- */
 const flatNav = () => NAV.flatMap((section) => section.items.flatMap((item) => item.children || [item]));
 const NAV_KEYWORDS = {
@@ -385,6 +397,7 @@ ${renderTopbar({ prefix, mobileOpen })}
 ${content}
 </div>
 ${renderMobileNav({ active, prefix, open: mobileOpen })}
+${renderTabbar({ active, prefix, mobileOpen })}
 <button class="fd-fab fd-app-fab fd-chat-launcher" type="button" data-fd-chat-toggle="${prefix}-chat" data-fd-tooltip="Chat with support" data-placement="left" aria-label="Chat with support"><span class="fd-chat-launcher-icon" data-role="open">${i('message-circle')}</span><span class="fd-chat-launcher-icon" data-role="close">${i('chevron-down')}</span><span class="fd-chat-launcher-badge" hidden></span></button>
 <section class="fd-chat" id="${prefix}-chat" data-mode="panel" data-state="closed" data-fd-chat-demo aria-label="Ember support"${contained ? ' data-contained' : ''}></section>
 ${renderOverlays({ prefix })}

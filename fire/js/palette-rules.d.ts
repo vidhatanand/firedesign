@@ -65,3 +65,5 @@ export declare function checkText(tokens: TokenMap, name: string, context: strin
 export declare function measure(tokens: TokenMap, name: string, context: string | undefined, fail: (message: string) => void, options?: { modes?: ModeIndex[] }): MeasureRow[];
 /** Every violation of a palette's token map, as messages. [] when it passes. */
 export declare function paletteFailures(tokens: TokenMap, options?: { name?: string; modes?: ModeIndex[] }): string[];
+/** The least contrast --fd-focus keeps against every ground. */
+export declare const FOCUS_MIN: number;

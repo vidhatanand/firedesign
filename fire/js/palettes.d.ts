@@ -54,3 +54,10 @@ export declare const TONE_RANGE: Readonly<Record<keyof Tone, readonly [min: numb
 export declare const isDefaultTone: (tone?: ThemeTone) => boolean;
 /** Bend a resolved token map by a tone. A default tone returns an identical copy. */
 export declare function toneTokens(tokens: TokenMap, tone?: ThemeTone): TokenMap;
+
+/** The least contrast the focus ring keeps against every ground it sits on (WCAG 1.4.11). */
+export declare const FOCUS_MIN: number;
+/** The focus ring's colour: the accent while it reaches FOCUS_MIN on every ground, else the accent text, else the ink. */
+export declare function focusOf(accent: ColorInput, accentText: ColorInput, ink: ColorInput, grounds: ColorInput[]): string;
+/** What a focused control sits on in one mode (0 light, 1 dark): the page, the well, the surfaces, the fill on each, and the accent wash. */
+export declare function focusGrounds(tokens: TokenMap, mode: 0 | 1): string[];

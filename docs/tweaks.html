@@ -464,7 +464,105 @@
       <li>Every face is open source under the SIL Open Font License 1.1. The licences are in <code class="fd-code">fire/fonts/licenses/</code>.</li>
       <li>A font file downloads only when a set that uses it is on the page, so a product that ships one set pays for one set. The Tweaks panel shows all twelve in its picker, so opening it loads their heading faces.</li>
       <li>A few sets also change the heading sizes: Loud steps them down because a wide face reads larger, and Matrix steps them up because dots need room to read as letters.</li>
-      <li>To add a set: put the woff2 file in <code class="fd-code">fire/fonts/</code>, add an <code class="fd-code">@font-face</code> and a <code class="fd-code">[data-type="name"]</code> block to <code class="fd-code">fire/typefaces.css</code>, and add an entry to <code class="fd-code">fire/js/typefaces.js</code> so the panel lists it.</li>
+      <li><code class="fd-code">fire/typefaces.css</code> is generated: each set is a spec in <code class="fd-code">fire/js/typefaces.js</code>, and <code class="fd-code">node scripts/build-typefaces.mjs</code> writes its faces and its block. To add a set, add its spec there and run the build; to make a look of your own, write a type set spec in a theme record (next section).</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="type-sets">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Type sets</h2>
+      <p>The twelve sets are specs, and a look of your own is another. A theme record's <code class="fd-code">type</code> may be a set's name or a spec: up to three families from the catalogue below, plus how headings are weighted, tracked and cased and how figures are set. <code class="fd-code">validateTheme()</code> checks the pairing; <code class="fd-code">expandTheme()</code> writes the font tokens and the fallback faces, so swapping a font does not move the layout.</p>
+    </div>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code data-lang="json">{
+  "type": {
+    "display": "Fraunces",
+    "sans": "DM Sans",
+    "mono": "DM Mono",
+    "displayWeight": 600,
+    "displayTracking": -0.01,
+    "headingCase": "sentence",
+    "figures": "proportional"
+  }
+}</code></pre>
+    </figure>
+    <ul class="doc-notes">
+      <li><code class="fd-code">display</code> sets <code class="fd-code">--fd-font-display</code> (headings), <code class="fd-code">sans</code> the interface and <code class="fd-code">mono</code> code, keys and eyebrows. A key left out leaves the default.</li>
+      <li><code class="fd-code">displayWeight</code> is <code class="fd-code">--fd-weight-display</code>; <code class="fd-code">displayTracking</code>, in em, is the letter-spacing of every heading level.</li>
+      <li><code class="fd-code">headingCase: "upper"</code> writes <code class="fd-code">data-heading-case="upper"</code> and <code class="fd-code">figures: "tabular"</code> writes <code class="fd-code">data-figures="tabular"</code>; both are in <code class="fd-code">fire/typefaces.css</code>.</li>
+    </ul>
+    <h3 class="doc-sub">The pairing rules</h3>
+    <ul class="doc-notes">
+      <li>At most two families plus a mono: <code class="fd-code">display</code> and <code class="fd-code">sans</code> are the two, <code class="fd-code">mono</code> is the third. They may be one family.</li>
+      <li>The interface face needs an x-height of at least 0.5 of the em, so 13 and 14px text stays legible. Space Grotesk, Hanken Grotesk and Source Sans 3 fall just under, and make good headings.</li>
+      <li>A family marked display-only (Anton, Bebas Neue, Big Shoulders Display, Syne, Unbounded, Doto, Pixelify Sans and the display serifs) is never the interface face, whatever its x-height.</li>
+      <li>The mono must be a mono. A mono may also be the interface face (JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono), as in Terminal and Pixel.</li>
+      <li><code class="fd-code">displayWeight</code> must be a weight the display family has: a range for a variable family, the listed weights for a static one.</li>
+      <li>A family outside the catalogue is allowed, for a licensed face. Fire cannot check its pairing or match a fallback to it, and says so in a note.</li>
+    </ul>
+    <h3 class="doc-sub">Three sets built from specs</h3>
+    <p class="fd-muted">Each card is a record's <code class="fd-code">type</code>, expanded live by <code class="fd-code">fire/js/theme.js</code> and painted with <code class="fd-code">themeToCss()</code>. The families here are Fire's own, so nothing extra loads.</p>
+    <div class="fd-grid" data-min="lg" data-cols="3" data-gap="4">
+      <div class="tw-card" id="tw-spec-a" data-tw-spec='{"display":"Fraunces","sans":"DM Sans","mono":"DM Mono","displayWeight":600,"displayTracking":-0.01}'>
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Press</p><code class="fd-mono-sm fd-muted">Fraunces · DM Sans</code></div>
+        <p class="fd-small fd-muted" data-tw-spec-notes>A serif headline over a friendly sans.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <p class="fd-title">1,520.50 credits · 98.76 left</p>
+      </div>
+      <div class="tw-card" id="tw-spec-b" data-tw-spec='{"display":"Big Shoulders Display","sans":"Instrument Sans","mono":"Space Mono","displayWeight":700,"displayTracking":0.02,"headingCase":"upper","figures":"tabular"}'>
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Board</p><code class="fd-mono-sm fd-muted">Big Shoulders</code></div>
+        <p class="fd-small fd-muted" data-tw-spec-notes>Condensed capitals, and figures that line up.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <p class="fd-title">1,520.50 credits · 98.76 left</p>
+      </div>
+      <div class="tw-card" id="tw-spec-c" data-tw-spec='{"display":"Space Grotesk","sans":"Manrope","mono":"JetBrains Mono","displayWeight":500,"displayTracking":-0.04}'>
+        <div class="fd-row" data-justify="between" data-align="baseline"><p class="fd-title">Lab</p><code class="fd-mono-sm fd-muted">Space Grotesk · Manrope</code></div>
+        <p class="fd-small fd-muted" data-tw-spec-notes>Tight, technical headings over a round sans.</p>
+        <p class="fd-eyebrow">Monitors</p>
+        <h3 class="fd-h2">Pages change. Your agent should know first.</h3>
+        <p class="fd-muted">Ember watches the pages you care about and sends the diff to your agent the moment something moves.</p>
+        <p class="fd-mono">POST /v2/scrape · 200 · 842 ms</p>
+        <p class="fd-title">1,520.50 credits · 98.76 left</p>
+      </div>
+    </div>
+    <h3 class="doc-sub">The catalogue</h3>
+    <p class="fd-muted">Every family is open-licensed (SIL OFL 1.1) and has a Latin woff2 subset, measured metrics and a fallback face in <code class="fd-code">contract/fonts.json</code>. Filter by what it can do and how it sounds.</p>
+    <div class="fd-row" data-wrap>
+      <div class="fd-segmented" data-size="sm" role="radiogroup" aria-label="Role" data-tw-role>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="">All</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="display">Display</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="interface">Interface</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="mono">Mono</button>
+      </div>
+      <label class="fd-select" data-size="sm"><span class="fd-sr-only">Voice</span>
+        <select aria-label="Voice" data-tw-voice><option value="">Any voice</option></select>
+      </label>
+      <p class="fd-small fd-muted" role="status" data-tw-count></p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Family</th><th>Roles</th><th>Voice</th><th>x-height</th><th>Weights</th><th>Licence</th><th>In Fire</th></tr></thead>
+        <tbody data-tw-families><tr><td colspan="7">The catalogue is <code class="fd-code">contract/fonts.json</code>.</td></tr></tbody>
+      </table>
+    </div>
+    <h3 class="doc-sub">Using a family in a product</h3>
+    <p class="fd-muted">Fire's own <code class="fd-code">fire/fonts/</code> keeps the nineteen families its type sets use. For any other catalogue family, copy or download its files, with the licence, into your product's font folder.</p>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code data-lang="bash">node scripts/fonts.mjs list --role interface --voice warm
+node scripts/fonts.mjs add "Plus Jakarta Sans" --out public/fonts
+# writes the woff2 file, licenses/plus-jakarta-sans.txt and fonts.css (the @font-face and its fallback face)</code></pre>
+    </figure>
+    <ul class="doc-notes">
+      <li>Every file is checked against the SHA-256 in the catalogue before it is written; <code class="fd-code">add</code> can be run again for each family a product uses.</li>
+      <li>Each family's fallback is Arial, Times New Roman or Courier New, resized to the web font's average letter width, ascent, descent and line gap. <code class="fd-code">local()</code> cannot name <code class="fd-code">system-ui</code>, so the stack still ends in it.</li>
     </ul>
   </section>
 
@@ -646,7 +744,7 @@
           <tr><td>contract</td><td>"fire/1"</td><td>The record format.</td></tr>
           <tr><td>palette</td><td>"ember"</td><td>A palette name (<code class="fd-code">data-palette</code>), or a spec Fire builds a palette from: an accent, brand colours, or the full spec form of <code class="fd-code">fire/js/palettes.js</code>.</td></tr>
           <tr><td>tone</td><td>0 · 100 · 0 · 0</td><td><code class="fd-code">hue</code>, <code class="fd-code">vivid</code>, <code class="fd-code">light</code> and <code class="fd-code">warmth</code>, whole numbers in the ranges of <a class="fd-link" href="#tone">Tone</a>. A toned palette is written out as its nineteen colour tokens.</td></tr>
-          <tr><td>type</td><td>"geist"</td><td>A type set name (<code class="fd-code">data-type</code>), or <code class="fd-code">{ "display", "sans", "mono" }</code> families your page loads, written to the three font tokens.</td></tr>
+          <tr><td>type</td><td>"geist"</td><td>A type set name (<code class="fd-code">data-type</code>), or a type set spec: <code class="fd-code">display</code>, <code class="fd-code">sans</code> and <code class="fd-code">mono</code> families from the catalogue, <code class="fd-code">displayWeight</code>, <code class="fd-code">displayTracking</code>, <code class="fd-code">headingCase</code> and <code class="fd-code">figures</code>. See Type sets.</td></tr>
           <tr><td>dials</td><td></td><td><code class="fd-code">corners</code> 0–2 (<code class="fd-code">--fd-radius-scale</code>), <code class="fd-code">density</code> (<code class="fd-code">data-density</code>), <code class="fd-code">lines</code> 1 · 1.5 · 2 (<code class="fd-code">--fd-hairline</code>), <code class="fd-code">textSize</code> (<code class="fd-code">data-text-size</code>), <code class="fd-code">contrast</code> (<code class="fd-code">data-contrast</code>), <code class="fd-code">motion</code> off · default · slow (<code class="fd-code">--fd-motion</code>), <code class="fd-code">texture</code> 0–1.5 (<code class="fd-code">--fd-texture</code>).</td></tr>
         </tbody>
       </table>
@@ -756,7 +854,7 @@ const { tokens, attributes } = expandTheme(record);</code></pre>
     <ul class="doc-notes">
       <li>Copy theme, beside Copy CSS in the Tweaks panel's footer, copies the panel's look as a record. In code, <code class="fd-code">toTheme()</code> from <code class="fd-code">fire/js/tweaks.js</code> returns the same, and <code class="fd-code">set(fromThemeRecord(record))</code> applies a record that uses a named palette and type set.</li>
       <li>A record has no light or dark: the theme is the viewer's choice, so Copy theme leaves it out and Copy CSS's <code class="fd-code">data-theme</code> has no counterpart. Otherwise <code class="fd-code">themeToCss</code> writes exactly the variables Copy CSS writes.</li>
-      <li>Named families are written to <code class="fd-code">--fd-font-display</code>, <code class="fd-code">--fd-font-sans</code> and <code class="fd-code">--fd-font-mono</code> with Fire's fallbacks behind them; the notes remind you to load them, since Fire ships only its type sets' fonts.</li>
+      <li>A spec's families are written to <code class="fd-code">--fd-font-display</code>, <code class="fd-code">--fd-font-sans</code> and <code class="fd-code">--fd-font-mono</code>, each with its metric-matched fallback face first and the system stack behind, and the fallback <code class="fd-code">@font-face</code> rules come with the stylesheet. The notes name the families your page must load, since Fire ships only its type sets' fonts.</li>
       <li><code class="fd-code">contract/looks/</code> holds a record for each of the fifteen palettes, and <code class="fd-code">contract/fire-contract.json</code> lists every token a record sets (tier <code class="fd-code">input</code>) beside the scales and derived tokens.</li>
     </ul>
   </section>
@@ -764,7 +862,8 @@ const { tokens, attributes } = expandTheme(record);</code></pre>
 <script type="module">
   // Tone demo buttons on this page.
   import { set } from '../fire/js/tweaks.js';
-  import { paletteFrom, themeToCss } from '../fire/js/theme.js';
+  import { paletteFrom, themeToCss, expandTheme } from '../fire/js/theme.js';
+  import { FONT_FAMILIES, VOICES } from '../fire/js/typefaces.js';
   import { highlight } from '../fire/js/code.js';
   document.addEventListener('click', (event) => {
     const button = event.target instanceof Element ? event.target.closest('[data-tw-tone]') : null;
@@ -802,6 +901,34 @@ const { tokens, attributes } = expandTheme(record);</code></pre>
   });
   paint('accent', accentSpec());
   paint('brand', { from: 'brand', colors: ['#14342b', '#f2c14e'] });
+
+  // Type sets: each spec card is painted from its record's `type`, with the attributes the spec asks for.
+  for (const card of document.querySelectorAll('[data-tw-spec]')) {
+    const record = { type: JSON.parse(card.dataset.twSpec) };
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(themeToCss(record, { selector: `#${card.id}` }));
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+    for (const [name, value] of Object.entries(expandTheme(record).attributes)) card.setAttribute(name, value);
+  }
+
+  // The catalogue: filter by role and voice.
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const body = document.querySelector('[data-tw-families]');
+  const voiceSelect = document.querySelector('[data-tw-voice]');
+  const roleGroup = document.querySelector('[data-tw-role]');
+  const count = document.querySelector('[data-tw-count]');
+  voiceSelect.insertAdjacentHTML('beforeend', VOICES.map((v) => `<option value="${v}">${v[0].toUpperCase()}${v.slice(1)}</option>`).join(''));
+  const weightsOf = (f) => (f.variable ? `${f.weightRange[0]}–${f.weightRange[1]}` : f.weights.join(', '));
+  function renderFamilies() {
+    const role = roleGroup.querySelector('[aria-checked="true"]')?.dataset.value || '';
+    const voice = voiceSelect.value;
+    const rows = Object.entries(FONT_FAMILIES).filter(([, f]) => (!role || f.roles.includes(role)) && (!voice || f.voices.includes(voice)));
+    body.innerHTML = rows.length ? rows.map(([name, f]) => `<tr><td>${esc(name)}</td><td>${f.roles.join(', ')}${f.displayOnly ? ' (display only)' : ''}</td><td>${f.voices.join(', ')}</td><td>${f.metrics.xHeightRatio}</td><td>${weightsOf(f)}${f.variable ? ' variable' : ''}</td><td>${esc(f.licence)}</td><td>${f.shipped ? 'Yes' : 'Add it'}</td></tr>`).join('') : '<tr><td colspan="7">No family has that role and voice together.</td></tr>';
+    count.textContent = `${rows.length} of ${Object.keys(FONT_FAMILIES).length} families`;
+  }
+  roleGroup.addEventListener('fd:change', renderFamilies);
+  voiceSelect.addEventListener('change', renderFamilies);
+  renderFamilies();
 </script>
 </body>
 </html>

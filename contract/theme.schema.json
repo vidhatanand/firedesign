@@ -31,17 +31,26 @@
       }
     },
     "type": {
-      "description": "A type set name, or the families of the three voices (the page loads those fonts).",
+      "description": "A type set name, or a type set spec: families from the font catalogue (contract/fonts.json), a heading weight and tracking, heading case and figures. validateTheme() also enforces the pairing rules the catalogue allows (at most two families plus a mono; an interface family has an x-height ratio of at least 0.5; a display-only family is never the interface face; the mono is a mono; displayWeight is a weight the display family has). A family outside the catalogue is allowed and unchecked; the page loads it.",
       "oneOf": [
         { "$ref": "#/$defs/typeName" },
         {
           "type": "object",
           "additionalProperties": false,
           "minProperties": 1,
+          "anyOf": [
+            { "properties": { "display": true }, "required": ["display"] },
+            { "properties": { "sans": true }, "required": ["sans"] },
+            { "properties": { "mono": true }, "required": ["mono"] }
+          ],
           "properties": {
-            "display": { "description": "Headings: --fd-font-display.", "$ref": "#/$defs/family" },
-            "sans": { "description": "The interface: --fd-font-sans.", "$ref": "#/$defs/family" },
-            "mono": { "description": "Code, keys and eyebrows: --fd-font-mono.", "$ref": "#/$defs/family" }
+            "display": { "description": "Headings: --fd-font-display. A catalogue family with the display role.", "$ref": "#/$defs/family" },
+            "sans": { "description": "The interface: --fd-font-sans. A catalogue family with the interface role (x-height ratio of at least 0.5, not display-only).", "$ref": "#/$defs/family" },
+            "mono": { "description": "Code, keys and eyebrows: --fd-font-mono. A catalogue mono.", "$ref": "#/$defs/family" },
+            "displayWeight": { "description": "--fd-weight-display: the heading weight, inside the display family's weights.", "type": "integer", "minimum": 100, "maximum": 900 },
+            "displayTracking": { "description": "--fd-ls-display and --fd-ls-h1 to -h3: heading letter-spacing, in em.", "type": "number", "minimum": -0.1, "maximum": 0.3 },
+            "headingCase": { "description": "upper sets data-heading-case=\"upper\" (headings in capitals); sentence is as written.", "enum": ["sentence", "upper"] },
+            "figures": { "description": "tabular sets data-figures=\"tabular\" (equal-width digits); proportional is the default.", "enum": ["proportional", "tabular"] }
           }
         }
       ]

@@ -9790,11 +9790,13 @@
     },
     {
       "name": "Site",
-      "purpose": "The grammar of a marketing site: a size container that every section measures instead of the viewport, fluid type that follows the type set, a section rhythm scaled by density, and six grounds. Fire ships no block library: variants differ in structure, never in decoration, and a site is told apart by its look and its composition. Never add a decorative variant.\nSurfaces: website. Kind: pattern.",
+      "purpose": "The grammar of a marketing site: a size container that every section measures instead of the viewport, fluid type that follows the type set, a section rhythm scaled by density, and seven grounds (the seventh, image, a picture behind the section with its text kept at 4.5:1 by a scrim). Fire ships no block library: variants differ in structure, never in decoration, and a site is told apart by its look and its composition. Never add a decorative variant.\nSurfaces: website. Kind: pattern.",
       "variants": [
         "contained",
         "ground-page",
-        "rhythm-tight"
+        "rhythm-tight",
+        "ground-image",
+        "scrim-light"
       ],
       "states": [],
       "paths": [
@@ -9878,6 +9880,10 @@
           {
             "name": "site-shot",
             "description": "A product specimen made of Fire components inside an fd-doc-frame."
+          },
+          {
+            "name": "site-backdrop",
+            "description": "An image ground's picture: an img with alt=\"\", width and height; data-position keeps a side; it takes data-treatment from its section."
           }
         ],
         "example": "<cc-component name=\"Site\" ground=\"page\" rhythm=\"tight\">Content</cc-component>"
@@ -10335,7 +10341,7 @@
     },
     {
       "name": "SiteCta",
-      "purpose": "band: a full-width ground with a title and actions, the home of the texture and inverse grounds. card: an inset panel inside the container. split: a title at the start and, at the end, actions or the one sign-up form (fd-field, a consent line, its states set by site.js). The same form also sits in the footer's sign-up column and at an article's foot.\nSurfaces: website. Kind: section.",
+      "purpose": "band: a full-width ground with a title and actions, the home of the texture, inverse and image grounds (on the image ground its actions stack under the title, in the head). card: an inset panel inside the container. split: a title at the start and, at the end, actions or the one sign-up form (fd-field, a consent line, its states set by site.js). The same form also sits in the footer's sign-up column and at an article's foot.\nSurfaces: website. Kind: section.",
       "variants": [
         "layout-band",
         "layout-card",
@@ -10361,6 +10367,15 @@
       ],
       "api": {
         "props": [
+          {
+            "name": "ground",
+            "type": "enum",
+            "values": [
+              "image"
+            ],
+            "required": false,
+            "description": "Sets data-ground."
+          },
           {
             "name": "layout",
             "type": "enum",
@@ -10399,7 +10414,7 @@
             "description": "One line on what the address is used for, with the privacy link."
           }
         ],
-        "example": "<cc-component name=\"SiteCta\" layout=\"band\">Content</cc-component>"
+        "example": "<cc-component name=\"SiteCta\" ground=\"image\" layout=\"band\">Content</cc-component>"
       }
     },
     {
@@ -10558,7 +10573,7 @@
     },
     {
       "name": "SitePosts",
-      "purpose": "list: ruled rows (a date rail, or without one the kind, title, summary, authors and a small frame). grid: media, title, meta. featured: one large entry beside a short list. The whole item is the link. As a listing, entries carry data-kind and data-tags, a tools bar of existing controls filters them, a live count follows, and site.js pages them and can keep the filters in the address.\nSurfaces: website. Kind: section.",
+      "purpose": "list: ruled rows (a date rail, or without one the kind, title, summary, authors and a small frame). grid: media (the signature texture, a typographic cover or a picture in fd-site-media), title, meta. featured: one large entry beside a short list. The whole item is the link. As a listing, entries carry data-kind and data-tags, a tools bar of existing controls filters them, a live count follows, and site.js pages them and can keep the filters in the address.\nSurfaces: website. Kind: section.",
       "variants": [
         "layout-list",
         "layout-grid",
@@ -11078,7 +11093,7 @@
     },
     {
       "name": "SiteHero",
-      "purpose": "The first section: a display title, a lead, one primary and one quiet action, a note, and in some variants a media frame holding a real product specimen. Variants differ in structure: the headline alone, the headline beside the product, the product under the headline, or one centred column.\nSurfaces: website. Kind: section.",
+      "purpose": "The first section: a display title, a lead, one primary and one quiet action, a note, and in some variants a media frame holding a real product specimen or a picture (site-media). On the image ground a picture stands behind the headline. Variants differ in structure: the headline alone, the headline beside the product, the product under the headline, or one centred column.\nSurfaces: website. Kind: section.",
       "variants": [
         "layout-start",
         "layout-split",
@@ -11095,7 +11110,8 @@
       ],
       "usage": "State what the product does on the first screen, with one primary action and one line of proof. Also called: hero, above the fold, masthead, jumbotron, landing hero, banner.",
       "do": [
-        "The top of a landing page or a product page."
+        "The top of a landing page or a product page.",
+        "A story or a launch that opens on a picture: start or stack on data-ground=\"image\"."
       ],
       "dont": [
         "A closing band near the end of the page. Use SiteCta.",
@@ -11109,6 +11125,15 @@
             "type": "boolean",
             "required": false,
             "description": "Sets data-bleed. Stack only: the frame runs past the section's bottom and its cut edge fades into the ground; only when the frame's bottom holds nothing a reader needs."
+          },
+          {
+            "name": "ground",
+            "type": "enum",
+            "values": [
+              "image"
+            ],
+            "required": false,
+            "description": "Sets data-ground."
           },
           {
             "name": "layout",
@@ -11151,7 +11176,7 @@
             "description": "One line of proof under the actions."
           }
         ],
-        "example": "<cc-component name=\"SiteHero\" layout=\"start\" side=\"start\">Content</cc-component>"
+        "example": "<cc-component name=\"SiteHero\" ground=\"image\" layout=\"start\">Content</cc-component>"
       }
     },
     {
@@ -12235,7 +12260,7 @@
     },
     {
       "name": "SiteSplit",
-      "purpose": "Two columns: the text (a head and fd-site-points) and the media (an fd-doc-frame with a product specimen, or a taller list of points). data-side puts the media first, data-ratio=\"media\" widens it, data-sticky keeps the text in view while a taller column scrolls. Below desktop it stacks.\nSurfaces: website. Kind: section.",
+      "purpose": "Two columns: the text (a head and fd-site-points) and the media (an fd-doc-frame with a product specimen, a picture in fd-site-media, or a taller list of points). data-side puts the media first, data-ratio=\"media\" widens it, data-sticky keeps the text in view while a taller column scrolls. Below desktop it stacks.\nSurfaces: website. Kind: section.",
       "variants": [
         "side-start",
         "side-end",
@@ -12251,7 +12276,8 @@
       "usage": "Make one claim beside one piece of media, with a ruled list of points under it. Also called: image and text, media and text, zigzag, two column, side by side, sticky scroll.",
       "do": [
         "A claim that a picture of the product proves.",
-        "A long list of points beside a short claim (data-sticky)."
+        "A long list of points beside a short claim (data-sticky).",
+        "A claim a photograph sets the mood for: an fd-site-media in the media column."
       ],
       "dont": [
         "Several parts of equal weight. Use SiteFeatures.",
@@ -12910,6 +12936,100 @@
           }
         ],
         "example": "<cc-component name=\"Preview\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "SiteMedia",
+      "purpose": "A figure holding one img (its own width and height, so its place is held before it loads) and an optional caption. data-ratio crops it to a shape with object-fit cover, data-position keeps a side, data-frame gives it the media frame's hairline and radius. Its treatment (natural, mono, duotone, wash) comes from the look's imagery dial unless data-treatment sets its own: a filter and two blend layers, no script.\nSurfaces: website. Kind: component.",
+      "variants": [
+        "ratio-wide",
+        "ratio-photo",
+        "ratio-square",
+        "ratio-portrait",
+        "ratio-tall",
+        "position-start",
+        "position-center",
+        "position-end",
+        "frame",
+        "treatment-natural",
+        "treatment-mono",
+        "treatment-duotone",
+        "treatment-wash"
+      ],
+      "states": [
+        "loading"
+      ],
+      "paths": [
+        "fire/components/site.css",
+        "docs/site.html"
+      ],
+      "usage": "Show a site's own photograph in a section, cropped to a set shape and treated by the look. Also called: image, picture, photo, figure, cover image, duotone, art.",
+      "do": [
+        "A picture beside the hero's headline, in a split, in the bento's large cell, as a post's cover or as a figure in an article.",
+        "Art that should sit with the look rather than as shot: the dial sets every picture on the site at once."
+      ],
+      "dont": [
+        "A picture a visitor supplied, an upload or an address from your data. Use DocFrame.",
+        "A screenshot or a specimen of the product. Use DocFrame.",
+        "Text set over the picture. Put the picture in .fd-site-backdrop on a section with data-ground=\"image\" (site).",
+        "A report or a resource with no picture of its own. Use SitePosts."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "frame",
+            "type": "boolean",
+            "required": false,
+            "description": "Sets data-frame. The picture stands on its own and needs the media frame's edge."
+          },
+          {
+            "name": "position",
+            "type": "enum",
+            "values": [
+              "center",
+              "end",
+              "start"
+            ],
+            "required": false,
+            "description": "Sets data-position. The subject sits at the start or the top of the picture."
+          },
+          {
+            "name": "ratio",
+            "type": "enum",
+            "values": [
+              "photo",
+              "portrait",
+              "square",
+              "tall",
+              "wide"
+            ],
+            "required": false,
+            "description": "Sets data-ratio. A band across a column: 21:9."
+          },
+          {
+            "name": "treatment",
+            "type": "enum",
+            "values": [
+              "duotone",
+              "mono",
+              "natural",
+              "wash"
+            ],
+            "required": false,
+            "description": "Sets data-treatment. This picture stays as shot whatever the look."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "site-media",
+            "description": "The figure: an img with alt, width and height, and an optional figcaption."
+          }
+        ],
+        "example": "<cc-component name=\"SiteMedia\" position=\"start\" ratio=\"wide\">Content</cc-component>"
       }
     },
     {
@@ -16640,7 +16760,8 @@
       "surfaces": "objects",
       "elevation": "soft",
       "controls": "soft",
-      "headings": "sentence"
+      "headings": "sentence",
+      "imagery": "natural"
     }
   }
 }

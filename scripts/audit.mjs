@@ -94,6 +94,9 @@ function checkColors() {
     }
     for (const m of clean.matchAll(fnRe)) {
       if (whiteBlackAlpha.test(clean.slice(m.index))) continue;
+      // Relative colour syntax that starts from a token, or from a mix of tokens, is derived, not raw:
+      // oklch(from var(--fd-accent) …), oklch(from color-mix(in oklch, var(--fd-accent) 55%, var(--fd-bg)) …).
+      if (/^(?:rgba?|hsla?|oklch)\(\s*from\s+(?:var\(--|color-mix\([^#]*?var\(--)/i.test(clean.slice(m.index, m.index + 200))) continue;
       const shown = raw.slice(m.index).match(/^[^)\n]*\)?/)[0].slice(0, 60);
       add('colors', 'WARN', f, line(m.index), `colour function ${shown}`);
     }

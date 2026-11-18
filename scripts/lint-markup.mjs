@@ -24,10 +24,12 @@
  *   no-style                 any style attribute or style prop (style=, :style=, v-bind:style=, .style=)
  *   no-raw-color             a hex/rgb()/hsl()/oklch()… colour (or a named colour in fill/stroke/color…) in an attribute
  *   no-raw-px                a pixel size (`12px`) in an attribute
- *   icon-only-name           data-icon-only without aria-label, aria-labelledby or visible text
+ *   icon-only-name           data-icon-only without aria-label, aria-labelledby, data-fd-tooltip or visible text
  *   no-i-icon-in-framework   <i data-icon> in .jsx/.tsx/.vue (use <fd-icon name="…"> or the SVG form)
  *
  * Each finding has file, line, column, rule, message and fix. Exit code 1 when there is any error, 2 on usage errors.
+ *
+ * An attribute whose catalogue values are ["*"] takes any value.
  *
  * Catalogue fields read: components[].{id, classes, attributes, element}, classes, icons, and the tag names of
  * components[].element and elements[].{tagName|tag|name}.
@@ -454,12 +456,13 @@ export function lintText(file, text, rawCatalog, kind) {
     // data-* values the component defines
     for (const a of attrs) {
       if (!a.key.startsWith('data-') || a.dynamic || a.value === null) continue;
+      if (a.key === 'data-size' && attrs.some((x) => x.key === 'data-icon')) continue;   // icons.js: a drawn icon takes 12|14|16|20|24 whatever class it carries
       let listed = null;
       for (const id of comps) {
         const def = cat.byId.get(id)?.attributes?.[a.key];
         if (Array.isArray(def)) listed = (listed || []).concat(def);
       }
-      if (listed && !listed.includes(a.value)) {
+      if (listed && !listed.includes('*') && !listed.includes(a.value)) {   // "*" in the catalogue: any value
         const s = nearest(a.value, listed);
         report(a.valueAt ?? a.at, 'unknown-attribute-value', `${a.key}="${a.value}" is not defined for ${[...comps].join('/')}`,
           `${s ? `did you mean "${s}"? ` : ''}allowed: ${listed.map((v) => `"${v}"`).join(', ')}`);
@@ -513,7 +516,7 @@ export function lintText(file, text, rawCatalog, kind) {
     // icon-only buttons
     const io = get('data-icon-only');
     if (io && !(io.value === 'false')) {
-      const named = get('aria-label') || get('aria-labelledby');
+      const named = get('aria-label') || get('aria-labelledby') || get('data-fd-tooltip');   // overlays.js: a tooltip names an icon-only trigger
       if (!named && !ev.spread) {
         const f = { tag, at: io.at, hasText: false };
         if (ev.selfClosing) evalFrame(f); else stack.push(f);

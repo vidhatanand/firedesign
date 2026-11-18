@@ -33,14 +33,16 @@ test('every fd- class the CSS defines is assigned to exactly one component', () 
   for (const f of files) for (const rule of stripCss(read(path.join(ROOT, f))).matchAll(/([^{}]+)\{/g)) {
     if (!rule[1].trim().startsWith('@')) for (const m of rule[1].matchAll(/\.(fd-[a-z0-9]+(?:-[a-z0-9]+)*)/g)) defined.add(m[1]);
   }
-  assert.deepEqual(Object.keys(catalog.classes).sort(), [...defined].sort());
+  // Classes the CSS defines are all there; the rest are hooks that scripts and module headers use and CSS never styles.
+  assert.deepEqual([...defined].filter((c) => !catalog.classes[c]), []);
+  assert.deepEqual(Object.keys(catalog.classes).filter((c) => !defined.has(c)).sort(), ['fd-diff-src', 'fd-model-chip-label', 'fd-notification-list', 'fd-sheet-close', 'fd-suggestions-text']);
   const seen = new Map();
   for (const c of catalog.components) for (const cls of c.classes) {
     assert.ok(!seen.has(cls), `${cls} is in both ${seen.get(cls)} and ${c.id}`);
     seen.set(cls, c.id);
     assert.equal(catalog.classes[cls], c.id);
   }
-  assert.equal(seen.size, defined.size);
+  assert.equal(seen.size, Object.keys(catalog.classes).length);
   for (const c of catalog.components) assert.ok(c.classes.includes(c.root), `${c.id} lists its root`);
 });
 
@@ -60,7 +62,7 @@ test('component ids are unique and every VOCABULARY root is a component or a par
 test('the catalogue lists attribute values from the styles', () => {
   const button = catalog.components.find((c) => c.id === 'button');
   assert.deepEqual(button.attributes['data-variant'], ['accent-soft', 'danger', 'danger-soft', 'ghost', 'inverse', 'outline', 'primary']);
-  assert.deepEqual(button.attributes['data-size'], ['lg', 'sm', 'xl', 'xs']);
+  assert.deepEqual(button.attributes['data-size'], ['lg', 'md', 'sm', 'xl', 'xs']);
   assert.deepEqual(button.attributes['data-icon-only'], []);
   assert.ok(catalog.globalAttributes['data-gap'].includes('4'));
   assert.ok(catalog.events['fd:select'].detail.includes('value'));
@@ -190,4 +192,15 @@ test('the audit still reports no errors', () => {
   assert.equal(r.status, 0);
   assert.match(r.stdout, /totals: ERROR=0 /);
   assert.match(r.stdout, /literals=0 inline=0 attrs=0/);
+});
+
+test('allowed values: layout, vocabulary, script and documented-default sources are merged; free attributes are "*"', () => {
+  const get = (id) => catalog.components.find((c) => c.id === id).attributes;
+  assert.ok(catalog.components.some((c) => c.attributes['data-gap']?.includes('0')), 'layout attribute values reach the components that style the attribute');
+  assert.ok(get('texture')['data-fd-ascii'].includes('halftone'), 'a module header documents halftone');
+  assert.ok(get('chat')['data-agent'].includes('away'), 'a CSS header documents the agent states');
+  assert.ok(get('doc')['data-method'].includes('patch'), 'a selector list inside :is() is read whole');
+  assert.ok(get('dialog')['data-size'].includes('md'), 'the documented default');
+  assert.deepEqual(get('codeblock')['data-collapse'], ['*']);
+  assert.deepEqual(get('menu')['data-fd-submenu'], ['*']);
 });

@@ -9,7 +9,8 @@
  *
  * The page's own look (data-palette, data-type written in its markup) is the default tweaks.js returns to.
  * Before a saved palette or type set replaces it, the page's value is kept in data-fd-default-palette /
- * data-fd-default-type (empty when the page declared none), so tweaks.js can still tell what the page asked for.
+ * data-fd-default-type (empty when the page declared none), so tweaks.js can still tell what the page asked for;
+ * the same for the signature dials, data-signature-* (data-fd-default-signature-*).
  *
  * It also applies data-fd-vars (see the second block) while the page is parsed. */
 (function () {
@@ -19,6 +20,7 @@
     var saved = { 'data-theme': store.getItem('fd-theme'), 'data-density': store.getItem('fd-density'), 'data-accent': store.getItem('fd-accent') };
     var boot = JSON.parse(store.getItem('fd-tweaks-boot') || 'null') || {};
     var keep = { 'data-palette': 'data-fd-default-palette', 'data-type': 'data-fd-default-type' };
+    ['field', 'mark', 'cell', 'ramp', 'marks', 'intensity'].forEach(function (dial) { keep['data-signature-' + dial] = 'data-fd-default-signature-' + dial; });
     var name;
     for (name in saved) if (saved[name]) root.setAttribute(name, saved[name]);
     for (name in boot.attrs) {

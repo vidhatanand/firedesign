@@ -11,6 +11,7 @@
    .fd-tweaks-swatch[data-palette][role=radio]   a palette in miniature: page, ink, accent
    .fd-tweaks-face[data-value][role=radio]       a type set: "Ag" set in its headings face (.fd-tweaks-face-sample[data-type]) and its name
    .fd-tweaks-readout                            the selected type set's faces, beside the Typeface label
+   .fd-tweaks-chips > .fd-tweaks-chip[role=radio][data-value]   a signature choice (field, mark): a labelled chip in a three-column radio grid
    .fd-tweaks-launcher                           the floating round button (html[data-fd-tweaks] without a trigger)
    ========================================================================== */
 
@@ -32,6 +33,7 @@
   --fd-tweaks-ink-w: 2px;
   --fd-tweaks-ring: 1.5px;           /* the selected ring, in the swatch's own accent */
   --fd-tweaks-ring-gap: 2px;         /* the gap between tile and ring */
+  --fd-tweaks-chip-h: 28px;          /* a signature chip */
   /* sliders */
   --fd-tweaks-track: 6px;            /* tone tracks: tall enough to show their sweep */
   --fd-tweaks-thumb: 16px;           /* the system thumb, re-centred on the taller track */
@@ -183,6 +185,24 @@
   box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-a8);
 }
 .fd-tweaks-tone > input[type="range"]::-moz-range-progress { background: transparent; }
+
+/* ---------- Signature chips: a radio grid of labelled choices ---------- */
+.fd-tweaks-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--fd-space-1); }
+.fd-tweaks-chip {
+  min-inline-size: 0; block-size: var(--fd-tweaks-chip-h);
+  padding-inline: var(--fd-space-1);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-bg);
+  box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line);
+  color: var(--fd-text-3);
+  font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color var(--fd-dur-2) var(--fd-ease-out), box-shadow var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-tweaks-chip:hover { color: var(--fd-text-2); box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong); }
+.fd-tweaks-chip:active { scale: var(--fd-press-scale); }
+.fd-tweaks-chip[aria-checked="true"] { color: var(--fd-text); box-shadow: inset 0 0 0 var(--fd-tweaks-ring) var(--fd-accent); }
+.fd-tweaks-chip:focus-visible { box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line), 0 0 0 var(--fd-tweaks-ring-gap) var(--_tw-panel), 0 0 0 calc(var(--fd-tweaks-ring-gap) * 2) var(--_tw-focus); }
 
 /* ---------- Palette swatches and typeface tiles ----------
    Two radio grids built the same way: a button (the radio), a 40px tile that carries the selection ring, a name. */

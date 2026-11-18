@@ -4,7 +4,7 @@ import { texture } from './fire.js';
 import { FireElement, type FireInit, type RootAttribute } from './fire-element.js';
 
 /**
- * A Fire generative character field: terrain, waves, orbit, rain, grid, flame, halftone or spark. The element is
+ * A Fire generative field: terrain, waves, orbit, rain, grid, flame, halftone, spark, contour, stipple or bars, drawn in characters, dots, squares, plus signs or dashes. The element is
  * the field's root: it carries the markup form's `class="fd-ascii"`, `data-fd-ascii="…"`,
  * the other `data-*` attributes and `aria-hidden="true"`, and Fire's texture module draws its canvas inside it and owns
  * its size, colour and animation (12 fps on a shared frame loop, paused off screen, one still frame under reduced
@@ -20,9 +20,9 @@ export class FdTexture extends FireElement {
   /** @internal */
   protected static override fire: FireInit[] = [texture.init];
 
-  /** The field: `terrain` (default), `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark` or a registered name (`data-fd-ascii`). */
+  /** The field: `terrain`, `waves`, `orbit`, `rain`, `grid`, `flame`, `halftone`, `spark`, `contour`, `stipple`, `bars` or a registered name (`data-fd-ascii`). A page signature field, when set, wins over it unless `signature` is `own`; left out, it is that field, else `terrain`. */
   @property()
-  pattern = 'terrain';
+  pattern?: string;
 
   /** Ink: `neutral` (default), `accent`, `contrast` or `strong` (`data-tone`). */
   @property()
@@ -32,9 +32,9 @@ export class FdTexture extends FireElement {
   @property()
   fade?: 'left' | 'right' | 'top' | 'bottom' | 'x' | 'y' | 'radial';
 
-  /** Draw `chars` (default) or `dots`, halftone discs (`data-style`). */
+  /** The mark: `chars` (default), `dots` (halftone discs), `squares`, `plus` or `dashes` (`data-style`). A page signature mark, when set, wins over it unless `signature` is `own`. */
   @property()
-  marks?: 'chars' | 'dots';
+  marks?: 'chars' | 'dots' | 'squares' | 'plus' | 'dashes';
 
   /** Character ramp: `default`, `soft`, `dense`, `glyph`, `rain`, or a literal ramp such as ` .:-=+*#` (`data-ramp`). */
   @property()
@@ -56,7 +56,7 @@ export class FdTexture extends FireElement {
   @property({ type: Number })
   speed?: number;
 
-  /** Luminance multiplier, default 1 (`data-intensity`). */
+  /** Luminance multiplier, default 1 (`data-intensity`); a set page signature intensity wins unless `signature` is `own`. */
   @property({ type: Number })
   intensity?: number;
 
@@ -79,6 +79,10 @@ export class FdTexture extends FireElement {
   /** `blob` clips the field to a soft, noisy disc (`data-shape`). */
   @property()
   shape?: 'blob';
+
+  /** `own` pins the field to its own pattern, marks, ramp, cell and intensity, whatever the page's signature dials say (`data-signature`). */
+  @property()
+  signature?: 'own';
 
   /** Flow in the page at the field height instead of filling the positioned ancestor (`data-inline`). */
   @property({ type: Boolean })
@@ -108,6 +112,7 @@ export class FdTexture extends FireElement {
       'data-side': this.side,
       'data-variant': this.variant,
       'data-shape': this.shape,
+      'data-signature': this.signature,
       'data-inline': this.inline,
     };
   }

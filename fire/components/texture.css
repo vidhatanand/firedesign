@@ -4,7 +4,10 @@
    <div class="fd-ascii" data-fd-ascii="terrain" data-fade="left" aria-hidden="true"></div>
      A generative character field drawn by fire/js/texture.js. It fills its positioned
      parent and sits between the parent's background and its content.
-     data-fd-ascii  terrain | waves | orbit | rain | grid | flame | halftone | spark
+     data-fd-ascii  terrain | waves | orbit | rain | grid | flame | halftone | spark | contour | stipple | bars;
+                    a page dial html[data-signature-field] that is set wins over it, unless data-signature="own"
+     data-signature own: pin the field to its own options, whatever the page's signature dials say
+     data-style     chars | dots | squares | plus | dashes: the mark (a set html[data-signature-mark] wins over it)
      data-tone      neutral (default) | accent | contrast (on an accent or inverse surface)
      data-fade      left | right | top | bottom | x | y | radial
      data-inline    in normal flow; give it a height
@@ -17,6 +20,10 @@
    <span class="fd-glyph" aria-hidden="true"></span>                      empty-state character glyph
    <span class="fd-shimmer">Searching the web…</span>                     moving highlight on a status
    <section class="fd-announce">…</section>                               accent announcement surface
+
+   The page's signature (data-signature-field, -mark, -cell, -ramp, -intensity, -marks on <html>; fire/js/theme.js writes
+   them, fire/js/texture.js and the frame in shell.css read them) is the default of every field, glyph and frame that
+   is not pinned with data-signature="own"; a dial left on auto changes nothing.
 
    Contrast stays under ~1.6:1 against the surface: neutral ink is a24 in light, a16 in dark.
    ========================================================================== */

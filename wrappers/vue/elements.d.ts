@@ -27,7 +27,7 @@ export type FdCodeProps = Partial<Pick<FdCode, 'code' | 'language' | 'lines' | '
 export type FdIconProps = Partial<Pick<FdIcon, 'icon' | 'size'>>;
 
 /** `<fd-texture>`: A generative texture field, safe to render from a framework. */
-export type FdTextureProps = Partial<Pick<FdTexture, 'pattern' | 'tone' | 'fade' | 'marks' | 'ramp' | 'cell' | 'seed' | 'animated' | 'speed' | 'intensity' | 'interactive' | 'origin' | 'side' | 'variant' | 'shape' | 'inline'>>;
+export type FdTextureProps = Partial<Pick<FdTexture, 'pattern' | 'tone' | 'fade' | 'marks' | 'ramp' | 'cell' | 'seed' | 'animated' | 'speed' | 'intensity' | 'interactive' | 'origin' | 'side' | 'variant' | 'shape' | 'signature' | 'inline'>>;
 
 declare module 'vue' {
   /** The `fd-` tags. With `isCustomElement` (see `fireVueOptions`) the tags are real elements; these types check their properties. */

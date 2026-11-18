@@ -277,7 +277,7 @@ test('values on a part stay with the part: loader, app, sidebar, tweaks, texture
   const app = comp('app');
   for (const a of ['data-corner', 'data-tone', 'data-marks', 'data-fill']) assert.equal(app.attributes[a], undefined, `app: ${a}`);
   assert.deepEqual(part('app', 'fd-crosshair')['data-corner'], ['', 'bl', 'br', 'tl', 'tr']);
-  assert.deepEqual(part('app', 'fd-frame')['data-marks'], ['none']);
+  assert.deepEqual(part('app', 'fd-frame')['data-marks'], ['', 'corners', 'crosses', 'dots', 'none']);
   assert.equal(comp('sidebar').attributes['data-side'], undefined);
   assert.deepEqual(part('sidebar', 'fd-rail-tip')['data-side'], ['left']);
   for (const a of ['data-palette', 'data-type']) assert.deepEqual(everywhere('tweaks', a), [], `tweaks: ${a} is the page's, not the panel's`);

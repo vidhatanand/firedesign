@@ -556,7 +556,8 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
    data-surface  surface (white band)
    data-grow     band fills the remaining height
    data-align    center: the band's content sits in the middle of its height (with data-grow)
-   data-marks    none hides the crosshairs (on a band, or on the frame for all bands)
+   data-marks    crosses | dots | corners | none: the marks where a band meets the rails (on a band, or on the frame for
+                 all its bands); it wins over the page's data-signature-marks on <html>. none hides them.
 */
 .fd-frame {
   position: relative;
@@ -595,19 +596,35 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   background: var(--fd-line-faint);
   pointer-events: none;
 }
-/* Crosshair marks (9px), centred on each rail/hairline intersection. */
+/* Marks (9px), centred on each rail/hairline intersection. Their shape is the signature's "marks" dial: the page's
+   data-signature-marks on <html> (crosses · dots · corners · none), or data-marks on a frame or a band, which wins.
+   The shapes are --_s-mark-l and --_s-mark-r, so a corner can face inward on each side. */
 .fd-band + .fd-band::after {
   content: ""; position: absolute; z-index: 1;
   top: calc(var(--fd-mark-half) * -1); inset-inline: calc(var(--fd-mark-inset) * -1); height: var(--fd-mark-size);
   background: var(--fd-line-strong);
-  -webkit-mask: var(--_s-mark) left top / var(--fd-mark-size) var(--fd-mark-size) no-repeat, var(--_s-mark) right top / var(--fd-mark-size) var(--fd-mark-size) no-repeat;
-  mask: var(--_s-mark) left top / var(--fd-mark-size) var(--fd-mark-size) no-repeat, var(--_s-mark) right top / var(--fd-mark-size) var(--fd-mark-size) no-repeat;
+  -webkit-mask: var(--_s-mark-l) left top / var(--fd-mark-size) var(--fd-mark-size) no-repeat, var(--_s-mark-r) right top / var(--fd-mark-size) var(--fd-mark-size) no-repeat;
+  mask: var(--_s-mark-l) left top / var(--fd-mark-size) var(--fd-mark-size) no-repeat, var(--_s-mark-r) right top / var(--fd-mark-size) var(--fd-mark-size) no-repeat;
   pointer-events: none;
+  display: var(--_s-show, block);
 }
-.fd-band[data-marks="none"]::after,
-.fd-frame[data-marks="none"] > .fd-band::after { display: none; }
-/* Outside an .fd-app the mark shape still needs a source. */
-.fd-frame, .fd-band { --_s-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M4 0h1v2.5Q5 4 6.5 4H9v1H6.5Q5 5 5 6.5V9H4V6.5Q4 5 2.5 5H0V4h2.5Q4 4 4 2.5Z'/%3E%3C/svg%3E"); }
+/* The shapes, as masks. Defined on :root so a frame or band can override them for itself and its bands. */
+:root {
+  --_s-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M4 0h1v2.5Q5 4 6.5 4H9v1H6.5Q5 5 5 6.5V9H4V6.5Q4 5 2.5 5H0V4h2.5Q4 4 4 2.5Z'/%3E%3C/svg%3E");
+  --_s-dot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Ccircle cx='4.5' cy='4.5' r='2'/%3E%3C/svg%3E");
+  --_s-corner-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M4 4h5v1H5v4H4Z'/%3E%3C/svg%3E");
+  --_s-corner-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M0 4h5v5H4V5H0Z'/%3E%3C/svg%3E");
+  --_s-mark-l: var(--_s-cross);
+  --_s-mark-r: var(--_s-cross);
+}
+:root[data-signature-marks="none"] { --_s-show: none; }
+:root[data-signature-marks="dots"] { --_s-mark-l: var(--_s-dot); --_s-mark-r: var(--_s-dot); }
+:root[data-signature-marks="corners"] { --_s-mark-l: var(--_s-corner-l); --_s-mark-r: var(--_s-corner-r); }
+:is(.fd-frame, .fd-band)[data-marks="none"] { --_s-show: none; }
+:is(.fd-frame, .fd-band)[data-marks]:not([data-marks="none"]) { --_s-show: block; }
+:is(.fd-frame, .fd-band)[data-marks="crosses"] { --_s-mark-l: var(--_s-cross); --_s-mark-r: var(--_s-cross); }
+:is(.fd-frame, .fd-band)[data-marks="dots"] { --_s-mark-l: var(--_s-dot); --_s-mark-r: var(--_s-dot); }
+:is(.fd-frame, .fd-band)[data-marks="corners"] { --_s-mark-l: var(--_s-corner-l); --_s-mark-r: var(--_s-corner-r); }
 
 /* ---------- Page hero ---------- */
 .fd-page-hero {

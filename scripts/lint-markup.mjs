@@ -27,13 +27,20 @@
  *   no-raw-px                a pixel size (`12px`) in an attribute
  *   icon-only-name           data-icon-only without aria-label, aria-labelledby, data-fd-tooltip or visible text
  *   no-i-icon-in-framework   <i data-icon> in .jsx/.tsx/.vue (use <fd-icon icon="…"> or the SVG form)
+ *   surface-mismatch         (a warning) a part whose card's `surfaces` does not include the surface the page declares
+ *                            with data-fd-surface="app|website|phone|email" (on <html> or any element; the nearest
+ *                            ancestor that carries it decides). On a phone page a part that lists app is fine too.
+ *                            Silent where nothing is declared. --surface <name> sets the surface for files that declare
+ *                            none; --no-surface turns the rule off. An unknown data-fd-surface value is an error
+ *                            (unknown-attribute-value).
  *
- * Each finding has file, line, column, rule, message and fix. Exit code 1 when there is any error, 2 on usage errors.
+ * Each finding has file, line, column, rule, severity ("error" or "warning"), message and fix. Exit code 1 when there
+ * is any error (warnings never change it), 2 on usage errors. --json: {catalog, files, errors, warnings, findings}.
  *
  * An attribute whose catalogue values are ["*"] takes any value. `data-x=""` counts as the bare `data-x` (the JSX
  * spelling, EXPORT A7) where the attribute takes no value.
  *
- * Catalogue fields read: components[].{id, classes, attributes, partAttributes, stateAttributes, element}, classes, icons, and the tag names of
+ * Catalogue fields read: components[].{id, name, classes, attributes, partAttributes, stateAttributes, element, card.{surfaces, avoidWhen, related}}, classes, icons, and the tag names of
  * components[].element and elements[].{tagName|tag|name}.
  */
 import fs from 'node:fs';
@@ -45,7 +52,8 @@ const HOLE = '\u0001';
 const BAIL = Symbol('bail');
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 export const RULES = ['unknown-class', 'unknown-attribute-value', 'unknown-element', 'unknown-icon', 'no-style',
-  'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework'];
+  'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework', 'surface-mismatch'];
+export const SURFACES = ['app', 'website', 'phone', 'email'];
 
 const isWs = (c) => c === ' ' || c === '\n' || c === '\t' || c === '\r' || c === '\f';
 const JSX_PREV = new Set(['', '(', ',', '=', ':', '?', '!', '&', '|', '{', '}', ';', '[', '>', 'return', 'yield', 'case', 'default', 'await', 'else', 'typeof', 'in', 'of']);
@@ -386,7 +394,8 @@ function normName(name, mode) {
   return n;
 }
 
-export function lintText(file, text, rawCatalog, kind) {
+// opts: { surface } the surface for a file that declares none; { noSurface: true } turns surface-mismatch off.
+export function lintText(file, text, rawCatalog, kind, opts = {}) {
   const cat = rawCatalog.classes instanceof Map ? rawCatalog : prepareCatalog(rawCatalog);
   kind = kind || kindOf(file);
   const findings = [];
@@ -400,7 +409,7 @@ export function lintText(file, text, rawCatalog, kind) {
     while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (starts[mid] <= p) lo = mid; else hi = mid - 1; }
     return { line: lo + 1, col: p - starts[lo] + 1 };
   };
-  const report = (at, rule, message, fix) => findings.push({ file, ...loc(at), rule, severity: 'error', message, fix });
+  const report = (at, rule, message, fix, severity = 'error') => findings.push({ file, ...loc(at), rule, severity, message, fix });
 
   const events = [];
   const ctx = { src: text, out: events, cur: null, jsx: kind === 'jsx', lit: kind === 'jsx' || kind === 'lit' };
@@ -413,6 +422,7 @@ export function lintText(file, text, rawCatalog, kind) {
   const tagNames = [...cat.tags.keys()];
   const iconNames = [...cat.icons];
   const stack = [];
+  const surfaceStack = [];   // open elements: { tag, surface, flagged: component ids already reported by an ancestor }
   const evalFrame = (f) => {
     if (!f.hasText) report(f.at, 'icon-only-name', `icon-only button <${f.tag}> has no accessible name`,
       'add aria-label="…" (or aria-labelledby), or put visible text inside the button');
@@ -422,6 +432,9 @@ export function lintText(file, text, rawCatalog, kind) {
     if (ev.type === 'text') { for (const f of stack) f.hasText = true; continue; }
     if (ev.type === 'close') {
       const t = ev.tag.toLowerCase();
+      let sk = surfaceStack.length - 1;
+      while (sk >= 0 && surfaceStack[sk].tag !== t) sk--;
+      if (sk >= 0) surfaceStack.splice(sk);
       let k = stack.length - 1;
       while (k >= 0 && stack[k].tag !== t) k--;
       if (k >= 0) { for (const f of stack.splice(k)) evalFrame(f); }
@@ -454,6 +467,32 @@ export function lintText(file, text, rawCatalog, kind) {
       const s = nearest(t, classNames);
       report(at, 'unknown-class', `unknown class "${t}"`, s ? `did you mean "${s}"?` : 'use a class from the catalogue (classes)');
     }
+
+    // surfaces: the nearest data-fd-surface decides for the element and everything inside it
+    const parent = surfaceStack[surfaceStack.length - 1];
+    let surface = parent ? parent.surface : opts.surface || null;
+    const ds = get('data-fd-surface');
+    if (ds && !ds.dynamic && ds.value !== null) {
+      if (SURFACES.includes(ds.value)) surface = ds.value;
+      else report(ds.valueAt ?? ds.at, 'unknown-attribute-value', `data-fd-surface="${ds.value}" is not a surface`,
+        `allowed: ${SURFACES.map((v) => `"${v}"`).join(', ')}`);
+    }
+    const flagged = new Set(parent ? parent.flagged : []);
+    if (surface && !opts.noSurface) {
+      for (const id of comps) {
+        const card = cat.byId.get(id)?.card;
+        if (!card || !Array.isArray(card.surfaces) || flagged.has(id)) continue;
+        if (card.surfaces.includes(surface) || (surface === 'phone' && card.surfaces.includes('app'))) continue;
+        flagged.add(id);
+        const here = (x) => { const k = cat.byId.get(x)?.card?.surfaces || []; return k.includes(surface) || (surface === 'phone' && k.includes('app')); };
+        const alt = [...(card.avoidWhen || []).map((a) => a.instead), ...(card.related || [])].filter((x, i, a) => cat.byId.has(x) && x !== id && here(x) && a.indexOf(x) === i)[0];
+        report(ev.at + 1, 'surface-mismatch',
+          `${cat.byId.get(id).name || id} (${id}) is for ${card.surfaces.join(', ')}, not ${surface}: the page declares data-fd-surface="${surface}"`,
+          alt ? `on ${surface} use ${alt} (${cat.byId.get(alt).name || alt}); the card names it as the alternative` : `leave it out of ${surface} pages, or put it in an element that declares data-fd-surface="${card.surfaces[0]}"`,
+          'warning');
+      }
+    }
+    if (!ev.selfClosing) surfaceStack.push({ tag, surface, flagged });
 
     // data-* values the component defines
     for (const a of attrs) {
@@ -604,18 +643,22 @@ export function findCatalog(explicit) {
 }
 
 function main(argv) {
-  let catalogPath = null, json = false;
+  let catalogPath = null, json = false, surface = null, noSurface = false;
   const inputs = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--json') json = true;
     else if (a === '--catalog') catalogPath = argv[++i];
     else if (a.startsWith('--catalog=')) catalogPath = a.slice(10);
-    else if (a === '-h' || a === '--help') { console.log('usage: node scripts/lint-markup.mjs [--catalog path] [--json] <files, directories or globs…>'); return 0; }
+    else if (a === '--no-surface') noSurface = true;
+    else if (a === '--surface') surface = argv[++i];
+    else if (a.startsWith('--surface=')) surface = a.slice(10);
+    else if (a === '-h' || a === '--help') { console.log('usage: node scripts/lint-markup.mjs [--catalog path] [--json] [--surface app|website|phone|email] [--no-surface] <files, directories or globs…>'); return 0; }
     else if (a.startsWith('--')) { console.error(`lint-markup: unknown option ${a}`); return 2; }
     else inputs.push(a);
   }
   if (!inputs.length) { console.error('lint-markup: no input files'); return 2; }
+  if (surface !== null && !SURFACES.includes(surface)) { console.error(`lint-markup: --surface is one of ${SURFACES.join(', ')}`); return 2; }
   const cpath = findCatalog(catalogPath);
   let catalog;
   try { catalog = prepareCatalog(JSON.parse(fs.readFileSync(cpath, 'utf8'))); } catch (e) {
@@ -625,14 +668,15 @@ function main(argv) {
   const findings = [];
   for (const f of files) {
     const rel = path.relative(process.cwd(), f) || f;
-    findings.push(...lintText(rel, fs.readFileSync(f, 'utf8'), catalog));
+    findings.push(...lintText(rel, fs.readFileSync(f, 'utf8'), catalog, undefined, { surface, noSurface }));
   }
   const errors = findings.filter((x) => x.severity === 'error').length;
+  const warnings = findings.length - errors;
   if (json) {
-    console.log(JSON.stringify({ catalog: cpath, files: files.length, errors, findings }, null, 2));
+    console.log(JSON.stringify({ catalog: cpath, files: files.length, errors, warnings, findings }, null, 2));
   } else {
     for (const x of findings) console.log(`${x.file}:${x.line}:${x.col}  ${x.severity}  ${x.rule}  ${x.message}\n    fix: ${x.fix}`);
-    console.log(`${files.length} file${files.length === 1 ? '' : 's'} checked, ${errors} error${errors === 1 ? '' : 's'}`);
+    console.log(`${files.length} file${files.length === 1 ? '' : 's'} checked, ${errors} error${errors === 1 ? '' : 's'}${warnings ? `, ${warnings} warning${warnings === 1 ? '' : 's'}` : ''}`);
   }
   return errors ? 1 : 0;
 }

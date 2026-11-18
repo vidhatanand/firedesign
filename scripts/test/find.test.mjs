@@ -150,3 +150,31 @@ test('fire find finds the email module', () => {
   const top = JSON.parse(r.stdout)[0];
   assert.deepEqual([top.id, top.kind], ['email', 'module']);
 });
+
+test('fire find: results carry their surfaces, and a query that fits better elsewhere says so', async () => {
+  const { betterElsewhere, betterNote } = await import('../find.mjs');
+  const fxIndex = path.join(ROOT, 'scripts/test/fixtures/surface/index.json');
+  const small = load(fxIndex);
+  const run = (...a) => spawnSync(process.execPath, ['scripts/find.mjs', ...a], { cwd: ROOT, encoding: 'utf8' });
+  // JSON and text both carry the surfaces
+  const json = JSON.parse(run('snackbar', '--json', '--limit', '1').stdout);
+  assert.ok(Array.isArray(json[0].surfaces) && json[0].surfaces.length);
+  assert.match(run('snackbar', '--limit', '1').stdout, /^toast {2}\[component\] {2}[a-z]+( · [a-z]+)* {2}[\d.]+$/m);
+  // nothing for the surface: the parts for other surfaces are named
+  const none = betterElsewhere(small, 'bottom navigation tab bar', { surface: 'app' }, search(small, 'bottom navigation tab bar', { surface: 'app' }));
+  assert.equal(none[0].id, 'tabbar');
+  assert.match(betterNote('app', none, false), /^1 match exists for other surfaces: tabbar \[component\] \(phone\)/);
+  // a better match elsewhere than the best on the surface
+  const here = search(small, 'navigation bar', { surface: 'app' });
+  assert.equal(here[0].id, 'sidebar');
+  // no --surface, or the surface already has the best answer: silent
+  assert.deepEqual(betterElsewhere(small, 'bottom navigation tab bar', {}), []);
+  assert.deepEqual(betterElsewhere(small, 'side navigation', { surface: 'app' }), []);
+  // the real index: a documentation-only part searched on the app surface
+  const r = run('table of contents', '--surface', 'app');
+  assert.match(r.stdout, /better match(es)? exists? for other surfaces: toc \[component\] \(website\)/);
+  // --json keeps stdout a plain array; the note goes to stderr
+  const j = run('table of contents', '--surface', 'app', '--json');
+  assert.ok(Array.isArray(JSON.parse(j.stdout)));
+  assert.match(j.stderr, /other surfaces: toc/);
+});

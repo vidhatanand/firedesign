@@ -195,3 +195,70 @@ test('CLI: text and JSON output, exit codes, globs, catalogue flag', () => {
   assert.equal(spawnSync(process.execPath, [script, '--catalog', path.join(fx, 'missing.json'), 'x.html'], { encoding: 'utf8' }).status, 2);
   assert.deepEqual(expandInputs([path.join(fx, 'lint', 'good.{html,vue}')]).map((f) => path.basename(f)), ['good.html', 'good.vue']);
 });
+
+/* ------------------------------------------------------------------ surface-mismatch (a warning) */
+
+const surfCatalogPath = path.join(fx, 'surface', 'catalog.json');
+const surfCatalog = prepareCatalog(JSON.parse(fs.readFileSync(surfCatalogPath, 'utf8')));
+const surf = (text, opts) => lintText('a.html', text, surfCatalog, undefined, opts).filter((f) => f.rule === 'surface-mismatch');
+
+test('surface-mismatch: silent where nothing is declared, and with --no-surface', () => {
+  assert.deepEqual(surf('<nav class="fd-tabbar"></nav><div class="fd-table"></div>'), []);
+  assert.deepEqual(surf('<html data-fd-surface="app"><nav class="fd-tabbar"></nav></html>', { noSurface: true }), []);
+});
+
+test('surface-mismatch: a phone-only part on an app page is a warning that names the part, its surfaces and what to use', () => {
+  const f = surf('<html data-fd-surface="app"><body><nav class="fd-tabbar"><a class="fd-tabbar-item"></a><a class="fd-tabbar-item"></a></nav></body></html>');
+  assert.equal(f.length, 1, 'one finding for the bar, not one per item');
+  assert.equal(f[0].severity, 'warning');
+  assert.match(f[0].message, /Tab bar \(tabbar\) is for phone, not app/);
+  assert.match(f[0].fix, /use sidebar|use tabs/);
+});
+
+test('surface-mismatch: the nearest declaration wins', () => {
+  const t = '<html data-fd-surface="app"><body><div class="fd-tabbar"></div>' +
+    '<div data-fd-surface="phone"><div class="fd-tabbar"></div><div class="fd-sidebar"></div>' +
+    '<section data-fd-surface="website"><div class="fd-sidebar"></div></section><div class="fd-tabbar"></div></div></body></html>';
+  const f = surf(t);
+  // app: tabbar flagged; phone: tabbar fine, an app part is fine on a phone; website: sidebar flagged; back on phone: fine
+  assert.deepEqual(f.map((x) => /\((\w+)\)/.exec(x.message)[1]), ['tabbar', 'sidebar']);
+  assert.match(f[1].message, /not website/);
+});
+
+test('surface-mismatch: a phone page takes parts that list app or phone', () => {
+  assert.deepEqual(surf('<div data-fd-surface="phone"><div class="fd-table"></div><div class="fd-tabbar"></div></div>'), []);
+});
+
+test('surface-mismatch: an email page using an app-only part', () => {
+  const f = surf('<html data-fd-surface="email"><div class="fd-btn"></div><div class="fd-sidebar"></div><div class="fd-table"></div></html>');
+  assert.deepEqual(f.map((x) => /\((\w+)\)/.exec(x.message)[1]), ['sidebar', 'table']);
+  assert.match(f[1].fix, /use list/);
+});
+
+test('surface-mismatch: --surface fills in for a file that declares nothing, and a declaration still wins', () => {
+  assert.equal(surf('<nav class="fd-tabbar"></nav>', { surface: 'app' }).length, 1);
+  assert.equal(surf('<div data-fd-surface="phone"><nav class="fd-tabbar"></nav></div>', { surface: 'app' }).length, 0);
+});
+
+test('surface-mismatch: framework files (JSX, Lit) and a bad value', () => {
+  assert.equal(lintText('a.tsx', 'const a = <div data-fd-surface="website"><nav className="fd-tabbar" /></div>;', surfCatalog).filter((f) => f.rule === 'surface-mismatch').length, 1);
+  const bad = lintText('a.html', '<div data-fd-surface="tablet"></div>', surfCatalog);
+  assert.deepEqual(bad.map((f) => [f.rule, f.severity]), [['unknown-attribute-value', 'error']]);
+});
+
+test('surface-mismatch CLI: warnings never change the exit code; JSON counts them; --surface and --no-surface', () => {
+  const script = path.join(here, '..', 'lint-markup.mjs');
+  const file = path.join(fx, 'surface', 'phone-part-on-app.html');
+  const run = (...a) => spawnSync(process.execPath, [script, '--catalog', surfCatalogPath, ...a], { encoding: 'utf8' });
+  let r = run(file);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /warning {2}surface-mismatch/);
+  assert.match(r.stdout, /0 errors, 1 warning/);
+  const j = JSON.parse(run('--json', file).stdout);
+  assert.equal(j.errors, 0); assert.equal(j.warnings, 1); assert.equal(j.findings[0].severity, 'warning');
+  assert.doesNotMatch(run('--no-surface', file).stdout, /surface-mismatch/);
+  const plain = path.join(fx, 'surface', 'undeclared.html');
+  assert.doesNotMatch(run(plain).stdout, /surface-mismatch/);
+  assert.match(run('--surface', 'email', plain).stdout, /surface-mismatch/);
+  assert.equal(run('--surface', 'tablet', file).status, 2);
+});

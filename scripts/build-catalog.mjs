@@ -200,6 +200,7 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   const known = collectAttrValues(attributeSheets({ docs: false }), { scope: 'compound' });
   const globalAttributes = {};
   for (const [k, set] of [...known].sort()) if (k.startsWith('*|')) globalAttributes[k.slice(2)] = [...set].sort();
+  globalAttributes['data-fd-surface'] = ['app', 'email', 'phone', 'website'];   // a declaration, no CSS: where the page or the element is used (lint-markup surface-mismatch)
   for (const [k, set] of known) { const [cls, attr] = k.split('|'); if (cls !== '*') for (const v of set) note('.' + cls, attr, v, 'css'); }
   for (const k of known.flags.keys()) { const [cls, attr] = k.split('|'); if (cls !== '*') note('.' + cls, attr, '', 'css'); }
   for (const { root, attr, values } of vocab.attrValues) for (const v of values) note('.' + root, attr, v, 'VOCABULARY.md');

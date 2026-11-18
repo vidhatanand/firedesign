@@ -498,6 +498,13 @@ const LEVELS = [
 const FULL_LEVEL = { purpose: 500, usage: 1000, items: 8, item: 300, parts: 16, part: 300, prop: 300, paths: 8, props: 32, variants: 16 };
 const MAX_BYTES = 126 * 1024; // 2 KiB under Facet's limit, for the difference between JSON and Python's canonical form
 
+// Facet's component entry has no field for tags, a group or a category, so the card's surfaces (and the kind) go in the
+// purpose as a last line of one fixed form, "Surfaces: app, website, phone. Kind: component.", in the order app, website,
+// phone, email. A reader splits on the last newline; /\nSurfaces: ([a-z, ]+)\. Kind: ([a-z]+)\.$/ takes it apart.
+const SURFACE_ORDER = ['app', 'website', 'phone', 'email'];
+const surfaceLine = (c, card) => `\nSurfaces: ${[...card.surfaces].sort((a, b) => SURFACE_ORDER.indexOf(a) - SURFACE_ORDER.indexOf(b)).join(', ')}. Kind: ${c.kind}.`;
+const withSurfaces = (text, c, card) => text + surfaceLine(c, card);
+
 function buildComponents(L, carried) {
 const droppedStates = new Set();
 // Components that take no content: a `children` slot is not offered.
@@ -569,7 +576,7 @@ for (const c of carried) {
 
   const entry = {
     name,
-    purpose: card ? cut(card.purpose, L.purpose) : cut(`The Fire ${c.family} ${c.kind} (${c.root}); no card yet, so this entry comes from the catalogue.`, L.purpose),
+    purpose: card ? withSurfaces(cut(card.purpose, L.purpose - surfaceLine(c, card).length), c, card) : cut(`The Fire ${c.family} ${c.kind} (${c.root}); no card yet, so this entry comes from the catalogue.`, L.purpose),
     variants, states: stateList,
     paths: [...(cssFileOf.has(c.id) ? [cssFileOf.get(c.id)] : []), ...(c.docs ? [c.docs.replace(/#.*/, '')] : [])].slice(0, L.paths),
   };
@@ -818,6 +825,7 @@ if (variant === 'full') {
 w('- **Breakpoints.** Facet\'s breakpoints are min-width and mobile first; Fire writes `max-width: 640px` for the phone layout and `min-width: 900px` for the wide one. `tablet` is 641px (where the wide layout starts) and `desktop` is 900px. `responsive` overrides are not written: Fire\'s phone overrides (smaller display and h1, 16px gutter) are max-width rules that a mobile-first override cannot say without inverting the base values.');
 w('- **Durations.** `duration` holds the five interaction durations and the stagger. The looping durations (spin 0.7s, shimmer 1.6s, pulse 1.8s, blink 1.1s, dots 1.2s) are left out: they are ambient loops, not transitions, and would make Facet report durations above 500ms. Reduced motion is `remove`: Fire sets `--fd-motion` to 0 and every duration is the token times that.');
 w('- **Dials and density.** Corners, density, line weight, text size, contrast, motion and texture are theme-record dials, not tokens Facet can model; they travel in `theme.json`.');
+w('- **Surfaces and kind.** Facet\'s component entry has no field for tags, a group or a category, so the last line of every `purpose` is `Surfaces: app, website, phone. Kind: component.` (surfaces in the order app, website, phone, email, from the card; kind is component, pattern or layout). Split on the last line break to read it; the text before it is the card\'s purpose, cut to leave room.');
 w(`- **Component states.** Facet takes any lower-case state name, and a web app must cover empty, loading, error and disabled. Card states map to a short vocabulary (${STATE_ORDER.join(', ')}); names that no pattern takes are dropped (${droppedStates.size} of them, mostly transient or per-component states such as closing, dragover, masked or sending; for example ${[...droppedStates].sort().slice(0, 8).join(', ')}). States are also read from the CSS selectors that carry the component's class (:hover, :focus, [disabled], [aria-invalid], [aria-busy], [aria-pressed], :checked, [open]); that is a heuristic, not a card.`);
 w('- **Props.** Fire attributes with values are `enum` props; attributes with no value are `boolean`. `data-state`, `data-fill` and `data-fd-instant` are not props (state is set by the page; the others are layout toggles). Enums with more than 32 values would be strings; ' + (propNotes.length ? `affected: ${propNotes.join('; ')}.` : 'none are.') + ' `children` is Facet\'s own name, so no prop is called that; a `children` part says the component takes content. Components that take none are listed in the build script (`VOID`).');
 w('- **Examples.** Each `api.example` is a `<cc-component>` tag with the first value of the first two enums, not Fire markup: the docs sections that show the real markup are named in the card (`example`) and in `paths`.');

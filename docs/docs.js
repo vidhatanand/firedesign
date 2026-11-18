@@ -31,6 +31,10 @@ const PAGES = [
     ['skeletons', 'Skeletons & loading', 'loader'],
     ['elements', 'Custom elements', 'blocks'],
   ]],
+  ['Website', [
+    ['site', 'Site foundation', 'globe'],
+    ['site-sections', 'Sections', 'layout-list'],
+  ]],
   ['Templates', [
     ['../templates/index', 'All screens', 'monitor'],
   ]],

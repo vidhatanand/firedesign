@@ -103,6 +103,17 @@ test('filters: --kind, --surface and --data narrow the results', () => {
   assert.ok(search(db, 'show', { data: 'series', limit: 20 }).every((r) => r.data.includes('series')));
 });
 
+test('website sections are kind "section" and --kind section finds them', () => {
+  const r = search(db, 'pricing table', { kind: 'section', limit: 5 });
+  assert.ok(r.length && r.every((x) => x.kind === 'section'));
+  assert.equal(r[0].id, 'site-pricing');
+  assert.equal(search(db, 'logo wall', { limit: 1 })[0].id, 'site-logos');
+  assert.ok(search(db, 'hero', { kind: 'section', limit: 5 }).some((x) => x.id === 'site-hero'));
+  const run = spawnSync('node', [path.join(ROOT, 'scripts/find.mjs'), 'faq', '--kind', 'section', '--limit', '1'], { encoding: 'utf8' });
+  assert.equal(run.status, 0);
+  assert.match(run.stdout, /site-faq\s+\[section\]/);
+});
+
 test('stemming and synonyms: plural, -ing and hand-written synonyms reach the same part', () => {
   assert.equal(stem('toggles'), stem('toggle'));
   assert.equal(stem('filtering'), stem('filter'));

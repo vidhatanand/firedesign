@@ -21,6 +21,14 @@ test('catalog.json validates against catalog.schema.json', () => {
   assert.ok(validate(catalog), JSON.stringify(validate.errors?.slice(0, 5), null, 1));
 });
 
+test('website sections: every Website root is kind "section" except the foundation, which is a pattern', () => {
+  const site = catalog.components.filter((c) => c.family === 'Website');
+  assert.equal(site.length, 17);
+  const foundation = ['site', 'site-container', 'site-head'];
+  for (const c of site) assert.equal(c.kind, foundation.includes(c.id) ? 'pattern' : 'section', c.id);
+  for (const c of site) assert.deepEqual(c.card.surfaces, ['website'], `${c.id} is tagged website only`);
+});
+
 test('both schemas are valid JSON Schema 2020-12', () => {
   const ajv = new Ajv2020({ strict: true });
   assert.ok(ajv.validateSchema(cardSchema));

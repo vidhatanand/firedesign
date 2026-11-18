@@ -1,0 +1,129 @@
+{
+  "id": "site-pricing",
+  "job": "Show what each plan costs and includes, with a monthly or yearly switch.",
+  "purpose": "Plans as ruled columns, ruled rows or one plan beside its inclusions. The price is the largest thing in a plan; a featured plan has a stronger rule and a label, not a colour of its own. The billing period is an fd-segmented: site.js sets data-period and shows the prices and units marked with it, and fires fd:change. Inclusions are an fd-feature-list.",
+  "useWhen": [
+    "The pricing page or the pricing section of a landing page."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Choosing or changing a plan in the app's billing settings.",
+      "instead": "plan"
+    },
+    {
+      "when": "Plans that differ in more than five ways.",
+      "instead": "Add site-compare under it."
+    }
+  ],
+  "aka": [
+    "pricing",
+    "pricing table",
+    "plans",
+    "tiers",
+    "billing toggle",
+    "monthly yearly"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "period",
+      "how": "data-period=\"monthly|yearly\" on the section (site.js); elements with another data-period get hidden"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-layout",
+      "value": "columns",
+      "useWhen": "Two to four plans side by side."
+    },
+    {
+      "attribute": "data-layout",
+      "value": "rows",
+      "useWhen": "Many plans, or usage pricing."
+    },
+    {
+      "attribute": "data-layout",
+      "value": "single",
+      "useWhen": "One plan and what it includes."
+    },
+    {
+      "attribute": "data-featured",
+      "value": "",
+      "useWhen": "On a plan: the one most teams pick; a stronger rule and a label."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-site-pricing",
+      "role": "The section."
+    },
+    {
+      "class": "fd-site-pricing-period",
+      "role": "The segmented control and its note."
+    },
+    {
+      "class": "fd-site-pricing-plans",
+      "role": "The plans."
+    },
+    {
+      "class": "fd-site-pricing-plan",
+      "role": "One plan."
+    },
+    {
+      "class": "fd-site-pricing-name",
+      "role": "Its name and label badge."
+    },
+    {
+      "class": "fd-site-pricing-price",
+      "role": "The price line."
+    },
+    {
+      "class": "fd-site-pricing-amount",
+      "role": "The amount; data-period per period."
+    },
+    {
+      "class": "fd-site-pricing-per",
+      "role": "Its unit."
+    },
+    {
+      "class": "fd-site-pricing-summary",
+      "role": "Who it is for."
+    },
+    {
+      "class": "fd-site-pricing-action",
+      "role": "Its button."
+    },
+    {
+      "class": "fd-site-pricing-includes",
+      "role": "Its fd-feature-list."
+    }
+  ],
+  "related": [
+    "plan",
+    "segmented",
+    "feature-list",
+    "site-compare"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow keys",
+      "does": "In the period control: choose monthly or yearly."
+    }
+  ],
+  "example": "docs/site-sections.html#pricing",
+  "provenance": [
+    "docs/site-sections.html",
+    "fire/components/site.css",
+    "fire/js/site.js"
+  ],
+  "since": "0.8.0",
+  "relation": {
+    "distinctFrom": "plan",
+    "because": "The plan card is for choosing a plan inside the app; this section sets public prices on ruled columns with a period switch."
+  }
+}

@@ -20,7 +20,7 @@ import { ROOT, read, stripCss, topFiles, loadIconNames, attributeSheets, collect
 import { sourceEvidence, scriptWrites, scriptValues } from './lib/evidence.mjs';
 import { parseVocabulary } from './lib/vocabulary.mjs';
 import { readModuleEvents, summariseEvents } from './lib/events.mjs';
-import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA, FREE_ATTRIBUTES, DEFAULT_VALUES, STATE_ATTRIBUTES, LAYOUT_ATTRIBUTES, MODULES } from './lib/catalog-assign.mjs';
+import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA, FREE_ATTRIBUTES, DEFAULT_VALUES, STATE_ATTRIBUTES, LAYOUT_ATTRIBUTES, MODULES, SECTION_FAMILIES } from './lib/catalog-assign.mjs';
 
 const OUT = path.join(ROOT, 'contract/catalog.json');
 const CARDS = path.join(ROOT, 'contract/cards');
@@ -138,7 +138,7 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   const idOf = (root) => ID_ALIASES[root] || root.slice(3);
   for (const root of [...roots.keys()].sort()) {
     const g = GROUPS.find((x) => x.root === root);
-    byRoot.set(root, { id: g?.id || idOf(root), name: g?.name || NAMES[root] || titleCase(idOf(root)), family: roots.get(root), kind: roots.get(root) === 'Layout' && !g ? 'layout' : PATTERNS.has(root) ? 'pattern' : 'component', root, classes: [] });
+    byRoot.set(root, { id: g?.id || idOf(root), name: g?.name || NAMES[root] || titleCase(idOf(root)), family: roots.get(root), kind: roots.get(root) === 'Layout' && !g ? 'layout' : PATTERNS.has(root) ? 'pattern' : SECTION_FAMILIES.has(roots.get(root)) ? 'section' : 'component', root, classes: [] });
   }
   const ids = new Set();
   for (const c of byRoot.values()) { if (ids.has(c.id)) errors.push(`two components share the id ${c.id}`); ids.add(c.id); }

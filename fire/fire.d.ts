@@ -1663,3 +1663,16 @@ export declare namespace tweaks {
   /** The named look the state equals, or null (Custom). */
   export function look(state?: TweaksState): LookName | null;
 }
+
+/** Website family: the header's sheet and scrolled state, the logo marquee, the pricing period, the compare column. */
+export declare namespace site {
+  export function init(root?: ParentNode): void;
+  /** Open the header's sheet (below desktop): data-state="open", aria-expanded, fd:open. */
+  export function openHeader(header: HTMLElement | null | undefined): void;
+  /** Close the header's sheet; with focus, focus returns to the menu button. fd:close. */
+  export function closeHeader(header: HTMLElement | null | undefined, options?: { focus?: boolean }): void;
+  /** Show the prices of a billing period in an .fd-site-pricing (data-period); fd:change { value } unless silent. */
+  export function setPeriod(section: HTMLElement | null | undefined, period: string, options?: { silent?: boolean }): void;
+  /** Show plan column n (1-based) of an .fd-site-compare on a phone (data-show); fd:change { value: n } unless silent. */
+  export function showPlan(section: HTMLElement | null | undefined, n: number, options?: { silent?: boolean }): void;
+}

@@ -1,0 +1,44 @@
+{
+  "id": "shell-static",
+  "job": "Start an app page from the shell as plain markup, when a server renders every page and no script should run.",
+  "purpose": "The app shell with no shell.js: sidebar, top bar, command palette and phone menu as markup, with a filtered table in the page. The server sets the title, the current nav item, the hero and the bands. It has no states to switch with the address, by design: the server renders loading, empty or failing screens itself, from fd-skeleton and fd-empty.",
+  "useWhen": [
+    "Pages are rendered by a server and the app must run with a strict content security policy.",
+    "A page should carry as little script as possible."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The pages are a single-page app that can build the shell with a script.",
+      "instead": "blank"
+    },
+    {
+      "when": "The screen is a dashboard.",
+      "instead": "overview"
+    }
+  ],
+  "aka": [
+    "server rendered shell",
+    "no javascript",
+    "csp shell",
+    "html-only shell",
+    "static shell"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "default",
+      "how": "none beyond the default: the server chooses what to render; no ?state= runs script here"
+    }
+  ],
+  "example": "templates/shell-static.html",
+  "provenance": [
+    "templates/shell-static.html",
+    "docs/shell.html"
+  ],
+  "since": "0.8.0"
+}

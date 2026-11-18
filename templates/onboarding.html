@@ -179,7 +179,7 @@ console.log(page.markdown.slice(0, 280));</code></pre>
   </div>
 </main>
 <script type="module">
-  import { nav, code } from '../fire/fire.js';
+  import { nav, code, init } from '../fire/fire.js';
   import { EMBER_MARK } from './shell.js';
 
   const $ = (sel) => document.querySelector(sel);
@@ -276,8 +276,54 @@ console.log(page.markdown.slice(0, 280));</code></pre>
     btn.removeAttribute('aria-busy');
   });
 
+  /* ?state= shows another moment of setup:
+       step-2 | step-3 | done   the later steps (the address hash #step-N does the same)
+       invalid                  step 1 with the team name left empty
+       loading | error          step 3 while the key is being issued, and when that failed
+     Anything else, or nothing, is step 1. */
+  const asked = new URLSearchParams(location.search).get('state');
+  const STEP_STATES = { 'step-2': 1, 'step-3': 2, done: 3 };
   const hashStep = Number(/step-(\d)/.exec(location.hash)?.[1]);
-  render(hashStep ? hashStep - 1 : 0, { focus: false });
+  const startAt = Object.hasOwn(STEP_STATES, asked) ? STEP_STATES[asked] : ['loading', 'error'].includes(asked) ? 2 : hashStep ? hashStep - 1 : 0;
+  render(startAt, { focus: false });
+
+  if (asked === 'invalid') {
+    team.value = '';
+    team.setAttribute('aria-invalid', 'true');
+    $('#ob-team-error').hidden = false;
+    $('#slug-preview').textContent = 'your-team';
+    slug.value = '';
+  }
+
+  /* The key step while the key is issued (loading), or when issuing it failed (error): the key, snippet and terminal
+     give way to a skeleton the same shape, or to the failure with Retry. Continue waits for a key. */
+  const keyPanel = panels[2];
+  const keyReal = [...keyPanel.children];
+  function keyState(mode, { settle = false } = {}) {
+    keyPanel.querySelector('[data-key-state]')?.remove();
+    keyReal.forEach((el) => { el.hidden = mode !== 'ready'; });
+    $('#ob-next').disabled = mode !== 'ready';
+    if (mode === 'ready') return;
+    const block = document.createElement('div');
+    block.dataset.keyState = mode;
+    block.innerHTML = mode === 'loading'
+      ? `<div class="fd-stack" data-gap="5" aria-busy="true" aria-label="Creating your API key">
+           <div class="fd-skeleton-form-field"><span class="fd-skeleton-title" data-size="label"></span><div class="fd-skeleton-form-control"><span class="fd-skeleton"></span></div><span class="fd-skeleton-title" data-size="caption"></span></div>
+           <div class="fd-skeleton-card"></div>
+           <div class="fd-skeleton-card"></div>
+         </div>`
+      : `<div class="fd-empty" data-size="sm" data-tone="danger" role="alert">
+           <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+           <h3 class="fd-empty-title">Couldn’t create your API key</h3>
+           <p class="fd-empty-text">The key service didn’t answer, so nothing was created and no credits were used. Try again.</p>
+           <div class="fd-empty-actions"><button class="fd-btn" type="button" data-size="sm" data-key-retry><i data-icon="refresh-cw"></i><span>Retry</span></button></div>
+         </div>`;
+    keyPanel.append(block);
+    init(block);
+    if (mode === 'loading' && settle) setTimeout(() => { if (block.isConnected) keyState('ready'); }, 1600);
+  }
+  keyPanel.addEventListener('click', (e) => { if (e.target.closest('[data-key-retry]')) keyState('loading', { settle: true }); });
+  if (asked === 'loading' || asked === 'error') keyState(asked);
 </script>
 </body>
 </html>

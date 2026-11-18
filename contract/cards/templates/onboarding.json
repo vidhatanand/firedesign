@@ -1,0 +1,74 @@
+{
+  "id": "onboarding",
+  "job": "Set up a new team in four steps, making a first call before leaving.",
+  "purpose": "A centred, one-column wizard: the step bar, a heading and one panel at a time (name the team, what is being built, the API key with a runnable snippet, a summary), with Back and Continue. The key step can be loading or fail with Retry. The address hash #step-N and ?state= open any step.",
+  "useWhen": [
+    "A new account needs a few answers and a first success before it reaches the product.",
+    "Each step depends on the one before and should not be skipped silently."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The page edits settings that already exist.",
+      "instead": "settings"
+    },
+    {
+      "when": "The product has more than one setup and each is a choice among options.",
+      "instead": "install"
+    },
+    {
+      "when": "It is one short form.",
+      "instead": "form"
+    }
+  ],
+  "aka": [
+    "setup wizard",
+    "welcome",
+    "first run",
+    "getting started",
+    "stepper",
+    "wizard"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "step 1",
+      "how": "the default: team name and URL"
+    },
+    {
+      "name": "step 2",
+      "how": "?state=step-2: what the team is building, choices in fd-choice"
+    },
+    {
+      "name": "step 3",
+      "how": "?state=step-3: the API key in fd-secret, a snippet, Run it"
+    },
+    {
+      "name": "done",
+      "how": "?state=done: the summary and where to go next"
+    },
+    {
+      "name": "invalid",
+      "how": "?state=invalid: the team name empty, fd-field-error and aria-invalid"
+    },
+    {
+      "name": "key loading",
+      "how": "?state=loading: step 3 while the key is issued, a skeleton form and cards; Continue waits"
+    },
+    {
+      "name": "key error",
+      "how": "?state=error: step 3 when the key could not be made, fd-empty with Retry"
+    }
+  ],
+  "example": "templates/onboarding.html",
+  "provenance": [
+    "templates/onboarding.html",
+    "docs/navigation.html#steps",
+    "docs/forms.html"
+  ],
+  "since": "0.8.0"
+}

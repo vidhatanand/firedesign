@@ -47,6 +47,15 @@
                     <i class="fd-callout-icon" data-icon="circle-alert"></i>
                     <div class="fd-callout-content"><p class="fd-callout-title">That email and password don't match</p><p class="fd-callout-body">Check both and try again, or reset your password.</p></div>
                   </div>
+                  <div class="fd-callout" data-tone="warning" role="alert" id="signin-locked" hidden>
+                    <i class="fd-callout-icon" data-icon="lock"></i>
+                    <div class="fd-callout-content"><p class="fd-callout-title">Too many attempts</p><p class="fd-callout-body">For your security, password sign-in is paused for 14 minutes. Email yourself a sign-in link to get in now.</p></div>
+                  </div>
+                  <div class="fd-callout" data-tone="danger" role="alert" id="signin-failed" hidden>
+                    <i class="fd-callout-icon" data-icon="triangle-alert"></i>
+                    <div class="fd-callout-content"><p class="fd-callout-title">We couldn't reach Ember</p><p class="fd-callout-body">Your details are fine. Sign-in didn't go through, so try again.</p>
+                      <div class="fd-callout-actions"><button class="fd-btn" type="button" data-size="sm" id="signin-retry"><i data-icon="refresh-cw"></i><span>Try again</span></button></div></div>
+                  </div>
                   <div class="fd-field">
                     <label class="fd-field-label" for="si-email">Email</label>
                     <input class="fd-input" data-size="lg" type="email" id="si-email" name="email" placeholder="maya@quarry.dev" autocomplete="email" required>
@@ -162,7 +171,7 @@
     signup: { id: 'view-signup', title: 'Create your Ember account', desc: 'Start with 1,000 free credits a month. No card needed.' },
     sent: { id: 'view-sent', title: 'Check your inbox', desc: 'We emailed you a one-time sign-in link and code.' },
   };
-  function show(name) {
+  function show(name, { focus = true } = {}) {
     for (const [key, v] of Object.entries(VIEWS)) $(`#${v.id}`).hidden = key !== name;
     $('#auth-title').textContent = VIEWS[name].title;
     $('#auth-desc').textContent = VIEWS[name].desc;
@@ -171,7 +180,7 @@
     next.classList.remove('fd-rise');
     void next.offsetWidth;
     next.classList.add('fd-rise');
-    next.querySelector('input')?.focus();
+    if (focus) next.querySelector('input')?.focus();
   }
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-auth-view]');
@@ -261,6 +270,42 @@
       $('#sent-email').textContent = $('#su-email').value;
       show('sent');
     }, 900);
+  });
+
+  /* ?state= shows the screen in another moment: signup, sent, wrong-password, locked, submitting, error.
+     Anything else (or nothing) is the sign-in default. */
+  const STATES = ['signin', 'signup', 'sent', 'wrong-password', 'locked', 'submitting', 'error'];
+  const asked = new URLSearchParams(location.search).get('state');
+  const state = STATES.includes(asked) ? asked : 'signin';
+  const fill = (email, password) => { $('#si-email').value = email; $('#si-password').value = password; };
+  const lock = (on) => signin.querySelectorAll('input').forEach((i) => { i.disabled = on; });
+  if (state === 'signup' || state === 'sent') show(state, { focus: false });
+  if (state === 'wrong-password') {
+    fill('maya@quarry.dev', 'not-my-password');
+    $('#signin-error').hidden = false;
+    signin.querySelectorAll('input').forEach((i) => i.setAttribute('aria-invalid', 'true'));
+  }
+  if (state === 'locked') {
+    fill('maya@quarry.dev', 'not-my-password');
+    $('#signin-locked').hidden = false;
+    lock(true);
+    $('#signin-submit').disabled = true;
+  }
+  if (state === 'submitting') {
+    fill('maya@quarry.dev', 'correct-horse-battery');
+    lock(true);
+    const btn = $('#signin-submit');
+    btn.setAttribute('aria-busy', 'true');
+    btn.disabled = true;
+  }
+  if (state === 'error') {
+    fill('maya@quarry.dev', 'correct-horse-battery');
+    $('#signin-failed').hidden = false;
+  }
+  $('#signin-retry').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    btn.setAttribute('aria-busy', 'true');
+    setTimeout(() => { btn.removeAttribute('aria-busy'); $('#signin-failed').hidden = true; toast({ title: 'Back online. Sign in again.', tone: 'success' }); }, 900);
   });
 </script>
 </body>

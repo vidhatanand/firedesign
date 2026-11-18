@@ -1,0 +1,67 @@
+{
+  "id": "support",
+  "job": "Ask Ember AI, reach a person, or read a past conversation, with the service status beside it.",
+  "purpose": "An app screen with three ways to get help, a chat that hands off from AI to a person in the same thread, and a side panel of past conversations and endpoint status. An incident shows as a banner in the chat. Out of hours the chat says support is away; with no history it starts a fresh chat; a failing service says which part failed.",
+  "useWhen": [
+    "People need help from the AI first and a person second, without losing the thread.",
+    "Their earlier conversations and the state of the service belong beside the chat."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The page is a public record of uptime and incidents.",
+      "instead": "status"
+    },
+    {
+      "when": "The person decides a request an agent or a customer sent.",
+      "instead": "decisions"
+    },
+    {
+      "when": "It is a documentation page.",
+      "instead": "docs-guide"
+    }
+  ],
+  "aka": [
+    "help centre",
+    "contact us",
+    "chat",
+    "inbox",
+    "helpdesk",
+    "live chat"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "list",
+    "text"
+  ],
+  "states": [
+    {
+      "name": "default",
+      "how": "an incident banner in the chat, the AI online, a person available, four conversations"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: skeleton thread and lists"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: a fresh chat, an empty history with a hint"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: the chat, history and status each fail with Retry or a link"
+    },
+    {
+      "name": "after hours",
+      "how": "?state=after-hours: the person card says Offline, the chat shows its away view"
+    }
+  ],
+  "example": "templates/support.html",
+  "provenance": [
+    "templates/support.html",
+    "docs/chat.html"
+  ],
+  "since": "0.8.0"
+}

@@ -170,10 +170,10 @@ export const GROUPS = [
   { id: 'inline-code', name: 'Inline code', family: 'Base', root: 'fd-code', members: ['fd-kbd'] },
   { id: 'utilities', name: 'Utilities', family: 'Base', root: 'fd-sr-only', members: ['fd-cq', 'fd-rise'] },
   // Shell
-  { id: 'app', name: 'App', family: 'Shell', root: 'fd-app', members: ['fd-main', 'fd-frame'] },
+  { id: 'app', name: 'App', family: 'Shell', root: 'fd-app', members: ['fd-main'] },
   { id: 'sidebar', name: 'Sidebar', family: 'Shell', root: 'fd-sidebar', members: ['fd-sidebar-head', 'fd-sidebar-body', 'fd-sidebar-foot', 'fd-nav', 'fd-nav-group', 'fd-nav-item', 'fd-nav-label', 'fd-nav-badge', 'fd-team-switch', 'fd-account', 'fd-usage-card'] },
   { id: 'brand', name: 'Brand', family: 'Shell', root: 'fd-brand', members: ['fd-wordmark'] },
-  { id: 'page', name: 'Page', family: 'Shell', root: 'fd-page', members: ['fd-band'] },
+  { id: 'page', name: 'Page', family: 'Shell', root: 'fd-page', members: ['fd-band', 'fd-frame'] },
   // Forms
   { id: 'form', name: 'Form', family: 'Forms', root: 'fd-form', members: ['fd-form-cols', 'fd-form-row', 'fd-form-actions'] },
   { id: 'listbox', name: 'Listbox', family: 'Forms', root: 'fd-listbox', members: ['fd-option'] },

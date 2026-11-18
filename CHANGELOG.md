@@ -96,6 +96,11 @@ before you refresh.
 - Four structural dials: `data-surfaces="flat|outlined"`, `data-elevation="none|lifted"`,
   `data-controls="outlined|filled"` and `data-headings="upper|mono"`. Each has a Tweaks control and a theme record
   field, and each is checked for contrast in every palette.
+- Named looks: eight complete theme records in `contract/looks/named` (steady, operator, folio, hearth, instrument,
+  marquee, gentle, clear), far apart in palette, type and structure. Tweaks has a Looks row that applies one whole;
+  `?look=<name>` puts a shipped look on a page before first paint; `docs/looks.html` shows each look on three real
+  screens. `scripts/looks-check.mjs` renders real screens under every look and 40 random theme records and checks
+  console errors, overflow, text contrast and focus rings.
 
 **For agents**
 
@@ -126,6 +131,15 @@ before you refresh.
   phone, and `data-fit` on `fd-number` wins inside a field.
 - **Keys.** `/` focuses a search that carries `data-fd-search-hotkey`, and `g` then a letter follows a `data-fd-keys`
   control. Keys are ignored while a field has focus.
+
+- **Focus ring.** `--fd-focus` is now a palette token: the accent where it reaches 3:1 on every ground a control sits
+  on, else the accent text. Ember's light-mode ring and input focus line are the darker orange (`#be4000`); Volt's are
+  olive. Input, search and code-field focus lines use `--fd-focus`. Four text colours that the look sweep measured
+  under 4.5:1 are fixed (the announcement tag, the snippet prompt, the account avatar, an accent secret value).
+- **Types.** `fire/fire.d.ts` declares every export and event of 0.7, and `theme`, `palettes`, `typefaces`, `fonts`,
+  `palette-rules`, `initial`, `looks` and `email` have their own declarations. New package entries: `fire-design/email`,
+  `/initial`, `/looks`, `/fonts`. A test fails when a declaration and the runtime differ.
+- **Starters** are converted from the rebuilt settings template and the new shell, and each passes its check again.
 
 ### For products refreshing from 0.6.x
 

@@ -36,6 +36,7 @@ Fire's HTML and CSS are the contract. Everything else is built on them, generate
 |---|---|---|
 | Styles and behaviour | `fire/` | Copy it, or depend on `fire-design`. Plain CSS and ES modules, no build needed to use them. |
 | Theme record | `fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/` | A product's whole look as one JSON object: palette, tone, type, dials and signature; `paletteFrom()` makes a palette from an accent or brand colours that passes every contrast rule. |
+| Named looks | `contract/looks/named/`, `fire/js/looks.js`, `docs/looks.html` | Eight complete looks to start from, far apart in palette, type and structure; `?look=<name>` previews one; `scripts/looks-check.mjs` proves every look and 40 random themes keep contrast on real screens. |
 | Looks: fonts and dials | `contract/fonts.json`, `fire/typefaces.css`, `scripts/fonts.mjs`, `fire/tokens.css` | A catalogue of 53 open-licensed font families and twelve type sets; `fonts.mjs add "<family>"` puts a family in a product. Four structural dials (surfaces, elevation, controls, headings) and the signature dials (texture field, mark, cell, ramp, frame marks, intensity) restyle every component. |
 | Email | `fire/email/email.js`, `docs/email.html` | `renderEmail()` writes a transactional email, HTML and text, in the product's look. |
 | Contract | `contract/fire-contract.json` | Every global token with its type, tier (input, scale, derived), default and Facet role. |

@@ -1,6 +1,6 @@
 # Fire 0.6 architecture: one system for plain pages, Lit, React and Next.js, Vue, and Facet
 
-Status: decided for 0.6 by the Fire maintainer (18 Nov 2026), and as built in v0.6.0. Every 0.6 work package follows this file. Where a
+Status: decided for 0.6 by the Fire maintainer (18 Nov 2026), as built in v0.6.0 and extended in v0.7.0 (see CHANGELOG.md). Every 0.6 work package follows this file. Where a
 package needs a choice this file does not make, it makes the smallest choice that keeps every rule below, and says so
 in its report.
 
@@ -62,7 +62,7 @@ scripts/
 `package.json` becomes a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css`
 (fire/fire.css), `./boot` (fire/boot.js), `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./contract`, `./catalog`, and `./fire/*` for direct file access. Development dependencies are pinned to exact
-versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.6.0`); the
+versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.7.0`); the
 starters in this repository use `file:../..`.
 
 ## 3. The theme record (the source of a Fire design system)

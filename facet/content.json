@@ -5782,7 +5782,7 @@
     },
     {
       "name": "Toast",
-      "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise. It never asks a question. Toasts last 5 seconds, 8 for errors; loading lasts until settled. The stack is a polite live region.",
+      "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise; toast({ undo }) adds Undo; toast.hold counts down before anything is sent. It never asks a question. Toasts last 5 seconds, 8 for errors and Undo; loading lasts until settled. The stack is a polite live region.",
       "variants": [
         "tone-neutral",
         "tone-success",
@@ -5790,11 +5790,13 @@
         "tone-warning",
         "tone-info",
         "tone-loading",
-        "tone-accent"
+        "tone-accent",
+        "held"
       ],
       "states": [
         "loading",
         "hover",
+        "pressed",
         "open"
       ],
       "paths": [
@@ -5805,13 +5807,16 @@
       "do": [
         "An action finished and needs a quiet receipt: key copied, saved, deleted.",
         "Something finished elsewhere: a crawl completed, a webhook failed.",
-        "A long task needs a loading toast that turns into the result."
+        "A long task needs a loading toast that turns into the result.",
+        "It is done and the server can reverse it for a few seconds: toast({ undo }) gives Done · Undo.",
+        "The page moves on after a commit (a queue) and nothing may be sent for a few seconds: toast.hold."
       ],
       "dont": [
         "The reader must choose or confirm something. Use Dialog.",
         "A persistent warning next to content. Use Callout.",
         "A notice about the whole account. Use Banner.",
-        "A list of past events to read later. Use Notification."
+        "A list of past events to read later. Use Notification.",
+        "The person stays on the case while a commit waits. Use Hold."
       ],
       "api": {
         "props": [
@@ -5829,6 +5834,12 @@
             ],
             "required": false,
             "description": "Sets data-tone. A plain confirmation."
+          },
+          {
+            "name": "held",
+            "type": "boolean",
+            "required": false,
+            "description": "Sets data-held. Set by toast.hold: nothing has happened yet; it goes when the ring runs out."
           },
           {
             "name": "staticDemo",
@@ -9852,7 +9863,8 @@
         "A list, table or page has no items yet and the next step is clear.",
         "A search or filter matches nothing; say what to change.",
         "A request failed and the reader can retry.",
-        "A feature is not on the plan; say which plan has it."
+        "A feature is not on the plan; say which plan has it.",
+        "One part of a page-state set (fd-states): no access, not found, switched off, link expired."
       ],
       "dont": [
         "The message is a warning above content that exists. Use Callout.",
@@ -9916,6 +9928,10 @@
           {
             "name": "empty-hint",
             "description": "A smaller aside, such as a keyboard tip."
+          },
+          {
+            "name": "empty-meta",
+            "description": "A quiet line under the actions: a request ID, who can grant access or turn an area on, when a link expired."
           },
           {
             "name": "empty-actions",
@@ -12352,6 +12368,451 @@
       }
     },
     {
+      "name": "Commit",
+      "purpose": "A form with a line saying what each button does, a reason field with a word budget, the primary button named for its effect and a Decline that needs the reason too. It checks the reason, then fires fd:commit, or holds it first with data-fd-hold: inline, or in a toast with data-fd-hold-in=\"toast\" so a queue can move on. A visible fd-commit-lock disables the buttons and says who can decide.",
+      "variants": [
+        "hold-*",
+        "hold-in-toast"
+      ],
+      "states": [
+        "error",
+        "pressed"
+      ],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Take a reason and commit a decision with buttons named for their effect. Also called: approve reject, reason field, audit reason, decision form, sign off.",
+      "do": [
+        "A decision needs a reason that someone reads later: the audit log, the requester, the agent.",
+        "Approve and decline are both real answers and both need a why.",
+        "The viewer can read the case but not decide it, and must learn who can."
+      ],
+      "dont": [
+        "A yes or no with nothing to record, such as dismissing a tip. Use Button.",
+        "The action destroys something with history and needs the name typed. Use Confirm.",
+        "A general form that edits a record. Use Form."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "hold",
+            "type": "string",
+            "required": false,
+            "description": "Sets data-fd-hold."
+          },
+          {
+            "name": "holdIn",
+            "type": "enum",
+            "values": [
+              "toast"
+            ],
+            "required": false,
+            "description": "Sets data-fd-hold-in. The page moves on after a commit (a queue): hold it in a toast instead of in the form."
+          },
+          {
+            "name": "maxWords",
+            "type": "string",
+            "required": false,
+            "description": "Sets data-max-words."
+          },
+          {
+            "name": "minWords",
+            "type": "string",
+            "required": false,
+            "description": "Sets data-min-words."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "commit",
+            "description": "The form (or a div inside another form)."
+          },
+          {
+            "name": "commit-effect",
+            "description": "One line on what each button does."
+          },
+          {
+            "name": "commit-budget",
+            "description": "The word count against data-min-words and data-max-words."
+          },
+          {
+            "name": "commit-actions",
+            "description": "The commit buttons: type=\"submit\" with a value and data-verb."
+          },
+          {
+            "name": "commit-lock",
+            "description": "Who can decide, when this viewer cannot."
+          }
+        ],
+        "example": "<cc-component name=\"Commit\" holdIn=\"toast\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Decision",
+      "purpose": "A card that asks the question as its title, then four numbered parts in reading order: the change, who it touches, the evidence, and who signs or what happens if nobody decides. The parts sit two by two and stack into one column when the brief is narrow. Once decided, an outcome strip at the foot says who decided, when, why, and until when Undo works.",
+      "variants": [],
+      "states": [
+        "focus"
+      ],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Show what a decision changes, who it touches, the evidence and who signs, so a person can decide in seconds. Also called: approval request, decision card, case page, review item, sign-off, change request, human in the loop.",
+      "do": [
+        "A person must approve or decline something that costs money, grants access or ships a change.",
+        "An agent proposes an action and a person signs it.",
+        "A decided case is opened again from a link or the history, and the reader needs what was decided, not only that it was."
+      ],
+      "dont": [
+        "The action is routine and the server can undo it. Use Toast.",
+        "The agent asks permission for one tool call in a run. Use ApprovalBar.",
+        "The action deletes something with history and needs the name typed. Use Confirm.",
+        "The facts are a record's fields with no decision to make. Use Kv."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "decision",
+            "description": "The card; an article labelled by its title."
+          },
+          {
+            "name": "decision-head",
+            "description": "Kind tile, heading and status pill."
+          },
+          {
+            "name": "decision-heading",
+            "description": "The eyebrow, the title and the meta line."
+          },
+          {
+            "name": "decision-title",
+            "description": "The question, with the object and the amount."
+          },
+          {
+            "name": "decision-meta",
+            "description": "Who asked, when, and when it expires, separated by dots."
+          },
+          {
+            "name": "decision-parts",
+            "description": "The dl that holds the parts and numbers them."
+          },
+          {
+            "name": "decision-part",
+            "description": "One part: a label, a lead line and at most one detail line."
+          },
+          {
+            "name": "decision-label",
+            "description": "The part's numbered mono label (dt)."
+          },
+          {
+            "name": "decision-lead",
+            "description": "The part's one line; may hold an fd-delta."
+          },
+          {
+            "name": "decision-detail",
+            "description": "A muted line under the lead."
+          },
+          {
+            "name": "decision-facts",
+            "description": "Evidence as name and value rows."
+          },
+          {
+            "name": "decision-quote",
+            "description": "Someone's own words, set in quotes."
+          },
+          {
+            "name": "decision-outcome",
+            "description": "What was decided, by whom and when; tinted by data-tone."
+          },
+          {
+            "name": "decision-outcome-title",
+            "description": "Who decided and when: \"Approved by you just now\"."
+          },
+          {
+            "name": "decision-actions",
+            "description": "Undo and the date it stops working."
+          }
+        ],
+        "example": "<cc-component name=\"Decision\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Delta",
+      "purpose": "An inline pair: the old value muted, an arrow read as \"to\", and the new value in label weight. Figures are tabular; data-mono sets identifiers such as scopes, plans and hosts in the mono face. Without a from part it shows only the new value.",
+      "variants": [
+        "mono"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Show a value before and after a change, with an arrow between them. Also called: before and after, from to, change value, was now.",
+      "do": [
+        "A decision or a preview changes a number, a plan or a scope and both values matter.",
+        "A list of affected records each shows its old and new value."
+      ],
+      "dont": [
+        "The figure is a trend over time with a direction and a percentage. Use Stats.",
+        "Two versions of text or code are compared line by line. Use Diff."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "mono",
+            "type": "boolean",
+            "required": false,
+            "description": "Sets data-mono. The values are identifiers: scopes, plan names, hosts, versions."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "delta",
+            "description": "The pair."
+          },
+          {
+            "name": "delta-from",
+            "description": "The value before, muted."
+          },
+          {
+            "name": "delta-to",
+            "description": "The value after; the arrow is drawn before it."
+          }
+        ],
+        "example": "<cc-component name=\"Delta\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Draft",
+      "purpose": "A dashed block naming the agent and who it drafted for, the text in quotes, and Use and Discard. Use copies the text into the reason field and focuses it; the block folds to one line that stays as provenance, and the field records data-fd-drafted used, then edited once changed. Discard folds it away. The agent never commits.",
+      "variants": [
+        "draft-for-*"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Offer words an agent wrote for a person, which stay the agent's until the person uses them. Also called: AI draft, suggested reason, agent suggestion, proposed text, copilot draft.",
+      "do": [
+        "An agent drafted the reason or the answer for a decision a person signs.",
+        "A suggested reply or note must not be mistaken for the person's own words."
+      ],
+      "dont": [
+        "The agent's text is its answer in a conversation. Use Message.",
+        "The agent asks to run a tool. Use ApprovalBar.",
+        "Short completions offered while someone types. Use Suggestions."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "draftFor",
+            "type": "string",
+            "required": false,
+            "description": "Sets data-fd-draft-for."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "draft",
+            "description": "The block, an aside labelled as a draft."
+          },
+          {
+            "name": "draft-by",
+            "description": "The agent, who it drafted for, and an icon."
+          },
+          {
+            "name": "draft-when",
+            "description": "When it was drafted."
+          },
+          {
+            "name": "draft-text",
+            "description": "The drafted words, in quotes."
+          },
+          {
+            "name": "draft-actions",
+            "description": "Buttons with data-fd-draft=\"use\" and \"discard\"."
+          },
+          {
+            "name": "draft-used",
+            "description": "The line shown once the draft is used."
+          }
+        ],
+        "example": "<cc-component name=\"Draft\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Hold",
+      "purpose": "A strip with a ring that drains with the time left, the action in words, a note that nothing has happened yet, and Undo. A commit with data-fd-hold or a button with data-fd-hold-for starts it; focus moves to Undo. Undo or Escape stops it and returns focus; the end fires fd:commit. Leaving the page sends it. Screen readers hear the start and the undo. toast.hold draws the same ring in a toast.",
+      "variants": [
+        "tone-danger",
+        "seconds-*"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Wait a few seconds before an action goes, with a countdown and Undo. Also called: undo send, countdown, grace period, delayed action, cancel window.",
+      "do": [
+        "Sending is hard to take back: money, access, a message, a shipped change, a cancelled run.",
+        "A person commits in one press and deserves a moment to change their mind."
+      ],
+      "dont": [
+        "It is already done and the server can reverse it. Use Toast.",
+        "A mistake destroys history and must not happen by one press. Use Confirm.",
+        "Work that runs for minutes with progress to watch. Use Progress."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "tone",
+            "type": "enum",
+            "values": [
+              "accent",
+              "danger",
+              "info",
+              "neutral",
+              "success",
+              "violet",
+              "warning"
+            ],
+            "required": false,
+            "description": "Sets data-tone. The held action removes or stops something; a danger commit button sets it."
+          },
+          {
+            "name": "seconds",
+            "type": "string",
+            "required": false,
+            "description": "Sets data-seconds."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "hold",
+            "description": "The strip."
+          },
+          {
+            "name": "hold-ring",
+            "description": "The countdown ring; data-size=\"sm\" in a toast."
+          },
+          {
+            "name": "hold-count",
+            "description": "The whole seconds left, inside the ring."
+          },
+          {
+            "name": "hold-text",
+            "description": "The title and the note."
+          },
+          {
+            "name": "hold-title",
+            "description": "The action in progress: \"Approving the credit\"."
+          },
+          {
+            "name": "hold-note",
+            "description": "That nothing has happened yet."
+          },
+          {
+            "name": "hold-undo",
+            "description": "Stops the hold."
+          }
+        ],
+        "example": "<cc-component name=\"Hold\" tone=\"danger\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Impact",
+      "purpose": "A tinted block that leads with a count in figures (\"29 teams change\"), one line on how they change, a short list of the largest with their before and after values, and \"and 26 more\" with a link to all. data-tone warns when the reach is wide. It is the result of a preview, or part of a case whose change reaches beyond one record.",
+      "variants": [
+        "tone-warning",
+        "tone-danger",
+        "tone-info"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Say how much a change will touch, before anyone commits it. Also called: blast radius, affected count, change preview, dry run result, who is affected.",
+      "do": [
+        "A change reaches more than the one thing on screen: a plan default, a crawl setting, a policy.",
+        "A preview must show its reach before the commit button appears."
+      ],
+      "dont": [
+        "The change touches one record, which the brief already names. Use Decision.",
+        "A warning with no figure and no list. Use Callout.",
+        "Figures to read without a decision. Use Stats."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "tone",
+            "type": "enum",
+            "values": [
+              "accent",
+              "danger",
+              "info",
+              "neutral",
+              "success",
+              "violet",
+              "warning"
+            ],
+            "required": false,
+            "description": "Sets data-tone. The reach is wide or the change is hard to take back."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "impact",
+            "description": "The block."
+          },
+          {
+            "name": "impact-count",
+            "description": "The figure in bold and what it counts."
+          },
+          {
+            "name": "impact-text",
+            "description": "One line on how they change."
+          },
+          {
+            "name": "impact-list",
+            "description": "A few of them, each with an fd-delta or a figure."
+          },
+          {
+            "name": "impact-more",
+            "description": "How many more, and a link to the full list."
+          }
+        ],
+        "example": "<cc-component name=\"Impact\" tone=\"warning\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Initial",
       "purpose": "A drawn mark: the first letter of a name on a 5 by 7 grid of dots, lit dots in the box's colour and unlit ones faint. The same name always draws the same glyph and takes the same tone. It goes in a brand mark, tile or avatar through data-fd-initial, or as an SVG string from initial.js on a server or in an email.",
       "variants": [],
@@ -12470,6 +12931,199 @@
           }
         ],
         "example": "<cc-component name=\"Loader\" size=\"12\" tone=\"accent\"></cc-component>"
+      }
+    },
+    {
+      "name": "Preview",
+      "purpose": "A pattern for changes whose reach depends on what is typed. The edit fields come first with a Preview button; asking for a preview checks them, fires fd:open (fill the fd-impact then) and shows the result: the impact and an fd-commit. Changing a field afterwards marks the preview stale, hides the commit and says to preview again. It works inline or inside a dialog.",
+      "variants": [
+        "preview-open"
+      ],
+      "states": [],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Edit a value, see what the change will touch, then commit it with a reason. Also called: dry run, review changes, preview changes, change summary, impact preview.",
+      "do": [
+        "Changing a default, a limit or a policy that applies to many teams at once.",
+        "The person should see \"412 teams change\" before the commit button exists."
+      ],
+      "dont": [
+        "Nothing is edited and the reach is known: show it in the case. Use Impact.",
+        "A setting that affects only the person changing it. Use Setting.",
+        "A multi-step create flow. Use Dialog."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "previewOpen",
+            "type": "boolean",
+            "required": false,
+            "description": "Sets data-fd-preview-open. On the button that asks for the preview."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "preview",
+            "description": "The form that holds the edit and the result."
+          },
+          {
+            "name": "preview-edit",
+            "description": "The fields and the Preview button."
+          },
+          {
+            "name": "preview-stale",
+            "description": "The line that says the preview is out of date."
+          },
+          {
+            "name": "preview-result",
+            "description": "The fd-impact and the fd-commit."
+          }
+        ],
+        "example": "<cc-component name=\"Preview\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Queue",
+      "purpose": "A pattern of a grouped list and the case it opens. Items show a kind tile, a two-line title, who asked and how long it waited. Picking one marks it current, shows its case and fires fd:select. Narrower than a list plus a readable case, it shows one at a time with a Queue button back. With fd-commit data-fd-hold-in=\"toast\", a committed case leaves at once while its toast counts down, and Undo returns it.",
+      "variants": [
+        "urgent"
+      ],
+      "states": [
+        "empty",
+        "hover",
+        "focus",
+        "pressed",
+        "selected"
+      ],
+      "paths": [
+        "fire/components/content.css",
+        "docs/decisions.html"
+      ],
+      "usage": "Work through what waits for a decision, one case at a time, beside the list. Also called: inbox, review queue, needs you, approvals, master detail, list detail, triage.",
+      "do": [
+        "Several requests or agent proposals wait for one person: credits, hosts, access, changes.",
+        "A reviewer moves through items and should not lose their place."
+      ],
+      "dont": [
+        "The items are records to compare, sort or act on in bulk. Use Table.",
+        "One decision on a page of its own, reached from a link. Use Decision.",
+        "Sections of one settings area. Use Subnav."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "queue",
+            "description": "The list and the case side by side."
+          },
+          {
+            "name": "queue-list",
+            "description": "The nav that holds the groups."
+          },
+          {
+            "name": "queue-group",
+            "description": "One kind of request, a group labelled by its heading."
+          },
+          {
+            "name": "queue-group-label",
+            "description": "The kind, and its count in fd-queue-count."
+          },
+          {
+            "name": "queue-count",
+            "description": "How many items the group holds; removeItem keeps it right."
+          },
+          {
+            "name": "queue-item",
+            "description": "One request: a button or a link with data-value."
+          },
+          {
+            "name": "queue-text",
+            "description": "The title and the meta line."
+          },
+          {
+            "name": "queue-title",
+            "description": "What is asked, in two lines at most."
+          },
+          {
+            "name": "queue-meta",
+            "description": "Who asked, and one fact."
+          },
+          {
+            "name": "queue-age",
+            "description": "How long it has waited, or when it is due."
+          },
+          {
+            "name": "queue-case",
+            "description": "The open case; holds [data-case] panels when the page keeps them all."
+          },
+          {
+            "name": "queue-back",
+            "description": "Returns a narrow queue to the list."
+          }
+        ],
+        "example": "<cc-component name=\"Queue\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "States",
+      "purpose": "A pattern and a wrapper with no box of its own. Its direct children name the states they belong to in data-when; data-state on the wrapper shows them. Nine states: loading (skeletons), ready, empty (first use), filtered, error (with a request ID and Try again), no-access (who can grant it), not-found, off (who can turn it on) and expired. setState or a data-fd-set-state button switches it and fires fd:change.",
+      "variants": [
+        "state-ready",
+        "state-empty",
+        "state-filtered",
+        "state-not-found",
+        "state-off",
+        "state-expired"
+      ],
+      "states": [
+        "loading",
+        "error"
+      ],
+      "paths": [
+        "fire/components/content.css",
+        "docs/content.html"
+      ],
+      "usage": "Show the one state a screen or a section is in: loading, ready, empty, error, no access and the rest. Also called: empty state, error state, zero state, no access, 404, forbidden, feature off, expired link, page state.",
+      "do": [
+        "Any screen or section that loads its own data.",
+        "A page reached from a link that can be gone, forbidden or out of date.",
+        "An area a team can switch off."
+      ],
+      "dont": [
+        "A table's own empty, loading and error rows inside its frame. Use Table.",
+        "A swap from skeleton to content with no other states. Use Skeleton.",
+        "A warning above content that loaded. Use Callout."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "when",
+            "type": "boolean",
+            "required": false,
+            "description": "Sets data-when."
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "states",
+            "description": "The wrapper; it adds no box, so it can switch whole bands."
+          }
+        ],
+        "example": "<cc-component name=\"States\">Content</cc-component>"
       }
     },
     {

@@ -1,0 +1,113 @@
+{
+  "id": "hold",
+  "job": "Wait a few seconds before an action goes, with a countdown and Undo.",
+  "purpose": "A strip with a ring that drains with the time left, the action in words, a note that nothing has happened yet, and Undo. A commit with data-fd-hold or a button with data-fd-hold-for starts it; focus moves to Undo. Undo or Escape stops it and returns focus; the end fires fd:commit. Leaving the page sends it. Screen readers hear the start and the undo. toast.hold draws the same ring in a toast.",
+  "useWhen": [
+    "Sending is hard to take back: money, access, a message, a shipped change, a cancelled run.",
+    "A person commits in one press and deserves a moment to change their mind."
+  ],
+  "avoidWhen": [
+    {
+      "when": "It is already done and the server can reverse it.",
+      "instead": "toast"
+    },
+    {
+      "when": "A mistake destroys history and must not happen by one press.",
+      "instead": "confirm"
+    },
+    {
+      "when": "Work that runs for minutes with progress to watch.",
+      "instead": "progress"
+    }
+  ],
+  "aka": [
+    "undo send",
+    "countdown",
+    "grace period",
+    "delayed action",
+    "cancel window"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "running",
+      "how": "data-state=\"running\" while it counts; the trigger is disabled"
+    },
+    {
+      "name": "idle",
+      "how": "hidden until a hold starts, and again once it is undone or sent"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "The held action removes or stops something; a danger commit button sets it."
+    },
+    {
+      "attribute": "data-seconds",
+      "value": "*",
+      "useWhen": "The length of a hold started by data-fd-hold-for; 10 by default, 5 inside a dialog."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-hold",
+      "role": "The strip."
+    },
+    {
+      "class": "fd-hold-ring",
+      "role": "The countdown ring; data-size=\"sm\" in a toast."
+    },
+    {
+      "class": "fd-hold-count",
+      "role": "The whole seconds left, inside the ring."
+    },
+    {
+      "class": "fd-hold-text",
+      "role": "The title and the note."
+    },
+    {
+      "class": "fd-hold-title",
+      "role": "The action in progress: \"Approving the credit\"."
+    },
+    {
+      "class": "fd-hold-note",
+      "role": "That nothing has happened yet."
+    },
+    {
+      "class": "fd-hold-undo",
+      "role": "Stops the hold."
+    }
+  ],
+  "related": [
+    "commit",
+    "toast",
+    "confirm",
+    "decision"
+  ],
+  "keyboard": [
+    {
+      "keys": "Escape",
+      "does": "Stops the hold when focus is in it, in its form, or nowhere."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "On Undo: stops the hold and returns focus to the button that started it."
+    }
+  ],
+  "example": "docs/decisions.html#hold",
+  "provenance": [
+    "docs/decisions.html",
+    "fire/components/content.css",
+    "fire/js/content.js",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.7.0"
+}

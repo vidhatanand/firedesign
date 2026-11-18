@@ -5523,6 +5523,175 @@
       }
     },
     {
+      "id": "commit",
+      "name": "Reason and commit",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-commit",
+      "classes": [
+        "fd-commit",
+        "fd-commit-actions",
+        "fd-commit-budget",
+        "fd-commit-effect",
+        "fd-commit-lock"
+      ],
+      "attributes": {
+        "data-fd-hold": [
+          "*"
+        ],
+        "data-fd-hold-in": [
+          "toast"
+        ],
+        "data-max-words": [
+          "*"
+        ],
+        "data-min-words": [
+          "*"
+        ]
+      },
+      "partAttributes": {
+        "fd-commit-lock": {
+          "data-icon": [
+            "*"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "committed",
+          "held",
+          "near",
+          "over"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:commit",
+        "fd:hold",
+        "fd:undo"
+      ],
+      "docs": "docs/decisions.html#commit",
+      "card": {
+        "id": "commit",
+        "job": "Take a reason and commit a decision with buttons named for their effect.",
+        "purpose": "A form with a line saying what each button does, a reason field with a word budget, the primary button named for its effect and a Decline that needs the reason too. It checks the reason, then fires fd:commit, or holds it first with data-fd-hold: inline, or in a toast with data-fd-hold-in=\"toast\" so a queue can move on. A visible fd-commit-lock disables the buttons and says who can decide.",
+        "useWhen": [
+          "A decision needs a reason that someone reads later: the audit log, the requester, the agent.",
+          "Approve and decline are both real answers and both need a why.",
+          "The viewer can read the case but not decide it, and must learn who can."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A yes or no with nothing to record, such as dismissing a tip.",
+            "instead": "button"
+          },
+          {
+            "when": "The action destroys something with history and needs the name typed.",
+            "instead": "confirm"
+          },
+          {
+            "when": "A general form that edits a record.",
+            "instead": "form"
+          }
+        ],
+        "aka": [
+          "approve reject",
+          "reason field",
+          "audit reason",
+          "decision form",
+          "sign off"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "invalid",
+            "how": "aria-invalid=\"true\" on the textarea and the fd-field-error shown, when the reason is missing or outside its budget"
+          },
+          {
+            "name": "near or over budget",
+            "how": "data-state=\"near\" or \"over\" on fd-commit-budget"
+          },
+          {
+            "name": "locked",
+            "how": "a visible fd-commit-lock; the commit buttons are disabled and described by it"
+          },
+          {
+            "name": "held",
+            "how": "data-state=\"held\" while a hold runs; the actions give way to fd-hold"
+          },
+          {
+            "name": "committed",
+            "how": "data-state=\"committed\" once sent; reopen(form) undoes it after a failed send"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-hold",
+            "value": "*",
+            "useWhen": "Sending is hard to take back: hold the commit this many seconds with Undo."
+          },
+          {
+            "attribute": "data-fd-hold-in",
+            "value": "toast",
+            "useWhen": "The page moves on after a commit (a queue): hold it in a toast instead of in the form."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-commit",
+            "role": "The form (or a div inside another form)."
+          },
+          {
+            "class": "fd-commit-effect",
+            "role": "One line on what each button does."
+          },
+          {
+            "class": "fd-commit-budget",
+            "role": "The word count against data-min-words and data-max-words."
+          },
+          {
+            "class": "fd-commit-actions",
+            "role": "The commit buttons: type=\"submit\" with a value and data-verb."
+          },
+          {
+            "class": "fd-commit-lock",
+            "role": "Who can decide, when this viewer cannot."
+          }
+        ],
+        "related": [
+          "decision",
+          "draft",
+          "hold",
+          "textarea",
+          "button",
+          "toast"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a commit button: checks the reason, then commits or starts the hold."
+          },
+          {
+            "keys": "Escape",
+            "does": "While the hold runs: stops it and opens the form again."
+          }
+        ],
+        "example": "docs/decisions.html#commit",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "composer",
       "name": "Composer",
       "family": "Agent",
@@ -6657,6 +6826,278 @@
           "fire/components/forms.css",
           "fire/js/forms.js",
           "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "decision",
+      "name": "Decision brief",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-decision",
+      "classes": [
+        "fd-decision",
+        "fd-decision-actions",
+        "fd-decision-detail",
+        "fd-decision-facts",
+        "fd-decision-head",
+        "fd-decision-heading",
+        "fd-decision-label",
+        "fd-decision-lead",
+        "fd-decision-meta",
+        "fd-decision-outcome",
+        "fd-decision-outcome-title",
+        "fd-decision-part",
+        "fd-decision-parts",
+        "fd-decision-quote",
+        "fd-decision-title"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-decision-outcome": {
+          "data-icon": [
+            "*"
+          ],
+          "data-tone": [
+            "accent",
+            "danger",
+            "info",
+            "neutral",
+            "success",
+            "violet",
+            "warning"
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/decisions.html#brief",
+      "card": {
+        "id": "decision",
+        "job": "Show what a decision changes, who it touches, the evidence and who signs, so a person can decide in seconds.",
+        "purpose": "A card that asks the question as its title, then four numbered parts in reading order: the change, who it touches, the evidence, and who signs or what happens if nobody decides. The parts sit two by two and stack into one column when the brief is narrow. Once decided, an outcome strip at the foot says who decided, when, why, and until when Undo works.",
+        "useWhen": [
+          "A person must approve or decline something that costs money, grants access or ships a change.",
+          "An agent proposes an action and a person signs it.",
+          "A decided case is opened again from a link or the history, and the reader needs what was decided, not only that it was."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action is routine and the server can undo it.",
+            "instead": "toast"
+          },
+          {
+            "when": "The agent asks permission for one tool call in a run.",
+            "instead": "approval-bar"
+          },
+          {
+            "when": "The action deletes something with history and needs the name typed.",
+            "instead": "confirm"
+          },
+          {
+            "when": "The facts are a record's fields with no decision to make.",
+            "instead": "kv"
+          }
+        ],
+        "aka": [
+          "approval request",
+          "decision card",
+          "case page",
+          "review item",
+          "sign-off",
+          "change request",
+          "human in the loop"
+        ],
+        "surfaces": [
+          "app",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "record"
+        ],
+        "states": [
+          {
+            "name": "waiting",
+            "how": "an fd-status pill data-tone=\"warning\" in fd-decision-head; the title ends in a question mark"
+          },
+          {
+            "name": "decided",
+            "how": "an fd-decision-outcome after fd-decision-parts, with its title, the reason and Undo"
+          },
+          {
+            "name": "expired",
+            "how": "fd-decision-outcome data-tone=\"warning\": nobody decided in time"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-decision",
+            "role": "The card; an article labelled by its title."
+          },
+          {
+            "class": "fd-decision-head",
+            "role": "Kind tile, heading and status pill."
+          },
+          {
+            "class": "fd-decision-heading",
+            "role": "The eyebrow, the title and the meta line."
+          },
+          {
+            "class": "fd-decision-title",
+            "role": "The question, with the object and the amount."
+          },
+          {
+            "class": "fd-decision-meta",
+            "role": "Who asked, when, and when it expires, separated by dots."
+          },
+          {
+            "class": "fd-decision-parts",
+            "role": "The dl that holds the parts and numbers them."
+          },
+          {
+            "class": "fd-decision-part",
+            "role": "One part: a label, a lead line and at most one detail line."
+          },
+          {
+            "class": "fd-decision-label",
+            "role": "The part's numbered mono label (dt)."
+          },
+          {
+            "class": "fd-decision-lead",
+            "role": "The part's one line; may hold an fd-delta."
+          },
+          {
+            "class": "fd-decision-detail",
+            "role": "A muted line under the lead."
+          },
+          {
+            "class": "fd-decision-facts",
+            "role": "Evidence as name and value rows."
+          },
+          {
+            "class": "fd-decision-quote",
+            "role": "Someone's own words, set in quotes."
+          },
+          {
+            "class": "fd-decision-outcome",
+            "role": "What was decided, by whom and when; tinted by data-tone."
+          },
+          {
+            "class": "fd-decision-outcome-title",
+            "role": "Who decided and when: \"Approved by you just now\"."
+          },
+          {
+            "class": "fd-decision-actions",
+            "role": "Undo and the date it stops working."
+          }
+        ],
+        "related": [
+          "commit",
+          "draft",
+          "delta",
+          "impact",
+          "hold",
+          "queue"
+        ],
+        "keyboard": [],
+        "example": "docs/decisions.html#brief",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
+      "id": "delta",
+      "name": "Delta",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-delta",
+      "classes": [
+        "fd-delta",
+        "fd-delta-from",
+        "fd-delta-to"
+      ],
+      "attributes": {
+        "data-mono": [
+          ""
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/decisions.html#brief",
+      "card": {
+        "id": "delta",
+        "job": "Show a value before and after a change, with an arrow between them.",
+        "purpose": "An inline pair: the old value muted, an arrow read as \"to\", and the new value in label weight. Figures are tabular; data-mono sets identifiers such as scopes, plans and hosts in the mono face. Without a from part it shows only the new value.",
+        "useWhen": [
+          "A decision or a preview changes a number, a plan or a scope and both values matter.",
+          "A list of affected records each shows its old and new value."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The figure is a trend over time with a direction and a percentage.",
+            "instead": "stats"
+          },
+          {
+            "when": "Two versions of text or code are compared line by line.",
+            "instead": "diff"
+          }
+        ],
+        "aka": [
+          "before and after",
+          "from to",
+          "change value",
+          "was now"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone",
+          "email"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-mono",
+            "value": "",
+            "useWhen": "The values are identifiers: scopes, plan names, hosts, versions."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-delta",
+            "role": "The pair."
+          },
+          {
+            "class": "fd-delta-from",
+            "role": "The value before, muted."
+          },
+          {
+            "class": "fd-delta-to",
+            "role": "The value after; the arrow is drawn before it."
+          }
+        ],
+        "related": [
+          "decision",
+          "impact",
+          "stats"
+        ],
+        "keyboard": [],
+        "example": "docs/decisions.html#brief",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css"
         ],
         "since": "0.7.0"
       }
@@ -8530,6 +8971,148 @@
       }
     },
     {
+      "id": "draft",
+      "name": "Drafted text",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-draft",
+      "classes": [
+        "fd-draft",
+        "fd-draft-actions",
+        "fd-draft-by",
+        "fd-draft-text",
+        "fd-draft-used",
+        "fd-draft-when"
+      ],
+      "attributes": {
+        "data-fd-draft-for": [
+          "*"
+        ]
+      },
+      "partAttributes": {
+        "fd-draft-by": {
+          "data-icon": [
+            "*"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "edited",
+          "used"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:accept",
+        "fd:close"
+      ],
+      "docs": "docs/decisions.html#draft",
+      "card": {
+        "id": "draft",
+        "job": "Offer words an agent wrote for a person, which stay the agent's until the person uses them.",
+        "purpose": "A dashed block naming the agent and who it drafted for, the text in quotes, and Use and Discard. Use copies the text into the reason field and focuses it; the block folds to one line that stays as provenance, and the field records data-fd-drafted used, then edited once changed. Discard folds it away. The agent never commits.",
+        "useWhen": [
+          "An agent drafted the reason or the answer for a decision a person signs.",
+          "A suggested reply or note must not be mistaken for the person's own words."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The agent's text is its answer in a conversation.",
+            "instead": "message"
+          },
+          {
+            "when": "The agent asks to run a tool.",
+            "instead": "approval-bar"
+          },
+          {
+            "when": "Short completions offered while someone types.",
+            "instead": "suggestions"
+          }
+        ],
+        "aka": [
+          "AI draft",
+          "suggested reason",
+          "agent suggestion",
+          "proposed text",
+          "copilot draft"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "waiting",
+            "how": "no data-state: the text in quotes with Use and Discard"
+          },
+          {
+            "name": "used",
+            "how": "data-state=\"used\", set by data-fd-draft=\"use\"; fd-draft-used shows"
+          },
+          {
+            "name": "edited",
+            "how": "data-state=\"edited\" once the person changes the words in the field"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-draft-for",
+            "value": "*",
+            "useWhen": "The field to fill is not the textarea of the enclosing fd-commit: give its id."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-draft",
+            "role": "The block, an aside labelled as a draft."
+          },
+          {
+            "class": "fd-draft-by",
+            "role": "The agent, who it drafted for, and an icon."
+          },
+          {
+            "class": "fd-draft-when",
+            "role": "When it was drafted."
+          },
+          {
+            "class": "fd-draft-text",
+            "role": "The drafted words, in quotes."
+          },
+          {
+            "class": "fd-draft-actions",
+            "role": "Buttons with data-fd-draft=\"use\" and \"discard\"."
+          },
+          {
+            "class": "fd-draft-used",
+            "role": "The line shown once the draft is used."
+          }
+        ],
+        "related": [
+          "commit",
+          "decision",
+          "message",
+          "textarea"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On Use: copies the draft into the field and moves focus there."
+          }
+        ],
+        "example": "docs/decisions.html#draft",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "empty",
       "name": "Empty",
       "family": "Content",
@@ -8541,6 +9124,7 @@
         "fd-empty-art",
         "fd-empty-hint",
         "fd-empty-icon",
+        "fd-empty-meta",
         "fd-empty-text",
         "fd-empty-title"
       ],
@@ -8573,7 +9157,8 @@
           "A list, table or page has no items yet and the next step is clear.",
           "A search or filter matches nothing; say what to change.",
           "A request failed and the reader can retry.",
-          "A feature is not on the plan; say which plan has it."
+          "A feature is not on the plan; say which plan has it.",
+          "One part of a page-state set (fd-states): no access, not found, switched off, link expired."
         ],
         "avoidWhen": [
           {
@@ -8664,6 +9249,10 @@
             "role": "A smaller aside, such as a keyboard tip."
           },
           {
+            "class": "fd-empty-meta",
+            "role": "A quiet line under the actions: a request ID, who can grant access or turn an area on, when a link expired."
+          },
+          {
             "class": "fd-empty-actions",
             "role": "The one or two actions that fix it."
           }
@@ -8672,7 +9261,8 @@
           "skeleton",
           "callout",
           "table",
-          "texture"
+          "texture",
+          "states"
         ],
         "keyboard": [],
         "example": "docs/content.html#empty",
@@ -10403,6 +10993,168 @@
       }
     },
     {
+      "id": "hold",
+      "name": "Held action",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-hold",
+      "classes": [
+        "fd-hold",
+        "fd-hold-count",
+        "fd-hold-note",
+        "fd-hold-ring",
+        "fd-hold-text",
+        "fd-hold-title",
+        "fd-hold-undo"
+      ],
+      "attributes": {
+        "data-seconds": [
+          "*"
+        ],
+        "data-tone": [
+          "accent",
+          "danger",
+          "info",
+          "neutral",
+          "success",
+          "violet",
+          "warning"
+        ]
+      },
+      "partAttributes": {
+        "fd-hold-ring": {
+          "data-size": [
+            "sm"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "running"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:commit",
+        "fd:hold",
+        "fd:undo"
+      ],
+      "docs": "docs/decisions.html#hold",
+      "card": {
+        "id": "hold",
+        "job": "Wait a few seconds before an action goes, with a countdown and Undo.",
+        "purpose": "A strip with a ring that drains with the time left, the action in words, a note that nothing has happened yet, and Undo. A commit with data-fd-hold or a button with data-fd-hold-for starts it; focus moves to Undo. Undo or Escape stops it and returns focus; the end fires fd:commit. Leaving the page sends it. Screen readers hear the start and the undo. toast.hold draws the same ring in a toast.",
+        "useWhen": [
+          "Sending is hard to take back: money, access, a message, a shipped change, a cancelled run.",
+          "A person commits in one press and deserves a moment to change their mind."
+        ],
+        "avoidWhen": [
+          {
+            "when": "It is already done and the server can reverse it.",
+            "instead": "toast"
+          },
+          {
+            "when": "A mistake destroys history and must not happen by one press.",
+            "instead": "confirm"
+          },
+          {
+            "when": "Work that runs for minutes with progress to watch.",
+            "instead": "progress"
+          }
+        ],
+        "aka": [
+          "undo send",
+          "countdown",
+          "grace period",
+          "delayed action",
+          "cancel window"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "running",
+            "how": "data-state=\"running\" while it counts; the trigger is disabled"
+          },
+          {
+            "name": "idle",
+            "how": "hidden until a hold starts, and again once it is undone or sent"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "The held action removes or stops something; a danger commit button sets it."
+          },
+          {
+            "attribute": "data-seconds",
+            "value": "*",
+            "useWhen": "The length of a hold started by data-fd-hold-for; 10 by default, 5 inside a dialog."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-hold",
+            "role": "The strip."
+          },
+          {
+            "class": "fd-hold-ring",
+            "role": "The countdown ring; data-size=\"sm\" in a toast."
+          },
+          {
+            "class": "fd-hold-count",
+            "role": "The whole seconds left, inside the ring."
+          },
+          {
+            "class": "fd-hold-text",
+            "role": "The title and the note."
+          },
+          {
+            "class": "fd-hold-title",
+            "role": "The action in progress: \"Approving the credit\"."
+          },
+          {
+            "class": "fd-hold-note",
+            "role": "That nothing has happened yet."
+          },
+          {
+            "class": "fd-hold-undo",
+            "role": "Stops the hold."
+          }
+        ],
+        "related": [
+          "commit",
+          "toast",
+          "confirm",
+          "decision"
+        ],
+        "keyboard": [
+          {
+            "keys": "Escape",
+            "does": "Stops the hold when focus is in it, in its form, or nowhere."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On Undo: stops the hold and returns focus to the button that started it."
+          }
+        ],
+        "example": "docs/decisions.html#hold",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js",
+          "fire/js/overlays.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "hovercard",
       "name": "Hovercard",
       "family": "Overlays",
@@ -10695,6 +11447,126 @@
           "elements/src/icon.ts"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "impact",
+      "name": "Impact",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-impact",
+      "classes": [
+        "fd-impact",
+        "fd-impact-count",
+        "fd-impact-list",
+        "fd-impact-more",
+        "fd-impact-text"
+      ],
+      "attributes": {
+        "data-tone": [
+          "accent",
+          "danger",
+          "info",
+          "neutral",
+          "success",
+          "violet",
+          "warning"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/decisions.html#preview",
+      "card": {
+        "id": "impact",
+        "job": "Say how much a change will touch, before anyone commits it.",
+        "purpose": "A tinted block that leads with a count in figures (\"29 teams change\"), one line on how they change, a short list of the largest with their before and after values, and \"and 26 more\" with a link to all. data-tone warns when the reach is wide. It is the result of a preview, or part of a case whose change reaches beyond one record.",
+        "useWhen": [
+          "A change reaches more than the one thing on screen: a plan default, a crawl setting, a policy.",
+          "A preview must show its reach before the commit button appears."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The change touches one record, which the brief already names.",
+            "instead": "decision"
+          },
+          {
+            "when": "A warning with no figure and no list.",
+            "instead": "callout"
+          },
+          {
+            "when": "Figures to read without a decision.",
+            "instead": "stats"
+          }
+        ],
+        "aka": [
+          "blast radius",
+          "affected count",
+          "change preview",
+          "dry run result",
+          "who is affected"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list"
+        ],
+        "states": [],
+        "variants": [
+          {
+            "attribute": "data-tone",
+            "value": "warning",
+            "useWhen": "The reach is wide or the change is hard to take back."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "danger",
+            "useWhen": "The change removes access or data for those it touches."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "info",
+            "useWhen": "A neutral reach worth knowing, such as a default for new teams only."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-impact",
+            "role": "The block."
+          },
+          {
+            "class": "fd-impact-count",
+            "role": "The figure in bold and what it counts."
+          },
+          {
+            "class": "fd-impact-text",
+            "role": "One line on how they change."
+          },
+          {
+            "class": "fd-impact-list",
+            "role": "A few of them, each with an fd-delta or a figure."
+          },
+          {
+            "class": "fd-impact-more",
+            "role": "How many more, and a link to the full list."
+          }
+        ],
+        "related": [
+          "preview",
+          "delta",
+          "decision",
+          "callout"
+        ],
+        "keyboard": [],
+        "example": "docs/decisions.html#preview",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -16068,6 +16940,137 @@
       }
     },
     {
+      "id": "preview",
+      "name": "Preview then commit",
+      "family": "Content",
+      "kind": "pattern",
+      "root": "fd-preview",
+      "classes": [
+        "fd-preview",
+        "fd-preview-edit",
+        "fd-preview-result",
+        "fd-preview-stale"
+      ],
+      "attributes": {
+        "data-fd-preview-open": [
+          ""
+        ]
+      },
+      "partAttributes": {
+        "fd-preview-stale": {
+          "data-icon": [
+            "*"
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-state": [
+          "preview",
+          "stale"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:change",
+        "fd:open"
+      ],
+      "docs": "docs/decisions.html#preview",
+      "card": {
+        "id": "preview",
+        "job": "Edit a value, see what the change will touch, then commit it with a reason.",
+        "purpose": "A pattern for changes whose reach depends on what is typed. The edit fields come first with a Preview button; asking for a preview checks them, fires fd:open (fill the fd-impact then) and shows the result: the impact and an fd-commit. Changing a field afterwards marks the preview stale, hides the commit and says to preview again. It works inline or inside a dialog.",
+        "useWhen": [
+          "Changing a default, a limit or a policy that applies to many teams at once.",
+          "The person should see \"412 teams change\" before the commit button exists."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Nothing is edited and the reach is known: show it in the case.",
+            "instead": "impact"
+          },
+          {
+            "when": "A setting that affects only the person changing it.",
+            "instead": "setting"
+          },
+          {
+            "when": "A multi-step create flow.",
+            "instead": "dialog"
+          }
+        ],
+        "aka": [
+          "dry run",
+          "review changes",
+          "preview changes",
+          "change summary",
+          "impact preview"
+        ],
+        "surfaces": [
+          "app"
+        ],
+        "data": [
+          "form"
+        ],
+        "states": [
+          {
+            "name": "editing",
+            "how": "no data-state: the edit fields and the Preview button"
+          },
+          {
+            "name": "preview",
+            "how": "data-state=\"preview\": fd-preview-result shows"
+          },
+          {
+            "name": "stale",
+            "how": "data-state=\"stale\": a field changed after the preview; fd-preview-stale shows"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-fd-preview-open",
+            "value": "",
+            "useWhen": "On the button that asks for the preview."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-preview",
+            "role": "The form that holds the edit and the result."
+          },
+          {
+            "class": "fd-preview-edit",
+            "role": "The fields and the Preview button."
+          },
+          {
+            "class": "fd-preview-stale",
+            "role": "The line that says the preview is out of date."
+          },
+          {
+            "class": "fd-preview-result",
+            "role": "The fd-impact and the fd-commit."
+          }
+        ],
+        "related": [
+          "impact",
+          "commit",
+          "dialog",
+          "delta"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter",
+            "does": "In an edit field: asks for the preview; it never commits."
+          }
+        ],
+        "example": "docs/decisions.html#preview",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "progress",
       "name": "Progress",
       "family": "Data",
@@ -16486,6 +17489,190 @@
           "fire/components/content.css"
         ],
         "since": "0.3.0"
+      }
+    },
+    {
+      "id": "queue",
+      "name": "Decision queue",
+      "family": "Content",
+      "kind": "pattern",
+      "root": "fd-queue",
+      "classes": [
+        "fd-queue",
+        "fd-queue-age",
+        "fd-queue-back",
+        "fd-queue-case",
+        "fd-queue-count",
+        "fd-queue-group",
+        "fd-queue-group-label",
+        "fd-queue-item",
+        "fd-queue-list",
+        "fd-queue-meta",
+        "fd-queue-text",
+        "fd-queue-title"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-queue-age": {
+          "data-urgent": [
+            ""
+          ]
+        },
+        "fd-queue-case": {
+          "data-case": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {
+        "data-view": [
+          "case",
+          "list"
+        ]
+      },
+      "element": null,
+      "events": [
+        "fd:select"
+      ],
+      "docs": "docs/decisions.html#queue",
+      "card": {
+        "id": "queue",
+        "job": "Work through what waits for a decision, one case at a time, beside the list.",
+        "purpose": "A pattern of a grouped list and the case it opens. Items show a kind tile, a two-line title, who asked and how long it waited. Picking one marks it current, shows its case and fires fd:select. Narrower than a list plus a readable case, it shows one at a time with a Queue button back. With fd-commit data-fd-hold-in=\"toast\", a committed case leaves at once while its toast counts down, and Undo returns it.",
+        "useWhen": [
+          "Several requests or agent proposals wait for one person: credits, hosts, access, changes.",
+          "A reviewer moves through items and should not lose their place."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The items are records to compare, sort or act on in bulk.",
+            "instead": "table"
+          },
+          {
+            "when": "One decision on a page of its own, reached from a link.",
+            "instead": "decision"
+          },
+          {
+            "when": "Sections of one settings area.",
+            "instead": "subnav"
+          }
+        ],
+        "aka": [
+          "inbox",
+          "review queue",
+          "needs you",
+          "approvals",
+          "master detail",
+          "list detail",
+          "triage"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "current",
+            "how": "aria-current=\"true\" on one fd-queue-item"
+          },
+          {
+            "name": "list or case",
+            "how": "data-view=\"list|case\" on fd-queue, which a narrow queue reads"
+          },
+          {
+            "name": "empty",
+            "how": "wrap it in fd-states and show data-when=\"empty\" when removeItem returns null"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-urgent",
+            "value": "",
+            "useWhen": "On fd-queue-age: the wait is close to a deadline."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-queue",
+            "role": "The list and the case side by side."
+          },
+          {
+            "class": "fd-queue-list",
+            "role": "The nav that holds the groups."
+          },
+          {
+            "class": "fd-queue-group",
+            "role": "One kind of request, a group labelled by its heading."
+          },
+          {
+            "class": "fd-queue-group-label",
+            "role": "The kind, and its count in fd-queue-count."
+          },
+          {
+            "class": "fd-queue-count",
+            "role": "How many items the group holds; removeItem keeps it right."
+          },
+          {
+            "class": "fd-queue-item",
+            "role": "One request: a button or a link with data-value."
+          },
+          {
+            "class": "fd-queue-text",
+            "role": "The title and the meta line."
+          },
+          {
+            "class": "fd-queue-title",
+            "role": "What is asked, in two lines at most."
+          },
+          {
+            "class": "fd-queue-meta",
+            "role": "Who asked, and one fact."
+          },
+          {
+            "class": "fd-queue-age",
+            "role": "How long it has waited, or when it is due."
+          },
+          {
+            "class": "fd-queue-case",
+            "role": "The open case; holds [data-case] panels when the page keeps them all."
+          },
+          {
+            "class": "fd-queue-back",
+            "role": "Returns a narrow queue to the list."
+          }
+        ],
+        "related": [
+          "decision",
+          "commit",
+          "states",
+          "split",
+          "subnav"
+        ],
+        "keyboard": [
+          {
+            "keys": "Arrow Up, Arrow Down",
+            "does": "Moves between items."
+          },
+          {
+            "keys": "Home, End",
+            "does": "Moves to the first or the last item."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "Opens the item's case."
+          }
+        ],
+        "example": "docs/decisions.html#queue",
+        "provenance": [
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -20679,6 +21866,149 @@
       }
     },
     {
+      "id": "states",
+      "name": "Page states",
+      "family": "Content",
+      "kind": "pattern",
+      "root": "fd-states",
+      "classes": [
+        "fd-states"
+      ],
+      "attributes": {
+        "data-state": [
+          "empty",
+          "error",
+          "expired",
+          "filtered",
+          "loading",
+          "no-access",
+          "not-found",
+          "off",
+          "ready"
+        ],
+        "data-when": [
+          ""
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change"
+      ],
+      "docs": "docs/content.html#page-states",
+      "card": {
+        "id": "states",
+        "job": "Show the one state a screen or a section is in: loading, ready, empty, error, no access and the rest.",
+        "purpose": "A pattern and a wrapper with no box of its own. Its direct children name the states they belong to in data-when; data-state on the wrapper shows them. Nine states: loading (skeletons), ready, empty (first use), filtered, error (with a request ID and Try again), no-access (who can grant it), not-found, off (who can turn it on) and expired. setState or a data-fd-set-state button switches it and fires fd:change.",
+        "useWhen": [
+          "Any screen or section that loads its own data.",
+          "A page reached from a link that can be gone, forbidden or out of date.",
+          "An area a team can switch off."
+        ],
+        "avoidWhen": [
+          {
+            "when": "A table's own empty, loading and error rows inside its frame.",
+            "instead": "table"
+          },
+          {
+            "when": "A swap from skeleton to content with no other states.",
+            "instead": "skeleton"
+          },
+          {
+            "when": "A warning above content that loaded.",
+            "instead": "callout"
+          }
+        ],
+        "aka": [
+          "empty state",
+          "error state",
+          "zero state",
+          "no access",
+          "404",
+          "forbidden",
+          "feature off",
+          "expired link",
+          "page state"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "loading",
+            "how": "data-state=\"loading\"; the loading part holds skeletons and aria-busy=\"true\""
+          },
+          {
+            "name": "error",
+            "how": "data-state=\"error\"; an fd-empty data-tone=\"danger\" role=\"alert\" with an fd-empty-meta request ID"
+          },
+          {
+            "name": "no access",
+            "how": "data-state=\"no-access\"; an fd-empty-meta names who can grant it"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-state",
+            "value": "ready",
+            "useWhen": "The content shows; the default when data-state is absent."
+          },
+          {
+            "attribute": "data-state",
+            "value": "empty",
+            "useWhen": "First use: nothing exists yet; say what will appear and give the action."
+          },
+          {
+            "attribute": "data-state",
+            "value": "filtered",
+            "useWhen": "A filter or a search hides everything; offer Clear filters."
+          },
+          {
+            "attribute": "data-state",
+            "value": "not-found",
+            "useWhen": "The record in the address does not exist; link to its list."
+          },
+          {
+            "attribute": "data-state",
+            "value": "off",
+            "useWhen": "The area is switched off for this team; say who can turn it on."
+          },
+          {
+            "attribute": "data-state",
+            "value": "expired",
+            "useWhen": "A link ran out; say when, and how to get a new one."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-states",
+            "role": "The wrapper; it adds no box, so it can switch whole bands."
+          }
+        ],
+        "related": [
+          "empty",
+          "skeleton",
+          "loader",
+          "queue"
+        ],
+        "keyboard": [],
+        "example": "docs/content.html#page-states",
+        "provenance": [
+          "docs/content.html",
+          "docs/decisions.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.7.0"
+      }
+    },
+    {
       "id": "stats",
       "name": "Stats",
       "family": "Data",
@@ -23726,6 +25056,9 @@
         "fd-toaster"
       ],
       "attributes": {
+        "data-held": [
+          ""
+        ],
         "data-static-demo": [
           ""
         ],
@@ -23762,16 +25095,22 @@
         ]
       },
       "element": null,
-      "events": [],
+      "events": [
+        "fd:commit",
+        "fd:hold",
+        "fd:undo"
+      ],
       "docs": "docs/overlays.html#toasts",
       "card": {
         "id": "toast",
         "job": "Confirm something that already happened, then get out of the way.",
-        "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise. It never asks a question. Toasts last 5 seconds, 8 for errors; loading lasts until settled. The stack is a polite live region.",
+        "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise; toast({ undo }) adds Undo; toast.hold counts down before anything is sent. It never asks a question. Toasts last 5 seconds, 8 for errors and Undo; loading lasts until settled. The stack is a polite live region.",
         "useWhen": [
           "An action finished and needs a quiet receipt: key copied, saved, deleted.",
           "Something finished elsewhere: a crawl completed, a webhook failed.",
-          "A long task needs a loading toast that turns into the result."
+          "A long task needs a loading toast that turns into the result.",
+          "It is done and the server can reverse it for a few seconds: toast({ undo }) gives Done · Undo.",
+          "The page moves on after a commit (a queue) and nothing may be sent for a few seconds: toast.hold."
         ],
         "avoidWhen": [
           {
@@ -23789,6 +25128,10 @@
           {
             "when": "A list of past events to read later.",
             "instead": "notification"
+          },
+          {
+            "when": "The person stays on the case while a commit waits.",
+            "instead": "hold"
           }
         ],
         "aka": [
@@ -23824,6 +25167,10 @@
           {
             "name": "loading",
             "how": "tone loading shows a spinner until toast.update or toast.promise settles"
+          },
+          {
+            "name": "held",
+            "how": "data-held, set by toast.hold: a countdown ring and Undo, no close button"
           }
         ],
         "variants": [
@@ -23861,6 +25208,11 @@
             "attribute": "data-tone",
             "value": "accent",
             "useWhen": "An accent receipt that is not a state."
+          },
+          {
+            "attribute": "data-held",
+            "value": "",
+            "useWhen": "Set by toast.hold: nothing has happened yet; it goes when the ring runs out."
           }
         ],
         "parts": [
@@ -23905,12 +25257,22 @@
           "callout",
           "banner",
           "dialog",
-          "notification"
+          "notification",
+          "hold",
+          "commit"
         ],
         "keyboard": [
           {
             "keys": "Tab",
             "does": "Reaches the action and close buttons of a toast."
+          },
+          {
+            "keys": "Ctrl+Z, Cmd+Z",
+            "does": "Outside a text field: presses Undo on the newest toast that has one."
+          },
+          {
+            "keys": "Escape",
+            "does": "Inside a held toast: presses its Undo."
           }
         ],
         "example": "docs/overlays.html#toasts",
@@ -25690,6 +27052,11 @@
     "fd-command-list": "command",
     "fd-command-note": "command",
     "fd-command-search": "command",
+    "fd-commit": "commit",
+    "fd-commit-actions": "commit",
+    "fd-commit-budget": "commit",
+    "fd-commit-effect": "commit",
+    "fd-commit-lock": "commit",
     "fd-composer": "composer",
     "fd-composer-attachment": "composer",
     "fd-composer-attachment-meta": "composer",
@@ -25749,6 +27116,24 @@
     "fd-daterange-preset": "date-picker",
     "fd-daterange-presets": "date-picker",
     "fd-daterange-summary": "date-picker",
+    "fd-decision": "decision",
+    "fd-decision-actions": "decision",
+    "fd-decision-detail": "decision",
+    "fd-decision-facts": "decision",
+    "fd-decision-head": "decision",
+    "fd-decision-heading": "decision",
+    "fd-decision-label": "decision",
+    "fd-decision-lead": "decision",
+    "fd-decision-meta": "decision",
+    "fd-decision-outcome": "decision",
+    "fd-decision-outcome-title": "decision",
+    "fd-decision-part": "decision",
+    "fd-decision-parts": "decision",
+    "fd-decision-quote": "decision",
+    "fd-decision-title": "decision",
+    "fd-delta": "delta",
+    "fd-delta-from": "delta",
+    "fd-delta-to": "delta",
     "fd-dialog": "dialog",
     "fd-dialog-body": "dialog",
     "fd-dialog-close": "dialog",
@@ -25960,6 +27345,12 @@
     "fd-donut-track": "donut",
     "fd-dotgrid": "texture",
     "fd-dots": "loader",
+    "fd-draft": "draft",
+    "fd-draft-actions": "draft",
+    "fd-draft-by": "draft",
+    "fd-draft-text": "draft",
+    "fd-draft-used": "draft",
+    "fd-draft-when": "draft",
     "fd-dropzone": "file-upload",
     "fd-dropzone-hint": "file-upload",
     "fd-dropzone-icon": "file-upload",
@@ -25970,6 +27361,7 @@
     "fd-empty-art": "empty",
     "fd-empty-hint": "empty",
     "fd-empty-icon": "empty",
+    "fd-empty-meta": "empty",
     "fd-empty-text": "empty",
     "fd-empty-title": "empty",
     "fd-endpoint": "endpoint",
@@ -26054,6 +27446,13 @@
     "fd-heatgrid-scroll": "heatgrid",
     "fd-heatgrid-summary": "heatgrid",
     "fd-heatgrid-swatch": "heatgrid",
+    "fd-hold": "hold",
+    "fd-hold-count": "hold",
+    "fd-hold-note": "hold",
+    "fd-hold-ring": "hold",
+    "fd-hold-text": "hold",
+    "fd-hold-title": "hold",
+    "fd-hold-undo": "hold",
     "fd-hovercard": "hovercard",
     "fd-hovercard-head": "hovercard",
     "fd-hovercard-meta": "hovercard",
@@ -26061,6 +27460,11 @@
     "fd-hovercard-text": "hovercard",
     "fd-hovercard-title": "hovercard",
     "fd-icon": "icon",
+    "fd-impact": "impact",
+    "fd-impact-count": "impact",
+    "fd-impact-list": "impact",
+    "fd-impact-more": "impact",
+    "fd-impact-text": "impact",
     "fd-initial": "initial",
     "fd-input": "input",
     "fd-input-affix": "input-group",
@@ -26326,6 +27730,10 @@
     "fd-popover-search": "popover",
     "fd-popover-title": "popover",
     "fd-popover-toolbar": "popover",
+    "fd-preview": "preview",
+    "fd-preview-edit": "preview",
+    "fd-preview-result": "preview",
+    "fd-preview-stale": "preview",
     "fd-progress": "progress",
     "fd-progress-bar": "progress",
     "fd-progress-center": "progress",
@@ -26357,6 +27765,18 @@
     "fd-quadrant-row-values": "chart",
     "fd-quadrant-rows": "chart",
     "fd-quadrant-tick": "chart",
+    "fd-queue": "queue",
+    "fd-queue-age": "queue",
+    "fd-queue-back": "queue",
+    "fd-queue-case": "queue",
+    "fd-queue-count": "queue",
+    "fd-queue-group": "queue",
+    "fd-queue-group-label": "queue",
+    "fd-queue-item": "queue",
+    "fd-queue-list": "queue",
+    "fd-queue-meta": "queue",
+    "fd-queue-text": "queue",
+    "fd-queue-title": "queue",
     "fd-radio": "radio",
     "fd-radio-box": "radio",
     "fd-radio-desc": "radio",
@@ -26572,6 +27992,7 @@
     "fd-stat-sub": "stats",
     "fd-stat-tile": "stats",
     "fd-stat-unit": "stats",
+    "fd-states": "states",
     "fd-stats": "stats",
     "fd-status": "status",
     "fd-status-note": "status",
@@ -27406,6 +28827,14 @@
       "detail": "",
       "shapes": {}
     },
+    "fd:accept": {
+      "detail": "{ value: text }",
+      "shapes": {
+        "content": [
+          "{ value: text }"
+        ]
+      }
+    },
     "fd:action": {
       "detail": "{ action, message }",
       "shapes": {
@@ -27428,7 +28857,9 @@
         ],
         "content": [
           "{ open, value }",
-          "{ value: \"start\" | \"middle\" | \"end\" }"
+          "{ value: \"start\" | \"middle\" | \"end\" }",
+          "{ value: \"stale\" }",
+          "{ value, previous }"
         ],
         "core": [
           "{ value }"
@@ -27475,11 +28906,21 @@
       "detail": "{ value: data-value or its text }",
       "shapes": {
         "content": [
-          "{ value: data-value or its text }"
+          "{ value: data-value or its text }",
+          "{ value: text }"
         ],
         "data": [
           "{ target }",
           "{ group }"
+        ]
+      }
+    },
+    "fd:commit": {
+      "detail": "{ value, reason, drafted, verb }",
+      "shapes": {
+        "content": [
+          "{ value, reason, drafted, verb }",
+          "{ value, cause: \"time\" | \"pagehide\" }"
         ]
       }
     },
@@ -27519,6 +28960,14 @@
       "shapes": {
         "forms": [
           "{ files }"
+        ]
+      }
+    },
+    "fd:hold": {
+      "detail": "{ value, seconds }",
+      "shapes": {
+        "content": [
+          "{ value, seconds }"
         ]
       }
     },
@@ -27569,6 +29018,9 @@
         "code": [
           "{ value: line number, row }"
         ],
+        "content": [
+          "{ value, item }"
+        ],
         "core": [
           "{ value, item }"
         ],
@@ -27605,6 +29057,17 @@
     "fd:theme": {
       "detail": "",
       "shapes": {}
+    },
+    "fd:undo": {
+      "detail": "{ value }",
+      "shapes": {
+        "content": [
+          "{ value }"
+        ],
+        "overlays": [
+          "{ value: id }"
+        ]
+      }
     },
     "fd:valid": {
       "detail": "",

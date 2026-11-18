@@ -45,6 +45,16 @@ export const EXTRA_ROOTS = {
   'fd-usage-chip': 'Agent',
   'fd-use-agent': 'Agent',
   'fd-viewswitch': 'Code',
+  // Decisions (content.css, docs/decisions.html): the brief, its parts and the patterns around them
+  'fd-decision': 'Content',
+  'fd-delta': 'Content',
+  'fd-draft': 'Content',
+  'fd-commit': 'Content',
+  'fd-impact': 'Content',
+  'fd-hold': 'Content',
+  'fd-preview': 'Content',             // pattern: change, see what it touches, then commit
+  'fd-queue': 'Content',               // pattern: the list of what waits, beside the case
+  'fd-states': 'Content',              // pattern: one set of page states for a screen or a section
 };
 
 /** Classes (and their dash-descendants) that are parts of another component: class -> root of the component.
@@ -89,10 +99,10 @@ export const PART_OF = {
 export const ID_ALIASES = { 'fd-btn': 'button' };
 
 /** Kind of a component. Default: `layout` in the Layout family, otherwise `component`. */
-export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground']);
+export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground', 'fd-preview', 'fd-queue', 'fd-states']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {
@@ -103,7 +113,7 @@ export const FAMILY_PAGES = {
   Forms: ['forms.html'],
   Overlays: ['overlays.html'],
   Data: ['data.html'],
-  Content: ['content.html'],
+  Content: ['content.html', 'decisions.html'],
   Code: ['code.html'],
   Agent: ['agent.html'],
   Chat: ['chat.html'],
@@ -137,6 +147,9 @@ export const EVENT_EXTRA = {
   confirm: ['fd:confirm'],
   'date-picker': ['fd:change'],
   filter: ['fd:change'],
+  commit: ['fd:hold'],                 // content.js: "fd:hold fires on the fd-commit" (the line names the fd-hold it starts)
+  hold: ['fd:commit'],                 // content.js: a standalone hold fires fd:commit on itself when it runs out
+  toast: ['fd:hold', 'fd:undo', 'fd:commit'],   // overlays.js: a held toast, and Done · Undo
 };
 
 /** Events a module listens for; they are not events of any component. */
@@ -209,12 +222,15 @@ export const FREE_ATTRIBUTES = {
   'doc-endpoint': ['data-in'],         // where a parameter goes (body, query, path, header…); docsite.js's try form reads body, query and path
   button: ['data-action'],             // the page's name for what the button does (agent.js: run, copy-result; pages: retry, export)
   log: ['data-action', 'data-anchor'], // code.js handles wrap, download and first-error; a page adds its own (replay). data-anchor: the prefix of line ids (build -> #build-L42)
+  commit: ['data-fd-hold', 'data-min-words', 'data-max-words'],   // seconds to hold a commit; the reason's word budget on fd-commit-budget
+  hold: ['data-seconds'],              // the length of a hold started by data-fd-hold-for or hold(el)
+  draft: ['data-fd-draft-for'],        // the id of the field a draft fills
 };
 /* An icon name is free text (the lint's unknown-icon rule checks it against catalog.icons). The drawn icon,
  * svg.fd-icon[data-icon] (EXPORT I2), takes it on the icon's root; rules such as `.fd-badge > i[data-icon]` give it to
  * the components below, on their root or on the part a drawn icon may carry, where it would otherwise allow only the
  * bare attribute. data-icon-fill stays a presence flag (`.fd-icon[data-icon-fill]`). */
-for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline', 'service-status']) {
+for (const id of ['icon', 'badge', 'banner', 'feature-list', 'status', 'tag', 'tile', 'command', 'menu', 'pipeline', 'service-status', 'decision', 'draft', 'commit', 'preview']) {
   (FREE_ATTRIBUTES[id] ??= []).push('data-icon');
 }
 
@@ -339,6 +355,13 @@ export const STATE_ATTRIBUTES = {
   progress: { 'data-complete': [], 'data-empty': [] },
   'fd-progress-steps': { 'data-current': [], 'data-done': [] },
   // the docs site's try-it form: docsite.js writes the fields and reads their type
+  // decisions (content.js): a draft used or edited, a hold running, a commit held or sent, a preview gone stale, a narrow queue's view
+  draft: { 'data-state': [] },
+  'fd-commit': { 'data-state': ['committed'] },
+  'fd-commit-budget': { 'data-state': [] },
+  hold: { 'data-state': [] },
+  preview: { 'data-state': [] },
+  queue: { 'data-view': [] },
   'fd-input': { 'data-type': [] },
   'fd-textarea': { 'data-type': [] },
 };

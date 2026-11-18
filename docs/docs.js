@@ -20,6 +20,7 @@ const PAGES = [
     ['overlays', 'Overlays', 'layers'],
     ['data', 'Tables & data', 'table'],
     ['content', 'Cards & feedback', 'layout-grid'],
+    ['decisions', 'Decisions', 'list-checks'],
     ['charts', 'Charts', 'chart-column'],
     ['code', 'Code & logs', 'braces'],
     ['agent', 'Agent & AI', 'wand-sparkles'],

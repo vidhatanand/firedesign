@@ -320,6 +320,11 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   for (const c of components) {
     const card = cards.get(c.id);
     if (!card) { missing.push({ id: c.id, family: c.family, docs: c.docs }); continue; }
+    if (card.relation) {   // contract/cards/card.schema.json `relation`: it must name another component (scripts/gate.mjs reads it)
+      const target = card.relation.variantOf ?? card.relation.distinctFrom;
+      if (!ids.has(target)) errors.push(`cards/${c.id}.json: relation names "${target}", which is not a component`);
+      else if (target === c.id) errors.push(`cards/${c.id}.json: relation names the component itself`);
+    }
     for (const r of card.related) if (!ids.has(r)) errors.push(`cards/${c.id}.json: related "${r}" is not a component`);
     for (const p of card.parts) if (!c.classes.includes(p.class)) errors.push(`cards/${c.id}.json: part ${p.class} is not a class of ${c.id}`);
     // A variant is an author choice: a value of the component's own attributes or of one of its parts'.

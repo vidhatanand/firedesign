@@ -24,6 +24,7 @@ const PAGES = [
     ['agent', 'Agent & AI', 'wand-sparkles'],
     ['documentation', 'Documentation', 'book-open'],
     ['chat', 'Chat', 'message-circle'],
+    ['email', 'Email', 'mail'],
     ['skeletons', 'Skeletons & loading', 'loader'],
     ['elements', 'Custom elements', 'blocks'],
   ]],

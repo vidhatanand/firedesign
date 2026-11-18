@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Email · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<style>
+  .em-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 16px; }
+  .em-frame { display: grid; gap: 8px; min-width: 0; }
+  .em-frame iframe { width: 100%; height: 960px; border: 1px solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); background: var(--fd-bg); }
+  .em-text { max-height: 360px; overflow: auto; }
+</style>
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="email">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Email</h1>
+    <p class="doc-lede">Transactional mail in the product’s own look: sign-in links, invitations, receipts and alerts. One function turns a theme record and a list of blocks into an HTML part and a plain-text part that any mail client can show.</p>
+  </header>
+
+  <section class="doc-section" id="render">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Render an email</h2>
+      <p>A module with no dependencies and no DOM, so it runs in the server that sends the mail and in the browser that previews it. Colours come from the same theme record the app loads, so a button in the email is the colour of the button in the product.</p>
+    </div>
+    <figure class="fd-codeblock">
+      <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
+      <pre class="fd-codeblock-body"><code data-lang="javascript">import { renderEmail } from "fire/email/email.js";
+
+const { html, text } = renderEmail({
+  theme: { contract: "fire/1", palette: "ember" },
+  brand: { name: "Ember", logoUrl: "https://cdn.ember.example/logo.png" },
+  preheader: "Your sign-in link for Ember expires in 15 minutes.",
+  locale: "en",
+  blocks: [
+    { type: "heading", text: "Sign in to Ember" },
+    { type: "text", text: "The link works once and expires in 15 minutes." },
+    { type: "button", label: "Sign in to Ember", href: "https://app.ember.example/auth/verify?token=7f3a" },
+    { type: "code", label: "Your code", value: "482 913" },
+    { type: "footer", lines: ["Ember, Inc."], links: [{ label: "Privacy", href: "https://ember.example/privacy" }] },
+  ],
+});
+// send { subject, html, text } with your mail service; the subject is yours</code></pre>
+    </figure>
+    <table class="doc-table">
+      <thead><tr><th>Field</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code class="fd-code">theme</code></td><td>A theme record. Left out, Fire’s default look. An invalid record throws.</td></tr>
+        <tr><td><code class="fd-code">brand</code></td><td><code class="fd-code">{ name, logoUrl? }</code>. The logo is an https URL and the only remote image the email loads. Without one, a square in the accent colour carries the name’s first letter.</td></tr>
+        <tr><td><code class="fd-code">preheader</code></td><td>The line a mailbox shows after the subject. It is hidden inside the message.</td></tr>
+        <tr><td><code class="fd-code">blocks</code></td><td>The content, in order. An unknown type, a missing field or an unsafe URL throws, naming the block.</td></tr>
+        <tr><td><code class="fd-code">locale</code></td><td>A BCP 47 tag, default <code class="fd-code">en</code>. Sets <code class="fd-code">lang</code> and, for Arabic, Hebrew, Persian and Urdu, <code class="fd-code">dir="rtl"</code>. Every word in the email is yours; nothing is translated here.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="doc-section" id="blocks">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Blocks</h2>
+      <p>Eight blocks cover the messages a product sends. URLs are https, http, mailto or tel; everything else is rejected, and every value is escaped.</p>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Block</th><th>Fields</th><th>Use it for</th></tr></thead>
+      <tbody>
+        <tr><td><code class="fd-code">heading</code></td><td><code class="fd-code">text</code>, <code class="fd-code">level</code> 1 or 2</td><td>The title. The first heading is the <code class="fd-code">h1</code>, later ones <code class="fd-code">h2</code>.</td></tr>
+        <tr><td><code class="fd-code">text</code></td><td><code class="fd-code">text</code> (a string, or an array of strings and <code class="fd-code">{ text, href }</code>), <code class="fd-code">tone: "muted"</code></td><td>A paragraph. A link carries words that say where it goes.</td></tr>
+        <tr><td><code class="fd-code">button</code></td><td><code class="fd-code">label</code>, <code class="fd-code">href</code>, <code class="fd-code">fallback</code></td><td>The one action. The address is printed under it for clients that block buttons; <code class="fd-code">fallback: false</code> removes that line.</td></tr>
+        <tr><td><code class="fd-code">code</code></td><td><code class="fd-code">value</code>, <code class="fd-code">label</code></td><td>A one-time code to type somewhere else.</td></tr>
+        <tr><td><code class="fd-code">keyValue</code></td><td><code class="fd-code">rows: [{ label, value, mono }]</code></td><td>Facts about the event: device, place, time, amount, invoice number.</td></tr>
+        <tr><td><code class="fd-code">divider</code></td><td></td><td>A rule between parts of one message.</td></tr>
+        <tr><td><code class="fd-code">note</code></td><td><code class="fd-code">text</code>, <code class="fd-code">title</code></td><td>An aside: “Not you? Ignore this email.”</td></tr>
+        <tr><td><code class="fd-code">footer</code></td><td><code class="fd-code">lines</code>, <code class="fd-code">links</code></td><td>Below the card: the sender’s address, privacy and help links.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="doc-section" id="examples">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">The same sign-in email in two looks</h2>
+      <p>Left: the Ember palette. Right: a palette generated from one accent (<code class="fd-code">#1f6feb</code>) with the editorial type set and rounder corners. Each frame shows the generated HTML as a mail client receives it; it follows your system’s light or dark setting, not this page’s theme toggle.</p>
+    </div>
+    <div class="em-pair">
+      <div class="em-frame">
+        <iframe src="assets/email/signin-ember.html" title="Sign-in email, Ember palette" sandbox></iframe>
+        <p class="fd-small fd-muted">Palette <code class="fd-code">ember</code></p>
+      </div>
+      <div class="em-frame">
+        <iframe src="assets/email/signin-generated.html" title="Sign-in email, generated palette" sandbox></iframe>
+        <p class="fd-small fd-muted">Palette from accent <code class="fd-code">#1f6feb</code>, type <code class="fd-code">editorial</code></p>
+      </div>
+    </div>
+    <p class="fd-small fd-muted">The examples are the files in <code class="fd-code">docs/assets/email/</code>, written by <code class="fd-code">node fire/email/build-examples.mjs</code>; a test fails when they differ from a fresh render.</p>
+  </section>
+
+  <section class="doc-section" id="text">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">The plain-text part</h2>
+      <p>Send it with the HTML as a <code class="fd-code">multipart/alternative</code> message. It carries every block in reading order: buttons become a label and the address, a code is its label and value, key-value rows are one per line, and the footer follows a <code class="fd-code">-- </code> signature line.</p>
+    </div>
+    <figure class="fd-codeblock em-text">
+      <pre class="fd-codeblock-body"><code>Sign in to Ember
+
+Press the button to sign in as maya@acme.example. The link works once and expires in 15 minutes.
+
+Sign in to Ember:
+https://app.ember.example/auth/verify?token=7f3a91c0
+
+On a different device? Enter this code on the sign-in page instead.
+
+Your code: 482 913
+
+Requested from: Chrome on macOS
+Location: Lisbon, Portugal
+Time: 18 Nov 2026, 09:41 UTC
+
+----
+
+Not you?
+Ignore this email and nothing happens. If you keep getting these, reply and we will look into it.
+
+-- 
+Ember, Inc. 548 Market St, San Francisco
+Privacy: https://ember.example/privacy
+Help centre: https://ember.example/help</code></pre>
+    </figure>
+  </section>
+
+  <section class="doc-section" id="clients">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Why the markup looks different from the rest of Fire</h2>
+      <p>Mail clients drop stylesheets, ignore custom properties and strip classes, so this is the one place in Fire where styles are written inline. Everything else in Fire still uses no style attributes.</p>
+    </div>
+    <ul class="doc-notes">
+      <li>Layout is presentation tables in a 560px column, each marked <code class="fd-code">role="presentation"</code>. Outlook gets a conditional table that holds the width.</li>
+      <li>Colours are opaque <code class="fd-code">#rrggbb</code>, resolved from the record. Muted text is Fire’s <code class="fd-code">--fd-text-3</code> step composited on the ground it sits on, so it keeps 4.5:1 in light and dark; the tests check every preset, its high-contrast form and generated palettes.</li>
+      <li>Dark mode is a single <code class="fd-code">prefers-color-scheme</code> block plus the <code class="fd-code">color-scheme</code> meta. A client that ignores it shows the light version, which every client can read.</li>
+      <li>The button is a VML rounded rectangle for Outlook and a padded table cell everywhere else, so it keeps its colour and shape in both.</li>
+      <li>Fonts are system stacks; the editorial and book type sets use a serif stack for headings. No web fonts load.</li>
+      <li>Nothing loads except the logo: no script, stylesheet, tracking pixel or background image.</li>
+      <li>Subject lines, translations and sending belong to the product. Pass the words in, and set <code class="fd-code">locale</code> to match.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

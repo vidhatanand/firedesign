@@ -5421,7 +5421,8 @@
         "Picking several values from a long list. Use Checklist.",
         "A date range. Use DatePicker.",
         "Switching between a few views of the same data. Use Segmented.",
-        "A category to apply to an item. Use Tag."
+        "A category to apply to an item. Use Tag.",
+        "More than three fields to filter by. Use Filters."
       ],
       "api": {
         "props": [
@@ -6015,64 +6016,6 @@
       }
     },
     {
-      "name": "Checklist",
-      "purpose": "The body of a filter popover: a search row, checkable rows with counts, a summary and Clear. The trigger label summarises the choice. Each change fires fd:change with the selected values. Used inside a popover marked data-fd-filter-list.\nSurfaces: app, phone. Kind: component.",
-      "variants": [
-        "highlighted"
-      ],
-      "states": [
-        "disabled",
-        "hover",
-        "focus",
-        "selected"
-      ],
-      "paths": [
-        "fire/components/overlays.css",
-        "docs/overlays.html"
-      ],
-      "usage": "Pick several values from a long list, with search and counts. Also called: multi-select, filter list, checkbox list, faceted filter, multiselect, select many.",
-      "do": [
-        "People filter by several values out of a long list: endpoints, keys, statuses.",
-        "Each option has a count worth showing."
-      ],
-      "dont": [
-        "One choice from a short list. Use Menu.",
-        "A short set of options that all fit on the page. Use Choice.",
-        "A single filter chip that opens a menu. Use Filter.",
-        "Free-form values typed by the user. Use TagInput."
-      ],
-      "api": {
-        "props": [],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's content, given as the children of <cc-component>."
-          },
-          {
-            "name": "checklist",
-            "description": "The list of checkable rows."
-          },
-          {
-            "name": "checklist-item",
-            "description": "One row with a checkbox."
-          },
-          {
-            "name": "checklist-label",
-            "description": "The option name."
-          },
-          {
-            "name": "checklist-count",
-            "description": "A muted count at the end of the row."
-          },
-          {
-            "name": "checklist-empty",
-            "description": "The \"no match\" message."
-          }
-        ],
-        "example": "<cc-component name=\"Checklist\">Content</cc-component>"
-      }
-    },
-    {
       "name": "Confirm",
       "purpose": "A dialog for actions that destroy something with history in it: a team, a project, all logs. A phrase (the slug, in mono) is shown, and the danger button stays disabled until the field matches it exactly after trimming spaces. Submitting fires a cancelable fd:confirm; cancel it to run async work, then closeDialog(id, \"confirm\").\nSurfaces: app. Kind: component.",
       "variants": [
@@ -6574,6 +6517,64 @@
           }
         ],
         "example": "<cc-component name=\"Bars\" tone=\"accent\"></cc-component>"
+      }
+    },
+    {
+      "name": "Checklist",
+      "purpose": "The body of a filter popover: a search row, checkable rows with counts, a summary and Clear. The trigger label summarises the choice. Each change fires fd:change with the selected values. Used inside a popover marked data-fd-filter-list.\nSurfaces: app, phone. Kind: component.",
+      "variants": [
+        "highlighted"
+      ],
+      "states": [
+        "disabled",
+        "hover",
+        "focus",
+        "selected"
+      ],
+      "paths": [
+        "fire/components/overlays.css",
+        "docs/overlays.html"
+      ],
+      "usage": "Pick several values from a long list, with search and counts. Also called: multi-select, filter list, checkbox list, faceted filter, multiselect, select many.",
+      "do": [
+        "People filter by several values out of a long list: endpoints, keys, statuses.",
+        "Each option has a count worth showing."
+      ],
+      "dont": [
+        "One choice from a short list. Use Menu.",
+        "A short set of options that all fit on the page. Use Choice.",
+        "A single filter chip that opens a menu. Use Filter.",
+        "Free-form values typed by the user. Use TagInput."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "checklist",
+            "description": "The list of checkable rows."
+          },
+          {
+            "name": "checklist-item",
+            "description": "One row with a checkbox."
+          },
+          {
+            "name": "checklist-label",
+            "description": "The option name."
+          },
+          {
+            "name": "checklist-count",
+            "description": "A muted count at the end of the row."
+          },
+          {
+            "name": "checklist-empty",
+            "description": "The \"no match\" message."
+          }
+        ],
+        "example": "<cc-component name=\"Checklist\">Content</cc-component>"
       }
     },
     {
@@ -7565,6 +7566,94 @@
           }
         ],
         "example": "<cc-component name=\"Datefield\">Content</cc-component>"
+      }
+    },
+    {
+      "name": "Filters",
+      "purpose": "One button opens a menu whose search finds fields and values at once; each field opens a panel of values (one, many, a date preset or range, text that the item contains, or a flag) with counts. What is set shows as chips that read as a sentence: the operator flips is and is not, the value reopens its panel. With data-fd-for it hides the rows itself. On a phone the menu is a bottom sheet in two steps.\nSurfaces: app, phone. Kind: component.",
+      "variants": [
+        "icon-only"
+      ],
+      "states": [
+        "empty",
+        "hover",
+        "focus",
+        "pressed",
+        "open"
+      ],
+      "paths": [
+        "fire/components/data.css",
+        "docs/data.html"
+      ],
+      "usage": "Narrow a table or list by many fields from one Filter button, and see each filter that is set as a chip. Also called: filter menu, filter builder, faceted filter, add filter, filter chips, filter pills, query filter.",
+      "do": [
+        "A table or list has more than three fields to filter by: status, endpoint, key, owner, priority, labels, date.",
+        "People need several filters at once and must see and change each one in place.",
+        "A filtered view should be sharable: data-fd-url keeps the set in the address."
+      ],
+      "dont": [
+        "Three fields or fewer that people change all the time. Use Filter.",
+        "A public listing such as a blog or a changelog. Use SitePosts.",
+        "Free-text search is the only way to narrow the list. Use Search.",
+        "A list of actions on a row or a page. Use Menu."
+      ],
+      "api": {
+        "props": [],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's content, given as the children of <cc-component>."
+          },
+          {
+            "name": "filters",
+            "description": "The root: data-fd-for, data-fd-url, data-fd-key and data-now; holds the button, the chips and the menu."
+          },
+          {
+            "name": "filters-add",
+            "description": "The Filter button (an fd-btn that opens the menu); shows the count and the key."
+          },
+          {
+            "name": "filters-menu",
+            "description": "The menu of fields (an fd-menu), with a search at the top and fields in groups."
+          },
+          {
+            "name": "filters-panel",
+            "description": "A field's values (an fd-menu sub-menu), or a text field's input."
+          },
+          {
+            "name": "filters-search",
+            "description": "The search row at the top of the menu or of a long panel."
+          },
+          {
+            "name": "filters-count",
+            "description": "A value's count, tabular; in the button, how many filters are set."
+          },
+          {
+            "name": "filters-list",
+            "description": "The chips: one fd-filter-token per field that is set."
+          },
+          {
+            "name": "filters-op",
+            "description": "A chip's operator: a button that flips is and is not, or plain text."
+          },
+          {
+            "name": "filters-value",
+            "description": "A chip's value: a button that reopens the field's panel."
+          },
+          {
+            "name": "filters-clear",
+            "description": "Removes every filter; hidden while none is set."
+          },
+          {
+            "name": "filters-sheet",
+            "description": "The phone form: a bottom fd-sheet holding the menu, then one field's values."
+          },
+          {
+            "name": "filters-back",
+            "description": "The sheet's button back from a field's values to the fields."
+          }
+        ],
+        "example": "<cc-component name=\"Filters\">Content</cc-component>"
       }
     },
     {
@@ -11067,7 +11156,7 @@
     },
     {
       "name": "Toolbar",
-      "purpose": "A row for the controls above a list: search, filters and view controls at the start, export and create at the end. It wraps instead of scrolling, and the search takes a full row on phones. It lives in a small-padded band.\nSurfaces: app, website. Kind: component.",
+      "purpose": "A row for the controls above a list: search, filters and view controls at the start, export and create at the end. When it does not fit on one line the search and the end group share the first line and the filters move together to the second; below 640px the filters become one row that scrolls sideways. It measures its nearest container and lives in a small-padded band.\nSurfaces: app, website. Kind: component.",
       "variants": [
         "size-full"
       ],
@@ -11108,6 +11197,10 @@
           {
             "name": "toolbar-end",
             "description": "The group pushed to the end."
+          },
+          {
+            "name": "toolbar-filters",
+            "description": "Optional wrapper around the filters: one item on a desktop, the row that scrolls sideways below 640px."
           }
         ],
         "example": "<cc-component name=\"Toolbar\">Content</cc-component>"

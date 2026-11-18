@@ -1,5 +1,5 @@
 // node scripts/build-index.mjs [--check]
-// Builds contract/index.json: one compact entry per component, pattern, layout and template, small enough for an
+// Builds contract/index.json: one compact entry per component, pattern, section, layout and template, small enough for an
 // agent to read whole (modules, JS-only parts with a card, are kind "module"). Reads contract/catalog.json (run build-catalog first); writes nothing else. Deterministic.
 // Entry: id, kind, name, family, job, aka[], surfaces[], data[], use (first use-when), not [{when-less ids}] (the
 // "instead" ids of avoid-when that name a component or template), docs (docs/<page>.html#<section>, or a template path).

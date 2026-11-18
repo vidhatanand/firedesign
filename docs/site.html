@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site foundation · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="site">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Website</p>
+    <h1 class="fd-display">Site foundation</h1>
+    <p class="doc-lede">The layout every public page stands on: named breakpoints, fluid type, section rhythm, grounds, the container and one section head. The sections are built on it.</p>
+  </header>
+
+  <section class="doc-section" id="breakpoints">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Breakpoints</h2>
+      <p>Four named widths. Sections measure the <code class="fd-code">.fd-site</code> container, never the viewport, so a site renders the same inside a board or a docs specimen as on its own page.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Name</th><th>Width</th><th>What changes</th></tr></thead><tbody>
+      <tr><td>phone</td><td>below 640px</td><td>One column everywhere; actions fill the width; compare shows one plan; the texture scrim becomes bands.</td></tr>
+      <tr><td>tablet</td><td>640 to 899px</td><td>The header's links move into the sheet; splits and heads stack; grids drop to two columns.</td></tr>
+      <tr><td>desktop</td><td>900px and up</td><td>Every variant at its designed layout.</td></tr>
+      <tr><td>wide</td><td>1200px and up</td><td>The fluid steps reach their ceiling; content stops at 1,200px.</td></tr>
+    </tbody></table></div>
+    <ul class="doc-notes">
+      <li>The same numbers the app shell and the docs kit use. They are in the contract (<code class="fd-code">breakpoints</code> in <code class="fd-code">contract/fire-contract.json</code>) for tools; markup never names them.</li>
+      <li><code class="fd-code">data-only="desktop|mobile"</code> keeps its meaning; there is no phone-only or tablet-only attribute.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="fluid-type">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Fluid type</h2>
+      <p>Four steps that grow with the container between a phone floor and a wide ceiling. They follow <code class="fd-code">data-text-size</code> (rem) and the type set: its display face, weight, tracking and heading case, and a set that steps its headings up or down scales them too.</p>
+    </div>
+    <h3 class="doc-sub">desktop</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section">
+          <div class="fd-site-container"><div class="fd-stack" data-gap="8">
+            <p class="fd-site-display">Read the web like an API.</p>
+            <p class="fd-site-title">Four endpoints cover the whole job.</p>
+            <p class="fd-site-heading">Crawls that took a weekend now finish before lunch.</p>
+            <p class="fd-site-lead">Scrape, crawl and extract any page as Markdown or JSON, with one key and one bill.</p>
+            <p class="fd-site-text">Every request shows its price in credits before it runs. A scrape costs 1 credit, a crawled page 1, an extracted page 5; a page that fails after two retries costs nothing.</p>
+          </div></div>
+        </section>
+      </div>
+    </div>
+    <h3 class="doc-sub">phone</h3>
+    <div class="doc-specimen" data-code data-layout="bleed" data-surface="sunken">
+      <div class="fd-site" data-contained data-frame="phone" data-frame-center>
+        <section class="fd-site-section">
+          <div class="fd-site-container"><div class="fd-stack" data-gap="8">
+            <p class="fd-site-display">Read the web like an API.</p>
+            <p class="fd-site-title">Four endpoints cover the whole job.</p>
+            <p class="fd-site-heading">Crawls that took a weekend now finish before lunch.</p>
+            <p class="fd-site-lead">Scrape, crawl and extract any page as Markdown or JSON, with one key and one bill.</p>
+            <p class="fd-site-text">Every request shows its price in credits before it runs. A scrape costs 1 credit, a crawled page 1, an extracted page 5; a page that fails after two retries costs nothing.</p>
+          </div></div>
+        </section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">fd-site-display</code> about 40 to 72px · <code class="fd-code">fd-site-title</code> 28 to 44 · <code class="fd-code">fd-site-heading</code> 22 to 30 · <code class="fd-code">fd-site-lead</code> 17 to 20. The tokens are <code class="fd-code">--fd-fluid-display</code>, <code class="fd-code">--fd-fluid-title</code>, <code class="fd-code">--fd-fluid-heading</code> and <code class="fd-code">--fd-fluid-lead</code>, each with <code class="fd-code">-lh</code> and <code class="fd-code">-ls</code>.</li>
+      <li>Titles balance their lines and stop at about 17 to 22 characters of their own size; text stops at about 64.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="rhythm">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Rhythm</h2>
+      <p>Every section is <code class="fd-code">section.fd-site-section</code>: block padding from <code class="fd-code">--fd-site-rhythm</code> (about 64 to 128px, times the density's space scale). Two neighbours on the same ground share one rhythm, not two.</p>
+    </div>
+    <h3 class="doc-sub">three sections on the page ground: one rhythm between each, a rule on the third</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section fd-site-stats" data-layout="row">
+          <div class="fd-site-container">
+    
+            <dl class="fd-site-stats-list"><div class="fd-site-stats-item"><dt class="fd-site-stats-label">Pages read a day</dt><dd class="fd-site-stats-figure">41.8<span class="fd-site-stats-unit">M</span></dd></div><div class="fd-site-stats-item"><dt class="fd-site-stats-label">Median scrape</dt><dd class="fd-site-stats-figure">842<span class="fd-site-stats-unit">ms</span></dd></div><div class="fd-site-stats-item"><dt class="fd-site-stats-label">Uptime, last 90 days</dt><dd class="fd-site-stats-figure">99.95<span class="fd-site-stats-unit">%</span></dd></div><div class="fd-site-stats-item"><dt class="fd-site-stats-label">Teams on Ember</dt><dd class="fd-site-stats-figure">1,400</dd></div></dl>
+          </div>
+        </section>
+        <section class="fd-site-section fd-site-logos" data-layout="row" data-rhythm="tight">
+          <div class="fd-site-container">
+            <p class="fd-site-logos-lead">Teams at 1,400 companies run their crawls on Ember.</p>
+            <ul class="fd-site-logos-list" aria-label="Customers"><li class="fd-site-logos-item"><svg viewBox="0 0 118 24" role="img" aria-label="Quarry Labs"><rect x="1" y="5" width="14" height="14" rx="3"/><text x="20" y="17.5" font-family="system-ui, sans-serif" font-size="16" font-weight="650" textLength="98" lengthAdjust="spacingAndGlyphs">quarry labs</text></svg></li><li class="fd-site-logos-item"><svg viewBox="0 0 128 24" role="img" aria-label="Northwind"><path d="M1 19 8.5 5 16 19z"/><text x="20" y="17.5" font-family="system-ui, sans-serif" font-size="16" font-weight="500" textLength="106" lengthAdjust="spacingAndGlyphs">NORTHWIND</text></svg></li><li class="fd-site-logos-item"><svg viewBox="0 0 82 24" role="img" aria-label="Halden"><path fill-rule="evenodd" d="M8 5a7 7 0 1 1 0 14A7 7 0 0 1 8 5zm0 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><text x="20" y="17.5" font-family="Georgia, serif" font-size="16" font-weight="600" font-style="italic" textLength="60" lengthAdjust="spacingAndGlyphs">Halden</text></svg></li><li class="fd-site-logos-item"><svg viewBox="0 0 78 24" role="img" aria-label="Tessel"><rect x="1" y="5" width="6" height="6" rx="1"/><rect x="9" y="5" width="6" height="6" rx="1"/><rect x="1" y="13" width="6" height="6" rx="1"/><rect x="9" y="13" width="6" height="6" rx="3"/><text x="20" y="17.5" font-family="system-ui, sans-serif" font-size="16" font-weight="750" textLength="56" lengthAdjust="spacingAndGlyphs">tessel</text></svg></li><li class="fd-site-logos-item"><svg viewBox="0 0 106 24" role="img" aria-label="Brightline"><path d="M4 19 9.5 5h4.5L8.5 19z"/><text x="20" y="17.5" font-family="system-ui, sans-serif" font-size="16" font-weight="450" textLength="84" lengthAdjust="spacingAndGlyphs">Brightline</text></svg></li><li class="fd-site-logos-item"><svg viewBox="0 0 86 24" role="img" aria-label="Kestrel"><path d="M1 6h5l6 6-6 6H1l6-6z"/><text x="20" y="17.5" font-family="Georgia, serif" font-size="16" font-weight="400" textLength="64" lengthAdjust="spacingAndGlyphs">Kestrel</text></svg></li></ul>
+          </div>
+        </section>
+        <section class="fd-site-section fd-site-quote" data-layout="pair" data-rule>
+          <div class="fd-site-container">
+            <div class="fd-site-quote-list"><figure class="fd-site-quote-item"><blockquote class="fd-site-quote-text"><p>“The extract endpoint returns the schema we asked for, every time. Our agents stopped guessing at page layouts.”</p></blockquote><figcaption class="fd-site-quote-cite"><span class="fd-site-quote-who"><cite class="fd-site-quote-name">Tomás Reyes</cite><span class="fd-site-quote-role">Staff engineer, Northwind</span></span></figcaption></figure><figure class="fd-site-quote-item"><blockquote class="fd-site-quote-text"><p>“The cost shows before the run, so nobody is surprised at the end of the month.”</p></blockquote><figcaption class="fd-site-quote-cite"><span class="fd-site-quote-who"><cite class="fd-site-quote-name">Jonas Lind</cite><span class="fd-site-quote-role">Founder, Kestrel</span></span></figcaption></figure></div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <h3 class="doc-sub">data-rhythm="tight" and "loose"</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="sunken" data-rhythm="tight"><div class="fd-site-container"><p class="fd-site-lead">data-rhythm="tight": half the padding.</p></div></section>
+        <section class="fd-site-section" data-rhythm="loose"><div class="fd-site-container"><p class="fd-site-lead">data-rhythm="loose": one and a half.</p></div></section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-rule</code> draws a hairline as wide as the content at the top of a section; use it between sections on the same ground.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="grounds">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Grounds</h2>
+      <p><code class="fd-code">data-ground</code> on a section sets what it stands on. Text keeps 4.5:1 on every ground, measured at the densest signature.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="page" data-rhythm="tight">
+          <div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow">data-ground="page"</p><h2 class="fd-site-title">The page colour.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="sunken" data-rhythm="tight">
+          <div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow">data-ground="sunken"</p><h2 class="fd-site-title">The sunken well.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="raised" data-rhythm="tight">
+          <div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow">data-ground="raised"</p><h2 class="fd-site-title">The surface colour.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="inverse" data-rhythm="tight">
+          <div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow">data-ground="inverse"</p><h2 class="fd-site-title">The ink ground.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="accent" data-rhythm="tight">
+          <div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow">data-ground="accent"</p><h2 class="fd-site-title">The accent fill.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="inverse" data-size="lg" href="#">Start free</a><a class="fd-btn" data-variant="ghost" data-size="lg" href="#">Read the docs</a></div></div></div>
+        </section>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="texture" data-rhythm="tight">
+          <div class="fd-ascii" data-fade="left" aria-hidden="true"></div>
+          <div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow">data-ground="texture"</p><h2 class="fd-site-title">The signature behind.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div></div></div>
+        </section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">inverse</code> flips the colour scheme inside the section, so every token and component follows: no separate inverse styles.</li>
+      <li><code class="fd-code">accent</code> sets text, lines and the focus ring in the accent's contrast colour. Its primary action is the <code class="fd-code">inverse</code> button.</li>
+      <li><code class="fd-code">texture</code> puts an <code class="fd-code">fd-ascii</code> behind the content and a scrim of the page colour under the text; the field shows where there is no text, and in bands above and below it on a phone.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="container">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Container</h2>
+      <p>Content sits in <code class="fd-code">.fd-site-container</code>: at most 1,200px, with gutters that grow with the width. There is no 12-column grid; each section defines its own columns.</p>
+    </div>
+    <h3 class="doc-sub">data-width="narrow": a 720px reading column</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section fd-site-faq" data-layout="list">
+          <div class="fd-site-container" data-width="narrow">
+            <div class="fd-site-head"><h2 class="fd-site-title">Questions about credits.</h2></div>
+            <div class="fd-accordion" data-single><details class="fd-accordion-item" open><summary class="fd-accordion-trigger"><span>How are credits counted?</span><i data-icon="chevron-down"></i></summary><div class="fd-accordion-panel"><div class="fd-accordion-inner">A scrape costs 1 credit. A crawl costs 1 credit per page, and /extract adds 4 credits per page for structured output.</div></div></details><details class="fd-accordion-item"><summary class="fd-accordion-trigger"><span>Do unused credits roll over?</span><i data-icon="chevron-down"></i></summary><div class="fd-accordion-panel"><div class="fd-accordion-inner">No. Credits reset on the first of each month, and your spend cap stays where you set it.</div></div></details><details class="fd-accordion-item"><summary class="fd-accordion-trigger"><span>Can I cap what a key spends?</span><i data-icon="chevron-down"></i></summary><div class="fd-accordion-panel"><div class="fd-accordion-inner">Yes. Set a monthly cap per team or per key; requests stop at the cap until credits reset.</div></div></details><details class="fd-accordion-item"><summary class="fd-accordion-trigger"><span>Do you store the pages you read?</span><i data-icon="chevron-down"></i></summary><div class="fd-accordion-panel"><div class="fd-accordion-inner">Logs keep request metadata for 30 days. With zero data retention on, Ember stores no page content at all.</div></div></details><details class="fd-accordion-item"><summary class="fd-accordion-trigger"><span>What happens when a page fails?</span><i data-icon="chevron-down"></i></summary><div class="fd-accordion-panel"><div class="fd-accordion-inner">Ember retries twice with a new browser. A page that still fails costs nothing and shows in your logs with its reason.</div></div></details></div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <h3 class="doc-sub">default and data-width="full"</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section" data-ground="sunken" data-rhythm="tight"><div class="fd-site-container"><p class="fd-site-lead">The default container: 1,200px with fluid gutters.</p></div></section>
+        <section class="fd-site-section" data-rhythm="tight"><div class="fd-site-container" data-width="full"><figure class="fd-doc-frame"><div class="fd-doc-frame-media"><div class="fd-site-shot">
+          <div class="fd-row" data-justify="between" data-wrap><div class="fd-stack" data-gap="1"><span class="fd-eyebrow">Credits used</span><span class="fd-stat">112,617</span></div><span class="fd-badge" data-variant="mono">Last 18 days</span></div>
+          <div class="fd-chart" data-fd-chart="area" data-height="160" data-label="Credits used per day, Oct 20 to Nov 6"><script type="application/json">{"labels":["Oct 20","Oct 21","Oct 22","Oct 23","Oct 24","Oct 25","Oct 26","Oct 27","Oct 28","Oct 29","Oct 30","Oct 31","Nov 01","Nov 02","Nov 03","Nov 04","Nov 05","Nov 06"],"yFormat":"compact","series":[{"name":"Credits used","values":[5800,6055,5977,5234,2418,2168,5538,5806,7009,6510,5586,2507,2137,6297,6422,8696,6604,6853]}]}</script></div>
+        </div></div></figure></div></section>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="head">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Section head</h2>
+      <p>One head for every section: eyebrow, title, lead, actions. Start-aligned by default; centred and split are variants.</p>
+    </div>
+    <h3 class="doc-sub">stack, start-aligned</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section"><div class="fd-site-container"><div class="fd-site-head"><p class="fd-site-eyebrow"><span class="fd-site-index">02</span>Pricing</p><h2 class="fd-site-title">Pay for pages, not seats.</h2><p class="fd-site-lead">Every plan includes every format. Credits reset on the first of the month.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">See pricing</a><a class="fd-btn" data-size="lg" href="#">Talk to sales</a></div></div></div></section>
+      </div>
+    </div>
+    <h3 class="doc-sub">data-layout="split"</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section"><div class="fd-site-container"><div class="fd-site-head" data-layout="split"><h2 class="fd-site-title">Four endpoints cover the whole job.</h2><p class="fd-site-lead">Each one bills by the page, in credits, and shows the cost before the run starts.</p></div></div></section>
+      </div>
+    </div>
+    <h3 class="doc-sub">data-align="center"</h3>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+        <section class="fd-site-section"><div class="fd-site-container"><div class="fd-site-head" data-align="center"><h2 class="fd-site-title">Read your first page in 2 minutes.</h2><p class="fd-site-lead">500 free credits, no card, every endpoint.</p><div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div></div></div></section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>The eyebrow uses the eyebrow tokens, so <code class="fd-code">data-headings</code> moves it as it does in the app. Use one eyebrow per three sections at most.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="shell">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Shell</h2>
+      <p><code class="fd-code">div.fd-site</code> holds <code class="fd-code">header.fd-site-header</code>, <code class="fd-code">main</code> and <code class="fd-code">footer.fd-site-footer</code>. It is a size container named <code class="fd-code">fd-site</code>; <code class="fd-code">data-contained</code> makes it a box for specimens.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="bleed">
+      <div class="fd-site" data-contained>
+
+        <header class="fd-site-header" data-layout="inline">
+          <div class="fd-site-container"><div class="fd-site-header-bar">
+            <a class="fd-brand" href="#" aria-label="Ember home"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a>
+            <nav class="fd-site-header-nav" id="site-nav-1" aria-label="Main">
+              <ul class="fd-site-header-links">
+                <li><button class="fd-site-header-link" type="button" data-fd-menu="site-menu-2" aria-haspopup="menu" aria-expanded="false">Product<i data-icon="chevron-down"></i></button>
+                  <div class="fd-menu" id="site-menu-2" popover role="menu">
+                    <a class="fd-menu-item" role="menuitem" href="#"><i data-icon="globe"></i>Scrape</a>
+                    <a class="fd-menu-item" role="menuitem" href="#"><i data-icon="workflow"></i>Crawl</a>
+                    <a class="fd-menu-item" role="menuitem" href="#"><i data-icon="braces"></i>Extract</a>
+                    <a class="fd-menu-item" role="menuitem" href="#"><i data-icon="radar"></i>Monitor</a>
+                  </div></li>
+                <li><a class="fd-site-header-link" href="#">Docs</a></li>
+                <li><a class="fd-site-header-link" href="#" aria-current="page">Pricing</a></li>
+                <li><a class="fd-site-header-link" href="#">Customers</a></li>
+                <li><a class="fd-site-header-link" href="#">Changelog</a></li>
+                <li data-sheet><a class="fd-site-header-link" href="#">Sign in</a></li>
+              </ul>
+            </nav>
+            <div class="fd-site-header-actions">
+              <a class="fd-btn" data-variant="ghost" href="#">Sign in</a>
+              <a class="fd-btn" data-variant="primary" href="#">Start free</a>
+              <button class="fd-btn fd-site-header-toggle" type="button" data-variant="ghost" data-icon-only aria-expanded="false" aria-controls="site-nav-1" aria-label="Menu"><i data-icon="menu"></i><i data-icon="x"></i></button>
+            </div>
+          </div></div>
+        </header>
+        <main><section class="fd-site-section fd-site-hero" data-layout="split">
+          <div class="fd-site-container">
+            <div class="fd-site-head">
+      
+              <h2 class="fd-site-display">Pages in, structured data out.</h2>
+              <p class="fd-site-lead">Send a URL and get clean Markdown back in under a second, or JSON that matches your schema.</p>
+              <div class="fd-site-head-actions"><a class="fd-btn" data-variant="primary" data-size="lg" href="#">Start free</a><a class="fd-btn" data-size="lg" href="#">Read the docs</a></div>
+              <p class="fd-site-hero-note">No card needed. 500 free credits.</p>
+            </div>
+            <div class="fd-site-hero-media"><figure class="fd-doc-frame"><div class="fd-doc-frame-media"><div class="fd-site-shot">
+          <figure class="fd-codeblock">
+            <div class="fd-codeblock-head"><span class="fd-codeblock-file"><i data-icon="terminal"></i>scrape.sh</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button></div></div>
+            <pre class="fd-codeblock-body"><code data-lang="bash">curl https://api.ember.dev/v1/scrape \
+          -H "Authorization: Bearer $EMBER_KEY" \
+          -d url=https://linear.app/pricing</code></pre>
+          </figure>
+          <div class="fd-table-wrap"><table class="fd-table" aria-label="Recent scrapes">
+            <thead><tr><th>Page</th><th>Status</th><th data-num>Time</th><th data-num>Credits</th></tr></thead>
+            <tbody>
+              <tr><td data-mono>linear.app/pricing</td><td><span class="fd-status" data-tone="success">200</span></td><td data-num>812 ms</td><td data-num>1</td></tr>
+              <tr><td data-mono>notion.so/pricing</td><td><span class="fd-status" data-tone="success">200</span></td><td data-num>904 ms</td><td data-num>1</td></tr>
+              <tr><td data-mono>stripe.com/docs</td><td><span class="fd-status" data-tone="success">200</span></td><td data-num>1.2 s</td><td data-num>1</td></tr>
+            </tbody>
+          </table></div>
+        </div></div></figure></div>
+          </div>
+        </section></main>
+        <footer class="fd-site-footer" data-layout="compact"><div class="fd-site-container"><a class="fd-brand" href="#" aria-label="Ember home"><span class="fd-brand-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></span><span class="fd-brand-name">Ember</span></a><div class="fd-site-footer-legal"><div class="fd-row"><a href="#">Docs</a><a href="#">Pricing</a><a href="#">Privacy</a><a href="#">Terms</a></div><span>© 2026 Ember Labs, Inc.</span></div></div></footer>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">fire/js/site.js</code> does the header's scrolled state and sheet, the logo marquee, the pricing period and the compare column. Nothing on a site moves with the scroll: no entrance animations, no parallax.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="generated">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Keep a site from looking generated</h2>
+      <p>A large library of website blocks makes every site look the same. Fire ships a grammar instead, and these rules.</p>
+    </div>
+    <div class="doc-do">
+      <div data-do><strong>Do</strong><ul class="doc-notes">
+        <li>Vary a site by its look: palette, type set, signature texture and the dials. The same markup under <code class="fd-code">folio</code> and <code class="fd-code">operator</code> should read as two companies.</li>
+        <li>Start-align. Let one thing in each section be the largest, and use the accent once at most.</li>
+        <li>Divide with hairlines and space: ruled cells, a rule above a section.</li>
+        <li>Show the product: a frame holding real Fire components, or the signature texture.</li>
+        <li>Write facts with units: "842 ms median", "500 free credits".</li>
+      </ul></div>
+      <div data-dont><strong>Don't</strong><ul class="doc-notes">
+        <li>Add a decorative variant. Variants differ in structure, never in skin.</li>
+        <li>Centre everything, or put a pill badge above every headline.</li>
+        <li>Use gradient text, glow, glass, drop-shadowed cards in a row of three, or an icon in a tinted square over every feature.</li>
+        <li>Use grey boxes for media, stock avatars, emoji or illustrations.</li>
+        <li>Write "supercharge", "seamless", "unlock" or "the future of".</li>
+      </ul></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

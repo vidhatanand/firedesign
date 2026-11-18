@@ -56,6 +56,24 @@ export const EXTRA_ROOTS = {
   'fd-preview': 'Content',             // pattern: change, see what it touches, then commit
   'fd-queue': 'Content',               // pattern: the list of what waits, beside the case
   'fd-states': 'Content',              // pattern: one set of page states for a screen or a section
+  // Website (site.css, docs/site.html and docs/site-sections.html): the foundation and the fourteen section types
+  'fd-site': 'Website',                // the shell of a public page: a size container every section measures
+  'fd-site-container': 'Website',
+  'fd-site-head': 'Website',
+  'fd-site-header': 'Website',
+  'fd-site-hero': 'Website',
+  'fd-site-logos': 'Website',
+  'fd-site-features': 'Website',
+  'fd-site-split': 'Website',
+  'fd-site-stats': 'Website',
+  'fd-site-steps': 'Website',
+  'fd-site-quote': 'Website',
+  'fd-site-pricing': 'Website',
+  'fd-site-compare': 'Website',
+  'fd-site-faq': 'Website',
+  'fd-site-cta': 'Website',
+  'fd-site-footer': 'Website',
+  'fd-site-posts': 'Website',
 };
 
 /** Classes (and their dash-descendants) that are parts of another component: class -> root of the component.
@@ -94,16 +112,21 @@ export const PART_OF = {
   'fd-text-2': 'fd-muted',
   'fd-toaster': 'fd-toast',
   'fd-token': 'fd-tag-input',
+  'fd-site-eyebrow': 'fd-site-head',  // the head's small label
+  'fd-site-points': 'fd-site-split',  // the ruled points list that goes with a split
 };
 
 /** Component ids that differ from the root class without its `fd-` (the vocabulary says Buttons, the class is btn). */
 export const ID_ALIASES = { 'fd-btn': 'button' };
 
 /** Kind of a component. Default: `layout` in the Layout family, otherwise `component`. */
-export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground', 'fd-preview', 'fd-queue', 'fd-states']);
+export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground', 'fd-preview', 'fd-queue', 'fd-states', 'fd-site', 'fd-site-container', 'fd-site-head']);
+
+/** Families whose roots are website sections (kind `section`), except the roots that are PATTERNS (the foundation). */
+export const SECTION_FAMILIES = new Set(['Website']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {
@@ -123,13 +146,14 @@ export const FAMILY_PAGES = {
   Documentation: ['documentation.html'],
   Tweaks: ['tweaks.html'],
   Layout: ['foundations.html', 'shell.html'],
+  Website: ['site.html', 'site-sections.html'],
 };
 
 /** The behaviour module whose header documents the events of a family. */
 export const FAMILY_MODULES = {
   Agent: ['agent'], Chat: ['chat'], Charts: ['charts'], Code: ['code'], Content: ['content'], Data: ['data'],
   Documentation: ['docsite'], Forms: ['forms'], Navigation: ['nav'], Overlays: ['overlays'], Shell: ['shell'],
-  'Texture & loading': ['texture'], Tweaks: ['tweaks'],
+  'Texture & loading': ['texture'], Tweaks: ['tweaks'], Website: ['site'],
 };
 
 /** Events a header documents without naming a class, tied to a component by a word in the statement
@@ -227,6 +251,7 @@ export const FREE_ATTRIBUTES = {
   commit: ['data-fd-hold', 'data-min-words', 'data-max-words'],   // seconds to hold a commit; the reason's word budget on fd-commit-budget
   hold: ['data-seconds'],              // the length of a hold started by data-fd-hold-for or hold(el)
   draft: ['data-fd-draft-for'],        // the id of the field a draft fills
+  'site-pricing': ['data-period'],     // a billing period's name, the segmented item's data-value (monthly, yearly)
 };
 /* An icon name is free text (the lint's unknown-icon rule checks it against catalog.icons). The drawn icon,
  * svg.fd-icon[data-icon] (EXPORT I2), takes it on the icon's root; rules such as `.fd-badge > i[data-icon]` give it to
@@ -249,7 +274,9 @@ export const DEFAULT_VALUES = {
   icon: { 'data-size': ['16'] },                   // icons.js header: data-size="12|14|16|20|24"; 16 is --fd-icon, the unstyled default
   'fd-spinner': { 'data-size': ['16'] },           // skeleton.css header: <span class="fd-spinner" data-size="16">; 16 is the unstyled default
   'copy-field': { 'data-mask': ['partial', 'full'] },   // forms.js header: the secret's data-mask="partial|full|end" "works the same on .fd-copy-field"
-  'doc-cards': { 'data-cols': ['3'] },             // docsite.css: .fd-doc-cards { --_doc-cols: 3 }; 2 and 4 are styled
+  'doc-cards': { 'data-cols': ['3'] },
+  'site-hero': { 'data-side': ['end'] },           // site.css: the split hero's media sits at the end unless data-side="start"
+  'site-split': { 'data-side': ['end'] },          // the same for a split section             // docsite.css: .fd-doc-cards { --_doc-cols: 3 }; 2 and 4 are styled
   matrix: { 'data-cols': ['2'] },                  // forms.css: .fd-matrix { --_f-cols: 2 }; 1, 3 and 4 are styled
 };
 

@@ -17,6 +17,7 @@
 //   default   Ember's value, var() resolved; { light, dark } where the value is a light-dark() pair; color-mix() with
 //             transparent written as rgb(r g b / a), calc(n × scale) at the default scale written as its result
 //   facetRole the Facet colour role the token fills (ARCHITECTURE.md section 4)
+// "breakpoints" names the widths (phone < 640, tablet 640–899, desktop >= 900, wide >= 1200), as fire/tokens.css's header says.
 // and, under "facet", each role with its token and Ember's opaque values (muted is --fd-text-3 laid over the page).
 // looks/<palette>.json is the theme record of each preset palette, as the Tweaks panel's Copy theme writes it.
 // looks/named/<name>.json are the named looks, written by hand: { name, label, note, record }. Each record must pass
@@ -249,6 +250,13 @@ const contract = {
     derived: 'Computed by Fire from the palette; never authored.',
   },
   tokens,
+  breakpoints: {
+    description: 'Named widths in px. Fire measures them on a container where it can (the app shell, the docs kit, a .fd-site), else on the viewport. min is inclusive; max is the last width the name covers.',
+    phone: { max: 639.98 },
+    tablet: { min: 640, max: 899.98 },
+    desktop: { min: 900 },
+    wide: { min: 1200 },
+  },
   facet: {
     description: 'Facet colour roles: each role, the token that fills it, and Ember\'s opaque value in each mode (muted is --fd-text-3 laid over --fd-bg). Facet\'s accent role is left to Facet.',
     roles,

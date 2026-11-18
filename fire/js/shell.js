@@ -46,18 +46,41 @@
  *                                                  host is named after the name (role="img") unless it is aria-hidden or a
  *                                                  brand mark. Empty value: the host's own text is the name.
  *
+ * Brand (0.8)
+ *  <script type="application/json" data-fd-brand>{ "name": "Quarry Labs", "mark": "/brand/mark.svg", "logo": "/brand/logo.svg",
+ *    "logoDark": "/brand/logo-dark.svg", "href": "/" }</script>   or   setBrand({ name, mark, logo, logoDark, href })
+ *                                                  The same JSON as the attribute of any element, <div data-fd-brand='{…}'>, brands only
+ *                                                  the .fd-brand inside it (a docs specimen, a preview of a customer's brand).
+ *                                                  Every .fd-brand on the page is filled from it, in the sidebar head, the top
+ *                                                  bar, a centred screen and the docs top bar; no inline style anywhere.
+ *                                                  name   the wordmark text (.fd-brand-name) and the alt text of a logo
+ *                                                  mark   a picture for .fd-brand-mark (an <img>, 24px); without it the mark is
+ *                                                         the dot-matrix initial of the name (setInitial)
+ *                                                  logo   a wide picture that stands in for the mark and the name (an <img
+ *                                                         class="fd-brand-logo"> with width and height attributes). A string, or
+ *                                                         { src, width, height }; without a size the attributes are set from
+ *                                                         the picture once it has loaded
+ *                                                  logoDark  the logo for the dark scheme, swapped when the scheme changes
+ *                                                         (fd:theme, the system setting, data-theme on <html>)
+ *                                                  href   the link of a .fd-brand that is an <a>
+ *                                                  hosts  hosts besides the page's own that may serve a picture (safeImageUrl)
+ *                                                  A picture whose address fails safeImageUrl is not used. A .fd-brand with
+ *                                                  data-fd-brand-keep is left as written (a wordmark, a partner's mark). Markup
+ *                                                  inserted later: call init(root), or setBrand() again.
+ *
  * Events (bubbling): fd:change { value: "expanded"|"collapsed" } on .fd-app;
  *  fd:open / fd:close on .fd-nav-group and .fd-mobile-nav;
  *  fd:keys { keys } on a control a key sequence activated; fd:change { value: count } on a .fd-running pill and
  *  fd:change { value: status } on a .fd-service-status when they change.
  * API: init(root), setSidebar(app, state), toggleSidebar(app), setNavGroup(button, open),
  *  openMobileNav(sheet, trigger), closeMobileNav(), cycleTheme(),
- *  syncRunning(root), setServiceStatus(el, status, text?), setInitial(host, name),
+ *  syncRunning(root), setServiceStatus(el, status, text?), setInitial(host, name), setBrand(brand, root?),
  *  initialMark / initialRows / initialTone (from initial.js, which has no DOM and also runs on a server)
  */
 import { $$, once, emit, ensureId, focusables, position, getTheme, setTheme, label } from './core.js';
 import { icon, setIcon } from './icons.js';
 import { initialMark, initialRows, initialTone } from './initial.js';
+import { safeImageUrl } from './content.js';
 
 export { initialMark, initialRows, initialTone };
 
@@ -425,6 +448,79 @@ function setupInitial(host) {
   setInitial(host, host.dataset.fdInitial || host.textContent);
 }
 
+/* ---------- Brand ---------- */
+let brand = null;           // the page's brand, from setBrand() or the data-fd-brand script
+const brandKey = (b) => JSON.stringify(b);
+const asPicture = (v) => (v && typeof v === 'object' ? { src: v.src, width: v.width, height: v.height } : { src: v });
+const darkScheme = () => {   // the same rule the tokens use: data-theme on <html>, else the system setting
+  const forced = document.documentElement.getAttribute('data-theme');
+  return forced ? forced === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+};
+function syncBrandLogos(root = document) {
+  const dark = darkScheme();
+  $$('img.fd-brand-logo[data-fd-src-dark]', root).forEach((img) => {
+    const want = (dark ? img.dataset.fdSrcDark : img.dataset.fdSrcLight) || img.dataset.fdSrcLight;
+    if (img.getAttribute('src') !== want) img.setAttribute('src', want);
+  });
+}
+function fillBrand(el, b) {
+  if (el.hasAttribute('data-fd-brand-keep') || el.fdBrandKey === brandKey(b)) return;
+  el.fdBrandKey = brandKey(b);
+  const name = b.name ?? el.querySelector('.fd-brand-name')?.textContent.trim() ?? '';
+  const pick = (v) => { const p = asPicture(v); const src = safeImageUrl(p.src, { hosts: b.hosts, data: true }); return src ? { ...p, src } : null; };
+  if (b.href && el.matches('a')) el.setAttribute('href', b.href);
+  const logo = pick(b.logo);
+  if (logo) {
+    const dark = pick(b.logoDark);
+    const img = document.createElement('img');
+    img.className = 'fd-brand-logo';
+    img.alt = name;
+    img.decoding = 'async';
+    img.referrerPolicy = 'no-referrer';
+    img.dataset.fdSrcLight = logo.src;
+    if (dark) img.dataset.fdSrcDark = dark.src;
+    if (logo.width && logo.height) { img.setAttribute('width', String(logo.width)); img.setAttribute('height', String(logo.height)); }
+    else img.addEventListener('load', () => { if (!img.hasAttribute('width') && img.naturalWidth) { img.setAttribute('width', String(img.naturalWidth)); img.setAttribute('height', String(img.naturalHeight)); } }, { once: true });
+    img.src = dark && darkScheme() ? dark.src : logo.src;
+    el.replaceChildren(img);
+    return;
+  }
+  const mark = document.createElement('span');
+  mark.className = 'fd-brand-mark';
+  const picture = pick(b.mark);
+  if (picture) {
+    const img = document.createElement('img');
+    img.alt = '';
+    img.src = picture.src;
+    mark.append(img);
+  } else setInitial(mark, name);
+  const text = document.createElement('span');
+  text.className = 'fd-brand-name';
+  text.textContent = name;
+  el.replaceChildren(mark, text);
+}
+/** Set the page's brand and fill every .fd-brand on it. With a `root` element, only the brands inside it are filled and the page's brand is unchanged. */
+export function setBrand(next, root = document) {
+  const value = next && typeof next === 'object' ? { ...next } : null;
+  if (root === document) brand = value;
+  if (value) $$('.fd-brand', root).forEach((el) => fillBrand(el, value));
+}
+const parseBrand = (text) => { try { const v = JSON.parse(text || 'null'); return v && typeof v === 'object' ? v : null; } catch { return null; } };
+function initBrand(root) {
+  if (!brand) brand = parseBrand(document.querySelector('script[type="application/json"][data-fd-brand]')?.textContent);
+  const scoped = (el) => el.closest('[data-fd-brand]:not(script)');
+  if (brand) {
+    $$('.fd-brand', root).forEach((el) => { if (!scoped(el)) fillBrand(el, brand); });
+    if (root instanceof Element && root.matches('.fd-brand') && !scoped(root)) fillBrand(root, brand);
+  }
+  const hosts = $$('[data-fd-brand]:not(script)', root);
+  if (root instanceof Element && root.matches('[data-fd-brand]:not(script)')) hosts.unshift(root);
+  hosts.forEach((host) => {
+    const own = parseBrand(host.getAttribute('data-fd-brand'));
+    if (own) $$('.fd-brand', host).forEach((el) => fillBrand(el, own));
+  });
+}
+
 /* ---------- Go-to keys ---------- */
 const KEY_WAIT = 1600;
 let keyWait = null;   // { first, timer } while a first key waits for its second
@@ -603,7 +699,9 @@ export function init(root = document) {
     document.addEventListener('focusout', (event) => { if (event.target === tipOwner) hideTip(); });
     addEventListener('scroll', hideTip, { capture: true, passive: true });
     addEventListener('blur', hideTip);
-    document.documentElement.addEventListener('fd:theme', () => syncThemeToggles());
+    document.documentElement.addEventListener('fd:theme', () => { syncThemeToggles(); syncBrandLogos(); });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => syncBrandLogos());
+    new MutationObserver(() => syncBrandLogos()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     document.addEventListener('keydown', onKeys);
     document.addEventListener('fd:open', (event) => { if (event.target instanceof Element && event.target.matches('[data-fd-shortcuts]')) renderShortcuts(event.target); });
   }
@@ -611,6 +709,7 @@ export function init(root = document) {
   if (root instanceof Element && root.matches('.fd-app')) setupApp(root);
   $$('.fd-nav-group > .fd-nav-item[aria-expanded], .fd-nav-group > .fd-nav-item[aria-controls]', root).forEach(setupGroup);
   $$('.fd-mobile-nav', root).forEach(setupMobileNav);
+  initBrand(root);
   $$('[data-fd-initial]', root).forEach(setupInitial);
   if (root instanceof Element && root.matches('[data-fd-initial]')) setupInitial(root);
   $$('.fd-nav-item[data-fd-keys]', root).forEach(setupNavKey);

@@ -66,6 +66,26 @@
  *                        it is masked again on submit and reset. No data-value, no copy, no rotate. Posts as a plain field.
  * Dropzone               <label class="fd-dropzone" data-fd-dropzone data-list="#files" data-max-mb="50"><input type="file" multiple accept=".pdf,.docx">…</label>
  *                        <ul class="fd-filelist" id="files"></ul>
+ * Logo field (0.8)       the dropzone as one setting row: a preview, an Upload button and a Remove button, for one image.
+ *                        <div class="fd-field"><span class="fd-field-label" id="logo-l">Team logo</span>
+ *                         <div class="fd-dropzone" data-fd-dropzone data-layout="logo" data-max-mb="2" role="group" aria-labelledby="logo-l">
+ *                          <input type="file" accept="image/png,image/svg+xml,image/jpeg" tabindex="-1" aria-label="Team logo file">
+ *                          <span class="fd-dropzone-preview"><img src alt="Current logo">   (optional: the logo now in use)
+ *                           <span class="fd-tile" data-size="44" data-fd-initial="Quarry Labs"></span></span>   (shown when there is no <img>)
+ *                          <span class="fd-dropzone-text"><span class="fd-dropzone-hint">PNG, SVG or JPEG, up to 2 MB.</span>
+ *                           <span class="fd-file-bar" role="progressbar" aria-label="Uploading logo"><span></span></span><span class="fd-file-status"></span></span>
+ *                          <span class="fd-dropzone-actions"><button type="button" class="fd-btn" data-fd-file-pick>Upload</button>
+ *                           <button type="button" class="fd-btn" data-variant="ghost" data-fd-file-clear>Remove</button></span></div>
+ *                         <p class="fd-field-error" hidden></p></div>
+ *                        The Upload button opens the file input; a file dropped on the row counts too. The file is checked against
+ *                        accept and data-max-mb: a refusal goes into the field's error and nothing changes. An accepted file shows
+ *                        in the preview at once (an object URL, revoked when it is replaced or removed), the row takes
+ *                        data-state="uploading", and fd:files { files, rows: [] } (cancelable) and fd:change { value: [file] } fire
+ *                        on the row. Nothing is uploaded: cancel fd:files, send the file, and call setFileProgress(row, pct,
+ *                        { state, message }) with the row itself ("done" shows the message; "error" shows it in red). Without a
+ *                        listener the row plays a short demo upload. Remove empties the preview back to the initial tile and
+ *                        fires fd:change { value: [] }. States: data-state="dragover | uploading | done | error"; aria-disabled
+ *                        on the row (and disabled buttons) switches it off.
  * One-time code          <div class="fd-otp" data-fd-otp data-length="6" [data-type="numeric|alphanumeric"]> (inputs are generated when empty)
  *                         In a form: data-name="code" adds a hidden input that carries the whole code. Or put one ordinary
  *                         named input inside (<input name="code" required>): it works as a plain field without script and
@@ -128,7 +148,7 @@
  *   fd:open / fd:close                          combobox popover
  *   fd:copy     { value }                       secret / copy field
  *   fd:rotate   {}                              secret rotate button (replace the value with setSecret)
- *   fd:files    { files }  (cancelable)         dropzone accepted files; cancel to run your own upload and drive setFileProgress
+ *   fd:files    { files }  (cancelable)         dropzone accepted files (a logo row: { files, rows: [] }); cancel to run your own upload and drive setFileProgress
  *   fd:change   { value, valid }                date field: the ISO date ("" when empty); colour: "#rrggbb" or the text typed
  *   fd:change   { value, matched }              confirm on the page, on the form
  *   fd:copy     { value }                       recovery codes, Copy all (the codes joined by new lines)
@@ -1373,8 +1393,60 @@ function fileRow(file, problem) {
   </li>`;
 }
 
+/* ---------- Logo field: the dropzone as a row with a preview ---------- */
+function logoError(zone, message) {
+  const input = $('input[type="file"]', zone);
+  const slot = errorSlot(zone);
+  if (!slot) return;
+  if (message) {
+    slot.innerHTML = `${icon('circle-alert', { size: 14 })}<span>${esc(message)}</span>`;
+    slot.dataset.message = message;
+    slot.hidden = false;
+    const described = new Set((input?.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+    described.add(slot.id);
+    input?.setAttribute('aria-describedby', [...described].join(' '));
+    input?.setAttribute('aria-invalid', 'true');
+  } else {
+    slot.hidden = true;
+    input?.removeAttribute('aria-invalid');
+  }
+}
+function logoPreview(zone, file) {
+  const box = $('.fd-dropzone-preview', zone);
+  if (!box) return;
+  if (zone.fdObjectUrl) { URL.revokeObjectURL(zone.fdObjectUrl); zone.fdObjectUrl = null; }
+  $('img', box)?.remove();
+  if (!file) return;
+  zone.fdObjectUrl = URL.createObjectURL(file);
+  const img = document.createElement('img');
+  img.alt = zone.dataset.alt || file.name;
+  img.src = zone.fdObjectUrl;
+  box.prepend(img);
+}
+function setLogo(zone, files) {
+  const file = [...files][0];
+  if (!file) return;
+  const problem = acceptProblem(zone, file);
+  if (problem) { zone.dataset.state = 'error'; logoError(zone, problem); return; }
+  logoError(zone, '');
+  logoPreview(zone, file);
+  zone.fdFile = file;
+  setFileProgress(zone, 0);
+  const proceed = emit(zone, 'fd:files', { files: [file], rows: [] });
+  emit(zone, 'fd:change', { value: [file] });
+  if (proceed) simulateUpload(zone);
+}
+function clearLogo(zone) {
+  logoPreview(zone, null);
+  zone.fdFile = null;
+  logoError(zone, '');
+  delete zone.dataset.state;
+  emit(zone, 'fd:change', { value: [] });
+}
+
 /** Add files to a dropzone's list. Accepted files are announced with fd:files; cancel it to handle the upload yourself. */
 export function addFiles(zone, files) {
+  if (zone.dataset.layout === 'logo') { setLogo(zone, files); return; }
   const list = listFor(zone);
   const multiple = $('input[type="file"]', zone)?.multiple !== false;
   const picked = [...files];
@@ -2159,13 +2231,13 @@ function bind() {
   });
   document.addEventListener('dragleave', (e) => {
     const zone = overZone(e);
-    if (zone && !zone.contains(e.relatedTarget)) delete zone.dataset.state;
+    if (zone && !zone.contains(e.relatedTarget) && zone.dataset.state === 'dragover') delete zone.dataset.state;
   });
   document.addEventListener('drop', (e) => {
     const zone = overZone(e);
     if (!zone || !hasFiles(e)) return;
     e.preventDefault();
-    delete zone.dataset.state;
+    if (zone.dataset.state === 'dragover') delete zone.dataset.state;
     if (zone.getAttribute('aria-disabled') !== 'true') addFiles(zone, e.dataTransfer.files);
   });
   on(document, 'change', '[data-fd-dropzone] input[type="file"]', (e, input) => {
@@ -2173,6 +2245,15 @@ function bind() {
     input.value = '';
   });
   on(document, 'click', '[data-fd-dropzone][aria-disabled="true"]', (e) => e.preventDefault());
+  on(document, 'click', '[data-fd-file-pick]', (e, button) => {
+    const zone = button.closest('[data-fd-dropzone]');
+    if (!zone || button.disabled || zone.getAttribute('aria-disabled') === 'true') return;
+    $('input[type="file"]', zone)?.click();
+  });
+  on(document, 'click', '[data-fd-file-clear]', (e, button) => {
+    const zone = button.closest('[data-fd-dropzone]');
+    if (zone && !button.disabled && zone.getAttribute('aria-disabled') !== 'true') clearLogo(zone);
+  });
   on(document, 'click', '[data-fd-file-remove]', (e, button) => {
     const row = button.closest('.fd-file');
     const list = row.parentElement;

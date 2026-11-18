@@ -447,6 +447,55 @@ console.log(page.markdown.slice(0, 400));</code></pre>
     </ul>
   </section>
 
+  <!-- ===================================================== Picture frame -->
+  <section class="doc-section" id="picture-frame">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Picture frame</h2>
+      <p>The frame for a picture a person supplied: a screenshot of a problem, an upload. It loads only an address that passes <code class="fd-code">safeImageUrl()</code>, holds its space from the first paint, and shows a quiet tile when there is nothing to show. In the app as well as the docs.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-grid" data-min="lg" data-gap="4">
+        <figure class="fd-doc-frame" data-zoom data-fd-src="../fire/favicon.svg" data-fd-alt="The Ember mark">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">Loaded. Click to enlarge.</figcaption>
+        </figure>
+        <figure class="fd-doc-frame" data-state="loading" aria-busy="true">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">Loading. The ratio is already held.</figcaption>
+        </figure>
+        <figure class="fd-doc-frame" data-fd-src="https://cdn.ember.invalid/runs/8f2a91.png" data-fd-hosts="cdn.ember.invalid" data-fd-alt="The failed run">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">Failed: the address was allowed and the picture did not arrive.</figcaption>
+        </figure>
+        <figure class="fd-doc-frame" data-fd-src="javascript:alert(1)" data-fd-alt="The failed run">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">Refused: the address is not on the allow-list, so nothing is requested.</figcaption>
+        </figure>
+        <figure class="fd-doc-frame" data-fd-src="" data-fd-alt="The failed run">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">Empty: no picture was attached.</figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <div class="fd-grid" data-min="lg" data-gap="4">
+        <figure class="fd-doc-frame" data-ratio="photo" data-fd-src="../fire/favicon.svg" data-fd-alt="The Ember mark">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">data-ratio="photo" holds 4:3.</figcaption>
+        </figure>
+        <figure class="fd-doc-frame" data-ratio="square" data-fd-src="../fire/favicon.svg" data-fd-alt="The Ember mark">
+          <div class="fd-doc-frame-media"></div>
+          <figcaption class="fd-doc-frame-caption">data-ratio="square" holds 1:1.</figcaption>
+        </figure>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Pass addresses through <code class="fd-code">safeImageUrl(url, { hosts, data })</code>: https on a listed host, or anything on the page's own origin; never <code class="fd-code">javascript:</code>, <code class="fd-code">blob:</code> or a plain <code class="fd-code">http:</code> address on another host. <code class="fd-code">data-fd-data</code> allows <code class="fd-code">data:image/png</code> and the other raster types.</li>
+      <li>The frame writes <code class="fd-code">data-state</code> (<code class="fd-code">empty</code>, <code class="fd-code">loading</code>, <code class="fd-code">loaded</code>, <code class="fd-code">failed</code>, <code class="fd-code">refused</code>) and fires <code class="fd-code">fd:change</code> with it. Only a loaded picture opens larger. <code class="fd-code">setPicture(frame, url)</code> points it at another address.</li>
+      <li>The loading specimen sets <code class="fd-code">data-state="loading"</code> by hand to hold still; the script sets it while the picture is requested.</li>
+    </ul>
+  </section>
+
   <!-- ===================================================== Code -->
   <section class="doc-section" id="code">
     <div class="doc-section-head">

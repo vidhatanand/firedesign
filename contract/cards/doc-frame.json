@@ -1,10 +1,11 @@
 {
   "id": "doc-frame",
-  "job": "Show a screenshot, video or diagram in a captioned frame that can open larger.",
-  "purpose": "A figure with a media area, an optional caption and a placeholder when there is no image yet. With data-zoom, activating the media opens a dialog with a copy of it. The 16:9 ratio is a preference: a placeholder that holds more grows to fit it, and nothing is clipped.",
+  "job": "Show a screenshot, video, diagram or a supplied picture in a captioned frame that can open larger.",
+  "purpose": "A figure with a media area, an optional caption and a placeholder when there is no image yet. With data-zoom, activating the media opens a dialog with a copy of it. The 16:9 ratio is a preference: a placeholder that holds more grows to fit it. With data-fd-src it loads a supplied picture: the address passes safeImageUrl() first, the ratio is held, and a tile with an icon and a line stands in when there is none, it is refused or it fails.",
   "useWhen": [
     "A docs page shows a screen of the product or a demo video.",
-    "A figure needs a caption and the option to look closer."
+    "A figure needs a caption and the option to look closer.",
+    "A person's own picture (a screenshot of a problem, an upload) is shown from an address the page does not control."
   ],
   "avoidWhen": [
     {
@@ -26,10 +27,15 @@
     "media frame",
     "image with caption",
     "video frame",
-    "lightbox"
+    "lightbox",
+    "picture frame",
+    "image with fallback",
+    "safe image",
+    "user image"
   ],
   "surfaces": [
-    "website"
+    "website",
+    "app"
   ],
   "data": [
     "none"
@@ -38,6 +44,26 @@
     {
       "name": "zoomable",
       "how": "data-zoom; the media gets a zoom-in cursor"
+    },
+    {
+      "name": "empty",
+      "how": "data-state=\"empty\"; data-fd-src is empty, so the tile says there is no picture"
+    },
+    {
+      "name": "loading",
+      "how": "data-state=\"loading\" and aria-busy while the picture is requested; the ratio is already held"
+    },
+    {
+      "name": "loaded",
+      "how": "data-state=\"loaded\"; the picture shows, and data-zoom works"
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\"; the address was allowed and the picture did not load"
+    },
+    {
+      "name": "refused",
+      "how": "data-state=\"refused\"; the address failed safeImageUrl(), so nothing was requested"
     }
   ],
   "variants": [
@@ -50,6 +76,21 @@
       "attribute": "data-ratio",
       "value": "wide",
       "useWhen": "A 21:9 placeholder for a wide banner screenshot."
+    },
+    {
+      "attribute": "data-fd-src",
+      "value": "*",
+      "useWhen": "The frame loads a picture from an address; it is checked first."
+    },
+    {
+      "attribute": "data-ratio",
+      "value": "photo",
+      "useWhen": "A 4:3 frame for a photo or an upload."
+    },
+    {
+      "attribute": "data-ratio",
+      "value": "square",
+      "useWhen": "A 1:1 frame."
     }
   ],
   "parts": [
@@ -78,7 +119,8 @@
     "doc",
     "prose",
     "dialog",
-    "chat-lightbox"
+    "chat-lightbox",
+    "file-upload"
   ],
   "keyboard": [
     {
@@ -94,7 +136,8 @@
   "provenance": [
     "docs/documentation.html",
     "fire/components/docsite.css",
-    "fire/js/docsite.js"
+    "fire/js/docsite.js",
+    "fire/js/content.js"
   ],
   "since": "0.1.0"
 }

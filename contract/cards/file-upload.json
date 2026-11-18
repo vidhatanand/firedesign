@@ -1,10 +1,11 @@
 {
   "id": "file-upload",
-  "job": "Add files by dropping them or browsing.",
-  "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Dragging over it turns the line accent. Accepted files appear as rows in fd-filelist with progress, status and size. fd:files is cancelable so your app can run the upload and report progress with setFileProgress(); data-max-mb and accept reject files that do not fit.",
+  "job": "Add files by dropping them or browsing; one image as a settings row for a logo.",
+  "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Accepted files appear as rows with progress, status and size. fd:files is cancelable so your app can run the upload and report with setFileProgress(); data-max-mb and accept reject files that do not fit. With data-layout=\"logo\" it is one row for a single image: preview, Upload, Remove, a progress bar and a field error. Fire uploads nothing.",
   "useWhen": [
     "People attach one or several files, such as a sitemap, a CSV or a document.",
-    "Upload progress and per-file errors should show as rows."
+    "Upload progress and per-file errors should show as rows.",
+    "A team uploads its logo or another single image in a settings row, with a preview and a way to remove it."
   ],
   "avoidWhen": [
     {
@@ -12,7 +13,7 @@
       "instead": "input"
     },
     {
-      "when": "The upload is an image avatar.",
+      "when": "The upload is a person's profile photo that is cropped to a circle.",
       "instead": "avatar"
     },
     {
@@ -25,7 +26,10 @@
     "file picker",
     "file input",
     "drag and drop upload",
-    "attachment"
+    "attachment",
+    "logo upload",
+    "logo field",
+    "image upload row"
   ],
   "surfaces": [
     "app",
@@ -51,6 +55,10 @@
     {
       "name": "done",
       "how": "data-state=\"done\" on a file row"
+    },
+    {
+      "name": "logo error",
+      "how": "data-state=\"error\" on a data-layout=\"logo\" row, with the reason in the field's .fd-field-error"
     }
   ],
   "variants": [
@@ -58,6 +66,11 @@
       "attribute": "data-layout",
       "value": "inline",
       "useWhen": "A compact one-line dropzone in a form row."
+    },
+    {
+      "attribute": "data-layout",
+      "value": "logo",
+      "useWhen": "A single image with a preview, Upload and Remove, in a settings row."
     }
   ],
   "parts": [
@@ -116,6 +129,14 @@
     {
       "class": "fd-file-bar",
       "role": "The progress bar."
+    },
+    {
+      "class": "fd-dropzone-preview",
+      "role": "The logo row's preview tile: the current picture, or the initial tile."
+    },
+    {
+      "class": "fd-dropzone-actions",
+      "role": "The logo row's Upload and Remove buttons."
     }
   ],
   "related": [

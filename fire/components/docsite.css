@@ -607,6 +607,19 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
      <div class="fd-doc-frame-media"><img src alt></div>   (or .fd-doc-frame-placeholder)
      <figcaption class="fd-doc-frame-caption">…</figcaption>
    </figure>
+
+   Added in 0.8 — a frame for a picture a person supplied (a screenshot of a problem, an upload), for the app as well
+   as the docs (behaviour in fire/js/docsite.js, the address check in safeImageUrl, fire/js/content.js):
+   <figure class="fd-doc-frame" data-fd-src="https://cdn.ember.dev/runs/8f2a91.png" data-fd-alt="…" data-fd-hosts="cdn.ember.dev">
+     <div class="fd-doc-frame-media"></div> <figcaption class="fd-doc-frame-caption">…</figcaption></figure>
+   data-fd-src     the address; the script fills the media with the picture, or with a .fd-doc-frame-placeholder tile
+   data-fd-hosts   hosts besides the page's own that may supply it (space separated; "*.ember.dev" for subdomains)
+   data-fd-data    also accept data: images
+   data-fd-alt     the picture's description
+   data-ratio      wide (21:9) | photo (4:3) | square (1:1) on the frame; 16:9 by default. The frame holds that ratio
+                   from the first paint, so nothing moves when the picture arrives.
+   data-state      written by the script: empty | loading | loaded | failed | refused (the tile names which); a frame
+                   that carries it is laid out as a picture frame
    ========================================================================== */
 .fd-doc-frame {
   margin: 0; min-width: 0; overflow: hidden;
@@ -628,6 +641,23 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
 }
 .fd-doc-frame-placeholder > .fd-icon { width: var(--fd-icon-xl); height: var(--fd-icon-xl); color: var(--fd-text-4); }
 .fd-doc-frame-placeholder[data-ratio="wide"] { aspect-ratio: 21 / 9; }
+/* A frame that loads its own picture. The media holds the ratio; the picture fades in over it, the tile fills it. */
+.fd-doc-frame:is([data-state], [data-fd-src]) { --_doc-ratio: 16 / 9; }
+.fd-doc-frame:is([data-state], [data-fd-src])[data-ratio="wide"] { --_doc-ratio: 21 / 9; }
+.fd-doc-frame:is([data-state], [data-fd-src])[data-ratio="photo"] { --_doc-ratio: 4 / 3; }
+.fd-doc-frame:is([data-state], [data-fd-src])[data-ratio="square"] { --_doc-ratio: 1; }
+.fd-doc-frame:is([data-state], [data-fd-src]) > .fd-doc-frame-media { aspect-ratio: var(--_doc-ratio); }
+.fd-doc-frame[data-state] > .fd-doc-frame-media > img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  opacity: 0; transition: opacity var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-doc-frame[data-state="loaded"] > .fd-doc-frame-media > img { opacity: 1; }
+.fd-doc-frame[data-state] > .fd-doc-frame-media > .fd-doc-frame-placeholder { position: absolute; inset: 0; aspect-ratio: auto; min-block-size: 0; }
+.fd-doc-frame[data-state="loading"] > .fd-doc-frame-media {
+  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a4) 50%, transparent 70%);
+  background-size: 150% 100%; background-repeat: no-repeat;
+  animation: fd-shimmer var(--fd-loop-shimmer) var(--fd-ease-in-out) infinite both;
+}
 .fd-doc-frame-play {
   display: grid; place-items: center; width: var(--fd-doc-play); height: var(--fd-doc-play); border-radius: 50%;
   background: var(--fd-surface-raised); color: var(--fd-text); box-shadow: var(--fd-shadow-lg);

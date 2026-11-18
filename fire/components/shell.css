@@ -40,6 +40,12 @@
                        the popover lists fd-running-item (data-kind, fd-running-title, fd-running-meta, fd-running-bar, fd-running-time)
    fd-service-status   the service status control in the top bar: data-status="operational|degraded|outage|maintenance"; the label shows
                        unless the service is operational (fd-service-status-label)
+   Added in 0.8:
+   fd-screen-foot      the legal row of a centred screen (below, "Centred screen")
+   data-fd-brand       the product's brand, set once: JSON in <script type="application/json" data-fd-brand> fills every .fd-brand on the
+                       page (name, mark, logo, logoDark, href); the same JSON as an attribute on an element fills only the brands
+                       inside it. No style attribute: a logo is an <img class="fd-brand-logo"> with width and height. A .fd-brand
+                       with data-fd-brand-keep is left as written. Behaviour in fire/js/shell.js (setBrand).
    Responsive: the shell is a size container named `fd-app`; under 900px the sidebar
    hides and .fd-mobile-nav takes over. Page parts query the `fd-page` container.
    ========================================================================== */
@@ -738,6 +744,15 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
    </div></main>
 
    data-size  sm (default) | md, for a screen with more to read (consent, a list of codes)
+
+   Added in 0.8 — the legal foot: copyright, the terms and privacy links, a language or status link.
+   <footer class="fd-band" data-pad="sm" aria-label="Legal">
+     <div class="fd-screen-foot"><span>© 2026 Ember Labs, Inc.</span><a href="…">Terms</a><a href="…">Privacy</a><a href="…">English</a></div>
+   </footer>
+   Put the footer band after the centred band inside the same fd-frame[data-fill]: the frame fills the screen, so the foot
+   sits at the bottom of a tall one, and under the card on a short one or with the keyboard open (it is in the flow,
+   never fixed or absolute, so it cannot cover the card). The foot is a centred row that wraps; links and buttons
+   (.fd-btn-text) in it are quiet ink, with an underline on hover. Inside .fd-screen it sits under the note.
 */
 .fd-screen {
   --_s-screen: var(--fd-column-sm);
@@ -749,6 +764,16 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 .fd-screen > .fd-corners > .fd-card, .fd-screen > .fd-card { gap: var(--fd-space-6); }
 .fd-screen-head { display: flex; flex-direction: column; align-items: center; gap: var(--fd-space-1-5); min-width: 0; text-align: center; text-wrap: balance; }
 .fd-screen-head > .fd-tile { margin-block-end: var(--fd-space-2-5); }
+.fd-screen-foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--fd-space-1) var(--fd-space-4);
+  min-width: 0; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-align: center;
+}
+.fd-screen > .fd-screen-foot { align-self: stretch; }
+.fd-screen-foot :is(a, .fd-btn-text) {
+  color: var(--fd-text-2); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: var(--fd-content-underline-offset);
+  transition: color var(--fd-dur-2) var(--fd-ease-out), text-decoration-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-screen-foot :is(a, .fd-btn-text):hover { color: var(--fd-text); text-decoration-color: currentColor; }
 .fd-screen-note {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--fd-space-1) var(--fd-space-2);
   font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); text-align: center;

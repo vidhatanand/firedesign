@@ -85,7 +85,7 @@ export type IconName =
   | 'italic' | 'underline' | 'strikethrough' | 'link-2' | 'unlink' | 'scissors' | 'clipboard' | 'clipboard-check'
   | 'clipboard-list' | 'file-plus' | 'file-up' | 'file-down' | 'folder-plus' | 'images' | 'camera' | 'crop' | 'palette'
   | 'swatch-book' | 'paintbrush' | 'ruler' | 'grid-3x3' | 'move' | 'expand' | 'shrink' | 'zoom-in' | 'zoom-out'
-  | 'rotate-cw' | 'flip-horizontal' | 'lasso' | 'wand' | 'eraser' | 'pipette';
+  | 'rotate-cw' | 'flip-horizontal' | 'lasso' | 'wand' | 'eraser' | 'pipette' | 'wrench' | 'calendar-check';
 
 /** Form controls that constraint validation covers. */
 export type FormControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -557,7 +557,7 @@ export interface FireCloseDetail {
  *  forms: search (string), tag input (string[]), multiple combobox (string[]), pairs (name → value), dropzone and
  *  file list (File[]), number (number | null), slider (number); overlays filter list (string[]); code tabs and view
  *  switch (string); agent: model chip (string), playground (result rows), thread ("done"), toggles (boolean), cycle
- *  (string); texture setLoading ("loading"|"ready"); docsite: request lang / example, helpful ("yes"|"no"|"sent"),
+ *  (string); texture setLoading ("loading"|"ready"); docsite: request lang / example, a picture frame (its state), helpful ("yes"|"no"|"sent"),
  *  try-it (HTTP status number); shell: a .fd-running pill (the count), a .fd-service-status (its status);
  *  content: a preview gone stale ("stale"). */
 export interface ValueChangeDetail {
@@ -679,7 +679,7 @@ export interface ChartPointValue {
 }
 
 /** fd:select detail, one shape with optional fields:
- *  forms combobox, data pipeline job, agent model menu: { value, item } · overlays menu: { value, item, trigger } ·
+ *  forms combobox, data pipeline job, agent model menu: { value, item } · overlays menu: { value, item, trigger, row } ·
  *  overlays command palette: { value, item, data } · data [data-action]: { action, value (selected row values), row,
  *  wrap } · data tr[data-href]: { action: 'open', href, row } · charts cartesian: { index, label, values } ·
  *  charts strip: { index, label, tone, name, href } · charts quadrant: { index, name, x, y, href } · content queue item,
@@ -912,6 +912,24 @@ export type ServiceStatus = 'operational' | 'degraded' | 'outage' | 'maintenance
 export type InitialTone = 'accent' | 'info' | 'violet' | 'success' | 'warning' | 'neutral';
 
 /** Sidebar, rail tooltips, nav groups, mobile nav, theme toggle, initial marks, running pill, service status. */
+/** A picture for the brand: an address, or an address with its size (the width and height attributes of the img). */
+export type BrandPicture = string | { src: string; width?: number; height?: number };
+/** The product's brand, set once (setBrand, or data-fd-brand JSON). */
+export interface BrandConfig {
+  /** The wordmark text and the alt text of a logo. */
+  name?: string;
+  /** A picture for the 24px mark slot; without it the mark is the dot-matrix initial of the name. */
+  mark?: BrandPicture;
+  /** A wide picture that stands in for the mark and the name. */
+  logo?: BrandPicture;
+  /** The logo for the dark scheme. */
+  logoDark?: BrandPicture;
+  /** The link of a brand that is an <a>. */
+  href?: string;
+  /** Hosts besides the page's own that may serve a picture. */
+  hosts?: string[];
+}
+
 export declare namespace shell {
   /** Mount the shell behaviours inside root. */
   export function init(root?: ParentNode): void;
@@ -929,6 +947,9 @@ export declare namespace shell {
   export function cycleTheme(): void;
   /** Draw `name`'s mark (its first letter as a dot-matrix glyph, a tone from its hash) into a tile, avatar or brand mark. Sets data-fd-initial. */
   export function setInitial(host: HTMLElement | null | undefined, name?: string | null): void;
+  /** Set the page's brand and fill every .fd-brand from it (or, with a root element, only the brands inside it). The page's brand
+   *  can also be JSON in <script type="application/json" data-fd-brand>. */
+  export function setBrand(brand: BrandConfig | null | undefined, root?: ParentNode): void;
   /** Recount every .fd-running pill in `root` (call it after changing its items) and watch each one's list. Fires fd:change { value: count } when the count changes. */
   export function syncRunning(root?: ParentNode): void;
   /** Set a .fd-service-status to a status, with an optional text of its own (default: the label status.<status>). Fires fd:change { value: status } when it changed. */
@@ -1168,6 +1189,8 @@ export declare namespace overlays {
   ): HTMLElement | null;
   /** Close a menu (and its sub-menus). */
   export function closeMenu(ref: ElementRef, returnFocus?: boolean): void;
+  /** Apply a row's flags (data-fd-flags on the opener or its row) to a menu's data-fd-when / data-fd-unless items. Returns how many items show. */
+  export function filterMenu(menu: HTMLElement, trigger?: Element | null): number;
   /** Open a popover by element or id; returns it, or null. */
   export function openPopover(ref: ElementRef, options?: { trigger?: HTMLElement | null; placement?: Placement; focus?: boolean }): HTMLElement | null;
   /** Close a popover. */
@@ -1231,6 +1254,8 @@ export declare namespace content {
   export function removeItem(item: HTMLElement | null | undefined): HTMLElement | null;
   /** Show one state of an .fd-states wrapper; fires fd:change { value, previous } when it changed. Unknown states are ignored. */
   export function setState(el: HTMLElement | null | undefined, state: PageState): void;
+  /** The address when it may load as a picture, else null: https on a listed host or anything on the page's own origin; data: images only with `data`. */
+  export function safeImageUrl(url: unknown, options?: { hosts?: string[] | string; data?: boolean; base?: string }): string | null;
 }
 
 /** A syntax token type (tokenize). */
@@ -1636,6 +1661,8 @@ export declare namespace docsite {
   export function setPanelLang(panel: HTMLElement, lang: string, options?: { persist?: boolean }): boolean;
   /** Show a request panel's named example. */
   export function setPanelExample(panel: HTMLElement, example: string): void;
+  /** Point an .fd-doc-frame picture frame at an address (checked with safeImageUrl first); "" or null shows the empty tile. */
+  export function setPicture(frame: HTMLElement | null | undefined, url?: string | null): void;
 }
 
 /** The tweaks panel and the tweak state. */

@@ -1,11 +1,12 @@
 {
   "id": "menu",
   "job": "Pick an action or a choice from a short list that belongs to one trigger.",
-  "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or sub-menus. Arrow keys move, typing jumps to an item, Escape returns focus to the trigger. Selecting fires a cancelable fd:select; checkbox and radio items fire fd:change. Danger items sit last, below a separator.",
+  "purpose": "A floating list of items that opens from a button or a right-click. Items can be actions, checkboxes, radios or sub-menus. Arrow keys move, typing jumps to an item, Escape returns focus to the trigger. Selecting fires a cancelable fd:select; checkbox and radio items fire fd:change. Danger items sit last, below a separator. One menu can serve every row of a table or list: items carry data-fd-when or data-fd-unless and the row carries data-fd-flags, so each row shows only the items that apply.",
   "useWhen": [
     "A row or a header has a set of actions behind a \"more\" button.",
     "Switching team, workspace or environment: use the switcher variant.",
-    "Choosing columns or one sort order from a short list."
+    "Choosing columns or one sort order from a short list.",
+    "Rows share one menu but not every action fits every row (Resume only on paused rows)."
   ],
   "avoidWhen": [
     {
@@ -63,6 +64,10 @@
     {
       "name": "keep open",
       "how": "data-keep-open on an item or the menu"
+    },
+    {
+      "name": "nothing to show",
+      "how": "every item gated out: the menu stays shut and the opener gets aria-disabled=\"true\" and data-fd-empty"
     }
   ],
   "variants": [
@@ -85,6 +90,21 @@
       "attribute": "data-icon",
       "value": "",
       "useWhen": "An item with a leading icon."
+    },
+    {
+      "attribute": "data-fd-when",
+      "value": "*",
+      "useWhen": "Show this item only on rows whose data-fd-flags hold one of the words."
+    },
+    {
+      "attribute": "data-fd-unless",
+      "value": "*",
+      "useWhen": "Hide this item on rows whose data-fd-flags hold any of the words."
+    },
+    {
+      "attribute": "data-fd-else",
+      "value": "disable",
+      "useWhen": "Dim a gated item instead of hiding it."
     }
   ],
   "parts": [
@@ -172,6 +192,10 @@
     {
       "keys": "Escape",
       "does": "Closes and returns focus to the trigger."
+    },
+    {
+      "keys": "Arrow keys",
+      "does": "Skip items hidden for this row."
     }
   ],
   "example": "docs/overlays.html#menus",

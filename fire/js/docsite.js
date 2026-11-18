@@ -26,7 +26,19 @@
  *                  [data-fd-copy] behaviour of fire.js.
  *  Helpful         .fd-doc-helpful with [data-fd-doc-vote="yes|no"], .fd-doc-helpful-thanks[hidden],
  *                  form.fd-doc-helpful-form[hidden]. fd:change { value: "yes" | "no" | "sent" }.
- *  Zoom            .fd-doc-frame[data-zoom] > .fd-doc-frame-media opens a dialog with a copy of the media.
+ *  Zoom            .fd-doc-frame[data-zoom] > .fd-doc-frame-media opens a dialog with a copy of the media. A frame that
+ *                  loads its own picture (below) zooms only while the picture is shown.
+ *  Picture (0.8)   <figure class="fd-doc-frame" data-fd-src="https://cdn.ember.dev/runs/8f2a91.png" data-fd-alt="…"
+ *                  [data-fd-hosts="cdn.ember.dev *.ember-usercontent.com"] [data-fd-data] [data-ratio="wide|photo|square"] [data-zoom]>
+ *                  <div class="fd-doc-frame-media"></div> [<figcaption class="fd-doc-frame-caption">…</figcaption>] </figure>
+ *                  The address goes through safeImageUrl() (content.js) with data-fd-hosts (and data-fd-data to allow
+ *                  data: images); only an address that passes is requested. The media is filled with an <img> and, for
+ *                  every state but "loaded", a .fd-doc-frame-placeholder tile (icon and one line). The frame reserves its
+ *                  space with an aspect ratio (16:9; data-ratio) and states itself in data-state="empty | loading | loaded
+ *                  | failed | refused" (aria-busy while loading), firing fd:change { value: state } on the figure. Words
+ *                  of the tile: data-label-frame-empty "No picture", -refused "This address isn't allowed", -failed
+ *                  "The picture didn't load" (on the figure or an ancestor). setPicture(frame, url) points it at another
+ *                  address ("" or null: empty).
  *  Try it          dialog.fd-doc-try[data-params="#selector"] > form[data-fd-doc-try-form] with an empty
  *                  [data-fd-doc-try-fields] (generated from the .fd-doc-params[data-in="body|query|path"] rows
  *                  inside data-params), input[data-fd-doc-try-key], .fd-doc-try-result[hidden] holding
@@ -38,14 +50,14 @@
  *
  * Events (bubbling): fd:open / fd:close (nav groups), fd:change (see above), fd:copy { value } (copy page, anchors).
  * API: init(root), buildToc(scope), toMarkdown(article), setNavGroup(button, open), openNavSheet(trigger),
- *      selectSetup(tile), setPanelLang(panel, lang), setPanelExample(panel, example)
+ *      selectSetup(tile), setPanelLang(panel, lang), setPanelExample(panel, example), setPicture(frame, url)
  */
 import { $, $$, once, emit, copyText, ensureId, position, reducedMotion } from './core.js';
 import { icon } from './icons.js';
 import { openDialog, closeDialog, toast } from './overlays.js';
 import { selectTab, renderJSON } from './code.js';
 import { refresh as refreshNav } from './nav.js';
-import { toggle as toggleDetails } from './content.js';
+import { toggle as toggleDetails, safeImageUrl } from './content.js';
 
 const doc = document;
 const HAS_POPOVER = typeof HTMLElement === 'function' && typeof HTMLElement.prototype.showPopover === 'function';
@@ -685,11 +697,69 @@ function openZoom(media) {
 }
 function setupZoom(frame) {
   if (!once(frame, 'doc-zoom')) return;
+  syncZoom(frame);
+}
+const zoomable = (media) => { const f = media.closest('.fd-doc-frame'); return !f.hasAttribute('data-fd-src') || f.dataset.state === 'loaded'; };
+/* A zoomable frame opens its media as a button. A frame with its own picture is one only while the picture shows. */
+function syncZoom(frame) {
   const media = $('.fd-doc-frame-media', frame);
-  if (!media) return;
+  if (!media || !frame.hasAttribute('data-zoom')) return;
+  if (frame.hasAttribute('data-fd-src') && frame.dataset.state !== 'loaded') {
+    media.removeAttribute('tabindex');
+    media.removeAttribute('role');
+    media.removeAttribute('aria-label');
+    return;
+  }
   media.tabIndex = 0;
   media.setAttribute('role', 'button');
   media.setAttribute('aria-label', `Enlarge: ${textOf($('.fd-doc-frame-caption', frame)) || $('img', media)?.alt || 'image'}`);
+}
+
+/* ---------- Picture: an address that passed the allow-list, a tile when it did not ---------- */
+const PICTURE_TEXT = { empty: 'No picture', refused: "This address isn't allowed", failed: "The picture didn't load" };
+const PICTURE_ICON = { empty: 'image', refused: 'shield-alert', failed: 'image' };
+function pictureState(frame, state) {
+  frame.dataset.state = state;
+  if (state === 'loading') frame.setAttribute('aria-busy', 'true'); else frame.removeAttribute('aria-busy');
+  syncZoom(frame);
+  emit(frame, 'fd:change', { value: state });
+}
+function pictureTile(frame, state) {
+  const media = $('.fd-doc-frame-media', frame);
+  $('.fd-doc-frame-placeholder', media)?.remove();
+  if (!PICTURE_TEXT[state]) return;
+  const attr = `data-label-frame-${state}`;
+  const text = frame.closest(`[${attr}]`)?.getAttribute(attr) ?? PICTURE_TEXT[state];
+  media.insertAdjacentHTML('beforeend', `<div class="fd-doc-frame-placeholder" role="img" aria-label="${esc(`${frame.dataset.fdAlt || ''} ${text}`.trim())}">${icon(PICTURE_ICON[state])}<span>${esc(text)}</span></div>`);
+}
+/** Point a picture frame at an address. It is checked first; "" or null shows the empty tile. */
+export function setPicture(frame, url) {
+  if (!frame) return;
+  if (url !== undefined) frame.setAttribute('data-fd-src', url ?? '');
+  const media = $('.fd-doc-frame-media', frame) || frame.insertAdjacentElement('afterbegin', Object.assign(doc.createElement('div'), { className: 'fd-doc-frame-media' }));
+  $('img', media)?.remove();
+  const raw = (frame.getAttribute('data-fd-src') || '').trim();
+  if (!raw) { pictureTile(frame, 'empty'); pictureState(frame, 'empty'); return; }
+  const safe = safeImageUrl(raw, { hosts: (frame.dataset.fdHosts || '').split(/[\s,]+/).filter(Boolean), data: frame.hasAttribute('data-fd-data') });
+  if (!safe) { pictureTile(frame, 'refused'); pictureState(frame, 'refused'); return; }
+  pictureTile(frame, null);
+  const img = doc.createElement('img');
+  img.alt = frame.dataset.fdAlt || textOf($('.fd-doc-frame-caption', frame)) || '';
+  img.decoding = 'async';
+  img.referrerPolicy = 'no-referrer';
+  let settled = false;
+  const done = (ok) => {
+    if (settled || img.parentNode !== media) return;
+    settled = true;
+    if (!ok) { img.remove(); pictureTile(frame, 'failed'); }
+    pictureState(frame, ok ? 'loaded' : 'failed');
+  };
+  img.addEventListener('load', () => done(true), { once: true });
+  img.addEventListener('error', () => done(false), { once: true });
+  media.prepend(img);
+  pictureState(frame, 'loading');
+  img.src = safe;
+  if (img.complete && img.naturalWidth) done(true);
 }
 
 function setupEndpoint(url) {
@@ -880,7 +950,7 @@ function onClick(event) {
   if (voteBtn) { vote(voteBtn); return; }
 
   const media = target.closest('.fd-doc-frame[data-zoom] .fd-doc-frame-media');
-  if (media && !target.closest('a, button:not(.fd-doc-frame-play)')) { openZoom(media); }
+  if (media && zoomable(media) && !target.closest('a, button:not(.fd-doc-frame-play)')) { openZoom(media); }
 }
 
 function onKeydown(event) {
@@ -899,7 +969,7 @@ function onKeydown(event) {
     if (to) { event.preventDefault(); selectSetup(to, { focus: true }); }
     return;
   }
-  if ((event.key === 'Enter' || event.key === ' ') && target.matches('.fd-doc-frame[data-zoom] .fd-doc-frame-media')) {
+  if ((event.key === 'Enter' || event.key === ' ') && target.matches('.fd-doc-frame[data-zoom] .fd-doc-frame-media') && zoomable(target)) {
     event.preventDefault();
     openZoom(target);
   }
@@ -974,6 +1044,7 @@ export function init(root = doc) {
   scope(root, '.fd-doc-nav').forEach(setupNav);
   scope(root, '.fd-doc-setup').forEach(setupSetup);
   scope(root, '.fd-doc-panel').forEach(setupPanel);
+  scope(root, '.fd-doc-frame[data-fd-src]').forEach((frame) => { if (once(frame, 'doc-picture')) setPicture(frame); });
   scope(root, '.fd-doc-frame[data-zoom]').forEach(setupZoom);
   scope(root, '.fd-doc-endpoint-url').forEach(setupEndpoint);
   scope(root, '.fd-doc-try').forEach(setupTry);

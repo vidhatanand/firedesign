@@ -113,6 +113,7 @@
   --fd-form-drop-lift: 4px;            /* icon lift while dragging over */
   --fd-form-file-icon: 36px;           /* file tile, and the inline dropzone icon */
   --fd-form-file-nudge: 1px;           /* aligns file text with its tile */
+  --fd-form-logo-tile: 64px;           /* the logo field's preview tile */
   --fd-form-hidden-input: 1px;         /* the visually hidden file input */
   /* one-time code */
   --fd-form-otp-h: 48px;
@@ -967,6 +968,32 @@
 .fd-dropzone[data-layout="inline"] > .fd-dropzone-icon { inline-size: var(--fd-form-file-icon); block-size: var(--fd-form-file-icon); flex: none; }
 .fd-dropzone[data-layout="inline"] .fd-dropzone-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); }
 
+/* Logo field (0.8; markup in fire/js/forms.js): the dropzone as one row, a preview, a hint and two buttons.
+   data-layout="logo"   preview tile (.fd-dropzone-preview: the current <img>, or the initial tile) · .fd-dropzone-text
+                        (.fd-dropzone-hint, then the progress bar and status while uploading) · .fd-dropzone-actions (Upload, Remove)
+   data-state           dragover | uploading (bar and status show) | done | error (the row's line turns red; the message is the field's error) */
+.fd-dropzone[data-layout="logo"] {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: var(--fd-space-3) var(--fd-space-4);
+  min-block-size: 0; padding: var(--fd-space-4); text-align: start; cursor: default;
+}
+.fd-dropzone[data-layout="logo"]:hover { --_f-line: var(--fd-line-strong); }
+.fd-dropzone-preview {
+  flex: none; display: grid; place-items: center; inline-size: var(--fd-form-logo-tile); block-size: var(--fd-form-logo-tile); overflow: hidden;
+  border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); background: var(--fd-surface);
+}
+.fd-dropzone-preview > img { inline-size: 100%; block-size: 100%; object-fit: contain; padding: var(--fd-space-2); }
+.fd-dropzone-preview > img ~ * { display: none; }
+.fd-dropzone[data-layout="logo"] > .fd-dropzone-text { flex: 1 1 var(--fd-size-sm); }
+.fd-dropzone-actions { flex: none; display: flex; flex-wrap: wrap; gap: var(--fd-space-2); margin-inline-start: auto; }
+.fd-dropzone[data-layout="logo"]:not(:has(.fd-dropzone-preview > img)) [data-fd-file-clear] { display: none; }
+.fd-dropzone[data-layout="logo"] .fd-file-bar, .fd-dropzone[data-layout="logo"] .fd-file-status { display: none; }
+.fd-dropzone[data-layout="logo"] .fd-file-status { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); align-items: center; gap: var(--fd-space-1); }
+.fd-dropzone[data-layout="logo"][data-state="uploading"] .fd-file-bar { display: block; }
+.fd-dropzone[data-layout="logo"]:is([data-state="uploading"], [data-state="done"], [data-state="error"]) .fd-file-status { display: inline-flex; }
+.fd-dropzone[data-layout="logo"][data-state="done"] .fd-file-status { color: var(--fd-success-text); }
+.fd-dropzone[data-layout="logo"][data-state="error"] { --_f-line: var(--fd-danger-solid); }
+.fd-dropzone[data-layout="logo"][data-state="error"] .fd-file-status { color: var(--fd-danger-text); }
+.fd-dropzone[data-layout="logo"][aria-disabled="true"] .fd-dropzone-preview { background: var(--fd-fill-disabled); }
 .fd-filelist { display: grid; gap: var(--fd-space-2); margin: 0; padding: 0; list-style: none; }
 .fd-file {
   display: grid; grid-template-columns: var(--fd-form-file-icon) minmax(0, 1fr) auto; align-items: start; gap: var(--fd-space-3); padding: var(--fd-space-3);

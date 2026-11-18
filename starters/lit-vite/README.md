@@ -10,11 +10,11 @@ checks that prove they match Fire's own templates.
 |---|---|---|
 | Overview | `/overview` | skeleton loading, an area chart and sparklines, a stats grid, a table, a first-visit dialog |
 | Activity logs | `/logs` | search, filters, a date range, sort, row selection, bulk and row-menu actions, toasts with Undo, table states, a detail sheet |
-| Settings | `/settings` | tabs kept in the URL, segmented controls, forms, switches, menus, a confirm dialog |
+| Settings | `/settings` | tabs kept in the URL, one dirty-tracked form, features as switches with Done · Undo, disabled-with-a-reason controls, delete confirmed on the page, a Demo state band (`?state=ready\|loading\|error\|member`), menus, a confirm dialog |
 | Elements | `/elements` | Fire's elements (`fd-chart`, `fd-code`, `fd-icon`, `fd-texture`) driven by Lit properties |
 
 The three screens are the `.fd-page` of Fire's `templates/overview.html`, `logs.html` and `settings.html`, converted
-to Lit. The shell is `templates/shell-static.html`. The sample data is Ember's, kept as it is.
+to Lit. The shell is `templates/shell-static.html` (go-to keys, the running-now pill, the service status, the shortcut sheet and the command palette; the starter has no Decisions page). The sample data is Ember's, kept as it is.
 
 ## Start
 

@@ -10,13 +10,17 @@ export interface Route {
   icon: IconName;
   /** The label of the sidebar group the item sits under (items without one sit at the top). */
   group?: string;
+  /** The go-to keys: `g` then this letter goes here (data-fd-keys="g o"). */
+  keys: string;
+  /** Words the command palette also finds the page by. */
+  keywords?: string;
 }
 
 export const routes: Route[] = [
-  { path: '/overview', tag: 'screen-overview', label: 'Overview', icon: 'home' },
-  { path: '/logs', tag: 'screen-logs', label: 'Activity logs', icon: 'list', group: 'Team' },
-  { path: '/settings', tag: 'screen-settings', label: 'Settings', icon: 'settings', group: 'Account' },
-  { path: '/elements', tag: 'screen-elements', label: 'Elements', icon: 'blocks', group: 'Fire' },
+  { path: '/overview', tag: 'screen-overview', label: 'Overview', icon: 'home', keys: 'g o', keywords: 'home dashboard credits' },
+  { path: '/logs', tag: 'screen-logs', label: 'Activity logs', icon: 'list', group: 'Team', keys: 'g l', keywords: 'requests history' },
+  { path: '/settings', tag: 'screen-settings', label: 'Settings', icon: 'settings', group: 'Account', keys: 'g s', keywords: 'preferences team account' },
+  { path: '/elements', tag: 'screen-elements', label: 'Elements', icon: 'blocks', group: 'Fire', keys: 'g e', keywords: 'components charts code' },
 ];
 
 /** The route for the current URL. An unknown path shows the first route. */

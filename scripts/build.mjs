@@ -17,6 +17,7 @@ const steps = [
   ['build-contract.mjs', check ? ['--check'] : []],
   ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card
   ['build-index.mjs', check ? ['--check'] : []],     // the search index, from the catalogue
+  ['build-pictures.mjs', check ? ['--check'] : [], { onlyCheck: true }],   // a picture for every index entry (the render is `npm run build:pictures`)
   ['gate.mjs', check ? ['--check', '--no-look'] : ['--no-look']],   // near-duplicates by structure and job (npm run gate adds the look)
   ['build-wrappers.mjs', check ? ['--check'] : [], { optional: true }],
   ['build-wrappers-vue.mjs', check ? ['--check'] : [], { optional: true }],
@@ -25,6 +26,7 @@ const steps = [
 let failed = 0;
 for (const [script, args, opts = {}] of steps) {
   const file = path.join(ROOT, 'scripts', script);
+  if (opts.onlyCheck && !check) continue;   // rendering needs a browser and minutes: never part of a plain build
   if (opts.optional) { try { await import('node:fs').then((fs) => fs.accessSync(file)); } catch { continue; } }
   const r = spawnSync(process.execPath, [file, ...args], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' });
   const last = (r.stdout.trim().split('\n').pop() || '').slice(0, 160);

@@ -2,6 +2,7 @@
 // fire find: search Fire by what a part is for.
 //   node scripts/find.mjs "approve a request" [--surface app|website|phone|email] [--data record|list|series|form|text]
 //                         [--kind component|pattern|section|template|module] [--json] [--limit 5]
+// --json results carry id, kind, family, surfaces, score, why, job, use, instead, docs and picture (a path, relative to the package root, to the PNG of the part; modules have none).
 // Each result prints its surfaces. With --surface, a line says when parts for other surfaces match the query clearly
 // better (to stderr with --json, so stdout stays the array; each JSON result carries `surfaces`).
 // Reads contract/index.json (node scripts/build-index.mjs builds it). No dependencies, no network.
@@ -123,6 +124,9 @@ for (const row of SYNONYMS) for (const a of row) {
 
 export function load(file = INDEX) {
   const idx = JSON.parse(fs.readFileSync(file, 'utf8'));
+  // the picture rule is written once at the top of the index; every result carries the path it gives
+  const rule = idx.pictures;
+  if (rule) for (const e of idx.entries) if (!rule.none.includes(e.kind)) e.picture = rule.path.replace('{kind}', e.kind).replace('{id}', e.id);
   const docs = idx.entries.map((e) => ({
     e,
     id: toks(e.id.replace(/-/g, ' ')), name: toks(e.name),
@@ -236,7 +240,7 @@ function main(argv) {
   const elsewhere = betterElsewhere(db, query, opts, res.length ? res : []);
   const note = betterNote(args.surface, elsewhere, res.length > 0);
   if (args.json) {
-    console.log(JSON.stringify(res.map(({ id, kind, family, surfaces, score, why, job, use, not, docs }) => ({ id, kind, family, surfaces: surfaceList(surfaces), score, why, job, use, instead: not, docs })), null, 2));
+    console.log(JSON.stringify(res.map(({ id, kind, family, surfaces, score, why, job, use, not, docs, picture }) => ({ id, kind, family, surfaces: surfaceList(surfaces), score, why, job, use, instead: not, docs, ...(picture ? { picture } : {}) })), null, 2));
     if (note) console.error(note);   // stdout stays the plain array
     return 0;
   }
@@ -247,6 +251,7 @@ function main(argv) {
     console.log(`  use when: ${r.use}`);
     if (r.not.length) console.log(`  instead of: see ${r.not.join(', ')} when it does not fit`);
     console.log(`  docs: ${r.docs}`);
+    if (r.picture) console.log(`  picture: ${r.picture}`);
   }
   if (note) console.log(note);
   return 0;

@@ -3,6 +3,9 @@
 // agent to read whole (modules, JS-only parts with a card, are kind "module"). Reads contract/catalog.json (run build-catalog first); writes nothing else. Deterministic.
 // Entry: id, kind, name, family, job, aka[], surfaces[], data[], use (first use-when), not [{when-less ids}] (the
 // "instead" ids of avoid-when that name a component or template), docs (docs/<page>.html#<section>, or a template path).
+// Top level: pictures { path, none }: the rule for an entry's picture, written once (path with {kind} and {id}, relative to the package root;
+// `none` lists the kinds without one). scripts/build-pictures.mjs renders them (`npm run build:pictures`) and its --check, which
+// scripts/build.mjs runs, fails when an entry has no file. `fire find` and the Catalogue page resolve the path from the rule.
 // A template's job comes from templates/index.html and its docs from its path. Its aka, surfaces, data, use and not come
 // from its card, contract/cards/templates/<slug>.json, when it has one (useWhen[0] is the use, avoidWhen insteads that
 // name a component or template are the not); otherwise from TEMPLATE_META below, with its job as the use.
@@ -48,6 +51,10 @@ function templateCard(id) {
   return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
 }
 
+/** The picture rule written once at the top of the index, and the path it gives an entry (null for a kind without pictures). */
+export const PICTURES = { path: 'contract/pictures/{kind}/{id}.png', none: ['module'] };
+export const pictureFor = (kind, id, rule = PICTURES) => (rule.none.includes(kind) ? null : rule.path.replace('{kind}', kind).replace('{id}', id));
+
 const clean = (s) => String(s || '').replace(/\s+/g, ' ').trim();
 
 export function buildIndex(catalog) {
@@ -84,11 +91,11 @@ export function buildIndex(catalog) {
   }
   // A template and a component may share an id (form): keep the kind in the sort so output is stable.
   entries.sort((a, b) => a.id.localeCompare(b.id) || a.kind.localeCompare(b.kind));
-  return { fire: catalog.fire, count: entries.length, entries };
+  return { fire: catalog.fire, count: entries.length, pictures: PICTURES, entries };
 }
 
 export function render(index) {
-  const head = `{"fire":${JSON.stringify(index.fire)},"count":${index.count},"entries":[\n`;
+  const head = `{"fire":${JSON.stringify(index.fire)},"count":${index.count},"pictures":${JSON.stringify(index.pictures)},"entries":[\n`;
   return head + index.entries.map((e) => '  ' + JSON.stringify(e)).join(',\n') + '\n]}\n';
 }
 

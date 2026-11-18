@@ -1,5 +1,7 @@
 /* The catalogue page for people: contract/index.json (the file `fire find` reads), filtered in the browser.
- * Filters live in the address so a link can be shared: ?q=approve&surface=phone&kind=component&data=list.
+ * Filters live in the address so a link can be shared: ?q=approve&surface=phone&kind=component&data=list&view=pictures.
+ * Every entry but a module has a picture (the index's top-level `pictures` rule, resolved here): a thumbnail beside each row that opens the large
+ * picture in a dialog, or, with view=pictures (the Pictures switch), a grid of them. view is not a filter: Clear filters keeps it.
  * Each filter takes one value (a Fire chip nav, single select); the values on offer are whatever the index contains. */
 import { icon } from '../fire/js/icons.js';
 import { init } from '../fire/fire.js';
@@ -15,7 +17,8 @@ const words = (s) => String(s || '').toLowerCase().split(/[^a-z0-9]+/).filter(Bo
 const href = (docs) => (docs.startsWith('docs/') ? docs.slice(5) : `../${docs}`);
 
 const $ = (id) => document.getElementById(id);
-const state = { q: '', surface: '', kind: '', data: '' };
+const state = { q: '', surface: '', kind: '', data: '', view: '' };
+const FILTERS = ['q', 'surface', 'kind', 'data'];
 let entries = [];
 
 function readUrl() {
@@ -84,24 +87,48 @@ function renderChips(q) {
   }
 }
 
+const THUMB = { list: [72, 48], grid: [360, 240] };   // the slot a picture sits in: width and height attributes, so nothing moves when it loads
+const pic = (e, kind) => (e.picture ? `<button class="doc-cat-thumb${kind === 'list' ? ' fd-list-lead' : ''}" type="button" data-fd-dialog-open="cat-picture" data-id="${esc(e.id)}" data-kind="${esc(e.kind)}" aria-haspopup="dialog">
+      <img src="${esc(href(e.picture))}" width="${THUMB[kind][0]}" height="${THUMB[kind][1]}" loading="lazy" decoding="async" alt="${esc(`${e.name}, ${e.kind}`)}"></button>` : '');
+
 function row(e) {
   const tags = SURFACES.filter((s) => e.surfaces.includes(s)).concat(e.surfaces.filter((s) => !SURFACES.includes(s)));
   return `<li class="fd-list-row">
-    <span class="fd-list-lead">${icon(KIND_ICON[e.kind] || 'box')}</span>
+    ${pic(e, 'list') || `<span class="fd-list-lead">${icon(KIND_ICON[e.kind] || 'box')}</span>`}
     <div class="fd-list-body"><a class="fd-list-link fd-list-title" href="${esc(href(e.docs))}">${esc(e.name)}</a><span class="fd-list-desc">${esc(e.job)}</span></div>
     <span class="fd-list-meta">${esc(cap(e.kind))}</span>
     <span class="fd-list-trail" role="group" aria-label="Surfaces">${tags.map((s) => `<span class="fd-badge">${esc(cap(s))}</span>`).join('')}</span>
   </li>`;
+}
+function card(e) {
+  return `<li class="doc-cat-card">${pic(e, 'grid')}
+    <p class="doc-cat-card-title"><a href="${esc(href(e.docs))}">${esc(e.name)}</a><span class="doc-cat-card-kind">${esc(cap(e.kind))}</span></p>
+    <p class="doc-cat-card-job">${esc(e.job)}</p>
+  </li>`;
+}
+
+/** The dialog behind a thumbnail: filled before Fire's own delegated listener opens it. */
+function fillPicture(e) {
+  $('cat-picture-title').textContent = e.name;
+  $('cat-picture-job').textContent = e.job;
+  const img = $('cat-picture-img');
+  img.src = href(e.picture);
+  img.alt = `${e.name}, ${e.kind}`;
+  $('cat-picture-docs').href = href(e.docs);
 }
 
 function render() {
   const q = [...new Set(words(state.q))];
   const hits = entries.map((e) => ({ e, s: passes(e) ? score(e, q) : 0 })).filter((x) => x.s)
     .sort((a, b) => (q.length ? b.s - a.s : 0) || a.e.name.localeCompare(b.e.name) || a.e.kind.localeCompare(b.e.kind));
-  $('cat-list').innerHTML = hits.map((x) => row(x.e)).join('');
-  $('cat-list').hidden = !hits.length;
+  const grid = state.view === 'pictures';
+  $('cat-list').innerHTML = grid ? '' : hits.map((x) => row(x.e)).join('');
+  $('cat-grid').innerHTML = grid ? hits.map((x) => card(x.e)).join('') : '';
+  $('cat-list').hidden = grid || !hits.length;
+  $('cat-grid').hidden = !grid || !hits.length;
+  $('cat-pictures').checked = grid;
   $('cat-empty').hidden = !!hits.length;
-  const active = Object.entries(state).filter(([, v]) => v).length;
+  const active = FILTERS.filter((k) => state[k]).length;
   $('cat-count').textContent = `${hits.length} of ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}${active ? ' match' : ''}`;
   $('cat-clear').hidden = !active;
   // Empty: when the surface is what hides them, say how many exist for other surfaces.
@@ -121,7 +148,10 @@ async function start() {
   try {
     res = await fetch(new URL('../contract/index.json', import.meta.url));
     if (!res.ok) throw new Error(String(res.status));
-    entries = (await res.json()).entries;
+    const index = await res.json();
+    const rule = index.pictures;
+    entries = index.entries;
+    if (rule) for (const e of entries) if (!rule.none.includes(e.kind)) e.picture = rule.path.replace('{kind}', e.kind).replace('{id}', e.id);
   } catch (error) {
     $('cat-count').textContent = 'The catalogue did not load.';
     $('cat-error').hidden = false;
@@ -129,7 +159,13 @@ async function start() {
   }
   buildFacets();
   input.addEventListener('input', () => { state.q = input.value.trim(); render(); });
-  $('cat-clear').addEventListener('click', () => { for (const k of Object.keys(state)) state[k] = ''; input.value = ''; render(); input.focus(); });
+  $('cat-clear').addEventListener('click', () => { for (const k of FILTERS) state[k] = ''; input.value = ''; render(); input.focus(); });
+  $('cat-pictures').addEventListener('change', (ev) => { state.view = ev.target.checked ? 'pictures' : ''; render(); });
+  document.querySelector('main').addEventListener('click', (ev) => {
+    const b = ev.target.closest('.doc-cat-thumb');
+    const e = b && entries.find((x) => x.id === b.dataset.id && x.kind === b.dataset.kind);
+    if (e) fillPicture(e);
+  });
   window.addEventListener('popstate', () => { readUrl(); input.value = state.q; render(); });
   render();
 }

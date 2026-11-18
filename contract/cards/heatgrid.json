@@ -1,0 +1,181 @@
+{
+  "id": "heatgrid",
+  "job": "See activity over weeks, one cell per day, or an outcome per day.",
+  "purpose": "A grid of day cells: weeks run in columns, Monday to Sunday in rows. Five steps run from a faint ink wash to the full accent, cut at the quartiles of the busy days so one spike does not flatten the rest. The strip variant shows one row of days with a tone each and a legend, for pass, slow or fail.",
+  "useWhen": [
+    "Activity over weeks or months: requests, commits, runs per day.",
+    "Each day has an outcome, not an amount: use the strip with a legend.",
+    "A table cell needs the last 14 days at a glance: strip at data-size=\"sm\"."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A value that changes by the hour or the minute.",
+      "instead": "chart"
+    },
+    {
+      "when": "A single day or week.",
+      "instead": "bars"
+    },
+    {
+      "when": "One quantity against a limit.",
+      "instead": "meter"
+    },
+    {
+      "when": "Exact numbers for each day.",
+      "instead": "table"
+    }
+  ],
+  "aka": [
+    "calendar heatmap",
+    "contribution graph",
+    "activity grid",
+    "heat map",
+    "github graph",
+    "uptime strip",
+    "status strip"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "series"
+  ],
+  "states": [
+    {
+      "name": "active",
+      "how": "data-active on the cell the crosshair or keyboard is on"
+    },
+    {
+      "name": "empty",
+      "how": "data-empty when a day has no data"
+    },
+    {
+      "name": "none",
+      "how": "data-none on a strip cell for a day with no outcome"
+    },
+    {
+      "name": "entering",
+      "how": "data-enter pending, run or done; columns draw in 14ms apart"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-variant",
+      "value": "strip",
+      "useWhen": "One outcome per day: passed, slow, failed; no axis."
+    },
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "11px cells, or a strip for a table cell."
+    },
+    {
+      "attribute": "data-size",
+      "value": "md",
+      "useWhen": "The default cell size."
+    },
+    {
+      "attribute": "data-size",
+      "value": "lg",
+      "useWhen": "18px cells."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "success",
+      "useWhen": "A heat grid in green, for healthy runs."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "accent",
+      "useWhen": "The default accent ramp."
+    },
+    {
+      "attribute": "data-l",
+      "value": "1",
+      "useWhen": "The faintest level."
+    },
+    {
+      "attribute": "data-l",
+      "value": "4",
+      "useWhen": "The strongest level."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-heatgrid",
+      "role": "The block."
+    },
+    {
+      "class": "fd-heatgrid-scroll",
+      "role": "Scrolls sideways when narrow."
+    },
+    {
+      "class": "fd-heatgrid-grid",
+      "role": "The cells."
+    },
+    {
+      "class": "fd-heatgrid-cell",
+      "role": "One day."
+    },
+    {
+      "class": "fd-heatgrid-month",
+      "role": "A month label above the grid."
+    },
+    {
+      "class": "fd-heatgrid-day",
+      "role": "A weekday label beside the grid."
+    },
+    {
+      "class": "fd-heatgrid-foot",
+      "role": "The legend and summary row."
+    },
+    {
+      "class": "fd-heatgrid-legend",
+      "role": "The key of levels."
+    },
+    {
+      "class": "fd-heatgrid-swatch",
+      "role": "One level in the key."
+    },
+    {
+      "class": "fd-heatgrid-summary",
+      "role": "A line such as \"1,204 requests\"."
+    }
+  ],
+  "related": [
+    "chart",
+    "legend",
+    "sparkline",
+    "status"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow Left, Arrow Right",
+      "does": "Move by a week; in the strip, by a day."
+    },
+    {
+      "keys": "Arrow Up, Arrow Down",
+      "does": "Move by a day."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Jump to the first or last day."
+    },
+    {
+      "keys": "Enter",
+      "does": "Fires fd:select, or follows the href of a strip day."
+    },
+    {
+      "keys": "Escape",
+      "does": "Hides the tooltip."
+    }
+  ],
+  "example": "docs/charts.html#heatgrid",
+  "provenance": [
+    "docs/charts.html",
+    "fire/components/charts.css",
+    "fire/js/charts.js"
+  ],
+  "since": "0.1.0"
+}

@@ -1,0 +1,231 @@
+{
+  "id": "log",
+  "job": "Watch a stream of lines and search them without losing your place.",
+  "purpose": "A viewer on a sunken well with search, level chips (debug, info, warn, error), Follow, wrap and download. It follows new lines and stops the moment the reader scrolls up, with a \"Jump to latest\" button. The terminal variant plays a CLI session. appendLog(el, entry) adds a line; ANSI colour codes become tone spans. Without data-fit the body keeps its height.",
+  "useWhen": [
+    "A job, a crawl or a deployment writes lines as it runs.",
+    "One run's lines sit on its page: use data-fit.",
+    "A CLI session is shown as a terminal."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A short block of code or output to copy.",
+      "instead": "codeblock"
+    },
+    {
+      "when": "The history of one thing in events.",
+      "instead": "timeline"
+    },
+    {
+      "when": "Records with columns.",
+      "instead": "table"
+    },
+    {
+      "when": "A summary of what happened.",
+      "instead": "timeline"
+    }
+  ],
+  "aka": [
+    "log viewer",
+    "console",
+    "terminal",
+    "output",
+    "tail",
+    "stream",
+    "build log",
+    "activity log"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "following",
+      "how": "Follow button aria-pressed=\"true\"; the dot is green while lines scroll in"
+    },
+    {
+      "name": "paused",
+      "how": "data-paused when the reader has scrolled up; the dot is amber"
+    },
+    {
+      "name": "new line",
+      "how": "data-new on a row that was just appended; it fades in"
+    },
+    {
+      "name": "copied",
+      "how": "data-state=\"copied\" after a copy"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-variant",
+      "value": "terminal",
+      "useWhen": "A CLI session with a title bar, prompt and cursor."
+    },
+    {
+      "attribute": "data-fit",
+      "value": "",
+      "useWhen": "A short or finished log: the body is as tall as its lines, then scrolls."
+    },
+    {
+      "attribute": "data-wrap",
+      "value": "",
+      "useWhen": "Soft wrap long lines."
+    },
+    {
+      "attribute": "data-level",
+      "value": "debug",
+      "useWhen": "A row at debug level."
+    },
+    {
+      "attribute": "data-level",
+      "value": "info",
+      "useWhen": "A row at info level."
+    },
+    {
+      "attribute": "data-level",
+      "value": "warn",
+      "useWhen": "A row at warn level."
+    },
+    {
+      "attribute": "data-level",
+      "value": "error",
+      "useWhen": "A row at error level."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "On a message span: ANSI red."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "success",
+      "useWhen": "On a message span: ANSI green."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "dim",
+      "useWhen": "On a message span: quiet text."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-log",
+      "role": "The viewer."
+    },
+    {
+      "class": "fd-log-bar",
+      "role": "The toolbar."
+    },
+    {
+      "class": "fd-log-search",
+      "role": "The search field."
+    },
+    {
+      "class": "fd-log-filters",
+      "role": "The level chips."
+    },
+    {
+      "class": "fd-log-filter",
+      "role": "One level chip."
+    },
+    {
+      "class": "fd-log-filter-count",
+      "role": "The count on a chip."
+    },
+    {
+      "class": "fd-log-follow",
+      "role": "The Follow toggle."
+    },
+    {
+      "class": "fd-log-btn",
+      "role": "A toolbar button."
+    },
+    {
+      "class": "fd-log-body",
+      "role": "The scrolling rows; role=\"log\"."
+    },
+    {
+      "class": "fd-log-row",
+      "role": "One line."
+    },
+    {
+      "class": "fd-log-time",
+      "role": "The timestamp."
+    },
+    {
+      "class": "fd-log-level",
+      "role": "The level tag."
+    },
+    {
+      "class": "fd-log-msg",
+      "role": "The message."
+    },
+    {
+      "class": "fd-log-mark",
+      "role": "A search match."
+    },
+    {
+      "class": "fd-log-tone",
+      "role": "A coloured span."
+    },
+    {
+      "class": "fd-log-jump",
+      "role": "The Jump to latest button."
+    },
+    {
+      "class": "fd-log-empty",
+      "role": "Shown when no line matches."
+    },
+    {
+      "class": "fd-log-title",
+      "role": "The title bar of a terminal."
+    },
+    {
+      "class": "fd-log-dots",
+      "role": "The three window dots."
+    },
+    {
+      "class": "fd-log-title-text",
+      "role": "The terminal title."
+    },
+    {
+      "class": "fd-log-cmd",
+      "role": "The command text typed in a terminal session."
+    },
+    {
+      "class": "fd-log-prompt",
+      "role": "The prompt character."
+    },
+    {
+      "class": "fd-log-cursor",
+      "role": "The blinking cursor."
+    }
+  ],
+  "related": [
+    "codeblock",
+    "timeline",
+    "table",
+    "filter"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Reaches search, chips, Follow and the body."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Toggles a chip or Follow."
+    }
+  ],
+  "example": "docs/code.html#log",
+  "provenance": [
+    "docs/code.html",
+    "fire/components/code.css",
+    "fire/js/code.js"
+  ],
+  "since": "0.1.0"
+}

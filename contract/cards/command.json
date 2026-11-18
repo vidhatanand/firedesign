@@ -1,0 +1,147 @@
+{
+  "id": "command",
+  "job": "Jump to a page or run an action by typing, from anywhere.",
+  "purpose": "A modal search palette on Cmd+K or Ctrl+K. A search field over grouped, fuzzy-matched items with the matched letters lit. Items come from markup or from command.register(). Focus stays in the field; the active row is announced through aria-activedescendant.",
+  "useWhen": [
+    "An app has many pages and actions and power users want the keyboard.",
+    "People should reach a recent run, a doc or a setting without navigating.",
+    "Actions need shortcuts and hints shown beside them."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Searching one list on one page.",
+      "instead": "search"
+    },
+    {
+      "when": "Choosing a value in a form.",
+      "instead": "combobox"
+    },
+    {
+      "when": "A short list of actions on one trigger.",
+      "instead": "menu"
+    },
+    {
+      "when": "Site-wide navigation that must always be visible.",
+      "instead": "sidebar"
+    }
+  ],
+  "aka": [
+    "command palette",
+    "command bar",
+    "spotlight",
+    "quick open",
+    "omnibar",
+    "cmd-k",
+    "quick actions",
+    "go to anything"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\" on the dialog; also command.open()"
+    },
+    {
+      "name": "active row",
+      "how": "data-active on the fd-command-item"
+    },
+    {
+      "name": "empty",
+      "how": "fd-command-empty is shown when nothing matches"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-active",
+      "value": "",
+      "useWhen": "The row Enter will run."
+    },
+    {
+      "attribute": "data-icon",
+      "value": "",
+      "useWhen": "A leading icon on an item."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-command",
+      "role": "The dialog."
+    },
+    {
+      "class": "fd-command-search",
+      "role": "The search row."
+    },
+    {
+      "class": "fd-command-input",
+      "role": "The search field."
+    },
+    {
+      "class": "fd-command-list",
+      "role": "The scrolling results."
+    },
+    {
+      "class": "fd-command-group",
+      "role": "A group of items."
+    },
+    {
+      "class": "fd-command-group-label",
+      "role": "The group heading."
+    },
+    {
+      "class": "fd-command-item",
+      "role": "One result."
+    },
+    {
+      "class": "fd-command-item-label",
+      "role": "The result name."
+    },
+    {
+      "class": "fd-command-item-hint",
+      "role": "A muted hint or shortcut at the end."
+    },
+    {
+      "class": "fd-command-empty",
+      "role": "Shown when nothing matches."
+    },
+    {
+      "class": "fd-command-foot",
+      "role": "A key legend row."
+    }
+  ],
+  "related": [
+    "dialog",
+    "search",
+    "menu",
+    "combobox"
+  ],
+  "keyboard": [
+    {
+      "keys": "Cmd+K, Ctrl+K",
+      "does": "Opens and closes the first palette on the page."
+    },
+    {
+      "keys": "Arrow Down, Arrow Up",
+      "does": "Moves the active row; Ctrl+N and Ctrl+P also work."
+    },
+    {
+      "keys": "Enter",
+      "does": "Runs the active row."
+    },
+    {
+      "keys": "Escape",
+      "does": "Clears the query, then closes."
+    }
+  ],
+  "example": "docs/overlays.html#command-palette",
+  "provenance": [
+    "docs/overlays.html",
+    "fire/components/overlays.css",
+    "fire/js/overlays.js"
+  ],
+  "since": "0.1.0"
+}

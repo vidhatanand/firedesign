@@ -1,0 +1,134 @@
+{
+  "id": "diff",
+  "job": "Show what a change does before it is saved.",
+  "purpose": "A unified diff in rows with old and new line numbers, a sign column and green and red lines. Write the diff as text in a script type=\"text/plain\" class=\"fd-diff-src\"; line numbers come from the hunk headers and highlighting from data-lang. Signs and numbers are not selectable, so a copy pastes clean code. An optional header shows the file and counts.",
+  "useWhen": [
+    "A monitor edit, a schema migration or a prompt change is reviewed before saving.",
+    "A skill or config update lists what changed."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Showing code with no comparison.",
+      "instead": "codeblock"
+    },
+    {
+      "when": "A history of events.",
+      "instead": "timeline"
+    },
+    {
+      "when": "Two values side by side.",
+      "instead": "kv"
+    },
+    {
+      "when": "A log of runtime lines.",
+      "instead": "log"
+    }
+  ],
+  "aka": [
+    "patch",
+    "changes",
+    "unified diff",
+    "git diff",
+    "compare",
+    "before and after",
+    "code review"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [],
+  "variants": [
+    {
+      "attribute": "data-type",
+      "value": "add",
+      "useWhen": "An added line (green)."
+    },
+    {
+      "attribute": "data-type",
+      "value": "del",
+      "useWhen": "A removed line (red)."
+    },
+    {
+      "attribute": "data-type",
+      "value": "ctx",
+      "useWhen": "An unchanged line for context."
+    },
+    {
+      "attribute": "data-type",
+      "value": "hunk",
+      "useWhen": "The @@ header of a hunk."
+    },
+    {
+      "attribute": "data-type",
+      "value": "meta",
+      "useWhen": "A file header line, such as +++ or ---."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-diff",
+      "role": "The block."
+    },
+    {
+      "class": "fd-diff-src",
+      "role": "The script holding the diff text."
+    },
+    {
+      "class": "fd-diff-head",
+      "role": "The header with the file and counts."
+    },
+    {
+      "class": "fd-diff-file",
+      "role": "The file name."
+    },
+    {
+      "class": "fd-diff-stats",
+      "role": "The added and removed counts."
+    },
+    {
+      "class": "fd-diff-stat",
+      "role": "One count."
+    },
+    {
+      "class": "fd-diff-bar",
+      "role": "The proportion bar."
+    },
+    {
+      "class": "fd-diff-body",
+      "role": "The rows."
+    },
+    {
+      "class": "fd-diff-line",
+      "role": "One row; carries data-type."
+    },
+    {
+      "class": "fd-diff-num",
+      "role": "A line number."
+    },
+    {
+      "class": "fd-diff-sign",
+      "role": "The plus or minus."
+    },
+    {
+      "class": "fd-diff-code",
+      "role": "The code on the row."
+    }
+  ],
+  "related": [
+    "codeblock",
+    "timeline",
+    "log"
+  ],
+  "keyboard": [],
+  "example": "docs/code.html#diff",
+  "provenance": [
+    "docs/code.html",
+    "fire/components/code.css",
+    "fire/js/code.js"
+  ],
+  "since": "0.1.0"
+}

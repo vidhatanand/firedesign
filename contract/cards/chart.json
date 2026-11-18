@@ -1,0 +1,213 @@
+{
+  "id": "chart",
+  "job": "See how values change over time or between periods.",
+  "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table.",
+  "useWhen": [
+    "A value moves continuously over time: use line, or area for volume.",
+    "Discrete periods are compared: use bar, or stacked for a total and its parts.",
+    "A number has a limit: draw a labelled threshold on the chart.",
+    "A live series should end in a pulsing dot."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A ranking of items.",
+      "instead": "bars"
+    },
+    {
+      "when": "A direction beside a figure, without axes.",
+      "instead": "sparkline"
+    },
+    {
+      "when": "Parts of a whole with two to five segments.",
+      "instead": "donut"
+    },
+    {
+      "when": "One value against a limit.",
+      "instead": "meter"
+    },
+    {
+      "when": "Activity per day over weeks.",
+      "instead": "heatgrid"
+    },
+    {
+      "when": "Exact values to compare across many columns.",
+      "instead": "table"
+    }
+  ],
+  "aka": [
+    "line chart",
+    "area chart",
+    "bar chart",
+    "column chart",
+    "stacked bar chart",
+    "graph",
+    "time series",
+    "plot",
+    "trend chart"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "series"
+  ],
+  "states": [
+    {
+      "name": "loading",
+      "how": "data-state=\"loading\" on an element with no data; keeps the height"
+    },
+    {
+      "name": "empty",
+      "how": "data-state=\"empty\" says so and suggests what to change"
+    },
+    {
+      "name": "live",
+      "how": "a series with live set ends in a pulsing dot"
+    },
+    {
+      "name": "gap",
+      "how": "a null value is a gap, not a zero"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-fd-chart",
+      "value": "line",
+      "useWhen": "A value that moves continuously."
+    },
+    {
+      "attribute": "data-fd-chart",
+      "value": "area",
+      "useWhen": "A value whose volume matters as well as its shape."
+    },
+    {
+      "attribute": "data-fd-chart",
+      "value": "bar",
+      "useWhen": "Discrete periods, grouped side by side."
+    },
+    {
+      "attribute": "data-fd-chart",
+      "value": "stacked",
+      "useWhen": "A total and its parts; the tooltip adds a Total row."
+    },
+    {
+      "attribute": "data-grid",
+      "value": "dashed",
+      "useWhen": "The default hairline grid."
+    },
+    {
+      "attribute": "data-grid",
+      "value": "solid",
+      "useWhen": "A solid grid for print or dense charts."
+    },
+    {
+      "attribute": "data-grid",
+      "value": "none",
+      "useWhen": "No grid, for small charts."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "danger",
+      "useWhen": "A series that carries meaning, such as failures."
+    },
+    {
+      "attribute": "data-trend",
+      "value": "good",
+      "useWhen": "A stat delta that is good."
+    },
+    {
+      "attribute": "data-trend",
+      "value": "bad",
+      "useWhen": "A stat delta that is bad."
+    },
+    {
+      "attribute": "data-ring",
+      "value": "bg",
+      "useWhen": "The chart sits on the page colour, not a card."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-chart",
+      "role": "The chart; data-fd-chart names the type."
+    },
+    {
+      "class": "fd-chart-card",
+      "role": "A card that holds a chart with a title and a legend."
+    },
+    {
+      "class": "fd-chart-card-head",
+      "role": "The title row of a chart card."
+    },
+    {
+      "class": "fd-chart-stat",
+      "role": "A headline figure above the chart."
+    },
+    {
+      "class": "fd-chart-stat-value",
+      "role": "The figure."
+    },
+    {
+      "class": "fd-chart-stat-delta",
+      "role": "The change; data-trend sets its tone."
+    },
+    {
+      "class": "fd-chart-tooltip",
+      "role": "The tooltip card."
+    },
+    {
+      "class": "fd-chart-threshold",
+      "role": "The dashed limit line."
+    },
+    {
+      "class": "fd-chart-threshold-label",
+      "role": "The label of the limit."
+    },
+    {
+      "class": "fd-chart-empty",
+      "role": "The empty state."
+    },
+    {
+      "class": "fd-chart-loading",
+      "role": "The loading skeleton."
+    },
+    {
+      "class": "fd-chart-svg",
+      "role": "The drawing surface."
+    }
+  ],
+  "related": [
+    "legend",
+    "sparkline",
+    "bars",
+    "donut",
+    "heatgrid",
+    "stats"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow Left, Arrow Right",
+      "does": "Moves the crosshair one point."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Jumps to the first or last point."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Fires fd:select for the active point."
+    },
+    {
+      "keys": "Escape",
+      "does": "Hides the tooltip."
+    }
+  ],
+  "example": "docs/charts.html#line",
+  "provenance": [
+    "docs/charts.html",
+    "fire/components/charts.css",
+    "fire/js/charts.js"
+  ],
+  "since": "0.1.0"
+}

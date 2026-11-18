@@ -16,7 +16,7 @@ export const LOOKS = Object.freeze([
     "note": "Cool blue on flat grey in Geist, soft depth and almost no texture: a calm console for admin, billing and settings-heavy products people sit in all day.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "ocean",
       "tone": {
         "hue": 0,
@@ -102,7 +102,7 @@ export const LOOKS = Object.freeze([
     "note": "Electric lime, JetBrains Mono everywhere, square corners and drawn outlines over raining characters: a terminal-native tool for developers who live in the CLI.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "volt",
       "tone": {
         "hue": 0,
@@ -191,7 +191,7 @@ export const LOOKS = Object.freeze([
     "note": "Cobalt ink on sepia paper, Newsreader throughout at a larger size with generous space and no shadows: a reading product for docs, journals and long-form writing.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "paper",
       "tone": {
         "hue": 0,
@@ -282,7 +282,7 @@ export const LOOKS = Object.freeze([
     "note": "Terracotta on sand with hand-cut Bricolage Grotesque, round corners, filled controls and lifted cards: a warm consumer app for bookings, food, home and family.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "clay",
       "tone": {
         "hue": 0,
@@ -370,7 +370,7 @@ export const LOOKS = Object.freeze([
     "note": "Teal on cool grey, Space Grotesk and Space Mono at a small size, compact rows, flat cards and upper-case labels: a dense data product for analytics, monitoring and ops.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "lagoon",
       "tone": {
         "hue": 0,
@@ -458,7 +458,7 @@ export const LOOKS = Object.freeze([
     "note": "Fire orange, tall condensed poster headings, lifted objects, filled controls and a loud flame texture: a marketing-forward product that sells from its first screen.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "ember",
       "tone": {
         "hue": 0,
@@ -545,7 +545,7 @@ export const LOOKS = Object.freeze([
     "note": "Lilac on a faintly warm page, wide rounded Unbounded headings over Manrope, full-round corners and slow motion: a soft, pastel product for wellbeing, learning and journaling.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "iris",
       "tone": {
         "hue": 20,
@@ -654,7 +654,7 @@ export const LOOKS = Object.freeze([
     "note": "Monochrome at high contrast with large text, two-pixel lines, outlined controls, no texture and no motion: an accessible look for public services and anyone reading at a distance.",
     "record": {
       "contract": "fire/1",
-      "fire": "0.6.2",
+      "fire": "0.7.0",
       "palette": "graphite",
       "tone": {
         "hue": 0,

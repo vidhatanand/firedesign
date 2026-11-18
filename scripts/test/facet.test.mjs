@@ -299,7 +299,7 @@ test('every required pairing is WCAG AA in light and dark, computed from the con
 test('Facet\'s own checker accepts content.json and its generator builds from it', { skip: !fs.existsSync(CLI) && 'Facet\'s command-line tool is not on this machine' }, () => {
   const out = execFileSync(process.execPath, [CLI, 'system', 'check', path.join(ROOT, 'facet/content.json')], { encoding: 'utf8' });
   assert.match(out, /^ok: Fire is a valid design system/);
-  if (FULL) assert.match(out, /142 components/);
+  if (FULL) assert.match(out, new RegExp(`${readJson('contract/catalog.json').components.length} components`));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-facet-'));
   try {
     const built = execFileSync(process.execPath, [CLI, 'system', 'build', path.join(ROOT, 'facet/content.json'), dir], { encoding: 'utf8' });

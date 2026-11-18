@@ -67,6 +67,7 @@
   --fd-code-search-pad: 28px;               /* room for the search icon */
   --fd-code-term-dot: 10px;
   --fd-code-title-inset: 72px;              /* terminal title clears the dots */
+  --fd-code-num-min: 3ch;                   /* line-number column: room for three digits */
   /* diff and schema */
   --fd-code-bar: 7px;
   --fd-code-num-pad: 20px;
@@ -507,6 +508,10 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
      </div>
    </div>
    data-fit: the body is as tall as its lines, up to the usual height (or data-height), and scrolls from there.
+   data-lines: each row gets a line number that links to it, <a class="fd-log-num" href="#L42">42</a>, and the row
+   the id L42 (data-anchor="build" makes it build-L42). The row the address points at, or the one a number or
+   "First error" chose, is aria-current="true". <button class="fd-log-btn" data-action="first-error"> jumps to the
+   first row with data-level="error" (terminal rows may carry it too) and is disabled while there is none.
    data-variant="terminal": add <div class="fd-log-title"><span class="fd-log-dots"><i></i><i></i><i></i></span><span class="fd-log-title-text">ember — zsh</span></div>
    rows hold <span class="fd-log-msg"> only; <span class="fd-log-prompt">$</span>, <span class="fd-log-cursor"></span>.
    ANSI-ish tones: <span class="fd-log-tone" data-tone="success|warning|danger|info|violet|dim|bold">.
@@ -637,6 +642,27 @@ button.fd-endpoint:focus-visible, a.fd-endpoint:focus-visible { box-shadow: inse
   background: var(--fd-text-2); border-radius: var(--fd-code-radius-hair);
   animation: fd-blink var(--fd-loop-blink) steps(1) infinite;
 }
+
+/* Line numbers and anchors (data-lines). The numbers are links: one tab stop, arrows walk the lines. */
+.fd-log[data-lines] .fd-log-body { grid-template-columns: auto auto auto minmax(max-content, 1fr); }
+.fd-log[data-lines][data-wrap] .fd-log-body { grid-template-columns: auto auto auto minmax(0, 1fr); }
+.fd-log[data-variant="terminal"][data-lines] .fd-log-body { grid-template-columns: auto minmax(max-content, 1fr); }
+.fd-log[data-variant="terminal"][data-lines][data-wrap] .fd-log-body { grid-template-columns: auto minmax(0, 1fr); }
+.fd-log-num {
+  min-width: var(--fd-code-num-min); text-align: end;
+  color: var(--fd-text-3); text-decoration: none; font-variant-numeric: tabular-nums; user-select: none;
+  border-radius: var(--fd-code-radius-nub);
+  transition: color var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-log-num:hover { color: var(--fd-text); text-decoration: underline; text-decoration-thickness: var(--fd-hairline); text-underline-offset: var(--fd-code-halo); }
+.fd-log-num:focus-visible { box-shadow: var(--fd-ring); }
+/* The linked line: an accent start bar on every row, and the accent wash unless the row is an error. */
+.fd-log .fd-log-row[aria-current="true"] { box-shadow: inset var(--fd-code-rule-bold) 0 0 0 var(--fd-accent); }
+.fd-log .fd-log-row[aria-current="true"]:not([data-level="error"]),
+.fd-log .fd-log-row[aria-current="true"]:not([data-level="error"]):hover { background: var(--fd-accent-12); }
+.fd-log .fd-log-row[aria-current="true"] .fd-log-num { color: var(--fd-accent-text); }
+.fd-log[data-variant="terminal"] .fd-log-row[data-level="error"] { background: var(--fd-danger-bg); }
+.fd-log-btn:disabled { background: none; color: var(--fd-text-4); cursor: not-allowed; scale: none; }
 
 /* ==========================================================================
    Diff — unified, with old/new line numbers.

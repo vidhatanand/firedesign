@@ -1305,9 +1305,11 @@
         "fd-bars",
         "fd-bars-fill",
         "fd-bars-label",
+        "fd-bars-mark",
         "fd-bars-row",
         "fd-bars-track",
-        "fd-bars-value"
+        "fd-bars-value",
+        "fd-bars-was"
       ],
       "attributes": {
         "data-tone": [
@@ -1345,7 +1347,8 @@
         "purpose": "A list for a ranking: label left, a thin bar, the figure right in mono. It is plain CSS driven by one custom property per row, --value, a fraction from 0 to 1 of the longest row. Below 320px the bar drops under its label. The fill grows once when scrolled into view.",
         "useWhen": [
           "A ranking of a few to a dozen items with exact figures.",
-          "Parts of a total where order matters more than proportion."
+          "Parts of a total where order matters more than proportion.",
+          "Each figure is shown beside the previous period's (432, was 401)."
         ],
         "avoidWhen": [
           {
@@ -1427,6 +1430,14 @@
           {
             "class": "fd-bars-value",
             "role": "The figure, in mono."
+          },
+          {
+            "class": "fd-bars-mark",
+            "role": "A tick on the track at the previous value, --was on the same scale as --value."
+          },
+          {
+            "class": "fd-bars-was",
+            "role": "The previous value written after the figure (\"was 401\")."
           }
         ],
         "related": [
@@ -2159,6 +2170,10 @@
           {
             "name": "flush",
             "how": "data-flush removes padding for tables and lists that run edge to edge"
+          },
+          {
+            "name": "selected",
+            "how": "aria-current=\"true\" (open beside a list) or aria-selected=\"true\" on a data-interactive card: an accent wash and edge"
           }
         ],
         "variants": [
@@ -11018,12 +11033,17 @@
         "fd-list-row": {
           "data-unread": [
             ""
+          ],
+          "data-value": [
+            "*"
           ]
         }
       },
       "stateAttributes": {},
       "element": null,
-      "events": [],
+      "events": [
+        "fd:change"
+      ],
       "docs": "docs/data.html#lists",
       "card": {
         "id": "list",
@@ -11032,7 +11052,8 @@
         "useWhen": [
           "Members, integrations or files with a name, a line of detail and one action.",
           "An inbox where unread rows carry a dot.",
-          "A card of rows divided by hairlines."
+          "A card of rows divided by hairlines.",
+          "People choose one item from a short list of rich rows: role=\"listbox\" with role=\"option\" rows."
         ],
         "avoidWhen": [
           {
@@ -11077,6 +11098,10 @@
           {
             "name": "interactive",
             "how": "data-interactive on the list; every row is a link or button with hover and focus"
+          },
+          {
+            "name": "selected",
+            "how": "aria-current=\"true\" on the row whose record is open; aria-selected=\"true\" on a role=\"option\" row"
           }
         ],
         "variants": [
@@ -11167,7 +11192,8 @@
           "table",
           "card",
           "avatar",
-          "notification"
+          "notification",
+          "list-detail"
         ],
         "keyboard": [
           {
@@ -11177,14 +11203,156 @@
           {
             "keys": "Space",
             "does": "Presses a button row."
+          },
+          {
+            "keys": "Arrow Up, Arrow Down, Home, End",
+            "does": "In a role=\"listbox\" list: moves the selection, which follows focus."
           }
         ],
         "example": "docs/data.html#lists",
         "provenance": [
           "docs/data.html",
-          "fire/components/data.css"
+          "fire/components/data.css",
+          "fire/js/data.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "list-detail",
+      "name": "List and detail",
+      "family": "Data",
+      "kind": "component",
+      "root": "fd-list-detail",
+      "classes": [
+        "fd-list-detail",
+        "fd-list-detail-back",
+        "fd-list-detail-list",
+        "fd-list-detail-main"
+      ],
+      "attributes": {
+        "data-view": [
+          "detail",
+          "list"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:change",
+        "fd:select"
+      ],
+      "docs": "docs/data.html#list-detail",
+      "card": {
+        "id": "list-detail",
+        "job": "Work through a queue: pick a record from a list and read or act on it beside the list.",
+        "purpose": "Two panes: a list of rows (buttons with data-value) and the record that is open. The open row has aria-current=\"true\" and the accent wash. Panels in the main pane with a matching data-detail are shown for you, or the page renders the record on fd:select. Below 760px of its own width one pane shows at a time (data-view=\"list|detail\"): focus moves to the record's heading, and the back button returns it to the row.",
+        "useWhen": [
+          "People decide or review records one after another: requests, approvals, failures, messages.",
+          "The list must stay in view while one record is open, and a phone shows the list first."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Each record needs its own page and address.",
+            "instead": "table"
+          },
+          {
+            "when": "The side pane is settings navigation.",
+            "instead": "subnav"
+          },
+          {
+            "when": "The detail is a short summary over the page.",
+            "instead": "sheet"
+          }
+        ],
+        "aka": [
+          "master-detail",
+          "list-detail",
+          "split view",
+          "inbox",
+          "queue",
+          "drill-down"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "list",
+          "record"
+        ],
+        "states": [
+          {
+            "name": "selected",
+            "how": "aria-current=\"true\" on the open row"
+          },
+          {
+            "name": "list",
+            "how": "data-view=\"list\" (the default): below 760px only the list shows"
+          },
+          {
+            "name": "detail",
+            "how": "data-view=\"detail\": below 760px only the record shows, with fd-list-detail-back"
+          },
+          {
+            "name": "loading",
+            "how": "aria-busy=\"true\" on the root with skeletons in both panes"
+          },
+          {
+            "name": "empty",
+            "how": "an fd-empty in place of the whole layout"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-view",
+            "value": "detail",
+            "useWhen": "Rendering a page whose address names one record, so a phone opens on it."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-list-detail",
+            "role": "The root: two columns, one pane at a time below 760px of its own width."
+          },
+          {
+            "class": "fd-list-detail-list",
+            "role": "The list pane: a heading and an fd-list (or cards) of rows with data-value."
+          },
+          {
+            "class": "fd-list-detail-main",
+            "role": "The record pane: the back button and the record, or [data-detail] panels."
+          },
+          {
+            "class": "fd-list-detail-back",
+            "role": "The way back to the list, shown only when one pane shows; put it on an fd-back button."
+          }
+        ],
+        "related": [
+          "list",
+          "card",
+          "split",
+          "back",
+          "empty"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On a row: opens its record; on a phone focus moves to the record's heading."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On the back button: returns to the list with focus on the open row."
+          }
+        ],
+        "example": "docs/data.html#list-detail",
+        "provenance": [
+          "docs/data.html",
+          "fire/components/data.css",
+          "fire/js/data.js"
+        ],
+        "since": "0.7.0"
       }
     },
     {
@@ -11566,6 +11734,7 @@
         "fd-log-level",
         "fd-log-mark",
         "fd-log-msg",
+        "fd-log-num",
         "fd-log-prompt",
         "fd-log-row",
         "fd-log-search",
@@ -11575,9 +11744,8 @@
         "fd-log-tone"
       ],
       "attributes": {
-        "data-fd-log-demo": [
-          "api",
-          "cli"
+        "data-anchor": [
+          "*"
         ],
         "data-fit": [
           ""
@@ -11587,6 +11755,9 @@
         ],
         "data-level": [
           "info"
+        ],
+        "data-lines": [
+          ""
         ],
         "data-variant": [
           "terminal"
@@ -11599,6 +11770,10 @@
         "fd-log-btn": {
           "data-action": [
             "*"
+          ],
+          "data-fd-log-demo": [
+            "api",
+            "cli"
           ]
         },
         "fd-log-filter": {
@@ -11642,7 +11817,9 @@
         ]
       },
       "element": null,
-      "events": [],
+      "events": [
+        "fd:select"
+      ],
       "docs": "docs/code.html#log",
       "card": {
         "id": "log",
@@ -11651,7 +11828,8 @@
         "useWhen": [
           "A job, a crawl or a deployment writes lines as it runs.",
           "One run's lines sit on its page: use data-fit.",
-          "A CLI session is shown as a terminal."
+          "A CLI session is shown as a terminal.",
+          "People link to a line of a finished log, or need to land on the first error."
         ],
         "avoidWhen": [
           {
@@ -11703,6 +11881,14 @@
           {
             "name": "copied",
             "how": "data-state=\"copied\" after a copy"
+          },
+          {
+            "name": "linked line",
+            "how": "aria-current=\"true\" on a fd-log-row, set from the address (#L42) or a chosen line number"
+          },
+          {
+            "name": "no errors",
+            "how": "the first-error button is disabled while no visible row has data-level=\"error\""
           }
         ],
         "variants": [
@@ -11755,6 +11941,16 @@
             "attribute": "data-tone",
             "value": "dim",
             "useWhen": "On a message span: quiet text."
+          },
+          {
+            "attribute": "data-lines",
+            "value": "",
+            "useWhen": "Number the rows; each number links to its line (#L42)."
+          },
+          {
+            "attribute": "data-anchor",
+            "value": "build",
+            "useWhen": "Several numbered logs on one page: line ids become build-L42."
           }
         ],
         "parts": [
@@ -11849,6 +12045,10 @@
           {
             "class": "fd-log-cursor",
             "role": "The blinking cursor."
+          },
+          {
+            "class": "fd-log-num",
+            "role": "A row's line number, a link to the row (added by code.js with data-lines)."
           }
         ],
         "related": [
@@ -11865,6 +12065,14 @@
           {
             "keys": "Enter, Space",
             "does": "Toggles a chip or Follow."
+          },
+          {
+            "keys": "Arrow Up, Arrow Down, Home, End",
+            "does": "On a line number: moves to the previous, next, first or last visible line."
+          },
+          {
+            "keys": "Enter",
+            "does": "On a line number: marks that line and writes it to the address."
           }
         ],
         "example": "docs/code.html#log",
@@ -19032,10 +19240,12 @@
           "data-dir": [
             "",
             "down",
+            "flat",
             "up"
           ],
           "data-tone": [
             "danger",
+            "neutral",
             "success",
             "warning"
           ]
@@ -19103,6 +19313,14 @@
           {
             "name": "delta down",
             "how": "data-dir=\"down\" on fd-stat-delta"
+          },
+          {
+            "name": "delta flat",
+            "how": "data-dir=\"flat\" on fd-stat-delta: a bar for no change"
+          },
+          {
+            "name": "status in the sub-line",
+            "how": "an fd-status (with an fd-status-note) inside fd-stat-sub takes the sub-line's size"
           }
         ],
         "variants": [
@@ -19140,6 +19358,16 @@
             "attribute": "data-tone",
             "value": "warning",
             "useWhen": "The change needs a look."
+          },
+          {
+            "attribute": "data-tone",
+            "value": "neutral",
+            "useWhen": "On fd-stat-delta: a change that is neither good nor bad, such as more runs."
+          },
+          {
+            "attribute": "data-dir",
+            "value": "flat",
+            "useWhen": "On fd-stat-delta: no change since the last period."
           }
         ],
         "parts": [
@@ -19203,7 +19431,8 @@
       "kind": "component",
       "root": "fd-status",
       "classes": [
-        "fd-status"
+        "fd-status",
+        "fd-status-note"
       ],
       "attributes": {
         "data-icon": [
@@ -19237,10 +19466,11 @@
       "card": {
         "id": "status",
         "job": "Show the state of a run, a monitor or a key with a dot and a word.",
-        "purpose": "A dot and a word. Only a running item pulses, and only while it is running (data-live). The icon variant swaps the dot for a status icon that spins while live; the pill variant puts the state in a tinted pill.",
+        "purpose": "A dot and a word. Only a running item pulses, and only while it is running (data-live). The icon variant swaps the dot for a status icon that spins while live; the pill variant puts the state in a tinted pill. An fd-status-note after the word adds a short qualifier, muted behind a small dot (\"Succeeded · 1 flaky page\").",
         "useWhen": [
           "A row needs the state of a thing: Running, Passed, Failed, Paused.",
-          "A header shows the state of the page object as a tinted pill."
+          "A header shows the state of the page object as a tinted pill.",
+          "The state needs a two- or three-word qualifier: a count, a time, a region."
         ],
         "avoidWhen": [
           {
@@ -19328,6 +19558,10 @@
           {
             "class": "fd-status",
             "role": "The dot and the word."
+          },
+          {
+            "class": "fd-status-note",
+            "role": "A short qualifier after the state word: a count, a time or a place."
           }
         ],
         "related": [
@@ -19353,9 +19587,11 @@
       "root": "fd-steps",
       "classes": [
         "fd-step",
+        "fd-step-action",
         "fd-step-body",
         "fd-step-desc",
         "fd-step-marker",
+        "fd-step-owner",
         "fd-step-title",
         "fd-steps"
       ],
@@ -19365,6 +19601,9 @@
         ],
         "data-orientation": [
           "vertical"
+        ],
+        "data-variant": [
+          "tracker"
         ]
       },
       "partAttributes": {
@@ -19372,7 +19611,11 @@
           "data-state": [
             "current",
             "done",
-            "error"
+            "error",
+            "failed",
+            "running",
+            "skipped",
+            "waiting"
           ]
         }
       },
@@ -19384,11 +19627,13 @@
       "docs": "docs/navigation.html#steps",
       "card": {
         "id": "steps",
-        "job": "Show where someone is in a flow with a fixed order.",
-        "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set the position with data-current (0-based) or setStep(); buttons with data-fd-step=\"next|prev|n\" move it. The vertical orientation suits a setup checklist with descriptions. A step in error shows the reason under its title.",
+        "job": "Show where someone is in a flow with a fixed order, or how far live work or a record has got.",
+        "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. A wizard sets the position with data-current or setStep(). Live work marks each step running, failed, waiting or skipped, with an owner and one action per step. The tracker variant lays a record's stages across its page and turns vertical below 560px of its own width.",
         "useWhen": [
           "A setup or create flow has a fixed order: choose pages, schedule, notify, review.",
-          "A vertical list of tasks shows what is done and what comes next."
+          "A vertical list of tasks shows what is done and what comes next.",
+          "Work runs in steps on its own and each step reports how it went: a key rotation, a deploy, an import.",
+          "One record moves through stages (Proposed, Checked, Approved, Testing, Result) and its page shows where it is."
         ],
         "avoidWhen": [
           {
@@ -19406,6 +19651,14 @@
           {
             "when": "The path is a location hierarchy.",
             "instead": "breadcrumb"
+          },
+          {
+            "when": "Each event has a time and the order of events is the point.",
+            "instead": "timeline"
+          },
+          {
+            "when": "The work is a graph of stages with parallel jobs.",
+            "instead": "pipeline"
           }
         ],
         "aka": [
@@ -19413,7 +19666,11 @@
           "wizard",
           "progress steps",
           "timeline",
-          "onboarding steps"
+          "onboarding steps",
+          "lifecycle tracker",
+          "stage tracker",
+          "progress tracker",
+          "checklist with owners"
         ],
         "surfaces": [
           "app",
@@ -19435,6 +19692,22 @@
           {
             "name": "error",
             "how": "data-state=\"error\" on a step"
+          },
+          {
+            "name": "running",
+            "how": "data-state=\"running\": the accent marker with a turning arc"
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\": a cross on the danger tone; the description reads in danger text"
+          },
+          {
+            "name": "waiting",
+            "how": "data-state=\"waiting\": an hourglass on the warning tone, waiting on the person in fd-step-owner"
+          },
+          {
+            "name": "skipped",
+            "how": "data-state=\"skipped\": a dashed ring and a dash; setStep keeps it"
           }
         ],
         "variants": [
@@ -19442,6 +19715,11 @@
             "attribute": "data-orientation",
             "value": "vertical",
             "useWhen": "A list with descriptions, as in a getting-started panel."
+          },
+          {
+            "attribute": "data-variant",
+            "value": "tracker",
+            "useWhen": "The stages of one record across the top of its page; vertical below 560px of its own width."
           }
         ],
         "parts": [
@@ -19468,6 +19746,14 @@
           {
             "class": "fd-step-desc",
             "role": "Detail under the title."
+          },
+          {
+            "class": "fd-step-owner",
+            "role": "Who the step waits on: an fd-avatar and a name, under the title."
+          },
+          {
+            "class": "fd-step-action",
+            "role": "One small button or link after the body: what to do about the step now."
           }
         ],
         "related": [
@@ -19475,7 +19761,10 @@
           "checklist",
           "dialog",
           "progress",
-          "breadcrumb"
+          "breadcrumb",
+          "timeline",
+          "pipeline",
+          "avatar"
         ],
         "keyboard": [
           {
@@ -19872,6 +20161,11 @@
         "fd-table-foot",
         "fd-table-foot-actions",
         "fd-table-foot-info",
+        "fd-table-group",
+        "fd-table-group-count",
+        "fd-table-group-head",
+        "fd-table-group-title",
+        "fd-table-group-toggle",
         "fd-table-lead",
         "fd-table-link",
         "fd-table-rows",
@@ -19895,6 +20189,9 @@
           "lg",
           "md",
           "sm"
+        ],
+        "data-collapsible": [
+          ""
         ],
         "data-expand": [
           ""
@@ -19945,6 +20242,9 @@
           "data-select-all": [
             ""
           ],
+          "data-select-group": [
+            ""
+          ],
           "data-select-row": [
             ""
           ]
@@ -19952,6 +20252,24 @@
         "fd-table-empty": {
           "data-tone": [
             "danger"
+          ]
+        },
+        "fd-table-group": {
+          "data-state": [
+            "closed"
+          ]
+        },
+        "fd-table-group-count": {
+          "data-auto": [
+            ""
+          ]
+        },
+        "fd-table-group-head": {
+          "data-expand": [
+            ""
+          ],
+          "data-select": [
+            ""
           ]
         },
         "fd-table-lead": {
@@ -20019,17 +20337,20 @@
       "element": null,
       "events": [
         "fd:change",
+        "fd:close",
+        "fd:open",
         "fd:select"
       ],
       "docs": "docs/data.html#activity",
       "card": {
         "id": "table",
         "job": "Compare, sort and act on records laid out in rows and columns.",
-        "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
+        "purpose": "A native table with a scrolling wrapper, sortable headers, optional row selection with a bulk bar, expandable and clickable rows, grouped rows under heading rows that can open and close, sticky headers, and skeleton, empty and error states. Numbers are right-aligned with tabular figures. Below 560px of container width a table with data-stack turns each row into a card.",
         "useWhen": [
           "People compare the same fields across many records: logs, keys, invoices, runs.",
           "Rows need sorting, selection, bulk actions or an actions cell.",
-          "The same records must stay readable on a phone (add data-stack)."
+          "The same records must stay readable on a phone (add data-stack).",
+          "Records fall into a few kinds that share columns (keys by environment, monitors by site): one table with a heading row per group."
         ],
         "avoidWhen": [
           {
@@ -20047,13 +20368,20 @@
           {
             "when": "The numbers are a trend over time.",
             "instead": "chart"
+          },
+          {
+            "when": "Each group has different columns.",
+            "instead": "Use one table per group, each with its own heading."
           }
         ],
         "aka": [
           "data grid",
           "datagrid",
           "list view",
-          "activity log"
+          "activity log",
+          "grouped table",
+          "row groups",
+          "section rows"
         ],
         "surfaces": [
           "app",
@@ -20087,6 +20415,14 @@
           {
             "name": "expanded",
             "how": "tr[data-expanded] followed by a tr.fd-table-detail row"
+          },
+          {
+            "name": "group closed",
+            "how": "data-state=\"closed\" on a tbody.fd-table-group; its toggle has aria-expanded=\"false\" and only the heading shows"
+          },
+          {
+            "name": "group filtered out",
+            "how": "every row of a group carries hidden; the group's heading hides too"
           }
         ],
         "variants": [
@@ -20129,6 +20465,11 @@
             "attribute": "data-href",
             "value": "",
             "useWhen": "On a tr: the whole row opens a page; keep a real link in the row for keyboard and middle-click."
+          },
+          {
+            "attribute": "data-collapsible",
+            "value": "",
+            "useWhen": "Groups open and close: data.js turns each group heading into a toggle button."
           }
         ],
         "parts": [
@@ -20187,6 +20528,26 @@
           {
             "class": "fd-table-foot",
             "role": "The foot under the table: count or summary on the left, pagination and actions on the right."
+          },
+          {
+            "class": "fd-table-group",
+            "role": "A tbody holding one group: its heading row, then its rows."
+          },
+          {
+            "class": "fd-table-group-head",
+            "role": "The group's heading row, a th scope=\"rowgroup\" across the columns; no hover, never a link."
+          },
+          {
+            "class": "fd-table-group-title",
+            "role": "The group's name; it labels the tbody."
+          },
+          {
+            "class": "fd-table-group-count",
+            "role": "The number of rows in the group; data-auto keeps it to the rows shown."
+          },
+          {
+            "class": "fd-table-group-toggle",
+            "role": "The button in a heading that opens and closes the group (aria-expanded)."
           }
         ],
         "related": [
@@ -20209,6 +20570,10 @@
           {
             "keys": "Enter",
             "does": "Opens a row that carries data-href, or sorts the focused header."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On a group heading's toggle: opens or closes the group."
           }
         ],
         "example": "docs/data.html#activity",
@@ -23375,9 +23740,11 @@
     "fd-bars-fill": "bars",
     "fd-bars-label": "bars",
     "fd-bars-loader": "loader",
+    "fd-bars-mark": "bars",
     "fd-bars-row": "bars",
     "fd-bars-track": "bars",
     "fd-bars-value": "bars",
+    "fd-bars-was": "bars",
     "fd-body": "type",
     "fd-body-lg": "type",
     "fd-braille": "loader",
@@ -24080,6 +24447,10 @@
     "fd-list-body": "list",
     "fd-list-chevron": "list",
     "fd-list-desc": "list",
+    "fd-list-detail": "list-detail",
+    "fd-list-detail-back": "list-detail",
+    "fd-list-detail-list": "list-detail",
+    "fd-list-detail-main": "list-detail",
     "fd-list-lead": "list",
     "fd-list-link": "list",
     "fd-list-meta": "list",
@@ -24105,6 +24476,7 @@
     "fd-log-level": "log",
     "fd-log-mark": "log",
     "fd-log-msg": "log",
+    "fd-log-num": "log",
     "fd-log-prompt": "log",
     "fd-log-row": "log",
     "fd-log-search": "log",
@@ -24504,10 +24876,13 @@
     "fd-stat-unit": "stats",
     "fd-stats": "stats",
     "fd-status": "status",
+    "fd-status-note": "status",
     "fd-step": "steps",
+    "fd-step-action": "steps",
     "fd-step-body": "steps",
     "fd-step-desc": "steps",
     "fd-step-marker": "steps",
+    "fd-step-owner": "steps",
     "fd-step-title": "steps",
     "fd-steps": "steps",
     "fd-stop-btn": "composer",
@@ -24551,6 +24926,11 @@
     "fd-table-foot": "table",
     "fd-table-foot-actions": "table",
     "fd-table-foot-info": "table",
+    "fd-table-group": "table",
+    "fd-table-group-count": "table",
+    "fd-table-group-head": "table",
+    "fd-table-group-title": "table",
+    "fd-table-group-toggle": "table",
     "fd-table-lead": "table",
     "fd-table-link": "table",
     "fd-table-rows": "table",
@@ -25332,7 +25712,9 @@
           "{ source: 'selection', value, selected, rows }",
           "{ source: 'sort', value: { key, index, direction }, sort }",
           "{ source: 'filter', value, filter }",
-          "{ source: 'filters', value: [{ key, value }] }"
+          "{ source: 'filters', value: [{ key, value }] }",
+          "{ value, item }",
+          "{ source: 'view', value: 'list' | 'detail' }"
         ],
         "docsite": [
           "{ value }",
@@ -25367,7 +25749,8 @@
           "{ value: data-value or its text }"
         ],
         "data": [
-          "{ target }"
+          "{ target }",
+          "{ group }"
         ]
       }
     },
@@ -25435,6 +25818,9 @@
       "shapes": {
         "charts": [
           "{ index, label, values }"
+        ],
+        "code": [
+          "{ value: line number, row }"
         ],
         "core": [
           "{ value, item }"

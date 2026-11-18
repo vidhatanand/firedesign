@@ -27,6 +27,13 @@
  *  .fd-log                           search, level chips, Follow, wrap, download; "Jump to latest" when the reader scrolls up.
  *    data-follow data-paused data-height="320" data-max="1000" data-filename="ember-logs.txt"
  *    data-fit                        the body fits its lines, up to that height, then scrolls.
+ *    data-lines [data-anchor="build"] numbers the rows; each number is <a class="fd-log-num" href="#L42"> and its row
+ *                                    gets id="L42" (build-L42 with data-anchor). The numbers are one tab stop: Arrow
+ *                                    Up/Down, Home and End move between visible lines, Enter or a click marks the line
+ *                                    aria-current="true" and writes it to the address (replaceState, no history entry).
+ *                                    On load, and on hashchange, the line the address names is marked and scrolled to.
+ *    .fd-log-btn[data-action="first-error"]   marks and scrolls to the first visible row[data-level="error"];
+ *                                    disabled while there is none.
  *    data-fd-log-demo="api|cli"      streams demo lines (api) or plays a CLI session (cli) once in view.
  *  .fd-diff  > script.fd-diff-src    unified diff text → rows with old/new numbers; data-file adds a header.
  *  .fd-schema-toggle                 shows/hides the next `.fd-schema-children`.
@@ -34,8 +41,11 @@
  * API: init(root), enhanceCodeblock(block), highlight(code, lang) → HTML, tokenize(code, lang) → [{t, v}],
  *      renderJSON(el, data, {depth, truncate}), setJSONExpanded(el, open), getJSON(el),
  *      selectTab(block, value), appendLog(el, entry | string) → row, streamLogDemo(el) → stop(),
- *      playTerminal(el, script?) → Promise, copied(button, {label, slot}).
+ *      playTerminal(el, script?) → Promise, copied(button, {label, slot}),
+ *      showLine(el, line | row, {focus, hash}) → row, firstError(el, {focus}) → row.
  * Events: fd:change (tabs, view switch; detail.value).
+ *         fd:select  .fd-log  { value: line number, row }   a line number was chosen; cancelable (preventDefault keeps
+ *                                                            the line and the address as they were)
  */
 import { $, $$, on, once, emit, copyText, ensureId, reducedMotion, label as fdLabel } from './core.js';
 import { icon } from './icons.js';
@@ -562,6 +572,84 @@ const stamp = (d = new Date()) => `${pad(d.getHours())}:${pad(d.getMinutes())}:$
 
 const logBody = (el) => $(':scope > .fd-log-body', el);
 const logRows = (el) => $$(':scope > .fd-log-row', logBody(el));
+/** A row's text without its line number. */
+const rowText = (row) => [...row.childNodes].filter((n) => !(n instanceof Element && n.classList.contains('fd-log-num'))).map((n) => n.textContent).join('');
+const lineId = (el, n) => `${el.dataset.anchor ? `${el.dataset.anchor}-` : ''}L${n}`;
+
+/** Give a row its number and anchor (data-lines). A number already in the markup is kept. */
+function numberRow(el, row) {
+  const state = LOGS.get(el);
+  if (!state || !el.hasAttribute('data-lines') || row.dataset.line) return;
+  const own = $(':scope > .fd-log-num', row);
+  const n = own ? parseInt(own.textContent, 10) || state.line : state.line;
+  state.line = n + 1;
+  row.dataset.line = String(n);
+  if (!row.id) row.id = lineId(el, n);
+  const num = own ?? document.createElement('a');
+  num.className = 'fd-log-num';
+  num.href = `#${row.id}`;
+  num.textContent = String(n);
+  num.setAttribute('aria-label', fdLabel(el, 'log.line', 'Line {n}', { n }));
+  num.tabIndex = -1;
+  if (!own) row.prepend(num);
+}
+
+/** One tab stop among the numbers: the marked line's, else the first visible one's. */
+function syncNumbers(el) {
+  const nums = logRows(el).filter((r) => !r.hidden).map((r) => $(':scope > .fd-log-num', r)).filter(Boolean);
+  if (!nums.length) return;
+  const focused = nums.find((a) => a === document.activeElement);
+  const home = focused ?? nums.find((a) => a.parentElement.getAttribute('aria-current') === 'true') ?? nums[0];
+  $$(':scope > .fd-log-row > .fd-log-num', logBody(el)).forEach((a) => { a.tabIndex = a === home ? 0 : -1; });
+}
+
+/** Scroll the log body (never the page) so the row sits in the middle of it. */
+function revealRow(el, row) {
+  const body = logBody(el);
+  if (!body || row.hidden) return;
+  const top = row.offsetTop - body.clientHeight / 2 + row.offsetHeight / 2;
+  body.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+}
+
+/** Mark a line (a row, or its number) as the one the reader is looking at, and scroll to it. Pauses Follow. */
+export function showLine(el, line, { focus = false, hash = false } = {}) {
+  initLog(el);
+  const state = LOGS.get(el);
+  const row = line instanceof Element ? line.closest('.fd-log-row') : logRows(el).find((r) => r.dataset.line === String(line));
+  if (!state || !row) return null;
+  logRows(el).forEach((r) => { if (r !== row) r.removeAttribute('aria-current'); });
+  row.setAttribute('aria-current', 'true');
+  if (state.follow) state.paused = true;
+  syncFollow(el);
+  state.auto = true;
+  revealRow(el, row);
+  clearTimeout(state.autoTimer);
+  state.autoTimer = setTimeout(() => { state.auto = false; }, 60);
+  if (hash && row.id && el.hasAttribute('data-lines')) history.replaceState(history.state, '', `#${row.id}`);
+  syncNumbers(el);
+  if (focus) ($(':scope > .fd-log-num', row) ?? logBody(el))?.focus({ preventScroll: true });
+  return row;
+}
+
+/** Mark and scroll to the first visible error row. */
+export function firstError(el, { focus = true } = {}) {
+  const row = logRows(el).find((r) => !r.hidden && r.dataset.level === 'error');
+  return row ? showLine(el, row, { focus, hash: true }) : null;
+}
+
+function syncErrorButton(el) {
+  const btn = $('.fd-log-btn[data-action="first-error"]', el);
+  if (btn) btn.disabled = !logRows(el).some((r) => !r.hidden && r.dataset.level === 'error');
+}
+
+/** The row the address names, if it is in this log. */
+function rowFromHash(el) {
+  let id = location.hash.slice(1);
+  try { id = decodeURIComponent(id); } catch { /* keep it as written */ }
+  if (!id) return null;
+  const row = document.getElementById(id);
+  return row?.matches('.fd-log-row') && row.closest('.fd-log') === el ? row : null;
+}
 
 function initLog(el) {
   if (!once(el, 'fd-log')) return;
@@ -570,8 +658,11 @@ function initLog(el) {
   if (!body.hasAttribute('tabindex')) body.tabIndex = 0;
   if (!body.hasAttribute('role')) body.setAttribute('role', 'log');
   if (el.dataset.height) el.style.setProperty('--_k-h', `${parseInt(el.dataset.height, 10)}px`);
-  const state = { query: '', follow: el.hasAttribute('data-follow'), paused: el.hasAttribute('data-paused'), auto: false };
+  const state = { query: '', follow: el.hasAttribute('data-follow'), paused: el.hasAttribute('data-paused'), auto: false, line: 1 };
   LOGS.set(el, state);
+  logRows(el).forEach((row) => numberRow(el, row));
+  syncNumbers(el);
+  syncErrorButton(el);
   if (!$(':scope > .fd-log-jump', el)) {
     const jump = document.createElement('button');
     jump.type = 'button';
@@ -590,7 +681,11 @@ function initLog(el) {
   if (wrapBtn) wrapBtn.setAttribute('aria-pressed', String(el.hasAttribute('data-wrap')));
   syncFollow(el);
   updateCounts(el);
-  if (state.follow && !state.paused) requestAnimationFrame(() => scrollToEnd(el));
+  const linked = rowFromHash(el);
+  if (linked) {
+    // A link to a line: mark it, bring the log into view, and stop following so it stays put.
+    requestAnimationFrame(() => { showLine(el, linked); el.scrollIntoView({ block: 'center' }); });
+  } else if (state.follow && !state.paused) requestAnimationFrame(() => scrollToEnd(el));
   const demo = el.dataset.fdLogDemo;
   if (demo === 'api') streamLogDemo(el);
   if (demo === 'cli') whenVisible(el, () => playTerminal(el));
@@ -655,7 +750,7 @@ function filterRow(el, row, levels = activeLevels(el)) {
   if (msg && MSG_ORIGINAL.has(msg)) msg.innerHTML = MSG_ORIGINAL.get(msg);
   const level = row.dataset.level;
   const q = state?.query.trim() || '';
-  const show = (!levels || !level || levels.has(level)) && (!q || row.textContent.toLowerCase().includes(q.toLowerCase()));
+  const show = (!levels || !level || levels.has(level)) && (!q || rowText(row).toLowerCase().includes(q.toLowerCase()));
   row.hidden = !show;
   if (q && show && msg) {
     if (!MSG_ORIGINAL.has(msg)) MSG_ORIGINAL.set(msg, msg.innerHTML);
@@ -668,6 +763,8 @@ function applyFilter(el) {
   const rows = logRows(el);
   rows.forEach((row) => filterRow(el, row, levels));
   syncEmpty(el, rows);
+  syncNumbers(el);
+  syncErrorButton(el);
 }
 
 function syncEmpty(el, rows = logRows(el)) {
@@ -717,12 +814,15 @@ export function appendLog(el, entry) {
   row.dataset.new = '';
   row.addEventListener('animationend', () => row.removeAttribute('data-new'), { once: true });
   body.insertBefore(row, $(':scope > .fd-log-empty', body));
+  numberRow(el, row);
   const max = parseInt(el.dataset.max, 10) || 1000;
   const rows = logRows(el);
   for (let i = 0; i < rows.length - max; i += 1) rows[i].remove();
   filterRow(el, row);
   updateCounts(el);
   syncEmpty(el);
+  syncNumbers(el);
+  if (row.dataset.level === 'error') syncErrorButton(el);
   if (state.follow && !state.paused) scrollToEnd(el);
   return row;
 }
@@ -811,6 +911,7 @@ export async function playTerminal(el, script = DEMO_CLI) {
   const alive = () => PLAYS.get(el) === run;
   const body = logBody(el);
   logRows(el).forEach((r) => r.remove());
+  LOGS.get(el).line = 1;
   const prompt = '<span class="fd-log-prompt">$ </span>';
   const instant = reducedMotion();
   const cmdRow = appendLog(el, { html: `${prompt}<span class="fd-log-cmd"></span><span class="fd-log-cursor"></span>` });
@@ -1075,10 +1176,35 @@ function bindGlobal() {
     }
     if (action === 'download') downloadLog(el);
     if (action === 'replay') playTerminal(el);
+    if (action === 'first-error') firstError(el);
     if (action === 'copy') {
-      const text = logRows(el).filter((r) => !r.hidden).map((r) => r.textContent).join('\n');
+      const text = logRows(el).filter((r) => !r.hidden).map(rowText).join('\n');
       copyText(text).then((ok) => ok && copied(btn, { iconOnly: true }));
     }
+  });
+
+  on(document, 'click', '.fd-log-num', (e, num) => {
+    const el = num.closest('.fd-log');
+    const row = num.closest('.fd-log-row');
+    if (!el || !row || e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+    e.preventDefault();
+    if (!emit(el, 'fd:select', { value: Number(row.dataset.line), row })) return;
+    showLine(el, row, { focus: true, hash: true });
+  });
+  on(document, 'keydown', '.fd-log-num', (e, num) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const el = num.closest('.fd-log');
+    const nums = logRows(el).filter((r) => !r.hidden).map((r) => $(':scope > .fd-log-num', r)).filter(Boolean);
+    const i = nums.indexOf(num);
+    const next = { ArrowDown: nums[i + 1], ArrowUp: nums[i - 1], Home: nums[0], End: nums[nums.length - 1] }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    nums.forEach((a) => { a.tabIndex = a === next ? 0 : -1; });
+    next.focus({ preventScroll: true });
+    next.parentElement.scrollIntoView({ block: 'nearest' });
+  });
+  addEventListener('hashchange', () => {
+    $$('.fd-log[data-lines]').forEach((el) => { const row = rowFromHash(el); if (row) showLine(el, row); });
   });
 
   on(document, 'click', '.fd-schema-toggle', (e, btn) => toggleSchema(btn));

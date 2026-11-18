@@ -18,6 +18,7 @@ export const EXTRA_ROOTS = {
   'fd-feature-row': 'Content',
   'fd-file': 'Forms',                  // an uploaded file row (fd-filelist is its list)
   'fd-glyph': 'Texture & loading',
+  'fd-list-detail': 'Data',           // a list beside the record it opens (one pane at a time on a phone)
   'fd-listbox': 'Forms',
   'fd-matrix': 'Forms',                // a table of switches
   'fd-model-menu': 'Agent',
@@ -78,7 +79,7 @@ export const ID_ALIASES = { 'fd-btn': 'button' };
 export const PATTERNS = new Set(['fd-agent', 'fd-form-section', 'fd-screen', 'fd-playground']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {
@@ -182,13 +183,14 @@ export const FREE_ATTRIBUTES = {
   codeblock: ['data-collapse'],        // collapsed height in px: "200", "240", "420" (code.js header)
   doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
   kv: ['data-copy'],                   // the text a row copies
+  list: ['data-value'],                // a row's record id: the option a listbox list selects, the record a list-and-detail row opens
   menu: ['data-fd-submenu'],           // the id of the sub-menu
   pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
   secret: ['data-noun'],               // the word the buttons name: "password", "API key", "signing secret"
   steps: ['data-current'],             // the 0-based index of the current step (nav.js header: data-current="n")
   'doc-endpoint': ['data-in'],         // where a parameter goes (body, query, path, header…); docsite.js's try form reads body, query and path
   button: ['data-action'],             // the page's name for what the button does (agent.js: run, copy-result; pages: retry, export)
-  log: ['data-action'],                // code.js handles wrap and download; a page adds its own (replay)
+  log: ['data-action', 'data-anchor'], // code.js handles wrap, download and first-error; a page adds its own (replay). data-anchor: the prefix of line ids (build -> #build-L42)
 };
 /* An icon name is free text (the lint's unknown-icon rule checks it against catalog.icons). The drawn icon,
  * svg.fd-icon[data-icon] (EXPORT I2), takes it on the icon's root; rules such as `.fd-badge > i[data-icon]` give it to

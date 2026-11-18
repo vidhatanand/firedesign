@@ -1,10 +1,12 @@
 {
   "id": "steps",
-  "job": "Show where someone is in a flow with a fixed order.",
-  "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set the position with data-current (0-based) or setStep(); buttons with data-fd-step=\"next|prev|n\" move it. The vertical orientation suits a setup checklist with descriptions. A step in error shows the reason under its title.",
+  "job": "Show where someone is in a flow with a fixed order, or how far live work or a record has got.",
+  "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. A wizard sets the position with data-current or setStep(). Live work marks each step running, failed, waiting or skipped, with an owner and one action per step. The tracker variant lays a record's stages across its page and turns vertical below 560px of its own width.",
   "useWhen": [
     "A setup or create flow has a fixed order: choose pages, schedule, notify, review.",
-    "A vertical list of tasks shows what is done and what comes next."
+    "A vertical list of tasks shows what is done and what comes next.",
+    "Work runs in steps on its own and each step reports how it went: a key rotation, a deploy, an import.",
+    "One record moves through stages (Proposed, Checked, Approved, Testing, Result) and its page shows where it is."
   ],
   "avoidWhen": [
     {
@@ -22,6 +24,14 @@
     {
       "when": "The path is a location hierarchy.",
       "instead": "breadcrumb"
+    },
+    {
+      "when": "Each event has a time and the order of events is the point.",
+      "instead": "timeline"
+    },
+    {
+      "when": "The work is a graph of stages with parallel jobs.",
+      "instead": "pipeline"
     }
   ],
   "aka": [
@@ -29,7 +39,11 @@
     "wizard",
     "progress steps",
     "timeline",
-    "onboarding steps"
+    "onboarding steps",
+    "lifecycle tracker",
+    "stage tracker",
+    "progress tracker",
+    "checklist with owners"
   ],
   "surfaces": [
     "app",
@@ -51,6 +65,22 @@
     {
       "name": "error",
       "how": "data-state=\"error\" on a step"
+    },
+    {
+      "name": "running",
+      "how": "data-state=\"running\": the accent marker with a turning arc"
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\": a cross on the danger tone; the description reads in danger text"
+    },
+    {
+      "name": "waiting",
+      "how": "data-state=\"waiting\": an hourglass on the warning tone, waiting on the person in fd-step-owner"
+    },
+    {
+      "name": "skipped",
+      "how": "data-state=\"skipped\": a dashed ring and a dash; setStep keeps it"
     }
   ],
   "variants": [
@@ -58,6 +88,11 @@
       "attribute": "data-orientation",
       "value": "vertical",
       "useWhen": "A list with descriptions, as in a getting-started panel."
+    },
+    {
+      "attribute": "data-variant",
+      "value": "tracker",
+      "useWhen": "The stages of one record across the top of its page; vertical below 560px of its own width."
     }
   ],
   "parts": [
@@ -84,6 +119,14 @@
     {
       "class": "fd-step-desc",
       "role": "Detail under the title."
+    },
+    {
+      "class": "fd-step-owner",
+      "role": "Who the step waits on: an fd-avatar and a name, under the title."
+    },
+    {
+      "class": "fd-step-action",
+      "role": "One small button or link after the body: what to do about the step now."
     }
   ],
   "related": [
@@ -91,7 +134,10 @@
     "checklist",
     "dialog",
     "progress",
-    "breadcrumb"
+    "breadcrumb",
+    "timeline",
+    "pipeline",
+    "avatar"
   ],
   "keyboard": [
     {

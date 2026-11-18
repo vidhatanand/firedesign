@@ -66,6 +66,7 @@
   --fd-status-pill-h-sm: 24px;
   --fd-status-pill-x: 10px;                 /* where the ping starts inside a pill */
   --fd-status-pill-x-sm: 8px;
+  --fd-status-sep: 3px;                     /* the dot between a status and its note */
   /* callout, banner */
   --fd-callout-dismiss: 24px;
   --fd-banner-min: 44px;
@@ -129,6 +130,7 @@
    data-variant  quiet | sunken | accent
    data-interactive  the whole card is an <a> or <button>; add
                      <i class="fd-card-arrow" data-icon="arrow-up-right"></i> for the corner arrow.
+                     aria-current="true" (open beside a list) or aria-selected="true" marks the selected card.
    ========================================================================== */
 .fd-card {
   --_c-pad: var(--fd-space-5);
@@ -186,6 +188,11 @@
 .fd-card[data-interactive]:active { scale: 0.99; }
 .fd-card[data-interactive]:focus-visible { border-radius: var(--_c-radius); box-shadow: var(--fd-ring-inset); border-color: transparent; }
 button.fd-card[data-interactive] { font: inherit; width: 100%; }
+/* Selected: the card open beside a list (aria-current) or chosen in a listbox (aria-selected). */
+.fd-card[data-interactive]:is([aria-current]:not([aria-current="false"]), [aria-selected="true"]) {
+  --_c-bg: color-mix(in srgb, var(--fd-accent) 8%, var(--fd-surface)); border-color: var(--fd-accent-40);
+}
+.fd-card[data-interactive]:is([aria-current]:not([aria-current="false"]), [aria-selected="true"]) > .fd-card-arrow { color: var(--fd-accent-text); }
 
 .fd-card-arrow {
   position: absolute; inset-block-start: var(--_c-pad); inset-inline-end: var(--_c-pad);
@@ -437,6 +444,8 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
    data-tone     neutral (hollow dot) | success | danger | warning | info | violet | accent
    data-size     sm (13px)               data-live   pulsing ping ring
    data-variant  icon (status icon instead of dot: <i data-icon> first child) | pill (tinted header pill)
+   fd-status-note  a short qualifier after the word, muted, behind a small dot:
+                 <span class="fd-status" data-tone="success">Succeeded<span class="fd-status-note">1 flaky test</span></span>
    ========================================================================== */
 .fd-status {
   --_c-c: var(--fd-text-4); --_c-t: var(--fd-text-2); --_c-bg: var(--fd-fill); --_c-l: transparent;
@@ -466,6 +475,15 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
 .fd-status[data-variant="pill"]:not([data-tone]), .fd-status[data-variant="pill"][data-tone="neutral"] { --_c-l: var(--fd-line); --_c-bg: transparent; color: var(--fd-text-2); }
 .fd-status[data-variant="pill"][data-size="sm"] { --_c-x: var(--fd-status-pill-x-sm); height: var(--fd-status-pill-h-sm); padding-inline: var(--fd-space-2); font-size: var(--fd-text-xs); }
 .fd-status[data-variant="pill"] > .fd-icon { color: currentColor; width: var(--fd-icon-sm); height: var(--fd-icon-sm); margin-inline-start: calc(var(--fd-space-0-5) * -1); }
+.fd-status { max-width: 100%; }
+.fd-status-note { min-width: 0; color: var(--fd-text-3); overflow: hidden; text-overflow: ellipsis; }
+.fd-status-note::before {
+  content: ""; display: inline-block; vertical-align: middle;
+  width: var(--fd-status-sep); height: var(--fd-status-sep); margin-inline-end: var(--fd-space-2);
+  border-radius: 50%; background: currentColor;
+}
+.fd-status[data-size="sm"] > .fd-status-note::before { margin-inline-end: var(--fd-space-1-5); }
+.fd-status[data-variant="pill"] > .fd-status-note { color: inherit; font-weight: var(--fd-weight-regular); }
 
 /* ==========================================================================
    Callout — a message inside content

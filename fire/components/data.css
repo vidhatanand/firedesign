@@ -34,12 +34,39 @@
    Stacked cells     td|th[data-stack="hide"] (dropped when the table stacks) · [data-stack-only] inside a cell (shown only when stacked)
    Foot              fd-table-foot > fd-table-foot-info (count or summary, left) + fd-table-foot-actions (right)
    Wrap attributes   data-variant="plain"
+   Groups            one tbody per group, its first row the heading; the th labels the rows under it (scope="rowgroup"):
+                     <table class="fd-table" data-collapsible>
+                       <tbody class="fd-table-group" data-state="closed">         (data-state="open|closed"; open by default)
+                         <tr class="fd-table-group-head">
+                           <td data-select><input type="checkbox" class="fd-table-check" data-select-group aria-label="Select all in Scrape"></td>
+                           <th scope="rowgroup" colspan="5">
+                             <button class="fd-table-group-toggle" type="button" aria-expanded="true"><i data-icon="chevron-right"></i>
+                               <span class="fd-table-group-title">Scrape</span><span class="fd-table-group-count" data-auto>3</span></button>
+                           </th>
+                         </tr>
+                         <tr>…rows…</tr>
+                       </tbody>
+                     The select cell is optional. Without the toggle the th holds fd-table-group-title and fd-table-group-count
+                     directly. data-collapsible: data.js builds the toggle from the th's content. data-state="closed" hides a
+                     group's rows; a group whose rows are all [hidden] hides its heading too.
 
    FILTERS   fd-filter (> fd-filter-trigger + fd-filter-clear) · fd-filter-bar · fd-filter-search · fd-filter-applied > fd-filter-token
    LIST      fd-list[data-divided|data-card|data-interactive] > fd-list-row > fd-list-lead, -body (-title, -desc), -meta, -trail
+             Selected: aria-current="true" on a row that is a button or link (or on its fd-list-link), or aria-selected="true"
+             on a row with role="option" in a role="listbox" list.
+   LIST AND DETAIL  a list beside the record it opens; under 760px of its own width it shows one pane at a time
+             <div class="fd-list-detail" data-view="list|detail">
+               <div class="fd-list-detail-list"> fd-list of button rows with data-value and aria-current="true" on the open one </div>
+               <div class="fd-list-detail-main">
+                 <button class="fd-back fd-list-detail-back" type="button"><i data-icon="arrow-left"></i><span>All requests</span></button>
+                 <section data-detail="req_8f3a21">…</section>     (optional: one panel per item, matched on data-value)
+               </div>
+             </div>
    KEY-VALUE fd-kv[data-cols="1|2|3"][data-layout="split"][data-divided] > fd-kv-item > fd-kv-key + fd-kv-value[data-copy|data-mono|data-plain]
    STATS     fd-stats[data-variant="cards"] > fd-stat-tile > fd-stat-label, fd-stat, fd-stat-sub, fd-stat-delta, fd-stat-slot, fd-stat-action
              fd-stat-row > fd-stat + fd-stat-unit   a figure with a small unit on its baseline ("27 of 30 days")
+             fd-stat-delta[data-dir="up|down|flat"][data-tone="neutral|success|warning|danger"]: neutral (the default look) for
+             a change that is neither good nor bad; flat for no change. fd-stat-sub may hold an fd-status ("Degraded · 2 regions").
    METER     fd-meter[data-value][data-max][data-tone][data-variant="inline|segmented"][data-size="sm|lg"]
    PROGRESS  fd-progress[data-value][data-variant="ring|steps"][data-size="16|24|40"][data-indeterminate]
    DATA CARD fd-data-card > fd-data-card-head, -body, -toggle, -more
@@ -86,6 +113,8 @@
   --fd-data-sr: 1px;                 /* the visually hidden box */
   --fd-data-stack-label: 80px;       /* stacked card: narrowest caption column */
   --fd-data-stack-select: 28px;      /*   room for the checkbox */
+  --fd-data-group-count: 18px;       /* group heading count: min width and height */
+  --fd-data-group-count-px: 5px;
   /* filters */
   --fd-data-clear: 20px;             /* filter and token clear buttons */
   --fd-data-fsearch-basis: 240px;
@@ -104,6 +133,7 @@
   --fd-data-delta-h: 20px;
   --fd-data-arrow-w: 7px;            /* delta arrow */
   --fd-data-arrow-h: 6px;
+  --fd-data-flat-h: 2px;             /* delta: the bar of "no change" */
   /* meter, progress */
   --fd-data-bar-h: 6px;              /* bar thickness */
   --fd-data-bar-h-sm: 4px;
@@ -303,7 +333,7 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table td[data-muted] { color: var(--fd-text-3); }
 
 /* Hover, selected, expanded */
-.fd-table tbody tr:where(:not(.fd-table-detail, .fd-table-state, [data-skeleton])):hover { background: var(--fd-fill-subtle); }
+.fd-table tbody tr:where(:not(.fd-table-detail, .fd-table-state, .fd-table-group-head, [data-skeleton])):hover { background: var(--fd-fill-subtle); }
 .fd-table tbody tr[data-expanded] { background: var(--fd-fill-subtle); }
 .fd-table tbody tr[aria-selected="true"] { background: var(--fd-accent-4); }
 .fd-table tbody tr[aria-selected="true"]:hover { background: var(--fd-accent-8); }
@@ -387,6 +417,52 @@ th[aria-sort="descending"] .fd-th-sort {
 }
 .fd-table-detail:not([hidden]) > td > * { animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out) both; }
 .fd-table tbody tr[data-expanded] > td { border-bottom-color: transparent; }
+
+/* ---------- Groups: one tbody per group, headed by a row that names it ----------
+   The heading row reads like the header (mono eyebrow on the page colour) so it never looks like a record: no hover,
+   not a link. A hairline above it separates it from the group before; a closed group keeps only its heading. */
+.fd-table tbody tr.fd-table-group-head { height: var(--_d-th-h); }
+.fd-table-group-head > :is(th, td) {
+  padding: 0 var(--fd-row-px);
+  background: var(--fd-bg);
+  border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs);
+  letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase;
+  font-weight: var(--fd-weight-regular); color: var(--fd-text-2);
+  text-align: start; white-space: nowrap; vertical-align: middle;
+}
+.fd-table-wrap[data-variant="plain"] .fd-table-group-head > :is(th, td) { background: var(--fd-fill-subtle); }
+.fd-table tbody + .fd-table-group > .fd-table-group-head > :is(th, td) { border-top: var(--fd-hairline) solid var(--fd-line-faint); }
+.fd-table-group-head > td[data-select] + th { padding-inline-start: var(--fd-space-3); }
+.fd-table-group-head > td[data-expand] + th { padding-inline-start: var(--fd-space-2); }
+.fd-table[data-sticky] .fd-table-group-head > :is(th, td) { position: sticky; top: var(--_d-th-h); z-index: 1; }
+.fd-table-group-title { min-width: 0; }
+.fd-table-group-count {
+  display: inline-grid; place-items: center; min-width: var(--fd-data-group-count); height: var(--fd-data-group-count);
+  margin-inline-start: var(--fd-space-2); padding-inline: var(--fd-data-group-count-px); border-radius: var(--fd-radius-full);
+  background: var(--fd-fill); color: var(--fd-text-3);
+  font-size: var(--fd-text-2xs); line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums;
+}
+.fd-table-group-toggle {
+  display: inline-flex; align-items: center; gap: var(--fd-space-1-5); max-width: 100%;
+  height: var(--fd-control-xs); margin-inline: calc(var(--fd-space-1-5) * -1); padding-inline: var(--fd-space-1-5);
+  border-radius: var(--fd-radius-sm);
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; white-space: nowrap;
+  transition: color var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-table-group-toggle:hover { color: var(--fd-text); background: var(--fd-fill); }
+.fd-table-group-toggle > .fd-table-group-count { margin-inline-start: var(--fd-space-0-5); }
+.fd-table-group-toggle > .fd-icon {
+  flex: none; width: var(--fd-icon-sm); height: var(--fd-icon-sm); color: var(--fd-text-3);
+  transition: rotate var(--fd-dur-3) var(--fd-ease-out);
+}
+.fd-table-group-toggle[aria-expanded="true"] > .fd-icon { rotate: 90deg; }
+.fd-table-group-toggle:dir(rtl) > .fd-icon { scale: -1 1; }
+/* Closed: only the heading shows. */
+.fd-table-group[data-state="closed"] > tr:not(.fd-table-group-head) { display: none; }
+.fd-table-group[data-state="closed"] > .fd-table-group-head > :is(th, td) { border-bottom-color: transparent; }
+/* A group whose every row is filtered out ([hidden]) disappears with its heading. */
+.fd-table .fd-table-group:not(:has(> tr:not(.fd-table-group-head, [hidden]))) { display: none; }
 
 /* ---------- States: loading, empty, error ---------- */
 .fd-table-skeleton {
@@ -523,6 +599,19 @@ th[aria-sort="descending"] .fd-th-sort {
   .fd-table[data-stack] .fd-table-state > td { display: block; }
   .fd-table[data-stack] .fd-table-empty { position: static; inline-size: auto; }
   .fd-table[data-stack] tbody tr[data-skeleton] > td:not([data-label]) { display: block; }
+  /* A group heading stays one plain line: the checkbox (if any) where the rows' checkboxes are, then the title. */
+  .fd-table[data-stack] .fd-table-group > tr.fd-table-group-head {
+    display: flex; align-items: center; gap: var(--fd-space-3); min-height: var(--_d-th-h); padding: 0 var(--fd-row-px);
+    background: var(--fd-bg); border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
+  }
+  .fd-table-wrap[data-variant="plain"] .fd-table[data-stack] .fd-table-group > tr.fd-table-group-head { background: var(--fd-fill-subtle); }
+  .fd-table[data-stack] tbody + .fd-table-group > tr.fd-table-group-head { border-top: var(--fd-hairline) solid var(--fd-line-faint); }
+  .fd-table[data-stack] .fd-table-group[data-state="closed"] > tr.fd-table-group-head { border-bottom-color: transparent; }
+  .fd-table[data-stack] tbody tr.fd-table-group-head > :is(th, td) {
+    position: static; display: block; min-width: 0; padding: 0; border: 0; background: none; white-space: normal;
+  }
+  .fd-table[data-stack] tbody tr.fd-table-group-head > td[data-select] { width: auto; }
+  .fd-table[data-stack] tbody tr.fd-table-group-head > th { flex: 1 1 auto; }
 
   .fd-table-bulk-actions .fd-btn { padding-inline: 0; width: var(--_b-h); }
   .fd-table-bulk-actions .fd-btn > span {
@@ -681,6 +770,22 @@ button.fd-list-row { width: 100%; font: inherit; }
 }
 .fd-list[data-card] > .fd-list-row:is(a, button):focus-visible { border-radius: 0; }
 
+/* Selected: the row open beside the list (aria-current) or chosen in a listbox (aria-selected): the same wash and
+   start bar as a selected table row. */
+.fd-list-row:is([aria-current]:not([aria-current="false"]), [aria-selected="true"]),
+.fd-list-row:has(> .fd-list-body > .fd-list-link[aria-current]:not([aria-current="false"])) {
+  background: var(--fd-accent-4);
+  box-shadow: inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent);
+}
+.fd-list-row:is([aria-current]:not([aria-current="false"]), [aria-selected="true"]):hover,
+.fd-list-row:has(> .fd-list-body > .fd-list-link[aria-current]:not([aria-current="false"])):hover { background: var(--fd-accent-8); }
+.fd-list-row:is([aria-current]:not([aria-current="false"]), [aria-selected="true"]) .fd-list-chevron { color: var(--fd-accent-text); }
+.fd-list-row:is(a, button, [role="option"]):is([aria-current]:not([aria-current="false"]), [aria-selected="true"]):focus-visible {
+  box-shadow: var(--fd-ring-inset), inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent);
+}
+.fd-list-row[role="option"] { cursor: pointer; }
+.fd-list-row[role="option"]:focus-visible { box-shadow: var(--fd-ring-inset); }
+
 @supports not (grid-template-columns: subgrid) {
   .fd-list { display: block; }
   .fd-list-row { grid-template-columns: auto minmax(0, 1fr) auto auto; }
@@ -688,6 +793,38 @@ button.fd-list-row { width: 100%; font: inherit; }
 @container fd-list (max-width: 480px) {
   .fd-list-meta { grid-column: 2; grid-row: 2; margin: var(--fd-space-0-5) 0 0; }
   .fd-list-trail { margin-inline-start: var(--fd-space-2); }
+}
+
+/* ==========================================================================
+   List and detail: the list beside the record it opens. Below 760px of its own width one pane shows at a time:
+   data-view="list" (the default) or "detail", written by data.js; the back button returns to the list.
+   ========================================================================== */
+.fd-list-detail {
+  --_d-ld-mode: split;               /* read by data.js: split | single */
+  container: fd-list-detail / inline-size;
+  display: grid; grid-template-columns: minmax(0, var(--fd-panel-w)) minmax(0, 1fr);
+  min-width: 0;
+}
+.fd-list-detail-list {
+  display: flex; flex-direction: column; gap: var(--fd-space-3);
+  min-width: 0; padding: var(--fd-space-4);
+  border-inline-end: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-list-detail-main {
+  display: flex; flex-direction: column; gap: var(--fd-space-4);
+  min-width: 0; padding: var(--fd-space-6) var(--fd-gutter);
+}
+.fd-list-detail-main :is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }
+.fd-list-detail-main :is(h1, h2, h3)[tabindex="-1"]:focus-visible { box-shadow: var(--fd-ring); border-radius: var(--fd-radius-xs); }
+.fd-list-detail-back { display: none; align-self: flex-start; }
+@container fd-list-detail (max-width: 759.98px) {
+  .fd-list-detail > * { --_d-ld-mode: single; grid-column: 1 / -1; }
+  .fd-list-detail-list { padding-inline: var(--fd-gutter); border-inline-end: 0; }
+  .fd-list-detail-main { padding-block-start: var(--fd-space-4); }
+  .fd-list-detail:not([data-view="detail"]) > .fd-list-detail-main,
+  .fd-list-detail[data-view="detail"] > .fd-list-detail-list { display: none; }
+  .fd-list-detail[data-view="detail"] .fd-list-detail-back { display: inline-flex; }
+  .fd-list-detail[data-view="detail"] > .fd-list-detail-main { animation: fd-fade-in var(--fd-dur-3) var(--fd-ease-out); }
 }
 
 /* ==========================================================================
@@ -786,6 +923,13 @@ a.fd-stat-tile:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 
 .fd-stat-delta[data-tone="success"] { background: var(--fd-success-bg); color: var(--fd-success-text); }
 .fd-stat-delta[data-tone="danger"] { background: var(--fd-danger-bg); color: var(--fd-danger-text); }
 .fd-stat-delta[data-tone="warning"] { background: var(--fd-warning-bg); color: var(--fd-warning-text); }
+/* Neutral: a change that is neither good nor bad (more runs, a bigger crawl). The default look, written out. */
+.fd-stat-delta[data-tone="neutral"] { background: var(--fd-fill); color: var(--fd-text-2); }
+/* Flat: no change; a short bar instead of an arrow. */
+.fd-stat-delta[data-dir="flat"]::before { height: var(--fd-data-flat-h); border-radius: var(--fd-radius-full); clip-path: none; }
+/* A sub-line that holds a status (and its note) keeps the sub-line's size. */
+.fd-stat-sub:has(> .fd-status) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1) var(--fd-space-2); }
+.fd-stat-sub > .fd-status { font-size: inherit; line-height: inherit; gap: var(--fd-space-1-5); }
 
 /* Standalone cards: the same tile, each its own object. */
 .fd-stats[data-variant="cards"] { gap: var(--fd-space-3); background: transparent; border: 0; border-radius: 0; overflow: visible; }

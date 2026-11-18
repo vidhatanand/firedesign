@@ -2092,7 +2092,8 @@
         "num",
         "mono",
         "actions",
-        "href"
+        "href",
+        "collapsible"
       ],
       "states": [
         "empty",
@@ -2130,6 +2131,11 @@
               "md",
               "sm"
             ],
+            "required": false
+          },
+          {
+            "name": "collapsible",
+            "type": "boolean",
             "required": false
           },
           {
@@ -2479,7 +2485,8 @@
       "states": [
         "hover",
         "focus",
-        "pressed"
+        "pressed",
+        "selected"
       ],
       "paths": [
         "fire/components/data.css"
@@ -3082,7 +3089,9 @@
         "dir-down",
         "tone-success",
         "tone-danger",
-        "tone-warning"
+        "tone-warning",
+        "tone-neutral",
+        "dir-flat"
       ],
       "states": [
         "hover",
@@ -3127,9 +3136,10 @@
     },
     {
       "name": "Steps",
-      "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. Set…",
+      "purpose": "An ordered list of steps: finished ones show a check, the current one wears the accent, the rest wait in outline. A…",
       "variants": [
-        "orientation-vertical"
+        "orientation-vertical",
+        "tracker"
       ],
       "states": [
         "error",
@@ -3147,6 +3157,14 @@
       ],
       "api": {
         "props": [
+          {
+            "name": "variant",
+            "type": "enum",
+            "values": [
+              "tracker"
+            ],
+            "required": false
+          },
           {
             "name": "current",
             "type": "string",
@@ -3175,7 +3193,7 @@
             "description": "One step; carries data-state."
           }
         ],
-        "example": "<cc-component name=\"Steps\" orientation=\"vertical\">Content</cc-component>"
+        "example": "<cc-component name=\"Steps\" variant=\"tracker\" orientation=\"vertical\">Content</cc-component>"
       }
     },
     {
@@ -5486,6 +5504,55 @@
       }
     },
     {
+      "name": "ListDetail",
+      "purpose": "Two panes: a list of rows (buttons with data-value) and the record that is open. The open row has aria-current=\"true\"…",
+      "variants": [
+        "view-detail"
+      ],
+      "states": [
+        "empty",
+        "loading",
+        "selected"
+      ],
+      "paths": [
+        "fire/components/data.css"
+      ],
+      "do": [
+        "People decide or review records one after another: requests, approvals, failures, messages."
+      ],
+      "dont": [
+        "Each record needs its own page and address. Use Table."
+      ],
+      "api": {
+        "props": [
+          {
+            "name": "view",
+            "type": "enum",
+            "values": [
+              "detail",
+              "list"
+            ],
+            "required": false
+          }
+        ],
+        "parts": [
+          {
+            "name": "children",
+            "description": "Slot: the component's…"
+          },
+          {
+            "name": "list-detail",
+            "description": "The root: two columns, one…"
+          },
+          {
+            "name": "list-detail-list",
+            "description": "The list pane: a heading and…"
+          }
+        ],
+        "example": "<cc-component name=\"ListDetail\" view=\"detail\">Content</cc-component>"
+      }
+    },
+    {
       "name": "Notification",
       "purpose": "A row in the notifications popover: a title, a line of text and a time, with an accent dot when unread. The popover…",
       "variants": [
@@ -6020,7 +6087,8 @@
       "states": [
         "hover",
         "focus",
-        "pressed"
+        "pressed",
+        "selected"
       ],
       "paths": [
         "fire/components/content.css"
@@ -6331,6 +6399,10 @@
           {
             "name": "status",
             "description": "The dot and the word."
+          },
+          {
+            "name": "status-note",
+            "description": "A short qualifier after the…"
           }
         ],
         "example": "<cc-component name=\"Status\" variant=\"icon\" size=\"sm\">Content</cc-component>"
@@ -6862,13 +6934,18 @@
         "level-error",
         "tone-danger",
         "tone-success",
-        "tone-dim"
+        "tone-dim",
+        "lines",
+        "anchor-build"
       ],
       "states": [
+        "error",
         "success",
+        "disabled",
         "hover",
         "focus",
-        "pressed"
+        "pressed",
+        "selected"
       ],
       "paths": [
         "fire/components/code.css"
@@ -6890,6 +6967,11 @@
             "required": false
           },
           {
+            "name": "anchor",
+            "type": "string",
+            "required": false
+          },
+          {
             "name": "fit",
             "type": "boolean",
             "required": false
@@ -6908,12 +6990,8 @@
             "required": false
           },
           {
-            "name": "logDemo",
-            "type": "enum",
-            "values": [
-              "api",
-              "cli"
-            ],
+            "name": "lines",
+            "type": "boolean",
             "required": false
           },
           {
@@ -7272,60 +7350,6 @@
           }
         ],
         "example": "<cc-component name=\"Timeline\">Content</cc-component>"
-      }
-    },
-    {
-      "name": "Accordion",
-      "purpose": "A list of native details elements. Each item has a trigger row and a panel; Fire animates the height. It works without…",
-      "variants": [
-        "card",
-        "icon-lead"
-      ],
-      "states": [
-        "hover",
-        "focus",
-        "open"
-      ],
-      "paths": [
-        "fire/components/content.css"
-      ],
-      "do": [
-        "A page answers several questions and most readers need only one: FAQs, request headers, response…"
-      ],
-      "dont": [
-        "The sections are peers that people switch between and compare. Use Tabs."
-      ],
-      "api": {
-        "props": [
-          {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "card"
-            ],
-            "required": false
-          },
-          {
-            "name": "single",
-            "type": "boolean",
-            "required": false
-          }
-        ],
-        "parts": [
-          {
-            "name": "children",
-            "description": "Slot: the component's…"
-          },
-          {
-            "name": "accordion",
-            "description": "The group of items."
-          },
-          {
-            "name": "accordion-item",
-            "description": "One details element."
-          }
-        ],
-        "example": "<cc-component name=\"Accordion\" variant=\"card\">Content</cc-component>"
       }
     }
   ],

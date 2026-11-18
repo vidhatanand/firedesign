@@ -74,7 +74,8 @@ The neutrals are alpha steps of two colours: `--fd-wash` (fills and tints) and `
 - State is written to the DOM (`data-state`, `hidden`, ARIA). Changes fire bubbling events: `fd:open`, `fd:close`, `fd:change` (`detail.value`), `fd:select`.
 - Floating surfaces use the native Popover API (`popover="auto"` or `"manual"`) for top-layer and light dismiss, positioned with `position()` from core. Modals use native `<dialog>` and `showModal()`.
 - No dependencies, no globals except what a module explicitly documents, no inline styles except computed geometry (positions, sizes, CSS custom properties for values).
-- A module documents its markup contract in a header comment.
+- A module documents its markup contract in a header comment. Plain functions that run with no DOM (`fire/js/theme.js`, `fire/js/initial.js`, `fire/email/email.js`) are modules too: each gets a card in the catalogue.
+- Custom elements (`fire/elements.js`) exist only where a component builds its own DOM (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`). Each is its component's root and renders the same DOM as the markup form. A component whose markup the author writes is not a custom element.
 
 ## 6. Voice
 
@@ -111,3 +112,7 @@ Every component family has a page in `docs/` built like `docs/buttons.html` (rea
 A component is done when: it is correct in light and dark, under at least the ember, volt and midnight palettes, in compact and spacious density, with corners at 0 and 2, at 1440px and 375px; it is operable by keyboard; nothing overflows at 320px; hover, focus-visible, active, disabled and loading states exist where they apply; text never touches an edge; and numbers align.
 
 A screen is done when, as well as the above: every control matches the kind of value it holds (`GUIDE.md` section 5, "Forms": nobody types a choice, a yes or no, a list or JSON); each heading level is a visible step from the one above it; a long form sits in `fd-form-section`s on a surface; and someone has looked at it in a browser. Every attribute value used in markup is one the vocabulary lists: an attribute Fire does not define does nothing, silently.
+
+A new component, pattern or template is admitted when it is not a near-duplicate of one Fire has, or when its card says how it differs: a `relation` (`variantOf` or `distinctFrom`) with one sentence on when to use it instead. `node scripts/gate.mjs` compares structure, look and job against every peer and runs in `scripts/build.mjs`; `node scripts/gate.mjs --probe <page>` checks a candidate first. Before you add anything, run `npx fire find` for what it does.
+
+Every dial must reach your component. Paint objects, fields, secondary controls and small labels with the semantic tokens in `fire/tokens.css`, never with a dial selector or a raw palette step: `--fd-surface-edge`, `--fd-surface-flush` and `--fd-surface-head` for an object's edge, its flush fill and its head strip; `--fd-field` and `--fd-field-hover` inside an input; `--fd-control-bg`, `--fd-control-bg-hover`, `--fd-control-bg-active`, `--fd-control-edge` and `--fd-control-edge-hover` for a secondary control; `--fd-shadow-object` for the drop of an object; and `--fd-eyebrow-font`, `--fd-eyebrow-case`, `--fd-eyebrow-ls`, `--fd-eyebrow-ls-tight`, `--fd-eyebrow-weight`, `--fd-section-label-font` and `--fd-section-label-ls` for small labels.

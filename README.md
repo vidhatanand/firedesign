@@ -13,7 +13,7 @@ npm run dev
 Then open http://127.0.0.1:4747/docs/index.html.
 
 - **Docs** (`/docs/index.html`): every component, live, with a "Markup" view to copy from.
-- **Templates** (`/templates/index.html`): 24 full screens for a fictional product, Ember, built only from Fire components.
+- **Templates** (`/templates/index.html`): 32 full screens for a fictional product, Ember, built only from Fire components.
 - **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, switch the typeface, change density, corners, contrast, motion and texture. Choices are saved and follow you across pages.
 
 ## Read next
@@ -28,16 +28,20 @@ Then open http://127.0.0.1:4747/docs/index.html.
 | Updating a product to a newer Fire | [CHANGELOG.md](CHANGELOG.md): what changed in each release and what to check |
 | Asking for a component or an extension | GUIDE.md section 7, then the "Component or extension request" issue template |
 
-## What Fire ships (0.6)
+## What Fire ships
 
 Fire's HTML and CSS are the contract. Everything else is built on them, generated from one source, and checked in CI (`npm run check`).
 
 | Part | Where | What it is for |
 |---|---|---|
 | Styles and behaviour | `fire/` | Copy it, or depend on `fire-design`. Plain CSS and ES modules, no build needed to use them. |
-| Theme record | `fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/` | A product's whole look as one JSON object; `paletteFrom()` makes a palette from an accent or brand colours that passes every contrast rule. |
+| Theme record | `fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/` | A product's whole look as one JSON object: palette, tone, type, dials and signature; `paletteFrom()` makes a palette from an accent or brand colours that passes every contrast rule. |
+| Looks: fonts and dials | `contract/fonts.json`, `fire/typefaces.css`, `scripts/fonts.mjs`, `fire/tokens.css` | A catalogue of 53 open-licensed font families and twelve type sets; `fonts.mjs add "<family>"` puts a family in a product. Four structural dials (surfaces, elevation, controls, headings) and the signature dials (texture field, mark, cell, ramp, frame marks, intensity) restyle every component. |
+| Email | `fire/email/email.js`, `docs/email.html` | `renderEmail()` writes a transactional email, HTML and text, in the product's look. |
 | Contract | `contract/fire-contract.json` | Every global token with its type, tier (input, scale, derived), default and Facet role. |
-| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 142 components with their classes, allowed values, events and a card each: job, when to use, when not, other names. What agents search. |
+| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 163 components, patterns and layouts, and 3 modules, with their classes, allowed values, events and a card each: job, when to use, when not, other names; a card per template in `contract/cards/templates/`. |
+| Find | `scripts/find.mjs`, `contract/index.json` | `npx fire find "<what you need>"` ranks the parts by what they are for: 198 entries, no network. What agents search first. |
+| Gate | `scripts/gate.mjs`, `contract/fingerprints.json` | Compares every component, pattern and template with its peers and fails a near-duplicate unless a card declares a `relation`. `--probe <page>` checks a candidate. |
 | Custom elements | `fire/elements.js` (Lit), `fire/elements.d.ts` | `fd-icon`, `fd-chart`, `fd-code`, `fd-texture` for frameworks; each is its component's root. |
 | Types | `fire/fire.d.ts` | Every export of `fire.js`, the `fd:*` events, the theme record. |
 | Framework packages | `wrappers/react`, `wrappers/vue` | `fire-design/react` and `fire-design/vue`. |
@@ -76,6 +80,7 @@ Serve the folder over HTTP; ES modules do not load from `file://`.
 - Theme: `data-theme="light|dark"` on `<html>` or any subtree; omit it to follow the system.
 - Palette: `data-palette="volt"` recolours neutrals and accent together. Fifteen are included; `ember` is the default and needs no attribute. `data-accent` swaps only the accent.
 - Typeface: `data-type="editorial"` changes the heading, interface and mono faces together. Twelve sets are included, all open source; `geist` is the default.
+- Structure: `data-surfaces="flat|outlined"`, `data-elevation="none|lifted"`, `data-controls="outlined|filled"`, `data-headings="upper|mono"`. The signature (the generated textures and frame marks) has its own `data-signature-*` dials.
 - Density, contrast, text size: `data-density="compact|spacious"`, `data-contrast="high"`, `data-text-size="sm|lg"`.
 - Character: `--fd-radius-scale`, `--fd-space-scale`, `--fd-motion`, `--fd-texture`, `--fd-hairline` and `--fd-font-display` each retune the whole system from one value.
 
@@ -94,7 +99,7 @@ overlays.toast({ title: 'Key created' });
 tweaks.set({ palette: 'midnight', corners: 1.5 });
 ```
 
-Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`.
+Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`, and for decisions `fd:commit`, `fd:hold` and `fd:undo`.
 
 **Pages a server renders**
 
@@ -115,17 +120,18 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/base.css` | Reset, type roles, links, focus, icons, layout and motion primitives. |
 | `fire/components/*.css` | One file per family. Each declares its own `--fd-<component>-*` values at the top; rules contain no raw sizes or timings. |
 | `fire/layout.css` | Layout attributes: `data-gap`, `data-min`, `data-cols`, `data-span`. |
-| `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (272 Lucide icons), `palettes.js` (palette data and the tone engine), `palette-rules.js` (the contrast rules every palette meets), `theme.js` (the theme record) and `tweaks.js` (the Tweaks panel). |
+| `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (272 Lucide icons), `initial.js` (the first-letter mark, no DOM), `palettes.js` (palette data and the tone engine), `palette-rules.js` (the contrast rules every palette meets), `theme.js` (the theme record) and `tweaks.js` (the Tweaks panel). |
+| `fire/email/` | `email.js`: transactional email as HTML and text. |
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
-| `docs/` | The documentation site: 18 pages. Start at `docs/index.html`. |
-| `templates/` | 24 screens for Ember: the app, a long create form, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Start at `templates/index.html`. |
-| `scripts/` | `serve.py` (dev server), `audit.mjs` (checks), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
+| `docs/` | The documentation site: 22 pages. Start at `docs/index.html`. |
+| `templates/` | 32 screens for Ember: the app, a long create form, decisions, settings, an audit log, status pages, a record hub, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Each state of the newer ones opens with `?state=`. Start at `templates/index.html`. |
+| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `render-equal`), `find.mjs` (search the parts), `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |
 
 ## Families
 
-Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Cards and feedback · Charts · Code and logs · Agent and AI · Chat · Documentation · Texture and frame · Skeletons and loading · Theming and tweaks. Each has a page in `docs/` showing every variant, size and state.
+Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Cards and feedback · Decisions · Charts · Code and logs · Agent and AI · Chat · Documentation · Texture and frame · Skeletons and loading · Email · Theming and tweaks. Each has a page in `docs/` showing every variant, size and state.
 
 ## Checks
 

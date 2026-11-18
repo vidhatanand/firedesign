@@ -21,11 +21,11 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Build or change any screen | `GUIDE.md` |
 | Write any text that appears on a screen | `WRITING.md` |
 | Use a class or an attribute | `VOCABULARY.md` (if it is not listed there, it does not exist) |
-| Pick a component, pattern or template | `contract/catalog.json` in the Fire package: search the cards by `job` and `aka` (other names) first, filter by `surfaces` and `data`, read `useWhen` and `avoidWhen`, then open only the chosen entry's `example` |
+| Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example` |
 | Write Fire markup in Lit, React, Next.js or Vue | `spec/EXPORT.md` in the Fire package, and the matching starter in `starters/` |
 | Add to Fire itself | `DESIGN.md`, in the Fire repository |
 
-Copy markup from the Fire docs pages or the nearest template. Do not write components from memory.
+Copy markup from the Fire docs pages or the nearest template. Do not write components from memory. Run `fire find` before you compose a pattern or a screen: Fire may already have it, under another name.
 
 ## 2. Always
 
@@ -33,7 +33,8 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 2. No custom CSS, no `<style>` blocks, no `style` attributes in markup (a custom property goes in `data-fd-vars="--name: value"`, and Fire sets it with `setProperty`, so pages work under a strict CSP), no pixel values, and no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`, `data-cols` and `data-span`.
 3. Never edit the project's copy of Fire, and never copy a Fire component and change the copy.
 4. Build every state: empty, loading, error, disabled.
-5. One primary button per view. One step between heading levels: page, section, card, field (`GUIDE.md` section 5, "Heading levels").
+5. A button that does something dangerous or irreversible goes on its own page or section with `fd-confirm-inline`; a decision someone can take back waits a few seconds with Undo (`GUIDE.md` section 5, "Decisions"). A control that is off says why (`fd-reason`).
+6. One primary button per view. One step between heading levels: page, section, card, field (`GUIDE.md` section 5, "Heading levels").
 
 ## 3. Forms
 
@@ -68,5 +69,7 @@ Follow `GUIDE.md` section 7, in order:
 2. Compose it from existing components.
 3. If it is a real gap, write a request (the fields are in `GUIDE.md` section 7), tell the owner, and carry on with a stopgap that is easy to remove: classes prefixed `x-`, Fire tokens only, in the project's stopgap file.
 4. Never build a one-off silently.
+
+In the Fire repository: a new pattern or template must pass the near-duplicate gate (`node scripts/gate.mjs --probe <page>`) or declare a `relation` in its card (`variantOf` or `distinctFrom`, with one sentence on when to use it instead).
 
 While you work, raise chances to improve Fire the same way: an arrangement you built twice, a variant you wished existed, a token you had to approximate, anything awkward to use.

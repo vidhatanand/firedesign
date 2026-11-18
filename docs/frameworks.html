@@ -15,7 +15,7 @@
   <header class="doc-hero">
     <p class="fd-eyebrow">Start</p>
     <h1 class="fd-display">Frameworks and checks</h1>
-    <p class="doc-lede">Fire 0.6 works in plain pages, Lit, React and Next.js, and Vue. Start from a starter, follow a short list of rules, and let two checks prove the result. This page covers what 0.6 added.</p>
+    <p class="doc-lede">Fire 0.6 works in plain pages, Lit, React and Next.js, and Vue. Start from a starter, follow a short list of rules, and let two checks prove the result. This page covers what 0.6 added, and how to find the right part.</p>
   </header>
 
   <section class="doc-section" id="starters">
@@ -63,10 +63,27 @@ export default defineConfig({
 });</code></pre></div>
   </section>
 
+  <section class="doc-section" id="find">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Find the part by its job</h2>
+      <p>Before you compose a screen, ask Fire what it already has. <code class="fd-code">fire find</code> searches components, patterns, templates, layouts and modules by what each is for, in the words an agent or a person would use. It reads <code class="fd-code">contract/index.json</code>. It needs no network.</p>
+    </div>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">Shell</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="bash">npx fire find "approve a request"
+npx fire find "date range with a comparison" --surface app --kind component
+node node_modules/fire-design/scripts/find.mjs "show a status page" --json --limit 3</code></pre></div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Option</th><th>Does</th></tr></thead><tbody><tr><td><code class="fd-code">--surface app|website|phone|email</code></td><td>Keeps parts made for that surface.</td></tr><tr><td><code class="fd-code">--data record|list|series|form|text</code></td><td>Keeps parts that show that kind of data.</td></tr><tr><td><code class="fd-code">--kind component|pattern|template|module</code></td><td>Keeps one kind. A template is a whole screen.</td></tr><tr><td><code class="fd-code">--limit 5</code></td><td>How many results. The default is five.</td></tr><tr><td><code class="fd-code">--json</code></td><td>Prints the entries for a script.</td></tr></tbody></table></div>
+    <ul class="doc-notes">
+      <li>The index holds one entry per part: its job, other names, surfaces, data, when to use it and what to use instead. <code class="fd-code">node scripts/build-index.mjs</code> builds it from the cards; the build checks it is current.</li>
+      <li>A word counts more when few parts use it, and more again when it is in a part's name or other names. Words such as "approve" and "modal" also reach "decide" and "dialog".</li>
+      <li>Open the result's <code class="fd-code">docs</code> link and copy its markup. If nothing fits, follow <code class="fd-code">GUIDE.md</code> section 7.</li>
+      <li>Adding a part to Fire? <code class="fd-code">node scripts/gate.mjs --probe &lt;page&gt;</code> compares it with every template and fails a near-duplicate, unless its card declares a <code class="fd-code">relation</code>.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="catalogue">
     <div class="doc-section-head">
       <h2 class="fd-h3">Catalogue and cards</h2>
-      <p>Fire describes itself in <code class="fd-code">contract/catalog.json</code>: 142 components, patterns and layouts, with their classes, allowed values, states and events. Each has a card that says what it is for, when to use it, when not to, and what else people call it.</p>
+      <p>Fire describes itself in <code class="fd-code">contract/catalog.json</code>: 163 components, patterns and layouts, and 3 modules, with their classes, allowed values, states and events. Each has a card that says what it is for, when to use it, when not to, and what else people call it.</p>
     </div>
     <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>Card field</th><th>Use it to</th></tr></thead><tbody><tr><td><code class="fd-code">job</code></td><td>Match a request. One sentence that starts with a verb.</td></tr><tr><td><code class="fd-code">aka</code></td><td>Match other names: "modal" finds the dialog.</td></tr><tr><td><code class="fd-code">surfaces</code>, <code class="fd-code">data</code></td><td>Filter: app or website, a list or a record.</td></tr><tr><td><code class="fd-code">useWhen</code>, <code class="fd-code">avoidWhen</code></td><td>Confirm the fit. Each <code class="fd-code">avoidWhen</code> names what to use instead.</td></tr><tr><td><code class="fd-code">example</code></td><td>Open the one docs section that shows it. Copy its markup.</td></tr></tbody></table></div>
     <h3 class="doc-sub">How an agent searches</h3>

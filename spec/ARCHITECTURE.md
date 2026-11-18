@@ -92,6 +92,7 @@ expander turns it into tokens. Version 1:
 - `brand` (0.8) is `{ name, mark, logo, logoDark, href }`: not CSS and not a token. `expandTheme()` returns it
   untouched as `brand`, `themeToCss()` ignores it, `validateTheme()` refuses an unsafe picture address in it, and
   `tweaks.set(fromThemeRecord(record))` hands it to the shell's `setBrand()`. `renderEmail()` reads the same name and logo.
+- `dials.imagery` (0.8) is `natural`, `mono`, `duotone` or `wash`: how a site's pictures are treated. It is carried like the structural dials, as `data-imagery` on `<html>` (none for `natural`), and each named look sets one.
 - Every field is optional; a missing field is Fire's default. Unknown fields are an error.
 - `fire/js/theme.js` exports: `expandTheme(record)` → `{ tokens: { name: [light, dark] | value }, attributes:
   { 'data-palette': …, 'data-density': … }, notes: [what the engine adjusted] }`; `themeToCss(record, { selector })`
@@ -225,7 +226,16 @@ Facet board or a docs specimen. The catalogue kind is `section`, with family Web
 gate compares sections like any other part. Breakpoints are named (phone, tablet, desktop, wide) in the
 `fire/tokens.css` header and in the contract's `breakpoints`. Fluid type is computed where it is used (`:root`, `.fd-site` and
 `[data-type]`), so a subtree with its own type set gets its own steps. There are no block variants that only change
-decoration; that rule is `DESIGN.md` section 9.
+decoration; that rule is `DESIGN.md` section 9. There are fifteen section types: the fifteenth, `fd-site-article`, is the reading
+page, and `fd-site-media` (a component) holds a picture. The `image` ground puts a picture behind a section and sets the text in
+the scheme of its scrim, so the text keeps 4.5:1 by construction. The treatments (`natural`, `mono`, `duotone`, `wash`) are CSS
+filters and blend layers chosen by the `imagery` dial, which the theme record, `fire/js/theme.js` and the Tweaks panel carry.
+
+**Publishing and the combined filter.** `site.js` runs a posts listing (filters, count, pages, the address), the one sign-up
+form in three places (`setSignup()`, a cancelable `fd:submit`) and an article's rail and note links. `fire/js/filters.js` is the
+combined filter, `fd-filters`, built on the menu, sub-menu, popover and sheet of `overlays.js`: the markup lists the fields and
+their values once, the DOM holds the state (`aria-checked`, `data-op`), and `fd:filter` reports the set. `fd-toolbar` wraps by
+container queries and `:has()`, with no markup change. The email module gained the blocks `section`, `story` and `list`.
 
 **Page transitions.** Opt in, with no cost to a page that does not ask. `fire/components/transitions.css` is part of
 `fire.css` but gives `view-transition-name` only under `:root[data-fd-transition]`, so a page without the attribute has
@@ -237,12 +247,17 @@ the Navigation API and exports `transition()` for single-page apps, which sets t
 Firefox has no cross-document transitions. Verified in Chromium; Safari is not verified. React 19.3's `<ViewTransition>`
 writes `vt-*` attributes into the server HTML: `spec/EXPORT.md` rule R14 makes `render-equal` ignore them.
 
+**Starters.** The overview and logs screens of each starter read `?state=` into a typed page state, so a starter opens the same
+state views as the templates, and each starter's check opens them. `spec/EXPORT.md` rule R15 makes the pixel comparison of
+`render-equal` a shot of the root alone: the fixed tab bar, the support button and a toast around it are hidden for the shot, on
+both sides.
+
 **Pictures.** `contract/index.json` has a top-level `pictures` rule (`path` with `{kind}` and `{id}`, and `none`, the
 kinds without one). `build-pictures.mjs` renders each entry in Chromium from the first docs specimen that holds the part
 (a template: its first screen), light theme, default look, animations frozen and the clock fixed, and writes an
 indexed PNG; `--check`, which `build.mjs` runs, fails on a missing or an extra file and compares no pixels, because
 renders differ between machines. `fire find --json` resolves the rule and returns `picture`. The package ships them
-through `contract` (about 8 MB).
+through `contract` (about 9 MB).
 
 **Colours per palette.** Status and chart colours are derived from each palette's accent, ink and page by
 `deriveColours()` in `fire/js/palettes.js`, written to `palettes.css`, and held by the rules in `fire/js/palette-rules.js`

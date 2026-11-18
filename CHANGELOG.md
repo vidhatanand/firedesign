@@ -5,7 +5,8 @@ What changed in each release, and what a product using Fire needs to do. Newest 
 ## 0.8.0 — unreleased
 
 Fire now covers public websites and phone apps as well as app screens. A site is built from a layout foundation and
-fourteen section types, a phone gets a tab bar, a page can move to the next without redrawing its chrome, and every
+fifteen section types, including an article page and a filtered listing, and its pictures follow the look. A table with many
+fields gets one combined filter. A phone gets a tab bar, a page can move to the next without redrawing its chrome, and every
 part says which surface it belongs to (app, website, phone or email), so a search, a lint and the Catalogue page can
 keep a part out of a page it does not suit. A product's own CSS and tokens get a check, status and chart colours
 follow each palette, and a picture of every part is searchable. No class, attribute value, token, event or export was
@@ -25,20 +26,87 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
   follows the type set and `data-text-size`.
 - Section rhythm (`data-rhythm="tight|loose"`, `data-rule`) and six grounds (`data-ground="page|sunken|raised|inverse|accent|texture"`),
   each with text at 4.5:1.
-- Fourteen section types, each with variants that differ in structure: `fd-site-header`, `-hero`, `-logos`, `-features`,
-  `-split`, `-stats`, `-steps`, `-quote`, `-pricing`, `-compare`, `-faq`, `-cta`, `-footer` and `-posts`. They are the
+  A seventh ground, `image`, is under "Pictures".
+- Fifteen section types, each with variants that differ in structure: `fd-site-header`, `-hero`, `-logos`, `-features`,
+  `-split`, `-stats`, `-steps`, `-quote`, `-pricing`, `-compare`, `-faq`, `-cta`, `-footer`, `-posts` and `-article`. They are the
   new catalogue kind `section`. Fire ships no block library: a section brings layout and rhythm, and every control,
   table and card inside it is an existing Fire component.
 - `fire/js/site.js` runs the header's menu sheet below desktop, the logo strip's pause button, the pricing period switch
   and the compare table's plan tabs. Nothing on a site animates on scroll: no entrance effects, no parallax.
 - The rule that keeps a site from looking generated is on `docs/site.html#generated`: vary a site by its look
   (palette, type set, signature, dials) and by how its sections are composed, never by a decorative variant.
-- Four website templates, `site-home`, `site-pricing`, `site-customers` and `site-changelog`, with their shared header
-  and footer in `templates/site-shell.js` (`mountSite()`, `renderHeader()`, `renderFooter()`). `templates/index.html` now
-  groups the 36 screens by surface: in the app, signed-out and system pages, public pages read from a link, website,
+- Ten website templates: `site-home`, `site-pricing`, `site-customers` and `site-changelog`, and the six for publishing
+  listed under "Publishing", with their shared header and footer in `templates/site-shell.js` (`mountSite()`,
+  `renderHeader()`, `renderFooter()`). `templates/index.html` now groups the 42 screens by surface: in the app, signed-out and system pages, public pages read from a link, website,
   documentation site.
 
-<!-- 0.8: publishing goes here -->
+**Publishing** (`docs/site-sections.html#article`, `#posts`, `#cta`; CSS `fire/components/site.css`, behaviour `fire/js/site.js`, email `fire/email/email.js`)
+
+- `fd-site-article` is the section for long text: a head (breadcrumb, eyebrow, title, standfirst, `fd-site-authors`, date,
+  actions), an optional cover, the body, and a foot of ruled rows (notes, references, cite this, tags, copy link, the
+  authors, a sign-up). `data-layout="plain"` is one reading column; `aside` adds a sticky rail for the contents, key
+  facts and the download (`data-side="start|end"`), which becomes a disclosure below desktop; `cover` spans the head over
+  a wide frame, like a report's front page.
+- The text is `fd-prose` with the new `data-size="lg"` (18/30, a 68ch measure, headings a step larger). A figure, table or
+  pull quote marked `data-breakout` runs wider than the measure. Footnotes are an `fd-site-notes-ref` in the text and an
+  `fd-site-notes` list below, each with a back link; following either end moves focus to the other, so the reader finds
+  their place again. `fd-site-refs` sets references with a hanging indent. A button with `data-fd-copy-link` copies the
+  page's link and announces it (`fd:copy`).
+- `fd-site-posts` is now also a listing. Entries carry `data-kind` and `data-tags`; the tools bar (`fd-site-posts-tools`)
+  holds existing controls (a chip nav or tabs, a select, a search), each marked `data-filter`, and `fd-site-posts-count`
+  says "12 of 48 resources" in a polite live region. When nothing matches, the `fd-empty` after the list shows with a
+  `[data-clear]` button. `data-page-size` pages the matches with numbered buttons or a `[data-more]` Show more button, and
+  `data-address` keeps the filters and the page in the address (`?kind=report&topic=pricing&q=…&page=2`), so Back restores
+  the listing. `fd:change` reports `{ value, shown, total }`; `filterPosts()` sets a listing from script. New parts:
+  `fd-site-posts-kind`, `-meta`, `-cover` (a cover drawn in type) and a list layout with no date rail.
+- One sign-up form in three places: the call to action (`fd-site-cta`, `data-layout="split"`, with a consent line), a
+  sign-up column in the footer (`fd-site-footer-signup`) and an article's foot. `data-state` on the form is `invalid`,
+  `busy`, `sent`, `subscribed` or `failed` (idle has none). Submitting fires a cancelable `fd:submit { value }`: cancel it,
+  send the address yourself and call `setSignup(form, state)`. A form with an `action` posts there. The three messages are
+  the label keys `signup.required`, `signup.invalid` and `signup.failed`; the listing's are the eight `posts.*` keys.
+- `renderEmail()` takes three more blocks, `section` (a labelled rule), `story` (a kind label, a linked title, a paragraph
+  and a link line) and `list`, eleven blocks in all, and `fire/email/examples.mjs` has a newsletter issue
+  (`docs/assets/email/newsletter-ember.html` and `.txt`).
+- Six templates: `site-blog`, `site-post` (an article with the `cover` layout), `site-resources`, `site-report`,
+  `site-research` and `site-newsletter`. Fire adds no part for what it already has: key facts are `fd-kv`, findings the
+  features list, a pull quote the quote section, and cite this the copy field (`GUIDE.md` section 5).
+- The media of an `fd-doc-frame` can be an `iframe` (`--fd-doc-embed-h` tall) as well as a picture; the newsletter page
+  shows its issue that way.
+
+**Pictures** (`docs/site.html#pictures`, `docs/tweaks.html#imagery`; CSS `fire/components/site.css`)
+
+- `fd-site-media` is a figure around one `img`, which carries `alt` and its own `width` and `height` so its place is held
+  before it loads. `data-ratio="wide|photo|square|portrait|tall"` crops it, `data-position="start|center|end"` keeps a side
+  and `data-frame` gives it the media frame's hairline and radius. It goes in the media slots of the hero, split, features and
+  posts sections and in an article's cover and text. A picture a visitor supplies still goes in `fd-doc-frame`, which
+  checks its address.
+- The image ground, `data-ground="image"`: a picture behind a section in `fd-site-backdrop`, with `data-scrim="dark|light"`
+  (dark by default). Text keeps 4.5:1 whatever the picture, by construction: the section takes the scheme of its scrim, and
+  from desktop the head and its actions keep to one column under a scrim at full strength; below desktop the picture is a
+  band above the text. It is built for head-led sections, the hero and the call to action band.
+- Four treatments, `data-treatment="natural|mono|duotone|wash"`, made with CSS filters and blend layers and no script. The
+  `imagery` dial sets one for every picture that names none: `data-imagery` on `<html>`, `dials.imagery` in the theme
+  record (the default, `natural`, writes no attribute) and a Pictures row in Tweaks. Each named look sets its own:
+  `steady` and `hearth` natural, `clear` and `folio` mono, `marquee` and `operator` duotone, `gentle` and `instrument` wash.
+- `templates/media/` holds ten generated placeholder pictures, which a product replaces with its own (`templates/media/README.md`).
+  `site-home`, `site-customers`, `site-blog` and `site-post` use five of them.
+- The lint warns `img-attrs` for an `<img>` inside `fd-site` without `alt` (`alt=""` is right for decoration) or without both
+  `width` and `height`.
+
+**Filters** (`docs/data.html#combined`; CSS `fire/components/data.css`, behaviour `fire/js/filters.js`)
+
+- `fd-filters` is one Filter button for a table or list with many fields. Its menu has a search that finds fields and values
+  together ("fail" offers Status: Failed in one step), and each field opens a panel of values with counts. A field's
+  `data-kind` is `one`, `many`, `date` (presets and a custom range), `text` (contains) or `flag`; `data-op="not"` makes it
+  "is not". What is set shows as chips that read as a sentence: the operator flips "is" and "is not", the value reopens its
+  panel. Below 640px the menu is a bottom sheet in two steps. The button's key is `F` (`data-fd-key`).
+- `data-fd-for="#table"` makes it hide the rows that do not match (each row carries `data-<field>`); `data-fd-url` keeps the
+  set in the address. `fd:filter` reports `{ filters, source }`, `getFilters`, `setFilters` and `clearFilters` read and
+  write the set, and `matches()` tests a record for a page that filters its own data. The 23 `filters.*` label keys are on
+  `docs/writing.html`.
+- The rule: up to three fields people change all the time stay `fd-filter` chips; more than three use `fd-filters`. The
+  `audit` template now uses it, with a search and a period beside it.
+- `fd-toolbar` wraps on purpose (see "Changed"), and `fd-toolbar-filters` is an optional wrapper around its filters.
 
 **Phone** (`docs/shell.html#tabbar`)
 
@@ -57,7 +125,7 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
   the page `blocking="render"`. A single-page app calls `transition(update, { kind, direction })` and needs none of the three.
   One link can choose its own kind with `data-fd-transition` on the `<a>`.
 - A page that does not ask gets no names and no transition. Reduced motion and the motion dial at "none" turn it off.
-  All 36 templates and the three starters opt in.
+  All 42 templates and the three starters opt in.
 
 **Tagging by surface** (`docs/catalogue.html`)
 
@@ -78,9 +146,12 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
 
 **Templates**
 
-- Every one of the 36 templates has a card in `contract/cards/templates/`. The 32 that have states open each from `?state=`
-  or from the screen's Demo state band; the card lists them with how to set each one. `blank`, `docs-home`,
-  `site-home` and `site-customers` have none.
+- Every one of the 42 templates has a card in `contract/cards/templates/`. The 39 that have states beyond the default open
+  each from `?state=`, from the screen's Demo state band, or with the control its card names (the header's menu button,
+  Copy link); the card lists them with how to set each one. `blank`, `docs-home` and `shell-static` have none.
+- The overview and logs screens of the three starters read `?state=` too, through a typed page state (`loading`, `empty`,
+  `error` on overview; `loaded`, `loading`, `empty`, `error`, `no-results` on logs; any other value is ignored), and each
+  starter's check opens the empty, error and no-results views.
 
 **Colours** (`docs/foundations.html`)
 
@@ -112,16 +183,17 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
 
 **For agents**
 
-- Every entry of the search index except the modules has a picture, `contract/pictures/<kind>/<id>.png` (217 files,
-  about 8 MB). `contract/index.json` names the rule in `pictures`, `npx fire find --json` returns each result's
+- Every entry of the search index except the modules has a picture, `contract/pictures/<kind>/<id>.png` (226 files,
+  about 9 MB). `contract/index.json` names the rule in `pictures`, `npx fire find --json` returns each result's
   `picture`, and `npm run build:pictures` renders them again. `node scripts/build.mjs --check` fails when an entry has
   no picture or a picture has no entry.
-- The catalogue lists 181 components, patterns, layouts and sections (152, 10, 5 and 14), up from 163, and 4 modules, up
-  from 3 (`transitions` is new). `contract/index.json` has 221 entries.
+- The catalogue lists 184 components, patterns, layouts and sections (154, 10, 5 and 15), up from 163, and 4 modules, up
+  from 3 (`transitions` is new). `contract/index.json` has 230 entries, and the size check on it allows 30,000 tokens.
 - **Starters**: each has the tab bar, `data-fd-surface="app"` on `<html>`, lint-css beside the markup lint in its check
   (and `--surface app` on the markup lint), and the page transition (Lit and Vue call `transition()`, Next wraps each
   screen in React's `<ViewTransition>`; rule R14 in `spec/EXPORT.md` ignores the `vt-*` attributes React writes). Fire's
-  typings now cover what they call, so they cast less. They render like the templates.
+  typings now cover what they call, so they cast less. They render like the templates; rule R15 makes the pixel
+  comparison look at the screen's root alone, so a fixed tab bar or a toast around it does not count.
 
 ### Changed
 
@@ -145,6 +217,17 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
   package exports `fire-design/transitions.css`. `scripts/lint-css.mjs` is in the package files.
 - **The top bar's menu button** is hidden below 640px when a tab bar has a "More" item, because the sheet opens from the bar.
 - **`fd:select`** from a menu also carries `row`, the opener's row.
+- **`fd-toolbar` wraps on purpose.** It is CSS only and needs no markup change, and it measures its nearest container (the
+  page in an app; put it in `fd-cq` elsewhere). A toolbar with a search, an end group and filters stays on one line while
+  they fit. When they do not, the search and the end group share the first line and the filters move together to the
+  second; how wide "fits" is depends on whether there are one, two, three or four-or-more filters (780, 940, 1,110 and
+  1,280px). Below 640px the search takes a line, the filters become one row that scrolls sideways with a fade, then the end
+  group. Every `fd-toolbar` in a product changes this way, `templates/logs.html` included: its three filters now scroll
+  on a phone instead of wrapping.
+- **The `audit` template's toolbar** uses `fd-filters` (who, kind, target, access changes, source) in place of two filter
+  chips and the row of applied filters under them.
+- **Fire's own audit** (`npm run audit`) no longer counts relative colour syntax that starts from a token, such as
+  `oklch(from var(--fd-accent) …)`, as a raw colour; the colour is derived from the palette.
 - **Phone screens**: parts that sit at the bottom of the screen (the support button, chat, toasts, the keys hint) rise
   by `--fd-tabbar-space`, which is 0 on a page without a tab bar.
 
@@ -157,6 +240,10 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
   a real iPhone.
 - Nothing new was tried with a screen reader: the tab bar, the site header's menu sheet, the logo strip's pause
   button, the pricing period switch and the logo field follow the ARIA patterns, and that is all that is claimed.
+- The picture treatments' blend modes (`mono`, `duotone`, `wash`) and the image ground's scrim were checked in Chromium
+  only, and the placeholder pictures were looked at under the eight named looks, not under every palette.
+- The combined filter, the article's note links, the sign-up form's states and the listing's live count follow the ARIA
+  patterns and were not tried with a screen reader either.
 - As before, the rest of Fire was reviewed in Chromium only; Safari and Firefox are untested.
 
 ### Decided against
@@ -181,7 +268,15 @@ Check the screens in "Changed", then:
   a `--fd-` name Fire does not define, a raw colour. Warnings are the rest; none fails a run.
 - **Page transitions.** Opt in with the three steps if you want them. A page that does not is unchanged.
 - **Websites.** A product site built by hand should compare its header, hero, pricing and footer with the sections
-  before it adds another variant.
+  before it adds another variant. A blog, a library, a report or a newsletter page starts from the matching `site-*`
+  template: `site-post` is an `fd-site-article` with the `cover` layout, and `site-blog` and `site-resources` are
+  `fd-site-posts` listings.
+- **Pictures.** Give every `<img>` on a site `alt` and its own `width` and `height` (the lint warns `img-attrs`), put the
+  site's own art in `fd-site-media`, and replace the placeholders in `templates/media/` before you copy a template. Text
+  over a picture goes on the image ground only.
+- **Tables with many filters.** Replace a row of four or more filter chips with `fd-filters` and `data-fd-for`.
+- **Toolbars.** Check each `fd-toolbar` at 375px and between 640px and 1,100px wide. A toolbar copied from `templates/logs.html`
+  or `templates/audit.html` should take the template's new markup.
 - If your code reads lint-markup's JSON, read `warnings` and `severity`. If you copy `templates/`, take
   `data-fd-surface` and `data-fd-transition` on `<html>` and `blocking="render"` on the module scripts with it.
 

@@ -22,7 +22,7 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Write any text that appears on a screen | `WRITING.md` |
 | Use a class or an attribute | `VOCABULARY.md` (if it is not listed there, it does not exist) |
 | Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Search with `--surface` set to where the page is used. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example`; `--json` gives the path of its picture, which you can open |
-| Build a public website | `GUIDE.md` section 5, "A public website", then `docs/site.html` and `docs/site-sections.html` |
+| Build a public website | `GUIDE.md` section 5, "A public website", then `docs/site.html` and `docs/site-sections.html` (articles, listings, sign-up and pictures are there too) |
 | Add your own CSS or tokens | `GUIDE.md` section 7, "Your own CSS and tokens" |
 | Write Fire markup in Lit, React, Next.js or Vue | `spec/EXPORT.md` in the Fire package, and the matching starter in `starters/` |
 | Add to Fire itself | `DESIGN.md`, in the Fire repository |
@@ -43,6 +43,10 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 10. Your own tokens carry your prefix, never `--fd-`. Never add a token that repeats a Fire token (a colour, length, duration or weight Fire has): use Fire's. Never restyle an `fd-` class; ask for a variant.
 11. Page transitions are opt in. Add them only when asked, with the three steps in `GUIDE.md` section 2, or `transition()` in a single-page app.
 12. Start a screen from its template. A template with states opens each from `?state=` (its card lists them): copy that state's markup instead of drawing it again.
+13. Filter by up to three fields with `fd-filter` chips; by more than three with one `fd-filters`. Do not build a row of your own.
+14. A public listing (a blog, a library, releases) is `fd-site-posts` with its tools bar, `data-kind`, `data-tags` and `data-filter`. Do not write a new block for it.
+15. Never set text over a picture except on the image ground (`data-ground="image"`), which keeps it readable. Everywhere else the text sits beside the picture.
+16. Every `<img>` on a site has `alt` (empty for decoration), `width` and `height`. The lint warns `img-attrs` when one is missing.
 
 ## 3. Forms
 

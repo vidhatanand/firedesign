@@ -1,0 +1,83 @@
+{
+  "id": "decisions",
+  "job": "Decide what waits for an owner, one case at a time, without losing your place in the queue.",
+  "purpose": "An app screen: the queue grouped by kind with ages and an urgent deadline, the current case beside it (brief, evidence, an agent's drafted reason, reason and a commit named for its effect). A commit leaves the queue at once and is held for 10 seconds in a toast; Undo or Ctrl+Z puts the case back. Below 800px it is list, then case, with a way back. A viewer reads every case and is told who decides; decided cases collect in Decided today.",
+  "useWhen": [
+    "Several requests or agent proposals wait for one person or role: credits, hosts, limits, changes.",
+    "Each decision needs a reason that someone reads later, and a few seconds to take it back."
+  ],
+  "avoidWhen": [
+    {
+      "when": "One decision reached from a link or a notification, or one whose reach needs a preview.",
+      "instead": "decision-case"
+    },
+    {
+      "when": "The person answers from an email or chat link without signing in.",
+      "instead": "answer"
+    },
+    {
+      "when": "The items are records to sort, filter and act on in bulk.",
+      "instead": "logs"
+    }
+  ],
+  "aka": [
+    "approvals",
+    "inbox",
+    "review queue",
+    "needs you",
+    "triage",
+    "pending requests"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "list",
+    "record",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "ready",
+      "how": "?state= absent, or the Owner demo state"
+    },
+    {
+      "name": "viewer",
+      "how": "?state=viewer: commits locked with fd-commit-lock, a callout names the owners"
+    },
+    {
+      "name": "held",
+      "how": "fd-commit data-fd-hold-in=\"toast\": the case leaves while the toast counts down"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: fd-states data-state=\"loading\" with skeleton list and form"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty, or the last case committed"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: Try again with data-fd-set-state=\"loading\""
+    },
+    {
+      "name": "no access",
+      "how": "?state=no-access: who can grant it, by name"
+    },
+    {
+      "name": "one case open",
+      "how": "?case=<value> selects that queue item"
+    }
+  ],
+  "example": "templates/decisions.html",
+  "provenance": [
+    "Assay operator prototype: waiting.html",
+    "Assay operator prototype: case.html",
+    "Assay prototype: needs-you.html",
+    "Fragmatic prototype: decisions.html",
+    "Touchstone: the app's pages"
+  ],
+  "since": "0.7.0"
+}

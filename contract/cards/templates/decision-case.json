@@ -1,0 +1,80 @@
+{
+  "id": "decision-case",
+  "job": "Read one wide-reaching change in full, preview who it touches, and ship or decline it with a held commit.",
+  "purpose": "One case on its own page, opened from a link or a notification: a lifecycle tracker of its sign-offs, the brief, the full evidence (a table of the test and a timeline), then preview-then-commit: choose the scope, preview \"29 teams change\", write the reason and ship with a 10-second inline hold. Once decided the brief keeps its parts and ends with who decided, the reason, the audit line and an Undo that is itself held. A side panel holds the case facts.",
+  "useWhen": [
+    "A change reaches many teams or records, and its reach depends on what the person chooses.",
+    "A decision is linked from a notification, an email or the queue, and must stand on its own page."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Several small cases wait for the same person and none needs a preview.",
+      "instead": "decisions"
+    },
+    {
+      "when": "The person is not signed in and answers from an email.",
+      "instead": "answer"
+    },
+    {
+      "when": "The page describes an entity, not a decision about it.",
+      "instead": "record"
+    }
+  ],
+  "aka": [
+    "change request",
+    "proposal",
+    "rollout review",
+    "case page"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "record",
+    "form",
+    "list"
+  ],
+  "states": [
+    {
+      "name": "waiting",
+      "how": "the default: tracker step data-state=\"waiting\", fd-preview ready"
+    },
+    {
+      "name": "stale preview",
+      "how": "fd-preview data-state=\"stale\" after a field changes"
+    },
+    {
+      "name": "held",
+      "how": "fd-commit data-fd-hold=\"10\": the inline fd-hold counts down with Undo"
+    },
+    {
+      "name": "decided",
+      "how": "?state=decided: fd-decision-outcome with the audit line"
+    },
+    {
+      "name": "viewer",
+      "how": "?state=viewer: the commit shows fd-commit-lock"
+    },
+    {
+      "name": "loading",
+      "how": "fd-states data-state=\"loading\""
+    },
+    {
+      "name": "not found",
+      "how": "?state=not-found"
+    },
+    {
+      "name": "error",
+      "how": "?state=error"
+    }
+  ],
+  "example": "templates/decision-case.html",
+  "provenance": [
+    "Assay operator prototype: case.html",
+    "Assay operator prototype: request.html",
+    "Assay operator prototype: outbound-host.html",
+    "Assay operator prototype: limits.html"
+  ],
+  "since": "0.7.0"
+}

@@ -1,0 +1,73 @@
+{
+  "id": "record",
+  "job": "See everything about one entity on one page, and act on it, even when one part fails to load.",
+  "purpose": "A record hub for one team: a head with its status and actions, the lifecycle tracker, usage meters, open requests, recent activity, a details panel and plan cards. Each section is its own fd-states and settles on its own; one in error shows Retry while the rest render. Plan moves and suspending are held in a toast; suspending then offers Done · Undo.",
+  "useWhen": [
+    "One customer, team, key or project needs a single page that gathers its state, history and actions.",
+    "The sections come from different services that can fail independently."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The page is a list of many such records.",
+      "instead": "logs"
+    },
+    {
+      "when": "The page exists to decide one request about the entity.",
+      "instead": "decision-case"
+    },
+    {
+      "when": "The page edits the entity's settings.",
+      "instead": "settings"
+    }
+  ],
+  "aka": [
+    "detail page",
+    "entity page",
+    "customer record",
+    "account hub",
+    "profile",
+    "360 view"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "record",
+    "list",
+    "series"
+  ],
+  "states": [
+    {
+      "name": "one section fails",
+      "how": "the default: the activity fd-states settles on error with Retry"
+    },
+    {
+      "name": "all loaded",
+      "how": "?state=ready"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: every section fd-states data-state=\"loading\""
+    },
+    {
+      "name": "not found",
+      "how": "?state=not-found"
+    },
+    {
+      "name": "no access",
+      "how": "?state=no-access"
+    },
+    {
+      "name": "suspended",
+      "how": "the menu's Suspend team, held, then fd-status data-tone=\"danger\""
+    }
+  ],
+  "example": "templates/record.html",
+  "provenance": [
+    "Assay operator prototype: workspace.html",
+    "Fragmatic prototype: work-item.html",
+    "Fragmatic prototype: job.html"
+  ],
+  "since": "0.7.0"
+}

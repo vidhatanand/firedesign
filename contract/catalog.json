@@ -17473,6 +17473,7 @@
           ""
         ],
         "data-size": [
+          "lg",
           "sm"
         ]
       },
@@ -17527,6 +17528,11 @@
             "useWhen": "Dense text: parameter notes, FAQ answers and changelog entries at 14/22."
           },
           {
+            "attribute": "data-size",
+            "value": "lg",
+            "useWhen": "An article's text at reading size: 18/30, a 68ch measure, headings a step larger in the display face (fd-site-article-text)."
+          },
+          {
             "attribute": "data-footnotes",
             "value": "",
             "useWhen": "The container holds a footnote list at its end."
@@ -17543,7 +17549,8 @@
           "callout",
           "text",
           "type",
-          "codeblock"
+          "codeblock",
+          "site-article"
         ],
         "keyboard": [],
         "example": "docs/documentation.html#prose",
@@ -20966,6 +20973,248 @@
       }
     },
     {
+      "id": "site-article",
+      "name": "Article",
+      "family": "Website",
+      "kind": "section",
+      "root": "fd-site-article",
+      "classes": [
+        "fd-site-article",
+        "fd-site-article-actions",
+        "fd-site-article-aside",
+        "fd-site-article-body",
+        "fd-site-article-cover",
+        "fd-site-article-foot",
+        "fd-site-article-head",
+        "fd-site-article-meta",
+        "fd-site-article-standfirst",
+        "fd-site-article-text",
+        "fd-site-article-title",
+        "fd-site-authors",
+        "fd-site-authors-item",
+        "fd-site-authors-name",
+        "fd-site-authors-role",
+        "fd-site-notes",
+        "fd-site-notes-back",
+        "fd-site-notes-ref",
+        "fd-site-refs"
+      ],
+      "attributes": {
+        "data-layout": [
+          "aside",
+          "cover",
+          "plain"
+        ],
+        "data-side": [
+          "end",
+          "start"
+        ]
+      },
+      "partAttributes": {
+        "fd-site-article-aside": {
+          "data-state": [
+            "open"
+          ]
+        },
+        "fd-site-article-text": {
+          "data-breakout": [
+            ""
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/site-sections.html#article",
+      "card": {
+        "id": "site-article",
+        "job": "Read a post, report or paper at reading length, with its sources and notes.",
+        "purpose": "The reading page, as one section: a head (breadcrumb, eyebrow, title, standfirst, authors and date, actions), an optional cover, the body (fd-prose at reading size, with figures, tables and pull quotes breaking out of the measure) and a foot of ruled rows (notes, references, cite this, tags, copy link, the authors, a sign-up). plain is one column, aside adds a sticky rail that becomes a disclosure below desktop, cover spans the head over a wide frame.",
+        "useWhen": [
+          "A post, a newsletter issue or a story on the site.",
+          "A report or a research paper read on the page before or instead of the PDF."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Documentation: a guide or a reference with the docs navigation.",
+            "instead": "doc"
+          },
+          {
+            "when": "A few posts that point to articles.",
+            "instead": "site-posts"
+          },
+          {
+            "when": "One claim beside one piece of media on a landing page.",
+            "instead": "site-split"
+          }
+        ],
+        "aka": [
+          "article",
+          "blog post",
+          "report",
+          "paper",
+          "long read"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "text"
+        ],
+        "states": [
+          {
+            "name": "rail open",
+            "how": "details.fd-site-article-aside[open]: kept open on desktop, summary hidden; a closed disclosure below 900px"
+          },
+          {
+            "name": "note in view",
+            "how": ":target and focus on the note li after an fd-site-notes-ref; its back link returns focus"
+          },
+          {
+            "name": "copied",
+            "how": "button[data-fd-copy-link] shows Copied for 1.4s and announces the copy"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-layout",
+            "value": "plain",
+            "useWhen": "One reading column: a blog post, a newsletter issue, a customer story."
+          },
+          {
+            "attribute": "data-layout",
+            "value": "aside",
+            "useWhen": "A long paper with sections: the rail holds the contents, key facts and the download."
+          },
+          {
+            "attribute": "data-layout",
+            "value": "cover",
+            "useWhen": "A report's front page: the head and key facts across the container over a wide texture or figure."
+          },
+          {
+            "attribute": "data-side",
+            "value": "start",
+            "useWhen": "aside: the rail before the text (the default reading order of contents)."
+          },
+          {
+            "attribute": "data-side",
+            "value": "end",
+            "useWhen": "aside: the rail after the text, when the key facts matter more than the contents."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-site-article",
+            "role": "The section: an article element with fd-site-section."
+          },
+          {
+            "class": "fd-site-article-head",
+            "role": "Breadcrumb, eyebrow, title, standfirst, meta, actions; an fd-kv in it sits at its end on desktop."
+          },
+          {
+            "class": "fd-site-article-title",
+            "role": "The page's h1, a step above a section title (display size under cover)."
+          },
+          {
+            "class": "fd-site-article-standfirst",
+            "role": "One or two sentences: the fluid lead."
+          },
+          {
+            "class": "fd-site-article-meta",
+            "role": "Authors, a time, reading time or the format, over a rule."
+          },
+          {
+            "class": "fd-site-article-actions",
+            "role": "Download, cite, copy link."
+          },
+          {
+            "class": "fd-site-article-cover",
+            "role": "cover: a wide frame of the signature texture, or an fd-doc-frame."
+          },
+          {
+            "class": "fd-site-article-body",
+            "role": "The aside (aside only) and the text."
+          },
+          {
+            "class": "fd-site-article-aside",
+            "role": "aside: a details.fd-disclosure with fd-toc, fd-kv and a download."
+          },
+          {
+            "class": "fd-site-article-text",
+            "role": "The text, with fd-prose data-size=lg; [data-breakout] children span wider than the measure."
+          },
+          {
+            "class": "fd-site-article-foot",
+            "role": "Ruled rows after the text."
+          },
+          {
+            "class": "fd-site-authors",
+            "role": "The byline: a list of fd-site-authors-item."
+          },
+          {
+            "class": "fd-site-authors-item",
+            "role": "One author: optional fd-avatar, name, role or affiliation."
+          },
+          {
+            "class": "fd-site-authors-name",
+            "role": "The author's name."
+          },
+          {
+            "class": "fd-site-authors-role",
+            "role": "Their role or affiliation."
+          },
+          {
+            "class": "fd-site-notes",
+            "role": "Footnotes: an ol whose li#note-n are focus targets."
+          },
+          {
+            "class": "fd-site-notes-ref",
+            "role": "In the text: sup > a#ref-n to the note, aria-describedby the notes heading."
+          },
+          {
+            "class": "fd-site-notes-back",
+            "role": "In the note: the link back to its reference, with an aria-label."
+          },
+          {
+            "class": "fd-site-refs",
+            "role": "References: an ol with a hanging indent."
+          }
+        ],
+        "related": [
+          "prose",
+          "doc-frame",
+          "breadcrumb",
+          "toc",
+          "kv",
+          "copy-field",
+          "site-features",
+          "site-quote",
+          "site-posts",
+          "site-cta"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter on a note reference",
+            "does": "Moves to the note and focuses it; Enter on its back link returns focus to the reference."
+          },
+          {
+            "keys": "Enter, Space on the rail's summary",
+            "does": "Opens or closes the contents below desktop."
+          }
+        ],
+        "example": "docs/site-sections.html#article",
+        "provenance": [
+          "docs/site-sections.html",
+          "fire/components/site.css",
+          "fire/js/site.js",
+          "templates/site-post.html",
+          "templates/site-report.html",
+          "templates/site-research.html"
+        ],
+        "since": "0.8.0"
+      }
+    },
+    {
       "id": "site-compare",
       "name": "Comparison section",
       "family": "Website",
@@ -21176,6 +21425,7 @@
       "root": "fd-site-cta",
       "classes": [
         "fd-site-cta",
+        "fd-site-cta-consent",
         "fd-site-cta-done",
         "fd-site-cta-form",
         "fd-site-cta-panel"
@@ -21187,18 +21437,28 @@
           "split"
         ]
       },
-      "partAttributes": {},
+      "partAttributes": {
+        "fd-site-cta-done": {
+          "data-state": [
+            "sent",
+            "subscribed"
+          ]
+        }
+      },
       "stateAttributes": {},
       "element": null,
-      "events": [],
+      "events": [
+        "fd:change"
+      ],
       "docs": "docs/site-sections.html#cta",
       "card": {
         "id": "site-cta",
         "job": "Ask for the one next step near the end of a page: a band, an inset panel, or a title beside a one-field form.",
-        "purpose": "band: a full-width ground with a title and actions, the home of the texture and inverse grounds. card: an inset panel inside the container. split: a title at the start and, at the end, actions or a one-field email form built from fd-field with its invalid, busy and sent states.",
+        "purpose": "band: a full-width ground with a title and actions, the home of the texture and inverse grounds. card: an inset panel inside the container. split: a title at the start and, at the end, actions or the one sign-up form (fd-field, a consent line, its states set by site.js). The same form also sits in the footer's sign-up column and at an article's foot.",
         "useWhen": [
           "The end of a landing page, before the footer.",
-          "A newsletter or waitlist sign-up (split with a form)."
+          "A newsletter or waitlist sign-up (split with a form).",
+          "The opening of a newsletter page, where signing up is the reason for the page."
         ],
         "avoidWhen": [
           {
@@ -21227,15 +21487,23 @@
         "states": [
           {
             "name": "invalid",
-            "how": "aria-invalid=\"true\" on the input and an fd-field-error"
+            "how": "data-state=\"invalid\": aria-invalid=\"true\" on the input and its fd-field-error"
           },
           {
             "name": "busy",
-            "how": "aria-busy=\"true\" on the button"
+            "how": "data-state=\"busy\": aria-busy=\"true\" on the button, the input read-only"
           },
           {
             "name": "sent",
-            "how": "the field replaced by .fd-site-cta-done with role=\"status\""
+            "how": "data-state=\"sent\": the field gives way to .fd-site-cta-done[data-state=\"sent\"] (role=\"status\")"
+          },
+          {
+            "name": "subscribed",
+            "how": "data-state=\"subscribed\": the address is already on the list; .fd-site-cta-done[data-state=\"subscribed\"]"
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\": the field stays and its error (role=\"alert\") holds data-error-failed"
           }
         ],
         "variants": [
@@ -21271,6 +21539,10 @@
           {
             "class": "fd-site-cta-done",
             "role": "The sent line."
+          },
+          {
+            "class": "fd-site-cta-consent",
+            "role": "One line on what the address is used for, with the privacy link."
           }
         ],
         "related": [
@@ -21283,7 +21555,9 @@
         "example": "docs/site-sections.html#cta",
         "provenance": [
           "docs/site-sections.html",
-          "fire/components/site.css"
+          "fire/components/site.css",
+          "fire/js/site.js",
+          "templates/site-newsletter.html"
         ],
         "since": "0.8.0"
       }
@@ -21549,6 +21823,7 @@
         "fd-site-footer-col-title",
         "fd-site-footer-cols",
         "fd-site-footer-legal",
+        "fd-site-footer-signup",
         "fd-site-footer-text",
         "fd-site-footer-wordmark"
       ],
@@ -21562,14 +21837,17 @@
       "partAttributes": {},
       "stateAttributes": {},
       "element": null,
-      "events": [],
+      "events": [
+        "fd:change"
+      ],
       "docs": "docs/site-sections.html#footer",
       "card": {
         "id": "site-footer",
         "job": "End every public page with link columns, the legal line and the service status.",
         "purpose": "columns: the brand and a line beside link columns, then a legal row with small links and the fd-service-status control. compact: one row. wordmark: the link columns above the brand name set in the display face across the full width, as the last thing on the page.",
         "useWhen": [
-          "The bottom of every public page."
+          "The bottom of every public page.",
+          "A site with a newsletter: the columns footer takes a sign-up column on every page."
         ],
         "avoidWhen": [
           {
@@ -21643,6 +21921,10 @@
           {
             "class": "fd-site-footer-wordmark",
             "role": "The brand name across the page (aria-hidden)."
+          },
+          {
+            "class": "fd-site-footer-signup",
+            "role": "columns: an optional sign-up column, the one sign-up form of fd-site-cta."
           }
         ],
         "related": [
@@ -22199,12 +22481,18 @@
       "root": "fd-site-posts",
       "classes": [
         "fd-site-posts",
+        "fd-site-posts-count",
+        "fd-site-posts-cover",
+        "fd-site-posts-cover-title",
         "fd-site-posts-date",
         "fd-site-posts-item",
+        "fd-site-posts-kind",
         "fd-site-posts-list",
         "fd-site-posts-media",
+        "fd-site-posts-meta",
         "fd-site-posts-summary",
-        "fd-site-posts-title"
+        "fd-site-posts-title",
+        "fd-site-posts-tools"
       ],
       "attributes": {
         "data-layout": [
@@ -22213,35 +22501,56 @@
           "list"
         ]
       },
-      "partAttributes": {},
+      "partAttributes": {
+        "fd-site-posts-cover": {
+          "data-ground": [
+            "inverse",
+            "raised"
+          ]
+        },
+        "fd-site-posts-list": {
+          "data-more": [
+            ""
+          ]
+        }
+      },
       "stateAttributes": {},
       "element": null,
-      "events": [],
+      "events": [
+        "fd:change"
+      ],
       "docs": "docs/site-sections.html#posts",
       "card": {
         "id": "site-posts",
-        "job": "Point to recent posts or releases as dated rows, a grid with media, or one large entry beside a list.",
-        "purpose": "list: dated ruled rows of date, title, summary and tag. grid: media, title and date. featured: one large entry beside a short list. The whole item is the link. For the changelog page itself fd-doc-changelog stays the component.",
+        "job": "List posts, releases or resources as rows, cards or one lead entry, filtered and paged.",
+        "purpose": "list: ruled rows (a date rail, or without one the kind, title, summary, authors and a small frame). grid: media, title, meta. featured: one large entry beside a short list. The whole item is the link. As a listing, entries carry data-kind and data-tags, a tools bar of existing controls filters them, a live count follows, and site.js pages them and can keep the filters in the address.",
         "useWhen": [
-          "A few recent posts or releases on a landing page, linking to the full list."
+          "A few recent posts or releases on a landing page, linking to the full list.",
+          "A blog index, a resources library or a news page: 10 to 60 entries filtered by kind and topic and paged.",
+          "Past issues of a newsletter with Show more."
         ],
         "avoidWhen": [
           {
-            "when": "The changelog page itself.",
+            "when": "The versioned release notes in the documentation.",
             "instead": "doc-changelog"
           },
           {
             "when": "A feed of activity in the app.",
             "instead": "timeline"
+          },
+          {
+            "when": "Reading one post.",
+            "instead": "site-article"
           }
         ],
         "aka": [
           "blog",
           "posts",
-          "news",
           "latest releases",
           "articles",
-          "changelog teaser"
+          "library",
+          "resources",
+          "blog index"
         ],
         "surfaces": [
           "website"
@@ -22249,7 +22558,28 @@
         "data": [
           "list"
         ],
-        "states": [],
+        "states": [
+          {
+            "name": "filtered",
+            "how": "a control with data-filter changed: non-matching entries get hidden and .fd-site-posts-count says \"12 of 30 resources\""
+          },
+          {
+            "name": "no results",
+            "how": "nothing matches: the .fd-empty after the list is shown, with a [data-clear] button"
+          },
+          {
+            "name": "paged",
+            "how": "data-page-size on the section: an empty .fd-pagination is filled, or a button[data-more] shows the next page"
+          },
+          {
+            "name": "in the address",
+            "how": "data-address: ?kind=&topic=&q=&page= follow the listing and Back restores it"
+          },
+          {
+            "name": "loading",
+            "how": "the page swaps the entries for skeletons and disables the tools; the count says what is loading"
+          }
+        ],
         "variants": [
           {
             "attribute": "data-layout",
@@ -22295,17 +22625,54 @@
           {
             "class": "fd-site-posts-media",
             "role": "Its frame: an image or the signature texture."
+          },
+          {
+            "class": "fd-site-posts-kind",
+            "role": "An entry's kind label (Report, Guide, Engineering)."
+          },
+          {
+            "class": "fd-site-posts-meta",
+            "role": "The format line: authors, date, reading time, \"PDF · 24 pages\"."
+          },
+          {
+            "class": "fd-site-posts-cover",
+            "role": "A document's cover drawn in type in the media frame; data-ground=\"inverse|raised\"."
+          },
+          {
+            "class": "fd-site-posts-cover-title",
+            "role": "The cover's title, set large."
+          },
+          {
+            "class": "fd-site-posts-tools",
+            "role": "The tools bar: chip nav or tabs, a select, a search, the count."
+          },
+          {
+            "class": "fd-site-posts-count",
+            "role": "The live count (role=status, data-noun)."
           }
         ],
         "related": [
           "doc-changelog",
-          "badge"
+          "badge",
+          "chip-nav",
+          "search",
+          "pagination",
+          "empty",
+          "site-article"
         ],
-        "keyboard": [],
+        "keyboard": [
+          {
+            "keys": "Tab, Enter, Space",
+            "does": "The tools are the existing chip nav, select and search; page buttons move focus to the first entry of the new page."
+          }
+        ],
         "example": "docs/site-sections.html#posts",
         "provenance": [
           "docs/site-sections.html",
-          "fire/components/site.css"
+          "fire/components/site.css",
+          "fire/js/site.js",
+          "templates/site-blog.html",
+          "templates/site-resources.html"
         ],
         "since": "0.8.0"
       }
@@ -29209,15 +29576,16 @@
       "docs": "docs/email.html#examples",
       "card": {
         "id": "email",
-        "job": "Send a sign-in link, invitation, receipt or alert as an email that matches the product.",
-        "purpose": "A function, not a stylesheet: renderEmail({ theme, brand, preheader, blocks, locale }) returns an HTML part and a plain-text part. Colours come from the theme record as opaque hex, layout is presentation tables 560px wide with inline styles, dark mode is one prefers-color-scheme block, and the button works in Outlook. Nothing loads except the logo.",
+        "job": "Send a sign-in link, receipt, alert or newsletter issue as an email that matches the product.",
+        "purpose": "A function, not a stylesheet: renderEmail({ theme, brand, preheader, blocks, locale }) returns an HTML part and a plain-text part. Colours come from the theme record as opaque hex, layout is presentation tables 560px wide with inline styles, dark mode is one prefers-color-scheme block, and the button works in Outlook. Nothing loads except the logo. A newsletter issue adds section, story and list blocks.",
         "useWhen": [
           "The product sends a transactional message: a sign-in link, a one-time code, an invitation, a receipt or an alert.",
-          "The email must carry the same palette as the app without a web font or a stylesheet."
+          "The email must carry the same palette as the app without a web font or a stylesheet.",
+          "A product's own newsletter issue: sections of short stories, each a title, one paragraph and a link."
         ],
         "avoidWhen": [
           {
-            "when": "The message is a marketing campaign with images and layouts a designer owns.",
+            "when": "The message is a marketing campaign with images and layouts a designer owns, not a text issue of stories.",
             "instead": "Use the email service's own template editor."
           },
           {
@@ -29233,7 +29601,8 @@
           "transactional email",
           "email template",
           "html email",
-          "notification email"
+          "notification email",
+          "newsletter"
         ],
         "surfaces": [
           "email"
@@ -29264,7 +29633,8 @@
         "provenance": [
           "fire/email/email.js",
           "docs/email.html",
-          "scripts/test/email.test.mjs"
+          "scripts/test/email.test.mjs",
+          "fire/email/examples.mjs"
         ],
         "since": "0.7.0"
       }
@@ -30750,6 +31120,21 @@
     "fd-sidebar-head": "sidebar",
     "fd-sidebar-toggle": "sidebar",
     "fd-site": "site",
+    "fd-site-article": "site-article",
+    "fd-site-article-actions": "site-article",
+    "fd-site-article-aside": "site-article",
+    "fd-site-article-body": "site-article",
+    "fd-site-article-cover": "site-article",
+    "fd-site-article-foot": "site-article",
+    "fd-site-article-head": "site-article",
+    "fd-site-article-meta": "site-article",
+    "fd-site-article-standfirst": "site-article",
+    "fd-site-article-text": "site-article",
+    "fd-site-article-title": "site-article",
+    "fd-site-authors": "site-article",
+    "fd-site-authors-item": "site-article",
+    "fd-site-authors-name": "site-article",
+    "fd-site-authors-role": "site-article",
     "fd-site-compare": "site-compare",
     "fd-site-compare-no": "site-compare",
     "fd-site-compare-table": "site-compare",
@@ -30757,6 +31142,7 @@
     "fd-site-compare-yes": "site-compare",
     "fd-site-container": "site-container",
     "fd-site-cta": "site-cta",
+    "fd-site-cta-consent": "site-cta",
     "fd-site-cta-done": "site-cta",
     "fd-site-cta-form": "site-cta",
     "fd-site-cta-panel": "site-cta",
@@ -30781,6 +31167,7 @@
     "fd-site-footer-col-title": "site-footer",
     "fd-site-footer-cols": "site-footer",
     "fd-site-footer-legal": "site-footer",
+    "fd-site-footer-signup": "site-footer",
     "fd-site-footer-text": "site-footer",
     "fd-site-footer-wordmark": "site-footer",
     "fd-site-head": "site-head",
@@ -30804,17 +31191,26 @@
     "fd-site-logos-list": "site-logos",
     "fd-site-logos-pause": "site-logos",
     "fd-site-logos-track": "site-logos",
+    "fd-site-notes": "site-article",
+    "fd-site-notes-back": "site-article",
+    "fd-site-notes-ref": "site-article",
     "fd-site-points": "site-split",
     "fd-site-points-item": "site-split",
     "fd-site-points-text": "site-split",
     "fd-site-points-title": "site-split",
     "fd-site-posts": "site-posts",
+    "fd-site-posts-count": "site-posts",
+    "fd-site-posts-cover": "site-posts",
+    "fd-site-posts-cover-title": "site-posts",
     "fd-site-posts-date": "site-posts",
     "fd-site-posts-item": "site-posts",
+    "fd-site-posts-kind": "site-posts",
     "fd-site-posts-list": "site-posts",
     "fd-site-posts-media": "site-posts",
+    "fd-site-posts-meta": "site-posts",
     "fd-site-posts-summary": "site-posts",
     "fd-site-posts-title": "site-posts",
+    "fd-site-posts-tools": "site-posts",
     "fd-site-pricing": "site-pricing",
     "fd-site-pricing-action": "site-pricing",
     "fd-site-pricing-amount": "site-pricing",
@@ -30836,6 +31232,7 @@
     "fd-site-quote-stat": "site-quote",
     "fd-site-quote-text": "site-quote",
     "fd-site-quote-who": "site-quote",
+    "fd-site-refs": "site-article",
     "fd-site-section": "site",
     "fd-site-shot": "site",
     "fd-site-split": "site-split",
@@ -31866,7 +32263,9 @@
         ],
         "site": [
           "{ value: period }",
-          "{ value: n }"
+          "{ value: n }",
+          "{ value: { kind, q, …, page }, shown, total }",
+          "{ value: state }"
         ],
         "texture": [
           "{ value: 'loading' | 'ready' }"
@@ -31909,6 +32308,9 @@
           "{ value }"
         ],
         "forms": [
+          "{ value }"
+        ],
+        "site": [
           "{ value }"
         ]
       }
@@ -32829,6 +33231,11 @@
       "job": "The whole app shell as plain markup, with no shell.js: copy it when a server renders your pages."
     },
     {
+      "path": "templates/site-blog.html",
+      "title": "Blog",
+      "job": "A lead post, then every post filtered and paged."
+    },
+    {
       "path": "templates/site-changelog.html",
       "title": "News and changelog",
       "job": "The latest release, then every update as dated rows filtered by kind, and an email signup."
@@ -32844,9 +33251,34 @@
       "job": "The public home: the product beside the headline, what it does, cost control, numbers and a quote."
     },
     {
+      "path": "templates/site-newsletter.html",
+      "title": "Newsletter",
+      "job": "The sign-up, a sample issue and past issues."
+    },
+    {
+      "path": "templates/site-post.html",
+      "title": "Blog post",
+      "job": "One post at reading size, with figures and a sign-up."
+    },
+    {
       "path": "templates/site-pricing.html",
       "title": "Pricing",
       "job": "Plans with a monthly or yearly switch, a comparison table, usage prices per endpoint and questions."
+    },
+    {
+      "path": "templates/site-report.html",
+      "title": "Report",
+      "job": "Key facts, findings, charts and a gated PDF."
+    },
+    {
+      "path": "templates/site-research.html",
+      "title": "Research paper",
+      "job": "A paper with a contents rail, footnotes and references."
+    },
+    {
+      "path": "templates/site-resources.html",
+      "title": "Resources library",
+      "job": "Reports and guides with drawn covers, filtered and paged."
     },
     {
       "path": "templates/status-admin.html",

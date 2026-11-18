@@ -33,13 +33,16 @@
 .fd-btn {
   --_b-h: var(--fd-control-md);
   --_b-px: var(--fd-control-px);
-  --_b-bg: var(--fd-fill);
-  --_b-bg-hover: var(--fd-fill-hover);
-  --_b-bg-active: var(--fd-fill-active);
+  --_b-bg: var(--fd-control-bg);
+  --_b-bg-hover: var(--fd-control-bg-hover);
+  --_b-bg-active: var(--fd-control-bg-active);
   --_b-fg: var(--fd-text);
-  /* An empty shadow, not none: the focus ring is appended to this list
-     (var(--_b-shadow), var(--fd-ring)), and none inside a list is invalid. */
-  --_b-shadow: 0 0 0 0 transparent;
+  /* The secondary button's edge: transparent while controls are soft (data-controls, tokens.css). */
+  --_b-edge: var(--fd-control-edge);
+  --_b-edge-hover: var(--fd-control-edge-hover);
+  /* A list, never none: the focus ring is appended to it (var(--_b-shadow), var(--fd-ring)), and none inside a
+     list is invalid. */
+  --_b-shadow: inset 0 0 0 var(--fd-hairline) var(--_b-edge);
   --_b-radius: var(--fd-radius-lg);
 
   position: relative;
@@ -56,7 +59,7 @@
     scale var(--fd-dur-1) var(--fd-ease-out),
     opacity var(--fd-dur-2) var(--fd-ease-out);
 }
-.fd-btn:hover { background: var(--_b-bg-hover); }
+.fd-btn:hover { --_b-edge: var(--_b-edge-hover); background: var(--_b-bg-hover); }
 .fd-btn:active { background: var(--_b-bg-active); scale: var(--fd-press-scale); }
 .fd-btn:focus-visible { box-shadow: var(--_b-shadow), var(--fd-ring); border-radius: var(--_b-radius); }
 .fd-btn[aria-pressed="true"], .fd-btn[aria-expanded="true"] { background: var(--_b-bg-active); }
@@ -95,7 +98,7 @@
 }
 .fd-btn[data-variant="outline"]:hover { --_b-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-strong), var(--fd-shadow-xs); }
 
-.fd-btn[data-variant="ghost"] { --_b-bg: transparent; --_b-bg-hover: var(--fd-fill); --_b-bg-active: var(--fd-fill-hover); --_b-fg: var(--fd-text-2); }
+.fd-btn[data-variant="ghost"] { --_b-bg: transparent; --_b-bg-hover: var(--fd-fill); --_b-bg-active: var(--fd-fill-hover); --_b-fg: var(--fd-text-2); --_b-edge: transparent; --_b-edge-hover: transparent; }
 .fd-btn[data-variant="ghost"]:hover { --_b-fg: var(--fd-text); }
 
 .fd-btn[data-variant="inverse"] {
@@ -106,7 +109,7 @@
 }
 .fd-btn[data-variant="inverse"] > .fd-icon { color: currentColor; }
 
-.fd-btn[data-variant="accent-soft"] { --_b-bg: var(--fd-accent-8); --_b-bg-hover: var(--fd-accent-12); --_b-bg-active: var(--fd-accent-16); --_b-fg: var(--fd-accent-text); }
+.fd-btn[data-variant="accent-soft"] { --_b-bg: var(--fd-accent-8); --_b-bg-hover: var(--fd-accent-12); --_b-bg-active: var(--fd-accent-16); --_b-fg: var(--fd-accent-text); --_b-edge: transparent; --_b-edge-hover: transparent; }
 .fd-btn[data-variant="accent-soft"] > .fd-icon { color: currentColor; }
 
 .fd-btn[data-variant="danger"] {
@@ -116,7 +119,7 @@
   --_b-shadow: inset 0 var(--fd-hairline) 0 0 rgb(255 255 255 / 0.16), 0 var(--fd-btn-lift-y) var(--fd-btn-lift-blur) 0 color-mix(in srgb, var(--fd-danger-solid) 30%, transparent);
 }
 .fd-btn[data-variant="danger"] > .fd-icon { color: currentColor; }
-.fd-btn[data-variant="danger-soft"] { --_b-bg: var(--fd-danger-bg); --_b-fg: var(--fd-danger-text); --_b-bg-hover: color-mix(in srgb, var(--fd-danger-solid) 14%, transparent); --_b-bg-active: color-mix(in srgb, var(--fd-danger-solid) 20%, transparent); }
+.fd-btn[data-variant="danger-soft"] { --_b-edge: transparent; --_b-edge-hover: transparent; --_b-bg: var(--fd-danger-bg); --_b-fg: var(--fd-danger-text); --_b-bg-hover: color-mix(in srgb, var(--fd-danger-solid) 14%, transparent); --_b-bg-active: color-mix(in srgb, var(--fd-danger-solid) 20%, transparent); }
 .fd-btn[data-variant="danger-soft"] > .fd-icon { color: currentColor; }
 
 /* ---------- Disabled & loading ---------- */

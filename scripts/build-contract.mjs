@@ -105,9 +105,20 @@ function resolve(value, m, seen = new Set()) {
   v = replaceCalls(v, 'light-dark', (inner) => resolve(args(inner)[m], m, seen));
   v = replaceCalls(v, 'color-mix', (inner) => {
     const mm = inner.match(/^in srgb, (.+) ([\d.]+)%, transparent$/);
-    if (!mm) throw new Error(`cannot resolve color-mix(${inner})`);
-    const { rgb, alpha } = parse(mm[1]);
-    return format(rgb, alpha * Number(mm[2]) / 100);
+    if (mm) {
+      const { rgb, alpha } = parse(mm[1]);
+      return format(rgb, alpha * Number(mm[2]) / 100);
+    }
+    // Two opaque colours, one of them with a percentage: color-mix(in srgb, A p%, B) or (in srgb, A, B p%).
+    const [space, a, b] = args(inner);
+    const pct = (part) => { const pm = part.match(/^(.+) ([\d.]+)%$/); return pm ? [pm[1], Number(pm[2]) / 100] : [part, null]; };
+    const [ca, pa] = pct(a);
+    const [cb, pb] = pct(b);
+    if (space !== 'in srgb' || (pa === null) === (pb === null)) throw new Error(`cannot resolve color-mix(${inner})`);
+    const wa = pa ?? 1 - pb;
+    const [A, B] = [parse(ca), parse(cb)];
+    if (A.alpha !== 1 || B.alpha !== 1) throw new Error(`cannot resolve color-mix(${inner}): translucent colours`);
+    return format(A.rgb.map((c, i) => c * wa + B.rgb[i] * (1 - wa)));
   });
   v = replaceCalls(v, 'calc', (inner) => {
     const mm = inner.match(/^(-?[\d.]+)([a-z%]*) \* (-?[\d.]+)$/);
@@ -142,6 +153,8 @@ const GROUPS = [
   [/^--fd-z-/, 'layer'],
   [/^--fd-a\d+$/, 'ink-ladder'],
   [/^--fd-(fill(-\w+)?|control-line(-hover)?)$/, 'fill'],
+  [/^--fd-(surface-(edge|flush|head)|field(-hover)?|control-(bg|edge)(-hover|-active)?)$/, 'structure'],
+  [/^--fd-(eyebrow|section-label)-/, 'label'],
   [/^--fd-accent-\d+$/, 'accent-wash'],
   [/^--fd-(success|warning|danger|info|violet)-/, 'status'],
   [/^--fd-chart-/, 'chart'],
@@ -153,10 +166,10 @@ function groupOf(name) {
   if (!hit) throw new Error(`${name}: no group; add it to GROUPS in scripts/build-contract.mjs`);
   return hit[1];
 }
-const COLOR_GROUPS = new Set(['palette', 'text', 'ink-ladder', 'fill', 'accent-wash', 'status', 'chart', 'syntax']);
+const COLOR_GROUPS = new Set(['palette', 'text', 'ink-ladder', 'fill', 'structure', 'accent-wash', 'status', 'chart', 'syntax']);
 function typeOf(name, group, def) {
   const v = typeof def === 'string' ? def : def.light;
-  if (group === 'font') return 'fontFamily';
+  if (group === 'font' || name === '--fd-eyebrow-font' || name === '--fd-section-label-font') return 'fontFamily';
   if (group === 'shadow' || name.startsWith('--fd-ring')) return 'shadow';
   if (/^cubic-bezier\(/.test(v)) return 'cubicBezier';
   if (COLOR_GROUPS.has(group) || name === '--fd-focus' || /^(#|rgb|hsl|oklch|transparent$)/.test(v)) return 'color';

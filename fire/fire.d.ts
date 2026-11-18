@@ -29,6 +29,14 @@ export type TextSize = 'sm' | 'md' | 'lg';
 export type ContrastLevel = 'default' | 'high';
 /** Motion dial: --fd-motion 0 · 1 · 1.75. */
 export type MotionSetting = 'off' | 'default' | 'slow';
+/** data-surfaces: white objects on an off-white page (default) · tinted areas without edges · drawn boxes. */
+export type SurfacesSetting = 'objects' | 'flat' | 'outlined';
+/** data-elevation: no shadows · today's (default) · deeper. */
+export type ElevationSetting = 'none' | 'soft' | 'lifted';
+/** data-controls: the secondary controls' 4% wash (default) · an edge at 3:1 · a stronger wash. */
+export type ControlsSetting = 'soft' | 'outlined' | 'filled';
+/** data-headings: the small labels' voice: mono capitals (default) · tracked sans capitals · mono as written. */
+export type HeadingsSetting = 'sentence' | 'upper' | 'mono';
 /** Hairline weight in px (--fd-hairline). */
 export type LineWeight = 1 | 1.5 | 2;
 
@@ -350,6 +358,10 @@ export interface ThemeDials {
   motion?: MotionSetting;
   /** 0…1.5, step .05 (--fd-texture). */
   texture?: number;
+  surfaces?: SurfacesSetting;
+  elevation?: ElevationSetting;
+  controls?: ControlsSetting;
+  headings?: HeadingsSetting;
 }
 
 /** A product's look as one JSON record, version 1. Every field is optional (missing = Fire's default); unknown fields are an error. */
@@ -390,6 +402,10 @@ export interface TweaksState {
   contrast: ContrastLevel;
   motion: MotionSetting;
   texture: number;
+  surfaces: SurfacesSetting;
+  elevation: ElevationSetting;
+  controls: ControlsSetting;
+  headings: HeadingsSetting;
 }
 /** A partial tweaks state for tweaks.set(); tone may be partial too. */
 export interface TweaksPatch {
@@ -404,6 +420,10 @@ export interface TweaksPatch {
   contrast?: ContrastLevel;
   motion?: MotionSetting;
   texture?: number;
+  surfaces?: SurfacesSetting;
+  elevation?: ElevationSetting;
+  controls?: ControlsSetting;
+  headings?: HeadingsSetting;
 }
 
 /** The API of fire/js/theme.js ("fire-design/theme"); fire.js does not export it. */

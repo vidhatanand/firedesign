@@ -13,7 +13,8 @@
  *     "tone": { "hue": 0, "vivid": 100, "light": 0, "warmth": 0 },
  *     "type": "geist",                          a type set name, or a type set spec (below)
  *     "dials": { "corners": 1, "density": "comfortable", "lines": 1, "textSize": "md",
- *                "contrast": "default", "motion": "default", "texture": 1 },
+ *                "contrast": "default", "motion": "default", "texture": 1,
+ *                "surfaces": "objects", "elevation": "soft", "controls": "soft", "headings": "sentence" },
  *     "signature": { "field": "auto", "mark": "auto", "cell": "auto", "ramp": "auto", "marks": "crosses", "intensity": 1 }
  *   }
  *   Type set spec (fire/js/typefaces.js; the families are in contract/fonts.json):
@@ -43,6 +44,9 @@
  *   motion    off · default · slow → --fd-motion 0 · 1 · 1.75
  *   texture   0…1.5   --fd-texture               density   compact · comfortable · spacious → data-density
  *   textSize  sm · md · lg → data-text-size      contrast  default · high → data-contrast="high"
+ *   The structural dials are attributes on <html> (tokens.css sets the semantic tokens for each value):
+ *   surfaces  objects · flat · outlined → data-surfaces       elevation  soft · none · lifted → data-elevation
+ *   controls  soft · outlined · filled → data-controls        headings   sentence · upper · mono → data-headings
  *   A named palette is data-palette; a toned or generated palette is written out as its nineteen colour tokens.
  *   A type set is data-type; a spec's families are written to --fd-font-display, --fd-font-sans and --fd-font-mono (each
  *   with its fallback face first), displayWeight to --fd-weight-display, displayTracking to --fd-ls-display and
@@ -76,6 +80,17 @@ import { paletteFailures } from './palette-rules.js';
 export const CONTRACT = 'fire/1';
 export const DIAL_DEFAULTS = Object.freeze({
   corners: 1, density: 'comfortable', lines: 1, textSize: 'md', contrast: 'default', motion: 'default', texture: 1,
+  surfaces: 'objects', elevation: 'soft', controls: 'soft', headings: 'sentence',
+});
+/* The structural dials: how a page is built (objects, depth, controls, small labels), each an attribute on <html>. */
+export const STRUCTURE_CHOICES = Object.freeze({
+  surfaces: ['objects', 'flat', 'outlined'],
+  elevation: ['none', 'soft', 'lifted'],
+  controls: ['soft', 'outlined', 'filled'],
+  headings: ['sentence', 'upper', 'mono'],
+});
+export const STRUCTURE_ATTRIBUTES = Object.freeze({
+  surfaces: 'data-surfaces', elevation: 'data-elevation', controls: 'data-controls', headings: 'data-headings',
 });
 export const DIAL_CHOICES = Object.freeze({
   density: ['compact', 'comfortable', 'spacious'],
@@ -83,6 +98,7 @@ export const DIAL_CHOICES = Object.freeze({
   textSize: ['sm', 'md', 'lg'],
   contrast: ['default', 'high'],
   motion: ['off', 'default', 'slow'],
+  ...STRUCTURE_CHOICES,
 });
 export const DIAL_RANGES = Object.freeze({ corners: [0, 2], texture: [0, 1.5] });
 /* The signature: Fire's generated texture and frame marks as one set of dials. */
@@ -497,6 +513,7 @@ export function expandTheme(record = {}) {
   if (d.density !== 'comfortable') attributes['data-density'] = d.density;
   if (d.textSize !== 'md') attributes['data-text-size'] = d.textSize;
   if (d.contrast === 'high') attributes['data-contrast'] = 'high';
+  for (const [k, name] of Object.entries(STRUCTURE_ATTRIBUTES)) if (d[k] !== DIAL_DEFAULTS[k]) attributes[name] = d[k];
   for (const [k, name] of Object.entries(SIGNATURE_ATTRIBUTES)) if (r.signature[k] !== SIGNATURE_DEFAULT[k]) attributes[name] = String(r.signature[k]);
   return { tokens, attributes, faces, notes };
 }
@@ -505,7 +522,8 @@ const fmtX = (v) => `${Number(v.toFixed(3))}×`;
 function summaryOf(r) {
   const palette = typeof r.palette === 'string' ? r.palette : 'custom palette';
   const type = typeof r.type === 'string' ? (r.type === DEFAULT_TYPEFACE ? '' : `${r.type} · `) : 'custom type · ';
-  return `${palette}${isDefaultTone(r.tone) ? '' : ' (toned)'} · ${type}${r.dials.density} · ${fmtX(r.dials.corners)}`;
+  const structure = Object.keys(STRUCTURE_ATTRIBUTES).filter((k) => r.dials[k] !== DIAL_DEFAULTS[k]).map((k) => ` · ${r.dials[k]} ${k}`).join('');
+  return `${palette}${isDefaultTone(r.tone) ? '' : ' (toned)'} · ${type}${r.dials.density} · ${fmtX(r.dials.corners)}${structure}`;
 }
 
 /** A record → a stylesheet: the tokens on `selector`, the attributes to set in its comment. Load it after fire.css. */

@@ -1,6 +1,6 @@
 # Fire 0.6 architecture: one system for plain pages, Lit, React and Next.js, Vue, and Facet
 
-Status: decided for 0.6 by the Fire maintainer (18 Nov 2026), as built in v0.6.0 and extended in v0.7.0 (see CHANGELOG.md). Every 0.6 work package follows this file. Where a
+Status: decided for 0.6 by the Fire maintainer (18 Nov 2026), as built in v0.6.0 and extended in v0.7.0 and v0.8.0 (see CHANGELOG.md; section 10 is what 0.8 added). Every 0.6 work package follows this file. Where a
 package needs a choice this file does not make, it makes the smallest choice that keeps every rule below, and says so
 in its report.
 
@@ -32,6 +32,8 @@ contract/
   fire-contract.json   GENERATED: every global token with tier, type, group, default and Facet role
   theme.schema.json    JSON Schema of the theme record
   catalog.json         GENERATED: components, classes, attribute values, elements, events, icons, tokens, cards
+  index.json           GENERATED: one compact entry per part (what `fire find` and the Catalogue page read)
+  pictures/<kind>/<id>.png  GENERATED: a picture of every index entry except the modules (section 10)
   catalog.schema.json  JSON Schema of catalog.json
   cards/<id>.json      HAND-WRITTEN: one card per component, pattern or template (judgement fields)
   custom-elements.json GENERATED: Custom Elements Manifest of elements/src
@@ -52,6 +54,8 @@ scripts/
   build-elements.mjs   elements/src → fire/elements.js, fire/elements.d.ts, contract/custom-elements.json
   build-contract.mjs   tokens.css + theme.js → contract/fire-contract.json
   build-catalog.mjs    CSS + module headers + VOCABULARY + cards + manifest → contract/catalog.json
+  build-pictures.mjs   index entries + docs specimens → contract/pictures (section 10)
+  lint-css.mjs         lints a product's CSS and tokens against fire-contract.json (section 7)
   build-wrappers.mjs   custom-elements.json → wrappers/react
   build-facet.mjs      contract + catalog + WRITING.md → facet/
   lint-markup.mjs      lints product or board markup against catalog.json (runs in any project)
@@ -85,6 +89,9 @@ expander turns it into tokens. Version 1:
   `{ "from": "brand", "colors": ["#14342b", "#f2c14e"] }`, or the full spec form `palettes.js` uses internally
   (hue, tint, ink, accent, on, L). `neutral` is `pure`, `cool`, `warm` or a hue in degrees.
 - `type` is a type set name, or `{ "display": "…", "sans": "…", "mono": "…" }` naming families that the page loads.
+- `brand` (0.8) is `{ name, mark, logo, logoDark, href }`: not CSS and not a token. `expandTheme()` returns it
+  untouched as `brand`, `themeToCss()` ignores it, `validateTheme()` refuses an unsafe picture address in it, and
+  `tweaks.set(fromThemeRecord(record))` hands it to the shell's `setBrand()`. `renderEmail()` reads the same name and logo.
 - Every field is optional; a missing field is Fire's default. Unknown fields are an error.
 - `fire/js/theme.js` exports: `expandTheme(record)` → `{ tokens: { name: [light, dark] | value }, attributes:
   { 'data-palette': …, 'data-density': … }, notes: [what the engine adjusted] }`; `themeToCss(record, { selector })`
@@ -109,7 +116,7 @@ source; judgement comes from the cards. Shape (see `catalog.schema.json`):
 
 ```
 { "fire": "0.6.0",
-  "components": [{ "id": "button", "name": "Button", "family": "Buttons", "kind": "component|pattern|template|layout",
+  "components": [{ "id": "button", "name": "Button", "family": "Buttons", "kind": "component|pattern|template|layout|section",
                    "root": "fd-btn", "classes": ["fd-btn", …],
                    "attributes": { "data-variant": ["primary", "outline", …], "data-size": ["xs", "sm", "lg", "xl"] },
                    "element": null, "events": ["fd:change"], "docs": "docs/buttons.html#variants",
@@ -173,6 +180,11 @@ base class holds the shared rules for future elements. Elements are registered b
   `style` props, raw colours and pixel sizes in markup, icon-only buttons without a name, `<i data-icon>` in framework
   code (use `fd-icon` or the SVG form). Inputs: `.html`, `.jsx`, `.tsx`, `.vue`, and Lit `html``` templates in
   `.ts`/`.js`. Output: text or JSON; exit code 1 on any error.
+- **`lint-css.mjs`** (0.8) reads `fire-contract.json` only, so it runs in any project. It checks a product's own
+  stylesheets, `<style>` blocks and `css` templates: unknown or reserved `--fd-` tokens, a product token that repeats a
+  Fire token, raw colours, sizes and durations, restyling of an `fd-` class. Eleven rules, four of them errors; the
+  product declares its prefix with `--prefix` or `fire.prefix` in `package.json`. Exit code 1 on any error.
+  `lint-markup.mjs` gained a warning, `surface-mismatch` (section 10), and its JSON output counts `warnings`.
 - **`render-equal.mjs`** compares a reference page (Fire markup, a Facet board) with a candidate (the exported
   screen running in its framework): the Fire nodes' structure (framework wrappers, comments and framework attributes
   ignored), their computed styles, and a pixel comparison with animations frozen, at 1440 and 375 wide, light and
@@ -193,3 +205,46 @@ which board revision each exported screen implements.
 `node scripts/audit.mjs` (ERROR=0, nothing under literals, inline, attrs), `node scripts/build-palettes.mjs --check`,
 `node scripts/build.mjs --check` once it exists, `node --test scripts/test/*.test.mjs`, and the package's own checks.
 The maintainer reviews every diff and looks at every changed screen.
+
+## 10. Added in 0.8
+
+**The surface model.** Where a part belongs is one fact, kept in one place: the `surfaces` of its card (`app`,
+`website`, `phone`, `email`, always in that order). `build-catalog.mjs` carries it into `catalog.json`, `build-index.mjs`
+into `index.json`, and everything else reads it from there: `fire find --surface`, the Catalogue page (`docs/catalogue.html`,
+filters kept in the address), the surface tags beside each docs heading, `lint-markup.mjs` and the Facet export. A page
+or an element declares where it is used with `data-fd-surface` (a global attribute with no CSS, listed by the
+catalogue in `globalAttributes`); the lint reports `surface-mismatch` for a part whose card does not list that surface,
+names the card's alternative, treats `phone` as accepting `app`, and says nothing where nothing is declared. Every
+template and starter declares one. A card must be honest: the audit that fixed 23 cards removed `email` from eight
+components, because an email is written by `renderEmail()`, and added `website` or `phone` where the part is used there.
+
+**The website family.** `fire/components/site.css` and `fire/js/site.js` add a foundation and section types, as a family
+of their own. A section is `section.fd-site-section.fd-site-<type>` inside
+`fd-site`, a size container named `fd-site`: every section measures the container, so a site renders the same inside a
+Facet board or a docs specimen. The catalogue kind is `section`, with family Website in `scripts/lib/catalog-assign.mjs`; the
+gate compares sections like any other part. Breakpoints are named (phone, tablet, desktop, wide) in the
+`fire/tokens.css` header and in the contract's `breakpoints`. Fluid type is computed where it is used (`:root`, `.fd-site` and
+`[data-type]`), so a subtree with its own type set gets its own steps. There are no block variants that only change
+decoration; that rule is `DESIGN.md` section 9.
+
+**Page transitions.** Opt in, with no cost to a page that does not ask. `fire/components/transitions.css` is part of
+`fire.css` but gives `view-transition-name` only under `:root[data-fd-transition]`, so a page without the attribute has
+no named regions and no extra stacking contexts. The cross-document `@view-transition { navigation: auto }` rule is in
+a separate file, `fire/transitions.css`, not imported by `fire.css`: linking it is the site's opt in, together with the
+attribute and `blocking="render"` on the module scripts (Chromium drops a cross-document transition when a page
+paints before its deferred scripts have run). `fire/js/transitions.js` reads the kind, writes `data-fd-direction` from
+the Navigation API and exports `transition()` for single-page apps, which sets the attribute only while it runs.
+Firefox has no cross-document transitions. Verified in Chromium; Safari is not verified. React 19.3's `<ViewTransition>`
+writes `vt-*` attributes into the server HTML: `spec/EXPORT.md` rule R14 makes `render-equal` ignore them.
+
+**Pictures.** `contract/index.json` has a top-level `pictures` rule (`path` with `{kind}` and `{id}`, and `none`, the
+kinds without one). `build-pictures.mjs` renders each entry in Chromium from the first docs specimen that holds the part
+(a template: its first screen), light theme, default look, animations frozen and the clock fixed, and writes an
+indexed PNG; `--check`, which `build.mjs` runs, fails on a missing or an extra file and compares no pixels, because
+renders differ between machines. `fire find --json` resolves the rule and returns `picture`. The package ships them
+through `contract` (about 8 MB).
+
+**Colours per palette.** Status and chart colours are derived from each palette's accent, ink and page by
+`deriveColours()` in `fire/js/palettes.js`, written to `palettes.css`, and held by the rules in `fire/js/palette-rules.js`
+(contrast, distance from the accent, and chart series told apart in normal and in simulated protanopia, deuteranopia and
+tritanopia). Ember's values are the reference and are what `tokens.css` holds, except chart series 3 to 6.

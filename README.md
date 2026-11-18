@@ -1,6 +1,6 @@
 # Fire
 
-A design system for developer, agent and AI products: consoles, playgrounds, catalogs, logs, billing, documentation and chat-style agent screens. Plain CSS and small ES modules, with no framework and no build step.
+A design system for developer, agent and AI products: consoles, playgrounds, catalogs, logs, billing, documentation and chat-style agent screens in an app, the public website beside it, the same app on a phone, and the emails it sends. Every part says which of those surfaces it belongs to. Plain CSS and small ES modules, with no framework and no build step.
 
 Every value is a variable, so the whole system can be retuned: fifteen palettes, tone controls, twelve type sets, density, corners and motion, live from a Tweaks panel.
 
@@ -13,7 +13,8 @@ npm run dev
 Then open http://127.0.0.1:4747/docs/index.html.
 
 - **Docs** (`/docs/index.html`): every component, live, with a "Markup" view to copy from.
-- **Templates** (`/templates/index.html`): 32 full screens for a fictional product, Ember, built only from Fire components.
+- **Templates** (`/templates/index.html`): 36 full screens for a fictional product, Ember, built only from Fire components and grouped by surface: the app, signed-out and system pages, public pages, a four-page website and a documentation site.
+- **Catalogue** (`/docs/catalogue.html`): every part, pattern and template, filtered by surface, with a picture of each.
 - **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, switch the typeface, change density, corners, contrast, motion and texture. Choices are saved and follow you across pages.
 
 ## Read next
@@ -40,15 +41,17 @@ Fire's HTML and CSS are the contract. Everything else is built on them, generate
 | Looks: fonts and dials | `contract/fonts.json`, `fire/typefaces.css`, `scripts/fonts.mjs`, `fire/tokens.css` | A catalogue of 53 open-licensed font families and twelve type sets; `fonts.mjs add "<family>"` puts a family in a product. Four structural dials (surfaces, elevation, controls, headings) and the signature dials (texture field, mark, cell, ramp, frame marks, intensity) restyle every component. |
 | Email | `fire/email/email.js`, `docs/email.html` | `renderEmail()` writes a transactional email, HTML and text, in the product's look. |
 | Contract | `contract/fire-contract.json` | Every global token with its type, tier (input, scale, derived), default and Facet role. |
-| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 163 components, patterns and layouts, and 3 modules, with their classes, allowed values, events and a card each: job, when to use, when not, other names; a card per template in `contract/cards/templates/`. |
-| Find | `scripts/find.mjs`, `contract/index.json` | `npx fire find "<what you need>"` ranks the parts by what they are for: 198 entries, no network. What agents search first. |
+| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 181 components, patterns, layouts and website sections, and 4 modules, with their classes, allowed values, events and a card each: job, when to use, when not, other names, and the surfaces it belongs to; a card per template (36) in `contract/cards/templates/`. |
+| Website | `fire/components/site.css`, `fire/js/site.js`, `docs/site.html`, `docs/site-sections.html`, `templates/site-*.html` | A layout foundation (named breakpoints, fluid type, section rhythm, six grounds) and 14 section types, with four website templates. Fire ships no block library: a site is told apart by its look and its composition. |
+| Page transitions | `fire/transitions.css`, `fire/components/transitions.css`, `fire/js/transitions.js`, `docs/transitions.html` | Opt in per site: the chrome holds still and the page changes. `transition()` does the same in a single-page app. Chromium only so far. |
+| Find | `scripts/find.mjs`, `contract/index.json`, `contract/pictures/` | `npx fire find "<what you need>"` ranks the parts by what they are for, and by surface with `--surface`: 221 entries, no network, each with a picture except the modules. What agents search first. |
 | Gate | `scripts/gate.mjs`, `contract/fingerprints.json` | Compares every component, pattern and template with its peers and fails a near-duplicate unless a card declares a `relation`. `--probe <page>` checks a candidate. |
 | Custom elements | `fire/elements.js` (Lit), `fire/elements.d.ts` | `fd-icon`, `fd-chart`, `fd-code`, `fd-texture` for frameworks; each is its component's root. |
 | Types | `fire/fire.d.ts` | Every export of `fire.js`, the `fd:*` events, the theme record. |
 | Framework packages | `wrappers/react`, `wrappers/vue` | `fire-design/react` and `fire-design/vue`. |
 | Starters | `starters/lit-vite`, `starters/next`, `starters/vue-vite` | Wired apps, each proven to render like Fire's templates in three engines. |
 | Export rules | `spec/EXPORT.md`, `spec/export-map.json` | How Fire markup is written in each framework; what an exporter implements. |
-| Checks | `scripts/lint-markup.mjs`, `scripts/render-equal.mjs` | Run in any project: lint markup against the catalogue; prove a screen renders like its reference. |
+| Checks | `scripts/lint-markup.mjs`, `scripts/lint-css.mjs`, `scripts/render-equal.mjs` | Run in any project: lint markup against the catalogue (a part on the wrong surface is a warning); lint a product's own CSS and tokens against the contract; prove a screen renders like its reference. |
 | Facet | `facet/` | Fire as a Facet design system: content, the files to carry, the theme record. |
 
 `spec/ARCHITECTURE.md` explains how the parts fit; [CHANGELOG.md](CHANGELOG.md) says what changed.
@@ -102,6 +105,8 @@ tweaks.set({ palette: 'midnight', corners: 1.5 });
 
 Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`, and for decisions `fd:commit`, `fd:hold` and `fd:undo`.
 
+A page declares where it is used with `data-fd-surface="app|website|phone|email"` on `<html>`. A multi-page site opts in to page transitions with `fire/transitions.css`, `data-fd-transition="fade"` on `<html>` and `blocking="render"` on its module scripts; a single-page app calls `transition()`.
+
 **Pages a server renders**
 
 - `templates/shell-static.html` is the whole app shell as plain markup, with no shell script. Per page the server changes the title, the current nav item and the content.
@@ -121,18 +126,19 @@ Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:op
 | `fire/base.css` | Reset, type roles, links, focus, icons, layout and motion primitives. |
 | `fire/components/*.css` | One file per family. Each declares its own `--fd-<component>-*` values at the top; rules contain no raw sizes or timings. |
 | `fire/layout.css` | Layout attributes: `data-gap`, `data-min`, `data-cols`, `data-span`. |
-| `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (272 Lucide icons), `initial.js` (the first-letter mark, no DOM), `palettes.js` (palette data and the tone engine), `palette-rules.js` (the contrast rules every palette meets), `theme.js` (the theme record) and `tweaks.js` (the Tweaks panel). |
+| `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (274 Lucide icons), `initial.js` (the first-letter mark, no DOM), `site.js` (the website family), `transitions.js` (page transitions), `palettes.js` (palette data and the tone engine), `palette-rules.js` (the contrast rules every palette meets), `theme.js` (the theme record) and `tweaks.js` (the Tweaks panel). |
 | `fire/email/` | `email.js`: transactional email as HTML and text. |
+| `fire/transitions.css` | The opt-in stylesheet for page transitions between pages; it is not part of `fire.css`. |
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
-| `docs/` | The documentation site: 22 pages. Start at `docs/index.html`. |
-| `templates/` | 32 screens for Ember: the app, a long create form, decisions, settings, an audit log, status pages, a record hub, sign-in (split and centred), onboarding, a support page, a documentation site, and the shell as plain markup. Each state of the newer ones opens with `?state=`. Start at `templates/index.html`. |
-| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `render-equal`), `find.mjs` (search the parts), `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
+| `docs/` | The documentation site: 26 pages. Start at `docs/index.html`. |
+| `templates/` | 36 screens for Ember: the app, a long create form, decisions, settings, an audit log, status pages, a record hub, sign-in (split and centred), onboarding, a support page, four website pages (`site-*.html`, with `site-shell.js`), a documentation site, and the shell as plain markup. 32 have states that open with `?state=`. Start at `templates/index.html`. |
+| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `lint-css`, `render-equal`), `find.mjs` (search the parts), `lint-markup.mjs`, `lint-css.mjs`, `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-pictures.mjs` (a picture of every part: `npm run build:pictures`), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |
 
 ## Families
 
-Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Cards and feedback · Decisions · Charts · Code and logs · Agent and AI · Chat · Documentation · Texture and frame · Skeletons and loading · Email · Theming and tweaks. Each has a page in `docs/` showing every variant, size and state.
+Buttons · Forms · Navigation · App shell · Overlays · Tables and data · Cards and feedback · Decisions · Charts · Code and logs · Agent and AI · Chat · Documentation · Texture and frame · Skeletons and loading · Email · Website · Theming and tweaks. Each has a page in `docs/` showing every variant, size and state.
 
 ## Checks
 
@@ -141,6 +147,13 @@ npm run audit
 ```
 
 It reports unknown icons, classes and tokens, broken links and duplicate ids. It also reports raw values in component styles (`literals`) and pixel values, widths or `style` attributes in markup (`inline`); both must be zero.
+
+```bash
+npx fire lint docs/*.html templates/*.html
+npx fire lint-css src --prefix acme
+```
+
+The first checks markup against the catalogue, and warns when a part does not suit the page's `data-fd-surface`. The second checks a product's own CSS and tokens against the contract. Both run in any project that installs Fire.
 
 ```bash
 node scripts/build-palettes.mjs --check
@@ -158,7 +171,7 @@ Then open `/scripts/style-diff.html?base=/.baseline&pages=templates/logs.html,do
 
 ## Browser support
 
-Fire uses `light-dark()`, `color-mix()`, `@property`, container queries, the Popover API and `<dialog>`. That means current Chrome, Edge, Safari and Firefox. It has been reviewed in Chromium only; Safari and Firefox are untested.
+Fire uses `light-dark()`, `color-mix()`, `@property`, container queries, the Popover API and `<dialog>`. That means current Chrome, Edge, Safari and Firefox. It has been reviewed in Chromium only; Safari and Firefox are untested. Page transitions are verified in Chromium; Firefox has no cross-document transitions and loads pages as usual, and Safari is not verified.
 
 ## Credits
 

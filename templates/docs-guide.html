@@ -267,5 +267,43 @@ then give me a table of plan names, monthly prices and request limits.</code></p
     </div>
   </article>
 </main>
+<script type="module">
+  import { init } from '../fire/fire.js';
+
+  /* ?state= shows the page in another moment: loading, error.
+     Anything else, or nothing, is the page as loaded. The head stays; the body gives way. */
+  const asked = new URLSearchParams(location.search).get('state');
+  const state = ['loading', 'error'].includes(asked) ? asked : null;
+  if (state) {
+    const article = document.querySelector('.fd-doc-article');
+    document.querySelector('.fd-doc-toc')?.setAttribute('hidden', '');
+    article.querySelector('.fd-doc-foot')?.remove();
+    const retry = () => location.assign(location.pathname);
+    const box = (markup) => { const el = document.createElement('div'); el.innerHTML = markup; return el; };
+    const failed = (what) => `<div class="fd-empty" data-tone="danger" role="alert">
+        <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+        <h2 class="fd-empty-title">Couldn’t load ${what}</h2>
+        <p class="fd-empty-text">The docs server didn’t answer. The rest of the docs still work: try again, or search for what you need.</p>
+        <div class="fd-empty-actions">
+          <button class="fd-btn" type="button" data-variant="primary" data-docs-retry><i data-icon="refresh-cw"></i><span>Retry</span></button>
+          <button class="fd-btn" type="button" data-fd-command-open="docs-command"><i data-icon="search"></i><span>Search the docs</span><kbd class="fd-kbd">⌘K</kbd></button>
+        </div>
+      </div>`;
+    const body = article.querySelector('.fd-prose');
+    const next = box(state === 'loading'
+      ? `<div class="fd-stack" data-gap="6" aria-busy="true" aria-label="Loading the page">
+           <div class="fd-skeleton-text" data-lines="4"></div>
+           <span class="fd-skeleton-title" data-size="h2"></span>
+           <div class="fd-skeleton-card"></div>
+           <div class="fd-skeleton-text" data-lines="5"></div>
+           <span class="fd-skeleton-title" data-size="h2"></span>
+           <div class="fd-skeleton-text" data-lines="4"></div>
+         </div>`
+      : failed('this page'));
+    body.replaceWith(next);
+    init(next);
+    article.addEventListener('click', (e) => { const b = e.target.closest('[data-docs-retry]'); if (b) { b.setAttribute('aria-busy', 'true'); setTimeout(retry, 700); } });
+  }
+</script>
 </body>
 </html>

@@ -1,0 +1,72 @@
+{
+  "id": "not-found",
+  "job": "Tell a person why they cannot see this page, in plain words, and give them the one way on.",
+  "purpose": "A full-screen message in the app shell, one reason per screen: the page is missing (404), the service failed with a request ID to quote (500), the browser is offline, the role has no access (403), the plan does not include it, or the service is down for maintenance. Each has a single main action. Pick the state with the address.",
+  "useWhen": [
+    "A link points to a page that moved, a signed-in person lacks the role, or the service is failing.",
+    "A feature is held back by plan or by scheduled maintenance."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A list or search has no results.",
+      "instead": "empty"
+    },
+    {
+      "when": "A section of a working page fails to load.",
+      "instead": "record"
+    },
+    {
+      "when": "Customers need to know whether the product works.",
+      "instead": "status"
+    }
+  ],
+  "aka": [
+    "404",
+    "500",
+    "403",
+    "error page",
+    "offline page",
+    "maintenance page",
+    "upgrade wall",
+    "paywall"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "404",
+      "how": "the default: a missing page, with the path asked for"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: 500, a request ID with Copy, Retry and Contact support"
+    },
+    {
+      "name": "offline",
+      "how": "?state=offline: a live status that is reconnecting, Try again"
+    },
+    {
+      "name": "no access",
+      "how": "?state=no-access: 403, who can grant it, Back to overview"
+    },
+    {
+      "name": "locked",
+      "how": "?state=locked: a plan feature, what it includes, Upgrade"
+    },
+    {
+      "name": "maintenance",
+      "how": "?state=maintenance: a progress bar and the time it ends, Status page"
+    }
+  ],
+  "example": "templates/not-found.html",
+  "provenance": [
+    "templates/not-found.html",
+    "docs/content.html#page-states"
+  ],
+  "since": "0.8.0"
+}

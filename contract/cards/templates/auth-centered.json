@@ -1,0 +1,66 @@
+{
+  "id": "auth-centered",
+  "job": "Sign in with a password, a provider or an emailed code, in one centred card with nothing beside it.",
+  "purpose": "A quiet front door: the brand, one card (providers, email and password, or a sign-in link with its code) and a legal footer on a dot grid. Choose it when the product has nothing to say beside the form. A wrong password, a lock after too many tries and an unreachable service each say what happened and what to do next.",
+  "useWhen": [
+    "The sign-in should be one centred card, for an app, a portal or an embedded login.",
+    "Sign-up lives on another page."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The page should also say what the product does, or offer sign-up in place.",
+      "instead": "auth"
+    },
+    {
+      "when": "The person arrives from a link and answers one question without signing in.",
+      "instead": "answer"
+    }
+  ],
+  "aka": [
+    "login",
+    "sign in",
+    "log in",
+    "centred login",
+    "single card login"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "sign in",
+      "how": "the default: social buttons, email and password, an email-link option"
+    },
+    {
+      "name": "link sent",
+      "how": "?state=sent: the one-time code in fd-otp, Resend, Use a different email"
+    },
+    {
+      "name": "wrong password",
+      "how": "?state=wrong-password: fd-callout data-tone=\"danger\", both fields aria-invalid"
+    },
+    {
+      "name": "locked",
+      "how": "?state=locked: a warning callout, fields and Sign in disabled; the email link still works"
+    },
+    {
+      "name": "submitting",
+      "how": "?state=submitting: Sign in aria-busy, fields disabled"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: a danger callout with Try again; nothing the person typed is lost"
+    }
+  ],
+  "example": "templates/auth-centered.html",
+  "provenance": [
+    "templates/auth-centered.html",
+    "docs/forms.html",
+    "docs/content.html#callout"
+  ],
+  "since": "0.8.0"
+}

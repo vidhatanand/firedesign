@@ -87,6 +87,21 @@
       </div>
     </section>
 
+    <!-- No access (403) -->
+    <section class="fd-band" data-pad="none" data-grow data-state-view="no-access" aria-label="No access" hidden>
+      <div class="fd-empty" data-size="lg" data-tone="warning">
+        <div class="fd-empty-art"><div class="fd-ascii" data-fd-ascii="halftone" aria-hidden="true"></div></div>
+        <span class="fd-empty-icon"><i data-icon="shield-alert"></i></span>
+        <div class="fd-stack" data-gap="3"><p class="fd-eyebrow">403</p>
+        <h1 class="fd-h1">You don't have access to this page</h1></div>
+        <p class="fd-empty-text">Billing is open to Quarry Labs owners and admins. You're signed in as a member, so ask an owner for access.</p>
+        <div class="fd-empty-actions">
+          <a class="fd-btn" data-variant="primary" data-size="lg" href="overview.html"><i data-icon="home"></i><span>Back to overview</span></a>
+          <a class="fd-btn" data-size="lg" href="#owners"><i data-icon="users"></i><span>See who the owners are</span></a>
+        </div>
+      </div>
+    </section>
+
     <!-- Maintenance -->
     <section class="fd-band" data-pad="none" data-grow data-state-view="maintenance" aria-label="Scheduled maintenance" hidden>
       <div class="fd-empty" data-size="lg" data-tone="info">
@@ -126,11 +141,11 @@
   import { overlays, data } from '../fire/fire.js';
 
   const $ = (sel) => document.querySelector(sel);
-  const TITLES = { 404: 'Page not found', error: 'Something went wrong', offline: "You're offline", locked: 'Webhooks are a Standard feature', maintenance: 'Scheduled maintenance' };
+  const TITLES = { 404: 'Page not found', error: 'Something went wrong', offline: "You're offline", 'no-access': "You don't have access", locked: 'Webhooks are a Standard feature', maintenance: 'Scheduled maintenance' };
 
-  /* Which state to show: ?state=error|offline|locked|maintenance, otherwise the 404 */
+  /* Which state to show: ?state=error|offline|no-access|locked|maintenance, otherwise the 404 */
   const asked = new URLSearchParams(location.search).get('state');
-  const state = TITLES[asked] ? asked : '404';
+  const state = Object.hasOwn(TITLES, asked) ? asked : '404';
   document.querySelectorAll('[data-state-view]').forEach((el) => { el.hidden = el.dataset.stateView !== state; });
   document.querySelectorAll('[data-state-link]').forEach((a) => { if (a.dataset.stateLink === state) a.setAttribute('aria-current', 'page'); });
   document.title = `${TITLES[state]} · Ember`;

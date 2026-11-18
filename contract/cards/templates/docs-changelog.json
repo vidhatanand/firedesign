@@ -1,0 +1,61 @@
+{
+  "id": "docs-changelog",
+  "job": "Read what shipped, newest first, and filter it by kind.",
+  "purpose": "A docs page of releases on a date rail: each with its version, tags, a headline, a short body, code and an image. Chips filter by kind. The list can still be loading, can fail with Retry, or be empty before the first release.",
+  "useWhen": [
+    "A product wants one place for new endpoints, SDK releases and fixes.",
+    "Readers look for one kind of change."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The page explains how to do a task.",
+      "instead": "docs-guide"
+    },
+    {
+      "when": "The page is the reference for one endpoint.",
+      "instead": "docs-api"
+    },
+    {
+      "when": "Someone needs the live health of the service.",
+      "instead": "status"
+    }
+  ],
+  "aka": [
+    "release notes",
+    "what's new",
+    "updates",
+    "version history",
+    "product updates"
+  ],
+  "surfaces": [
+    "website"
+  ],
+  "data": [
+    "list",
+    "text"
+  ],
+  "states": [
+    {
+      "name": "default",
+      "how": "five releases, the filter on All"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading: three skeleton releases, the filters off"
+    },
+    {
+      "name": "error",
+      "how": "?state=error: fd-empty with Retry and the RSS link"
+    },
+    {
+      "name": "empty",
+      "how": "?state=empty: no releases yet, with Subscribe"
+    }
+  ],
+  "example": "templates/docs-changelog.html",
+  "provenance": [
+    "templates/docs-changelog.html",
+    "docs/documentation.html"
+  ],
+  "since": "0.8.0"
+}

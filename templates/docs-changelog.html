@@ -118,5 +118,55 @@ const plans = page.json; // Plan[]</code></pre>
     </div>
   </article>
 </main>
+<script type="module">
+  import { init } from '../fire/fire.js';
+
+  /* ?state= shows the page in another moment: loading, error, or empty (nothing released yet).
+     Anything else, or nothing, is the changelog as loaded. The head stays; the list gives way. */
+  const asked = new URLSearchParams(location.search).get('state');
+  const state = ['loading', 'error', 'empty'].includes(asked) ? asked : null;
+  if (state) {
+    const article = document.querySelector('.fd-doc-article');
+    const list = article.querySelector('.fd-doc-releases');
+    const filters = article.querySelector('.fd-doc-changelog-filters');
+    document.querySelector('.fd-doc-toc')?.setAttribute('hidden', '');
+    article.querySelector('.fd-doc-foot')?.remove();
+    article.querySelector('.fd-doc-releases-empty')?.remove();
+    const row = (i) => `<li class="fd-doc-release" data-fd-vars="--fd-i: ${i}">
+        <div class="fd-doc-release-date"><span class="fd-skeleton-title" data-size="label"></span><span class="fd-skeleton-title" data-size="mono"></span></div>
+        <div class="fd-doc-release-body">
+          <span class="fd-skeleton-title" data-size="caption"></span>
+          <span class="fd-skeleton-title" data-size="h2"></span>
+          <div class="fd-skeleton-text" data-lines="3"></div>
+        </div>
+      </li>`;
+    const next = document.createElement('div');
+    if (state === 'loading') {
+      filters.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+      next.innerHTML = `<ol class="fd-doc-releases" aria-busy="true" aria-label="Loading releases">${row(0)}${row(1)}${row(2)}</ol>`;
+    } else if (state === 'error') {
+      next.innerHTML = `<div class="fd-empty" data-tone="danger" role="alert">
+          <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+          <h2 class="fd-empty-title">Couldn’t load the changelog</h2>
+          <p class="fd-empty-text">The docs server didn’t answer. Releases are unchanged: try again, or read them from the RSS feed.</p>
+          <div class="fd-empty-actions">
+            <button class="fd-btn" type="button" data-variant="primary" data-docs-retry><i data-icon="refresh-cw"></i><span>Retry</span></button>
+            <a class="fd-btn" href="#rss"><i data-icon="rss"></i><span>RSS feed</span></a>
+          </div>
+        </div>`;
+    } else {
+      filters.hidden = true;
+      next.innerHTML = `<div class="fd-empty">
+          <span class="fd-empty-icon"><i data-icon="scroll-text"></i></span>
+          <h2 class="fd-empty-title">No releases yet</h2>
+          <p class="fd-empty-text">New endpoints, SDK releases and fixes appear here as they ship. Subscribe and you’ll hear about the first one.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="primary" href="#rss"><i data-icon="rss"></i><span>Subscribe with RSS</span></a></div>
+        </div>`;
+    }
+    list.replaceWith(next);
+    init(next);
+    article.addEventListener('click', (e) => { const b = e.target.closest('[data-docs-retry]'); if (b) { b.setAttribute('aria-busy', 'true'); setTimeout(() => location.assign(location.pathname), 700); } });
+  }
+</script>
 </body>
 </html>

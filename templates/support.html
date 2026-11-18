@@ -90,7 +90,7 @@
   </div>
 </main>
 <script type="module">
-  import { chat } from '../fire/fire.js';
+  import { chat, init } from '../fire/fire.js';
   const inbox = document.getElementById('support-inbox');
   const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.addEventListener('click', (event) => {
@@ -106,6 +106,52 @@
     }
     if (thread) c.show('conversation');
   });
+
+  /* ?state= shows the page in another moment:
+       loading      the conversation and both lists as skeletons
+       empty        no conversations yet: a fresh chat and an empty list
+       error        the chat, the list and the status did not load, each with its own way on
+       after-hours  nobody is online: the person card says so and the chat shows its away view
+     Anything else, or nothing, is the default. */
+  const asked = new URLSearchParams(location.search).get('state');
+  const state = ['loading', 'empty', 'error', 'after-hours'].includes(asked) ? asked : null;
+  if (state) {
+    const panel = document.querySelector('.fd-panel');
+    const list = panel.querySelector('.fd-chat-history-list');
+    const status = panel.querySelector('ul[aria-label="Endpoints"]');
+    const html = (el, markup) => { const box = document.createElement('div'); box.innerHTML = markup; el.replaceWith(box); init(box); return box; };
+    const swapChat = (markup) => {
+      const clone = inbox.cloneNode(false);
+      ['data-fd-chat-demo', 'data-fd-chat-play', 'data-banner'].forEach((a) => clone.removeAttribute(a));
+      clone.removeAttribute('id');
+      clone.innerHTML = markup;
+      inbox.replaceWith(clone);
+      init(clone);
+    };
+    const retry = (what) => `<div class="fd-empty-actions"><button class="fd-btn" type="button" data-size="sm" data-support-retry><i data-icon="refresh-cw"></i><span>${what}</span></button></div>`;
+    if (state === 'loading') {
+      swapChat('<div class="fd-skeleton-thread" aria-busy="true" aria-label="Loading your conversation"></div>');
+      html(list, '<div class="fd-skeleton-list" data-rows="4" aria-busy="true" aria-label="Loading conversations"></div>');
+      html(status, `<div class="fd-stack" data-gap="3" aria-busy="true" aria-label="Loading service status">${[22, 28, 24, 30, 22, 36].map((w) => `<div class="fd-row" data-justify="between"><span class="fd-skeleton-title" data-size="mono" data-fd-vars="--_sk-w: ${w}%"></span><span class="fd-skeleton-title" data-size="caption" data-fd-vars="--_sk-w: 26%"></span></div>`).join('')}</div>`);
+    }
+    if (state === 'error') {
+      swapChat(`<div class="fd-empty" data-size="sm" data-tone="danger" role="alert"><span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span><h2 class="fd-empty-title">Couldn’t open the chat</h2><p class="fd-empty-text">The support service didn’t answer. Your earlier conversations are safe. Try again, or email support@ember.dev.</p>${retry('Retry')}</div>`);
+      html(list, `<div class="fd-empty" data-size="sm" data-tone="danger" role="alert"><span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span><h3 class="fd-empty-title">Couldn’t load conversations</h3>${retry('Retry')}</div>`);
+      html(status, '<p class="fd-small fd-muted">Service status didn’t load. Check <a class="fd-link" href="https://status.ember.dev" target="_blank" rel="noopener">status.ember.dev</a>.</p>');
+    }
+    if (state === 'empty') {
+      chat.get(inbox)?.newConversation();
+      html(list, '<div class="fd-empty" data-size="sm"><span class="fd-empty-icon"><i data-icon="message-circle"></i></span><h3 class="fd-empty-title">No conversations yet</h3><p class="fd-empty-text">Ask Ember AI anything, and it lands here.</p></div>');
+    }
+    if (state === 'after-hours') {
+      const person = document.querySelector('[data-support="person"]');
+      person.querySelector('.fd-card-meta').textContent = 'Back Monday, 9:00 CET';
+      person.querySelector('.fd-card-foot').innerHTML = '<span class="fd-status" data-size="sm" data-tone="neutral">Offline</span><span class="fd-card-count">Replies by email, within 4 hours</span>';
+      chat.get(inbox)?.stopRun();
+      chat.get(inbox)?.show('offline');
+    }
+    document.querySelectorAll('[data-support-retry]').forEach((b) => b.addEventListener('click', () => { b.setAttribute('aria-busy', 'true'); setTimeout(() => { location.href = location.pathname; }, 900); }));
+  }
 </script>
 </body>
 </html>

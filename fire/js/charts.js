@@ -9,6 +9,7 @@
  *       "yFormat": "number|compact|percent|ms|credits",
  *       "threshold": { "value": 2, "label": "Concurrency limit: 2", "tone": "danger" },
  *       "live": true,                                  pulsing end-point dot on line series
+ *       "marks": "dash",                               line and area series 2–6 each take a dash (or data-marks="dash")
  *       "unit": "browsers", "yMin": 0|"auto", "yMax": 100, "xTitle": "Day", "label": "aria-label override",
  *       "empty": { "title": "...", "description": "..." }, "state": "loading|empty"
  *     }</script>
@@ -54,6 +55,9 @@
  * data and a polite live region announces the active point while navigating by keyboard.
  *
  * Colour comes from CSS (data-s="1…6" / data-tone) so themes and accents switch without re-rendering.
+ * A second cue besides colour: data-marks="dash" (or "marks": "dash") gives line and area series 2–6 a dash pattern each
+ * (series 1, the accent, stays solid); the legend and the tooltip draw their swatches with the same dash. Bars keep
+ * their order in the group and the stack, the legend, the tooltip and the data table.
  */
 import { once, emit, reducedMotion, clamp, id as uid } from './core.js';
 
@@ -210,6 +214,7 @@ function normalize(config, el) {
   cfg.height = clamp(Number(cfg.height ?? el.dataset.height) || 240, 80, 900);
   cfg.yFormat = cfg.yFormat || el.dataset.yFormat || 'number';
   cfg.threshold = cfg.threshold && finite(cfg.threshold.value) != null ? { ...cfg.threshold, value: Number(cfg.threshold.value) } : null;
+  cfg.marks = (cfg.marks ?? el.dataset.marks) === 'dash' ? 'dash' : null;
   return cfg;
 }
 
@@ -254,6 +259,7 @@ export function render(el, config = {}) {
   st.type = st.config.type;
   st.hidden = new Set([...st.hidden].filter((i) => i < st.config.series.length));
   if (config.type) el.dataset.fdChart = config.type;
+  if (st.config.marks) el.dataset.marks = st.config.marks;
   buildMeta(el, st);
   buildLegend(el, st);
   armEnter(el);
@@ -328,10 +334,17 @@ function buildMeta(el, st) {
 
 /* Legend: built-in (data-legend) and standalone (.fd-legend[data-for]) share state. */
 function legendShape(type) { return type === 'bar' || type === 'stacked' ? 'square' : 'line'; }
+/* A line swatch drawn with the series' dash (data-marks="dash"). */
+function dashSwatch(sw) {
+  sw.dataset.shape = 'dash';
+  const g = svg('svg', { class: 'fd-chart-swatch-svg', viewBox: '0 0 16 2', 'aria-hidden': 'true', focusable: 'false' }, sw);
+  svg('line', { class: 'fd-chart-swatch-dash', x1: 1, y1: 1, x2: 15, y2: 1 }, g);
+}
+const dashed = (st) => st.config.marks === 'dash' && st.type !== 'bar' && st.type !== 'stacked';
 function buildLegend(el, st) {
   const cfg = st.config;
   const want = cfg.legend ?? (el.hasAttribute('data-legend') && el.getAttribute('data-legend') !== 'false');
-  const key = JSON.stringify([!!want, st.type, cfg.series.map((s) => [s.name, s.tone])]);
+  const key = JSON.stringify([!!want, st.type, cfg.marks, cfg.series.map((s) => [s.name, s.tone])]);
   if (key === st.legendKey) return;
   st.legendKey = key;
   st.legend?.remove();
@@ -348,7 +361,7 @@ function buildLegend(el, st) {
     item.dataset.series = i;
     item.setAttribute('aria-pressed', String(!st.hidden.has(i)));
     const sw = html('span', 'fd-legend-swatch', null, item);
-    sw.dataset.shape = legendShape(st.type);
+    if (dashed(st)) dashSwatch(sw); else sw.dataset.shape = legendShape(st.type);
     html('span', '', s.name, item);
   });
   st.plot.after(box);
@@ -575,7 +588,9 @@ function drawCartesian(el, st, W, H) {
         if (seg.length === 1) { svg('circle', { class: 'fd-chart-point', cx: r2(seg[0][0]), cy: r2(seg[0][1]), r: 3 }, g); continue; }
         const d = seg.map(([x, y], k) => `${k ? 'L' : 'M'}${r2(x)} ${r2(y)}`).join('');
         if (gradId) svg('path', { class: 'fd-chart-area', fill: `url(#${gradId})`, d: `M${r2(seg[0][0])} ${bottomY}${d.replace('M', 'L')}L${r2(seg[seg.length - 1][0])} ${bottomY}Z` }, g);
-        svg('path', { class: 'fd-chart-line', pathLength: 1, d }, g);
+        // A dashed series keeps its real length (pathLength would scale the dash); it fades in instead of drawing.
+        const dash = cfg.marks === 'dash' && slot(i) > 1;
+        svg('path', { class: 'fd-chart-line', pathLength: dash ? null : 1, 'data-dash': dash ? '' : null, d }, g);
       }
     }
   }
@@ -679,7 +694,7 @@ function buildTip(st, data) {
   for (const r of data.rows) {
     const row = html('div', 'fd-chart-tooltip-row', null, tip);
     const sw = html('span', 'fd-chart-tooltip-swatch', null, row);
-    sw.dataset.shape = shape;
+    if (shape === 'line' && dashed(st)) dashSwatch(sw); else sw.dataset.shape = shape;
     sw.dataset.s = r.slot;
     if (r.tone) sw.dataset.tone = r.tone;
     html('span', 'fd-chart-tooltip-value', r.value, row);

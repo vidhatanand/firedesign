@@ -400,8 +400,10 @@ test('fire-contract.json: every token typed and tiered; inputs are what a record
   assert.equal(by['--fd-dur-3'].type, 'duration');
   assert.equal(by['--fd-ease-out'].type, 'cubicBezier');
   assert.equal(by['--fd-shadow-md'].type, 'shadow');
-  assert.equal(by['--fd-chart-1'].tier, 'derived');
-  assert.equal(by['--fd-chart-3'].tier, 'scale');
+  // 0.8: every palette sets its status and chart colours, so a record sets them too.
+  assert.equal(by['--fd-chart-1'].tier, 'input');
+  assert.equal(by['--fd-chart-3'].tier, 'input');
+  assert.equal(by['--fd-chart-3'].group, 'chart');
   const roles = Object.fromEntries(c.tokens.filter((t) => t.facetRole).map((t) => [t.facetRole, t.name]));
   assert.deepEqual(roles, {
     background: '--fd-bg', surface: '--fd-surface', text: '--fd-ink', muted: '--fd-text-3', primary: '--fd-accent',

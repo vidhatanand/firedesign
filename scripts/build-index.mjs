@@ -3,8 +3,9 @@
 // agent to read whole. Reads contract/catalog.json (run build-catalog first); writes nothing else. Deterministic.
 // Entry: id, kind, name, family, job, aka[], surfaces[], data[], use (first use-when), not [{when-less ids}] (the
 // "instead" ids of avoid-when that name a component or template), docs (docs/<page>.html#<section>, or a template path).
-// A template has no card, so its aka, surfaces and data come from TEMPLATE_META below (the judgement a template card
-// would hold), its job from templates/index.html, its use from its job, and its docs from its path.
+// A template with a card (contract/cards/templates/<id>.json) takes aka, surfaces, data, use and not from it; one without
+// a card takes aka, surfaces and data from TEMPLATE_META below (the judgement a template card
+// would hold) and its use from its job. Every template takes its job from templates/index.html and its docs from its path.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,11 +59,14 @@ export function buildIndex(catalog) {
   }
   for (const t of catalog.templates) {
     const id = path.basename(t.path, '.html');
-    const m = TEMPLATE_META[id];
-    if (!m) throw new Error(`template ${id} has no TEMPLATE_META entry in scripts/build-index.mjs`);
+    const cardFile = path.join(ROOT, 'contract/cards/templates', `${id}.json`);
+    const k = fs.existsSync(cardFile) ? JSON.parse(fs.readFileSync(cardFile, 'utf8')) : null;
+    const m = k || TEMPLATE_META[id];
+    if (!m) throw new Error(`template ${id} has no card (contract/cards/templates/${id}.json) and no TEMPLATE_META entry in scripts/build-index.mjs`);
+    const not = k ? [...new Set(k.avoidWhen.map((a) => a.instead).filter((i) => ids.has(i) || tpl.has(i)))] : [];
     entries.push({
       id, kind: 'template', name: t.title, family: 'Templates', job: clean(t.job), aka: m.aka,
-      surfaces: m.surfaces, data: m.data, use: clean(t.job), not: [], docs: t.path,
+      surfaces: m.surfaces, data: m.data, use: clean(k ? k.useWhen[0] : t.job), not, docs: t.path,
     });
   }
   // A template and a component may share an id (form): keep the kind in the sort so output is stable.

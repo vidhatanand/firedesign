@@ -1,0 +1,75 @@
+{
+  "id": "status",
+  "job": "Tell customers whether the product works now, what is being done about it and how each part has done for 90 days.",
+  "purpose": "A public page with no app shell: the brand and Subscribe, the overall status in one line with a tile in its tone, the open incident or maintenance with its updates on a timeline, every component with its state and a 90-day fd-heatgrid strip (60 or 30 days where 90 would not fit) and its uptime, scheduled maintenance, and past incidents by day, folded. One reading column; one fd-states wrapper switches loading and error.",
+  "useWhen": [
+    "Customers and their agents need one public address that says whether the product works.",
+    "An incident or planned work affects some components, and people want its updates without signing in."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The people reading it are operators who post the updates.",
+      "instead": "status-admin"
+    },
+    {
+      "when": "Only the signed-in product needs to show its health.",
+      "instead": "service-status"
+    },
+    {
+      "when": "The page shares one result or piece of evidence, not live health.",
+      "instead": "proof"
+    }
+  ],
+  "aka": [
+    "status page",
+    "system status",
+    "uptime page",
+    "incident history",
+    "public status"
+  ],
+  "surfaces": [
+    "website",
+    "phone"
+  ],
+  "data": [
+    "series",
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "operational",
+      "how": "?state=operational, or the Demo state band; every component reads Operational and no incident card shows"
+    },
+    {
+      "name": "degraded",
+      "how": "?state=degraded, the default; one component Degraded and the open incident with its updates"
+    },
+    {
+      "name": "outage",
+      "how": "?state=outage, or the Demo state band; two components in outage and the incident in the danger tone"
+    },
+    {
+      "name": "maintenance",
+      "how": "?state=maintenance, or the Demo state band; maintenance in progress in place of an incident"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading, or the Demo state band; first paint shows it for about 600 ms; fd-states data-state=\"loading\""
+    },
+    {
+      "name": "error",
+      "how": "?state=error, or the Demo state band; fd-states data-state=\"error\" with Try again"
+    }
+  ],
+  "example": "templates/status.html",
+  "provenance": [
+    "Touchstone: release.html",
+    "Assay operator prototype: status-page.html",
+    "docs/charts.html#heatgrid",
+    "docs/content.html#page-states",
+    "docs/content.html#timeline",
+    "templates/auth-centered.html"
+  ],
+  "since": "0.7.0"
+}

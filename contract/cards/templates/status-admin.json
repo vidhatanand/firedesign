@@ -1,0 +1,76 @@
+{
+  "id": "status-admin",
+  "job": "Run the public status page: post incident updates after a preview, set each component's state and schedule maintenance.",
+  "purpose": "An operator's app screen behind the public status page: a page head with View public page and Open an incident, a strip of what the public reads now, the open incident with its updates on a timeline beside a composer that previews the update and its reach (fd-preview, fd-impact) before a held publish with Undo (fd-commit in a held toast), a table of components whose state changes at once with Done and Undo, and scheduled maintenance.",
+  "useWhen": [
+    "Operators tell customers about an incident or planned work, and every word goes out to subscribers.",
+    "A component's public state has to change during an incident, with a way to take it back."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Customers read the status; nobody edits it.",
+      "instead": "status"
+    },
+    {
+      "when": "The product only needs to show its own health in the top bar.",
+      "instead": "service-status"
+    },
+    {
+      "when": "The change waits for someone else to approve it.",
+      "instead": "queue"
+    }
+  ],
+  "aka": [
+    "status page admin",
+    "incident console",
+    "incident updates",
+    "statuspage editor",
+    "maintenance scheduler"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "record",
+    "list",
+    "series",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "incident",
+      "how": "?state=incident, or the Demo state band; an open incident with its updates and the composer; fd-states data-state=\"ready\""
+    },
+    {
+      "name": "all-clear",
+      "how": "?state=all-clear, or resolving the incident; fd-states data-state=\"empty\": no open incident, with Open an incident"
+    },
+    {
+      "name": "maintenance",
+      "how": "?state=maintenance, or the Demo state band; maintenance underway in place of the incident, with Mark complete"
+    },
+    {
+      "name": "read-only",
+      "how": "?state=read-only, or the Demo state band; every control is disabled and described by a line that names the on-call operators (fd-reason, fd-commit-lock)"
+    },
+    {
+      "name": "loading",
+      "how": "?state=loading, or the Demo state band; first paint shows it for about 600 ms; data-state=\"loading\" shows stat, card and table skeletons"
+    },
+    {
+      "name": "error",
+      "how": "?state=error, or the Demo state band; data-state=\"error\" with the request ID and Try again"
+    }
+  ],
+  "example": "templates/status-admin.html",
+  "provenance": [
+    "Assay operator prototype: status-page.html",
+    "Touchstone: release.html",
+    "docs/decisions.html#preview",
+    "docs/decisions.html#hold",
+    "docs/charts.html#heatgrid",
+    "docs/content.html#page-states",
+    "docs/forms.html#reason"
+  ],
+  "since": "0.7.0"
+}

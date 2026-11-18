@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status page · Ember</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-title="Status page">
+<main class="fd-page">
+  <div class="fd-frame">
+
+    <section class="fd-band fd-rise" data-pad="sm" aria-label="Status page">
+      <div class="fd-stack" data-gap="3">
+        <div class="fd-page-head">
+          <div class="fd-page-head-text">
+            <h1 class="fd-page-head-title">Status page</h1>
+            <p class="fd-page-head-desc">What customers read at status.ember.dev. All times UTC.</p>
+          </div>
+          <div class="fd-page-head-actions">
+            <a class="fd-btn" data-variant="ghost" href="status.html"><i data-icon="external-link"></i><span>View public page</span></a>
+            <button class="fd-btn" type="button" id="open-incident" data-fd-dialog-open="dlg-incident"><i data-icon="megaphone"></i><span>Open an incident</span></button>
+          </div>
+        </div>
+        <p class="fd-row fd-small fd-muted" data-gap="1-5" id="viewer-reason" hidden><i data-icon="lock" data-size="14"></i><span>Only on-call operators change the status page. Ask Tomasz Nowak or Amara Okafor.</span></p>
+      </div>
+    </section>
+
+    <div class="fd-states" id="page" data-state="ready">
+
+      <!-- Loading -->
+      <section class="fd-band" data-when="loading" aria-busy="true" aria-label="Loading the status page">
+        <div class="fd-stack" data-gap="6">
+          <div class="fd-skeleton-stat" data-count="4"></div>
+          <div class="fd-skeleton-card"></div>
+          <div class="fd-skeleton-table" data-rows="6" data-cols="4"></div>
+        </div>
+      </section>
+
+      <!-- Error -->
+      <section class="fd-band" data-pad="lg" data-grow data-when="error" aria-label="Status page unavailable">
+        <div class="fd-empty" data-size="lg" data-tone="danger" role="alert">
+          <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+          <h2 class="fd-empty-title">Couldn’t load the status page</h2>
+          <p class="fd-empty-text">The admin API timed out. The public page still shows the last status you posted.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-action="reload"><i data-icon="refresh-cw"></i><span>Try again</span></button></div>
+          <p class="fd-empty-meta"><span>Request ID</span><code class="fd-code">req_5c71e0a2</code><button class="fd-btn" type="button" data-size="xs" data-variant="ghost" data-icon-only data-fd-copy="req_5c71e0a2" aria-label="Copy request ID"><i data-icon="copy"></i></button></p>
+        </div>
+      </section>
+
+      <!-- Now: what the public page says -->
+      <section class="fd-band" data-pad="sm" data-when="ready empty" aria-label="Now">
+        <div class="fd-stats">
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label">Public status</span>
+            <span class="fd-stat" data-bind="public-status">Degraded</span>
+            <span class="fd-stat-sub"><span class="fd-status" data-size="sm" data-tone="warning" data-bind="public-tone">1 component affected</span></span>
+          </div>
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label" data-bind="open-label">Open incident</span>
+            <span class="fd-stat" data-bind="open-for">2 h 26 min</span>
+            <span class="fd-stat-sub" data-bind="open-sub">Since 9:12 AM</span>
+          </div>
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label">Subscribers</span>
+            <span class="fd-stat">1,284</span>
+            <span class="fd-stat-sub">1,031 email · 253 webhook</span>
+          </div>
+          <div class="fd-stat-tile">
+            <span class="fd-stat-label">Uptime, 90 days</span>
+            <span class="fd-stat">99.94%</span>
+            <span class="fd-stat-sub">3 incidents · 1 h 58 min down</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- The open incident, and the update composer -->
+      <section class="fd-band" data-when="ready" id="incident-band" aria-labelledby="h-incident">
+        <div class="fd-grid" data-min="2xl" data-cols="2" data-gap="8">
+          <div class="fd-stack" data-gap="6">
+            <div class="fd-stack" data-gap="3">
+              <div class="fd-row" data-wrap data-gap="2">
+                <span class="fd-status" data-variant="pill" data-tone="info" id="inc-phase">Monitoring</span>
+                <span class="fd-small fd-muted fd-mono" id="inc-id">INC-0142</span>
+              </div>
+              <h2 class="fd-h3" id="h-incident">Crawls are starting slowly</h2>
+              <dl class="fd-kv" data-cols="3">
+                <div class="fd-kv-item"><dt class="fd-kv-key">Started</dt><dd class="fd-kv-value" id="inc-started">Nov 18, 9:12 AM</dd></div>
+                <div class="fd-kv-item"><dt class="fd-kv-key">Open for</dt><dd class="fd-kv-value fd-num" data-bind="open-for">2 h 26 min</dd></div>
+                <div class="fd-kv-item"><dt class="fd-kv-key">Affects</dt><dd class="fd-kv-value" id="inc-affects">Crawl and map</dd></div>
+              </dl>
+            </div>
+            <div class="fd-stack" data-gap="3">
+              <h3 class="fd-label" id="h-updates">Public updates</h3>
+              <ol class="fd-timeline" id="inc-updates" aria-labelledby="h-updates">
+                <li class="fd-timeline-item" data-tone="info">
+                  <span class="fd-timeline-node"><i data-icon="eye"></i></span>
+                  <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Monitoring</span><time class="fd-timeline-time">10:58 AM</time></div><p class="fd-timeline-body">Wait times are back under 30 seconds for most crawls. We are watching the queue.</p></div>
+                </li>
+                <li class="fd-timeline-item" data-tone="warning">
+                  <span class="fd-timeline-node"><i data-icon="target"></i></span>
+                  <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Identified</span><time class="fd-timeline-time">9:41 AM</time></div><p class="fd-timeline-body">A crawl queue in eu-west-1 is short of workers after a deploy. We are adding capacity.</p></div>
+                </li>
+                <li class="fd-timeline-item" data-tone="warning">
+                  <span class="fd-timeline-node"><i data-icon="triangle-alert"></i></span>
+                  <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Investigating</span><time class="fd-timeline-time">9:12 AM</time></div><p class="fd-timeline-body">New crawls wait up to 6 minutes before the first page. Running crawls are not affected.</p></div>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <section class="fd-card" aria-labelledby="h-compose">
+            <header class="fd-card-head">
+              <div class="fd-card-heading"><h3 class="fd-title" id="h-compose">Post an update</h3><p class="fd-card-desc">Shown on the status page and sent to subscribers.</p></div>
+            </header>
+            <form class="fd-preview" id="compose" aria-labelledby="h-compose" novalidate>
+              <div class="fd-preview-edit">
+                <div class="fd-field">
+                  <span class="fd-field-label" id="cp-phase-label">Status</span>
+                  <div class="fd-segmented" role="radiogroup" aria-labelledby="cp-phase-label" id="cp-phase">
+                    <label class="fd-segmented-item"><input type="radio" name="phase" value="investigating"><span>Investigating</span></label>
+                    <label class="fd-segmented-item"><input type="radio" name="phase" value="identified"><span>Identified</span></label>
+                    <label class="fd-segmented-item"><input type="radio" name="phase" value="monitoring" checked><span>Monitoring</span></label>
+                    <label class="fd-segmented-item"><input type="radio" name="phase" value="resolved"><span>Resolved</span></label>
+                  </div>
+                </div>
+                <div class="fd-field" role="group" aria-labelledby="cp-comps-label">
+                  <span class="fd-field-label" id="cp-comps-label">Affected components</span>
+                  <div class="fd-options" data-orientation="horizontal" id="cp-comps">
+                    <label class="fd-checkbox"><input type="checkbox" name="components" value="crawl" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Crawl and map</span></span></label>
+                    <label class="fd-checkbox"><input type="checkbox" name="components" value="scrape"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Scrape</span></span></label>
+                    <label class="fd-checkbox"><input type="checkbox" name="components" value="agent"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Agent</span></span></label>
+                    <label class="fd-checkbox"><input type="checkbox" name="components" value="webhooks"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Webhooks</span></span></label>
+                  </div>
+                </div>
+                <div class="fd-field">
+                  <label class="fd-field-label" for="cp-message">Message</label>
+                  <textarea class="fd-textarea" id="cp-message" name="message" rows="3" required data-fd-autogrow placeholder="Wait times are normal again. We are watching the queue for another hour." aria-describedby="cp-message-hint" data-error-required="Write what customers will read."></textarea>
+                  <p class="fd-field-hint" id="cp-message-hint">Say what customers notice and what to do.</p>
+                  <p class="fd-field-error" id="cp-message-error" hidden><i data-icon="circle-alert" data-size="14"></i><span>Write what customers will read.</span></p>
+                </div>
+                <div class="fd-reason">
+                  <button class="fd-btn" type="button" data-fd-preview-open id="cp-preview"><i data-icon="eye"></i><span>Preview the update</span></button>
+                  <p class="fd-reason-text" id="cp-viewer" hidden><i data-icon="lock"></i><span><span class="fd-reason-why">Only on-call operators post updates.</span> <span class="fd-reason-who">Ask Tomasz Nowak or Amara Okafor.</span></span></p>
+                </div>
+              </div>
+              <p class="fd-preview-stale" role="status"><i data-icon="triangle-alert"></i><span>You changed the update. Preview it again before you publish.</span></p>
+              <div class="fd-preview-result">
+                <div class="fd-stack" data-gap="2">
+                  <p class="fd-eyebrow">On status.ember.dev</p>
+                  <div class="fd-card" data-variant="sunken">
+                    <ol class="fd-timeline" id="cp-render" aria-label="The update as customers will read it"></ol>
+                  </div>
+                </div>
+                <div class="fd-impact" data-tone="info" id="cp-impact">
+                  <p class="fd-impact-count"><b>1,284</b> subscribers get this</p>
+                  <p class="fd-impact-text">1,031 by email and 253 by webhook, within a minute of publishing.</p>
+                  <ul class="fd-impact-list" id="cp-impact-list"></ul>
+                </div>
+                <div class="fd-commit" data-fd-hold="10" data-fd-hold-in="toast" id="cp-commit">
+                  <div class="fd-field">
+                    <label class="fd-field-label" for="cp-reason">Note for the team</label>
+                    <textarea class="fd-textarea" id="cp-reason" name="reason" rows="2" required data-fd-autogrow placeholder="Queue wait under 30 s for an hour."></textarea>
+                    <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log. Customers never see it.</p><span class="fd-commit-budget" data-min-words="3" data-max-words="40">0 / 40 words</span></div>
+                    <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+                  </div>
+                  <div class="fd-commit-actions">
+                    <button class="fd-btn" type="submit" data-variant="primary" value="publish" data-verb="Publishing the update" id="cp-publish"><i data-icon="send"></i><span>Publish update</span></button>
+                  </div>
+                  <p class="fd-commit-lock" id="cp-lock" hidden><i data-icon="lock"></i><span>Only on-call operators publish. Ask Tomasz Nowak or Amara Okafor.</span></p>
+                </div>
+              </div>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- Maintenance underway (in place of an incident) -->
+      <section class="fd-band" data-when="ready" id="maint-band" aria-labelledby="h-maint-now" hidden>
+        <div class="fd-stack" data-gap="5">
+          <div class="fd-callout" data-tone="info" role="status">
+            <i class="fd-callout-icon" data-icon="hard-drive"></i>
+            <div class="fd-callout-content">
+              <p class="fd-callout-title" id="h-maint-now">Maintenance underway</p>
+              <p class="fd-callout-body">Queue storage upgrade in eu-west-1, 11:00 AM to 12:00 PM. Monitors and webhooks pause and catch up after.</p>
+              <div class="fd-callout-actions"><button class="fd-btn" type="button" data-size="sm" data-variant="outline" id="maint-done"><i data-icon="check"></i><span>Mark complete</span></button></div>
+            </div>
+          </div>
+          <ol class="fd-timeline" aria-label="Maintenance updates">
+            <li class="fd-timeline-item" data-tone="info" data-live>
+              <span class="fd-timeline-node"></span>
+              <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">In progress</span><time class="fd-timeline-time">11:00 AM</time></div><p class="fd-timeline-body">Checks and deliveries are queued, none are lost.</p></div>
+            </li>
+            <li class="fd-timeline-item">
+              <span class="fd-timeline-node"></span>
+              <div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">Scheduled</span><time class="fd-timeline-time">Nov 11, 3:20 PM</time></div><p class="fd-timeline-body">Announced to 1,284 subscribers.</p></div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- All clear -->
+      <section class="fd-band" data-pad="lg" data-when="empty" aria-label="No open incidents">
+        <div class="fd-empty" data-tone="success">
+          <span class="fd-empty-icon"><i data-icon="circle-check"></i></span>
+          <h2 class="fd-empty-title">No open incidents</h2>
+          <p class="fd-empty-text">Every component reads Operational. Open an incident when customers need to know something.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-fd-dialog-open="dlg-incident"><i data-icon="megaphone"></i><span>Open an incident</span></button></div>
+          <p class="fd-empty-meta" data-bind="last-incident"><span>Last incident: Agent runs timing out, resolved Nov 17</span></p>
+        </div>
+      </section>
+
+      <!-- Components -->
+      <section class="fd-band" data-when="ready empty" aria-labelledby="h-components">
+        <div class="fd-stack" data-gap="4">
+          <div class="fd-stack" data-gap="1">
+            <h2 class="fd-h3" id="h-components">Components</h2>
+            <p class="fd-small fd-muted">A state shows on the public page as soon as you change it. Uptime covers 90 days.</p>
+          </div>
+          <div class="fd-table-wrap">
+            <div class="fd-table-scroll">
+              <table class="fd-table" data-stack id="comp-table" aria-labelledby="h-components">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th data-col="md">Public state</th>
+                    <th data-col="md" data-stack="hide">Last 30 days</th>
+                    <th data-num>Uptime</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-component="api"><td data-stack-title>API</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of API</span><select data-state-of="api"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="api"></div></td><td data-num data-uptime="api">99.99%</td></tr>
+                  <tr data-component="search"><td data-stack-title>Search</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Search</span><select data-state-of="search"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="search"></div></td><td data-num data-uptime="search">99.98%</td></tr>
+                  <tr data-component="scrape"><td data-stack-title>Scrape</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Scrape</span><select data-state-of="scrape"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="scrape"></div></td><td data-num data-uptime="scrape">99.97%</td></tr>
+                  <tr data-component="crawl"><td data-stack-title>Crawl and map</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Crawl and map</span><select data-state-of="crawl"><option value="operational">Operational</option><option value="degraded" selected>Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="crawl"></div></td><td data-num data-uptime="crawl">99.86%</td></tr>
+                  <tr data-component="agent"><td data-stack-title>Agent</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Agent</span><select data-state-of="agent"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="agent"></div></td><td data-num data-uptime="agent">99.95%</td></tr>
+                  <tr data-component="monitors"><td data-stack-title>Monitors</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Monitors</span><select data-state-of="monitors"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="monitors"></div></td><td data-num data-uptime="monitors">100%</td></tr>
+                  <tr data-component="webhooks"><td data-stack-title>Webhooks</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Webhooks</span><select data-state-of="webhooks"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="webhooks"></div></td><td data-num data-uptime="webhooks">99.92%</td></tr>
+                  <tr data-component="dashboard"><td data-stack-title>Dashboard</td><td><label class="fd-select" data-size="sm"><span class="fd-sr-only">Public state of Dashboard</span><select data-state-of="dashboard"><option value="operational">Operational</option><option value="degraded">Degraded</option><option value="partial">Partial outage</option><option value="major">Major outage</option><option value="maintenance">Maintenance</option></select></label></td><td data-stack="hide"><div class="fd-heatgrid" data-variant="strip" data-size="sm" data-strip="dashboard"></div></td><td data-num data-uptime="dashboard">100%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="fd-table-foot">
+              <div class="fd-legend" aria-label="Day colours">
+                <span class="fd-legend-item" data-tone="success"><span class="fd-legend-swatch" data-shape="square"></span><span>No incident</span></span>
+                <span class="fd-legend-item" data-tone="warning"><span class="fd-legend-swatch" data-shape="square"></span><span>Degraded</span></span>
+                <span class="fd-legend-item" data-tone="danger"><span class="fd-legend-swatch" data-shape="square"></span><span>Outage</span></span>
+                <span class="fd-legend-item" data-tone="info"><span class="fd-legend-swatch" data-shape="square"></span><span>Maintenance</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scheduled maintenance -->
+      <section class="fd-band" data-grow data-when="ready empty" aria-labelledby="h-maint">
+        <div class="fd-stack" data-gap="4">
+          <div class="fd-row" data-wrap data-justify="between" data-align="end" data-gap="3">
+            <div class="fd-stack" data-gap="1">
+              <h2 class="fd-h3" id="h-maint">Scheduled maintenance</h2>
+              <p class="fd-small fd-muted">Subscribers hear about it when you schedule it and an hour before.</p>
+            </div>
+            <button class="fd-btn" type="button" id="maint-new"><i data-icon="calendar-clock"></i><span>Schedule maintenance</span></button>
+          </div>
+          <ul class="fd-list" data-card id="maint-list" aria-labelledby="h-maint">
+            <li class="fd-list-row" data-maint="mnt_db" data-title="Database upgrade" data-date="2026-11-21" data-start="02:00" data-hours="1" data-components="monitors webhooks">
+              <span class="fd-list-lead" data-tone="info"><i data-icon="hard-drive"></i></span>
+              <div class="fd-list-body"><span class="fd-list-title">Database upgrade</span><span class="fd-list-desc">Nov 21, 2:00 AM to 3:00 AM · Monitors, Webhooks</span></div>
+              <span class="fd-list-meta"><span class="fd-badge" data-tone="info">Scheduled</span></span>
+              <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-maint-edit>Edit</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-maint-cancel>Cancel</button></span>
+            </li>
+            <li class="fd-list-row" data-maint="mnt_dash" data-title="Dashboard sign-in move" data-date="2026-11-26" data-start="06:00" data-hours="2" data-components="dashboard">
+              <span class="fd-list-lead" data-tone="info"><i data-icon="hard-drive"></i></span>
+              <div class="fd-list-body"><span class="fd-list-title">Dashboard sign-in move</span><span class="fd-list-desc">Nov 26, 6:00 AM to 8:00 AM · Dashboard</span></div>
+              <span class="fd-list-meta"><span class="fd-badge" data-tone="info">Scheduled</span></span>
+              <span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-maint-edit>Edit</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-maint-cancel>Cancel</button></span>
+            </li>
+          </ul>
+          <div class="fd-empty" data-size="sm" id="maint-empty" hidden>
+            <span class="fd-empty-icon"><i data-icon="calendar"></i></span>
+            <h3 class="fd-empty-title">No maintenance scheduled</h3>
+            <p class="fd-empty-text">Planned work shows here and on the public page.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="fd-band" data-pad="sm" aria-label="Demo state">
+      <div class="fd-row" data-wrap data-justify="between">
+        <span class="fd-eyebrow">Demo state</span>
+        <div class="fd-segmented" data-size="sm" id="state-switch" role="radiogroup" aria-label="Page state">
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="incident">Incident</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="all-clear">All clear</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="maintenance">Maintenance</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="read-only">Read-only</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="loading">Loading</button>
+          <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Open an incident -->
+  <dialog class="fd-dialog" id="dlg-incident" data-size="md" data-reset>
+    <form method="dialog" data-fd-validate>
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title">Open an incident</h2>
+        <p class="fd-dialog-desc">It goes on the public page and to 1,284 subscribers at once.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="ni-title" data-required>Title</label>
+          <input class="fd-input" id="ni-title" name="title" required maxlength="80" autocomplete="off" placeholder="Scrapes return 502 for some sites" data-error-required="Name what customers notice.">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="ni-component">Affected component</label>
+          <div class="fd-select" data-variant="outline"><select id="ni-component" name="component"><option value="api">API</option><option value="search">Search</option><option value="scrape" selected>Scrape</option><option value="crawl">Crawl and map</option><option value="agent">Agent</option><option value="monitors">Monitors</option><option value="webhooks">Webhooks</option><option value="dashboard">Dashboard</option></select></div>
+        </div>
+        <div class="fd-field">
+          <span class="fd-field-label" id="ni-impact-label">Impact</span>
+          <div class="fd-segmented" role="radiogroup" aria-labelledby="ni-impact-label">
+            <label class="fd-segmented-item"><input type="radio" name="impact" value="degraded" checked><span>Degraded</span></label>
+            <label class="fd-segmented-item"><input type="radio" name="impact" value="partial"><span>Partial outage</span></label>
+            <label class="fd-segmented-item"><input type="radio" name="impact" value="major"><span>Major outage</span></label>
+          </div>
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="ni-message" data-required>First update</label>
+          <textarea class="fd-textarea" id="ni-message" name="message" rows="3" required data-fd-autogrow placeholder="Some scrapes fail with 502. We are looking into it." data-error-required="Write what customers will read."></textarea>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" value="open" data-variant="primary"><span>Open incident</span></button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Schedule or edit maintenance -->
+  <dialog class="fd-dialog" id="dlg-maint" data-size="md">
+    <form method="dialog" data-fd-validate id="maint-form">
+      <div class="fd-dialog-head">
+        <h2 class="fd-h3 fd-dialog-title" id="maint-title">Schedule maintenance</h2>
+        <p class="fd-dialog-desc">Subscribers are told now and an hour before it starts.</p>
+        <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <div class="fd-dialog-body fd-stack">
+        <div class="fd-field">
+          <label class="fd-field-label" for="mt-name" data-required>Title</label>
+          <input class="fd-input" id="mt-name" name="title" required maxlength="60" autocomplete="off" placeholder="Database upgrade" data-error-required="Name the work.">
+        </div>
+        <div class="fd-form-cols">
+          <div class="fd-field">
+            <label class="fd-field-label" for="mt-date" data-required>Date</label>
+            <div class="fd-datefield" data-fd-datefield data-min-date="today">
+              <div class="fd-input-group">
+                <input class="fd-input" id="mt-date" name="date" type="text" inputmode="numeric" autocomplete="off" required placeholder="2026-11-21" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" title="A date like 2026-11-21" data-error-required="Pick a date.">
+                <span class="fd-input-affix" data-kind="action"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Choose a date" data-fd-popover="mt-date-cal" data-placement="bottom-end"><i data-icon="calendar"></i></button></span>
+              </div>
+              <div class="fd-popover" id="mt-date-cal" popover data-size="auto" aria-label="Choose a date">
+                <div class="fd-datefield-panel" data-fd-datepanel>
+                  <div class="fd-calendar"></div>
+                  <div class="fd-datefield-foot">
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-today>Today</button>
+                    <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-datepanel-clear>Clear</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="mt-start">Starts</label>
+            <div class="fd-select" data-variant="outline"><select id="mt-start" name="start"><option value="00:00">12:00 AM</option><option value="02:00">2:00 AM</option><option value="04:00">4:00 AM</option><option value="06:00">6:00 AM</option><option value="22:00">10:00 PM</option></select></div>
+          </div>
+          <div class="fd-field">
+            <label class="fd-field-label" for="mt-hours">Lasts</label>
+            <div class="fd-select" data-variant="outline"><select id="mt-hours" name="hours"><option value="1">1 hour</option><option value="2">2 hours</option><option value="4">4 hours</option></select></div>
+          </div>
+        </div>
+        <div class="fd-field" role="group" aria-labelledby="mt-comps-label">
+          <span class="fd-field-label" id="mt-comps-label">Affected components</span>
+          <div class="fd-options" data-orientation="horizontal" id="mt-comps">
+            <label class="fd-checkbox"><input type="checkbox" name="components" value="api"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">API</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="components" value="crawl"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Crawl and map</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="components" value="monitors"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Monitors</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="components" value="webhooks"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Webhooks</span></span></label>
+            <label class="fd-checkbox"><input type="checkbox" name="components" value="dashboard"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Dashboard</span></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="fd-dialog-foot">
+        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
+        <button class="fd-btn" type="submit" value="save" data-variant="primary" id="maint-save"><span>Schedule</span></button>
+      </div>
+    </form>
+  </dialog>
+</main>
+
+<script type="module">
+  import { init, overlays, content, charts, forms, nav, reducedMotion } from '../fire/fire.js';
+
+  const { toast, openDialog } = overlays;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const bind = (name, html) => $$(`[data-bind="${name}"]`).forEach((el) => { el.innerHTML = html; });
+
+  /* ---------- The model: components, their state, the incident (demo data, fixed to Nov 18, 11:38 AM UTC) ---------- */
+  const NAMES = { api: 'API', search: 'Search', scrape: 'Scrape', crawl: 'Crawl and map', agent: 'Agent', monitors: 'Monitors', webhooks: 'Webhooks', dashboard: 'Dashboard' };
+  const STATES = {
+    operational: { tone: 'success', label: 'Operational', rank: 0 },
+    maintenance: { tone: 'info', label: 'Maintenance', rank: 1 },
+    degraded: { tone: 'warning', label: 'Degraded', rank: 2 },
+    partial: { tone: 'danger', label: 'Partial outage', rank: 3 },
+    major: { tone: 'danger', label: 'Major outage', rank: 4 },
+  };
+  const OVERALL = {
+    operational: ['All operational', 'success'], maintenance: ['Maintenance', 'info'], degraded: ['Degraded', 'warning'],
+    partial: ['Partial outage', 'danger'], major: ['Major outage', 'danger'],
+  };
+  const PHASES = {
+    investigating: { label: 'Investigating', tone: 'warning', icon: 'triangle-alert' },
+    identified: { label: 'Identified', tone: 'warning', icon: 'target' },
+    monitoring: { label: 'Monitoring', tone: 'info', icon: 'eye' },
+    resolved: { label: 'Resolved', tone: 'success', icon: 'circle-check' },
+  };
+  const NOW = '11:38 AM';
+  const BASE_UPDATES = [
+    { phase: 'monitoring', time: '10:58 AM', text: 'Wait times are back under 30 seconds for most crawls. We are watching the queue.' },
+    { phase: 'identified', time: '9:41 AM', text: 'A crawl queue in eu-west-1 is short of workers after a deploy. We are adding capacity.' },
+    { phase: 'investigating', time: '9:12 AM', text: 'New crawls wait up to 6 minutes before the first page. Running crawls are not affected.' },
+  ];
+  const incident = { id: 'INC-0142', title: 'Crawls are starting slowly', started: 'Nov 18, 9:12 AM', components: ['crawl'], updates: BASE_UPDATES.slice() };
+
+  /* The last 90 days of each component that were not clean: [days ago, tone, minutes down], the same feed as status.html.
+     The strip shows the last 30; uptime counts all 90. Today is the last cell and follows the live state. */
+  const PAST = {
+    api: [[63, 'danger', 41]], search: [[6, 'info', 0]], scrape: [[22, 'warning', 25], [63, 'danger', 41]],
+    crawl: [[9, 'danger', 70], [41, 'warning', 30]], agent: [[1, 'warning', 48]], monitors: [[77, 'info', 0]],
+    webhooks: [[4, 'warning', 72]], dashboard: [],
+  };
+  /** Minutes down today for a component that is not operational (since 9:12 AM, as on the public page). */
+  const TODAY_DOWN = { degraded: 146, partial: 146, major: 146 };
+
+  const pageStates = $('#page');
+  const table = $('#comp-table');
+  const selectOf = (id) => $(`select[data-state-of="${id}"]`, table);
+  const stateOf = (id) => selectOf(id).value;
+
+  function drawStrip(id) {
+    const el = $(`[data-strip="${id}"]`, table);
+    const tones = Array.from({ length: 30 }, () => 'success');
+    let down = 0;
+    for (const [ago, tone, minutes] of PAST[id]) { if (ago < 30) tones[29 - ago] = tone; down += minutes; }
+    const now = stateOf(id);
+    if (now !== 'operational') tones[29] = STATES[now].tone;
+    down += TODAY_DOWN[now] || 0;
+    $(`[data-uptime="${id}"]`, table).textContent = `${down ? (100 - (down / (90 * 1440)) * 100).toFixed(2) : '100'}%`;
+    el.innerHTML = `<script type="application/json">${JSON.stringify({ start: '2026-10-20', tones, label: `${NAMES[id]}, last 30 days`, legend: { success: 'No incident', warning: 'Degraded', danger: 'Outage', info: 'Maintenance' } })}<\/script>`;
+    charts.heatgrid(el);
+  }
+
+  /** The overall line follows the worst component, the way the public page computes it. */
+  function syncOverall() {
+    const ids = Object.keys(NAMES);
+    const worst = ids.map(stateOf).sort((a, b) => STATES[b].rank - STATES[a].rank)[0];
+    const hit = ids.filter((id) => stateOf(id) !== 'operational');
+    const [label, tone] = OVERALL[worst];
+    bind('public-status', label);
+    const pill = $('[data-bind="public-tone"]');
+    pill.dataset.tone = tone;
+    pill.textContent = hit.length ? `${hit.length} component${hit.length === 1 ? '' : 's'} affected` : 'Every component';
+  }
+
+  function setComponent(id, value) {
+    const select = selectOf(id);
+    select.value = value;
+    select.dataset.current = value;
+    drawStrip(id);
+  }
+
+  const updateItem = (u, { live = false } = {}) => {
+    const p = PHASES[u.phase];
+    return `<li class="fd-timeline-item" data-tone="${p.tone}"${live ? ' data-live' : ''}><span class="fd-timeline-node"><i data-icon="${p.icon}"></i></span><div class="fd-timeline-main"><div class="fd-timeline-head"><span class="fd-timeline-title">${p.label}</span><time class="fd-timeline-time">${esc(u.time)}</time></div><p class="fd-timeline-body">${esc(u.text)}</p></div></li>`;
+  };
+
+  function renderIncident() {
+    const latest = PHASES[incident.updates[0].phase];
+    const phase = $('#inc-phase');
+    phase.dataset.tone = latest.tone;
+    phase.textContent = latest.label;
+    $('#inc-id').textContent = incident.id;
+    $('#h-incident').textContent = incident.title;
+    $('#inc-started').textContent = incident.started;
+    $('#inc-affects').textContent = incident.components.map((id) => NAMES[id]).join(', ');
+    $('#inc-updates').innerHTML = incident.updates.map((u) => updateItem(u)).join('');
+    init($('#inc-updates'));
+  }
+
+  /* ---------- Scenes: what the demo switch shows ---------- */
+  let scene = 'incident';
+  const SCENES = {
+    incident: { page: 'ready', comps: { crawl: 'degraded' } },
+    'all-clear': { page: 'empty', comps: {} },
+    maintenance: { page: 'ready', comps: { monitors: 'maintenance', webhooks: 'maintenance' }, maintenance: true },
+    'read-only': { page: 'ready', comps: { crawl: 'degraded' }, viewer: true },
+    loading: { page: 'loading', comps: { crawl: 'degraded' } },
+    error: { page: 'error', comps: { crawl: 'degraded' } },
+  };
+  const switcher = $('#state-switch');
+
+  function setViewer(on) {
+    $('#viewer-reason').hidden = !on;
+    const reason = on ? 'viewer-reason' : null;
+    const lockables = [...$$('select[data-state-of]', table), ...$$('#compose .fd-preview-edit :is(input, textarea, button)'), $('#maint-new'), ...$$('#maint-list button')];
+    for (const el of lockables) {
+      el.disabled = on;
+      if (reason) el.setAttribute('aria-describedby', reason); else if (el.getAttribute('aria-describedby') === 'viewer-reason') el.removeAttribute('aria-describedby');
+    }
+    const open = $('#open-incident');
+    if (on) { open.setAttribute('aria-disabled', 'true'); open.setAttribute('aria-describedby', 'viewer-reason'); }
+    else { open.removeAttribute('aria-disabled'); open.removeAttribute('aria-describedby'); }
+    $('#cp-viewer').hidden = !on;
+    if (on) $('#cp-preview').setAttribute('aria-describedby', 'cp-viewer');
+    $('#cp-lock').hidden = !on;
+    $('#cp-publish').disabled = on;
+    if (on) $('#cp-publish').setAttribute('aria-describedby', 'cp-lock'); else $('#cp-publish').removeAttribute('aria-describedby');
+  }
+
+  function setScene(name, { url = true, reset = true } = {}) {
+    scene = SCENES[name] ? name : 'incident';
+    const s = SCENES[scene];
+    if (reset) {
+      for (const id of Object.keys(NAMES)) setComponent(id, s.comps[id] || 'operational');
+      incident.updates = BASE_UPDATES.slice();
+      incident.title = 'Crawls are starting slowly';
+      incident.id = 'INC-0142';
+      incident.started = 'Nov 18, 9:12 AM';
+      incident.components = ['crawl'];
+      renderIncident();
+      resetCompose();
+    }
+    $('#incident-band').hidden = Boolean(s.maintenance);
+    $('#maint-band').hidden = !s.maintenance;
+    bind('open-label', s.page === 'empty' ? 'Open incident' : s.maintenance ? 'Maintenance' : 'Open incident');
+    bind('open-for', s.page === 'empty' ? 'None' : s.maintenance ? '38 min' : '2 h 26 min');
+    bind('open-sub', s.page === 'empty' ? 'Last one closed Nov 17' : s.maintenance ? 'Since 11:00 AM' : 'Since 9:12 AM');
+    setViewer(Boolean(s.viewer));
+    syncOverall();
+    content.setState(pageStates, s.page);
+    nav.selectSegment($(`.fd-segmented-item[data-value="${scene}"]`, switcher), { silent: true });
+    if (url) { const next = new URL(location.href); next.searchParams.set('state', scene); history.replaceState(null, '', next); }
+  }
+
+  switcher.addEventListener('fd:change', (event) => { if (event.detail.value !== scene) setScene(event.detail.value); });
+  document.addEventListener('click', (event) => {
+    const reload = event.target instanceof Element && event.target.closest('[data-action="reload"]');
+    if (!reload) return;
+    content.setState(pageStates, 'loading');
+    setTimeout(() => setScene('incident'), 900);
+  });
+
+  /* ---------- Component state: changes at once, with Done · Undo ---------- */
+  table.addEventListener('change', (event) => {
+    const select = event.target.closest('select[data-state-of]');
+    if (!select) return;
+    const id = select.dataset.stateOf;
+    const before = select.dataset.current || 'operational';
+    const after = select.value;
+    setComponent(id, after);
+    syncOverall();
+    toast({
+      title: `${NAMES[id]} updated`,
+      description: `Public page: ${STATES[before].label} → ${STATES[after].label}.`,
+      tone: 'success',
+      undo: async () => { setComponent(id, before); syncOverall(); },
+    });
+  });
+
+  /* ---------- Compose: preview, then a held publish ---------- */
+  const compose = $('#compose');
+  const commitBox = $('#cp-commit');
+  const formValue = () => {
+    const data = new FormData(compose);
+    return { phase: data.get('phase'), components: data.getAll('components'), message: String(data.get('message') || '').trim() };
+  };
+
+  function resetCompose() {
+    content.reopen(commitBox);
+    compose.reset();
+    delete compose.dataset.state;
+    $('#cp-message').removeAttribute('aria-invalid');
+    $('#cp-message-error').hidden = true;
+    $$('#compose .fd-segmented').forEach((seg) => init(seg));
+  }
+
+  /* The message is checked here, with Fire's inline error, before the preview opens. */
+  const message = $('#cp-message');
+  $('#cp-preview').addEventListener('click', (event) => {
+    if (message.value.trim()) return;
+    event.stopPropagation();
+    forms.validateControl(message);
+    message.focus();
+  });
+  message.addEventListener('input', () => { if (message.getAttribute('aria-invalid') === 'true') forms.validateControl(message); });
+
+  compose.addEventListener('fd:open', () => {
+    const v = formValue();
+    $('#cp-render').innerHTML = updateItem({ phase: v.phase, time: NOW, text: v.message });
+    const rows = [];
+    const resolved = v.phase === 'resolved';
+    for (const id of Object.keys(NAMES)) {
+      const now = stateOf(id);
+      const next = resolved ? 'operational' : v.components.includes(id) ? (now === 'operational' ? 'degraded' : now) : now;
+      if (next !== now) rows.push(`<li><span>${NAMES[id]}</span><span class="fd-delta"><span class="fd-delta-from">${STATES[now].label}</span><span class="fd-delta-to">${STATES[next].label}</span></span></li>`);
+    }
+    if (resolved) rows.unshift(`<li><span>${esc(incident.id)}</span><span class="fd-delta"><span class="fd-delta-from">Open</span><span class="fd-delta-to">Resolved</span></span></li>`);
+    if (!rows.length) rows.push(`<li><span>Component states</span><b>No change</b></li>`);
+    $('#cp-impact-list').innerHTML = rows.join('');
+    $('#cp-impact').dataset.tone = resolved ? 'success' : 'info';
+    init($('.fd-preview-result', compose));
+  });
+
+  commitBox.addEventListener('fd:commit', () => setTimeout(published, 0));
+  function published() {
+    const v = formValue();
+    incident.updates.unshift({ phase: v.phase, time: NOW, text: v.message });
+    if (v.phase === 'resolved') {
+      for (const id of Object.keys(NAMES)) setComponent(id, 'operational');
+      bind('last-incident', `<span>Last incident: ${esc(incident.title)}, resolved today at ${NOW}</span>`);
+      toast({ title: 'Incident resolved', description: '1,284 subscribers were told.', tone: 'success' });
+      SCENES['all-clear'].comps = {};
+      setScene('all-clear', { reset: false });
+    } else {
+      for (const id of v.components) if (stateOf(id) === 'operational') setComponent(id, 'degraded');
+      incident.components = v.components.length ? v.components : incident.components;
+      toast({ title: 'Update published', description: '1,284 subscribers were told.', tone: 'success' });
+    }
+    renderIncident();
+    syncOverall();
+    resetCompose();
+  }
+
+  /* ---------- Open an incident ---------- */
+  $('#dlg-incident').addEventListener('fd:close', (event) => {
+    const dialog = event.target;
+    if (dialog.returnValue !== 'open') return;
+    const form = $('form', dialog);
+    const data = new FormData(form);
+    const id = data.get('component');
+    const snapshot = { scene, comps: Object.fromEntries(Object.keys(NAMES).map((c) => [c, stateOf(c)])), incident: structuredClone(incident) };
+    Object.assign(incident, { id: 'INC-0143', title: String(data.get('title')).trim(), started: `Nov 18, ${NOW}`, components: [id], updates: [{ phase: 'investigating', time: NOW, text: String(data.get('message')).trim() }] });
+    setComponent(id, data.get('impact'));
+    renderIncident();
+    setScene('incident', { reset: false });
+    toast({
+      title: 'Incident opened', description: `${incident.id} is on the public page.`, tone: 'success',
+      undo: async () => {
+        Object.assign(incident, snapshot.incident);
+        for (const [c, v] of Object.entries(snapshot.comps)) setComponent(c, v);
+        renderIncident();
+        setScene(snapshot.scene, { reset: false });
+      },
+    });
+  });
+  $('#open-incident').addEventListener('click', (event) => {
+    if (event.currentTarget.getAttribute('aria-disabled') === 'true') { event.preventDefault(); event.stopImmediatePropagation(); }
+  }, true);
+
+  /* ---------- Scheduled maintenance: schedule, edit, cancel with Undo ---------- */
+  const maintList = $('#maint-list');
+  const maintForm = $('#maint-form');
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const clock = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
+  const describe = (row) => {
+    const [, mo, d] = row.dataset.date.split('-').map(Number);
+    const [h, m] = row.dataset.start.split(':').map(Number);
+    const end = `${String((h + Number(row.dataset.hours)) % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    const comps = row.dataset.components.split(' ').filter(Boolean).map((c) => NAMES[c]).join(', ') || 'No component';
+    return `${MONTHS[mo - 1]} ${d}, ${clock(row.dataset.start)} to ${clock(end)} · ${comps}`;
+  };
+  const refreshMaint = () => {
+    const none = !$$('[data-maint]', maintList).length;
+    maintList.hidden = none;
+    $('#maint-empty').hidden = !none;
+  };
+  let editing = null;
+
+  function openMaint(row) {
+    editing = row;
+    maintForm.reset();
+    $('#maint-title').textContent = row ? 'Edit maintenance' : 'Schedule maintenance';
+    $('#maint-save span').textContent = row ? 'Save changes' : 'Schedule';
+    if (row) {
+      $('#mt-name').value = row.dataset.title;
+      $('#mt-date').value = row.dataset.date;
+      $('#mt-start').value = row.dataset.start;
+      $('#mt-hours').value = row.dataset.hours;
+      $$('#mt-comps input').forEach((box) => { box.checked = row.dataset.components.split(' ').includes(box.value); });
+    }
+    openDialog('dlg-maint', { trigger: row ? $('[data-maint-edit]', row) : $('#maint-new') });
+  }
+  $('#maint-new').addEventListener('click', () => openMaint(null));
+  $('#dlg-maint').addEventListener('fd:close', (event) => {
+    if (event.target.returnValue !== 'save') return;
+    const data = new FormData(maintForm);
+    let row = editing;
+    if (!row) {
+      row = document.createElement('li');
+      row.className = 'fd-list-row';
+      row.dataset.maint = `mnt_${Date.now().toString(36)}`;
+      row.innerHTML = `<span class="fd-list-lead" data-tone="info"><i data-icon="hard-drive"></i></span><div class="fd-list-body"><span class="fd-list-title"></span><span class="fd-list-desc"></span></div><span class="fd-list-meta"><span class="fd-badge" data-tone="info">Scheduled</span></span><span class="fd-list-trail"><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-maint-edit>Edit</button><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-maint-cancel>Cancel</button></span>`;
+      maintList.append(row);
+    }
+    Object.assign(row.dataset, { title: String(data.get('title')).trim(), date: data.get('date'), start: data.get('start'), hours: data.get('hours'), components: data.getAll('components').join(' ') });
+    $('.fd-list-title', row).textContent = row.dataset.title;
+    $('.fd-list-desc', row).textContent = describe(row);
+    init(row);
+    refreshMaint();
+    toast({ title: editing ? 'Maintenance updated' : 'Maintenance scheduled', description: '1,284 subscribers were told.', tone: 'success' });
+  });
+  maintList.addEventListener('click', (event) => {
+    const row = event.target.closest('[data-maint]');
+    if (!row) return;
+    if (event.target.closest('[data-maint-edit]')) openMaint(row);
+    if (event.target.closest('[data-maint-cancel]')) {
+      const next = row.nextElementSibling;
+      row.remove();
+      refreshMaint();
+      toast({
+        title: 'Maintenance cancelled', description: `${row.dataset.title} is off the public page.`, tone: 'success',
+        undo: async () => { maintList.insertBefore(row, next); refreshMaint(); },
+      });
+    }
+  });
+
+  $('#maint-done').addEventListener('click', () => {
+    setComponent('monitors', 'operational');
+    setComponent('webhooks', 'operational');
+    SCENES['all-clear'].comps = {};
+    setScene('all-clear', { reset: false });
+    toast({
+      title: 'Maintenance complete', description: 'Monitors and webhooks read Operational.', tone: 'success',
+      undo: async () => { setComponent('monitors', 'maintenance'); setComponent('webhooks', 'maintenance'); setScene('maintenance', { reset: false }); },
+    });
+  });
+
+  /* ---------- First paint: the state in the URL, or a short load into the incident (none with reduced motion) ---------- */
+  const asked = new URLSearchParams(location.search).get('state');
+  if (asked && SCENES[asked]) setScene(asked, { url: false });
+  else if (reducedMotion()) setScene('incident', { url: false });
+  else { setScene('loading', { url: false }); setTimeout(() => scene === 'loading' && setScene('incident', { url: false }), 600); }
+  refreshMaint();
+</script>
+</body>
+</html>

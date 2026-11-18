@@ -16,6 +16,8 @@ written as Vue single-file components from Fire's own templates, and proves the 
   charts, copy buttons and secrets all work: Fire runs them from the markup, and `v-fire` runs Fire on the page.
 - **Events the Vue way**: `@fd:select` on the logs table (row actions and bulk actions show toasts), `@fd:change` on the
   settings screen. `event.detail` is typed, from `fire-design`'s `FireEventMap`.
+- **A page transition**: `src/router.ts` opens Fire's `transition()` in a `beforeResolve` guard and ends it in `afterEach`, so the
+  sidebar and top bar hold still and the page fades. Without View Transitions, or with reduced motion, the page swaps at once.
 - **A look from a theme record**: `look.json` is a theme record (Fire's forest look with rounder corners).
   `npm run theme` turns it into `src/fire-theme.css` with `themeToCss` and writes the `<html>` attributes to
   `src/fire-theme.json`. `main.ts` imports the stylesheet after `fire-design/css`; `vite.config.ts` puts the attributes

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page transitions · Fire</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<link rel="stylesheet" href="docs.css">
+<script type="module" src="docs.js"></script>
+<script type="module" src="../fire/fire.js"></script>
+</head>
+<body class="doc" data-page="transitions">
+<main class="doc-main">
+  <header class="doc-hero">
+    <p class="fd-eyebrow">Components</p>
+    <h1 class="fd-display">Page transitions</h1>
+    <p class="doc-lede">Moving from one page to the next feels like one product: the chrome holds still and only the content changes. It uses the browser's View Transitions, so a browser without them navigates as it always did.</p>
+  </header>
+
+  <section class="doc-section" id="demo">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Try it</h2>
+      <p>Three pages in one box, switched with <code class="fd-code">transition()</code>. The bar holds still; the page moves.</p>
+    </div>
+    <div class="doc-specimen" data-vt-demo>
+      <div class="doc-vt" id="vt-demo">
+        <div class="doc-vt-controls">
+          <div class="fd-segmented" role="radiogroup" aria-label="Kind">
+            <label class="fd-segmented-item"><input type="radio" name="vt-kind" value="fade" checked><span>Fade</span></label>
+            <label class="fd-segmented-item"><input type="radio" name="vt-kind" value="slide"><span>Slide</span></label>
+            <label class="fd-segmented-item"><input type="radio" name="vt-kind" value="none"><span>None</span></label>
+          </div>
+        </div>
+        <div class="doc-vt-frame">
+          <nav class="doc-vt-bar" aria-label="Demo pages">
+            <span class="fd-brand-name">Ember</span>
+            <div class="fd-btn-group" role="group" aria-label="Page">
+              <button class="fd-btn" type="button" data-vt-go="0" aria-pressed="true">Overview</button>
+              <button class="fd-btn" type="button" data-vt-go="1" aria-pressed="false">Logs</button>
+              <button class="fd-btn" type="button" data-vt-go="2" aria-pressed="false">Settings</button>
+            </div>
+          </nav>
+          <div class="doc-vt-pane" aria-live="polite">
+            <section data-vt-page="0">
+              <h3 class="fd-title">Overview</h3>
+              <p class="fd-small fd-muted">Credits used, last 7 days</p>
+              <p class="fd-stat">986</p>
+              <span class="fd-badge" data-tone="success">3 monitors live</span>
+            </section>
+            <section data-vt-page="1" hidden>
+              <h3 class="fd-title">Activity logs</h3>
+              <p class="fd-small fd-muted">Every request your keys made</p>
+              <p class="fd-stat">12,408</p>
+              <span class="fd-badge" data-tone="warning">2 failed</span>
+            </section>
+            <section data-vt-page="2" hidden>
+              <h3 class="fd-title">Settings</h3>
+              <p class="fd-small fd-muted">Team, keys and billing</p>
+              <p class="fd-stat">4 members</p>
+              <span class="fd-badge">Free plan</span>
+            </section>
+          </div>
+        </div>
+        <p class="fd-small fd-muted" data-vt-note aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="doc-section" id="what-moves">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">What moves</h2>
+      <p>One region moves. Each part of the chrome has its own name, so it is never cross-faded. Names exist only under <code class="fd-code">data-fd-transition</code>.</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Name</th><th>Element</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td>fd-content</td><td><code class="fd-code">.fd-main &gt; .fd-page</code>, <code class="fd-code">.fd-doc-main</code>, <code class="fd-code">.fd-site main</code>, a page of its own</td><td>Moves</td></tr>
+          <tr><td>fd-sidebar</td><td><code class="fd-code">.fd-sidebar</code></td><td>Holds still</td></tr>
+          <tr><td>fd-topbar</td><td><code class="fd-code">.fd-topbar</code></td><td>Holds still</td></tr>
+          <tr><td>fd-tabbar</td><td><code class="fd-code">.fd-tabbar</code></td><td>Holds still</td></tr>
+          <tr><td>fd-doc-top, fd-doc-nav</td><td><code class="fd-code">.fd-doc-top</code>, <code class="fd-code">.fd-doc-nav</code></td><td>Hold still</td></tr>
+          <tr><td>fd-site-header</td><td><code class="fd-code">.fd-site-header</code></td><td>Holds still</td></tr>
+          <tr><td>fd-fab</td><td><code class="fd-code">.fd-app-fab</code></td><td>Holds still</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>The rest of the page is the root snapshot, which does not animate.</li>
+      <li>A specimen is never named: anything inside <code class="fd-code">.fd-app[data-contained]</code> or <code class="fd-code">.doc-specimen</code> keeps its own motion.</li>
+      <li>A name must be unique on a page. Two elements with one name make the browser skip the transition.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="kinds">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Three kinds</h2>
+      <p>Choose with <code class="fd-code">data-fd-transition</code> on <code class="fd-code">&lt;html&gt;</code>. The default is fade.</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Value</th><th>Use it for</th><th>Motion</th></tr></thead>
+        <tbody>
+          <tr><td>fade</td><td>Pages at one level</td><td>The old page fades out in <code class="fd-code">--fd-dur-3</code>. The new page fades in and rises over <code class="fd-code">--fd-dur-4</code>.</td></tr>
+          <tr><td>slide</td><td>Phone drill-down</td><td>Forward slides the new page in from the inline end. Back reverses it. Right-to-left pages mirror.</td></tr>
+          <tr><td>none</td><td>A page that must swap at once</td><td>No transition.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="doc-notes">
+      <li>One link can override the page: <code class="fd-code">&lt;a data-fd-transition="slide" href="https://ember.dev/logs"&gt;</code>. It applies to that navigation only.</li>
+      <li>Direction comes from the browser's Navigation API: a move to an earlier history entry is back. <code class="fd-code">data-fd-direction</code> is on <code class="fd-code">&lt;html&gt;</code> while the transition runs.</li>
+      <li>Distances and durations are tokens: <code class="fd-code">--fd-transition-out</code>, <code class="fd-code">-in</code>, <code class="fd-code">-rise</code>, <code class="fd-code">-slide</code>, <code class="fd-code">-slide-out</code>. The motion dial scales them, and motion "none" makes them instant.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="links">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Between pages</h2>
+      <p>A multi-page site opts in. A page that does not ask gets no names and no transition.</p>
+    </div>
+    <ul class="doc-notes">
+      <li>Link <code class="fd-code">fire/transitions.css</code> after <code class="fd-code">fire.css</code>. It is not part of <code class="fd-code">fire.css</code>.</li>
+      <li>Put <code class="fd-code">data-fd-transition="fade"</code> (or <code class="fd-code">slide</code>) on <code class="fd-code">&lt;html&gt;</code>.</li>
+      <li>Mark the module scripts that build the page <code class="fd-code">blocking="render"</code>. Chromium drops the transition, with a console error, when a page paints before its scripts have run.</li>
+    </ul>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">HTML</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="html">&lt;html lang="en" data-fd-transition="fade"&gt;
+  &lt;link rel="stylesheet" href="fire/fire.css"&gt;
+  &lt;link rel="stylesheet" href="fire/transitions.css"&gt;
+  &lt;script type="module" src="fire/fire.js" blocking="render"&gt;&lt;/script&gt;</code></pre></div>
+  </section>
+
+  <section class="doc-section" id="helper">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">In a single-page app</h2>
+      <p><code class="fd-code">transition(update, options)</code> runs a route change inside a view transition. It sets <code class="fd-code">data-fd-transition</code> while it runs and removes it after, so the page needs none.</p>
+    </div>
+    <div class="fd-codeblock"><div class="fd-codeblock-head"><span class="fd-codeblock-lang">TypeScript</span><div class="fd-codeblock-actions"><button class="fd-codeblock-copy" type="button" aria-label="Copy code"><i data-icon="copy"></i></button></div></div><pre class="fd-codeblock-body"><code data-lang="ts">import { transition } from 'fire-design';
+
+// update may return a promise; the call resolves when the DOM is updated.
+await transition(() =&gt; render(route), { kind: 'slide', direction: 'back' });</code></pre></div>
+    <ul class="doc-notes">
+      <li>Without View Transitions, with reduced motion, or with motion "none", it calls <code class="fd-code">update</code> and nothing else.</li>
+      <li>With them, the browser calls <code class="fd-code">update</code> a frame later. The promise rejects when <code class="fd-code">update</code> does.</li>
+      <li>Vue: call it from a <code class="fd-code">beforeResolve</code> guard. Lit: wrap the route change. Next.js: wrap each screen in React's <code class="fd-code">&lt;ViewTransition&gt;</code> and set the attribute on <code class="fd-code">&lt;html&gt;</code>. The three starters do this.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="support">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Support and reduced motion</h2>
+      <p>What a reader sees depends on the browser. Nothing breaks without support.</p>
+    </div>
+    <div class="doc-table-wrap">
+      <table class="doc-table">
+        <thead><tr><th>Browser</th><th>Between pages</th><th>transition()</th></tr></thead>
+        <tbody>
+          <tr><td>Chromium</td><td>Verified, with a render-blocking script</td><td>Verified</td></tr>
+          <tr><td>Firefox</td><td>Not supported: pages load as usual</td><td>The browser has it; not verified here</td></tr>
+          <tr><td>Safari (WebKit)</td><td>Not verified</td><td>Not verified</td></tr>
+        </table>
+    </div>
+    <ul class="doc-notes">
+      <li>With <code class="fd-code">prefers-reduced-motion: reduce</code>, <code class="fd-code">fire/transitions.css</code> opts no page in and <code class="fd-code">transition()</code> only calls <code class="fd-code">update</code>.</li>
+      <li>In WebKit's test build the incoming page did not paint during a transition, so the chrome may blink out in Safari. Treat Safari as unsupported until you have tried it.</li>
+      <li>The stylesheet and module need no inline style and no inline script, so a strict Content Security Policy is fine.</li>
+    </ul>
+  </section>
+</main>
+<script type="module">
+  import { transition } from '../fire/js/transitions.js';
+
+  const demo = document.getElementById('vt-demo');
+  const note = demo.querySelector('[data-vt-note]');
+  const pages = [...demo.querySelectorAll('[data-vt-page]')];
+  let current = 0;
+
+  demo.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-vt-go]');
+    if (!button) return;
+    const next = Number(button.dataset.vtGo);
+    if (next === current) return;
+    const kind = demo.querySelector('input[name="vt-kind"]:checked').value;
+    const direction = next < current ? 'back' : 'forward';
+    current = next;
+    await transition(() => {
+      pages.forEach((page, i) => { page.hidden = i !== next; });
+      demo.querySelectorAll('[data-vt-go]').forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+    }, { kind, direction });
+    note.textContent = typeof document.startViewTransition === 'function' ? '' : 'This browser has no View Transitions: the page switched at once.';
+  });
+</script>
+</body>
+</html>

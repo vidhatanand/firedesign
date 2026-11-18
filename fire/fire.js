@@ -16,8 +16,9 @@ import * as texture from './js/texture.js';
 import * as docsite from './js/docsite.js';
 import * as tweaks from './js/tweaks.js';
 import * as site from './js/site.js';
+import * as transitions from './js/transitions.js';
 
-const modules = { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks, site };
+const modules = { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks, site, transitions };
 
 /** Initialise every behaviour inside `root`. Call again after inserting markup. */
 export function init(root = document) {
@@ -46,4 +47,5 @@ ready(() => { initIcons(); init(document); bindCopy(); document.documentElement.
 
 export * from './js/core.js';
 export { icon, setIcon, ICONS } from './js/icons.js';
-export { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks, site };
+export { transition } from './js/transitions.js';
+export { shell, nav, forms, overlays, data, content, code, agent, chat, charts, texture, docsite, tweaks, site, transitions };

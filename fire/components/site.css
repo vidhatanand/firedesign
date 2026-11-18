@@ -28,6 +28,8 @@
      </main>
      <footer class="fd-site-footer" data-layout="columns|compact|wordmark">…</footer>
    </div>
+   A page whose chrome is written by a script (templates/site-shell.js) declares body[data-site-shell]: the bare page
+   stays hidden until the script sets data-site-shell="mounted", and is shown anyway after --fd-site-reveal.
 
    Foundation
    .fd-site-display · .fd-site-title · .fd-site-heading · .fd-site-lead   fluid type (tokens --fd-fluid-*): it scales
@@ -46,7 +48,8 @@
    Sections (each `section.fd-site-section.fd-site-<type>`; variants are data-layout unless noted)
    fd-site-header    inline | centered · data-scrolled (site.js) · data-state="open" (the sheet below desktop)
                      parts: -bar, -nav, -links, -link ([data-sheet]: only in the sheet), -actions, -toggle
-   fd-site-hero      start | split | stack | center · data-side="start|end" (split: the media side)
+   fd-site-hero      start | split | stack | center · data-side="start|end" (split: the media side) ·
+                     data-bleed (stack: the frame runs past the section's bottom, its cut edge fading into the ground)
                      parts: -note, -media
    fd-site-logos     row | grid | marquee · parts: -lead, -track, -list, -item, -pause (marquee)
    fd-site-features  grid | list | bento · parts: -items (data-cols 2–4 on grid), -item, -icon, -title, -text, -link,
@@ -62,6 +65,8 @@
                      fd-segmented), -plans, -plan ([data-featured]: a stronger rule; its label is an fd-badge in -name), -name,
                      -price, -amount, -per, -summary, -action, -includes (an fd-feature-list); prices and units carry
                      data-period="monthly|yearly"
+                     columns and rows share their tracks (subgrid): a plan's parts come in this order, name, price, summary,
+                     action, includes (columns: five shared rows; rows: four shared columns, the action always in the last)
    fd-site-compare   (default) | versus · data-show="1–4" (site.js, phone: the plan column shown) ·
                      parts: -tabs (an fd-tabs), -table (an fd-table-wrap), -yes, -no
    fd-site-faq       list | split | columns · parts: -list (dl), -item, -question, -answer
@@ -117,7 +122,8 @@
   --fd-site-index-w: 6ch;
   --fd-site-date-w: 13ch;
   /* parts */
-  --fd-site-bleed: 112px;              /* how far the stacked hero's media runs past the section */
+  --fd-site-bleed: 112px;              /* data-bleed: how far the stacked hero's media runs past the section */
+  --fd-site-bleed-fade: 72px;          /* data-bleed: the cut edge fades into the ground over this distance */
   --fd-site-media-min: 280px;
   --fd-site-cell-min: 200px;
   --fd-site-plan-min: 220px;
@@ -131,6 +137,7 @@
   --fd-site-blur: 12px;                /* the scrolled header's backdrop */
   --fd-site-sheet-row: 52px;           /* a link row in the phone sheet */
   --fd-site-scrim: 88%;                /* opacity of the texture ground's scrim under text */
+  --fd-site-reveal: 1.2s;              /* body[data-site-shell]: how long the bare page waits for its chrome */
 }
 
 /* Fluid type: computed where it is used, so a subtree with its own type set or density gets its own steps. */
@@ -159,6 +166,8 @@
 }
 .fd-site > main { display: block; flex: 1 0 auto; min-width: 0; }
 .fd-site[data-contained] { isolation: isolate; overflow: clip; }
+body[data-site-shell=""] { visibility: hidden; animation: fd-site-reveal 0s var(--fd-site-reveal) forwards; }
+@keyframes fd-site-reveal { to { visibility: visible; } }
 [data-fd-site-sentinel] { position: absolute; top: 0; inset-inline: 0; height: var(--fd-hairline); pointer-events: none; visibility: hidden; }
 
 /* ---------- Container ---------- */
@@ -372,8 +381,14 @@
 .fd-site-hero[data-layout="split"][data-side="start"] .fd-site-hero-media { order: -1; }
 .fd-site-hero[data-layout="split"] .fd-site-display { --_site-scale: var(--fd-site-split-scale); max-inline-size: none; }
 /* stack: the text, then a frame across the container that runs past the bottom of the section */
-.fd-site-hero[data-layout="stack"] { --_site-pb: 0px; overflow: clip; border-bottom: var(--fd-hairline) solid var(--fd-line-faint); }
-.fd-site-hero[data-layout="stack"] .fd-site-hero-media { margin-block: var(--fd-site-head-gap) calc(var(--fd-site-bleed) * -1); }
+.fd-site-hero[data-layout="stack"] .fd-site-hero-media { margin-block-start: var(--fd-site-head-gap); }
+/* data-bleed: the frame runs past the bottom of the section; the cut edge fades into the ground, so it never reads as sliced */
+.fd-site-hero[data-layout="stack"][data-bleed] { --_site-bleed: var(--fd-site-bleed); --_site-pb: 0px; overflow: clip; border-bottom: var(--fd-hairline) solid var(--fd-line-faint); }
+.fd-site-hero[data-layout="stack"][data-bleed] .fd-site-hero-media {
+  margin-block-end: calc(var(--_site-bleed) * -1);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--_site-bleed) - var(--fd-site-bleed-fade)), transparent calc(100% - var(--_site-bleed)));
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--_site-bleed) - var(--fd-site-bleed-fade)), transparent calc(100% - var(--_site-bleed)));
+}
 /* center: one centred column, no media */
 .fd-site-hero[data-layout="center"] .fd-site-head { justify-items: center; text-align: center; }
 .fd-site-hero[data-layout="center"] .fd-site-head > :is(.fd-site-eyebrow, .fd-site-head-actions) { justify-content: center; }
@@ -605,14 +620,26 @@
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-plan { padding-block-start: var(--fd-space-6); border-top: var(--fd-hairline) solid var(--fd-line); }
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-includes { padding-block-start: var(--fd-space-5); border-top: var(--fd-hairline) solid var(--fd-line-faint); }
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-action > .fd-btn { flex: 1 1 auto; }
+/* The plans share their rows (name, price, summary, action, inclusions): each plan is a subgrid five rows tall, so every
+   action and every list starts on one line whatever the text length. A plan row that wraps gets five rows of its own. */
+@supports (grid-template-rows: subgrid) {
+  .fd-site-pricing[data-layout="columns"] .fd-site-pricing-plan { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: var(--fd-space-5); align-content: start; }
+  .fd-site-pricing[data-layout="columns"] .fd-site-pricing-plan > .fd-site-pricing-summary { align-self: start; }
+}
 .fd-site-pricing-plan[data-featured] { border-top: var(--fd-site-edge) solid var(--fd-text); }
 .fd-site-pricing[data-layout="columns"] .fd-site-pricing-plan[data-featured] { padding-block-start: calc(var(--fd-space-6) - var(--fd-site-edge) + var(--fd-hairline)); }
 /* rows: one plan a row; good for many plans or usage pricing */
-.fd-site-pricing[data-layout="rows"] .fd-site-pricing-plans { border-bottom: var(--fd-hairline) solid var(--fd-line); }
+/* The rows share their columns (name, price, summary, action) through subgrid: a wide button, a narrow one or none
+   keeps every column in line. */
+.fd-site-pricing[data-layout="rows"] .fd-site-pricing-plans {
+  display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr) auto; column-gap: var(--fd-space-8);
+  border-bottom: var(--fd-hairline) solid var(--fd-line);
+}
 .fd-site-pricing[data-layout="rows"] .fd-site-pricing-plan {
-  display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr) auto; column-gap: var(--fd-space-8); align-items: baseline;
+  grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: baseline;
   padding-block: var(--fd-space-6); border-top: var(--fd-hairline) solid var(--fd-line);
 }
+.fd-site-pricing[data-layout="rows"] .fd-site-pricing-plan > .fd-site-pricing-action { grid-column: 4; }
 .fd-site-pricing[data-layout="rows"] .fd-site-pricing-amount { font-size: var(--fd-fluid-heading); line-height: var(--fd-fluid-heading-lh); }
 .fd-site-pricing[data-layout="rows"] .fd-site-pricing-action { justify-content: flex-end; }
 /* single: one plan with its inclusions beside it */
@@ -819,9 +846,10 @@
   .fd-site-quote[data-layout="proof"] > .fd-site-container { grid-template-columns: minmax(0, 1fr); row-gap: var(--fd-space-10); }
   .fd-site-quote-stat { padding-inline-start: 0; padding-block-start: var(--fd-space-6); border-inline-start: 0; border-top: var(--fd-hairline) solid var(--fd-line); }
 
-  .fd-site-pricing[data-layout="rows"] .fd-site-pricing-plan { grid-template-columns: minmax(0, 1fr) auto; row-gap: var(--fd-space-3); }
+  .fd-site-pricing[data-layout="rows"] .fd-site-pricing-plans { grid-template-columns: minmax(0, 1fr) auto; }
+  .fd-site-pricing[data-layout="rows"] .fd-site-pricing-plan { row-gap: var(--fd-space-3); }
   .fd-site-pricing[data-layout="rows"] .fd-site-pricing-summary { grid-column: 1 / -1; }
-  .fd-site-pricing[data-layout="rows"] .fd-site-pricing-action { grid-column: 1 / -1; justify-content: flex-start; }
+  .fd-site-pricing[data-layout="rows"] .fd-site-pricing-plan > .fd-site-pricing-action { grid-column: 1 / -1; justify-content: flex-start; }
   .fd-site-pricing[data-layout="single"] .fd-site-pricing-plan { grid-template-columns: minmax(0, 1fr); }
   .fd-site-pricing[data-layout="single"] .fd-site-pricing-includes { grid-column: 1; grid-row: auto; padding-inline-start: 0; padding-block-start: var(--fd-space-6); border-inline-start: 0; border-top: var(--fd-hairline) solid var(--fd-line-faint); }
 
@@ -857,7 +885,7 @@
   .fd-site-hero[data-layout="start"] .fd-site-head > :is(.fd-site-lead, .fd-site-head-actions, .fd-site-hero-note) { grid-column: 1; grid-row: auto; justify-self: stretch; text-align: start; }
   .fd-site-hero[data-layout="start"] .fd-site-head::after { margin-block-start: var(--fd-space-8); }
   .fd-site-hero[data-layout="start"] .fd-site-display { --_site-scale: 1; }
-  .fd-site-hero[data-layout="stack"] .fd-site-hero-media { margin-block-end: calc(var(--fd-site-bleed) * -0.5); }
+  .fd-site-hero[data-layout="stack"][data-bleed] { --_site-bleed: calc(var(--fd-site-bleed) * 0.5); }
 
   .fd-site-logos[data-layout="row"] .fd-site-logos-list { column-gap: var(--fd-space-8); }
   .fd-site-logos[data-layout="grid"] .fd-site-logos-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -889,6 +917,7 @@
   .fd-site-quote-mark { margin-inline-start: 0; flex-basis: 100%; }
 
   .fd-site-pricing[data-layout="single"] .fd-site-pricing-includes > .fd-feature-list { grid-template-columns: minmax(0, 1fr); }
+  .fd-site-pricing[data-layout="columns"] .fd-site-pricing-plan { display: flex; grid-row: auto; }
 
   /* compare: one plan column at a time, chosen with the tabs (versus keeps both of its columns) */
   .fd-site-compare:not([data-layout="versus"]) .fd-site-compare-tabs { display: flex; }

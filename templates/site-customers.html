@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" data-fd-surface="website">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarry Labs · Ember customers</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./site-shell.js"></script>
+</head>
+<body data-site-shell data-active="customers" data-header="centered" data-footer="columns">
+<main>
+  <!-- Hero, stack: the article's title, then its evidence set across the page like a lead picture. -->
+  <section class="fd-site-section fd-site-hero" data-layout="stack">
+    <div class="fd-site-container">
+      <div class="fd-site-head" data-layout="split">
+        <p class="fd-site-eyebrow">Customer story · Quarry Labs</p>
+        <h1 class="fd-site-display">Fourteen scrapers became three API calls.</h1>
+        <p class="fd-site-lead">Quarry Labs builds price indexes from 9,000 retail sites. In six weeks its data team moved every scraper to Ember, and stopped repairing them.</p>
+        <p class="fd-site-hero-note">By Mara Okafor, head of data · Oct 30, 2026 · 6 min read</p>
+      </div>
+      <div class="fd-site-hero-media"><figure class="fd-doc-frame"><div class="fd-doc-frame-media"><div class="fd-site-shot">
+        <div class="fd-row" data-justify="between" data-wrap><div class="fd-stack" data-gap="1"><span class="fd-eyebrow">Crawl spend, Quarry Labs</span><span class="fd-stat">$12,600</span></div><span class="fd-badge" data-variant="mono">October 2026</span></div>
+        <div class="fd-table-wrap"><table class="fd-table" aria-label="Before and after the move">
+          <thead><tr><th>Month</th><th>Crawls run on</th><th data-num>Spend</th></tr></thead>
+          <tbody>
+            <tr><td>October 2026</td><td>Ember: /crawl, /extract, /monitor</td><td data-num>$12,600</td></tr>
+            <tr><td>July 2026</td><td>14 scrapers, a browser fleet and a proxy pool</td><td data-num>$19,100</td></tr>
+          </tbody>
+        </table></div>
+        <div class="fd-chart" data-fd-chart="area" data-height="320" data-label="Quarry Labs crawl spend per month in US dollars, April to October 2026: about 19,000 before the move, 12,600 after"><script type="application/json">{"labels":["Apr","May","Jun","Jul","Aug","Sep","Oct"],"titles":["April 2026","May 2026","June 2026","July 2026","August 2026, the move","September 2026","October 2026"],"yFormat":"compact","unit":"USD","series":[{"name":"Crawl spend","values":[18400,18900,19600,19100,15200,12700,12600]}]}</script></div>
+      </div></div></figure></div>
+    </div>
+  </section>
+
+  <!-- The reading column: fd-prose in a narrow container. -->
+  <section class="fd-site-section">
+    <div class="fd-site-container" data-width="narrow">
+      <div class="fd-prose">
+        <p>Quarry Labs sells weekly price indexes to retailers and the analysts who follow them. Every night its crawlers read product and listing pages on 9,000 sites, and every Monday the index ships.</p>
+        <p>Until this summer those crawlers were 14 scrapers the team had written over four years: a headless browser fleet, a proxy pool and a parser per site. They worked. Keeping them working was the job.</p>
+        <h2>A redesign a week</h2>
+        <p>A retailer that changed its product page broke a parser, and the index missed that retailer until someone fixed it. In the first half of 2026 that happened 31 times. The on-call engineer spent most of the week reading alerts and patching selectors.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote, proof: the head of data's own words beside the one figure the story turns on. -->
+  <section class="fd-site-section fd-site-quote" data-layout="proof" data-rule>
+    <div class="fd-site-container">
+      <figure class="fd-site-quote-item"><blockquote class="fd-site-quote-text"><p>“We were paying for servers, proxies and a person’s week to keep fourteen parsers alive. Now we pay for pages.”</p></blockquote><figcaption class="fd-site-quote-cite"><span class="fd-site-quote-who"><cite class="fd-site-quote-name">Mara Okafor</cite><span class="fd-site-quote-role">Head of data, Quarry Labs</span></span></figcaption></figure>
+      <dl class="fd-site-quote-stat"><dt class="fd-site-stats-label">Lower crawl spend at Quarry Labs, 3 months after moving to Ember.</dt><dd class="fd-site-stats-figure">34<span class="fd-site-stats-unit">%</span></dd></dl>
+    </div>
+  </section>
+
+  <section class="fd-site-section">
+    <div class="fd-site-container" data-width="narrow">
+      <div class="fd-prose">
+        <h2>Pages, not parsers</h2>
+        <p>The team tried Ember on the three retailers that broke most often. <code>/extract</code> read their product pages with one schema and returned the same fields after two of them redesigned in the trial month.</p>
+        <p>That settled it. The move took six weeks, from Jul 7 to Aug 15, and one engineer did most of it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Steps, rail: each step of the move is a split of its own, the text beside the call that replaced a scraper. -->
+  <section class="fd-site-section fd-site-steps" data-layout="rail" data-ground="sunken">
+    <div class="fd-site-container">
+      <div class="fd-site-head"><p class="fd-site-eyebrow">The move</p><h2 class="fd-site-title">Six weeks, four steps.</h2></div>
+      <ol class="fd-doc-steps">
+        <li class="fd-doc-step"><h3 class="fd-doc-step-title">Map each scraper to one call</h3><div class="fd-doc-step-body"><div class="fd-site-steps-detail"><p class="fd-site-steps-text">Ten scrapers only walked listing pages. Each became one <code class="fd-code">/crawl</code> per retailer, limited to the paths that hold products.</p><div class="fd-site-steps-aside"><figure class="fd-codeblock"><pre class="fd-codeblock-body"><code data-lang="typescript">await ember.crawl("https://halden.io", {
+  include: ["/products/*", "/sale/*"],
+  limit: 20000,
+});</code></pre></figure></div></div></div></li>
+        <li class="fd-doc-step"><h3 class="fd-doc-step-title">Describe the fields once</h3><div class="fd-doc-step-body"><div class="fd-site-steps-detail"><p class="fd-site-steps-text">The four that parsed product pages became one <code class="fd-code">/extract</code> call with a shared schema: name, price, currency and stock.</p><div class="fd-site-steps-aside"><figure class="fd-codeblock"><pre class="fd-codeblock-body"><code data-lang="typescript">const Product = z.object({
+  name: z.string(),
+  price: z.number(),
+  currency: z.string(),
+  inStock: z.boolean(),
+});</code></pre></figure></div></div></div></li>
+        <li class="fd-doc-step"><h3 class="fd-doc-step-title">Watch prices instead of re-reading pages</h3><div class="fd-doc-step-body"><div class="fd-site-steps-detail"><p class="fd-site-steps-text">Nightly re-crawls of pages that rarely change became <code class="fd-code">/monitor</code> checks. A webhook arrives only when a price moves.</p><div class="fd-site-steps-aside"><figure class="fd-codeblock"><pre class="fd-codeblock-body"><code data-lang="typescript">await ember.monitor.create({
+  url: "https://tessel.dev/store",
+  every: "6h",
+  ignore: [".timestamp", ".promo"],
+});</code></pre></figure></div></div></div></li>
+        <li class="fd-doc-step"><h3 class="fd-doc-step-title">Run both, then switch off the fleet</h3><div class="fd-doc-step-body"><div class="fd-site-steps-detail"><p class="fd-site-steps-text">For two weeks both systems ran side by side. When the prices matched, the browsers went off on Aug 15.</p><div class="fd-site-steps-aside"><div class="fd-table-wrap"><table class="fd-table" aria-label="Side-by-side check, Aug 1 to Aug 14">
+          <thead><tr><th>Check</th><th data-num>Prices</th></tr></thead>
+          <tbody>
+            <tr><td>Compared</td><td data-num>120,418</td></tr>
+            <tr><td>Matched</td><td data-num>120,203</td></tr>
+            <tr><td>Differed: sale price shown after load</td><td data-num>215</td></tr>
+          </tbody>
+        </table></div></div></div></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="fd-site-section">
+    <div class="fd-site-container" data-width="narrow">
+      <div class="fd-prose">
+        <h2>What changed</h2>
+        <p>The 215 prices that differed were Ember’s to win: the old scrapers read the page before a sale price loaded. The index has not missed a retailer since the move.</p>
+        <p>Crawl spend fell from $19,100 in July to $12,600 in October. The larger change is where the team’s week goes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats, lead: one figure carries this part of the story, with the sentence that says what it counts. -->
+  <section class="fd-site-section fd-site-stats" data-layout="lead" data-rule>
+    <div class="fd-site-container">
+      <dl class="fd-site-stats-list"><div class="fd-site-stats-item"><dt class="fd-site-stats-label">of scraper repairs a month that nobody at Quarry Labs does any more.</dt><dd class="fd-site-stats-figure">38<span class="fd-site-stats-unit">h</span></dd><dd class="fd-site-stats-note">From the team’s on-call log, Aug to Oct 2026 against the three months before.</dd></div></dl>
+    </div>
+  </section>
+
+  <!-- Quote, pair: two pull quotes from the people the change reached, an engineer and finance. -->
+  <section class="fd-site-section fd-site-quote" data-layout="pair" data-rule>
+    <div class="fd-site-container">
+      <h2 class="fd-sr-only">From the team</h2>
+      <div class="fd-site-quote-list">
+        <figure class="fd-site-quote-item"><blockquote class="fd-site-quote-text"><p>“I used to start the week reading scraper alerts. Now I start it reading the price changes.”</p></blockquote><figcaption class="fd-site-quote-cite"><span class="fd-site-quote-who"><cite class="fd-site-quote-name">Dev Patel</cite><span class="fd-site-quote-role">Data engineer, Quarry Labs</span></span></figcaption></figure>
+        <figure class="fd-site-quote-item"><blockquote class="fd-site-quote-text"><p>“The cost of a crawl shows before it runs. I stopped asking for the bill at the end of the month.”</p></blockquote><figcaption class="fd-site-quote-cite"><span class="fd-site-quote-who"><cite class="fd-site-quote-name">Lena Hoff</cite><span class="fd-site-quote-role">Finance lead, Quarry Labs</span></span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Posts, featured: the next story large, three more beside it. -->
+  <section class="fd-site-section fd-site-posts" data-layout="featured" data-ground="sunken">
+    <div class="fd-site-container">
+      <div class="fd-site-head"><h2 class="fd-site-title">More customer stories.</h2></div>
+      <div class="fd-site-posts-list">
+        <article class="fd-site-posts-item"><div class="fd-site-posts-media"><div class="fd-ascii" data-fd-ascii="contour" data-seed="11" aria-hidden="true"></div></div><time class="fd-site-posts-date" datetime="2026-10-09">Oct 9, 2026</time><h3 class="fd-site-posts-title"><a href="site-customers.html">Northwind’s agents stopped guessing at page layouts</a></h3><p class="fd-site-posts-summary">How a support team gave its agents typed answers from 600 help centres with one extract schema.</p></article>
+        <article class="fd-site-posts-item"><time class="fd-site-posts-date" datetime="2026-09-18">Sep 18, 2026</time><h3 class="fd-site-posts-title"><a href="site-customers.html">Tessel’s weekend crawls now finish before lunch</a></h3></article>
+        <article class="fd-site-posts-item"><time class="fd-site-posts-date" datetime="2026-08-27">Aug 27, 2026</time><h3 class="fd-site-posts-title"><a href="site-customers.html">Kestrel sees the cost of a run before it starts</a></h3></article>
+        <article class="fd-site-posts-item"><time class="fd-site-posts-date" datetime="2026-07-30">Jul 30, 2026</time><h3 class="fd-site-posts-title"><a href="site-customers.html">Halden watches 4,000 competitor pages with monitors</a></h3></article>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

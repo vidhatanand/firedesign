@@ -1,0 +1,36 @@
+{
+  "id": "site-changelog",
+  "job": "See what changed in the product lately, filter it by kind, and subscribe.",
+  "purpose": "The news page of Ember's public site: a short masthead, the latest release beside the diff it makes visible, then every update as dated rows (fd-site-posts list) filtered by kind with a chip nav, and an email signup with its invalid, busy and sent states. It uses the posts list, not fd-doc-changelog: the site page mixes releases with engineering and customer posts and links to the docs release notes for detail.",
+  "useWhen": [
+    "A product publishes releases, fixes and posts on its public site.",
+    "Readers want one kind of update, or to get them by email."
+  ],
+  "avoidWhen": [
+    { "when": "The page is the versioned release notes inside the documentation.", "instead": "docs-changelog" },
+    { "when": "Someone needs the live health of the service.", "instead": "status" },
+    { "when": "The page tells one story at reading length.", "instead": "site-customers" }
+  ],
+  "aka": ["news", "blog", "what's new", "release notes", "updates"],
+  "surfaces": ["website"],
+  "data": ["list", "text", "form"],
+  "sections": [
+    { "section": "site-header", "variant": "centered", "why": "Shared with the customer story: the two editorial pages of the site." },
+    { "section": "site-hero", "variant": "center, texture, tight", "why": "A short masthead for a page that is mostly a list; the site's one centred hero." },
+    { "section": "site-split", "variant": "data-ratio=media", "why": "The latest release: its claim beside the webhook diff it makes visible." },
+    { "section": "site-posts", "variant": "list", "why": "The page itself: dated rows, one kind of update at a time." },
+    { "section": "site-cta", "variant": "split, sunken", "why": "The one action a changelog reader takes is to subscribe, in one field." },
+    { "section": "site-footer", "variant": "compact", "why": "A list page ends quietly in one row." }
+  ],
+  "states": [
+    { "name": "default", "how": "nine updates, the filter on All" },
+    { "name": "loading", "how": "?state=loading: four skeleton rows, the filters off, the latest release hidden" },
+    { "name": "error", "how": "?state=error: fd-empty with Retry and the docs release notes" },
+    { "name": "empty", "how": "?state=empty: nothing published yet, with the email signup" },
+    { "name": "no results", "how": "?state=no-results: the Deprecations filter, which matches nothing, with Show every update" },
+    { "name": "subscribe invalid, busy, sent", "how": "submit the form: aria-invalid with fd-field-error, then aria-busy, then fd-site-cta-done" }
+  ],
+  "example": "templates/site-changelog.html",
+  "provenance": ["docs/site-sections.html", "templates/docs-changelog.html", "fire/components/site.css", "templates/site-shell.js"],
+  "since": "0.8.0"
+}

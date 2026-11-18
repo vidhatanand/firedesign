@@ -14,7 +14,7 @@ const steps = [
   ['build-palettes.mjs', check ? ['--check'] : []],
   ['build-elements.mjs', check ? ['--check'] : []],
   ['build-contract.mjs', check ? ['--check'] : []],
-  ['build-catalog.mjs', ['--allow-missing', ...(check ? ['--check'] : [])]],
+  ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card
   ['build-wrappers.mjs', check ? ['--check'] : [], { optional: true }],
   ['build-facet.mjs', check ? ['--check'] : [], { optional: true }],
 ];

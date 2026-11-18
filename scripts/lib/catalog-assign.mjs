@@ -41,6 +41,7 @@ export const PART_OF = {
   'fd-danger-text': 'fd-accent-text',
   'fd-success-text': 'fd-accent-text',
   'fd-warning-text': 'fd-accent-text',
+  'fd-bars-loader': 'fd-spinner',      // a loader (skeleton.css, texture.js), not the bars chart its prefix suggests
   'fd-check-dash': 'fd-checkbox',
   'fd-check-tick': 'fd-checkbox',
   'fd-clamp-2': 'fd-truncate',
@@ -183,15 +184,134 @@ export const FREE_ATTRIBUTES = {
   kv: ['data-copy'],                   // the text a row copies
   menu: ['data-fd-submenu'],           // the id of the sub-menu
   pipeline: ['data-when'],             // the condition of a conditional stage (data.js header shows "failure")
+  secret: ['data-noun'],               // the word the buttons name: "password", "API key", "signing secret"
+  steps: ['data-current'],             // the 0-based index of the current step (nav.js header: data-current="n")
+  'doc-endpoint': ['data-in'],         // where a parameter goes (body, query, path, header…); docsite.js's try form reads body, query and path
+  button: ['data-action'],             // the page's name for what the button does (agent.js: run, copy-result; pages: retry, export)
+  log: ['data-action'],                // code.js handles wrap and download; a page adds its own (replay)
 };
 
-/** Values the docs or module headers state for a state no selector styles, or the unwritten default of a styled attribute. component id -> attribute -> values. */
+/** Values the docs or module headers state for a state no selector styles, or the unwritten default of a styled attribute.
+ *  Key: a component id (the value is the component's own) or a class (the value is that part's). -> attribute -> values. */
 export const DEFAULT_VALUES = {
   dialog: { 'data-size': ['md'] },                 // overlays.css: 480px, "default"
   sheet: { 'data-size': ['md'], 'data-side': ['right'] },   // docs/overlays.html: <dialog class="fd-sheet" data-side="right" data-size="md">; the CSS styles left and bottom
-  stats: { 'data-dir': ['up'] },                   // data.css: [data-dir] draws the up arrow, [data-dir="down"] flips it
+  'fd-stat-delta': { 'data-dir': ['up'] },         // data.css: .fd-stat-delta[data-dir] draws the up arrow, [data-dir="down"] flips it
   log: { 'data-level': ['info'] },                 // code.css: only warn, error and debug have a dot colour; info is the default row
-  'chat-message': { 'data-state': ['delivered'] }, // docs/chat.html: state sending | sent | delivered | read | failed
+  'fd-chat-receipt': { 'data-state': ['sending', 'sent', 'delivered'] },   // chat.js header: state 'sending'|'sent'|'delivered'|'read'|'failed', drawn on the receipt; chat.css styles read and failed
   message: { 'data-state': ['error'] },            // docs/agent.html: a failed assistant message
-  table: { 'data-state': ['error'] },              // docs/data.html: tr.fd-table-state data-state="error"
+  'fd-table-state': { 'data-state': ['error'] },   // docs/data.html: tr.fd-table-state data-state="error"
+  icon: { 'data-size': ['16'] },                   // icons.js header: data-size="12|14|16|20|24"; 16 is --fd-icon, the unstyled default
+  'fd-spinner': { 'data-size': ['16'] },           // skeleton.css header: <span class="fd-spinner" data-size="16">; 16 is the unstyled default
+  'copy-field': { 'data-mask': ['partial', 'full'] },   // forms.js header: the secret's data-mask="partial|full|end" "works the same on .fd-copy-field"
+  'doc-cards': { 'data-cols': ['3'] },             // docsite.css: .fd-doc-cards { --_doc-cols: 3 }; 2 and 4 are styled
+  matrix: { 'data-cols': ['2'] },                  // forms.css: .fd-matrix { --_f-cols: 2 }; 1, 3 and 4 are styled
+};
+
+/** Layout attributes (fire/layout.css, any element) that GUIDE.md section 5 documents on a layout primitive: they take
+ *  the values of catalog.globalAttributes. data-span is written on a grid's child, which may be anything. */
+export const LAYOUT_ATTRIBUTES = {
+  stack: ['data-gap'],                              // "Space between children: data-gap on the parent"
+  row: ['data-gap', 'data-gap-x'],
+  grid: ['data-gap', 'data-gap-x', 'data-min', 'data-cols'],   // "fd-grid with data-min (narrowest column) and data-cols (most columns)"
+};
+
+/**
+ * Attributes Fire's scripts set as state (open, dragging, copied, measured overflow, animation phases, what a renderer
+ * stamps): the lint accepts them, Facet does not offer them as props. Key: a component id (the attribute on any of its
+ * classes) or a class (on that class only; the root class means the root alone) -> attribute -> extra values the
+ * scripts write that no style or comment lists (usually none: the evidence's values move here). The build fails when
+ * no Fire script writes the attribute, or a listed value is not a literal of a script that writes it. Reviewed against the writes in fire/js/*.js (`dataset.x =`, setAttribute, toggleAttribute).
+ */
+export const STATE_ATTRIBUTES = {
+  // open / closed, written by the open and close code (core.js: "State lives in the DOM: data-state")
+  accordion: { 'data-state': ['closing', 'closed'] },   // content.js: open|closing|closed on the <details>
+  chat: { 'data-state': [], 'data-dragging': [], 'data-instant': [], 'data-expanded': [] },
+  combobox: { 'data-state': ['closed'] },              // forms.js: state.root.dataset.state = 'open' | 'closed'
+  hovercard: { 'data-state': [], 'data-measuring': [] },
+  menu: { 'data-state': [], 'data-measuring': [] },
+  // where position() (core.js) placed a floating element: "Sets data-side and data-align on the floating element"
+  'fd-menu': { 'data-side': [], 'data-align': [] },
+  'fd-popover': { 'data-side': [], 'data-align': [] },
+  'fd-tooltip': { 'data-side': [], 'data-align': [] },
+  'fd-hovercard': { 'data-side': [], 'data-align': [] },
+  'fd-chat': { 'data-view': ['home', 'conversation', 'history', 'offline'] },   // chat.js: root.dataset.view = the view it shows (VIEWS)
+  'mobile-nav': { 'data-state': ['closed'] },          // shell.js: sheet and scrim open | closed
+  popover: { 'data-state': [], 'data-measuring': [] },
+  tooltip: { 'data-state': [], 'data-measuring': [] },
+  tweaks: { 'data-state': [], 'data-dragging': [], 'data-moved': [] },
+  'fd-table-bulk': { 'data-state': [] },
+  'fd-chart-tooltip': { 'data-state': [], 'data-snap': [] },
+  'fd-doc-otp': { 'data-state': [] },
+  'fd-data-card-more': { 'data-state': [] },
+  // feedback after an action: copied, done, voted, revealed, dragged over, uploading
+  'fd-codeblock-copy': { 'data-state': [] },
+  'fd-snippet-copy': { 'data-state': [] },
+  'fd-json-btn': { 'data-state': [] },
+  'fd-log-btn': { 'data-state': [] },
+  'fd-message-action': { 'data-state': [] },
+  'fd-doc-copy': { 'data-state': [] },
+  'fd-doc-anchor': { 'data-state': [] },
+  'fd-doc-helpful': { 'data-state': [] },
+  'fd-kv-copy': { 'data-copied': [] },
+  'fd-field-counter': { 'data-state': [] },          // forms.js: limit | near as the count grows
+  secret: { 'data-state': ['masked'] },              // forms.js: masked | revealed, toggled by the reveal button
+  'file-upload': { 'data-state': [] },               // forms.js: dragover on the zone; uploading | done | error on the rows it writes
+  'fd-chat-block': { 'data-state': ['done', 'sent'] },   // chat.js: used, locked, joined, booked, cancelled as a block is answered
+  'fd-chat-jump': { 'data-state': [] },
+  'fd-chat-file': { 'data-state': [] },
+  'fd-composer-attachment': { 'data-state': [], 'data-upload': [] },
+  'fd-free-runs': { 'data-state': [] },
+  pagebar: { 'data-state': [], 'data-scoped': [] },
+  // measured by a script: scroll overflow, sliding indicators, sizes
+  tabs: { 'data-indicator': [], 'data-overflow': [] },    // nav.js
+  'chip-nav': { 'data-overflow': [] },
+  subnav: { 'data-overflow': [] },
+  pipeline: { 'data-overflow': [] },
+  'fd-table-scroll': { 'data-overflow': [] },
+  dialog: { 'data-overflow-top': [], 'data-overflow-bottom': [], 'data-bump': [], 'data-dragging': [], 'data-step': [] },
+  sheet: { 'data-dragging': [], 'data-step': [] },
+  'fd-chat-carousel': { 'data-start': [], 'data-end': [] },
+  // pointer and animation phases
+  slider: { 'data-dragging': [] },
+  'fd-slider-ticks': { 'data-active': [] },
+  toast: { 'data-front': [], 'data-hidden': [], 'data-state': [], 'data-swiped': [], 'data-swiping': [] },
+  'fd-toaster': { 'data-expanded': [] },
+  'fd-chat-view': { 'data-enter': [], 'data-leave': [] },
+  'fd-chat-who': { 'data-swap': [] },
+  'fd-chat-launcher-badge': { 'data-pop': [] },
+  'chat-message': { 'data-removing': [], 'data-editing': [], 'data-new': [] },
+  'fd-chat-msg-actions': { 'data-picking': [] },
+  'fd-log-row': { 'data-new': [] },
+  'fd-log-follow': { 'data-paused': [] },
+  'fd-token': { 'data-new': [] },
+  'fd-tweaks-value': { 'data-changed': [] },
+  // what a renderer stamps on the marks it draws (charts.css: "the renderer stamps data-s=1…6")
+  chart: { 'data-enter': [], 'data-s': [] },
+  bars: { 'data-enter': [], 'data-s': [] },
+  donut: { 'data-enter': [], 'data-s': [], 'data-active': [] },
+  heatgrid: { 'data-enter': [], 'data-s': [] },
+  legend: { 'data-s': [] },
+  sparkline: { 'data-s': [] },
+  'fd-heatgrid-cell': { 'data-active': [], 'data-l': [], 'data-none': [], 'data-empty': [] },
+  'fd-calendar': { 'data-pending': [] },
+  'fd-calendar-cell': { 'data-cap': [], 'data-range': [] },
+  'fd-calendar-day': { 'data-preview': [], 'data-today': [] },
+  'fd-command-item': { 'data-active': [] },
+  'fd-option': { 'data-active': [] },
+  'fd-segmented-thumb': { 'data-empty': [] },
+  'fd-toc-marker': { 'data-empty': [] },
+  composer: { 'data-ready': [] },
+  'fd-composer': { 'data-state': [] },             // agent.js: running while a reply streams
+  'fd-endpoint': { 'data-state': [] },             // copied
+  command: { 'data-dragging': [] },
+  filter: { 'data-active': [] },                   // data.js: toggled when the filter holds a value
+  listbox: { 'data-fallback': [] },
+  message: { 'data-new': [] },
+  result: { 'data-new': [] },
+  progress: { 'data-complete': [], 'data-empty': [] },
+  'fd-progress-steps': { 'data-current': [], 'data-done': [] },
+  // the docs site's try-it form: docsite.js writes the fields and reads their type
+  'fd-input': { 'data-type': [] },
+  'fd-textarea': { 'data-type': [] },
 };

@@ -77,6 +77,22 @@ function splitList(text) {
 }
 // Remove :not(...) groups (one nesting level): a negated value is not a value the component defines.
 const withoutNot = (s) => s.replace(/:not\((?:[^()]|\([^()]*\))*\)/g, '');
+// Remove :has(...) groups: what they test is on a descendant or a sibling, not on the compound itself.
+const withoutHas = (s) => s.replace(/:has\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)/g, '');
+// Expand :is(a, b) and :where(a, b) into one selector per alternative: `:is(.fd-a, .fd-b[data-x="y"] > select)`
+// gives `.fd-a` and `.fd-b[data-x="y"] > select`, so a value tested on one alternative stays with that alternative.
+function expandIs(selector, limit = 64) {
+  const m = /:(?:is|where)\(/.exec(selector);
+  if (!m) return [selector];
+  let depth = 0, end = m.index + m[0].length - 1;
+  for (; end < selector.length; end++) { if (selector[end] === '(') depth++; else if (selector[end] === ')' && --depth === 0) break; }
+  const head = selector.slice(0, m.index), tail = selector.slice(end + 1);
+  const out = [];
+  for (const alt of splitList(selector.slice(m.index + m[0].length, end))) {
+    for (const s of expandIs(head + alt.trim() + tail, limit)) { out.push(s); if (out.length >= limit) return out; }
+  }
+  return out;
+}
 
 /**
  * The data attribute values the styles define, per class context.
@@ -85,7 +101,8 @@ const withoutNot = (s) => s.replace(/:not\((?:[^()]|\([^()]*\))*\)/g, '');
  *
  * scope 'selector' (the audit): every attribute in a selector counts for every fd- class anywhere in that selector.
  * scope 'compound' (the catalogue): an attribute counts for the fd- classes of its own compound selector only, and
- *   attributes on a compound with no fd- class (an ancestor state such as [data-theme="dark"]) are ignored.
+ *   attributes on a compound with no fd- class (an ancestor state such as [data-theme="dark"]) are ignored;
+ *   :is()/:where() lists are read one alternative at a time, and :not()/:has() groups are not read.
  */
 export function collectAttrValues(sheets, { scope = 'selector' } = {}) {
   const known = new Map();
@@ -103,9 +120,9 @@ export function collectAttrValues(sheets, { scope = 'selector' } = {}) {
           // Only fire/layout.css defines attributes for any element; a class-less selector elsewhere is page chrome.
           const contexts = classes.length ? classes : (anyElement ? ['*'] : []);
           for (const [, attr, value] of attrs) for (const ctx of contexts) note(ctx, attr, value);
-        } else {
+        } else for (const alternative of expandIs(withoutHas(withoutNot(selector)))) {
           let before = [];   // the fd- classes of the nearest compound to the left that has any: `.fd-table td[data-actions]` is the table's
-          for (const compound of compounds(selector)) {
+          for (const compound of compounds(alternative)) {
             const c = withoutNot(compound);
             const classes = [...c.matchAll(/\.(fd-[a-z0-9-]+)/g)].map((m) => m[1]);
             if (classes.length && !/\[data-[a-z0-9-]+/.test(c)) { before = classes; continue; }
@@ -122,35 +139,6 @@ export function collectAttrValues(sheets, { scope = 'selector' } = {}) {
   return known;
 }
 
-const camel = (a) => a.replace(/^data-/, '').replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
-
-/**
- * The literal values Fire's own scripts read or compare for a data attribute: `dataset.x === 'y'`,
- * `getAttribute('data-x') === 'y'`, `setAttribute('data-x', 'y')`, `dataset.x = 'y'`, `[data-x="y"]` selectors and
- * `data-x="y"` markup in strings. Returns Map module -> Map attribute -> Set(values).
- */
-export function scriptAttrValues() {
-  const out = new Map();
-  for (const file of topFiles('fire/js', ['.js'])) {
-    const text = read(file).replace(/\/\*[\s\S]*?\*\/|(?<![:\\'"`])\/\/[^\n]*/g, blank);   // code only: comments hold examples with placeholders
-    const mod = path.basename(file, '.js');
-    const m = new Map();
-    const add = (attr, v) => { if (!/^[a-z0-9][a-z0-9-]*$/.test(v)) return; if (!m.has(attr)) m.set(attr, new Set()); m.get(attr).add(v); };
-    const REF = String.raw`(?:getAttribute\(\s*['"](data-[a-z0-9-]+)['"]\s*\)|dataset\.([a-zA-Z0-9]+)|dataset\[\s*['"]([a-zA-Z0-9]+)['"]\s*\])`;
-    const name = (a, b, c) => a || 'data-' + (b || c).replace(/[A-Z]/g, (x) => '-' + x.toLowerCase());
-    for (const x of text.matchAll(new RegExp(REF + String.raw`\s*(?:===|!==|==|!=|=)\s*['"]([^'"]+)['"]`, 'g'))) add(name(x[1], x[2], x[3]), x[4]);
-    for (const x of text.matchAll(new RegExp(String.raw`['"]([^'"]+)['"]\s*(?:===|!==|==|!=)\s*` + REF, 'g'))) add(name(x[2], x[3], x[4]), x[1]);
-    for (const x of text.matchAll(/setAttribute\(\s*['"](data-[a-z0-9-]+)['"]\s*,\s*['"]([^'"]+)['"]/g)) add(x[1], x[2]);
-    for (const x of text.matchAll(/(?<![\w-])(data-[a-z0-9-]+)=\\?["']([^"'\\$]+)["']/g)) add(x[1], x[2]);
-    // Values the module's header documents: `data-x  a | b | c` and `data-x="a|b|c"`.
-    for (const c of read(file).matchAll(/\/\*[\s\S]*?\*\//g)) {
-      for (const x of c[0].matchAll(/(?<![\w-])(data-[a-z0-9-]+)(?:="|\s+)((?:[a-z0-9-]+\s*\|\s*)+[a-z0-9-]+)(?![\w-])/g)) for (const v of x[2].split('|')) add(x[1], v.trim());
-    }
-    out.set(mod, m);
-  }
-  return out;
-}
-
 /** fd- classes the behaviour modules refer to in selectors, classList calls and markup strings (comments included: they document hooks). */
 export function scriptClasses() {
   const set = new Set();
@@ -161,20 +149,4 @@ export function scriptClasses() {
     for (const x of text.matchAll(/class(?:Name)?\s*=\s*\\?["'`]([^"'`]*)/g)) for (const y of x[1].split(/\s+/)) if (/^fd-[a-z0-9]+(-[a-z0-9]+)*$/.test(y)) set.add(y);
   }
   return set;
-}
-
-/** Values the component style sheets document in their header comments: `data-x  a | b | c` and `data-x="a|b|c"`. Map file -> Map attribute -> Set(values). */
-export function cssCommentValues() {
-  const out = new Map();
-  for (const file of cssFiles()) {
-    const m = new Map();
-    for (const c of read(file).matchAll(/\/\*[\s\S]*?\*\//g)) {
-      for (const x of c[0].matchAll(/(?<![\w-])(data-[a-z0-9-]+)(?:="|\]\[[a-z-]+="[^"]*"\]\[(?=data-)|\s+)((?:[a-z0-9-]+\s*\|\s*)+[a-z0-9-]+)(?![\w-])/g)) {
-        if (!m.has(x[1])) m.set(x[1], new Set());
-        for (const v of x[2].split('|')) m.get(x[1]).add(v.trim());
-      }
-    }
-    out.set(path.basename(file), m);
-  }
-  return out;
 }

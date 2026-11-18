@@ -1464,7 +1464,8 @@
               "ghost",
               "inverse",
               "outline",
-              "primary"
+              "primary",
+              "secondary"
             ],
             "required": false
           },
@@ -1481,26 +1482,26 @@
             "required": false
           },
           {
-            "name": "tone",
+            "name": "action",
             "type": "enum",
             "values": [
-              "accent"
+              "*"
             ],
             "required": false
           },
           {
             "name": "block",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "chatExpand",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "iconOnly",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -1525,15 +1526,7 @@
       "name": "Type",
       "purpose": "The type scale in Geist and Geist Mono: display, h1 to h3, title, label, body, small, caption, mono and eyebrow. 450…",
       "variants": [
-        "tone-accent",
-        "tone-neutral",
-        "tone-success",
-        "tone-warning",
-        "tone-danger",
-        "tone-info",
-        "tone-violet",
-        "tone-loading",
-        "tone-inverse"
+        "tone-accent"
       ],
       "states": [],
       "paths": [
@@ -1546,24 +1539,7 @@
         "Only the colour or length changes. Use Text."
       ],
       "api": {
-        "props": [
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "danger",
-              "info",
-              "inverse",
-              "loading",
-              "neutral",
-              "success",
-              "violet",
-              "warning"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -1578,7 +1554,7 @@
             "description": "Level 1 heading."
           }
         ],
-        "example": "<cc-component name=\"Type\" tone=\"accent\">Content</cc-component>"
+        "example": "<cc-component name=\"Type\">Content</cc-component>"
       }
     },
     {
@@ -1617,27 +1593,11 @@
       "api": {
         "props": [
           {
-            "name": "size",
+            "name": "variant",
             "type": "enum",
             "values": [
-              "16",
-              "20",
-              "24",
-              "40",
-              "48",
-              "56",
-              "64",
-              "caption",
-              "display",
-              "eyebrow",
-              "label",
-              "lead",
-              "lg",
-              "md",
-              "mono",
-              "sm",
-              "stat",
-              "xl"
+              "flat",
+              "perspective"
             ],
             "required": false
           },
@@ -1653,10 +1613,18 @@
             "required": false
           },
           {
+            "name": "animate",
+            "type": "enum",
+            "values": [
+              "false",
+              "true"
+            ],
+            "required": false
+          },
+          {
             "name": "ascii",
             "type": "enum",
             "values": [
-              "any",
               "flame",
               "grid",
               "halftone",
@@ -1683,32 +1651,38 @@
             "required": false
           },
           {
-            "name": "gap",
+            "name": "inline",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "ramp",
             "type": "enum",
             "values": [
-              "0",
-              "0-5",
-              "1",
-              "1-5",
-              "10",
-              "12",
-              "16",
-              "2",
-              "2-5",
-              "20",
-              "24",
-              "3",
-              "3-5",
-              "4",
-              "5",
-              "6",
-              "8"
+              "default",
+              "dense",
+              "glyph",
+              "rain",
+              "soft"
             ],
             "required": false
           },
           {
-            "name": "inline",
-            "type": "boolean",
+            "name": "side",
+            "type": "enum",
+            "values": [
+              "left",
+              "right"
+            ],
+            "required": false
+          },
+          {
+            "name": "style",
+            "type": "enum",
+            "values": [
+              "chars",
+              "dots"
+            ],
             "required": false
           }
         ],
@@ -1726,7 +1700,7 @@
             "description": "The small character glyph…"
           }
         ],
-        "example": "<cc-component name=\"Texture\" size=\"16\" tone=\"accent\"></cc-component>"
+        "example": "<cc-component name=\"Texture\" variant=\"flat\" tone=\"accent\"></cc-component>"
       }
     },
     {
@@ -1754,35 +1728,8 @@
       "api": {
         "props": [
           {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent"
-            ],
-            "required": false
-          },
-          {
             "name": "contained",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "corner",
-            "type": "enum",
-            "values": [
-              "bl",
-              "br",
-              "tl",
-              "tr"
-            ],
-            "required": false
-          },
-          {
-            "name": "marks",
-            "type": "enum",
-            "values": [
-              "none"
-            ],
+            "type": "string",
             "required": false
           },
           {
@@ -1818,7 +1765,7 @@
             "description": "The column to the right of…"
           }
         ],
-        "example": "<cc-component name=\"App\" tone=\"accent\" corner=\"bl\">Content</cc-component>"
+        "example": "<cc-component name=\"App\" only=\"desktop\" sidebar=\"expanded\">Content</cc-component>"
       }
     },
     {
@@ -1847,54 +1794,7 @@
         "Cards or groups inside one band. Use Card."
       ],
       "api": {
-        "props": [
-          {
-            "name": "align",
-            "type": "enum",
-            "values": [
-              "center"
-            ],
-            "required": false
-          },
-          {
-            "name": "grow",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "marks",
-            "type": "enum",
-            "values": [
-              "none"
-            ],
-            "required": false
-          },
-          {
-            "name": "pad",
-            "type": "enum",
-            "values": [
-              "lg",
-              "md",
-              "none",
-              "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "sticky",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "surface",
-            "type": "enum",
-            "values": [
-              "sunken",
-              "surface"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -1909,7 +1809,7 @@
             "description": "One strip of the page."
           }
         ],
-        "example": "<cc-component name=\"Page\" align=\"center\" marks=\"none\">Content</cc-component>"
+        "example": "<cc-component name=\"Page\">Content</cc-component>"
       }
     },
     {
@@ -1965,21 +1865,7 @@
         "The text needs a size or weight. Use Type."
       ],
       "api": {
-        "props": [
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "neutral"
-            ],
-            "required": false
-          },
-          {
-            "name": "quiet",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -1994,7 +1880,7 @@
             "description": "The third-step colour for…"
           }
         ],
-        "example": "<cc-component name=\"Text\" tone=\"neutral\">Content</cc-component>"
+        "example": "<cc-component name=\"Text\">Content</cc-component>"
       }
     },
     {
@@ -2035,15 +1921,11 @@
             "type": "enum",
             "values": [
               "20",
-              "24",
               "28",
-              "32",
               "36",
               "40",
               "44",
-              "56",
-              "lg",
-              "sm"
+              "56"
             ],
             "required": false
           },
@@ -2064,12 +1946,12 @@
           },
           {
             "name": "bordered",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "icon",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
@@ -2137,11 +2019,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
               "lg",
               "sm"
             ],
@@ -2149,12 +2026,12 @@
           },
           {
             "name": "flush",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "interactive",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -2206,12 +2083,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
-              "lg",
               "sm"
             ],
             "required": false
@@ -2223,7 +2094,6 @@
               "accent",
               "danger",
               "info",
-              "inverse",
               "neutral",
               "success",
               "violet",
@@ -2281,23 +2151,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "framed",
-              "segmented",
-              "terminal"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "bold",
-              "danger",
-              "dim",
-              "info",
-              "success",
-              "violet",
-              "warning"
+              "framed"
             ],
             "required": false
           },
@@ -2311,22 +2165,17 @@
           },
           {
             "name": "expanded",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "hl",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "lines",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "wrap",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -2344,7 +2193,7 @@
             "description": "The header row."
           }
         ],
-        "example": "<cc-component name=\"Codeblock\" variant=\"segmented\" tone=\"bold\">Content</cc-component>"
+        "example": "<cc-component name=\"Codeblock\" variant=\"framed\" collapse=\"*\">Content</cc-component>"
       }
     },
     {
@@ -2384,38 +2233,8 @@
             "required": false
           },
           {
-            "name": "bump",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dragging",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "overflowBottom",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "overflowTop",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "start",
-            "type": "boolean",
-            "required": false
-          },
-          {
             "name": "staticDemo",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "step",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -2462,26 +2281,8 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "ghost",
-              "schema",
-              "steps",
-              "sticky"
+              "schema"
             ],
-            "required": false
-          },
-          {
-            "name": "mono",
-            "type": "enum",
-            "values": [
-              "both",
-              "key",
-              "value"
-            ],
-            "required": false
-          },
-          {
-            "name": "required",
-            "type": "boolean",
             "required": false
           }
         ],
@@ -2499,20 +2300,14 @@
             "description": "Row holding the label, the…"
           }
         ],
-        "example": "<cc-component name=\"Field\" variant=\"schema\" mono=\"both\">Content</cc-component>"
+        "example": "<cc-component name=\"Field\" variant=\"schema\">Content</cc-component>"
       }
     },
     {
       "name": "InlineCode",
       "purpose": "Inline code in the mono face on a faint fill (fd-code), with a tone for status words, and a keyboard key cap (fd-kbd)…",
       "variants": [
-        "tone-accent",
-        "tone-neutral",
-        "tone-success",
-        "tone-warning",
-        "tone-danger",
-        "tone-info",
-        "tone-loading"
+        "tone-accent"
       ],
       "states": [],
       "paths": [
@@ -2530,13 +2325,7 @@
             "name": "tone",
             "type": "enum",
             "values": [
-              "accent",
-              "danger",
-              "info",
-              "loading",
-              "neutral",
-              "success",
-              "warning"
+              "accent"
             ],
             "required": false
           }
@@ -2597,9 +2386,6 @@
       "variants": [
         "icon",
         "pill",
-        "quiet",
-        "accent",
-        "sunken",
         "live",
         "size-sm",
         "tone-success",
@@ -2625,11 +2411,8 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "accent",
               "icon",
-              "pill",
-              "quiet",
-              "sunken"
+              "pill"
             ],
             "required": false
           },
@@ -2637,12 +2420,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
-              "lg",
               "sm"
             ],
             "required": false
@@ -2654,7 +2431,6 @@
               "accent",
               "danger",
               "info",
-              "inverse",
               "neutral",
               "success",
               "violet",
@@ -2664,12 +2440,12 @@
           },
           {
             "name": "icon",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "live",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -2692,9 +2468,6 @@
       "variants": [
         "size-sm",
         "size-lg",
-        "mono-value",
-        "mono-key",
-        "mono-both",
         "fit"
       ],
       "states": [
@@ -2714,17 +2487,6 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "ghost",
-              "outline",
-              "steps",
-              "sticky"
-            ],
-            "required": false
-          },
-          {
             "name": "size",
             "type": "enum",
             "values": [
@@ -2735,32 +2497,12 @@
           },
           {
             "name": "fit",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "joined",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "kind",
-            "type": "enum",
-            "values": [
-              "action",
-              "chevron",
-              "tag"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "mono",
-            "type": "enum",
-            "values": [
-              "both",
-              "key",
-              "value"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -2774,7 +2516,7 @@
             "description": "A field and a button side by…"
           }
         ],
-        "example": "<cc-component name=\"Input\" variant=\"ghost\" size=\"sm\"></cc-component>"
+        "example": "<cc-component name=\"Input\" size=\"sm\"></cc-component>"
       }
     },
     {
@@ -2784,11 +2526,7 @@
         "switcher",
         "tone-danger",
         "submenu-*",
-        "icon",
-        "side-top",
-        "side-bottom",
-        "align-start",
-        "align-end"
+        "icon"
       ],
       "states": [
         "disabled",
@@ -2812,74 +2550,22 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "ghost",
               "switcher"
             ],
             "required": false
           },
           {
-            "name": "tone",
+            "name": "docPicker",
             "type": "enum",
             "values": [
-              "danger",
-              "info",
-              "loading",
-              "neutral",
-              "success",
-              "warning"
-            ],
-            "required": false
-          },
-          {
-            "name": "align",
-            "type": "enum",
-            "values": [
-              "end",
-              "start"
-            ],
-            "required": false
-          },
-          {
-            "name": "highlighted",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "icon",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "measuring",
-            "type": "enum",
-            "values": [
-              "settle",
-              "true"
-            ],
-            "required": false
-          },
-          {
-            "name": "side",
-            "type": "enum",
-            "values": [
-              "bottom",
-              "left",
-              "right",
-              "top"
+              "example",
+              "lang"
             ],
             "required": false
           },
           {
             "name": "staticDemo",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "submenu",
-            "type": "enum",
-            "values": [
-              "*"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -2897,7 +2583,7 @@
             "description": "Title and close button row."
           }
         ],
-        "example": "<cc-component name=\"Menu\" variant=\"switcher\" tone=\"danger\">Content</cc-component>"
+        "example": "<cc-component name=\"Menu\" variant=\"switcher\" docPicker=\"example\">Content</cc-component>"
       }
     },
     {
@@ -2931,62 +2617,7 @@
         "A small control or one line of text. Use Loader."
       ],
       "api": {
-        "props": [
-          {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "bars"
-            ],
-            "required": false
-          },
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "16",
-              "20",
-              "24",
-              "32",
-              "40",
-              "48",
-              "56",
-              "64",
-              "caption",
-              "display",
-              "eyebrow",
-              "h1",
-              "h2",
-              "h3",
-              "label",
-              "lead",
-              "lg",
-              "mono",
-              "sm",
-              "stat",
-              "xs"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent"
-            ],
-            "required": false
-          },
-          {
-            "name": "search",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "square",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "skeleton",
@@ -3001,7 +2632,7 @@
             "description": "A title bar at a type role."
           }
         ],
-        "example": "<cc-component name=\"Skeleton\" variant=\"bars\" size=\"display\"></cc-component>"
+        "example": "<cc-component name=\"Skeleton\"></cc-component>"
       }
     },
     {
@@ -3032,8 +2663,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "accent",
-              "terminal"
+              "accent"
             ],
             "required": false
           },
@@ -3098,50 +2728,8 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "inline",
-              "plain",
-              "ring",
-              "segmented",
-              "steps"
-            ],
-            "required": false
-          },
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "16",
-              "24",
-              "2xs",
-              "40",
-              "lg",
-              "md",
-              "sm",
-              "xl",
-              "xs"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "auto",
-              "danger",
-              "info",
-              "success",
-              "violet",
-              "warning"
-            ],
-            "required": false
-          },
-          {
             "name": "actions",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
@@ -3158,96 +2746,72 @@
           },
           {
             "name": "expand",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "expanded",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "href",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "mono",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "muted",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "num",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "overflow",
-            "type": "enum",
-            "values": [
-              "both",
-              "end",
-              "start"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "primary",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "select",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "shape",
-            "type": "enum",
-            "values": [
-              "circle",
-              "pill",
-              "round",
-              "tile"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "skeleton",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "stack",
-            "type": "enum",
-            "values": [
-              "hide"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "stackOnly",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "stackTitle",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "sticky",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "wrap",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -3265,7 +2829,7 @@
             "description": "Frame around the scroller…"
           }
         ],
-        "example": "<cc-component name=\"Table\" variant=\"inline\" size=\"16\">Content</cc-component>"
+        "example": "<cc-component name=\"Table\" col=\"fit\">Content</cc-component>"
       }
     },
     {
@@ -3297,14 +2861,13 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "bare",
-              "terminal"
+              "bare"
             ],
             "required": false
           },
           {
-            "name": "container",
-            "type": "boolean",
+            "name": "toolbar",
+            "type": "string",
             "required": false
           }
         ],
@@ -3332,9 +2895,6 @@
         "solid",
         "outline",
         "mono",
-        "quiet",
-        "sunken",
-        "accent",
         "dot",
         "icon",
         "tone-success",
@@ -3362,13 +2922,10 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "accent",
               "lg",
               "mono",
               "outline",
-              "quiet",
-              "solid",
-              "sunken"
+              "solid"
             ],
             "required": false
           },
@@ -3376,13 +2933,7 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
-              "lg",
-              "sm"
+              "lg"
             ],
             "required": false
           },
@@ -3393,7 +2944,6 @@
               "accent",
               "danger",
               "info",
-              "inverse",
               "neutral",
               "success",
               "violet",
@@ -3403,12 +2953,12 @@
           },
           {
             "name": "dot",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "icon",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -3426,7 +2976,7 @@
             "description": "The button that removes a…"
           }
         ],
-        "example": "<cc-component name=\"Badge\" variant=\"solid\" size=\"20\">Content</cc-component>"
+        "example": "<cc-component name=\"Badge\" variant=\"solid\" size=\"lg\">Content</cc-component>"
       }
     },
     {
@@ -3457,11 +3007,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
               "lg",
               "sm"
             ],
@@ -3469,17 +3014,7 @@
           },
           {
             "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "danger",
-              "info",
-              "inverse",
-              "neutral",
-              "success",
-              "violet",
-              "warning"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -3497,7 +3032,7 @@
             "description": "The icon tile."
           }
         ],
-        "example": "<cc-component name=\"Empty\" size=\"sm\" tone=\"danger\">Content</cc-component>"
+        "example": "<cc-component name=\"Empty\" size=\"sm\">Content</cc-component>"
       }
     },
     {
@@ -3599,17 +3134,20 @@
           },
           {
             "name": "block",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "empty",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "iconOnly",
-            "type": "boolean",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "tweak",
+            "type": "enum",
+            "values": [
+              "theme"
+            ],
             "required": false
           }
         ],
@@ -3699,55 +3237,18 @@
       "api": {
         "props": [
           {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "auto",
-              "danger",
-              "info",
-              "success",
-              "violet",
-              "warning"
-            ],
-            "required": false
-          },
-          {
             "name": "card",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "divided",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "end",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "interactive",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "mono",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "shape",
-            "type": "enum",
-            "values": [
-              "round"
-            ],
-            "required": false
-          },
-          {
-            "name": "unread",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -3765,7 +3266,7 @@
             "description": "One row."
           }
         ],
-        "example": "<cc-component name=\"List\" tone=\"accent\" shape=\"round\">Content</cc-component>"
+        "example": "<cc-component name=\"List\">Content</cc-component>"
       }
     },
     {
@@ -3797,10 +3298,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "ghost",
-              "outline",
-              "steps",
-              "sticky"
+              "outline"
             ],
             "required": false
           },
@@ -3815,12 +3313,12 @@
           },
           {
             "name": "block",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "fit",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -3869,39 +3367,18 @@
             "type": "enum",
             "values": [
               "lg",
-              "md",
-              "sm"
+              "md"
             ],
-            "required": false
-          },
-          {
-            "name": "dragging",
-            "type": "boolean",
             "required": false
           },
           {
             "name": "side",
-            "type": "enum",
-            "values": [
-              "bottom",
-              "left",
-              "right"
-            ],
-            "required": false
-          },
-          {
-            "name": "start",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "staticDemo",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "step",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -3919,15 +3396,14 @@
             "description": "A compact title row with the…"
           }
         ],
-        "example": "<cc-component name=\"Sheet\" size=\"sm\" side=\"right\">Content</cc-component>"
+        "example": "<cc-component name=\"Sheet\" size=\"lg\">Content</cc-component>"
       }
     },
     {
       "name": "Split",
       "purpose": "A main area with a 320px panel at its end, or a nav at its start. Below 760px of page width the panel stacks under, or…",
       "variants": [
-        "side-start",
-        "grow"
+        "side-start"
       ],
       "states": [],
       "paths": [
@@ -3941,11 +3417,6 @@
       ],
       "api": {
         "props": [
-          {
-            "name": "grow",
-            "type": "boolean",
-            "required": false
-          },
           {
             "name": "side",
             "type": "enum",
@@ -3977,7 +3448,6 @@
       "purpose": "A real checkbox with role=\"switch\": off is a faint ink track, on is the accent. The thumb slides with a slight spring…",
       "variants": [
         "size-sm",
-        "size-lg",
         "label-start",
         "locked"
       ],
@@ -4002,7 +3472,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "lg",
               "sm"
             ],
             "required": false
@@ -4017,7 +3486,7 @@
           },
           {
             "name": "locked",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -4042,10 +3511,8 @@
       "name": "TagInput",
       "purpose": "A field that turns typed values into removable tokens. Enter or a comma adds one, Backspace on an empty field removes…",
       "variants": [
-        "mono-both",
         "size-sm",
-        "size-lg",
-        "mode-entry"
+        "size-lg"
       ],
       "states": [
         "error",
@@ -4065,17 +3532,6 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "ghost",
-              "outline",
-              "steps",
-              "sticky"
-            ],
-            "required": false
-          },
-          {
             "name": "size",
             "type": "enum",
             "values": [
@@ -4085,31 +3541,16 @@
             "required": false
           },
           {
-            "name": "invalid",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "mode",
+            "name": "format",
             "type": "enum",
             "values": [
-              "entry"
+              "json"
             ],
             "required": false
           },
           {
             "name": "mono",
-            "type": "enum",
-            "values": [
-              "both",
-              "key",
-              "value"
-            ],
-            "required": false
-          },
-          {
-            "name": "new",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -4127,7 +3568,7 @@
             "description": "The typing input."
           }
         ],
-        "example": "<cc-component name=\"TagInput\" variant=\"ghost\" size=\"sm\">Content</cc-component>"
+        "example": "<cc-component name=\"TagInput\" size=\"sm\" format=\"json\">Content</cc-component>"
       }
     },
     {
@@ -4151,16 +3592,7 @@
         "The options are plain labels. Use Radio."
       ],
       "api": {
-        "props": [
-          {
-            "name": "layout",
-            "type": "enum",
-            "values": [
-              "grid"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -4175,7 +3607,7 @@
             "description": "The label that wraps the…"
           }
         ],
-        "example": "<cc-component name=\"Choice\" layout=\"grid\">Content</cc-component>"
+        "example": "<cc-component name=\"Choice\">Content</cc-component>"
       }
     },
     {
@@ -4198,7 +3630,7 @@
         "props": [
           {
             "name": "vertical",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -4245,113 +3677,8 @@
       "api": {
         "props": [
           {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "lg",
-              "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "strong"
-            ],
-            "required": false
-          },
-          {
-            "name": "atEnd",
-            "type": "boolean",
-            "required": false
-          },
-          {
             "name": "contained",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dir",
-            "type": "enum",
-            "values": [
-              "next",
-              "prev"
-            ],
-            "required": false
-          },
-          {
-            "name": "docHide",
-            "type": "enum",
-            "values": [
-              "*"
-            ],
-            "required": false
-          },
-          {
-            "name": "docShow",
-            "type": "enum",
-            "values": [
-              "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "kind",
-            "type": "enum",
-            "values": [
-              "request",
-              "response"
-            ],
-            "required": false
-          },
-          {
-            "name": "level",
-            "type": "enum",
-            "values": [
-              "2"
-            ],
-            "required": false
-          },
-          {
-            "name": "menuValue",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "method",
-            "type": "enum",
-            "values": [
-              "delete",
-              "get",
-              "patch",
-              "post",
-              "put"
-            ],
-            "required": false
-          },
-          {
-            "name": "mono",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "row",
-            "type": "enum",
-            "values": [
-              "crumbs",
-              "sections",
-              "tools"
-            ],
-            "required": false
-          },
-          {
-            "name": "width",
-            "type": "enum",
-            "values": [
-              "wide"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -4369,7 +3696,7 @@
             "description": "The sticky two-row top bar."
           }
         ],
-        "example": "<cc-component name=\"Doc\" size=\"lg\" tone=\"accent\">Content</cc-component>"
+        "example": "<cc-component name=\"Doc\">Content</cc-component>"
       }
     },
     {
@@ -4405,8 +3732,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "plain",
-              "terminal"
+              "plain"
             ],
             "required": false
           },
@@ -4416,6 +3742,11 @@
             "values": [
               "sm"
             ],
+            "required": false
+          },
+          {
+            "name": "copyable",
+            "type": "string",
             "required": false
           },
           {
@@ -4459,8 +3790,7 @@
         "kind-chevron",
         "size-sm",
         "size-lg",
-        "fit",
-        "mono-both"
+        "fit"
       ],
       "states": [
         "error"
@@ -4487,37 +3817,12 @@
           },
           {
             "name": "fit",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "kind",
-            "type": "enum",
-            "values": [
-              "action",
-              "chevron",
-              "tag",
-              "text",
-              "unit"
-            ],
-            "required": false
-          },
-          {
-            "name": "mode",
-            "type": "enum",
-            "values": [
-              "entry"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "mono",
-            "type": "enum",
-            "values": [
-              "both",
-              "key",
-              "value"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -4535,7 +3840,7 @@
             "description": "An icon, text, unit, chevron…"
           }
         ],
-        "example": "<cc-component name=\"InputGroup\" size=\"sm\" kind=\"tag\">Content</cc-component>"
+        "example": "<cc-component name=\"InputGroup\" size=\"sm\">Content</cc-component>"
       }
     },
     {
@@ -4574,29 +3879,13 @@
             "values": [
               "1",
               "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ],
-            "required": false
-          },
-          {
-            "name": "copied",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "copy",
-            "type": "enum",
-            "values": [
-              "*"
+              "3"
             ],
             "required": false
           },
           {
             "name": "divided",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
@@ -4614,16 +3903,6 @@
               "split"
             ],
             "required": false
-          },
-          {
-            "name": "mono",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "plain",
-            "type": "boolean",
-            "required": false
           }
         ],
         "parts": [
@@ -4640,7 +3919,7 @@
             "description": "One key and value pair."
           }
         ],
-        "example": "<cc-component name=\"Kv\" cols=\"1\" copy=\"*\">Content</cc-component>"
+        "example": "<cc-component name=\"Kv\" cols=\"1\" keys=\"plain\">Content</cc-component>"
       }
     },
     {
@@ -4672,14 +3951,6 @@
       "api": {
         "props": [
           {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent"
-            ],
-            "required": false
-          },
-          {
             "name": "mask",
             "type": "enum",
             "values": [
@@ -4694,6 +3965,14 @@
             "type": "enum",
             "values": [
               "entry"
+            ],
+            "required": false
+          },
+          {
+            "name": "noun",
+            "type": "enum",
+            "values": [
+              "*"
             ],
             "required": false
           }
@@ -4712,7 +3991,7 @@
             "description": "The drawn value."
           }
         ],
-        "example": "<cc-component name=\"Secret\" tone=\"accent\" mask=\"partial\">Content</cc-component>"
+        "example": "<cc-component name=\"Secret\" mask=\"partial\" mode=\"entry\">Content</cc-component>"
       }
     },
     {
@@ -4737,16 +4016,7 @@
         "Moving between views of one page. Use Tabs."
       ],
       "api": {
-        "props": [
-          {
-            "name": "side",
-            "type": "enum",
-            "values": [
-              "left"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -4761,7 +4031,7 @@
             "description": "Brand and the collapse button."
           }
         ],
-        "example": "<cc-component name=\"Sidebar\" side=\"left\">Content</cc-component>"
+        "example": "<cc-component name=\"Sidebar\">Content</cc-component>"
       }
     },
     {
@@ -4774,8 +4044,7 @@
         "dir-down",
         "tone-success",
         "tone-danger",
-        "tone-warning",
-        "tone-auto"
+        "tone-warning"
       ],
       "states": [
         "hover",
@@ -4796,36 +4065,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "cards",
-              "inline",
-              "ring",
-              "segmented",
-              "steps"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "auto",
-              "danger",
-              "success",
-              "warning"
-            ],
-            "required": false
-          },
-          {
-            "name": "card",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dir",
-            "type": "enum",
-            "values": [
-              "down",
-              "up"
+              "cards"
             ],
             "required": false
           }
@@ -4844,7 +4084,7 @@
             "description": "One tile."
           }
         ],
-        "example": "<cc-component name=\"Stats\" variant=\"cards\" tone=\"success\">Content</cc-component>"
+        "example": "<cc-component name=\"Stats\" variant=\"cards\">Content</cc-component>"
       }
     },
     {
@@ -4870,6 +4110,14 @@
       "api": {
         "props": [
           {
+            "name": "current",
+            "type": "enum",
+            "values": [
+              "*"
+            ],
+            "required": false
+          },
+          {
             "name": "orientation",
             "type": "enum",
             "values": [
@@ -4892,17 +4140,14 @@
             "description": "One step; carries data-state."
           }
         ],
-        "example": "<cc-component name=\"Steps\" orientation=\"vertical\">Content</cc-component>"
+        "example": "<cc-component name=\"Steps\" current=\"*\" orientation=\"vertical\">Content</cc-component>"
       }
     },
     {
       "name": "Tabs",
       "purpose": "Underline tabs on a hairline; the accent underline slides between them. Buttons with role=\"tab\" and aria-controls get…",
       "variants": [
-        "size-sm",
-        "overflow-start",
-        "overflow-end",
-        "overflow-both"
+        "size-sm"
       ],
       "states": [
         "disabled",
@@ -4928,21 +4173,6 @@
               "sm"
             ],
             "required": false
-          },
-          {
-            "name": "indicator",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "overflow",
-            "type": "enum",
-            "values": [
-              "both",
-              "end",
-              "start"
-            ],
-            "required": false
           }
         ],
         "parts": [
@@ -4959,17 +4189,13 @@
             "description": "One tab; a button or a link."
           }
         ],
-        "example": "<cc-component name=\"Tabs\" size=\"sm\" overflow=\"start\">Content</cc-component>"
+        "example": "<cc-component name=\"Tabs\" size=\"sm\">Content</cc-component>"
       }
     },
     {
       "name": "ChipNav",
       "purpose": "A category strip, lighter than tabs: no underline, just ink. The selected chip turns weight 450 and its width is…",
-      "variants": [
-        "overflow-start",
-        "overflow-end",
-        "overflow-both"
-      ],
+      "variants": [],
       "states": [
         "disabled",
         "hover",
@@ -4987,23 +4213,7 @@
         "The items switch views of one object. Use Tabs."
       ],
       "api": {
-        "props": [
-          {
-            "name": "overflow",
-            "type": "enum",
-            "values": [
-              "both",
-              "end",
-              "start"
-            ],
-            "required": false
-          },
-          {
-            "name": "text",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -5018,7 +4228,7 @@
             "description": "One category; a link or a…"
           }
         ],
-        "example": "<cc-component name=\"ChipNav\" overflow=\"start\">Content</cc-component>"
+        "example": "<cc-component name=\"ChipNav\">Content</cc-component>"
       }
     },
     {
@@ -5046,11 +4256,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
               "lg",
               "sm"
             ],
@@ -5060,25 +4265,18 @@
             "name": "tone",
             "type": "enum",
             "values": [
-              "accent",
-              "danger",
-              "info",
-              "inverse",
-              "neutral",
-              "success",
-              "violet",
-              "warning"
+              "accent"
             ],
             "required": false
           },
           {
             "name": "excluded",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "icon",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -5140,49 +4338,35 @@
             "required": false
           },
           {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "bold",
-              "danger",
-              "dim",
-              "info",
-              "success",
-              "violet",
-              "warning"
-            ],
+            "name": "fit",
+            "type": "string",
             "required": false
           },
           {
-            "name": "fit",
-            "type": "boolean",
+            "name": "follow",
+            "type": "string",
             "required": false
           },
           {
             "name": "level",
             "type": "enum",
             "values": [
-              "debug",
-              "error",
-              "info",
-              "warn"
+              "info"
             ],
             "required": false
           },
           {
-            "name": "new",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "paused",
-            "type": "boolean",
+            "name": "logDemo",
+            "type": "enum",
+            "values": [
+              "api",
+              "cli"
+            ],
             "required": false
           },
           {
             "name": "wrap",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -5200,7 +4384,7 @@
             "description": "The toolbar."
           }
         ],
-        "example": "<cc-component name=\"Log\" variant=\"terminal\" tone=\"danger\">Content</cc-component>"
+        "example": "<cc-component name=\"Log\" variant=\"terminal\" level=\"info\">Content</cc-component>"
       }
     },
     {
@@ -5226,22 +4410,20 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "ghost",
-              "outline",
-              "steps",
-              "sticky"
-            ],
-            "required": false
-          },
-          {
             "name": "size",
             "type": "enum",
             "values": [
               "lg",
               "sm"
+            ],
+            "required": false
+          },
+          {
+            "name": "type",
+            "type": "enum",
+            "values": [
+              "alphanumeric",
+              "numeric"
             ],
             "required": false
           }
@@ -5256,7 +4438,7 @@
             "description": "A separator between groups…"
           }
         ],
-        "example": "<cc-component name=\"Otp\" variant=\"ghost\" size=\"sm\"></cc-component>"
+        "example": "<cc-component name=\"Otp\" size=\"sm\" type=\"alphanumeric\"></cc-component>"
       }
     },
     {
@@ -5267,9 +4449,6 @@
         "size-lg",
         "size-auto",
         "arrow",
-        "side-top",
-        "side-bottom",
-        "align-start",
         "align-end",
         "align-center"
       ],
@@ -5294,48 +4473,19 @@
             "values": [
               "auto",
               "lg",
+              "md",
               "sm"
             ],
             "required": false
           },
           {
-            "name": "align",
-            "type": "enum",
-            "values": [
-              "center",
-              "end",
-              "start"
-            ],
-            "required": false
-          },
-          {
             "name": "arrow",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "measuring",
-            "type": "enum",
-            "values": [
-              "settle",
-              "true"
-            ],
-            "required": false
-          },
-          {
-            "name": "side",
-            "type": "enum",
-            "values": [
-              "bottom",
-              "left",
-              "right",
-              "top"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "staticDemo",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -5353,7 +4503,7 @@
             "description": "The header row."
           }
         ],
-        "example": "<cc-component name=\"Popover\" size=\"sm\" align=\"start\">Content</cc-component>"
+        "example": "<cc-component name=\"Popover\" size=\"sm\">Content</cc-component>"
       }
     },
     {
@@ -5391,9 +4541,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "inline",
               "ring",
-              "segmented",
               "steps"
             ],
             "required": false
@@ -5404,9 +4552,7 @@
             "values": [
               "16",
               "24",
-              "40",
-              "lg",
-              "sm"
+              "40"
             ],
             "required": false
           },
@@ -5423,28 +4569,8 @@
             "required": false
           },
           {
-            "name": "complete",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "current",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "done",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "empty",
-            "type": "boolean",
-            "required": false
-          },
-          {
             "name": "indeterminate",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -5494,7 +4620,7 @@
           },
           {
             "name": "footnotes",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -5539,10 +4665,7 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "ghost",
-              "soft",
-              "steps",
-              "sticky"
+              "soft"
             ],
             "required": false
           },
@@ -5557,25 +4680,12 @@
           },
           {
             "name": "fit",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "mode",
-            "type": "enum",
-            "values": [
-              "entry"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "mono",
-            "type": "enum",
-            "values": [
-              "both",
-              "key",
-              "value"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -5613,16 +4723,7 @@
         "The title row of a page. Use PageHead."
       ],
       "api": {
-        "props": [
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "full"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -5637,7 +4738,7 @@
             "description": "The search field; grows to…"
           }
         ],
-        "example": "<cc-component name=\"Toolbar\" size=\"full\">Content</cc-component>"
+        "example": "<cc-component name=\"Toolbar\">Content</cc-component>"
       }
     },
     {
@@ -5663,88 +4764,7 @@
         "A single light and dark switch. Use Segmented."
       ],
       "api": {
-        "props": [
-          {
-            "name": "changed",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dragging",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "inline",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "moved",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "palette",
-            "type": "enum",
-            "values": [
-              "clay",
-              "ember",
-              "forest",
-              "glacier",
-              "graphite",
-              "honey",
-              "iris",
-              "lagoon",
-              "midnight",
-              "mint",
-              "ocean",
-              "paper",
-              "plum",
-              "rose",
-              "volt"
-            ],
-            "required": false
-          },
-          {
-            "name": "shape",
-            "type": "enum",
-            "values": [
-              "round",
-              "square"
-            ],
-            "required": false
-          },
-          {
-            "name": "type",
-            "type": "enum",
-            "values": [
-              "atelier",
-              "book",
-              "cyber",
-              "editorial",
-              "gallery",
-              "geist",
-              "grotesk",
-              "loud",
-              "matrix",
-              "pixel",
-              "poster",
-              "terminal"
-            ],
-            "required": false
-          },
-          {
-            "name": "weight",
-            "type": "enum",
-            "values": [
-              "1",
-              "1.5",
-              "2"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -5759,7 +4779,7 @@
             "description": "The drag handle with the…"
           }
         ],
-        "example": "<cc-component name=\"Tweaks\" palette=\"clay\" shape=\"round\">Content</cc-component>"
+        "example": "<cc-component name=\"Tweaks\">Content</cc-component>"
       }
     },
     {
@@ -5813,24 +4833,7 @@
         "A person or a team needs an avatar. Use Avatar."
       ],
       "api": {
-        "props": [
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -5845,7 +4848,7 @@
             "description": "The 36px mark, an inline SVG…"
           }
         ],
-        "example": "<cc-component name=\"Brand\" size=\"sm\" tone=\"accent\">Content</cc-component>"
+        "example": "<cc-component name=\"Brand\">Content</cc-component>"
       }
     },
     {
@@ -5908,16 +4911,6 @@
             "required": false
           },
           {
-            "name": "enter",
-            "type": "enum",
-            "values": [
-              "done",
-              "pending",
-              "run"
-            ],
-            "required": false
-          },
-          {
             "name": "grid",
             "type": "enum",
             "values": [
@@ -5928,50 +4921,15 @@
             "required": false
           },
           {
+            "name": "legend",
+            "type": "string",
+            "required": false
+          },
+          {
             "name": "ring",
             "type": "enum",
             "values": [
               "bg"
-            ],
-            "required": false
-          },
-          {
-            "name": "s",
-            "type": "enum",
-            "values": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ],
-            "required": false
-          },
-          {
-            "name": "shape",
-            "type": "enum",
-            "values": [
-              "square"
-            ],
-            "required": false
-          },
-          {
-            "name": "snap",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "total",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "trend",
-            "type": "enum",
-            "values": [
-              "bad",
-              "good"
             ],
             "required": false
           }
@@ -5998,8 +4956,6 @@
       "purpose": "The prompt form for an agent. A textarea grows to 240px, then scrolls. A row of tools holds the model chip…",
       "variants": [
         "playground",
-        "bare",
-        "ghost",
         "size-sm",
         "side-top"
       ],
@@ -6026,54 +4982,13 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "bare",
-              "ghost",
               "playground"
             ],
             "required": false
           },
           {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "danger",
-              "warning"
-            ],
-            "required": false
-          },
-          {
             "name": "focus",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "ready",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "side",
-            "type": "enum",
-            "values": [
-              "top"
-            ],
-            "required": false
-          },
-          {
-            "name": "upload",
-            "type": "enum",
-            "values": [
-              "failed",
-              "uploading"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -6091,7 +5006,7 @@
             "description": "The textarea; grows to 240px."
           }
         ],
-        "example": "<cc-component name=\"Composer\" variant=\"playground\" size=\"sm\">Content</cc-component>"
+        "example": "<cc-component name=\"Composer\" variant=\"playground\">Content</cc-component>"
       }
     },
     {
@@ -6116,7 +5031,7 @@
         "props": [
           {
             "name": "confirmInput",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -6190,12 +5105,7 @@
     {
       "name": "DatePicker",
       "purpose": "A date range panel: presets (24h, 7d, 30d, month, custom) beside a Monday-first month grid. Click a start and an end…",
-      "variants": [
-        "size-sm",
-        "range-start",
-        "range-middle",
-        "range-end"
-      ],
+      "variants": [],
       "states": [
         "loading",
         "disabled",
@@ -6214,51 +5124,7 @@
         "A single date in a form. Use Input."
       ],
       "api": {
-        "props": [
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "auto",
-              "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "cap",
-            "type": "enum",
-            "values": [
-              "end",
-              "start"
-            ],
-            "required": false
-          },
-          {
-            "name": "pending",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "preview",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "range",
-            "type": "enum",
-            "values": [
-              "end",
-              "middle",
-              "start"
-            ],
-            "required": false
-          },
-          {
-            "name": "today",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -6273,19 +5139,16 @@
             "description": "The preset column."
           }
         ],
-        "example": "<cc-component name=\"DatePicker\" size=\"sm\" cap=\"end\">Content</cc-component>"
+        "example": "<cc-component name=\"DatePicker\">Content</cc-component>"
       }
     },
     {
       "name": "DocCards",
       "purpose": "A grid of fd-card[data-interactive] items, each with an icon, a title and one line. They are flush with the page until…",
       "variants": [
-        "cols-1",
         "cols-2",
         "cols-3",
-        "cols-4",
-        "cols-5",
-        "cols-6"
+        "cols-4"
       ],
       "states": [],
       "paths": [
@@ -6303,12 +5166,9 @@
             "name": "cols",
             "type": "enum",
             "values": [
-              "1",
               "2",
               "3",
-              "4",
-              "5",
-              "6"
+              "4"
             ],
             "required": false
           }
@@ -6323,7 +5183,7 @@
             "description": "The grid."
           }
         ],
-        "example": "<cc-component name=\"DocCards\" cols=\"1\">Content</cc-component>"
+        "example": "<cc-component name=\"DocCards\" cols=\"2\">Content</cc-component>"
       }
     },
     {
@@ -6349,16 +5209,8 @@
       "api": {
         "props": [
           {
-            "name": "ratio",
-            "type": "enum",
-            "values": [
-              "wide"
-            ],
-            "required": false
-          },
-          {
             "name": "zoom",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -6376,14 +5228,13 @@
             "description": "The image, video or…"
           }
         ],
-        "example": "<cc-component name=\"DocFrame\" ratio=\"wide\">Content</cc-component>"
+        "example": "<cc-component name=\"DocFrame\">Content</cc-component>"
       }
     },
     {
       "name": "Filter",
       "purpose": "A soft chip that reads like a button at rest. With a value chosen it turns white, the value goes to full ink and a…",
       "variants": [
-        "active",
         "size-sm"
       ],
       "states": [
@@ -6408,17 +5259,8 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "16",
-              "24",
-              "40",
-              "lg",
               "sm"
             ],
-            "required": false
-          },
-          {
-            "name": "active",
-            "type": "boolean",
             "required": false
           }
         ],
@@ -6465,44 +5307,12 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "ghost",
-              "steps",
-              "sticky"
-            ],
-            "required": false
-          },
-          {
             "name": "size",
             "type": "enum",
             "values": [
               "full",
               "lg",
               "sm"
-            ],
-            "required": false
-          },
-          {
-            "name": "align",
-            "type": "enum",
-            "values": [
-              "between",
-              "start"
-            ],
-            "required": false
-          },
-          {
-            "name": "inlineMobile",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "layout",
-            "type": "enum",
-            "values": [
-              "stack"
             ],
             "required": false
           }
@@ -6521,7 +5331,7 @@
             "description": "One setting: text left…"
           }
         ],
-        "example": "<cc-component name=\"Form\" variant=\"sticky\" size=\"sm\">Content</cc-component>"
+        "example": "<cc-component name=\"Form\" size=\"sm\">Content</cc-component>"
       }
     },
     {
@@ -6530,8 +5340,7 @@
       "variants": [
         "role-user",
         "role-assistant",
-        "actions-visible",
-        "new"
+        "actions-visible"
       ],
       "states": [
         "error",
@@ -6560,20 +5369,6 @@
             "required": false
           },
           {
-            "name": "chatAction",
-            "type": "enum",
-            "values": [
-              "down",
-              "up"
-            ],
-            "required": false
-          },
-          {
-            "name": "new",
-            "type": "boolean",
-            "required": false
-          },
-          {
             "name": "role",
             "type": "enum",
             "values": [
@@ -6597,7 +5392,7 @@
             "description": "The text; headings, lists…"
           }
         ],
-        "example": "<cc-component name=\"Message\" actions=\"visible\" chatAction=\"down\">Content</cc-component>"
+        "example": "<cc-component name=\"Message\" actions=\"visible\" role=\"user\">Content</cc-component>"
       }
     },
     {
@@ -6608,7 +5403,6 @@
         "segmented",
         "size-sm",
         "size-lg",
-        "tone-auto",
         "tone-neutral",
         "tone-accent",
         "tone-success",
@@ -6635,9 +5429,7 @@
             "type": "enum",
             "values": [
               "inline",
-              "ring",
-              "segmented",
-              "steps"
+              "segmented"
             ],
             "required": false
           },
@@ -6645,9 +5437,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "16",
-              "24",
-              "40",
               "lg",
               "sm"
             ],
@@ -6658,7 +5447,6 @@
             "type": "enum",
             "values": [
               "accent",
-              "auto",
               "danger",
               "neutral",
               "success",
@@ -6710,8 +5498,6 @@
       "name": "MobileNav",
       "purpose": "On phones the menu button opens a full-height sheet under the top bar: the upgrade first, then the account, then every…",
       "variants": [
-        "state-open",
-        "state-closed",
         "level-2",
         "only-mobile",
         "only-desktop"
@@ -6734,14 +5520,6 @@
       ],
       "api": {
         "props": [
-          {
-            "name": "level",
-            "type": "enum",
-            "values": [
-              "2"
-            ],
-            "required": false
-          },
           {
             "name": "only",
             "type": "enum",
@@ -6766,7 +5544,7 @@
             "description": "The dimmed backdrop."
           }
         ],
-        "example": "<cc-component name=\"MobileNav\" level=\"2\" only=\"mobile\">Content</cc-component>"
+        "example": "<cc-component name=\"MobileNav\" only=\"mobile\">Content</cc-component>"
       }
     },
     {
@@ -6831,20 +5609,16 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "ghost",
-              "steps",
-              "sticky"
+              "steps"
             ],
             "required": false
           },
           {
-            "name": "active",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dragging",
-            "type": "boolean",
+            "name": "bubble",
+            "type": "enum",
+            "values": [
+              "off"
+            ],
             "required": false
           }
         ],
@@ -6862,7 +5636,7 @@
             "description": "Clickable stop labels under…"
           }
         ],
-        "example": "<cc-component name=\"Slider\" variant=\"steps\"></cc-component>"
+        "example": "<cc-component name=\"Slider\" variant=\"steps\" bubble=\"off\"></cc-component>"
       }
     },
     {
@@ -6891,36 +5665,7 @@
         "Parallel staged work with a graph of what ran after what. Use Pipeline."
       ],
       "api": {
-        "props": [
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "danger",
-              "info",
-              "inverse",
-              "neutral",
-              "success",
-              "violet",
-              "warning"
-            ],
-            "required": false
-          },
-          {
-            "name": "kind",
-            "type": "enum",
-            "values": [
-              "group"
-            ],
-            "required": false
-          },
-          {
-            "name": "live",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -6935,7 +5680,7 @@
             "description": "One event."
           }
         ],
-        "example": "<cc-component name=\"Timeline\" tone=\"success\" kind=\"group\">Content</cc-component>"
+        "example": "<cc-component name=\"Timeline\">Content</cc-component>"
       }
     },
     {
@@ -6948,9 +5693,7 @@
         "tone-warning",
         "tone-info",
         "tone-loading",
-        "tone-accent",
-        "front",
-        "hidden"
+        "tone-accent"
       ],
       "states": [
         "loading",
@@ -6983,33 +5726,8 @@
             "required": false
           },
           {
-            "name": "expanded",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "front",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "hidden",
-            "type": "boolean",
-            "required": false
-          },
-          {
             "name": "staticDemo",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "swiped",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "swiping",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -7052,18 +5770,7 @@
         "The action is a plain command in the page. Use Button."
       ],
       "api": {
-        "props": [
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "info",
-              "neutral",
-              "violet"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -7078,7 +5785,7 @@
             "description": "The overlapping tiles."
           }
         ],
-        "example": "<cc-component name=\"UseAgent\" tone=\"info\">Content</cc-component>"
+        "example": "<cc-component name=\"UseAgent\">Content</cc-component>"
       }
     },
     {
@@ -7108,16 +5815,13 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "accent",
-              "card",
-              "quiet",
-              "sunken"
+              "card"
             ],
             "required": false
           },
           {
-            "name": "iconLead",
-            "type": "boolean",
+            "name": "single",
+            "type": "string",
             "required": false
           }
         ],
@@ -7148,7 +5852,6 @@
         "size-28",
         "size-40",
         "tone-accent",
-        "tone-neutral",
         "tone-success",
         "tone-danger",
         "overflow",
@@ -7179,10 +5882,7 @@
               "24",
               "28",
               "32",
-              "36",
-              "40",
-              "lg",
-              "sm"
+              "40"
             ],
             "required": false
           },
@@ -7193,8 +5893,6 @@
               "accent",
               "danger",
               "info",
-              "inverse",
-              "neutral",
               "success",
               "violet",
               "warning"
@@ -7202,13 +5900,8 @@
             "required": false
           },
           {
-            "name": "icon",
-            "type": "boolean",
-            "required": false
-          },
-          {
             "name": "overflow",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
@@ -7221,13 +5914,7 @@
           },
           {
             "name": "status",
-            "type": "enum",
-            "values": [
-              "away",
-              "busy",
-              "offline",
-              "online"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -7253,10 +5940,7 @@
       "purpose": "A list for a ranking: label left, a thin bar, the figure right in mono. It is plain CSS driven by one custom property…",
       "variants": [
         "tone-accent",
-        "tone-neutral",
-        "s-1",
-        "s-2",
-        "s-3"
+        "tone-neutral"
       ],
       "states": [
         "loading"
@@ -7286,29 +5970,6 @@
               "warning"
             ],
             "required": false
-          },
-          {
-            "name": "enter",
-            "type": "enum",
-            "values": [
-              "done",
-              "pending",
-              "run"
-            ],
-            "required": false
-          },
-          {
-            "name": "s",
-            "type": "enum",
-            "values": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ],
-            "required": false
           }
         ],
         "parts": [
@@ -7325,7 +5986,7 @@
             "description": "The name."
           }
         ],
-        "example": "<cc-component name=\"Bars\" tone=\"accent\" enter=\"done\"></cc-component>"
+        "example": "<cc-component name=\"Bars\" tone=\"accent\"></cc-component>"
       }
     },
     {
@@ -7344,7 +6005,6 @@
         "view-conversation",
         "view-history",
         "view-offline",
-        "expanded",
         "contained"
       ],
       "states": [
@@ -7367,45 +6027,6 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "faces",
-              "ghost",
-              "outline",
-              "primary",
-              "segmented",
-              "stars"
-            ],
-            "required": false
-          },
-          {
-            "name": "size",
-            "type": "enum",
-            "values": [
-              "12",
-              "28",
-              "40",
-              "sm",
-              "xl",
-              "xs"
-            ],
-            "required": false
-          },
-          {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "accent",
-              "danger",
-              "info",
-              "neutral",
-              "success",
-              "warning"
-            ],
-            "required": false
-          },
-          {
             "name": "agent",
             "type": "enum",
             "values": [
@@ -7417,95 +6038,38 @@
             "required": false
           },
           {
-            "name": "art",
-            "type": "enum",
-            "values": [
-              "chart",
-              "code",
-              "error"
-            ],
-            "required": false
-          },
-          {
             "name": "chatClose",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "chatExpand",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "chatMinimize",
-            "type": "boolean",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "chatPlay",
+            "type": "enum",
+            "values": [
+              "ai",
+              "handoff",
+              "support"
+            ],
             "required": false
           },
           {
             "name": "contained",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dir",
-            "type": "enum",
-            "values": [
-              "next",
-              "prev"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "disabled",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "dragging",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "end",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "enter",
-            "type": "enum",
-            "values": [
-              "back"
-            ],
-            "required": false
-          },
-          {
-            "name": "expanded",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "instant",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "layout",
-            "type": "enum",
-            "values": [
-              "grid",
-              "row",
-              "split"
-            ],
-            "required": false
-          },
-          {
-            "name": "leave",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "lit",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
@@ -7516,47 +6080,6 @@
               "panel",
               "popup",
               "side"
-            ],
-            "required": false
-          },
-          {
-            "name": "more",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "start",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "static",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "swap",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "tick",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "unread",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "view",
-            "type": "enum",
-            "values": [
-              "conversation",
-              "history",
-              "home",
-              "offline"
             ],
             "required": false
           }
@@ -7575,7 +6098,7 @@
             "description": "The 52px head: who answers…"
           }
         ],
-        "example": "<cc-component name=\"Chat\" variant=\"faces\" size=\"12\">Content</cc-component>"
+        "example": "<cc-component name=\"Chat\" agent=\"ai\" chatPlay=\"ai\">Content</cc-component>"
       }
     },
     {
@@ -7600,13 +6123,7 @@
         "One choice from a short list. Use Menu."
       ],
       "api": {
-        "props": [
-          {
-            "name": "highlighted",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -7646,7 +6163,7 @@
         "props": [
           {
             "name": "codefieldFormat",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -7670,10 +6187,7 @@
     {
       "name": "DataCard",
       "purpose": "A framed block: a heading and description on the left, the figure and its unit opposite, and a toggle that reveals…",
-      "variants": [
-        "state-open",
-        "state-closed"
-      ],
+      "variants": [],
       "states": [
         "hover",
         "focus",
@@ -7728,20 +6242,7 @@
         "Showing code with no comparison. Use Codeblock."
       ],
       "api": {
-        "props": [
-          {
-            "name": "type",
-            "type": "enum",
-            "values": [
-              "add",
-              "ctx",
-              "del",
-              "hunk",
-              "meta"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -7756,7 +6257,7 @@
             "description": "The script holding the diff…"
           }
         ],
-        "example": "<cc-component name=\"Diff\" type=\"add\">Content</cc-component>"
+        "example": "<cc-component name=\"Diff\">Content</cc-component>"
       }
     },
     {
@@ -7776,13 +6277,7 @@
         "A sequence of events on a record, such as an audit trail. Use Timeline."
       ],
       "api": {
-        "props": [
-          {
-            "name": "latest",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -7985,55 +6480,6 @@
               "warning"
             ],
             "required": false
-          },
-          {
-            "name": "active",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "empty",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "enter",
-            "type": "enum",
-            "values": [
-              "done",
-              "pending",
-              "run"
-            ],
-            "required": false
-          },
-          {
-            "name": "l",
-            "type": "enum",
-            "values": [
-              "1",
-              "2",
-              "3",
-              "4"
-            ],
-            "required": false
-          },
-          {
-            "name": "none",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "s",
-            "type": "enum",
-            "values": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ],
-            "required": false
           }
         ],
         "parts": [
@@ -8076,24 +6522,6 @@
       "api": {
         "props": [
           {
-            "name": "active",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "fallback",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "orientation",
-            "type": "enum",
-            "values": [
-              "horizontal"
-            ],
-            "required": false
-          },
-          {
             "name": "side",
             "type": "enum",
             "values": [
@@ -8116,7 +6544,7 @@
             "description": "A group heading."
           }
         ],
-        "example": "<cc-component name=\"Listbox\" orientation=\"horizontal\" side=\"top\">Content</cc-component>"
+        "example": "<cc-component name=\"Listbox\" side=\"top\">Content</cc-component>"
       }
     },
     {
@@ -8126,9 +6554,7 @@
         "size-sm",
         "size-lg",
         "block",
-        "fit",
-        "mono-both",
-        "mode-entry"
+        "fit"
       ],
       "states": [
         "error",
@@ -8159,30 +6585,17 @@
           },
           {
             "name": "block",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "fit",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "mode",
-            "type": "enum",
-            "values": [
-              "entry"
-            ],
+            "type": "string",
             "required": false
           },
           {
             "name": "mono",
-            "type": "enum",
-            "values": [
-              "both",
-              "key",
-              "value"
-            ],
+            "type": "string",
             "required": false
           }
         ],
@@ -8200,7 +6613,7 @@
             "description": "The minus and plus buttons…"
           }
         ],
-        "example": "<cc-component name=\"Number\" size=\"sm\" mode=\"entry\"></cc-component>"
+        "example": "<cc-component name=\"Number\" size=\"sm\"></cc-component>"
       }
     },
     {
@@ -8272,17 +6685,6 @@
       "api": {
         "props": [
           {
-            "name": "variant",
-            "type": "enum",
-            "values": [
-              "ghost",
-              "outline",
-              "steps",
-              "sticky"
-            ],
-            "required": false
-          },
-          {
             "name": "size",
             "type": "enum",
             "values": [
@@ -8292,13 +6694,16 @@
             "required": false
           },
           {
-            "name": "mono",
+            "name": "format",
             "type": "enum",
             "values": [
-              "both",
-              "key",
-              "value"
+              "json"
             ],
+            "required": false
+          },
+          {
+            "name": "mono",
+            "type": "string",
             "required": false
           }
         ],
@@ -8316,7 +6721,7 @@
             "description": "The column headings."
           }
         ],
-        "example": "<cc-component name=\"Pairs\" variant=\"ghost\" size=\"sm\">Content</cc-component>"
+        "example": "<cc-component name=\"Pairs\" size=\"sm\" format=\"json\">Content</cc-component>"
       }
     },
     {
@@ -8324,9 +6729,6 @@
       "purpose": "In billing, a plan is one quiet row with its price and allowance. In a pricing grid it is a card with a name, a…",
       "variants": [
         "row",
-        "accent",
-        "quiet",
-        "sunken",
         "current",
         "recommended"
       ],
@@ -8348,21 +6750,18 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "accent",
-              "quiet",
-              "row",
-              "sunken"
+              "row"
             ],
             "required": false
           },
           {
             "name": "current",
-            "type": "boolean",
+            "type": "string",
             "required": false
           },
           {
             "name": "recommended",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],
@@ -8425,8 +6824,7 @@
       "purpose": "A result card under the prose of an answer: a title with a row count, a Table / JSON switch, the rows, and one mono…",
       "variants": [
         "mono",
-        "num",
-        "new"
+        "num"
       ],
       "states": [],
       "paths": [
@@ -8439,23 +6837,7 @@
         "A static table of records that is not an agent output. Use Table."
       ],
       "api": {
-        "props": [
-          {
-            "name": "mono",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "new",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "num",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -8535,13 +6917,7 @@
         "Primary navigation between app sections. Use Sidebar."
       ],
       "api": {
-        "props": [
-          {
-            "name": "active",
-            "type": "boolean",
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -8584,12 +6960,6 @@
             "name": "size",
             "type": "enum",
             "values": [
-              "20",
-              "24",
-              "28",
-              "32",
-              "36",
-              "lg",
               "sm"
             ],
             "required": false
@@ -8598,14 +6968,7 @@
             "name": "tone",
             "type": "enum",
             "values": [
-              "accent",
-              "danger",
-              "info",
-              "inverse",
-              "neutral",
-              "success",
-              "violet",
-              "warning"
+              "danger"
             ],
             "required": false
           },
@@ -8641,7 +7004,7 @@
             "description": "Title and description."
           }
         ],
-        "example": "<cc-component name=\"Setting\" size=\"20\" tone=\"danger\">Content</cc-component>"
+        "example": "<cc-component name=\"Setting\" size=\"sm\" tone=\"danger\">Content</cc-component>"
       }
     },
     {
@@ -8673,29 +7036,10 @@
       "api": {
         "props": [
           {
-            "name": "tone",
-            "type": "enum",
-            "values": [
-              "info",
-              "neutral",
-              "success",
-              "violet"
-            ],
-            "required": false
-          },
-          {
             "name": "layout",
             "type": "enum",
             "values": [
               "row"
-            ],
-            "required": false
-          },
-          {
-            "name": "side",
-            "type": "enum",
-            "values": [
-              "bottom"
             ],
             "required": false
           }
@@ -8714,7 +7058,7 @@
             "description": "The hover card, built by…"
           }
         ],
-        "example": "<cc-component name=\"Sources\" tone=\"neutral\" layout=\"row\">Content</cc-component>"
+        "example": "<cc-component name=\"Sources\" layout=\"row\">Content</cc-component>"
       }
     },
     {
@@ -8758,25 +7102,7 @@
           },
           {
             "name": "fluid",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "last",
-            "type": "boolean",
-            "required": false
-          },
-          {
-            "name": "s",
-            "type": "enum",
-            "values": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ],
+            "type": "string",
             "required": false
           },
           {
@@ -8786,6 +7112,14 @@
               "bad",
               "flat",
               "good"
+            ],
+            "required": false
+          },
+          {
+            "name": "type",
+            "type": "enum",
+            "values": [
+              "bars"
             ],
             "required": false
           }
@@ -8804,17 +7138,13 @@
             "description": "The line."
           }
         ],
-        "example": "<cc-component name=\"Sparkline\" tone=\"accent\" s=\"1\"></cc-component>"
+        "example": "<cc-component name=\"Sparkline\" tone=\"accent\" trend=\"good\"></cc-component>"
       }
     },
     {
       "name": "Subnav",
       "purpose": "The side navigation inside settings: a 280px column of 40px rows. When it cannot sit beside the content (a container…",
-      "variants": [
-        "overflow-start",
-        "overflow-end",
-        "overflow-both"
-      ],
+      "variants": [],
       "states": [
         "disabled",
         "hover",
@@ -8832,18 +7162,7 @@
         "The whole app needs navigation. Use Sidebar."
       ],
       "api": {
-        "props": [
-          {
-            "name": "overflow",
-            "type": "enum",
-            "values": [
-              "both",
-              "end",
-              "start"
-            ],
-            "required": false
-          }
-        ],
+        "props": [],
         "parts": [
           {
             "name": "children",
@@ -8858,7 +7177,7 @@
             "description": "One page; a link or a button."
           }
         ],
-        "example": "<cc-component name=\"Subnav\" overflow=\"start\">Content</cc-component>"
+        "example": "<cc-component name=\"Subnav\">Content</cc-component>"
       }
     },
     {
@@ -8866,9 +7185,6 @@
       "purpose": "A 24px pill for categories and filters. A button tag toggles with aria-pressed; a link tag marks the current one with…",
       "variants": [
         "soft",
-        "quiet",
-        "sunken",
-        "accent",
         "icon"
       ],
       "states": [
@@ -8893,16 +7209,13 @@
             "name": "variant",
             "type": "enum",
             "values": [
-              "accent",
-              "quiet",
-              "soft",
-              "sunken"
+              "soft"
             ],
             "required": false
           },
           {
             "name": "icon",
-            "type": "boolean",
+            "type": "string",
             "required": false
           }
         ],

@@ -32,6 +32,24 @@
  *   fd:select  { index, label, values }                   click / tap / Enter on the active point
  *   fd:change  { value: seriesName, index, visible }      a legend toggle
  *
+ * Quadrant: points placed on two axes, split into four corners by a midpoint on each.
+ *   <div class="fd-chart" data-fd-chart="quadrant" data-height="360" data-labels="none">
+ *     <script type="application/json">{
+ *       "x": { "label": "Credits per call", "min": 0, "max": 10, "mid": 4, "format": "number" },   y is the same; min and max
+ *       "y": { "label": "Success rate", "min": 90, "max": 100, "mid": 97, "format": "percent" },   default to the data, mid to the centre
+ *       "corners": { "topLeft": "Cheap and reliable", "topRight": { "label": "Worth the cost", "tone": "success" },
+ *                    "bottomLeft": "Cheap and flaky", "bottomRight": "Costly and flaky" },     a string, or { label, tone }
+ *       "size": { "label": "Calls", "format": "compact" },             optional: what a point's size means
+ *       "points": [{ "name": "/scrape", "x": 1, "y": 99.4, "size": 120000, "tone": "accent", "href": "/endpoints/scrape" }],
+ *       "label": "aria-label override", "empty": { "title": "...", "description": "..." }, "state": "loading|empty"
+ *     }</script>
+ *   </div>
+ *   Every point is a link (with href) or a button and takes focus; ←/→/↑/↓ move to the nearest point in that direction.
+ *   Hover or focus shows a tooltip with both values. data-labels="none" hides the names beside the points.
+ *   Below 520px of width the plot gives way to a list grouped by corner, with the same names, values and links.
+ *   charts.quadrant(el, config?)   draw (or redraw) from a config, or from the element's JSON when none is given
+ *   Events: fd:hover { index, name, x, y } the active point changed · fd:select { index, name, x, y, href } click or Enter
+ *
  * Accessibility: the plot is role="img" with an aria-label and is focusable; a visually hidden <table> carries the
  * data and a polite live region announces the active point while navigating by keyboard.
  *
@@ -228,6 +246,7 @@ function create(el) {
 
 /** Draw (or redraw) a chart from a config object. */
 export function render(el, config = {}) {
+  if ((config.type || el.dataset.fdChart) === 'quadrant') return quadrant(el, config);
   el.classList.add('fd-chart');
   const st = states.get(el) || create(el);
   st.raw = { ...config };
@@ -245,6 +264,12 @@ export function render(el, config = {}) {
 
 /** Merge a patch into the current config and redraw (no entrance animation). */
 export function update(el, patch = {}) {
+  const quad = quadStates.get(el);
+  if (quad?.raw) {
+    const next = { ...quad.raw, ...patch };
+    if ('points' in patch && !('state' in patch)) delete next.state;
+    return quadrant(el, next);
+  }
   const st = states.get(el);
   if (!st) return render(el, patch);
   const next = { ...st.raw, ...patch };
@@ -1213,6 +1238,265 @@ function initHeatgrid(el) {
 }
 
 /* ==========================================================================
+   Quadrant (documented in the header)
+   ========================================================================== */
+const quadStates = new WeakMap();
+const CORNERS = [['topLeft', 'tl'], ['topRight', 'tr'], ['bottomLeft', 'bl'], ['bottomRight', 'br']];
+
+function quadAxis(raw, values, fallbackLabel) {
+  const a = raw && typeof raw === 'object' ? raw : {};
+  const nums = values.filter((v) => v != null);
+  let min = finite(a.min);
+  let max = finite(a.max);
+  if (min == null) min = nums.length ? Math.min(...nums) : 0;
+  if (max == null) max = nums.length ? Math.max(...nums) : 1;
+  if (!(max > min)) max = min + 1;
+  const mid = clamp(finite(a.mid) ?? (min + max) / 2, min, max);
+  return { label: a.label ?? fallbackLabel, min, max, mid, format: a.format || 'number' };
+}
+
+function quadNormalize(config) {
+  const cfg = { ...config };
+  const points = (Array.isArray(cfg.points) ? cfg.points : [])
+    .map((p) => ({ name: String(p?.name ?? ''), x: finite(p?.x), y: finite(p?.y), size: finite(p?.size), tone: p?.tone || null, href: p?.href || null }))
+    .filter((p) => p.x != null && p.y != null);
+  cfg.points = points;
+  cfg.x = quadAxis(cfg.x, points.map((p) => p.x), 'X');
+  cfg.y = quadAxis(cfg.y, points.map((p) => p.y), 'Y');
+  const corners = {};
+  for (const [key, short] of CORNERS) {
+    const c = cfg.corners?.[key];
+    corners[short] = typeof c === 'string' ? { label: c, tone: null } : { label: c?.label ?? '', tone: c?.tone || null };
+  }
+  cfg.corners = corners;
+  cfg.size = cfg.size && typeof cfg.size === 'object' ? { label: cfg.size.label ?? 'Size', format: cfg.size.format || 'number' } : null;
+  return cfg;
+}
+
+const quadFrac = (v, axis) => clamp((v - axis.min) / (axis.max - axis.min), 0, 1);
+const pct = (f) => `${r2(f * 100)}%`;
+function quadCorner(cfg, p) {
+  return `${p.y >= cfg.y.mid ? 't' : 'b'}${p.x >= cfg.x.mid ? 'r' : 'l'}`;
+}
+function quadReadout(cfg, p) {
+  const rows = [
+    [cfg.x.label, formatValue(p.x, cfg.x.format, true)],
+    [cfg.y.label, formatValue(p.y, cfg.y.format, true)],
+  ];
+  if (cfg.size && p.size != null) rows.push([cfg.size.label, formatValue(p.size, cfg.size.format, true)]);
+  return rows;
+}
+
+/** Draw (or redraw) a quadrant chart from `config`, or from the element's JSON when none is given. */
+export function quadrant(el, config) {
+  el.classList.add('fd-chart');
+  el.dataset.fdChart = 'quadrant';
+  const raw = { ...(config ?? readJSON(el)) };
+  if (!raw.state && !quadStates.has(el) && ['loading', 'empty'].includes(el.dataset.state)) raw.state = el.dataset.state;
+  const cfg = quadNormalize(raw);
+  cfg.height = clamp(Number(raw.height ?? el.dataset.height) || 360, 160, 900);
+  cfg.labels = (raw.labels ?? el.dataset.labels) !== 'none' && raw.labels !== false;
+  clearDrawn(el);
+  const state = raw.state === 'loading' ? 'loading' : raw.state === 'empty' || !cfg.points.length ? 'empty' : 'ready';
+  el.dataset.state = state;
+  if (state === 'loading') el.setAttribute('aria-busy', 'true'); else el.removeAttribute('aria-busy');
+  const label = raw.label || el.dataset.label || `Quadrant chart of ${cfg.points.length} points by ${cfg.x.label} and ${cfg.y.label}`;
+  setStyle(el, `--_q-h:${cfg.height}px`);
+
+  if (state !== 'ready') {
+    const box = html('div', 'fd-chart-empty', null, el);
+    if (state === 'loading') {
+      box.className = 'fd-chart-loading';
+      box.setAttribute('role', 'status');
+      box.setAttribute('aria-label', 'Loading chart');
+      const grid = html('div', 'fd-chart-skel-grid', null, box);
+      for (let k = 0; k < 4; k++) html('i', '', null, grid);
+    } else {
+      html('p', 'fd-chart-empty-title', raw.empty?.title || 'Nothing to place yet', box);
+      html('p', 'fd-chart-empty-text', raw.empty?.description || 'Points appear here once there is data for both axes.', box);
+    }
+    setStyle(box, `height:${cfg.height}px`);
+    quadStates.set(el, { cfg, raw });
+    return el;
+  }
+
+  const frame = html('div', 'fd-quadrant-frame', null, el);
+  frame.setAttribute('role', 'group');
+  frame.setAttribute('aria-label', label);
+
+  /* axes: min, mid and max ticks along each, and the title */
+  const yAxis = html('div', 'fd-quadrant-axis', null, frame);
+  yAxis.dataset.axis = 'y';
+  yAxis.setAttribute('aria-hidden', 'true');
+  const xAxis = html('div', 'fd-quadrant-axis', null, frame);
+  xAxis.dataset.axis = 'x';
+  xAxis.setAttribute('aria-hidden', 'true');
+  for (const [axis, host, name] of [[cfg.x, xAxis, 'x'], [cfg.y, yAxis, 'y']]) {
+    for (const [at, value] of [['min', axis.min], ['mid', axis.mid], ['max', axis.max]]) {
+      const f = name === 'x' ? quadFrac(value, axis) : 1 - quadFrac(value, axis);
+      if (at === 'mid' && (f < 0.16 || f > 0.84)) continue; // too close to an end tick to read
+      const tick = html('span', 'fd-quadrant-tick', formatValue(value, axis.format), host);
+      tick.dataset.at = at;
+      setStyle(tick, `--_q-at:${r2(f)}`);
+    }
+    html('span', 'fd-quadrant-axis-title', axis.label, host);
+  }
+
+  const plot = html('div', 'fd-quadrant-plot', null, frame);
+  setStyle(plot, `--_q-mx:${r2(quadFrac(cfg.x.mid, cfg.x))};--_q-my:${r2(1 - quadFrac(cfg.y.mid, cfg.y))}`);
+  for (const [, short] of CORNERS) {
+    const c = cfg.corners[short];
+    const cell = html('div', 'fd-quadrant-cell', null, plot);
+    cell.dataset.corner = short;
+    cell.setAttribute('aria-hidden', 'true');
+    if (c.tone) cell.dataset.tone = c.tone;
+    if (c.label) html('span', 'fd-quadrant-corner', c.label, cell);
+  }
+
+  const sizes = cfg.points.map((p) => p.size).filter((v) => v != null);
+  const maxSize = sizes.length ? Math.max(...sizes) : 0;
+  const nodes = cfg.points.map((p, index) => {
+    const node = html(p.href ? 'a' : 'button', 'fd-quadrant-point', null, plot);
+    if (p.href) node.href = p.href; else node.type = 'button';
+    if (p.tone) node.dataset.tone = p.tone;
+    const fx = quadFrac(p.x, cfg.x);
+    const fy = 1 - quadFrac(p.y, cfg.y);
+    if (fx > 0.7) node.dataset.side = 'start';
+    if (fy < 0.08) node.dataset.edge = 'top';
+    const s = p.size != null && maxSize > 0 ? Math.sqrt(Math.max(0, p.size) / maxSize) : 0.3;
+    setStyle(node, `--_q-x:${r2(fx)};--_q-y:${r2(fy)};--_q-s:${r2(s)};--_q-z:${Math.round((1 - s) * 10)}`);
+    node.dataset.corner = quadCorner(cfg, p);
+    html('span', 'fd-quadrant-dot', null, node);
+    if (cfg.labels) html('span', 'fd-quadrant-name', p.name, node);
+    const readout = quadReadout(cfg, p).map(([k, v]) => `${k} ${v}`).join(', ');
+    node.setAttribute('aria-label', `${p.name}: ${readout}`);
+    return node;
+  });
+
+  /* the phone fallback: a list grouped by corner */
+  const list = html('div', 'fd-quadrant-list', null, el);
+  html('p', 'fd-quadrant-key', [cfg.x.label, cfg.y.label, cfg.size?.label].filter(Boolean).join(' · '), list);
+  for (const [, short] of CORNERS) {
+    const members = cfg.points.map((p, i) => [p, i]).filter(([p]) => quadCorner(cfg, p) === short);
+    if (!members.length) continue;
+    const group = html('section', 'fd-quadrant-group', null, list);
+    group.dataset.corner = short;
+    const c = cfg.corners[short];
+    if (c.tone) group.dataset.tone = c.tone;
+    const head = html('h4', 'fd-quadrant-group-label', c.label || 'Points', group);
+    html('span', 'fd-quadrant-group-count', String(members.length), head);
+    const ul = html('ul', 'fd-quadrant-rows', null, group);
+    for (const [p, i] of members) {
+      const li = html('li', '', null, ul);
+      const row = html(p.href ? 'a' : 'div', 'fd-quadrant-row', null, li);
+      if (p.href) row.href = p.href;
+      if (p.tone) row.dataset.tone = p.tone;
+      html('span', 'fd-quadrant-row-name', p.name, row);
+      html('span', 'fd-quadrant-row-values', quadReadout(cfg, p).map(([, v]) => v).join(' · '), row);
+      row.dataset.index = i;
+    }
+    group.setAttribute('aria-label', c.label || 'Points');
+  }
+
+  /* tooltip and keyboard */
+  const tip = html('div', 'fd-chart-tooltip', null, el);
+  tip.setAttribute('aria-hidden', 'true');
+  let active = -1;
+  const hide = () => {
+    active = -1;
+    tip.dataset.state = 'closed';
+    nodes.forEach((n) => n.removeAttribute('data-active'));
+  };
+  const show = (i) => {
+    const p = cfg.points[i];
+    const node = nodes[i];
+    if (!p || !node) return;
+    const changed = i !== active;
+    active = i;
+    nodes.forEach((n, k) => n.toggleAttribute('data-active', k === i));
+    tip.replaceChildren();
+    html('div', 'fd-chart-tooltip-title', p.name, tip);
+    for (const [k, v] of quadReadout(cfg, p)) {
+      const row = html('div', 'fd-chart-tooltip-row', null, tip);
+      html('span', 'fd-chart-tooltip-value', v, row);
+      html('span', 'fd-chart-tooltip-name', k, row);
+    }
+    const box = el.getBoundingClientRect();
+    const at = node.getBoundingClientRect();
+    const cx = at.left - box.left + at.width / 2;
+    const cy = at.top - box.top + at.height / 2;
+    const first = tip.dataset.state !== 'open';
+    if (first) tip.dataset.snap = '';
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    let tx = cx + at.width / 2 + 6;
+    if (tx + tw > box.width - 4) tx = cx - at.width / 2 - 6 - tw;
+    tx = clamp(tx, 4, Math.max(4, box.width - tw - 4));
+    const ty = clamp(cy - th / 2, 0, Math.max(0, box.height - th));
+    tip.style.translate = `${Math.round(tx)}px ${Math.round(ty)}px`;
+    if (first) {
+      void tip.offsetWidth;
+      tip.dataset.state = 'open';
+      requestAnimationFrame(() => tip.removeAttribute('data-snap'));
+    }
+    if (changed) emit(el, 'fd:hover', { index: i, name: p.name, x: p.x, y: p.y });
+  };
+  const nearest = (from, dir) => {
+    const a = nodes[from].getBoundingClientRect();
+    const ax = a.left + a.width / 2;
+    const ay = a.top + a.height / 2;
+    let best = -1;
+    let bestScore = Infinity;
+    nodes.forEach((n, k) => {
+      if (k === from) return;
+      const b = n.getBoundingClientRect();
+      const dx = b.left + b.width / 2 - ax;
+      const dy = b.top + b.height / 2 - ay;
+      const along = dir === 'right' ? dx : dir === 'left' ? -dx : dir === 'down' ? dy : -dy;
+      const across = dir === 'left' || dir === 'right' ? Math.abs(dy) : Math.abs(dx);
+      if (along <= 1) return;
+      const score = along + across * 2;
+      if (score < bestScore) { bestScore = score; best = k; }
+    });
+    return best;
+  };
+  const onOver = (event) => { const i = nodes.indexOf(event.target.closest?.('.fd-quadrant-point')); if (i >= 0) show(i); };
+  const onOut = (event) => { const n = event.target.closest?.('.fd-quadrant-point'); if (n && n !== document.activeElement) hide(); };
+  const onFocus = (event) => { const i = nodes.indexOf(event.target); if (i >= 0) show(i); };
+  const onBlur = (event) => { if (nodes.includes(event.target) && !nodes.includes(event.relatedTarget)) hide(); };
+  const KEYS = { ArrowRight: 'right', ArrowLeft: 'left', ArrowDown: 'down', ArrowUp: 'up' };
+  const onKey = (event) => {
+    const i = nodes.indexOf(event.target);
+    if (i < 0) return;
+    if (event.key === 'Escape') { hide(); return; }
+    const dir = KEYS[event.key];
+    if (!dir) return;
+    const next = nearest(i, dir);
+    event.preventDefault();
+    if (next >= 0) nodes[next].focus();
+  };
+  const onClick = (event) => {
+    const i = nodes.indexOf(event.target.closest?.('.fd-quadrant-point'));
+    if (i < 0) return;
+    const p = cfg.points[i];
+    emit(el, 'fd:select', { index: i, name: p.name, x: p.x, y: p.y, href: p.href });
+  };
+  plot.addEventListener('pointerover', onOver);
+  plot.addEventListener('pointerout', onOut);
+  plot.addEventListener('focusin', onFocus);
+  plot.addEventListener('focusout', onBlur);
+  plot.addEventListener('keydown', onKey);
+  plot.addEventListener('click', onClick);
+  quadStates.set(el, { cfg, raw });
+  return el;
+}
+
+function initQuadrant(el) {
+  if (quadStates.has(el)) return;
+  quadrant(el);
+}
+
+/* ==========================================================================
    Ranked bars (pure CSS; JS only arms the entrance when scrolled into view)
    <ul class="fd-bars">
      <li class="fd-bars-row" data-fd-vars="--value: 0.62"><span class="fd-bars-label">/scrape</span>
@@ -1227,6 +1511,7 @@ function initBars(el) {
 /* ---------- init ---------- */
 function initChart(el) {
   if (!once(el, 'chart')) return;
+  if (el.dataset.fdChart === 'quadrant') { initQuadrant(el); return; }
   const cfg = readJSON(el);
   if (!cfg.state && el.dataset.state && el.dataset.state !== 'ready') cfg.state = el.dataset.state;
   render(el, cfg);

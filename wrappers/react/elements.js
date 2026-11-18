@@ -23,7 +23,7 @@ const shape = (name, fields) => {
 export const FireChart = createComponent({
   react: React,
   tagName: 'fd-chart',
-  elementClass: shape('FdChart', ['type', 'variant', 'data', 'height', 'width', 'legend', 'grid', 'state', 'label', 'yFormat', 'values', 'area', 'dot', 'invert', 'fluid', 'tone', 'size', 'thickness', 'value', 'max', 'format']),
+  elementClass: shape('FdChart', ['type', 'variant', 'data', 'height', 'width', 'legend', 'grid', 'hideLabels', 'state', 'label', 'yFormat', 'values', 'area', 'dot', 'invert', 'fluid', 'tone', 'size', 'thickness', 'value', 'max', 'format']),
   events: { onHover: 'fd:hover', onSelect: 'fd:select', onChange: 'fd:change' },
   displayName: 'FireChart',
 });

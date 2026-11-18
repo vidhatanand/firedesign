@@ -15,6 +15,12 @@
   Per page, the server changes four things: the <title>, which nav item carries aria-current="page" (in the
   sidebar and in the phone menu), the hero, and the bands.
 
+  Keys (0.7): data-fd-keys="g l" on a nav item makes "g" then "l" go there; "/" on the search trigger opens the
+  palette and "?" on the shortcut button opens the sheet, which lists whatever the page binds. Running now: the
+  pill counts the items of its popover. Service status: data-status="operational" shows the icon alone; the server
+  sets "degraded" or "outage" and the label shows. Found records in the palette (runs, keys, pages) come from your
+  own search: register them with fire.overlays.command.records({ group, search }), see templates/shell.js.
+
   Behaviour comes from fire.js. A page that wants less script can render its icons as inline SVG and load only
   fire/js/shell.js (sidebar collapse, phone menu, rail tips); add fire/js/texture.js for the hero art. Both run
   under a strict Content Security Policy.
@@ -31,15 +37,15 @@
     </div>
     <div class="fd-sidebar-body">
       <nav class="fd-nav" aria-label="Main">
-        <a class="fd-nav-item" href="overview.html"><i data-icon="home"></i><span class="fd-nav-text">Overview</span></a>
-        <a class="fd-nav-item" href="catalog.html"><i data-icon="blocks"></i><span class="fd-nav-text">Catalog</span><span class="fd-nav-badge">New</span></a>
+        <a class="fd-nav-item" data-fd-keys="g o" href="overview.html"><i data-icon="home"></i><span class="fd-nav-text">Overview</span></a>
+        <a class="fd-nav-item" data-fd-keys="g c" href="catalog.html"><i data-icon="blocks"></i><span class="fd-nav-text">Catalog</span><span class="fd-nav-badge">New</span></a>
         <p class="fd-nav-label">Team</p>
-        <a class="fd-nav-item" href="shell-static.html" aria-current="page"><i data-icon="users"></i><span class="fd-nav-text">Members</span></a>
-        <a class="fd-nav-item" href="api-keys.html"><i data-icon="key-round"></i><span class="fd-nav-text">API keys</span></a>
-        <a class="fd-nav-item" href="logs.html"><i data-icon="list"></i><span class="fd-nav-text">Activity logs</span></a>
+        <a class="fd-nav-item" data-fd-keys="g m" href="shell-static.html" aria-current="page"><i data-icon="users"></i><span class="fd-nav-text">Members</span></a>
+        <a class="fd-nav-item" data-fd-keys="g k" href="api-keys.html"><i data-icon="key-round"></i><span class="fd-nav-text">API keys</span></a>
+        <a class="fd-nav-item" data-fd-keys="g l" href="logs.html"><i data-icon="list"></i><span class="fd-nav-text">Activity logs</span></a>
         <p class="fd-nav-label">Account</p>
-        <a class="fd-nav-item" href="usage.html"><i data-icon="chart-column"></i><span class="fd-nav-text">Usage</span></a>
-        <a class="fd-nav-item" href="settings.html"><i data-icon="settings"></i><span class="fd-nav-text">Settings</span></a>
+        <a class="fd-nav-item" data-fd-keys="g u" href="usage.html"><i data-icon="chart-column"></i><span class="fd-nav-text">Usage</span></a>
+        <a class="fd-nav-item" data-fd-keys="g s" href="settings.html"><i data-icon="settings"></i><span class="fd-nav-text">Settings</span></a>
       </nav>
     </div>
     <div class="fd-sidebar-foot">
@@ -52,6 +58,10 @@
       <a class="fd-topbar-brand" data-only="mobile" href="overview.html" aria-label="Ember overview"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4.5" y="7.5" width="12" height="12" rx="3.25" transform="rotate(45 10.5 13.5)"/><circle cx="19" cy="5" r="2.5"/><circle cx="14.25" cy="2.25" r="1.25" opacity=".55"/></svg></a>
       <span class="fd-topbar-title">Quarry Labs</span>
       <div class="fd-topbar-actions">
+        <button class="fd-running" type="button" data-fd-running="ember-running" data-fd-popover="ember-running" data-placement="bottom-end" aria-label="2 running"><span class="fd-running-dot" aria-hidden="true"></span><span class="fd-running-count">2</span><span class="fd-running-label">running</span></button>
+        <a class="fd-service-status" data-status="operational" href="https://status.ember.dev" target="_blank" rel="noopener" data-fd-tooltip="All systems operational" aria-label="All systems operational"><i data-icon="activity"></i><span class="fd-service-status-label">All systems operational</span></a>
+        <button class="fd-btn" type="button" data-only="desktop" data-fd-command-open="ember-command" data-fd-keys="/" data-fd-keys-label="Search"><i data-icon="search"></i><span class="fd-grow fd-muted">Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
+        <button class="fd-btn" type="button" data-icon-only data-only="desktop" data-fd-dialog-open="ember-shortcuts" data-fd-keys="?" data-fd-keys-label="Keyboard shortcuts" data-fd-tooltip="Keyboard shortcuts" aria-label="Keyboard shortcuts"><i data-icon="keyboard"></i></button>
         <button class="fd-btn" type="button" data-icon-only data-fd-tweaks-open data-fd-tooltip="Tweaks" aria-label="Tweaks" aria-expanded="false"><i data-icon="sliders-horizontal"></i></button>
         <a class="fd-btn" data-variant="ghost" data-only="desktop" href="https://docs.ember.dev"><i data-icon="book-open"></i><span>Docs</span></a>
         <a class="fd-btn" data-only="desktop" href="settings.html"><i data-icon="user"></i><span>Your account</span></a>
@@ -120,6 +130,53 @@
       <a class="fd-mobile-nav-item" href="settings.html"><span>Settings</span><i data-icon="settings"></i></a>
     </div>
   </div>
+
+  <div class="fd-popover" id="ember-running" popover data-size="lg" aria-label="Running now">
+    <div class="fd-popover-head"><p class="fd-popover-title">Running now</p></div>
+    <div class="fd-popover-body">
+      <div class="fd-running-list">
+        <a class="fd-running-item" href="logs.html#run_8f2a91" data-kind="crawl"><span class="fd-tile" data-size="28" data-tone="accent"><i data-icon="network"></i></span><span class="fd-running-title">Crawl docs.quarry.dev</span><span class="fd-running-time">2m 08s</span><span class="fd-running-meta">412 of 1,200 pages</span><span class="fd-running-bar" data-fd-vars="--value: 0.34" aria-hidden="true"></span></a>
+        <a class="fd-running-item" href="monitoring.html#mon_31e9b2" data-kind="monitor"><span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="radar"></i></span><span class="fd-running-title">Monitor: acme.dev/changelog</span><span class="fd-running-time">12s</span><span class="fd-running-meta">Checking now · 6 pages</span><span class="fd-running-bar" data-fd-vars="--value: 0.8" aria-hidden="true"></span></a>
+      </div>
+    </div>
+    <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="logs.html"><span>View all runs</span><i data-icon="arrow-right" data-nudge></i></a></div>
+  </div>
+
+  <dialog class="fd-dialog" id="ember-shortcuts" data-size="md" data-fd-shortcuts>
+    <div class="fd-dialog-head">
+      <h2 class="fd-h3 fd-dialog-title">Keyboard shortcuts</h2>
+      <p class="fd-dialog-desc">They work anywhere except in a field.</p>
+      <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+    </div>
+    <div class="fd-dialog-body"><div data-fd-shortcuts-list></div></div>
+  </dialog>
+
+  <dialog class="fd-command" id="ember-command" aria-label="Command palette">
+    <div class="fd-command-search">
+      <i data-icon="search"></i>
+      <input class="fd-command-input" type="text" placeholder="Search pages and records…" aria-label="Search commands" autocomplete="off" spellcheck="false">
+      <kbd class="fd-kbd">esc</kbd>
+    </div>
+    <div class="fd-command-list">
+      <div class="fd-command-group">
+        <p class="fd-command-group-label">Navigation</p>
+        <a class="fd-command-item" href="overview.html" data-keywords="home dashboard credits"><i data-icon="home"></i><span class="fd-command-item-label">Overview</span></a>
+        <a class="fd-command-item" href="logs.html" data-keywords="requests history"><i data-icon="list"></i><span class="fd-command-item-label">Activity logs</span></a>
+        <a class="fd-command-item" href="usage.html" data-keywords="credits billing plan"><i data-icon="chart-column"></i><span class="fd-command-item-label">Usage</span></a>
+        <a class="fd-command-item" href="settings.html" data-keywords="preferences team account"><i data-icon="settings"></i><span class="fd-command-item-label">Settings</span></a>
+      </div>
+    </div>
+    <div class="fd-command-empty" hidden>
+      <i data-icon="search"></i>
+      <p class="fd-command-empty-title">No results for “<span data-fd-command-query></span>”</p>
+      <p class="fd-command-empty-text">Try a page name or a run ID.</p>
+    </div>
+    <div class="fd-command-foot">
+      <span><kbd class="fd-kbd">↑</kbd><kbd class="fd-kbd">↓</kbd>navigate</span>
+      <span><kbd class="fd-kbd">↵</kbd>select</span>
+      <span><kbd class="fd-kbd">esc</kbd>close</span>
+    </div>
+  </dialog>
 
 </div>
 </body>

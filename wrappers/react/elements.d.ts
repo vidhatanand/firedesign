@@ -9,13 +9,13 @@ export type FireHostProps<E extends HTMLElement, Events extends string = never> 
 
 /** Props of FireChart (<fd-chart>). */
 export interface FireChartProps extends FireHostProps<FdChart, 'onHover' | 'onSelect' | 'onChange'> {
-  /** Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three). */
+  /** Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three). */
   type?: FdChartType;
   /** Variant of a type: `bars` for a sparkline (`data-type="bars"`), `progress` for a donut (a progress ring, `data-type="progress"`), `strip` for a heat grid (`data-variant="strip"`). */
   variant?: 'bars' | 'progress' | 'strip';
-  /** The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON. */
+  /** The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON. */
   data?: FdChartData;
-  /** Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24). */
+  /** Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24). */
   height?: number;
   /** Sparkline: width in px (default from CSS, 80). */
   width?: number;
@@ -23,7 +23,9 @@ export interface FireChartProps extends FireHostProps<FdChart, 'onHover' | 'onSe
   legend?: boolean;
   /** Cartesian: grid lines, `dashed` (default), `solid` or `none`. */
   grid?: 'dashed' | 'solid' | 'none';
-  /** Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state). */
+  /** Quadrant: hide the names beside the points (`data-labels="none"`). */
+  hideLabels?: boolean;
+  /** Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state). */
   state?: 'loading' | 'empty';
   /** Accessible name override (all types); a progress ring also shows it as its caption. */
   label?: string;
@@ -144,6 +146,7 @@ export interface FdChartAttributes extends Omit<React.HTMLAttributes<FdChart>, '
   width?: number;
   legend?: boolean;
   grid?: 'dashed' | 'solid' | 'none';
+  'hide-labels'?: boolean;
   state?: 'loading' | 'empty';
   label?: string;
   'y-format'?: ChartFormat;

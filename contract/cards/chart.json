@@ -1,12 +1,13 @@
 {
   "id": "chart",
   "job": "See how values change over time or between periods.",
-  "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table.",
+  "purpose": "An SVG line, area, bar or stacked bar chart from a JSON config: labels, up to six series, an optional threshold. Hairline grid, mono axes, the first series in the accent. Lines draw in once on scroll. A crosshair and tooltip follow the pointer, a finger or the arrow keys. Every chart has role=\"img\" and a hidden data table. A fifth type, quadrant, places points on two axes and names the four corners; on a phone it becomes a list grouped by corner.",
   "useWhen": [
     "A value moves continuously over time: use line, or area for volume.",
     "Discrete periods are compared: use bar, or stacked for a total and its parts.",
     "A number has a limit: draw a labelled threshold on the chart.",
-    "A live series should end in a pulsing dot."
+    "A live series should end in a pulsing dot.",
+    "A handful of things are sorted on two measures at once, such as cost against reliability: use quadrant."
   ],
   "avoidWhen": [
     {
@@ -32,6 +33,10 @@
     {
       "when": "Exact values to compare across many columns.",
       "instead": "table"
+    },
+    {
+      "when": "More than about a dozen points to place, or exact values matter more than position.",
+      "instead": "table"
     }
   ],
   "aka": [
@@ -43,7 +48,11 @@
     "graph",
     "time series",
     "plot",
-    "trend chart"
+    "trend chart",
+    "quadrant chart",
+    "scatter plot",
+    "bubble chart",
+    "2x2 matrix"
   ],
   "surfaces": [
     "app",
@@ -68,6 +77,10 @@
     {
       "name": "gap",
       "how": "a null value is a gap, not a zero"
+    },
+    {
+      "name": "phone",
+      "how": "quadrant below 520px of width: the plot gives way to a list grouped by corner"
     }
   ],
   "variants": [
@@ -90,6 +103,11 @@
       "attribute": "data-fd-chart",
       "value": "stacked",
       "useWhen": "A total and its parts; the tooltip adds a Total row."
+    },
+    {
+      "attribute": "data-fd-chart",
+      "value": "quadrant",
+      "useWhen": "Points on two axes with a midpoint on each, split into four named corners."
     },
     {
       "attribute": "data-grid",
@@ -125,6 +143,11 @@
       "attribute": "data-ring",
       "value": "bg",
       "useWhen": "The chart sits on the page colour, not a card."
+    },
+    {
+      "attribute": "data-labels",
+      "value": "none",
+      "useWhen": "A quadrant whose names would collide: the tooltip still names each point."
     }
   ],
   "parts": [
@@ -175,6 +198,22 @@
     {
       "class": "fd-chart-svg",
       "role": "The drawing surface."
+    },
+    {
+      "class": "fd-quadrant-plot",
+      "role": "The quadrant's field, with a dashed line at each midpoint."
+    },
+    {
+      "class": "fd-quadrant-point",
+      "role": "One point of a quadrant: a link, or a button; takes focus."
+    },
+    {
+      "class": "fd-quadrant-cell",
+      "role": "One corner of a quadrant; data-tone tints it."
+    },
+    {
+      "class": "fd-quadrant-list",
+      "role": "The phone fallback: the points as a list grouped by corner."
     }
   ],
   "related": [
@@ -201,11 +240,16 @@
     {
       "keys": "Escape",
       "does": "Hides the tooltip."
+    },
+    {
+      "keys": "Arrow keys (quadrant)",
+      "does": "Moves focus to the nearest point in that direction."
     }
   ],
   "example": "docs/charts.html#line",
   "provenance": [
     "docs/charts.html",
+    "docs/charts.html#quadrant",
     "fire/components/charts.css",
     "fire/js/charts.js"
   ],

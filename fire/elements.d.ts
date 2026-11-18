@@ -1,6 +1,6 @@
 /* Types of fire/elements.js (import 'fire-design/elements'). BUILT by scripts/build-elements.mjs from elements/src:
  * edit the source and rebuild, never this file. Data and event types come from fire.d.ts. */
-import type { ChartConfig, ChartFormat, ChartTone, DonutConfig, HeatgridConfig, IconName, StripConfig } from './fire.js';
+import type { ChartConfig, ChartFormat, ChartTone, DonutConfig, HeatgridConfig, IconName, QuadrantConfig, StripConfig } from './fire.js';
 
 /** The part of Lit's ReactiveElement that Fire's elements expose (Lit is bundled into elements.js). */
 declare abstract class LitElement extends HTMLElement {
@@ -56,14 +56,14 @@ declare global {
     }
 }
 
-/** The chart an `fd-chart` draws: the four cartesian types, or a sparkline, donut or heat grid. */
-export type FdChartType = 'line' | 'area' | 'bar' | 'stacked' | 'sparkline' | 'donut' | 'heatgrid';
-/** The data an `fd-chart` takes, by type: a cartesian config, sparkline values, a donut or a heat grid (or strip). */
-export type FdChartData = ChartConfig | number[] | DonutConfig | HeatgridConfig | StripConfig;
+/** The chart an `fd-chart` draws: the four cartesian types, a quadrant, or a sparkline, donut or heat grid. */
+export type FdChartType = 'line' | 'area' | 'bar' | 'stacked' | 'quadrant' | 'sparkline' | 'donut' | 'heatgrid';
+/** The data an `fd-chart` takes, by type: a cartesian config, a quadrant config, sparkline values, a donut or a heat grid (or strip). */
+export type FdChartData = ChartConfig | QuadrantConfig | number[] | DonutConfig | HeatgridConfig | StripConfig;
 /**
- * A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and
+ * A Fire chart drawn from data given as a property: line, area, bar and stacked charts, quadrants, sparklines, donuts and
  * progress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type
- * (`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data
+ * (`fd-chart` for the cartesian types and the quadrant, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data
  * as the markup form's `<script type="application/json">`, and Fire's charts module draws the chart inside it, so it
  * looks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance
  * animation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new
@@ -81,13 +81,13 @@ export type FdChartData = ChartConfig | number[] | DonutConfig | HeatgridConfig 
  */
 export declare class FdChart extends FireElement {
     #private;
-    /** Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three). */
+    /** Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three). */
     type: FdChartType;
     /** Variant of a type: `bars` for a sparkline (`data-type="bars"`), `progress` for a donut (a progress ring, `data-type="progress"`), `strip` for a heat grid (`data-variant="strip"`). */
     variant?: 'bars' | 'progress' | 'strip';
-    /** The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON. */
+    /** The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON. */
     data?: FdChartData;
-    /** Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24). */
+    /** Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24). */
     height?: number;
     /** Sparkline: width in px (default from CSS, 80). */
     width?: number;
@@ -95,7 +95,9 @@ export declare class FdChart extends FireElement {
     legend: boolean;
     /** Cartesian: grid lines, `dashed` (default), `solid` or `none`. */
     grid?: 'dashed' | 'solid' | 'none';
-    /** Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state). */
+    /** Quadrant: hide the names beside the points (`data-labels="none"`). */
+    hideLabels: boolean;
+    /** Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state). */
     state?: 'loading' | 'empty';
     /** Accessible name override (all types); a progress ring also shows it as its caption. */
     label?: string;

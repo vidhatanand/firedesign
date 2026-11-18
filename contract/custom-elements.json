@@ -8,7 +8,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart`, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
+          "description": "A Fire chart drawn from data given as a property: line, area, bar and stacked charts, quadrants, sparklines, donuts and\nprogress rings, heat grids and strips. The element is the chart's root: it carries the root class of its type\n(`fd-chart` for the cartesian types and the quadrant, `fd-sparkline`, `fd-donut` or `fd-heatgrid`) and the markup form's data-* attributes, holds the data\nas the markup form's `<script type=\"application/json\">`, and Fire's charts module draws the chart inside it, so it\nlooks and behaves exactly like the markup form. Setting `data` (or any attribute) redraws it, without the entrance\nanimation. Changing `type` to another kind of chart (say from `line` to `donut`) is not supported: render a new\nelement (in React or Vue, give it a new `key`).\n\nAttributes mirror the markup form's `data-*` attributes; each applies to the types named. A function in the data\n(a custom `yFormat`) is kept for cartesian charts, which are drawn from the object itself; the other types are\ndrawn from the JSON, so their formats are names.",
           "name": "FdChart",
           "members": [
             {
@@ -18,7 +18,7 @@
                 "text": "FdChartType"
               },
               "default": "'line'",
-              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
+              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
               "attribute": "type",
               "reflects": true
             },
@@ -38,7 +38,7 @@
               "type": {
                 "text": "FdChartData | undefined"
               },
-              "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
+              "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
               "attribute": "data"
             },
             {
@@ -47,7 +47,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24).",
+              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24).",
               "attribute": "height"
             },
             {
@@ -80,11 +80,21 @@
             },
             {
               "kind": "field",
+              "name": "hideLabels",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`).",
+              "attribute": "hide-labels"
+            },
+            {
+              "kind": "field",
               "name": "state",
               "type": {
                 "text": "'loading' | 'empty' | undefined"
               },
-              "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
+              "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
               "attribute": "state"
             },
             {
@@ -223,7 +233,7 @@
               "name": "#family",
               "privacy": "private",
               "type": {
-                "text": "'cartesian' | 'sparkline' | 'donut' | 'heatgrid'"
+                "text": "'cartesian' | 'quadrant' | 'sparkline' | 'donut' | 'heatgrid'"
               },
               "readonly": true
             },
@@ -323,7 +333,7 @@
                 "text": "FdChartType"
               },
               "default": "'line'",
-              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
+              "description": "Chart type: `line` (default), `area`, `bar`, `stacked`, `quadrant`, `sparkline`, `donut` or `heatgrid` (the markup form's `data-fd-chart`, or its class for the other three).",
               "fieldName": "type"
             },
             {
@@ -339,7 +349,7 @@
               "type": {
                 "text": "FdChartData | undefined"
               },
-              "description": "The chart's data: a `ChartConfig` for the cartesian types, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
+              "description": "The chart's data: a `ChartConfig` for the cartesian types, a `QuadrantConfig` for a quadrant, an array of numbers for a sparkline, a `DonutConfig`, a `HeatgridConfig` or (strip) a `StripConfig`. As an attribute, JSON.",
               "fieldName": "data"
             },
             {
@@ -347,7 +357,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Sparkline: the drawing (default from CSS, 24).",
+              "description": "Height in px. Cartesian: the plot, 80 to 900 (default 240). Quadrant: the plot, 160 to 900 (default 360). Sparkline: the drawing (default from CSS, 24).",
               "fieldName": "height"
             },
             {
@@ -376,11 +386,20 @@
               "fieldName": "grid"
             },
             {
+              "name": "hide-labels",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Quadrant: hide the names beside the points (`data-labels=\"none\"`).",
+              "fieldName": "hideLabels"
+            },
+            {
               "name": "state",
               "type": {
                 "text": "'loading' | 'empty' | undefined"
               },
-              "description": "Cartesian: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
+              "description": "Cartesian and quadrant: `loading` (a skeleton; needs no data) or `empty` (the empty state).",
               "fieldName": "state"
             },
             {

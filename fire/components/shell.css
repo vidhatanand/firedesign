@@ -28,6 +28,18 @@
    data-sidebar       expanded (default) | collapsed (64px icon rail)
    data-contained     the shell fills its parent box instead of the viewport (docs, previews)
    data-only          desktop | mobile — hide an element on the other side of the 900px breakpoint (the shell's width inside .fd-app, the viewport's elsewhere)
+
+   Added in 0.7 (behaviour in fire/js/shell.js, whose header documents the attributes):
+   fd-initial          a dot-matrix mark drawn from a name's first letter, for where no logo exists. On an svg.fd-initial,
+                       or drawn into a .fd-tile, .fd-avatar, .fd-brand-mark or .fd-account-avatar that carries data-fd-initial.
+   fd-nav-key          the go-to key of a nav item (<kbd class="fd-kbd fd-nav-key">L</kbd>): shown while "g" waits for a letter, i.e.
+                       inside any element that carries data-fd-keys-pending (shell.js sets it on <html>)
+   fd-keys-hint        the status line that says a key sequence is waiting (data-state="open"; data-static draws it in the flow, for docs)
+   fd-shortcuts        the list inside a shortcut sheet: fd-shortcuts-group > fd-shortcuts-label, fd-shortcuts-row (fd-shortcuts-name, fd-shortcuts-keys)
+   fd-running          the running-now pill in the top bar: fd-running-dot, fd-running-count, fd-running-label; aria-expanded while its popover is open;
+                       the popover lists fd-running-item (data-kind, fd-running-title, fd-running-meta, fd-running-bar, fd-running-time)
+   fd-service-status   the service status control in the top bar: data-status="operational|degraded|outage|maintenance"; the label shows
+                       unless the service is operational (fd-service-status-label)
    Responsive: the shell is a size container named `fd-app`; under 900px the sidebar
    hides and .fd-mobile-nav takes over. Page parts query the `fd-page` container.
    ========================================================================== */
@@ -99,6 +111,18 @@
   --fd-toolbar-search-max: 280px;
   --fd-topbar-search-w: 240px;        /* the top bar's search trigger */
   --fd-panel-head-h: 32px;
+  /* initial mark */
+  --fd-initial-size: var(--fd-icon-xl);   /* on its own: the size of a brand mark's drawing */
+  --fd-initial-fill: 72%;                 /* in a tile or an avatar: how much of the box the glyph takes */
+  /* go-to keys */
+  --fd-nav-key-w: 3ch;
+  --fd-keys-hint-gap: 16px;               /* from the corner of the viewport */
+  /* running now, service status */
+  --fd-running-dot: 8px;
+  --fd-running-bar-h: 3px;
+  --fd-running-icon: 28px;
+  --fd-running-ring: 2.2;                 /* how far the ping ring grows (scale) */
+  --fd-service-icon: 16px;
   /* mobile nav */
   --fd-mobile-nav-nudge: 8px;      /* the menu drops in from this far above */
   --fd-mobile-sheet-w: 400px;      /* tablet sheet */
@@ -877,4 +901,107 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 @container fd-page (max-width: 639.98px) {
   .fd-frame { width: 100%; border-inline: 0; }
   .fd-band + .fd-band::after { display: none; }
+}
+
+/* ---------- Initial mark ----------
+   A dot-matrix glyph drawn from a name's first letter, where a logo is missing. It takes the colour of its box.
+   <span class="fd-brand-mark" data-fd-initial="Quarry Labs"></span>               the brand slot
+   <span class="fd-tile" data-size="28" data-fd-initial="Quarry Labs"></span>       an organisation; the tone comes from the name
+   <span class="fd-avatar" data-fd-initial="Acme Research"></span>
+   Without script the box keeps its text (the letter), which the tile and avatar already style. */
+.fd-initial { display: block; flex: none; inline-size: var(--fd-initial-size); block-size: var(--fd-initial-size); }
+:is(.fd-tile, .fd-avatar, .fd-account-avatar) > .fd-initial { inline-size: var(--fd-initial-fill); block-size: var(--fd-initial-fill); }
+.fd-brand-mark > .fd-initial { inline-size: var(--fd-icon-xl); block-size: var(--fd-icon-xl); }
+
+/* ---------- Go-to keys ---------- */
+.fd-nav-item > .fd-nav-key {
+  flex: none; max-inline-size: 0; margin-inline-start: 0; padding-inline: 0; overflow: hidden;
+  opacity: 0; scale: 0.9;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-2) var(--fd-ease-out), max-inline-size var(--fd-dur-3) var(--fd-ease-out);
+}
+[data-fd-keys-pending] .fd-nav-item > .fd-nav-key { max-inline-size: var(--fd-nav-key-w); margin-inline-start: var(--fd-space-2); padding-inline: var(--fd-space-1); opacity: 1; scale: 1; }
+[data-fd-keys-pending] .fd-nav-item > .fd-nav-hint { opacity: 0; max-width: 0; margin-inline-start: 0; }
+.fd-app[data-sidebar="collapsed"] > .fd-sidebar .fd-nav-key { display: none; }
+
+.fd-keys-hint {
+  position: fixed; z-index: var(--fd-z-toast); inset-inline-start: var(--fd-keys-hint-gap); inset-block-end: var(--fd-keys-hint-gap);
+  display: inline-flex; align-items: center; gap: var(--fd-space-2); padding: var(--fd-space-2) var(--fd-space-3);
+  border-radius: var(--fd-radius-lg); background: var(--fd-surface-raised); color: var(--fd-text-2); box-shadow: var(--fd-shadow-lg);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm);
+  opacity: 0; translate: 0 var(--fd-space-1); pointer-events: none;
+  transition: opacity var(--fd-dur-2) var(--fd-ease-out), translate var(--fd-dur-2) var(--fd-ease-out), overlay var(--fd-dur-2) allow-discrete, display var(--fd-dur-2) allow-discrete;
+}
+.fd-keys-hint[hidden] { display: none; }
+.fd-keys-hint[data-static] { position: static; align-self: start; width: fit-content; }
+.fd-keys-hint[data-state="open"] { opacity: 1; translate: 0 0; }
+@starting-style { .fd-keys-hint[data-state="open"] { opacity: 0; translate: 0 var(--fd-space-1); } }
+
+/* The shortcut sheet's list, filled from the page's data-fd-keys controls. */
+.fd-shortcuts { display: grid; gap: var(--fd-space-5); min-width: 0; margin: 0; }
+.fd-shortcuts-group { display: grid; gap: var(--fd-space-0-5); min-width: 0; }
+.fd-shortcuts-label { margin: 0 0 var(--fd-space-1); font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-2xs); letter-spacing: var(--fd-ls-eyebrow); text-transform: uppercase; color: var(--fd-text-3); }
+.fd-shortcuts-row { display: flex; align-items: center; justify-content: space-between; gap: var(--fd-space-4); min-height: var(--fd-control-md); border-block-end: var(--fd-hairline) solid var(--fd-line-faint); }
+.fd-shortcuts-row:last-child { border-block-end: 0; }
+.fd-shortcuts-name { min-width: 0; color: var(--fd-text); }
+.fd-shortcuts-keys { flex: none; display: inline-flex; align-items: center; gap: var(--fd-space-1); color: var(--fd-text-3); font-size: var(--fd-text-xs); }
+
+/* ---------- Running now ----------
+   <button class="fd-running" type="button" data-fd-running="ember-running" data-fd-popover="ember-running" hidden>
+     <span class="fd-running-dot" aria-hidden="true"></span><span class="fd-running-count">3</span><span class="fd-running-label">running</span></button>
+   <div class="fd-popover" id="ember-running" popover>… <a class="fd-running-item" href="…">…</a> …</div>
+   shell.js counts the items of the popover into the pill, names it ("3 running") and hides it when none are left. */
+.fd-running {
+  display: inline-flex; align-items: center; gap: var(--fd-space-2); flex: none;
+  height: var(--fd-control-md); padding-inline: var(--fd-space-3); border-radius: var(--fd-radius-lg);
+  background: var(--fd-accent-8); color: var(--fd-accent-text);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label); white-space: nowrap;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-running[hidden] { display: none; }
+.fd-running:hover, .fd-running[aria-expanded="true"] { background: var(--fd-accent-12); }
+.fd-running:active { scale: var(--fd-press-scale); }
+.fd-running:focus-visible { box-shadow: var(--fd-ring); }
+.fd-running-dot { position: relative; flex: none; inline-size: var(--fd-running-dot); block-size: var(--fd-running-dot); border-radius: 50%; background: var(--fd-accent); }
+.fd-running-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--fd-accent); opacity: 0.4; animation: fd-ping var(--fd-loop-pulse) var(--fd-ease-out) infinite; }
+@media (prefers-reduced-motion: reduce) { .fd-running-dot::after { animation: none; opacity: 0.24; scale: var(--fd-running-ring); } }
+.fd-running-count { font-variant-numeric: tabular-nums; }
+.fd-running-list { display: grid; margin: 0; padding: var(--fd-space-1); }
+.fd-running-item {
+  display: grid; grid-template-columns: var(--fd-running-icon) minmax(0, 1fr) auto; align-items: center; gap: var(--fd-space-1) var(--fd-space-3);
+  padding: var(--fd-space-2-5) var(--fd-space-2); border-radius: var(--fd-radius-lg); color: var(--fd-text); text-decoration: none;
+}
+.fd-running-item:hover { background: var(--fd-fill); }
+.fd-running-item:focus-visible { box-shadow: var(--fd-ring-inset); }
+.fd-running-item > .fd-tile { grid-row: 1 / span 2; }
+.fd-running-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--fd-weight-label); }
+.fd-running-time { font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+.fd-running-meta { grid-column: 2 / -1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); }
+.fd-running-bar { grid-column: 2 / -1; block-size: var(--fd-running-bar-h); border-radius: var(--fd-radius-full); background: var(--fd-a6); overflow: hidden; }
+.fd-running-bar::after { content: ""; display: block; block-size: 100%; inline-size: calc(clamp(0, var(--value, 0), 1) * 100%); border-radius: inherit; background: var(--fd-accent); }
+
+/* ---------- Service status ----------
+   <a class="fd-service-status" data-status="operational" href="https://status.ember.dev" data-fd-tooltip="All systems operational">
+     <i data-icon="activity"></i><span class="fd-service-status-label">All systems operational</span></a>
+   Operational: the icon alone, quiet, with its label for assistive technology. Anything else: a tinted pill that says it. */
+.fd-service-status {
+  --_s-c: var(--fd-success-text); --_s-bg: transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--fd-space-1-5); flex: none;
+  min-inline-size: var(--fd-control-md); height: var(--fd-control-md); padding-inline: var(--fd-space-2-5); border-radius: var(--fd-radius-lg);
+  background: var(--_s-bg); color: var(--_s-c);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label); white-space: nowrap;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-service-status > .fd-icon, .fd-service-status > i[data-icon] { flex: none; inline-size: var(--fd-service-icon); block-size: var(--fd-service-icon); }
+.fd-service-status:hover { background: var(--fd-fill); }
+.fd-service-status:focus-visible { box-shadow: var(--fd-ring); }
+.fd-service-status[data-status="operational"] { padding-inline: 0; }
+.fd-service-status[data-status="operational"] > .fd-service-status-label { position: absolute; inline-size: var(--fd-base-sr-size); block-size: var(--fd-base-sr-size); margin: calc(var(--fd-base-sr-size) * -1); overflow: hidden; clip: rect(0 0 0 0); }
+.fd-service-status[data-status="degraded"] { --_s-c: var(--fd-warning-text); --_s-bg: var(--fd-warning-bg); }
+.fd-service-status[data-status="outage"] { --_s-c: var(--fd-danger-text); --_s-bg: var(--fd-danger-bg); }
+.fd-service-status[data-status="maintenance"] { --_s-c: var(--fd-info-text); --_s-bg: var(--fd-info-bg); }
+.fd-service-status[data-status]:not([data-status="operational"]):hover { background: color-mix(in srgb, var(--_s-c) 14%, var(--_s-bg)); }
+@container fd-app (max-width: 639.98px) {
+  .fd-running-label { display: none; }
+  .fd-service-status:not([data-status="operational"]) > .fd-service-status-label { display: none; }
+  .fd-service-status:not([data-status="operational"]) { padding-inline: 0; }
 }

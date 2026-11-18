@@ -1,0 +1,118 @@
+{
+  "id": "running",
+  "job": "Show how many jobs are in progress and open the list from the top bar.",
+  "purpose": "A pill in the top bar with a pulsing dot and a count, that opens a popover of what is running: a title, the time so far, a line of detail and an optional progress bar, each row a link to the run. The count is the number of rows in the popover and follows them; with none the pill is hidden, so a quiet account has a quiet bar.",
+  "useWhen": [
+    "Work continues after the page that started it: crawls, agent runs, monitor checks, imports.",
+    "A person should find a long job from any screen without opening the page that started it."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A job finished, failed or needs a decision.",
+      "instead": "notification"
+    },
+    {
+      "when": "One job on the page you are on, with its own progress.",
+      "instead": "progress"
+    },
+    {
+      "when": "The health of the product itself.",
+      "instead": "service-status"
+    }
+  ],
+  "aka": [
+    "running jobs",
+    "activity indicator",
+    "background tasks",
+    "in progress",
+    "job tray",
+    "live runs"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "none running",
+      "how": "hidden; set by shell.js when the popover has no .fd-running-item"
+    },
+    {
+      "name": "open",
+      "how": "aria-expanded=\"true\" on the pill while its popover is open"
+    },
+    {
+      "name": "phone",
+      "how": "the label drops and the pill keeps the dot and the count"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-running",
+      "role": "The pill; a button that opens the popover. data-fd-running names the popover."
+    },
+    {
+      "class": "fd-running-dot",
+      "role": "The pulsing dot."
+    },
+    {
+      "class": "fd-running-count",
+      "role": "The number of rows in the popover."
+    },
+    {
+      "class": "fd-running-label",
+      "role": "The word 'running'; hidden on a phone."
+    },
+    {
+      "class": "fd-running-list",
+      "role": "The rows inside the popover."
+    },
+    {
+      "class": "fd-running-item",
+      "role": "One running job, a link to its run."
+    },
+    {
+      "class": "fd-running-title",
+      "role": "The job's name."
+    },
+    {
+      "class": "fd-running-time",
+      "role": "Time so far."
+    },
+    {
+      "class": "fd-running-meta",
+      "role": "One line of detail, such as the step or the page count."
+    },
+    {
+      "class": "fd-running-bar",
+      "role": "A progress bar; --value is 0 to 1."
+    }
+  ],
+  "related": [
+    "popover",
+    "notification",
+    "progress",
+    "service-status"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "Opens the popover from the pill."
+    },
+    {
+      "keys": "Escape",
+      "does": "Closes the popover and returns focus to the pill."
+    }
+  ],
+  "example": "docs/shell.html#running",
+  "provenance": [
+    "docs/shell.html",
+    "fire/js/shell.js",
+    "fire/components/shell.css",
+    "templates/shell.js"
+  ],
+  "since": "0.7.0"
+}

@@ -1039,6 +1039,11 @@
      <div class="fd-command-empty" hidden>…</div>
      <div class="fd-command-foot">…key hints…</div>
    </dialog>
+
+   Found records (command.records() in overlays.js): a group of items that a search returned, not actions.
+     .fd-command-group[data-records="Runs"]   the group; aria-busy="true" while a search runs (its old rows dim)
+     .fd-command-item[data-found]             a record: the palette's filter never hides or re-ranks it
+     .fd-command-note[data-state="loading|error"]   one quiet line in a group: "Searching runs…" or the error
    ========================================================================== */
 .fd-command {
   position: fixed;
@@ -1097,6 +1102,9 @@
 .fd-command-item-hint.fd-mono, .fd-command-item-hint > .fd-mono { font-size: var(--fd-text-xs); }
 .fd-command-item > .fd-kbd + .fd-kbd { margin-inline-start: var(--fd-space-0-5); }
 .fd-command-item > .fd-status, .fd-command-item > .fd-badge { flex: none; margin-inline-start: auto; }
+.fd-command-group[aria-busy="true"] > .fd-command-item { opacity: 0.55; }
+.fd-command-note { margin: 0; padding: var(--fd-space-2-5) var(--fd-space-2-5); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-command-note[data-state="error"] { color: var(--fd-danger-text); }
 .fd-command-empty { flex: none; display: grid; justify-items: center; gap: var(--fd-space-1); padding: var(--fd-space-10) var(--fd-space-6); text-align: center; }
 .fd-command-empty > .fd-icon { width: var(--fd-icon-lg); height: var(--fd-icon-lg); margin-block-end: var(--fd-space-2); color: var(--fd-text-4); }
 .fd-command-empty-title { font-weight: var(--fd-weight-label); color: var(--fd-text); }

@@ -1247,6 +1247,267 @@
     </ul>
   </section>
 
+  <section class="doc-section" id="initial-mark">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Initial mark</h2>
+      <p>Where an organisation has no logo, draw its first letter as a small dot-matrix glyph: lit dots in the box's colour, unlit ones faint, so it reads as a tiny display. The same name always gives the same glyph and the same tone, so an organisation keeps its mark on every screen. Use it in the brand slot, in tiles and avatars of organisations, and in email.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <a class="fd-brand" href="#initial-mark"><span class="fd-brand-mark" data-fd-initial="Quarry Labs"></span><span class="fd-brand-name">Quarry Labs</span></a>
+      <a class="fd-brand" href="#initial-mark"><span class="fd-brand-mark" data-fd-initial="Northwind"></span><span class="fd-brand-name">Northwind</span></a>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-tile" data-size="28" data-fd-initial="Quarry Labs"></span>
+      <span class="fd-tile" data-size="28" data-fd-initial="Personal"></span>
+      <span class="fd-tile" data-size="28" data-fd-initial="Acme Research"></span>
+      <span class="fd-tile" data-size="28" data-fd-initial="Northwind"></span>
+      <span class="fd-tile" data-size="28" data-fd-initial="Zephyr"></span>
+      <span class="fd-tile" data-size="44" data-fd-initial="Quarry Labs"></span>
+      <span class="fd-tile" data-size="44" data-fd-initial="Acme Research"></span>
+      <span class="fd-tile" data-size="56" data-fd-initial="Northwind"></span>
+      <span class="fd-tile" data-size="56" data-fd-initial="9 Lives" data-bordered></span>
+    </div>
+    <div class="doc-specimen" data-code>
+      <span class="fd-avatar" data-size="40" data-fd-initial="Quarry Labs"></span>
+      <span class="fd-avatar" data-size="40" data-fd-initial="Acme Research"></span>
+      <span class="fd-avatar" data-size="28" data-fd-initial="Zephyr"></span>
+      <span class="fd-avatar" data-size="28" data-fd-initial="Personal" data-tone="success"></span>
+      <span class="fd-avatar" data-size="28" data-fd-initial="—"></span>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-fd-initial="Quarry Labs"</code> on a <code class="fd-code">.fd-tile</code>, <code class="fd-code">.fd-avatar</code>, <code class="fd-code">.fd-account-avatar</code> or <code class="fd-code">.fd-brand-mark</code> draws the mark. Leave the value empty and the box's own text is the name. Without script the box keeps its letter, which a tile and an avatar already style.</li>
+      <li>A tile or avatar without <code class="fd-code">data-tone</code> takes the tone its name maps to (accent, info, violet, success, warning or neutral; never danger). Give <code class="fd-code">data-tone</code> to choose one. A brand mark keeps the accent. The box is named after the organisation (<code class="fd-code">role="img"</code>) unless it is <code class="fd-code">aria-hidden</code>.</li>
+      <li>Letters A to Z and digits draw their own glyph; accents are dropped ("Élan" draws an E); anything else draws a diamond. Below 28px the dots are too small to read: use a tile of 28 or more, or the letter.</li>
+      <li>For a server or an email: <code class="fd-code">import { initialMark, initialRows, initialTone } from "fire/js/initial.js"</code>. <code class="fd-code">initialMark(name)</code> is an SVG string in <code class="fd-code">currentColor</code> (<code class="fd-code">{ label: true }</code> names it); <code class="fd-code">initialRows(name)</code> is seven strings of five 0 and 1 cells, for a mail client that draws no SVG; <code class="fd-code">initialTone(name)</code> is the tone. No DOM is needed. In a page, <code class="fd-code">shell.setInitial(host, name)</code> redraws a host.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="reading-column">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Reading column in a band</h2>
+      <p>For a public or signed-out page: a header band across the page, then a narrow column of text under it. <code class="fd-code">data-column</code> on a band puts its content in a centred column of that measure, while the band, its hairline and its surface still run edge to edge. It replaces the spacer divs on each side that a page would otherwise build.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <div class="fd-page">
+        <div class="fd-frame" data-frame-h="3xl">
+          <header class="fd-band" data-pad="sm">
+            <div class="fd-row" data-justify="between" data-gap="4">
+              <a class="fd-brand" href="#reading-column"><span class="fd-brand-mark" data-fd-initial="Quarry Labs"></span><span class="fd-brand-name">Quarry Labs</span></a>
+              <a class="fd-link" href="#reading-column">Sign in</a>
+            </div>
+          </header>
+          <section class="fd-band" data-pad="lg" data-column="md" data-grow>
+            <div class="fd-stack" data-gap="4">
+              <p class="fd-eyebrow" data-tone="accent">Shared answer</p>
+              <h1 class="fd-h1">Northwind raised its Team plan by 12%</h1>
+              <p class="fd-muted">Ember compared the pricing page with the copy saved on Nov 3 and found two changes: the Team plan went from $49 to $55 a seat, and annual billing now saves 15% instead of 20%.</p>
+              <div class="fd-row" data-gap="2"><a class="fd-btn" data-variant="primary" href="#reading-column">See the evidence</a><a class="fd-btn" href="#reading-column">Ask a follow-up</a></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-surface="sunken" data-code>
+      <p class="doc-specimen-label">the same page at 375px: the column fills the band</p>
+      <div data-frame="phone">
+        <div class="fd-page">
+          <div class="fd-frame" data-frame-h="3xl">
+            <header class="fd-band" data-pad="sm">
+              <div class="fd-row" data-justify="between" data-gap="4">
+                <a class="fd-brand" href="#reading-column"><span class="fd-brand-mark" data-fd-initial="Quarry Labs"></span><span class="fd-brand-name">Quarry Labs</span></a>
+                <a class="fd-link" href="#reading-column">Sign in</a>
+              </div>
+            </header>
+            <section class="fd-band" data-pad="lg" data-column="md" data-grow>
+              <div class="fd-stack" data-gap="4">
+                <p class="fd-eyebrow" data-tone="accent">Shared answer</p>
+                <h1 class="fd-h1">Northwind raised its Team plan by 12%</h1>
+                <p class="fd-muted">Two changes since Nov 3: the Team plan is $55 a seat, and annual billing saves 15%.</p>
+                <a class="fd-btn" data-variant="primary" href="#reading-column">See the evidence</a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-column="xs|sm|md|lg|xl"</code> sets the measure: 320, 400, 560 (default), 640 and 768px, the <code class="fd-code">--fd-column-*</code> tokens. The padding never goes below the band's own, so on a phone the content fills the band.</li>
+      <li>Add <code class="fd-code">data-grow</code> so the band takes the rest of the height, and <code class="fd-code">data-align="center"</code> to centre the column in it (a result, a welcome). <code class="fd-code">.fd-column</code> still places a block in a column inside a band; use <code class="fd-code">data-column</code> when the whole band is the column.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="go-keys">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Go-to keys and the shortcut sheet</h2>
+      <p>Press <kbd class="fd-kbd">G</kbd> and then a letter to go to a page, <kbd class="fd-kbd">/</kbd> to search and <kbd class="fd-kbd">?</kbd> to see them all. The keys are data attributes on the controls themselves, so the nav stays the one list of destinations, and the sheet always lists what the page really binds.</p>
+    </div>
+    <div class="doc-specimen" data-layout="grid" data-code>
+      <nav class="fd-nav" aria-label="Go-to keys" data-frame="md" data-fd-keys-pending="g">
+        <a class="fd-nav-item" href="#go-keys" data-fd-keys="g o" data-fd-keys-label="Overview"><i data-icon="home"></i><span class="fd-nav-text">Overview</span></a>
+        <a class="fd-nav-item" href="#go-keys" data-fd-keys="g l" data-fd-keys-label="Activity logs" aria-current="page"><i data-icon="list"></i><span class="fd-nav-text">Activity logs</span></a>
+        <a class="fd-nav-item" href="#go-keys" data-fd-keys="g k" data-fd-keys-label="API keys"><i data-icon="key-round"></i><span class="fd-nav-text">API keys</span></a>
+        <a class="fd-nav-item" href="#go-keys"><i data-icon="settings"></i><span class="fd-nav-text">Settings</span></a>
+      </nav>
+      <div class="fd-stack" data-gap="3">
+        <p class="doc-specimen-label">after the first key</p>
+        <div class="fd-keys-hint" data-state="open" data-static role="status"><kbd class="fd-kbd">G</kbd><span>then a key</span></div>
+        <p class="fd-muted fd-small">While <kbd class="fd-kbd">G</kbd> waits, each item that has a key shows it. Press one, or <kbd class="fd-kbd">Esc</kbd>.</p>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code>
+      <button class="fd-btn" type="button" data-fd-dialog-open="doc-shortcuts" data-fd-keys="?" data-fd-keys-label="Keyboard shortcuts"><i data-icon="keyboard"></i><span>Keyboard shortcuts</span><kbd class="fd-kbd">?</kbd></button>
+      <dialog class="fd-dialog" id="doc-shortcuts" data-size="md" data-fd-shortcuts>
+        <div class="fd-dialog-head">
+          <h2 class="fd-h3 fd-dialog-title">Keyboard shortcuts</h2>
+          <p class="fd-dialog-desc">They work anywhere except in a field.</p>
+          <button class="fd-btn fd-dialog-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+        </div>
+        <div class="fd-dialog-body"><div data-fd-shortcuts-list></div></div>
+      </dialog>
+      <div class="fd-shortcuts" data-frame="md">
+        <section class="fd-shortcuts-group">
+          <h3 class="fd-shortcuts-label">General</h3>
+          <div class="fd-shortcuts-row"><span class="fd-shortcuts-name">Search</span><span class="fd-shortcuts-keys"><kbd class="fd-kbd">/</kbd></span></div>
+          <div class="fd-shortcuts-row"><span class="fd-shortcuts-name">Keyboard shortcuts</span><span class="fd-shortcuts-keys"><kbd class="fd-kbd">?</kbd></span></div>
+        </section>
+        <section class="fd-shortcuts-group">
+          <h3 class="fd-shortcuts-label">Go to</h3>
+          <div class="fd-shortcuts-row"><span class="fd-shortcuts-name">Overview</span><span class="fd-shortcuts-keys"><kbd class="fd-kbd">G</kbd><span>then</span><kbd class="fd-kbd">O</kbd></span></div>
+          <div class="fd-shortcuts-row"><span class="fd-shortcuts-name">Activity logs</span><span class="fd-shortcuts-keys"><kbd class="fd-kbd">G</kbd><span>then</span><kbd class="fd-kbd">L</kbd></span></div>
+        </section>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">data-fd-keys="g l"</code> on a link, button or field: pressing the two keys follows, presses or focuses it. One key works too (<code class="fd-code">"/"</code>, <code class="fd-code">"?"</code>). Letters are case-insensitive; the second key has 1.6 seconds. It fires <code class="fd-code">fd:keys</code> with <code class="fd-code">{ keys }</code> on the control.</li>
+      <li>Keys are ignored while a field has focus, while a modal is open and with Ctrl, Cmd or Alt held; a hidden or disabled control is skipped. A page search that carries <code class="fd-code">data-fd-search-hotkey</code> keeps <kbd class="fd-kbd">/</kbd>. A control inside a closed menu still works, so the help menu's item can carry <kbd class="fd-kbd">?</kbd>.</li>
+      <li><code class="fd-code">.fd-dialog[data-fd-shortcuts]</code> with a <code class="fd-code">[data-fd-shortcuts-list]</code> inside is the sheet: it fills itself each time it opens, grouped by <code class="fd-code">data-fd-keys-group</code> ("Go to" for a <kbd class="fd-kbd">G</kbd> sequence, else "General") and named by <code class="fd-code">data-fd-keys-label</code>, the aria-label, the nav text or the control's text. A nav item with a two-key sequence gets its <code class="fd-code">.fd-nav-key</code> automatically.</li>
+      <li>Try it: press <kbd class="fd-kbd">G</kbd> then <kbd class="fd-kbd">L</kbd> on this page, or <kbd class="fd-kbd">?</kbd>.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="palette-records">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Found records in the command palette</h2>
+      <p>The palette lists pages and actions you already know. A records group adds the things a search finds: runs, keys, monitors, people. It searches as you type, shows that it is looking, says so when it fails, and never lets the palette's own filter hide or re-rank what the search returned.</p>
+    </div>
+    <div class="doc-specimen" data-layout="center" data-surface="sunken" data-code>
+      <dialog class="fd-command" aria-label="Command palette, found records" data-static-demo open>
+        <div class="fd-command-search"><i data-icon="search"></i><input class="fd-command-input" type="text" value="quarry" aria-label="Search commands"><kbd class="fd-kbd">esc</kbd></div>
+        <div class="fd-command-list">
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Navigation</p>
+            <a class="fd-command-item" href="#palette-records" data-keywords="team members"><i data-icon="users"></i><span class="fd-command-item-label">Quarry Labs settings</span></a>
+          </div>
+          <div class="fd-command-group" data-records="Runs">
+            <p class="fd-command-group-label">Runs</p>
+            <a class="fd-command-item" href="#palette-records" data-found><i data-icon="network"></i><span class="fd-command-item-label">run_8f2a91</span><span class="fd-command-item-hint">Crawl docs.quarry.dev · running</span></a>
+            <a class="fd-command-item" href="#palette-records" data-found><i data-icon="file-text"></i><span class="fd-command-item-label">run_6d03ee</span><span class="fd-command-item-hint">Scrape quarry.dev/pricing · 2h ago</span></a>
+          </div>
+          <div class="fd-command-group" data-records="Monitors" aria-busy="true">
+            <p class="fd-command-group-label">Monitors</p>
+            <p class="fd-command-note" data-state="loading">Searching monitors…</p>
+          </div>
+          <div class="fd-command-group" data-records="Keys">
+            <p class="fd-command-group-label">API keys</p>
+            <p class="fd-command-note" data-state="error">Could not search API keys</p>
+          </div>
+        </div>
+        <div class="fd-command-foot"><span><kbd class="fd-kbd">↑</kbd><kbd class="fd-kbd">↓</kbd>navigate</span><span><kbd class="fd-kbd">↵</kbd>select</span><span><kbd class="fd-kbd">esc</kbd>close</span></div>
+      </dialog>
+    </div>
+    <div class="doc-specimen" data-code>
+      <button class="fd-btn" type="button" data-fd-command-open="doc-records-palette"><i data-icon="search"></i><span>Try it</span></button>
+      <p class="fd-muted fd-small">Type <span class="fd-mono">run</span> or <span class="fd-mono">mon</span>. <span class="fd-mono">fail</span> makes the search fail.</p>
+      <dialog class="fd-command" id="doc-records-palette" aria-label="Command palette with found records">
+        <div class="fd-command-search"><i data-icon="search"></i><input class="fd-command-input" type="text" placeholder="Search pages and records…" aria-label="Search commands"><kbd class="fd-kbd">esc</kbd></div>
+        <div class="fd-command-list">
+          <div class="fd-command-group">
+            <p class="fd-command-group-label">Navigation</p>
+            <a class="fd-command-item" href="#palette-records" data-keywords="requests history"><i data-icon="list"></i><span class="fd-command-item-label">Activity logs</span></a>
+            <a class="fd-command-item" href="#palette-records" data-keywords="credits billing"><i data-icon="chart-column"></i><span class="fd-command-item-label">Usage</span></a>
+          </div>
+        </div>
+        <div class="fd-command-empty" hidden><i data-icon="search"></i><p class="fd-command-empty-title">No results for “<span data-fd-command-query></span>”</p><p class="fd-command-empty-text">Try a page name or a run ID.</p></div>
+        <div class="fd-command-foot"><span><kbd class="fd-kbd">↑</kbd><kbd class="fd-kbd">↓</kbd>navigate</span><span><kbd class="fd-kbd">↵</kbd>select</span><span><kbd class="fd-kbd">esc</kbd>close</span></div>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">command.records({ group, search, icon, min, delay, limit, palette })</code> registers a group and returns a function that removes it. <code class="fd-code">search(query, { signal })</code> returns rows, or a promise of them: <code class="fd-code">{ id, label, hint, href, icon, keywords, perform, data }</code>. It runs after <code class="fd-code">delay</code> ms (160) once the query has <code class="fd-code">min</code> characters (2); a search that is still running when the query changes is aborted through <code class="fd-code">signal</code>. At most <code class="fd-code">limit</code> rows (5).</li>
+      <li>The group is <code class="fd-code">.fd-command-group[data-records]</code>; it carries <code class="fd-code">aria-busy="true"</code> while it waits, with a <code class="fd-code">.fd-command-note[data-state="loading"]</code> when it has nothing yet (older rows stay, dimmed, so the list does not jump). When the search fails the note says <code class="fd-code">error</code> (an alert); when it finds nothing the group is hidden.</li>
+      <li>Rows are <code class="fd-code">.fd-command-item[data-found]</code> and behave like any item: <kbd class="fd-kbd">↵</kbd> or a click fires <code class="fd-code">fd:select</code> with <code class="fd-code">detail.data</code> set to the row, then follows its <code class="fd-code">href</code> or calls <code class="fd-code">perform</code>. The palette shows its "no results" state only once every search has settled.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="running">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Running now</h2>
+      <p>A pill in the top bar that counts what is in progress and opens the list: crawls, agent runs, monitor checks. It only exists while something runs, so a quiet account has a quiet bar.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <div class="fd-app" data-contained data-frame="md">
+        <div class="fd-main">
+          <header class="fd-topbar">
+            <span class="fd-topbar-title">Quarry Labs</span>
+            <div class="fd-topbar-actions">
+              <button class="fd-running" id="doc-running-pill" type="button" data-fd-running="doc-running" data-fd-popover="doc-running" data-placement="bottom-end" aria-label="3 running"><span class="fd-running-dot" aria-hidden="true"></span><span class="fd-running-count">3</span><span class="fd-running-label">running</span></button>
+              <button class="fd-btn" type="button" data-icon-only aria-label="Notifications"><i data-icon="bell"></i></button>
+            </div>
+          </header>
+        </div>
+      </div>
+      <div class="fd-popover" id="doc-running" popover data-size="lg" aria-label="Running now">
+        <div class="fd-popover-head"><p class="fd-popover-title">Running now</p></div>
+        <div class="fd-popover-body">
+          <div class="fd-running-list" id="doc-running-list">
+            <a class="fd-running-item" href="#running" data-kind="crawl"><span class="fd-tile" data-size="28" data-tone="accent"><i data-icon="network"></i></span><span class="fd-running-title">Crawl docs.quarry.dev</span><span class="fd-running-time">2m 08s</span><span class="fd-running-meta">412 of 1,200 pages</span><span class="fd-running-bar" data-fd-vars="--value: 0.34" aria-hidden="true"></span></a>
+            <a class="fd-running-item" href="#running" data-kind="agent"><span class="fd-tile" data-size="28" data-tone="accent"><i data-icon="wand-sparkles"></i></span><span class="fd-running-title">Agent: compare plans on three sites</span><span class="fd-running-time">48s</span><span class="fd-running-meta">Step 4 of 9 · reading northwind.dev/pricing</span><span class="fd-running-bar" data-fd-vars="--value: 0.44" aria-hidden="true"></span></a>
+            <a class="fd-running-item" href="#running" data-kind="monitor"><span class="fd-tile" data-size="28" data-tone="neutral"><i data-icon="radar"></i></span><span class="fd-running-title">Monitor: acme.dev/changelog</span><span class="fd-running-time">12s</span><span class="fd-running-meta">Checking now · 6 pages</span><span class="fd-running-bar" data-fd-vars="--value: 0.8" aria-hidden="true"></span></a>
+          </div>
+        </div>
+        <div class="fd-popover-foot" data-align="center"><a class="fd-btn-text" href="#running"><span>View all runs</span><i data-icon="arrow-right" data-nudge></i></a></div>
+      </div>
+    </div>
+    <div class="doc-specimen" data-code>
+      <button class="fd-btn" type="button" id="doc-running-finish"><i data-icon="check"></i><span>Finish one</span></button>
+      <button class="fd-btn" type="button" id="doc-running-start"><i data-icon="play"></i><span>Start one</span></button>
+      <span class="fd-muted fd-small">The pill counts the popover's items, so it follows them. With none left it is hidden.</span>
+    </div>
+    <div class="doc-specimen" data-code>
+      <button class="fd-running" type="button" aria-label="1 running"><span class="fd-running-dot" aria-hidden="true"></span><span class="fd-running-count">1</span><span class="fd-running-label">running</span></button>
+      <button class="fd-running" type="button" aria-label="12 running"><span class="fd-running-dot" aria-hidden="true"></span><span class="fd-running-count">12</span><span class="fd-running-label">running</span></button>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">.fd-running[data-fd-running="popover-id"]</code> with <code class="fd-code">-dot</code>, <code class="fd-code">-count</code> and <code class="fd-code">-label</code>. <code class="fd-code">shell.syncRunning(root)</code> counts its popover's <code class="fd-code">.fd-running-item</code>s, names the pill ("3 running"), hides it at 0 and fires <code class="fd-code">fd:change</code> with <code class="fd-code">{ value }</code>; it watches the list afterwards, so adding or removing rows is enough.</li>
+      <li>A row is a link to the run: <code class="fd-code">.fd-running-item</code> with a tile, <code class="fd-code">-title</code>, <code class="fd-code">-time</code>, <code class="fd-code">-meta</code> and a <code class="fd-code">-bar</code> whose <code class="fd-code">--value</code> is 0 to 1 (through <code class="fd-code">data-fd-vars</code>). Leave out the bar for work with no known end. On a phone the label drops and the pill keeps the dot and the count.</li>
+    </ul>
+  </section>
+
+  <section class="doc-section" id="service-status">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Service status</h2>
+      <p>Whether the product itself is healthy, in the top bar. When everything is normal it is an icon and nothing more; when it is not, it says so in words and a colour, because a quiet icon would be missed exactly when it matters.</p>
+    </div>
+    <div class="doc-specimen" data-code>
+      <a class="fd-service-status" data-status="operational" href="#service-status" data-fd-tooltip="All systems operational" aria-label="All systems operational"><i data-icon="activity"></i><span class="fd-service-status-label">All systems operational</span></a>
+      <a class="fd-service-status" data-status="degraded" href="#service-status" aria-label="Degraded performance"><i data-icon="triangle-alert"></i><span class="fd-service-status-label">Degraded performance</span></a>
+      <a class="fd-service-status" data-status="outage" href="#service-status" aria-label="Service outage"><i data-icon="circle-alert"></i><span class="fd-service-status-label">Service outage</span></a>
+      <a class="fd-service-status" data-status="maintenance" href="#service-status" aria-label="Scheduled maintenance"><i data-icon="clock"></i><span class="fd-service-status-label">Scheduled maintenance</span></a>
+    </div>
+    <div class="doc-specimen" data-code>
+      <a class="fd-service-status" id="doc-status-live" data-status="operational" href="#service-status" data-fd-tooltip="All systems operational" aria-label="All systems operational"><i data-icon="activity"></i><span class="fd-service-status-label">All systems operational</span></a>
+      <div class="fd-segmented" role="radiogroup" aria-label="Set the status" data-size="sm" id="doc-status-set">
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="operational">Operational</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="degraded">Degraded</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="outage">Outage</button>
+        <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="maintenance">Maintenance</button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li><code class="fd-code">.fd-service-status[data-status="operational|degraded|outage|maintenance"]</code> is a link to your status page. Operational shows the icon alone in green, with the label for assistive technology and a tooltip; any other status shows the label in its tone. On a phone only the icon remains, so the name travels in <code class="fd-code">aria-label</code>.</li>
+      <li><code class="fd-code">shell.setServiceStatus(el, status, text?)</code> changes it: the status, the label, the <code class="fd-code">aria-label</code>, the tooltip and the icon together, and fires <code class="fd-code">fd:change</code> with <code class="fd-code">{ value: status }</code>. Poll your status feed and call it; the control does not fetch anything itself.</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="api">
     <div class="doc-section-head"><h2 class="fd-h3">Reference</h2></div>
     <table class="doc-table">
@@ -1267,6 +1528,12 @@
         <tr><td>.fd-toolbar</td><td><code class="fd-code">-search</code>, <code class="fd-code">-sep</code>, <code class="fd-code">-end</code>.</td></tr>
         <tr><td>.fd-split / .fd-panel</td><td><code class="fd-code">data-side="start"</code>; <code class="fd-code">.fd-split-main</code>; panel <code class="fd-code">-head</code>, <code class="fd-code">-title</code>, <code class="fd-code">-body</code>. <code class="fd-code">.fd-panel[data-variant="pane"]</code> as a direct child of <code class="fd-code">.fd-app</code>.</td></tr>
         <tr><td>.fd-mobile-nav</td><td><code class="fd-code">-actions</code>, <code class="fd-code">-account</code>, <code class="fd-code">-section</code>, <code class="fd-code">-label</code>, <code class="fd-code">-item</code>. Opened by <code class="fd-code">[data-fd-mobile-nav]</code>; fires <code class="fd-code">fd:open</code> / <code class="fd-code">fd:close</code>.</td></tr>
+        <tr><td>[data-fd-initial]</td><td>On <code class="fd-code">.fd-tile</code>, <code class="fd-code">.fd-avatar</code>, <code class="fd-code">.fd-account-avatar</code> or <code class="fd-code">.fd-brand-mark</code>: draws the name's first letter as a dot-matrix mark, and a tone for a tile or avatar. <code class="fd-code">svg.fd-initial</code> is the drawing; <code class="fd-code">shell.setInitial(host, name)</code> redraws; <code class="fd-code">initialMark</code>, <code class="fd-code">initialRows</code> and <code class="fd-code">initialTone</code> need no DOM.</td></tr>
+        <tr><td>.fd-band[data-column]</td><td><code class="fd-code">xs|sm|md|lg|xl</code>: the band's content sits in a centred reading column (layout.css).</td></tr>
+        <tr><td>[data-fd-keys]</td><td><code class="fd-code">"g l"</code> or <code class="fd-code">"/"</code>: the key sequence that activates the control. <code class="fd-code">data-fd-keys-label</code>, <code class="fd-code">data-fd-keys-group</code>. <code class="fd-code">.fd-nav-key</code>, <code class="fd-code">.fd-keys-hint</code>. <code class="fd-code">.fd-dialog[data-fd-shortcuts]</code> with <code class="fd-code">[data-fd-shortcuts-list]</code> is the sheet (<code class="fd-code">.fd-shortcuts</code>). Fires <code class="fd-code">fd:keys</code>.</td></tr>
+        <tr><td>.fd-running</td><td><code class="fd-code">data-fd-running="popover-id"</code>; <code class="fd-code">-dot</code>, <code class="fd-code">-count</code>, <code class="fd-code">-label</code>. Popover rows <code class="fd-code">.fd-running-item</code>: <code class="fd-code">-title</code>, <code class="fd-code">-time</code>, <code class="fd-code">-meta</code>, <code class="fd-code">-bar</code>. <code class="fd-code">shell.syncRunning(root)</code>.</td></tr>
+        <tr><td>.fd-service-status</td><td><code class="fd-code">data-status="operational|degraded|outage|maintenance"</code>; <code class="fd-code">-label</code>. <code class="fd-code">shell.setServiceStatus(el, status, text?)</code>.</td></tr>
+        <tr><td>command.records</td><td><code class="fd-code">overlays.command.records({ group, search, icon, min, delay, limit, palette })</code>: a group of found records in the palette. <code class="fd-code">.fd-command-group[data-records]</code>, <code class="fd-code">.fd-command-item[data-found]</code>, <code class="fd-code">.fd-command-note</code>.</td></tr>
         <tr><td>shell.js</td><td><code class="fd-code">setSidebar(app, state)</code>, <code class="fd-code">toggleSidebar(app)</code>, <code class="fd-code">setNavGroup(button, open)</code>, <code class="fd-code">openMobileNav(sheet, trigger)</code>, <code class="fd-code">closeMobileNav()</code>, <code class="fd-code">cycleTheme()</code>.</td></tr>
       </tbody>
     </table>
@@ -1280,5 +1547,41 @@
     </div>
   </section>
 </main>
+<script type="module">
+  import { shell, overlays } from '../fire/fire.js';
+
+  // Running now: the pill follows the popover's items.
+  const list = document.getElementById('doc-running-list');
+  const sample = list?.firstElementChild;
+  document.getElementById('doc-running-finish')?.addEventListener('click', () => list.lastElementChild?.remove());
+  document.getElementById('doc-running-start')?.addEventListener('click', () => {
+    if (!sample) return;
+    const row = sample.cloneNode(true);
+    row.querySelector('.fd-running-title').textContent = 'Crawl shop.acme.dev';
+    list.append(row);
+  });
+
+  // Service status: the control follows the choice.
+  const live = document.getElementById('doc-status-live');
+  document.getElementById('doc-status-set')?.addEventListener('click', (event) => {
+    const item = event.target.closest('[data-value]');
+    if (!item || !live) return;
+    shell.setServiceStatus(live, item.dataset.value);
+  });
+
+  // Found records: a fixture that answers after a short wait, and fails on "fail".
+  const RUNS = [['run_8f2a91', 'Crawl docs.quarry.dev · running'], ['run_6d03ee', 'Scrape northwind.dev/pricing · 2h ago'], ['run_4b1c7a', 'Crawl shop.acme.dev · failed on page 41']];
+  const MONITORS = [['acme.dev/changelog', 'Daily · changed 2 days ago'], ['northwind.dev/pricing', 'Hourly · 3 changes since yesterday']];
+  const source = (rows, icon) => (query, { signal }) => new Promise((resolve, reject) => {
+    const q = query.toLowerCase();
+    const timer = setTimeout(() => {
+      if (q.includes('fail')) { reject(new Error('offline')); return; }
+      resolve(rows.filter(([label, hint]) => `${label} ${hint}`.toLowerCase().includes(q)).map(([label, hint]) => ({ id: label, label, hint, href: '#palette-records', icon })));
+    }, 420);
+    signal.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); });
+  });
+  overlays.command.records({ group: 'Runs', icon: 'network', search: source(RUNS, 'network'), palette: 'doc-records-palette' });
+  overlays.command.records({ group: 'Monitors', icon: 'radar', search: source(MONITORS, 'radar'), palette: 'doc-records-palette' });
+</script>
 </body>
 </html>

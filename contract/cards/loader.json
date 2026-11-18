@@ -1,0 +1,132 @@
+{
+  "id": "loader",
+  "job": "Show that something small is loading with a ring, dots, bars or a text frame.",
+  "purpose": "Loaders for work too small or too unpredictable to sketch. A ring goes inside controls and small panels. A braille frame or dots go beside a sentence that says what is happening. Equaliser bars show a stream receiving data. fd-pending shows an optimistic change at half strength until the server confirms it. Under reduced motion they hold still.",
+  "useWhen": [
+    "A control, a small panel or one line of text is waiting on a response.",
+    "A stream is receiving data and needs a quiet live mark.",
+    "A change shows at once at half strength and settles when the server confirms."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A page or a region whose layout is known; sketch it.",
+      "instead": "skeleton"
+    },
+    {
+      "when": "Navigation or a full reload.",
+      "instead": "pagebar"
+    },
+    {
+      "when": "A button is busy; set aria-busy=\"true\" on it instead of adding a spinner child.",
+      "instead": "button"
+    },
+    {
+      "when": "Progress with a known amount.",
+      "instead": "progress"
+    }
+  ],
+  "aka": [
+    "spinner",
+    "activity indicator",
+    "busy",
+    "throbber",
+    "loading dots",
+    "progress ring",
+    "waiting"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "announced",
+      "how": "role=\"status\" with aria-label, or the sentence beside it as the label"
+    },
+    {
+      "name": "pending change",
+      "how": ".fd-pending around the changed content"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-size",
+      "value": "12",
+      "useWhen": "Inside an xs control or an inline icon slot."
+    },
+    {
+      "attribute": "data-size",
+      "value": "16",
+      "useWhen": "The default beside a line of text or in a small button row."
+    },
+    {
+      "attribute": "data-size",
+      "value": "20",
+      "useWhen": "In a field, a menu row or a compact panel."
+    },
+    {
+      "attribute": "data-size",
+      "value": "24",
+      "useWhen": "In a card or a panel with room."
+    },
+    {
+      "attribute": "data-size",
+      "value": "32",
+      "useWhen": "A larger box, as a section that is loading."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "accent",
+      "useWhen": "Live work the person is waiting on."
+    },
+    {
+      "attribute": "data-tone",
+      "value": "muted",
+      "useWhen": "A quiet spinner that should not draw the eye."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-spinner",
+      "role": "The ring; use data-size and role=\"status\"."
+    },
+    {
+      "class": "fd-braille",
+      "role": "A text loader: a braille frame that cycles every 80ms, then your label."
+    },
+    {
+      "class": "fd-braille-frame",
+      "role": "The cycling frame, added by JavaScript."
+    },
+    {
+      "class": "fd-dots",
+      "role": "Three pulsing dots."
+    },
+    {
+      "class": "fd-pending",
+      "role": "Wraps an optimistic change; children show at half strength."
+    },
+    {
+      "class": "fd-spin",
+      "role": "The rotation helper for an icon."
+    }
+  ],
+  "related": [
+    "skeleton",
+    "pagebar",
+    "progress",
+    "button"
+  ],
+  "keyboard": [],
+  "example": "docs/skeletons.html#spinners",
+  "provenance": [
+    "docs/skeletons.html",
+    "fire/components/skeleton.css",
+    "fire/js/texture.js"
+  ],
+  "since": "0.1.0"
+}

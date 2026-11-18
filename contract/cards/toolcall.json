@@ -1,0 +1,126 @@
+{
+  "id": "toolcall",
+  "job": "Show one step the agent took, with its arguments, time and cost.",
+  "purpose": "One quiet row for each tool the agent ran: the name, a summary of the arguments, duration and credits in mono. Open it to see the full arguments and the result. Consecutive calls are joined by a rail. States are queued, running, done, failed with a Retry, and approval with three choices.",
+  "useWhen": [
+    "The agent calls tools and the person may want to check what ran.",
+    "A call needs permission first (approval) or has failed and can be retried."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A plan to tick off, not exact calls.",
+      "instead": "run-steps"
+    },
+    {
+      "when": "The agent's thinking in prose.",
+      "instead": "reasoning"
+    },
+    {
+      "when": "A tool step inside a support chat; use the tool block of a chat message.",
+      "instead": "chat-message"
+    }
+  ],
+  "aka": [
+    "tool use",
+    "function call",
+    "action step",
+    "agent step",
+    "trace span",
+    "MCP call"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "record"
+  ],
+  "states": [
+    {
+      "name": "queued",
+      "how": "data-state=\"queued\"; dashed ring"
+    },
+    {
+      "name": "running",
+      "how": "data-state=\"running\"; spinner and shimmering name"
+    },
+    {
+      "name": "done",
+      "how": "data-state=\"done\""
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\"; danger edge, message and Retry"
+    },
+    {
+      "name": "approval",
+      "how": "data-state=\"approval\"; accent wash with Allow once, Always allow, Deny"
+    },
+    {
+      "name": "open",
+      "how": "aria-expanded=\"true\" on .fd-toolcall-head"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-toolcall",
+      "role": "One call."
+    },
+    {
+      "class": "fd-toolcall-group",
+      "role": "Joins consecutive calls with a rail."
+    },
+    {
+      "class": "fd-toolcall-head",
+      "role": "The button row that opens the panel."
+    },
+    {
+      "class": "fd-toolcall-name",
+      "role": "The tool name."
+    },
+    {
+      "class": "fd-toolcall-args",
+      "role": "A one-line summary of the arguments; hidden below 440px."
+    },
+    {
+      "class": "fd-toolcall-meta",
+      "role": "Duration and credits, mono, right-aligned."
+    },
+    {
+      "class": "fd-toolcall-status",
+      "role": "The status icon."
+    },
+    {
+      "class": "fd-toolcall-panel",
+      "role": "The folding detail."
+    },
+    {
+      "class": "fd-toolcall-body",
+      "role": "Arguments and result."
+    },
+    {
+      "class": "fd-toolcall-foot",
+      "role": "Error text and its actions."
+    }
+  ],
+  "related": [
+    "reasoning",
+    "run-steps",
+    "approval-bar",
+    "message",
+    "thread"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "Opens or closes the call."
+    }
+  ],
+  "example": "docs/agent.html#toolcalls",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

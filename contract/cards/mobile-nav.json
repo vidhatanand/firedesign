@@ -1,0 +1,126 @@
+{
+  "id": "mobile-nav",
+  "job": "Open the full navigation as a sheet on a phone.",
+  "purpose": "On phones the menu button opens a full-height sheet under the top bar: the upgrade first, then the account, then every destination with its icon on the right. Between 640 and 900px it is a side sheet over a scrim. It traps focus, locks page scroll and closes on Escape.",
+  "useWhen": [
+    "The sidebar is hidden below 900px and people still need every destination.",
+    "The shell needs the upgrade and the account in reach on a phone."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The same nav on a desktop width.",
+      "instead": "sidebar"
+    },
+    {
+      "when": "A short list of actions anchored to a button.",
+      "instead": "menu"
+    },
+    {
+      "when": "A bottom sheet with other content.",
+      "instead": "sheet"
+    }
+  ],
+  "aka": [
+    "hamburger menu",
+    "drawer",
+    "off-canvas nav",
+    "mobile menu",
+    "burger"
+  ],
+  "surfaces": [
+    "phone"
+  ],
+  "data": [
+    "list"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\"; set by openMobileNav"
+    },
+    {
+      "name": "closed",
+      "how": "data-state=\"closed\" or hidden"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-state",
+      "value": "open",
+      "useWhen": "The sheet is showing."
+    },
+    {
+      "attribute": "data-state",
+      "value": "closed",
+      "useWhen": "The sheet is out of the way."
+    },
+    {
+      "attribute": "data-level",
+      "value": "2",
+      "useWhen": "A child item under a group, indented."
+    },
+    {
+      "attribute": "data-only",
+      "value": "mobile",
+      "useWhen": "Show a part only on the phone side of 900px."
+    },
+    {
+      "attribute": "data-only",
+      "value": "desktop",
+      "useWhen": "Show a part only on the desktop side of 900px."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-mobile-nav",
+      "role": "The sheet; trigger it with data-fd-mobile-nav and aria-controls."
+    },
+    {
+      "class": "fd-mobile-nav-scrim",
+      "role": "The dimmed backdrop."
+    },
+    {
+      "class": "fd-mobile-nav-actions",
+      "role": "The upgrade buttons at the top."
+    },
+    {
+      "class": "fd-mobile-nav-account",
+      "role": "The account row."
+    },
+    {
+      "class": "fd-mobile-nav-section",
+      "role": "A labelled group."
+    },
+    {
+      "class": "fd-mobile-nav-item",
+      "role": "One destination."
+    },
+    {
+      "class": "fd-mobile-nav-label",
+      "role": "A section label."
+    }
+  ],
+  "related": [
+    "sidebar",
+    "topbar",
+    "sheet",
+    "app"
+  ],
+  "keyboard": [
+    {
+      "keys": "Escape",
+      "does": "Closes the sheet and returns focus to the menu button."
+    },
+    {
+      "keys": "Tab",
+      "does": "Cycles inside the sheet while it is open."
+    }
+  ],
+  "example": "docs/shell.html#mobile",
+  "provenance": [
+    "docs/shell.html",
+    "fire/components/shell.css",
+    "fire/js/shell.js"
+  ],
+  "since": "0.1.0"
+}

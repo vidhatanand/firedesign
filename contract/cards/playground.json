@@ -1,0 +1,121 @@
+{
+  "id": "playground",
+  "job": "Try one capability of a data source with a request form and a response panel.",
+  "purpose": "A two-column screen: the request as a form on the left, the response on the right. The response shows its shape as a skeleton until the first run, so people see what they will get before they spend a credit. A sticky footer shows the cost and Run; Ctrl or Cmd+Enter runs it. Below 720px the columns stack.",
+  "useWhen": [
+    "One endpoint or tool has parameters and people want to try it before writing code.",
+    "The cost of a run should be visible and update with the inputs."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The person talks to the agent in free text.",
+      "instead": "agent"
+    },
+    {
+      "when": "Docs show a reference with a request panel and a Try it sheet.",
+      "instead": "doc-endpoint"
+    },
+    {
+      "when": "A single form saves settings rather than running a request.",
+      "instead": "form"
+    }
+  ],
+  "aka": [
+    "API explorer",
+    "try it",
+    "sandbox",
+    "request builder",
+    "console",
+    "REST client"
+  ],
+  "surfaces": [
+    "app"
+  ],
+  "data": [
+    "form",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "empty response",
+      "how": "skeleton rows until Run"
+    },
+    {
+      "name": "running",
+      "how": "data-action=\"run\" fills the response from a template with a rise"
+    },
+    {
+      "name": "reset",
+      "how": "data-action=\"reset\" restores the fields and the skeleton"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-size",
+      "value": "sm",
+      "useWhen": "A compact playground inside a panel or a narrow page."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-playground",
+      "role": "The root; takes data-fd-playground."
+    },
+    {
+      "class": "fd-playground-head",
+      "role": "Title, capability count and the Try it / Agent / Docs switch."
+    },
+    {
+      "class": "fd-playground-cols",
+      "role": "The two columns."
+    },
+    {
+      "class": "fd-playground-col",
+      "role": "One column with its head."
+    },
+    {
+      "class": "fd-playground-colhead",
+      "role": "The numbered heading, such as \"1 Request\"."
+    },
+    {
+      "class": "fd-playground-form",
+      "role": "The request fields."
+    },
+    {
+      "class": "fd-playground-field",
+      "role": "One parameter with name, type and hint."
+    },
+    {
+      "class": "fd-playground-output",
+      "role": "The response area with the Table and JSON views."
+    },
+    {
+      "class": "fd-playground-foot",
+      "role": "Sticky footer with the credit estimate and Run."
+    },
+    {
+      "class": "fd-playground-credits",
+      "role": "The cost line; data-fd-credits on an input drives it."
+    }
+  ],
+  "related": [
+    "composer",
+    "result",
+    "doc-endpoint",
+    "endpoint",
+    "skeleton"
+  ],
+  "keyboard": [
+    {
+      "keys": "Ctrl/Cmd+Enter",
+      "does": "Runs the request from inside the form."
+    }
+  ],
+  "example": "docs/agent.html#playground",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

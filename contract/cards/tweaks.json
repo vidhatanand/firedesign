@@ -1,0 +1,141 @@
+{
+  "id": "tweaks",
+  "job": "Change the whole look of the product live: palette, type, tone, density, corners and motion.",
+  "purpose": "A floating, non-modal panel with controls for fifteen palettes, twelve type sets, tone (hue, vivid, light, warmth), theme, density, corners, lines, text size, contrast, motion and texture. Choices are saved in localStorage and applied before first paint when fire/boot.js loads. Copy CSS and Copy theme export the look. On phones it is a bottom sheet.",
+  "useWhen": [
+    "A team is choosing a product's character before committing to it.",
+    "Users may tune density, contrast and motion for themselves."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A single light and dark switch.",
+      "instead": "segmented"
+    },
+    {
+      "when": "Settings that belong to the account and save to the server.",
+      "instead": "setting"
+    },
+    {
+      "when": "A modal choice that blocks the page.",
+      "instead": "dialog"
+    }
+  ],
+  "aka": [
+    "theme switcher",
+    "theme customizer",
+    "appearance settings",
+    "style panel",
+    "design controls",
+    "palette picker",
+    "live editor"
+  ],
+  "surfaces": [
+    "app",
+    "website"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\" on .fd-tweaks"
+    },
+    {
+      "name": "closed",
+      "how": "data-state=\"closed\""
+    },
+    {
+      "name": "changed",
+      "how": "data-changed on a row whose value differs from the default"
+    },
+    {
+      "name": "dragging",
+      "how": "data-dragging while the header is dragged on desktop"
+    },
+    {
+      "name": "moved",
+      "how": "data-moved after it was dragged; double-click the header to dock again"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-inline",
+      "value": "",
+      "useWhen": "A row with the label beside the control instead of above it."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-tweaks",
+      "role": "The panel; a role=\"dialog\" that is not modal."
+    },
+    {
+      "class": "fd-tweaks-head",
+      "role": "The drag handle with the title, Reset and Close."
+    },
+    {
+      "class": "fd-tweaks-body",
+      "role": "The sections of controls."
+    },
+    {
+      "class": "fd-tweaks-row",
+      "role": "One control with its label."
+    },
+    {
+      "class": "fd-tweaks-palettes",
+      "role": "The 5 by 3 grid of palette swatches."
+    },
+    {
+      "class": "fd-tweaks-faces",
+      "role": "The 4 by 3 grid of type sets."
+    },
+    {
+      "class": "fd-tweaks-range",
+      "role": "A slider for tone, corners or texture."
+    },
+    {
+      "class": "fd-tweaks-value",
+      "role": "The readout; click to reset that control."
+    },
+    {
+      "class": "fd-tweaks-foot",
+      "role": "Copy CSS and Copy theme, and a summary."
+    },
+    {
+      "class": "fd-tweaks-launcher",
+      "role": "The round button added when html has data-fd-tweaks and no trigger."
+    }
+  ],
+  "related": [
+    "segmented",
+    "slider",
+    "switch",
+    "dialog"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Moves between controls."
+    },
+    {
+      "keys": "Arrow keys",
+      "does": "Move inside the palette and type grids and select."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Jump to the first or last swatch or type set."
+    },
+    {
+      "keys": "Escape",
+      "does": "Closes the panel and returns focus to its trigger."
+    }
+  ],
+  "example": "docs/tweaks.html#panel",
+  "provenance": [
+    "docs/tweaks.html",
+    "fire/components/tweaks.css",
+    "fire/js/tweaks.js"
+  ],
+  "since": "0.1.0"
+}

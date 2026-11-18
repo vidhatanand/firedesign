@@ -1,0 +1,148 @@
+{
+  "id": "message",
+  "job": "Show one turn of an agent conversation: the person in a bubble, the agent in prose.",
+  "purpose": "One message in a thread. The person's turn is a grey bubble on the right, at most 70% wide. The agent's turn is unboxed prose at reading size, with copy, retry and thumbs actions under it that appear on hover or focus and always show under the last one. It can show a thinking line, three dots, a streaming caret or an error.",
+  "useWhen": [
+    "A thread shows what the person asked and what the agent answered.",
+    "An answer streams word by word, or fails and offers a retry."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The conversation is with support and carries blocks, delivery state and avatars.",
+      "instead": "chat-message"
+    },
+    {
+      "when": "A single status or announcement sits on a page, not in a thread.",
+      "instead": "callout"
+    },
+    {
+      "when": "The step the agent took, with arguments and cost.",
+      "instead": "toolcall"
+    }
+  ],
+  "aka": [
+    "chat bubble",
+    "answer",
+    "response",
+    "assistant message",
+    "user message",
+    "turn"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [
+    {
+      "name": "thinking",
+      "how": "fd-message-thinking holds a short shimmering line; fd-message-dots shows three dots"
+    },
+    {
+      "name": "streaming",
+      "how": "fd-cursor at the end of the last word; stream(el, html)"
+    },
+    {
+      "name": "error",
+      "how": "fd-message-error with a title, text and a Retry button"
+    },
+    {
+      "name": "copied",
+      "how": "data-state=\"copied\" on the copy action"
+    },
+    {
+      "name": "actions shown",
+      "how": "data-actions=\"visible\""
+    },
+    {
+      "name": "new",
+      "how": "data-new; the entrance rise"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-role",
+      "value": "user",
+      "useWhen": "The person's turn: a right-aligned bubble."
+    },
+    {
+      "attribute": "data-role",
+      "value": "assistant",
+      "useWhen": "The agent's turn: unboxed prose with actions under it."
+    },
+    {
+      "attribute": "data-actions",
+      "value": "visible",
+      "useWhen": "Keep the actions showing before hover, such as on the latest answer."
+    },
+    {
+      "attribute": "data-new",
+      "value": "",
+      "useWhen": "Play the rise-in for a message just added."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-message",
+      "role": "One turn."
+    },
+    {
+      "class": "fd-message-body",
+      "role": "The text; headings, lists, code and tables need no classes."
+    },
+    {
+      "class": "fd-message-content",
+      "role": "Wraps the body when a message also holds status or tools."
+    },
+    {
+      "class": "fd-message-actions",
+      "role": "Copy, retry and thumbs up and down."
+    },
+    {
+      "class": "fd-message-action",
+      "role": "One action button; data-action is copy, up, down, retry or open."
+    },
+    {
+      "class": "fd-message-meta",
+      "role": "A mono line such as \"2 pages · 3 credits · 4.1s\"."
+    },
+    {
+      "class": "fd-message-thinking",
+      "role": "The shimmering line before the first word."
+    },
+    {
+      "class": "fd-message-dots",
+      "role": "Three soft dots for the unspecific wait."
+    },
+    {
+      "class": "fd-cursor",
+      "role": "The accent caret at the end of streaming text."
+    },
+    {
+      "class": "fd-message-error",
+      "role": "The error block with title, text and retry."
+    }
+  ],
+  "related": [
+    "thread",
+    "toolcall",
+    "reasoning",
+    "sources",
+    "chat-message"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "Activates a focused message action."
+    }
+  ],
+  "example": "docs/agent.html#streaming",
+  "provenance": [
+    "docs/agent.html",
+    "fire/components/agent.css",
+    "fire/js/agent.js"
+  ],
+  "since": "0.1.0"
+}

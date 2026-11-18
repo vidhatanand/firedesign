@@ -1,0 +1,123 @@
+{
+  "id": "app",
+  "job": "Frame every signed-in screen with a sidebar, a top bar and a page.",
+  "purpose": "The app shell: a sidebar on the left, a main column with the top bar and the page, and a mobile nav. The sidebar is expanded or a 64px icon rail; the choice is remembered. The shell is a size container, so under 900px of its own width the sidebar gives way to the top bar and a menu button. It also holds the floating support button.",
+  "useWhen": [
+    "The product has several screens that share navigation, an account and a top bar.",
+    "A screen is a working page inside the product, not a single task on its own page."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A single task on a page of its own: sign in, consent, a result.",
+      "instead": "screen"
+    },
+    {
+      "when": "A docs site with its own two-row top bar and contents column.",
+      "instead": "doc"
+    },
+    {
+      "when": "A marketing page with no signed-in navigation.",
+      "instead": "page"
+    }
+  ],
+  "aka": [
+    "app shell",
+    "layout",
+    "dashboard layout",
+    "admin layout",
+    "scaffold",
+    "chrome",
+    "main layout"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "expanded",
+      "how": "data-sidebar=\"expanded\"; the default"
+    },
+    {
+      "name": "collapsed rail",
+      "how": "data-sidebar=\"collapsed\"; 64px, labels become tooltips"
+    },
+    {
+      "name": "contained",
+      "how": "data-contained; fills its parent box instead of the viewport"
+    },
+    {
+      "name": "no motion on load",
+      "how": "data-fd-instant; skips the sidebar transition"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-sidebar",
+      "value": "expanded",
+      "useWhen": "The default: icons with labels."
+    },
+    {
+      "attribute": "data-sidebar",
+      "value": "collapsed",
+      "useWhen": "Dense work, such as a playground or a long log, where width matters more than labels."
+    },
+    {
+      "attribute": "data-contained",
+      "value": "",
+      "useWhen": "The shell sits in a box, as in docs or a preview."
+    },
+    {
+      "attribute": "data-fd-instant",
+      "value": "",
+      "useWhen": "Render the saved sidebar state without animating on load."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-app",
+      "role": "The root; a size container named fd-app."
+    },
+    {
+      "class": "fd-main",
+      "role": "The column to the right of the sidebar."
+    },
+    {
+      "class": "fd-frame",
+      "role": "The drafted page column with 1px rails inside fd-page."
+    },
+    {
+      "class": "fd-crosshair",
+      "role": "One registration mark where a hairline crosses a rail."
+    },
+    {
+      "class": "fd-app-fab",
+      "role": "Positions the floating support button."
+    }
+  ],
+  "related": [
+    "sidebar",
+    "topbar",
+    "page",
+    "mobile-nav",
+    "screen"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Moves through the sidebar, top bar and page in markup order."
+    }
+  ],
+  "example": "docs/shell.html#app",
+  "provenance": [
+    "docs/shell.html",
+    "fire/components/shell.css",
+    "fire/js/shell.js",
+    "GUIDE.md",
+    "templates/shell-static.html"
+  ],
+  "since": "0.1.0"
+}

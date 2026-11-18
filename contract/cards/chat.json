@@ -1,0 +1,228 @@
+{
+  "id": "chat",
+  "job": "Talk with an AI assistant and a support person in one thread, with rich replies.",
+  "purpose": "A support and help chat. A head says who is answering, an optional banner flags incidents, a body shows one view (home, conversation, history or offline), and the composer is pinned to the bottom. The AI replies in prose, a person in a bubble beside their face, and messages carry blocks such as forms, cards and approvals. It docks, floats, fills a page or pushes it. Under 640px it is a full-screen sheet.",
+  "useWhen": [
+    "Customers ask for help from inside the product or on docs and marketing pages.",
+    "An AI answers first and a person can take over in the same thread.",
+    "A help page needs a persistent conversation with history and an offline form."
+  ],
+  "avoidWhen": [
+    {
+      "when": "An agent that does the person's work, with tool calls, plans and results.",
+      "instead": "agent"
+    },
+    {
+      "when": "Only a prompt box on a page.",
+      "instead": "composer"
+    },
+    {
+      "when": "A short question in a floating card with no history.",
+      "instead": "popover"
+    },
+    {
+      "when": "Comments or notes on a record.",
+      "instead": "list"
+    }
+  ],
+  "aka": [
+    "live chat",
+    "chat widget",
+    "support chat",
+    "help widget",
+    "messenger",
+    "intercom",
+    "assistant panel",
+    "chatbot"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "list",
+    "text",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "data-state=\"open\" on .fd-chat"
+    },
+    {
+      "name": "closed",
+      "how": "data-state=\"closed\""
+    },
+    {
+      "name": "expanded",
+      "how": "data-expanded; a 760px panel or a taller popup"
+    },
+    {
+      "name": "closed conversation",
+      "how": "data-disabled; the composer is disabled with a reason"
+    },
+    {
+      "name": "dragging",
+      "how": "data-dragging; the file drop overlay shows"
+    },
+    {
+      "name": "remembered",
+      "how": "open state and mode saved per browser session; data-persist=\"false\" opts out"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-mode",
+      "value": "panel",
+      "useWhen": "Help from anywhere in the console: 420px, docked right, over the page."
+    },
+    {
+      "attribute": "data-mode",
+      "value": "popup",
+      "useWhen": "Marketing and docs pages: a 400px card that grows out of the launcher."
+    },
+    {
+      "attribute": "data-mode",
+      "value": "inline",
+      "useWhen": "An embedded help page or a full-page inbox: fills its box and is always open."
+    },
+    {
+      "attribute": "data-mode",
+      "value": "side",
+      "useWhen": "Long sessions where the person works and asks together: a 400px column that pushes the page."
+    },
+    {
+      "attribute": "data-agent",
+      "value": "ai",
+      "useWhen": "The AI is answering; the disclaimer shows."
+    },
+    {
+      "attribute": "data-agent",
+      "value": "human",
+      "useWhen": "A person from support is answering."
+    },
+    {
+      "attribute": "data-agent",
+      "value": "away",
+      "useWhen": "Nobody is in; the head says when they are back."
+    },
+    {
+      "attribute": "data-agent",
+      "value": "queue",
+      "useWhen": "Waiting for a person; the head shows the place in line."
+    },
+    {
+      "attribute": "data-view",
+      "value": "home",
+      "useWhen": "A new conversation: greeting and up to four starter questions."
+    },
+    {
+      "attribute": "data-view",
+      "value": "conversation",
+      "useWhen": "The thread."
+    },
+    {
+      "attribute": "data-view",
+      "value": "history",
+      "useWhen": "Past conversations with their state."
+    },
+    {
+      "attribute": "data-view",
+      "value": "offline",
+      "useWhen": "The form that takes a message when nobody is in."
+    },
+    {
+      "attribute": "data-expanded",
+      "value": "",
+      "useWhen": "A wider panel or taller popup for long answers."
+    },
+    {
+      "attribute": "data-contained",
+      "value": "",
+      "useWhen": "Position inside the nearest positioned box, for docs and previews."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-chat",
+      "role": "The root; an empty one is filled with the default support chat by chat.js."
+    },
+    {
+      "class": "fd-chat-head",
+      "role": "The 52px head: who answers, the status line and the icon actions."
+    },
+    {
+      "class": "fd-chat-banner",
+      "role": "An incident strip under the head; tone is warning, danger or info."
+    },
+    {
+      "class": "fd-chat-body",
+      "role": "Holds the four views."
+    },
+    {
+      "class": "fd-chat-log",
+      "role": "The thread; role=\"log\" and polite."
+    },
+    {
+      "class": "fd-chat-foot",
+      "role": "The composer, reply strip, closed line and disclaimer."
+    },
+    {
+      "class": "fd-chat-home",
+      "role": "The home view."
+    },
+    {
+      "class": "fd-chat-history",
+      "role": "The history view."
+    },
+    {
+      "class": "fd-chat-offline",
+      "role": "The offline form."
+    },
+    {
+      "class": "fd-chat-jump",
+      "role": "The \"New messages\" pill when scrolled up."
+    },
+    {
+      "class": "fd-chat-drop",
+      "role": "The overlay shown while a file is dragged over."
+    },
+    {
+      "class": "fd-chat-teaser",
+      "role": "The one-time offer of help near the launcher."
+    }
+  ],
+  "related": [
+    "chat-launcher",
+    "chat-message",
+    "composer",
+    "agent",
+    "chat-lightbox"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter",
+      "does": "Sends the message."
+    },
+    {
+      "keys": "Shift+Enter",
+      "does": "Adds a new line."
+    },
+    {
+      "keys": "ArrowUp",
+      "does": "In an empty composer, edits your last message."
+    },
+    {
+      "keys": "Escape",
+      "does": "Cancels an edit or quote, or closes a floating chat."
+    }
+  ],
+  "example": "docs/chat.html#anatomy",
+  "provenance": [
+    "docs/chat.html",
+    "fire/components/chat.css",
+    "fire/js/chat.js"
+  ],
+  "since": "0.1.0"
+}

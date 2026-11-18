@@ -1,0 +1,111 @@
+{
+  "id": "chat-launcher",
+  "job": "Open and close the chat from a floating button with an unread count.",
+  "purpose": "The floating action button for the chat. Its chat icon turns and fades into a chevron while the chat is open; an unread count pops in beside it. Add data-fd-chat-toggle with the chat id and it keeps aria-expanded and aria-controls in sync, and focus returns to it when the chat closes. A teaser can offer help once after a delay.",
+  "useWhen": [
+    "The chat floats over the page and needs a button that is always in reach.",
+    "Unread replies should show on a button when the chat is closed."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A floating action that is not the chat.",
+      "instead": "fab"
+    },
+    {
+      "when": "A chat that sits in a column or fills a page and is always open.",
+      "instead": "chat"
+    },
+    {
+      "when": "A button in a toolbar that opens a menu.",
+      "instead": "button"
+    }
+  ],
+  "aka": [
+    "chat bubble",
+    "chat button",
+    "help button",
+    "support button",
+    "messenger button",
+    "widget launcher"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "aria-expanded=\"true\"; shows the chevron"
+    },
+    {
+      "name": "unread",
+      "how": "the badge shows the count; setUnread(n) updates it and the accessible name"
+    },
+    {
+      "name": "badge pop",
+      "how": "data-pop on the badge"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-float",
+      "value": "",
+      "useWhen": "Pin to the bottom-right corner of the viewport."
+    },
+    {
+      "attribute": "data-contained",
+      "value": "",
+      "useWhen": "Pin inside the nearest positioned box instead of the viewport."
+    },
+    {
+      "attribute": "data-role",
+      "value": "open",
+      "useWhen": "The icon shown while the chat is closed."
+    },
+    {
+      "attribute": "data-role",
+      "value": "close",
+      "useWhen": "The icon shown while the chat is open."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-chat-launcher",
+      "role": "The button; also takes fd-fab."
+    },
+    {
+      "class": "fd-chat-launcher-icon",
+      "role": "One of two stacked icons, data-role open or close."
+    },
+    {
+      "class": "fd-chat-launcher-badge",
+      "role": "The unread count."
+    },
+    {
+      "class": "fd-chat-pill",
+      "role": "A pill used for a starter question or a quick reply."
+    }
+  ],
+  "related": [
+    "chat",
+    "fab",
+    "button"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "Opens or closes the chat."
+    }
+  ],
+  "example": "docs/chat.html#launcher",
+  "provenance": [
+    "docs/chat.html",
+    "fire/components/chat.css",
+    "fire/js/chat.js"
+  ],
+  "since": "0.1.0"
+}

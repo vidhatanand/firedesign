@@ -1,0 +1,214 @@
+{
+  "id": "chat-message",
+  "job": "Show who said what in a chat, and carry blocks such as forms, cards and approvals.",
+  "purpose": "One message in a chat. The person speaks from a grey bubble on the right, the AI in prose beside a spark, a person from support in a white bubble beside their face, and the system in small muted lines. Messages from one author within two minutes join into a run. The body is a stack of blocks, each built from another Fire component. Only the latest message of the person shows its delivery state.",
+  "useWhen": [
+    "A support or help chat shows turns from the person, the AI, an agent and the system.",
+    "An answer should hold a form, a card, a list of choices or an approval, not only text."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A turn in an agent thread.",
+      "instead": "message"
+    },
+    {
+      "when": "A notification outside a conversation.",
+      "instead": "notification"
+    },
+    {
+      "when": "A single tool step.",
+      "instead": "toolcall"
+    }
+  ],
+  "aka": [
+    "chat bubble",
+    "chat turn",
+    "support message",
+    "rich message",
+    "message block",
+    "quick replies",
+    "chat card"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "text",
+    "record",
+    "form"
+  ],
+  "states": [
+    {
+      "name": "sending",
+      "how": "data-state=\"sending\"; spinner under the bubble"
+    },
+    {
+      "name": "sent",
+      "how": "data-state=\"sent\""
+    },
+    {
+      "name": "delivered",
+      "how": "data-state=\"delivered\""
+    },
+    {
+      "name": "read",
+      "how": "data-state=\"read\"; double check in accent"
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\"; offers a retry"
+    },
+    {
+      "name": "typing",
+      "how": "data-typing; the indicator at the end of the thread"
+    },
+    {
+      "name": "editing",
+      "how": "data-editing"
+    },
+    {
+      "name": "removing",
+      "how": "data-removing; fades out"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-author",
+      "value": "user",
+      "useWhen": "The person's own message: grey bubble on the right."
+    },
+    {
+      "attribute": "data-author",
+      "value": "ai",
+      "useWhen": "The AI: unboxed prose beside a spark."
+    },
+    {
+      "attribute": "data-author",
+      "value": "human",
+      "useWhen": "A support person: white bubble beside their face with name and role."
+    },
+    {
+      "attribute": "data-author",
+      "value": "system",
+      "useWhen": "A date, join, handover or resolution line."
+    },
+    {
+      "attribute": "data-continued",
+      "value": "",
+      "useWhen": "Same author within two minutes; chat.js sets it."
+    },
+    {
+      "attribute": "data-type",
+      "value": "text",
+      "useWhen": "Prose, lists, code and citations."
+    },
+    {
+      "attribute": "data-type",
+      "value": "quick-replies",
+      "useWhen": "Offer up to three likely answers that send themselves."
+    },
+    {
+      "attribute": "data-type",
+      "value": "actions",
+      "useWhen": "One to three buttons for what to do next."
+    },
+    {
+      "attribute": "data-type",
+      "value": "card",
+      "useWhen": "An object worth opening: a docs article or a plan."
+    },
+    {
+      "attribute": "data-type",
+      "value": "list",
+      "useWhen": "The answer depends on which one; radio rows with meta."
+    },
+    {
+      "attribute": "data-type",
+      "value": "form",
+      "useWhen": "Collect a few details without leaving the thread."
+    },
+    {
+      "attribute": "data-type",
+      "value": "confirm",
+      "useWhen": "An action that moves money, deletes or changes access asks first."
+    },
+    {
+      "attribute": "data-type",
+      "value": "handoff",
+      "useWhen": "Hand over to a person with the wait and place in line."
+    },
+    {
+      "attribute": "data-type",
+      "value": "rating",
+      "useWhen": "Ask once, at the end, how the conversation went."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-chat-msg",
+      "role": "One message; data-author sets who."
+    },
+    {
+      "class": "fd-chat-msg-avatar",
+      "role": "The face or mark."
+    },
+    {
+      "class": "fd-chat-msg-main",
+      "role": "The column with head, body and meta."
+    },
+    {
+      "class": "fd-chat-msg-head",
+      "role": "Name, role and time."
+    },
+    {
+      "class": "fd-chat-msg-body",
+      "role": "The bubble or prose."
+    },
+    {
+      "class": "fd-chat-block",
+      "role": "One block in the body; data-type picks the kind. Other kinds: carousel, details, table, code, attachment, sources, tool, steps, metric, schedule, notice."
+    },
+    {
+      "class": "fd-chat-msg-actions",
+      "role": "Copy, react, reply and good or bad answer on hover or focus."
+    },
+    {
+      "class": "fd-chat-msg-reactions",
+      "role": "Reaction chips under the message."
+    },
+    {
+      "class": "fd-chat-receipt",
+      "role": "The delivery line under the latest message."
+    },
+    {
+      "class": "fd-chat-typing",
+      "role": "The typing indicator."
+    }
+  ],
+  "related": [
+    "chat",
+    "message",
+    "sources",
+    "chat-lightbox",
+    "chat-launcher"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "Reveals the message actions and moves through the blocks."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Activates a focused action, option or button in a block."
+    }
+  ],
+  "example": "docs/chat.html#messages",
+  "provenance": [
+    "docs/chat.html",
+    "fire/components/chat.css",
+    "fire/js/chat.js"
+  ],
+  "since": "0.1.0"
+}

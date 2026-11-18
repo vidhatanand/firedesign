@@ -1,0 +1,38 @@
+{
+  "id": "proof",
+  "job": "Show someone outside the account one result, its measure and the evidence behind it, on a read-only page they open from a link.",
+  "purpose": "A public page with no app shell: the brand, a Read-only note and Copy link; the result in one line with its measure and a before-and-after strip; how it was counted; what changed and when; drawn screenshots in zoomable frames; a cut of the run log with level filters; the raw response, folded; and who shared it. Expired, switched-off and missing links each get a page state that says when and who.",
+  "useWhen": [
+    "A customer, a manager or a client needs to see that a change worked, without an Ember account.",
+    "A figure has to carry its evidence: which runs were counted, what was left out, and the raw data.",
+    "A result is shared by link and must stay as it was when it was shared."
+  ],
+  "avoidWhen": [
+    { "when": "The reader is signed in and works with the records: filters, retries, exports.", "instead": "logs" },
+    { "when": "The page reports the live health of the service rather than one past result.", "instead": "status" },
+    { "when": "The page asks the visitor to do one thing, such as sign in or approve.", "instead": "auth-centered" },
+    { "when": "A person has to decide on the result before it goes anywhere.", "instead": "decision" }
+  ],
+  "aka": ["evidence page", "public proof", "shared result", "case study", "report link", "receipt"],
+  "surfaces": ["website", "phone"],
+  "data": ["record", "series", "text"],
+  "states": [
+    { "name": "ready", "how": "fd-states#proof with data-state=\"ready\"; the default after a 600 ms skeleton" },
+    { "name": "updated", "how": "?state=updated: ready, with the info callout band #band-updated shown above the result" },
+    { "name": "loading", "how": "data-state=\"loading\": skeleton title, text, stats and card in one band with aria-busy" },
+    { "name": "expired", "how": "data-state=\"expired\": fd-empty with when it was shared, when it ran out and who to ask" },
+    { "name": "off", "how": "data-state=\"off\": fd-empty saying the owner switched the link off and the figures were not changed" },
+    { "name": "not-found", "how": "data-state=\"not-found\": fd-empty with the address shape and a link to Ember" }
+  ],
+  "example": "templates/proof.html",
+  "provenance": [
+    "Touchstone: proof.html",
+    "Fragmatic prototype: proof-public.html",
+    "docs/content.html#page-states",
+    "docs/documentation.html#prose",
+    "docs/code.html#log",
+    "docs/code.html#json",
+    "templates/auth-centered.html"
+  ],
+  "since": "0.7.0"
+}

@@ -60,6 +60,7 @@ export const NAV = [
   {
     label: 'Account',
     items: [
+      { id: 'decisions', label: 'Decisions', icon: 'inbox', href: 'decisions.html', keys: 'g d' },
       { id: 'logs', label: 'Activity logs', icon: 'list', href: 'logs.html', keys: 'g l' },
       { id: 'usage', label: 'Usage', icon: 'chart-column', href: 'usage.html', keys: 'g u' },
       { id: 'api-keys', label: 'API keys', icon: 'key-round', href: 'api-keys.html', keys: 'g k' },
@@ -224,11 +225,11 @@ const NAV_KEYWORDS = {
   overview: 'home dashboard credits', install: 'mcp skill cli agent claude cursor codex connect', catalog: 'providers data sources',
   search: 'web query results', scrape: 'page url markdown', interact: 'click browser actions session', parse: 'pdf document file upload',
   crawl: 'site website links', map: 'urls sitemap discover', batch: 'many urls bulk', monitoring: 'watch changes diff webhook',
-  agent: 'research ask run', logs: 'requests history', usage: 'credits billing plan', 'api-keys': 'tokens secrets', settings: 'preferences team account',
+  agent: 'research ask run', decisions: 'approve requests proposals queue', logs: 'requests history', usage: 'credits billing plan', 'api-keys': 'tokens secrets', settings: 'preferences team account',
 };
 const NAV_HINTS = {
   overview: 'Credits, keys and recent activity', install: 'Skill, CLI and MCP setup', catalog: 'Data providers', monitoring: 'Watch pages for changes',
-  logs: 'Requests from the last 30 days', usage: 'Credits and concurrency', 'api-keys': '3 active keys', settings: 'Team, billing and account',
+  decisions: 'Requests and proposals waiting for an owner', logs: 'Requests from the last 30 days', usage: 'Credits and concurrency', 'api-keys': '3 active keys', settings: 'Team, billing and account',
   parse: '/parse', agent: '/agent',
 };
 const navHint = (n) => (NAV_HINTS[n.id]

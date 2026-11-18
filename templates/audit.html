@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit log · Ember</title>
+<script src="../fire/boot.js"></script>
+<link rel="stylesheet" href="../fire/fire.css">
+<script type="module" src="../fire/fire.js"></script>
+<script type="module" src="./shell.js"></script>
+</head>
+<body data-shell data-active="settings" data-title="Audit log">
+<main class="fd-page">
+  <div class="fd-frame">
+    <!-- One set of page states for the whole screen: every band says which states it belongs to. -->
+    <div class="fd-states" id="audit-states" data-state="loading">
+
+      <section class="fd-band fd-rise" data-pad="sm" aria-label="Audit log" data-when="loading ready empty filtered error no-access">
+        <div class="fd-page-head">
+          <div class="fd-page-head-text">
+            <h1 class="fd-page-head-title">Audit log</h1>
+            <p class="fd-page-head-desc">Who changed what in Quarry Labs, and when.</p>
+          </div>
+          <div class="fd-page-head-actions">
+            <button class="fd-btn" type="button" id="audit-export" disabled><i data-icon="download"></i><span>Export CSV</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="fd-band fd-rise" data-fd-vars="--fd-i: 1" data-pad="sm" aria-label="Filters" data-when="loading ready filtered">
+        <div class="fd-stack" data-gap="3">
+          <div class="fd-toolbar">
+            <div class="fd-search fd-toolbar-search" data-variant="soft">
+              <i data-icon="search"></i>
+              <input class="fd-search-input" id="audit-search" type="search" placeholder="Data retention" aria-label="Search the audit log" autocomplete="off" data-fd-search-hotkey>
+              <button type="button" class="fd-search-clear" aria-label="Clear search"><i data-icon="x"></i></button>
+              <kbd class="fd-kbd">/</kbd>
+            </div>
+            <div class="fd-filter" data-default="Anyone">
+              <button class="fd-filter-trigger" type="button" data-fd-popover="pop-who" data-placement="bottom-start"><i data-icon="user"></i><span class="fd-filter-value" data-fd-filter-label data-empty="Anyone">Anyone</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+            </div>
+            <div class="fd-filter" data-default="All kinds">
+              <button class="fd-filter-trigger" type="button" data-fd-popover="pop-kind" data-placement="bottom-start"><i data-icon="list-filter"></i><span class="fd-filter-value" data-fd-filter-label data-empty="All kinds">All kinds</span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+            </div>
+            <div class="fd-toolbar-end">
+              <div class="fd-filter fd-period">
+                <button class="fd-filter-trigger" type="button" data-fd-popover="pop-period" data-placement="bottom-end" aria-label="Choose a period"><i data-icon="calendar"></i><span class="fd-filter-value"><span data-fd-daterange-label>Last 7 days</span><span class="fd-period-compare" data-fd-daterange-compare-label>vs previous period</span></span><i data-icon="chevron-down" data-size="14" class="fd-filter-chevron"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="fd-filter-applied" id="audit-applied" aria-label="Applied filters" hidden></div>
+        </div>
+      </section>
+
+      <!-- The period against the one it is compared with -->
+      <section class="fd-band" data-pad="sm" aria-label="This period" data-when="ready filtered">
+        <div class="fd-stats" id="audit-stats">
+          <div class="fd-stat-tile" data-stat="events">
+            <span class="fd-stat-label">Events</span>
+            <div class="fd-stat-row"><span class="fd-stat" data-figure>16</span><span class="fd-stat-delta" data-tone="neutral" data-dir="up">60%</span></div>
+            <span class="fd-stat-sub" data-sub>vs 10 in Nov 5 – 11</span>
+          </div>
+          <div class="fd-stat-tile" data-stat="access">
+            <span class="fd-stat-label">Access changes</span>
+            <div class="fd-stat-row"><span class="fd-stat" data-figure>7</span><span class="fd-stat-delta" data-tone="neutral" data-dir="up">75%</span></div>
+            <span class="fd-stat-sub" data-sub>keys, members and roles</span>
+          </div>
+          <div class="fd-stat-tile" data-stat="signin">
+            <span class="fd-stat-label">New devices</span>
+            <div class="fd-stat-row"><span class="fd-stat" data-figure>2</span><span class="fd-stat-delta" data-tone="neutral" data-dir="flat">0%</span></div>
+            <span class="fd-stat-sub" data-sub>vs 2 in Nov 5 – 11</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading: the shape of the strip and the table -->
+      <section class="fd-band" data-pad="sm" aria-busy="true" aria-label="Loading the audit log" data-when="loading">
+        <div class="fd-stack" data-gap="5">
+          <div class="fd-skeleton-stat" data-count="3"></div>
+          <div class="fd-skeleton-table" data-rows="8" data-cols="5"></div>
+        </div>
+      </section>
+
+      <!-- Ready: one table, a group of rows per day -->
+      <section class="fd-band" data-pad="none" data-surface="surface" aria-label="Events" data-when="ready">
+        <div class="fd-table-wrap" data-variant="plain">
+          <div class="fd-table-scroll">
+            <table class="fd-table" id="audit-table" data-stack data-collapsible aria-label="Audit log, newest day first">
+              <thead>
+                <tr>
+                  <th data-col="fit" aria-sort="descending" data-sort-type="date"><button class="fd-th-sort" type="button">Time</button></th>
+                  <th data-col="md" aria-sort="none"><button class="fd-th-sort" type="button">Who</button></th>
+                  <th data-col="fill">Action</th>
+                  <th data-col="lg">Target</th>
+                  <th data-col="fit">Source</th>
+                </tr>
+              </thead>
+              <!-- One tbody.fd-table-group per day, written from EVENTS below -->
+            </table>
+          </div>
+          <div class="fd-table-foot">
+            <span class="fd-table-foot-info" id="audit-info" aria-live="polite">16 events · Nov 12 – 18</span>
+            <div class="fd-table-foot-actions"><span class="fd-small fd-muted">Kept for 1 year</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="fd-band" data-pad="lg" aria-label="No events yet" data-when="empty">
+        <div class="fd-empty" data-size="lg">
+          <span class="fd-empty-icon"><i data-icon="scroll-text"></i></span>
+          <h2 class="fd-empty-title">No events yet</h2>
+          <p class="fd-empty-text">Changes to keys, members and settings appear here as they happen.</p>
+          <div class="fd-empty-actions"><a class="fd-btn" data-variant="primary" href="settings.html?tab=team"><i data-icon="user-plus"></i><span>Invite a teammate</span></a></div>
+        </div>
+      </section>
+
+      <section class="fd-band" data-pad="lg" aria-label="No matching events" data-when="filtered">
+        <div class="fd-empty" data-size="lg">
+          <span class="fd-empty-icon"><i data-icon="list-filter"></i></span>
+          <h2 class="fd-empty-title">No events match</h2>
+          <p class="fd-empty-text" id="audit-filtered-text">Nothing in Nov 12 – 18 matches these filters. Widen the period or clear them.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="outline" id="audit-clear"><span>Clear filters</span></button></div>
+        </div>
+      </section>
+
+      <section class="fd-band" data-pad="lg" aria-label="Audit log unavailable" data-when="error">
+        <div class="fd-empty" data-size="lg" data-tone="danger" role="alert">
+          <span class="fd-empty-icon"><i data-icon="triangle-alert"></i></span>
+          <h2 class="fd-empty-title">Couldn’t load the audit log</h2>
+          <p class="fd-empty-text">The request timed out after 10 seconds. No events were lost.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-fd-set-state="loading"><i data-icon="refresh-cw"></i><span>Try again</span></button></div>
+          <p class="fd-empty-meta"><span>Request ID</span><code class="fd-code">req_a41c09e7</code><button class="fd-btn" type="button" data-size="xs" data-variant="ghost" data-icon-only data-fd-copy="req_a41c09e7" aria-label="Copy request ID"><i data-icon="copy"></i></button></p>
+        </div>
+      </section>
+
+      <section class="fd-band" data-pad="lg" aria-label="No access" data-when="no-access">
+        <div class="fd-empty" data-size="lg">
+          <span class="fd-empty-icon"><i data-icon="lock"></i></span>
+          <h2 class="fd-empty-title">You can’t read the audit log</h2>
+          <p class="fd-empty-text">Owners and admins of Quarry Labs can. An owner can make you an admin.</p>
+          <div class="fd-empty-actions"><button class="fd-btn" type="button" data-variant="primary" id="audit-ask"><i data-icon="send"></i><span>Ask for access</span></button></div>
+          <p class="fd-empty-meta"><span class="fd-avatar-stack"><span class="fd-avatar" data-size="24">MR</span><span class="fd-avatar" data-size="24">TN</span></span><span>Maya Reyes and Tomasz Nowak can add you.</span></p>
+        </div>
+      </section>
+
+      <section class="fd-band" data-pad="sm" data-grow aria-label="Demo state" data-when="loading ready empty filtered error no-access">
+        <div class="fd-row" data-wrap data-justify="between">
+          <span class="fd-eyebrow">Demo state</span>
+          <div class="fd-segmented" data-size="sm" id="state-switch" role="radiogroup" aria-label="Page state">
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="ready">Ready</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="true" data-value="loading">Loading</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="empty">Empty</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="filtered">Filtered</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="error">Error</button>
+            <button class="fd-segmented-item" type="button" role="radio" aria-checked="false" data-value="no-access">No access</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Filter popovers -->
+  <div class="fd-popover" id="pop-who" popover data-fd-filter-list data-filter="who" data-size="sm" aria-label="Filter by who">
+    <label class="fd-popover-search"><i data-icon="search"></i><input type="search" placeholder="Filter people and keys" aria-label="Filter people and keys" data-fd-filter-search autocomplete="off"></label>
+    <div class="fd-popover-body">
+      <div class="fd-checklist" aria-label="People, keys and the agent">
+        <div class="fd-checklist-item" data-value="maya"><span class="fd-checklist-label">Maya Reyes</span><span class="fd-checklist-count">8</span></div>
+        <div class="fd-checklist-item" data-value="tomasz"><span class="fd-checklist-label">Tomasz Nowak</span><span class="fd-checklist-count">5</span></div>
+        <div class="fd-checklist-item" data-value="amara"><span class="fd-checklist-label">Amara Okafor</span><span class="fd-checklist-count">2</span></div>
+        <div class="fd-checklist-item" data-value="lukas"><span class="fd-checklist-label">Lukas Schmidt</span><span class="fd-checklist-count">3</span></div>
+        <div class="fd-checklist-item" data-value="key-prod"><span class="fd-checklist-label">Production crawler key</span><span class="fd-checklist-count">2</span></div>
+        <div class="fd-checklist-item" data-value="key-ci"><span class="fd-checklist-label">CI key</span><span class="fd-checklist-count">2</span></div>
+        <div class="fd-checklist-item" data-value="agent"><span class="fd-checklist-label">Ember agent</span><span class="fd-checklist-count">3</span></div>
+      </div>
+      <p class="fd-checklist-empty" hidden>Nobody matches “<span data-fd-filter-query></span>”</p>
+    </div>
+    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+  </div>
+
+  <div class="fd-popover" id="pop-kind" popover data-fd-filter-list data-filter="kind" data-size="sm" aria-label="Filter by kind">
+    <div class="fd-popover-body">
+      <div class="fd-checklist" aria-label="Kinds of event">
+        <div class="fd-checklist-item" data-value="key-created"><span class="fd-checklist-label">Key created</span><span class="fd-checklist-count">3</span></div>
+        <div class="fd-checklist-item" data-value="key-revoked"><span class="fd-checklist-label">Key revoked</span><span class="fd-checklist-count">1</span></div>
+        <div class="fd-checklist-item" data-value="member-invited"><span class="fd-checklist-label">Member invited</span><span class="fd-checklist-count">2</span></div>
+        <div class="fd-checklist-item" data-value="member-removed"><span class="fd-checklist-label">Member removed</span><span class="fd-checklist-count">1</span></div>
+        <div class="fd-checklist-item" data-value="role"><span class="fd-checklist-label">Role changed</span><span class="fd-checklist-count">2</span></div>
+        <div class="fd-checklist-item" data-value="setting"><span class="fd-checklist-label">Setting changed</span><span class="fd-checklist-count">5</span></div>
+        <div class="fd-checklist-item" data-value="limit"><span class="fd-checklist-label">Limit raised</span><span class="fd-checklist-count">3</span></div>
+        <div class="fd-checklist-item" data-value="webhook"><span class="fd-checklist-label">Webhook added</span><span class="fd-checklist-count">2</span></div>
+        <div class="fd-checklist-item" data-value="export"><span class="fd-checklist-label">Export downloaded</span><span class="fd-checklist-count">4</span></div>
+        <div class="fd-checklist-item" data-value="signin"><span class="fd-checklist-label">Sign-in</span><span class="fd-checklist-count">4</span></div>
+      </div>
+    </div>
+    <div class="fd-popover-foot"><span data-fd-filter-summary>None selected</span><button class="fd-btn-text" type="button" data-fd-filter-clear>Clear</button></div>
+  </div>
+
+  <div class="fd-popover" id="pop-period" popover data-size="auto" aria-label="Period">
+    <div class="fd-daterange" data-fd-daterange data-preset="7d" data-compare="previous" data-max="today">
+      <div class="fd-daterange-presets" role="group" aria-label="Presets">
+        <button class="fd-daterange-preset" type="button" data-preset="7d">Last 7 days</button>
+        <button class="fd-daterange-preset" type="button" data-preset="30d">Last 30 days</button>
+        <button class="fd-daterange-preset" type="button" data-preset="month">This month</button>
+        <button class="fd-daterange-preset" type="button" data-preset="lastmonth">Last month</button>
+        <button class="fd-daterange-preset" type="button" data-preset="custom">Custom</button>
+      </div>
+      <div class="fd-daterange-main"><div class="fd-calendar"></div></div>
+      <div class="fd-daterange-compare" role="radiogroup" aria-labelledby="period-compare-label" data-fd-daterange-compare>
+        <span class="fd-daterange-compare-label" id="period-compare-label">Compared with</span>
+        <div class="fd-options">
+          <label class="fd-radio"><input type="radio" name="period-compare" value="none"><span class="fd-radio-box"></span><span class="fd-radio-label">Nothing</span></label>
+          <label class="fd-radio"><input type="radio" name="period-compare" value="previous"><span class="fd-radio-box"></span><span class="fd-radio-label">Previous period</span></label>
+          <label class="fd-radio"><input type="radio" name="period-compare" value="year"><span class="fd-radio-box"></span><span class="fd-radio-label">Same period last year</span></label>
+        </div>
+        <span class="fd-daterange-compare-dates" data-fd-daterange-compare-dates></span>
+      </div>
+      <div class="fd-daterange-foot">
+        <span class="fd-daterange-summary" data-fd-daterange-summary></span>
+        <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-daterange-cancel>Cancel</button>
+        <button class="fd-btn" type="button" data-size="sm" data-variant="primary" data-fd-daterange-apply>Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- One entry: what changed, then who, when and from where -->
+  <dialog class="fd-sheet" id="sheet-entry" data-side="right" data-size="md" aria-labelledby="en-title">
+    <div class="fd-sheet-head">
+      <div class="fd-sheet-bar">
+        <span class="fd-badge" id="en-kind">Setting changed</span>
+        <h2 class="fd-sheet-title" id="en-title">Changed data retention</h2>
+        <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+      </div>
+      <p class="fd-sheet-desc" id="en-desc"></p>
+    </div>
+    <div class="fd-sheet-body">
+      <div class="fd-stack" data-gap="6">
+        <div class="fd-stack" data-gap="3">
+          <h3 class="fd-label" id="en-change-label">What changed</h3>
+          <dl class="fd-kv" data-layout="split" data-divided id="en-changes" aria-labelledby="en-change-label"></dl>
+          <div id="en-diff"></div>
+        </div>
+        <div class="fd-stack" data-gap="3">
+          <h3 class="fd-label" id="en-details-label">Details</h3>
+          <dl class="fd-kv" data-layout="split" data-divided id="en-details" aria-labelledby="en-details-label"></dl>
+        </div>
+      </div>
+    </div>
+    <div class="fd-sheet-foot">
+      <button class="fd-btn" type="button" id="en-copy" data-variant="ghost" data-start><i data-icon="link"></i><span>Copy link</span></button>
+      <a class="fd-btn" id="en-open" data-variant="primary" href="settings.html?tab=advanced"><span>Open settings</span><i data-icon="arrow-up-right"></i></a>
+    </div>
+  </dialog>
+</main>
+
+<script type="module">
+  import { init, overlays, nav, content, copyText, reducedMotion } from '../fire/fire.js';
+
+  const { toast, openDialog } = overlays;
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  const states = $('#audit-states');
+  const switcher = $('#state-switch');
+  const search = $('#audit-search');
+  const applied = $('#audit-applied');
+  const exportBtn = $('#audit-export');
+
+  /* ---------- Fixtures: the demo data is fixed to Wednesday, Nov 18, 2026, 4:40 PM ---------- */
+  const NOW = new Date('2026-11-18T16:40:00');
+  const WHO = {
+    maya: { name: 'Maya Reyes', sub: 'Owner', initials: 'MR', tone: 'accent', email: 'maya@quarry.dev' },
+    tomasz: { name: 'Tomasz Nowak', sub: 'Admin', initials: 'TN', tone: 'info', email: 'tomasz@quarry.dev' },
+    amara: { name: 'Amara Okafor', sub: 'Admin', initials: 'AO', tone: 'success', email: 'amara@quarry.dev' },
+    lukas: { name: 'Lukas Schmidt', sub: 'Billing', initials: 'LS', tone: 'violet', email: 'lukas@quarry.dev' },
+    'key-prod': { name: 'Production crawler', sub: 'API key', icon: 'key-round' },
+    'key-ci': { name: 'CI', sub: 'API key', icon: 'key-round' },
+    agent: { name: 'Ember agent', sub: 'Agent', icon: 'wand-sparkles' },
+  };
+  const KIND = {
+    'key-created': { label: 'Key created', tone: 'accent', open: ['Open API keys', 'api-keys.html'] },
+    'key-revoked': { label: 'Key revoked', tone: 'danger', open: ['Open API keys', 'api-keys.html'] },
+    'member-invited': { label: 'Member invited', tone: 'info', open: ['Open team', 'settings.html?tab=team'] },
+    'member-removed': { label: 'Member removed', tone: 'danger', open: ['Open team', 'settings.html?tab=team'] },
+    role: { label: 'Role changed', tone: 'warning', open: ['Open team', 'settings.html?tab=team'] },
+    setting: { label: 'Setting changed', tone: 'neutral', open: ['Open settings', 'settings.html?tab=advanced'] },
+    limit: { label: 'Limit raised', tone: 'warning', open: ['Open usage', 'usage.html'] },
+    webhook: { label: 'Webhook added', tone: 'neutral', open: ['Open webhooks', 'settings.html?tab=advanced'] },
+    export: { label: 'Export downloaded', tone: 'neutral', open: ['Open activity logs', 'logs.html'] },
+    signin: { label: 'Sign-in', tone: 'neutral', open: ['Open account', 'settings.html?tab=account'] },
+  };
+  const ACCESS = new Set(['key-created', 'key-revoked', 'member-invited', 'member-removed', 'role']);
+  const CLIENT = { Dashboard: 'Chrome 131 on macOS', API: 'ember-node 2.6.0', CLI: 'ember-cli 1.9.0', Agent: 'Ember agent 0.7' };
+  const CREW_DIFF = `@@ -1,6 +1,7 @@
+ {
+-  "maxDepth": 3,
++  "maxDepth": 5,
+   "limit": 500,
+-  "formats": ["markdown"],
++  "formats": ["markdown", "json"],
++  "onlyMainContent": true,
+   "timeout": 30000
+ }`;
+
+  // [id, at, who, kind, action, target, source, ip, changes [[field, before|null, after]], extra]
+  const EVENTS = [
+    ['evt_9c41e2', '2026-11-18T15:42', 'maya', 'setting', 'Changed data retention', 'team.retention', 'Dashboard', '203.0.113.24', [['Data retention', '30 days', '90 days']]],
+    ['evt_9c3f07', '2026-11-18T14:05', 'agent', 'limit', 'Raised the crawl limit', 'limits.concurrentCrawls', 'Agent', '198.51.100.7', [['Concurrent crawls', '5', '20']], { behalf: 'Maya Reyes', reason: 'Docs crawl waited 41 minutes for a slot.' }],
+    ['evt_9c2b88', '2026-11-18T11:20', 'key-ci', 'export', 'Downloaded an export', 'runs-2026-11.csv', 'API', '192.0.2.61', [['Rows', null, '1,204'], ['Size', null, '94 KB']]],
+    ['evt_9c1d30', '2026-11-18T09:12', 'tomasz', 'signin', 'Signed in from a new device', 'Firefox on Linux', 'Dashboard', '198.51.100.88', [['Device', null, 'Firefox 132 on Linux'], ['Location', null, 'Warsaw, Poland']]],
+    ['evt_9b8e51', '2026-11-17T17:48', 'tomasz', 'key-revoked', 'Revoked an API key', 'ember_live_…c4e9', 'Dashboard', '198.51.100.88', [['Key', null, 'Old production'], ['Status', 'Active', 'Revoked']]],
+    ['evt_9b7a12', '2026-11-17T16:30', 'maya', 'key-created', 'Created an API key', 'ember_live_…7f1d', 'Dashboard', '203.0.113.24', [['Name', null, 'Production crawler'], ['Scopes', null, 'scrape, crawl, map']]],
+    ['evt_9b5c03', '2026-11-17T10:02', 'amara', 'webhook', 'Added a webhook endpoint', 'https://n8n.quarry.dev/webhook/ember-runs', 'Dashboard', '192.0.2.140', [['URL', null, 'https://n8n.quarry.dev/webhook/ember-runs'], ['Events', null, 'agent.finished']]],
+    ['evt_9a9f64', '2026-11-16T13:15', 'maya', 'role', 'Changed a role', 'amara@quarry.dev', 'Dashboard', '203.0.113.24', [['Role', 'Member', 'Admin']]],
+    ['evt_9a8d2c', '2026-11-16T09:40', 'key-prod', 'setting', 'Updated crawl defaults', 'team.crawlDefaults', 'API', '192.0.2.61', [['Max depth', '3', '5'], ['Formats', 'markdown', 'markdown, json']], { diff: CREW_DIFF }],
+    ['evt_99e410', '2026-11-14T18:22', 'lukas', 'limit', 'Raised the spend cap', 'billing.spendCap', 'Dashboard', '203.0.113.90', [['Monthly spend cap', '$100', '$250']]],
+    ['evt_99c0a7', '2026-11-14T15:03', 'maya', 'member-invited', 'Invited a member', 'jun@northwind.dev', 'Dashboard', '203.0.113.24', [['Email', null, 'jun@northwind.dev'], ['Role', null, 'Member']]],
+    ['evt_99a7f1', '2026-11-14T11:47', 'agent', 'export', 'Downloaded an export', 'activity-logs-nov.csv', 'Agent', '198.51.100.7', [['Rows', null, '812'], ['Size', null, '61 KB']], { behalf: 'Tomasz Nowak' }],
+    ['evt_995e3b', '2026-11-13T16:55', 'tomasz', 'member-removed', 'Removed a member', 'dana@quarry.dev', 'Dashboard', '198.51.100.88', [['Role', 'Member', 'No access']]],
+    ['evt_9941d6', '2026-11-13T09:30', 'maya', 'setting', 'Required two-factor sign-in', 'team.require2fa', 'Dashboard', '203.0.113.24', [['Two-factor', 'Optional', 'Required']]],
+    ['evt_9902c5', '2026-11-12T14:10', 'lukas', 'signin', 'Signed in from a new device', 'Safari on iPhone', 'Dashboard', '203.0.113.90', [['Device', null, 'Safari on iPhone'], ['Location', null, 'Berlin, Germany']]],
+    ['evt_98f1a0', '2026-11-12T10:25', 'key-ci', 'setting', 'Rotated the signing secret', 'webhooks.signingSecret', 'CLI', '192.0.2.61', [['Signing secret', 'whsec_…0b85', 'whsec_…7e2a']]],
+    // the week before
+    ['evt_98a3c2', '2026-11-11T17:00', 'maya', 'member-invited', 'Invited a member', 'priya@brightline.io', 'Dashboard', '203.0.113.24', [['Email', null, 'priya@brightline.io'], ['Role', null, 'Admin']]],
+    ['evt_9881e9', '2026-11-11T10:10', 'tomasz', 'key-created', 'Created an API key', 'ember_test_…5e11', 'Dashboard', '198.51.100.88', [['Name', null, 'CI'], ['Scopes', null, 'scrape, search']]],
+    ['evt_985a7d', '2026-11-10T15:30', 'amara', 'signin', 'Signed in from a new device', 'Chrome on Windows', 'Dashboard', '192.0.2.140', [['Device', null, 'Chrome 131 on Windows'], ['Location', null, 'Lagos, Nigeria']]],
+    ['evt_9833b0', '2026-11-09T12:00', 'lukas', 'limit', 'Raised the spend cap', 'billing.spendCap', 'Dashboard', '203.0.113.90', [['Monthly spend cap', '$50', '$100']]],
+    ['evt_980f14', '2026-11-08T09:45', 'maya', 'setting', 'Changed data retention', 'team.retention', 'Dashboard', '203.0.113.24', [['Data retention', '7 days', '30 days']]],
+    ['evt_97e2d8', '2026-11-07T16:20', 'agent', 'export', 'Downloaded an export', 'usage-oct.csv', 'Agent', '198.51.100.7', [['Rows', null, '31'], ['Size', null, '4 KB']], { behalf: 'Lukas Schmidt' }],
+    ['evt_97c051', '2026-11-06T11:11', 'tomasz', 'role', 'Changed a role', 'lukas@quarry.dev', 'Dashboard', '198.51.100.88', [['Role', 'Member', 'Billing']]],
+    ['evt_97a9ce', '2026-11-06T08:55', 'key-prod', 'export', 'Downloaded an export', 'monitors.csv', 'API', '192.0.2.61', [['Rows', null, '12'], ['Size', null, '2 KB']]],
+    ['evt_9781fa', '2026-11-05T14:40', 'maya', 'webhook', 'Added a webhook endpoint', 'https://api.quarry.dev/hooks/ember', 'Dashboard', '203.0.113.24', [['URL', null, 'https://api.quarry.dev/hooks/ember'], ['Events', null, 'crawl.completed, monitor.changed']]],
+    ['evt_9760b3', '2026-11-05T10:00', 'maya', 'signin', 'Signed in from a new device', 'Safari on macOS', 'Dashboard', '203.0.113.24', [['Device', null, 'Safari 18 on macOS'], ['Location', null, 'Lisbon, Portugal']]],
+  ].map(([id, at, who, kind, action, target, source, ip, changes, extra = {}]) => ({ id, at, day: at.slice(0, 10), who, kind, action, target, source, ip, changes, ...extra }));
+  const byId = new Map(EVENTS.map((e) => [e.id, e]));
+
+  /* ---------- Dates ---------- */
+  const DAY = 864e5;
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const parse = (s) => new Date(`${s}T12:00:00`);
+  const shift = (s, days) => iso(new Date(parse(s).getTime() + days * DAY));
+  const span = (a, b) => Math.round((parse(b) - parse(a)) / DAY) + 1;
+  const short = (s) => parse(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  function rangeText(a, b) {
+    const x = parse(a), y = parse(b);
+    if (a === b) return short(a);
+    const year = y.getFullYear() !== NOW.getFullYear() ? `, ${y.getFullYear()}` : '';
+    if (x.getFullYear() !== y.getFullYear()) return `${short(a)}, ${x.getFullYear()} – ${short(b)}, ${y.getFullYear()}`;
+    if (x.getMonth() === y.getMonth()) return `${short(a)} – ${y.getDate()}${year}`;
+    return `${short(a)} – ${short(b)}${year}`;
+  }
+  const clock = (at) => new Date(at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const longWhen = (at) => new Date(at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  function dayTitle(day) {
+    const today = iso(NOW);
+    const label = parse(day).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    if (day === today) return `Today, ${short(day)}`;
+    if (day === shift(today, -1)) return `Yesterday, ${short(day)}`;
+    return label;
+  }
+
+  /* The period works from the fixed demo date, so the fixtures always fall in it. */
+  function periodOf(value) {
+    const today = iso(NOW);
+    let start = today, end = today;
+    const preset = value.preset || 'custom';
+    if (preset === '24h') start = today;
+    else if (preset === '7d') start = shift(today, -6);
+    else if (preset === '30d') start = shift(today, -29);
+    else if (preset === 'month') start = `${today.slice(0, 8)}01`;
+    else if (preset === 'lastmonth') { const first = parse(`${today.slice(0, 8)}01`); end = shift(iso(first), -1); start = `${end.slice(0, 8)}01`; }
+    else { start = value.start || start; end = value.end || end; }
+    const mode = value.compare?.mode || (value.compare === undefined ? 'previous' : 'none');
+    let compare = null;
+    if (mode === 'previous') compare = { start: shift(start, -span(start, end)), end: shift(start, -1) };
+    if (mode === 'year') compare = { start: `${Number(start.slice(0, 4)) - 1}${start.slice(4)}`, end: `${Number(end.slice(0, 4)) - 1}${end.slice(4)}` };
+    return { preset, start, end, compare };
+  }
+
+  /* ---------- Rows: one tbody per day, newest first ---------- */
+  function whoCell(key) {
+    const w = WHO[key];
+    const lead = w.icon
+      ? `<span class="fd-table-lead"><i data-icon="${w.icon}"></i></span>`
+      : `<span class="fd-table-lead" data-shape="round" data-tone="${w.tone}">${w.initials}</span>`;
+    return `<div class="fd-table-cell">${lead}<div class="fd-table-two"><span class="fd-table-title">${esc(w.name)}</span><span class="fd-table-sub">${w.sub}</span></div></div>`;
+  }
+  // fire.js has already set up the empty table, so the rows go into a fresh copy that init() sets up whole:
+  // tab stops on the rows, stacked labels and the day toggles. A server-rendered page writes the tbodies in the markup.
+  const days = [...new Set(EVENTS.map((e) => e.day))].sort().reverse();
+  const table = $('#audit-table').cloneNode(true);
+  table.insertAdjacentHTML('beforeend', days.map((day) => {
+    const rows = EVENTS.filter((e) => e.day === day);
+    return `<tbody class="fd-table-group" data-day="${day}">
+      <tr class="fd-table-group-head"><th scope="rowgroup" colspan="5"><span class="fd-table-group-title">${dayTitle(day)}</span><span class="fd-table-group-count" data-auto>${rows.length}</span></th></tr>
+      ${rows.map((e) => `<tr data-value="${e.id}" data-href="#${e.id}">
+        <td data-sort-value="${e.at}">${clock(e.at)}</td>
+        <td data-sort-value="${esc(WHO[e.who].name)}">${whoCell(e.who)}</td>
+        <td data-stack-title>${esc(e.action)}</td>
+        <td data-mono data-muted><span class="fd-table-trunc">${esc(e.target)}</span></td>
+        <td>${e.source}</td>
+      </tr>`).join('')}
+    </tbody>`;
+  }).join(''));
+  $('#audit-table').replaceWith(table);
+  init(table.parentElement);
+  const rows = $$('tr[data-value]', table);
+
+  /* ---------- Filters, search and the period ---------- */
+  const filters = { who: [], kind: [], period: periodOf({ preset: '7d' }) };
+  let query = '';
+  const LABEL = { who: Object.fromEntries(Object.entries(WHO).map(([k, w]) => [k, w.sub === 'API key' ? `${w.name} key` : w.name])), kind: Object.fromEntries(Object.entries(KIND).map(([k, v]) => [k, v.label])) };
+  const TOKEN = { who: 'Who', kind: 'Kind' };
+
+  const inRange = (e, r) => r && e.day >= r.start && e.day <= r.end;
+  function matches(e) {
+    if (filters.who.length && !filters.who.includes(e.who)) return false;
+    if (filters.kind.length && !filters.kind.includes(e.kind)) return false;
+    const q = query.trim().toLowerCase();
+    return !q || `${e.action} ${e.target} ${WHO[e.who].name} ${KIND[e.kind].label} ${e.source}`.toLowerCase().includes(q);
+  }
+  const isFiltered = () => Boolean(query.trim() || filters.who.length || filters.kind.length);
+
+  function stat(name, figure, now, before, sub) {
+    const tile = $(`[data-stat="${name}"]`, $('#audit-stats'));
+    let delta = '';
+    if (before !== null && before > 0) {
+      const pct = Math.round(((now - before) / before) * 100);
+      const dir = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+      delta = `<span class="fd-stat-delta" data-tone="neutral" data-dir="${dir}">${Math.abs(pct)}%</span>`;
+    }
+    $('.fd-stat-row', tile).innerHTML = `<span class="fd-stat" data-figure>${figure}</span>${delta}`;
+    $('[data-sub]', tile).textContent = sub;
+  }
+
+  function apply() {
+    const { period } = filters;
+    let shown = 0;
+    for (const tr of rows) {
+      const e = byId.get(tr.dataset.value);
+      tr.hidden = !(inRange(e, period) && matches(e));
+      if (!tr.hidden) shown += 1;
+    }
+    const current = EVENTS.filter((e) => inRange(e, period) && matches(e));
+    const before = period.compare ? EVENTS.filter((e) => inRange(e, period.compare) && matches(e)) : null;
+    const where = rangeText(period.start, period.end);
+    const versus = period.compare ? `vs ${before.length} in ${rangeText(period.compare.start, period.compare.end)}` : where;
+    const count = (list, test) => list.filter(test).length;
+    stat('events', current.length, current.length, before?.length ?? null, versus);
+    const access = (e) => ACCESS.has(e.kind);
+    const signin = (e) => e.kind === 'signin';
+    stat('access', count(current, access), count(current, access), before ? count(before, access) : null, period.compare ? `vs ${count(before, access)} · keys, members and roles` : 'Keys, members and roles');
+    stat('signin', count(current, signin), count(current, signin), before ? count(before, signin) : null, period.compare ? `vs ${count(before, signin)} in ${rangeText(period.compare.start, period.compare.end)}` : 'Sign-ins on a new device');
+    $('#audit-info').textContent = `${shown} event${shown === 1 ? '' : 's'} · ${where}`;
+    $('#audit-filtered-text').textContent = `Nothing in ${where} matches ${isFiltered() ? 'these filters' : 'this period'}. Widen the period or clear the filters.`;
+    const state = states.dataset.state;
+    if (state === 'ready' && !shown) show('filtered');
+    else if (state === 'filtered' && shown) show('ready');
+  }
+
+  function renderTokens() {
+    const tokens = ['who', 'kind'].flatMap((key) => filters[key].map((value) => [key, value]));
+    applied.hidden = tokens.length === 0;
+    applied.innerHTML = tokens.map(([key, value]) =>
+      `<span class="fd-filter-token"><span class="fd-filter-token-key">${TOKEN[key]}</span><span class="fd-filter-token-value">${esc(LABEL[key][value])}</span><button class="fd-filter-token-remove" type="button" aria-label="Remove ${TOKEN[key]}: ${esc(LABEL[key][value])}"><i data-icon="x" data-size="12"></i></button></span>`).join('')
+      + '<button class="fd-btn-text" type="button" data-filter-clear-all>Clear all</button>';
+    init(applied);
+  }
+
+  search.addEventListener('input', () => { query = search.value; apply(); });
+
+  document.addEventListener('fd:change', (event) => {
+    const el = event.target;
+    if (!(el instanceof Element)) return;
+    if (el.matches('[data-fd-filter-list]')) { filters[el.dataset.filter] = event.detail.value; renderTokens(); apply(); return; }
+    if (el.matches('[data-fd-daterange]')) { filters.period = periodOf(event.detail.value); apply(); return; }
+    if (el === applied && event.detail.source === 'filters') {
+      // A token was removed (or Clear all): untick the matching items in each popover.
+      const left = new Set(event.detail.value.map((t) => `${t.key}:${t.value}`));
+      for (const key of ['who', 'kind']) {
+        for (const value of [...filters[key]]) {
+          if (!left.has(`${TOKEN[key]}:${LABEL[key][value]}`)) $(`#pop-${key} .fd-checklist-item[data-value="${CSS.escape(value)}"]`)?.click();
+        }
+      }
+      return;
+    }
+    if (el === switcher && event.detail.value !== states.dataset.state) choose(event.detail.value);
+    if (el === states) sync(event.detail.value);
+  });
+
+  function clearFilters() {
+    search.value = '';
+    query = '';
+    for (const key of ['who', 'kind']) $(`#pop-${key} [data-fd-filter-clear]`)?.click();
+    if (filters.period.preset !== '7d' || !filters.period.compare) {
+      $('#pop-period [data-preset="7d"]').click();
+      $('#pop-period input[value="previous"]').click();
+      $('#pop-period [data-fd-daterange-apply]').click();
+    }
+    renderTokens();
+    apply();
+  }
+  $('#audit-clear').addEventListener('click', () => { clearFilters(); if (states.dataset.state === 'filtered') show('ready'); search.focus(); });
+
+  /* ---------- Page states ---------- */
+  let loadTimer;
+  const show = (state) => content.setState(states, state);
+  function sync(state) {
+    nav.selectSegment($(`.fd-segmented-item[data-value="${state}"]`, switcher), { silent: true });
+    exportBtn.disabled = state !== 'ready';
+    const url = new URL(location.href);
+    url.searchParams.set('state', state);
+    history.replaceState(null, '', url);
+    clearTimeout(loadTimer);
+    // Loading settles on its own unless the demo asked for it: Try again goes back to the data.
+    if (state === 'loading' && !holdLoading) loadTimer = setTimeout(() => show('ready'), 700);
+    holdLoading = false;
+    if (state === 'ready') apply();
+  }
+  let holdLoading = false;
+  /** The Demo state band: each state as a person would reach it. */
+  function choose(state) {
+    if (state === 'filtered') { search.value = 'single sign-on'; query = search.value; }
+    else if (state === 'ready' && isFiltered()) clearFilters();
+    if (state === 'loading') holdLoading = true;
+    show(state);
+    if (state === 'filtered') apply();
+  }
+
+  $('#audit-ask').addEventListener('click', () => toast({ title: 'Request sent', description: 'Maya Reyes and Tomasz Nowak got an email.', tone: 'success' }));
+
+  /* ---------- One entry in a sheet ---------- */
+  let current = null;
+  const kv = (key, value, attrs = '') => `<div class="fd-kv-item"><dt class="fd-kv-key">${key}</dt><dd class="fd-kv-value"${attrs}>${value}</dd></div>`;
+  const delta = (before, after) => `<span class="fd-delta">${before === null ? '' : `<span class="fd-delta-from">${esc(before)}</span>`}<span class="fd-delta-to">${esc(after)}</span></span>`;
+
+  function openEntry(tr) {
+    const e = (current = byId.get(tr.dataset.value));
+    const w = WHO[e.who];
+    const k = KIND[e.kind];
+    const badge = $('#en-kind');
+    badge.textContent = k.label;
+    if (k.tone === 'neutral') badge.removeAttribute('data-tone'); else badge.dataset.tone = k.tone;
+    $('#en-title').textContent = e.action;
+    $('#en-desc').innerHTML = `${esc(w.name)} · ${esc(longWhen(e.at))} · ${e.source}`;
+    $('#en-changes').innerHTML = e.changes.map(([field, before, after]) => kv(esc(field), delta(before, after))).join('')
+      + (e.reason ? kv('Reason', esc(e.reason)) : '');
+    $('#en-diff').innerHTML = e.diff ? `<div class="fd-diff" data-file="team/crawl-defaults.json" data-lang="json"><script type="text/plain" class="fd-diff-src">${e.diff}<\/script></div>` : '';
+    $('#en-details').innerHTML = [
+      kv('Who', `${esc(w.name)}${w.email ? ` <span class="fd-muted">${w.email}</span>` : ''}`),
+      kv('Role', w.sub),
+      e.behalf ? kv('On behalf of', esc(e.behalf)) : '',
+      kv('When', esc(longWhen(e.at))),
+      kv('Source', e.source),
+      kv('Client', CLIENT[e.source], ' data-mono'),
+      kv('IP address', e.ip, ' data-mono'),
+      kv('Target', esc(e.target), ` data-copy="${esc(e.target)}"`),
+      kv('Request ID', `req_${e.id.slice(4)}`, ' data-copy'),
+      kv('Event ID', e.id, ' data-copy'),
+    ].join('');
+    const open = $('#en-open');
+    open.href = k.open[1];
+    $('span', open).textContent = k.open[0];
+    init($('#sheet-entry'));
+    openDialog('sheet-entry', { trigger: tr });
+  }
+
+  $('#en-copy').addEventListener('click', () => {
+    const url = new URL(location.href);
+    url.search = '';
+    url.hash = current.id;
+    copyText(url.href).then(() => toast.success('Link copied', { description: current.id }));
+  });
+
+  document.addEventListener('fd:select', (event) => {
+    const { action, row } = event.detail || {};
+    if (action === 'open' && row?.closest('#audit-table')) { event.preventDefault(); openEntry(row); }
+  });
+
+  /* ---------- Export ---------- */
+  exportBtn.addEventListener('click', () => {
+    const count = rows.filter((tr) => !tr.hidden).length;
+    const { start, end } = filters.period;
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1800)), {
+      loading: { title: 'Preparing export', description: `${count} events · ${rangeText(start, end)}` },
+      success: { title: `audit-log-${start}.csv is ready`, description: `${count} rows · ${Math.max(1, Math.round(count * 0.4))} KB`, action: { label: 'Download' } },
+      error: 'Export failed',
+    });
+  });
+
+  /* ---------- First paint: ?state= picks a state; otherwise skeletons for ~700 ms, then the data (at once with reduced motion) ---------- */
+  apply();
+  const asked = new URLSearchParams(location.search).get('state');
+  const start = ['ready', 'loading', 'empty', 'filtered', 'error', 'no-access'].includes(asked) ? asked : reducedMotion() ? 'ready' : 'loading';
+  if (start === 'loading') { holdLoading = asked === 'loading'; states.dataset.state = 'ready'; show('loading'); }
+  else { states.dataset.state = 'loading'; choose(start); }
+  // A link to one entry (#evt_…) opens it once the data is in.
+  const linked = location.hash && byId.has(location.hash.slice(1)) ? $(`tr[data-value="${location.hash.slice(1)}"]`) : null;
+  if (linked) setTimeout(() => { if (!linked.hidden && states.dataset.state === 'ready') openEntry(linked); }, 800);
+</script>
+</body>
+</html>

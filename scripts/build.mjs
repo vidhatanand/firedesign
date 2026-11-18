@@ -16,6 +16,7 @@ const steps = [
   ['build-contract.mjs', check ? ['--check'] : []],
   ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card
   ['build-wrappers.mjs', check ? ['--check'] : [], { optional: true }],
+  ['build-wrappers-vue.mjs', check ? ['--check'] : [], { optional: true }],
   ['build-facet.mjs', check ? ['--check'] : [], { optional: true }],
 ];
 let failed = 0;

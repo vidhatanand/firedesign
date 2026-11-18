@@ -3,6 +3,8 @@
    fd-card · fd-tile · fd-qr · fd-avatar · fd-badge · fd-tag · fd-verified · fd-status
    fd-callout · fd-banner · fd-empty · fd-accordion · fd-disclosure
    fd-timeline · fd-setting · fd-plan · fd-feature-list · fd-feature-row
+   Decisions: fd-decision · fd-delta · fd-draft · fd-commit · fd-impact · fd-hold · fd-preview · fd-queue
+   Page states: fd-states (with fd-empty and the skeletons)
 
    Tones. Every component below that takes data-tone reads four private values
    from the same ladder, so a tone means the same thing everywhere:
@@ -93,24 +95,35 @@
   --fd-plan-min: 232px;                     /* narrowest plan card */
   --fd-plan-halo: 3px;                      /* halo of the recommended plan */
   --fd-feature-nudge: 3px;                  /* icon drop of a compact feature row */
+  /* decisions */
+  --fd-decision-part-min: 248px;            /* narrowest column of the brief's parts before they stack */
+  --fd-draft-stroke: 1px;                   /* the dashed edge of a draft nobody has accepted */
+  --fd-commit-measure: 640px;               /* the reason field and effect line stop here */
+  --fd-hold-ring: 36px;
+  --fd-hold-ring-sm: 24px;                  /* the ring inside a held toast */
+  --fd-hold-stroke: 2.5px;
+  --fd-hold-stroke-sm: 2px;
+  --fd-hold-edge: 0.5px;                    /* anti-aliasing edge of the ring's mask */
+  --fd-queue-list-w: 320px;
+  --fd-queue-min-h: 560px;                  /* a queue holds this much height so the case does not jump */
 }
 
-:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar)[data-tone="accent"] {
+:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar, .fd-impact, .fd-hold, .fd-decision-outcome)[data-tone="accent"] {
   --_c-c: var(--fd-accent); --_c-t: var(--fd-accent-text); --_c-bg: var(--fd-accent-8); --_c-l: var(--fd-accent-16);
 }
-:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar)[data-tone="success"] {
+:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar, .fd-impact, .fd-hold, .fd-decision-outcome)[data-tone="success"] {
   --_c-c: var(--fd-success-solid); --_c-t: var(--fd-success-text); --_c-bg: var(--fd-success-bg); --_c-l: var(--fd-success-line);
 }
-:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar)[data-tone="warning"] {
+:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar, .fd-impact, .fd-hold, .fd-decision-outcome)[data-tone="warning"] {
   --_c-c: var(--fd-warning-solid); --_c-t: var(--fd-warning-text); --_c-bg: var(--fd-warning-bg); --_c-l: var(--fd-warning-line);
 }
-:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar)[data-tone="danger"] {
+:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar, .fd-impact, .fd-hold, .fd-decision-outcome)[data-tone="danger"] {
   --_c-c: var(--fd-danger-solid); --_c-t: var(--fd-danger-text); --_c-bg: var(--fd-danger-bg); --_c-l: var(--fd-danger-line);
 }
-:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar)[data-tone="info"] {
+:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar, .fd-impact, .fd-hold, .fd-decision-outcome)[data-tone="info"] {
   --_c-c: var(--fd-info-solid); --_c-t: var(--fd-info-text); --_c-bg: var(--fd-info-bg); --_c-l: var(--fd-info-line);
 }
-:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar)[data-tone="violet"] {
+:is(.fd-badge, .fd-tile, .fd-status, .fd-callout, .fd-banner, .fd-timeline-item, .fd-empty, .fd-avatar, .fd-impact, .fd-hold, .fd-decision-outcome)[data-tone="violet"] {
   --_c-c: var(--fd-violet-solid); --_c-t: var(--fd-violet-text); --_c-bg: var(--fd-violet-bg); --_c-l: var(--fd-violet-line);
 }
 
@@ -562,7 +575,9 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
      <h3 class="fd-empty-title">No logs yet</h3><p class="fd-empty-text">…</p>
      <div class="fd-empty-actions">…</div><code class="fd-empty-hint">curl …</code>
    </div>
+     <p class="fd-empty-meta"><span>Request ID</span><code class="fd-code">req_8f2a91c4</code>…copy button…</p>
    data-size  sm | (default) | lg      data-tone  neutral | danger | warning | info | accent | violet | success
+   fd-empty-meta  a quiet line under the actions: a request ID, who can grant access, when a link expired
    ========================================================================== */
 .fd-empty {
   --_c-c: var(--fd-text-3); --_c-t: var(--fd-text-3); --_c-bg: var(--fd-surface); --_c-l: var(--fd-line-faint);
@@ -591,6 +606,16 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
   border-radius: var(--fd-radius-md); background: var(--fd-fill); color: var(--fd-text-3);
   font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs);
 }
+/* A quiet line under the actions: the request ID of a failure, who can grant access or turn an area on, when a link ran out. */
+.fd-empty-meta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--fd-space-1-5) var(--fd-space-2);
+  max-width: 100%; margin-block-start: var(--fd-space-4);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty;
+}
+.fd-empty-meta > .fd-code { color: var(--fd-text-2); overflow-wrap: anywhere; }
+.fd-empty-meta > .fd-avatar-stack { --fd-stack-ring: var(--fd-surface); }
+.fd-empty-meta + .fd-empty-meta { margin-block-start: var(--fd-space-1-5); }
+.fd-empty[data-size="sm"] .fd-empty-meta { margin-block-start: var(--fd-space-3); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); }
 .fd-empty[data-tone]:not([data-tone="neutral"]) .fd-empty-icon { box-shadow: inset 0 0 0 var(--fd-hairline) var(--_c-l); }
 .fd-empty[data-size="sm"] { padding: var(--fd-space-6) var(--fd-space-4); }
 .fd-empty[data-size="sm"] .fd-empty-icon { width: var(--fd-empty-icon-sm); height: var(--fd-empty-icon-sm); margin-block-end: var(--fd-space-3); border-radius: var(--fd-radius-lg); box-shadow: inset 0 0 0 var(--fd-hairline) var(--_c-l); }
@@ -803,3 +828,399 @@ button.fd-tag:active, a.fd-tag:active { scale: var(--fd-press-scale); }
 .fd-feature-row-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); }
 .fd-feature-row-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
 .fd-feature-row > .fd-tile[data-shape="wide"][data-tone="accent"] { --_c-bg: var(--fd-accent-8); --_c-t: var(--fd-accent-text); }
+
+/* ==========================================================================
+   Decisions — one family for a person deciding what a system or an agent may do:
+   approve a credit grant, allow a host, ship a change. Read the brief, take or leave
+   an agent's draft, write a reason, commit with a button named for its effect, and
+   keep a few seconds to take it back. Behaviour: fire/js/content.js.
+
+   Decision brief — the four parts, readable in five seconds
+   <article class="fd-decision" aria-labelledby="dc-title">
+     <header class="fd-decision-head">
+       <span class="fd-tile" data-tone="warning"><i data-icon="wallet"></i></span>
+       <div class="fd-decision-heading">
+         <p class="fd-eyebrow">Credit grant</p>
+         <h2 class="fd-decision-title" id="dc-title">Grant 40,000 credits to Northwind Labs?</h2>
+         <p class="fd-decision-meta"><span>Lena Ortiz asked 2 h ago</span><span>Expires in 22 h</span></p>
+       </div>
+       <span class="fd-status" data-variant="pill" data-size="sm" data-tone="warning">Waiting</span>
+     </header>
+     <dl class="fd-decision-parts">
+       <div class="fd-decision-part">
+         <dt class="fd-decision-label">The change</dt>
+         <dd class="fd-decision-lead">…one line…</dd>
+         <dd class="fd-decision-detail">…a muted line…</dd>
+       </div>
+       …who it touches · the evidence (fd-decision-facts) · who signs, or what happens if you wait…
+     </dl>
+     <div class="fd-decision-outcome" data-tone="success" role="status">…</div>      (once decided)
+   </article>
+   The labels are numbered in reading order. Parts sit two by two and stack into one column when the
+   brief is narrower than two --fd-decision-part-min columns. An odd last part takes the full row.
+   fd-decision-facts  a list of evidence rows: <li><span>Failed crawls</span><b>212</b></li>; links allowed
+   fd-decision-quote  someone's own words (the requester's reason, the decided reason), set in quotes
+   fd-decision-outcome  what was decided: an icon, fd-decision-outcome-title, a detail line or a quote, and
+                        fd-decision-actions (Undo, and the date it stops working). Tones as fd-decision-outcome[data-tone="success|danger|neutral|info|warning"]
+   ========================================================================== */
+.fd-decision {
+  container: fd-decision / inline-size;
+  display: grid; min-width: 0;
+  border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl);
+  background: var(--fd-surface); color: var(--fd-text);
+}
+.fd-decision-head { display: flex; align-items: flex-start; gap: var(--fd-space-3); min-width: 0; padding: var(--fd-space-5) var(--fd-space-5) var(--fd-space-4); }
+.fd-decision-heading { flex: 1 1 0; min-width: 0; display: grid; gap: var(--fd-space-1); }
+.fd-decision-heading > .fd-eyebrow { margin-block-end: var(--fd-space-0-5); }
+.fd-decision-head > .fd-status, .fd-decision-head > .fd-badge { flex: none; }
+.fd-decision-title {
+  font-family: var(--fd-font-display); font-size: var(--fd-text-h3); line-height: var(--fd-lh-h3); letter-spacing: var(--fd-ls-h3);
+  font-weight: var(--fd-weight-display, var(--fd-weight-medium)); color: var(--fd-text); text-wrap: balance; overflow-wrap: anywhere;
+}
+.fd-decision-title:focus-visible { border-radius: var(--fd-radius-xs); }
+.fd-decision-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1) var(--fd-space-2); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-decision-meta > :not(:first-child)::before { content: "·"; margin-inline-end: var(--fd-space-2); color: var(--fd-text-4); }
+.fd-decision-meta .fd-mono, .fd-decision-meta code { font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); }
+
+.fd-decision-parts {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--fd-hairline); margin: 0;
+  border-block-start: var(--fd-hairline) solid var(--fd-line-faint); background: var(--fd-line-faint);
+  counter-reset: fd-decision;
+}
+.fd-decision-parts:last-child { border-end-start-radius: calc(var(--fd-radius-xl) - var(--fd-hairline)); border-end-end-radius: calc(var(--fd-radius-xl) - var(--fd-hairline)); overflow: hidden; }
+.fd-decision-part { display: flex; flex-direction: column; gap: var(--fd-space-1); min-width: 0; padding: var(--fd-space-4) var(--fd-space-5) var(--fd-space-5); background: var(--fd-surface); counter-increment: fd-decision; }
+.fd-decision-part:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.fd-decision-part > dd { margin: 0; min-width: 0; }
+.fd-decision-label {
+  margin-block-end: var(--fd-space-1);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); letter-spacing: 0;
+  text-transform: uppercase; color: var(--fd-text-3);
+}
+.fd-decision-label::before { content: counter(fd-decision) " · "; color: var(--fd-text-3); }
+.fd-decision-lead { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); text-wrap: pretty; overflow-wrap: anywhere; }
+.fd-decision-lead > .fd-delta { font-size: var(--fd-text-lg); line-height: var(--fd-lh-lg); }
+.fd-decision-detail { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty; }
+.fd-decision-detail a:not(.fd-btn), .fd-decision-facts a:not(.fd-btn), .fd-decision-lead a:not(.fd-btn) {
+  color: inherit; text-decoration: underline; text-decoration-color: var(--fd-a32); text-underline-offset: var(--fd-content-underline-offset); text-decoration-thickness: var(--fd-hairline); border-radius: var(--fd-radius-xs);
+  transition: text-decoration-color var(--fd-dur-2) var(--fd-ease-out);
+}
+.fd-decision-detail a:not(.fd-btn):hover, .fd-decision-facts a:not(.fd-btn):hover, .fd-decision-lead a:not(.fd-btn):hover { text-decoration-color: currentColor; }
+.fd-decision-quote { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); color: var(--fd-text); text-wrap: pretty; overflow-wrap: anywhere; quotes: "\201C" "\201D"; }
+.fd-decision-quote::before { content: open-quote; }
+.fd-decision-quote::after { content: close-quote; }
+
+.fd-decision-facts { list-style: none; margin: 0; padding: 0; display: grid; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); }
+.fd-decision-facts > li { display: flex; align-items: baseline; justify-content: space-between; gap: var(--fd-space-1) var(--fd-space-4); flex-wrap: wrap; padding-block: var(--fd-space-1-5); min-width: 0; }
+.fd-decision-facts > li + li { border-block-start: var(--fd-hairline) solid var(--fd-line-faint); }
+.fd-decision-facts > li > :first-child { color: var(--fd-text-3); min-width: 0; }
+.fd-decision-facts > li > :last-child:not(:first-child) { color: var(--fd-text); font-weight: var(--fd-weight-regular); font-variant-numeric: tabular-nums; text-align: end; margin-inline-start: auto; overflow-wrap: anywhere; }
+
+/* Outcome: what was decided, by whom, and the window to take it back. */
+.fd-decision-outcome {
+  --_c-c: var(--fd-text-3); --_c-t: var(--fd-text-3); --_c-bg: var(--fd-fill-subtle); --_c-l: var(--fd-line-faint);
+  display: grid; grid-template-columns: var(--fd-icon) minmax(0, 1fr); align-items: start; gap: var(--fd-space-1) var(--fd-space-3);
+  padding: var(--fd-space-4) var(--fd-space-5);
+  border-block-start: var(--fd-hairline) solid var(--_c-l); background: var(--_c-bg);
+  border-end-start-radius: calc(var(--fd-radius-xl) - var(--fd-hairline)); border-end-end-radius: calc(var(--fd-radius-xl) - var(--fd-hairline));
+}
+.fd-decision-outcome > .fd-icon, .fd-decision-outcome > i[data-icon] { margin-block-start: var(--fd-space-0-5); color: var(--_c-t); }
+.fd-decision-outcome > :not(.fd-icon, i[data-icon]) { grid-column: 2; min-width: 0; }
+.fd-decision-outcome-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-decision-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2) var(--fd-space-3); margin-block-start: var(--fd-space-2); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+
+@container fd-decision (max-width: 559.98px) {
+  .fd-decision-parts { grid-template-columns: minmax(0, 1fr); }
+  .fd-decision-head { flex-wrap: wrap; padding: var(--fd-space-4); }
+  .fd-decision-head > .fd-tile { display: none; }
+  .fd-decision-head > .fd-status, .fd-decision-head > .fd-badge { order: -1; }
+  .fd-decision-heading { flex-basis: 100%; }
+  .fd-decision-part { padding: var(--fd-space-3-5) var(--fd-space-4) var(--fd-space-4); }
+  .fd-decision-outcome { padding: var(--fd-space-4); }
+}
+
+/* ==========================================================================
+   Delta — a value before and after a change
+   <span class="fd-delta"><span class="fd-delta-from">12,400</span><span class="fd-delta-to">52,400</span></span>
+   The arrow is drawn between them and read as "to". data-mono for identifiers (plan names, hosts, versions).
+   A delta with no fd-delta-from shows only the new value: something that did not exist before.
+   ========================================================================== */
+.fd-delta { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--fd-space-1-5); min-width: 0; font-variant-numeric: tabular-nums; vertical-align: baseline; }
+.fd-delta-from { color: var(--fd-text-3); font-weight: var(--fd-weight-regular); }
+.fd-delta-to { color: var(--fd-text); font-weight: var(--fd-weight-label); }
+.fd-delta-from + .fd-delta-to::before { content: "\2192"; content: "\2192" / "to"; margin-inline-end: var(--fd-space-1-5); color: var(--fd-text-3); font-weight: var(--fd-weight-regular); }
+.fd-delta-from + .fd-delta-to:dir(rtl)::before { content: "\2190"; content: "\2190" / "to"; }
+.fd-delta[data-mono] { font-family: var(--fd-font-mono); font-size: 0.92em; font-feature-settings: "zero", "ss01"; }
+
+/* ==========================================================================
+   Draft — words an agent wrote for a person, which stay the agent's until the person takes them
+   <aside class="fd-draft" aria-label="Draft reason" [data-fd-draft-for="reason-id"]>
+     <p class="fd-draft-by"><i data-icon="bot"></i><span>Drafted by <b>Ember agent</b> for Maya Chen</span><span class="fd-draft-when">1 h ago</span></p>
+     <p class="fd-draft-text">Northwind lost 212 crawls in the Nov 14 outage…</p>
+     <div class="fd-draft-actions">
+       <button class="fd-btn" type="button" data-size="sm" data-variant="outline" data-fd-draft="use">…Use as my reason</button>
+       <button class="fd-btn" type="button" data-size="sm" data-variant="ghost" data-fd-draft="discard">Discard</button>
+     </div>
+     <p class="fd-draft-used">You used this draft. Edit it until it says what you mean.</p>
+   </aside>
+   A dashed edge, the agent's name and quotes keep it from reading as the person's own words.
+   data-state  used | edited (set by content.js): the text and actions fold away; fd-draft-used shows.
+   ========================================================================== */
+.fd-draft {
+  display: grid; gap: var(--fd-space-2); min-width: 0; padding: var(--fd-space-3) var(--fd-space-4) var(--fd-space-3-5);
+  border: var(--fd-draft-stroke) dashed var(--fd-line-strong); border-radius: var(--fd-radius-xl); background: transparent;
+}
+.fd-draft-by { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1) var(--fd-space-2); min-width: 0; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-draft-by > .fd-icon, .fd-draft-by > i[data-icon] { flex: none; width: var(--fd-icon-sm); height: var(--fd-icon-sm); color: var(--fd-violet-text); }
+.fd-draft-by b { font-weight: var(--fd-weight-label); color: var(--fd-text-2); }
+.fd-draft-when { margin-inline-start: auto; font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); white-space: nowrap; }
+.fd-draft-text { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); color: var(--fd-text-2); text-wrap: pretty; overflow-wrap: anywhere; quotes: "\201C" "\201D"; }
+.fd-draft-text::before { content: open-quote; }
+.fd-draft-text::after { content: close-quote; }
+.fd-draft-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-1-5); margin-block-start: var(--fd-space-1); }
+.fd-draft-used { display: none; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-draft:is([data-state="used"], [data-state="edited"]) { padding-block: var(--fd-space-2-5); border-style: solid; border-color: var(--fd-line-faint); background: var(--fd-fill-subtle); }
+.fd-draft:is([data-state="used"], [data-state="edited"]) :is(.fd-draft-text, .fd-draft-actions) { display: none; }
+.fd-draft:is([data-state="used"], [data-state="edited"]) .fd-draft-used { display: block; }
+
+/* ==========================================================================
+   Commit — the reason, the effect and the buttons named for it
+   <form class="fd-commit" [data-fd-hold="10"] [data-fd-hold-in="toast"]>
+     <p class="fd-commit-effect">Approving adds <b>40,000 credits</b> to Northwind Labs now. Declining sends nothing.</p>
+     …an optional fd-draft…
+     <div class="fd-field">
+       <label class="fd-field-label" for="cr-reason">Reason</label>
+       <textarea class="fd-textarea" id="cr-reason" name="reason" rows="3" required data-fd-autogrow></textarea>
+       <div class="fd-field-foot"><p class="fd-field-hint">Kept in the audit log.</p>
+         <span class="fd-commit-budget" data-min-words="3" data-max-words="60">0 / 60 words</span></div>
+       <p class="fd-field-error" hidden><i data-icon="circle-alert"></i><span></span></p>
+     </div>
+     <div class="fd-commit-actions">
+       <button class="fd-btn" type="submit" data-variant="primary" value="approve" data-verb="Approving the credit">…Approve the credit</button>
+       <button class="fd-btn" type="submit" data-variant="outline" value="decline" data-verb="Declining the credit">Decline</button>
+     </div>
+     <p class="fd-commit-lock" id="cr-lock"><i data-icon="lock"></i><span>Only owners can approve credits. Ask Sam Ortiz.</span></p>
+     <div class="fd-hold" hidden>…</div>
+   </form>
+   Every button that commits also needs the reason (Decline too). The primary button names the effect, never "Submit".
+   fd-commit-budget  the reason's word budget, from data-min-words and data-max-words; content.js sets fd-commit-budget[data-state="near|over"]
+   fd-commit-lock    who can decide, when this viewer cannot: the commit buttons are disabled and described by it
+   fd-commit[data-state="held|committed"]  set by content.js: held while a hold runs (the actions give way to fd-hold),
+                        committed once sent (the controls stay read-only)
+   A <div class="fd-commit"> works too (inside another form, such as fd-preview).
+   ========================================================================== */
+.fd-commit { display: grid; gap: var(--fd-space-4); min-width: 0; }
+.fd-commit > :is(.fd-field, .fd-commit-effect, .fd-draft) { max-width: var(--fd-commit-measure); }
+.fd-commit-effect { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); color: var(--fd-text-2); text-wrap: pretty; }
+.fd-commit-effect b, .fd-commit-effect strong { font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-commit-budget { flex: none; font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-sm); color: var(--fd-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fd-commit-budget[data-state="near"] { color: var(--fd-warning-text); }
+.fd-commit-budget[data-state="over"] { color: var(--fd-danger-text); }
+.fd-commit-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2); padding-block-start: var(--fd-space-1); }
+.fd-commit-lock { display: flex; align-items: flex-start; gap: var(--fd-space-2); max-width: var(--fd-commit-measure); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); }
+.fd-commit-lock > .fd-icon, .fd-commit-lock > i[data-icon] { flex: none; width: var(--fd-icon-sm); height: var(--fd-icon-sm); margin-block-start: var(--fd-content-underline-offset); color: var(--fd-text-3); }
+.fd-commit-actions + .fd-commit-lock { margin-block-start: calc(var(--fd-space-2) * -1); }
+.fd-commit[data-state="held"] > .fd-commit-actions { display: none; }
+.fd-commit[data-state="held"] > .fd-draft { display: none; }
+@media (max-width: 640px) {
+  .fd-commit-actions > .fd-btn { flex: 1 1 auto; }
+}
+
+/* ==========================================================================
+   Impact — what a change will touch, shown before anyone commits it
+   <div class="fd-impact" data-tone="warning" role="status">
+     <p class="fd-impact-count"><b>29</b> teams change</p>
+     <p class="fd-impact-text">Their crawls wait the crawl-delay a site asks for. Running crawls finish as they started.</p>
+     <ul class="fd-impact-list">
+       <li><span>Northwind Labs</span><span class="fd-delta">…</span></li> …
+     </ul>
+     <p class="fd-impact-more">and 26 more · <a href="…">See all 29</a></p>
+   </div>
+   data-tone  neutral (default) | info | warning | danger | success. Name the count first; list a few, never all.
+   ========================================================================== */
+.fd-impact {
+  --_c-c: var(--fd-text-3); --_c-t: var(--fd-text-3); --_c-bg: var(--fd-fill-subtle); --_c-l: var(--fd-line-faint);
+  display: grid; gap: var(--fd-space-1); min-width: 0; padding: var(--fd-space-4);
+  border: var(--fd-hairline) solid var(--_c-l); border-radius: var(--fd-radius-xl); background: var(--_c-bg);
+}
+.fd-impact-count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--fd-space-2); font-size: var(--fd-text-title); line-height: var(--fd-lh-title); font-weight: var(--fd-weight-label); color: var(--fd-text); }
+.fd-impact-count > b, .fd-impact-count > strong {
+  font-size: var(--fd-text-stat); line-height: var(--fd-lh-stat); letter-spacing: var(--fd-ls-stat); font-weight: var(--fd-weight-medium);
+  color: var(--_c-t); font-variant-numeric: tabular-nums;
+}
+.fd-impact:not([data-tone]) .fd-impact-count > :is(b, strong), .fd-impact[data-tone="neutral"] .fd-impact-count > :is(b, strong) { color: var(--fd-text); }
+.fd-impact-text { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); text-wrap: pretty; }
+.fd-impact-list {
+  list-style: none; margin: var(--fd-space-2) 0 0; padding: 0; display: grid;
+  border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-lg); background: var(--fd-surface);
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm);
+}
+.fd-impact-list > li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--fd-space-1) var(--fd-space-3); padding: var(--fd-space-2) var(--fd-space-3); min-width: 0; color: var(--fd-text); }
+.fd-impact-list > li + li { border-block-start: var(--fd-hairline) solid var(--fd-line-faint); }
+.fd-impact-list > li > :first-child { min-width: 0; overflow-wrap: anywhere; }
+.fd-impact-list > li > :last-child:not(:first-child) { margin-inline-start: auto; }
+.fd-impact-more { margin-block-start: var(--fd-space-1); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-impact-more a:not(.fd-btn) { color: var(--fd-text); text-decoration: underline; text-decoration-color: var(--fd-a32); text-underline-offset: var(--fd-content-underline-offset); border-radius: var(--fd-radius-xs); }
+.fd-impact-more a:not(.fd-btn):hover { text-decoration-color: currentColor; }
+
+/* ==========================================================================
+   Hold — a commit that waits a few seconds, with a countdown and Undo, then goes
+   <div class="fd-hold" [data-tone="danger"] [data-seconds="10"] hidden>
+     <span class="fd-hold-ring" aria-hidden="true"><span class="fd-hold-count">10</span></span>
+     <div class="fd-hold-text"><p class="fd-hold-title">Approving the credit</p>
+       <p class="fd-hold-note">Nothing is sent until the countdown ends. Undo or Esc stops it.</p></div>
+     <button class="fd-btn fd-hold-undo" type="button"><i data-icon="undo-2"></i><span>Undo</span></button>
+   </div>
+   Inside an fd-commit with data-fd-hold it runs on commit; on its own, a button with data-fd-hold-for="<id>"
+   starts it, or hold(el, { seconds, label }) from content.js. The ring drains with the time left.
+   fd-hold[data-state="running"] is set by content.js.      data-tone  neutral (default) | danger | warning | accent
+   fd-hold-ring data-size="sm"  the smaller ring a held toast draws (fire/js/overlays.js)
+   ========================================================================== */
+@property --_c-hold-p { syntax: "<number>"; inherits: true; initial-value: 1; }
+.fd-hold {
+  --_c-c: var(--fd-text); --_c-t: var(--fd-text-3); --_c-bg: var(--fd-fill-subtle); --_c-l: var(--fd-line-faint);
+  display: flex; align-items: center; gap: var(--fd-space-3); min-width: 0; max-width: var(--fd-commit-measure);
+  padding: var(--fd-space-3) var(--fd-space-3) var(--fd-space-3) var(--fd-space-3-5);
+  border: var(--fd-hairline) solid var(--fd-line-faint); border-radius: var(--fd-radius-xl); background: var(--fd-surface); box-shadow: var(--fd-shadow-xs);
+}
+.fd-hold[hidden] { display: none; }
+.fd-hold:is([data-tone="danger"], [data-tone="warning"], [data-tone="accent"]) { --_c-c: var(--_c-t); }
+.fd-hold[data-state="running"] { animation: fd-rise var(--fd-dur-3) var(--fd-ease-out); }
+.fd-hold-ring {
+  --_c-s: var(--fd-hold-ring); --_c-w: var(--fd-hold-stroke);
+  position: relative; flex: none; display: grid; place-items: center; width: var(--_c-s); height: var(--_c-s); border-radius: 50%;
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: 1; font-variant-numeric: tabular-nums; color: var(--fd-text);
+}
+.fd-hold-ring::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(var(--_c-c, var(--fd-text)) calc(var(--_c-hold-p) * 1turn), var(--fd-a12) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--_c-w) - var(--fd-hold-edge)), #000 calc(100% - var(--_c-w)));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--_c-w) - var(--fd-hold-edge)), #000 calc(100% - var(--_c-w)));
+}
+.fd-hold-count { position: relative; }
+.fd-hold-ring[data-size="sm"] { --_c-s: var(--fd-hold-ring-sm); --_c-w: var(--fd-hold-stroke-sm); font-size: var(--fd-text-3xs); }
+.fd-hold-text { flex: 1 1 auto; min-width: 0; display: grid; }
+.fd-hold-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); overflow-wrap: anywhere; }
+.fd-hold-note { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty; }
+.fd-hold-undo { flex: none; }
+@media (max-width: 640px) {
+  .fd-hold { flex-wrap: wrap; }
+  .fd-hold-text { flex-basis: calc(100% - var(--fd-hold-ring) - var(--fd-space-3)); }
+  .fd-hold-undo { flex: 1 1 100%; }
+}
+
+/* ==========================================================================
+   Preview — change, see what it touches, then commit (pattern)
+   <form class="fd-preview">
+     <div class="fd-preview-edit">…fields… <button class="fd-btn" type="button" data-fd-preview-open>Preview the change</button></div>
+     <div class="fd-preview-stale"><i data-icon="info"></i><span>You changed the settings. Preview again before you commit.</span></div>
+     <div class="fd-preview-result">fd-impact, then a <div class="fd-commit"></div>
+   </form>
+   data-state  preview (the result shows) | stale (a field changed after the preview; the commit hides). Set by content.js,
+   which fires fd:open on the fd-preview when a preview is asked for: fill the fd-impact then. Works the same inside a dialog.
+   ========================================================================== */
+.fd-preview { display: grid; gap: var(--fd-space-5); min-width: 0; }
+.fd-preview-edit { display: grid; gap: var(--fd-space-4); min-width: 0; max-width: var(--fd-commit-measure); }
+.fd-preview-result > .fd-impact { max-width: var(--fd-commit-measure); }
+.fd-preview-result { display: grid; gap: var(--fd-space-5); min-width: 0; padding-block-start: var(--fd-space-5); border-block-start: var(--fd-hairline) solid var(--fd-line-faint); }
+.fd-preview:not([data-state="preview"]) > .fd-preview-result { display: none; }
+.fd-preview[data-state="preview"] [data-fd-preview-open] { display: none; }
+.fd-preview-stale { display: none; align-items: flex-start; gap: var(--fd-space-2); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-warning-text); }
+.fd-preview-stale > .fd-icon, .fd-preview-stale > i[data-icon] { flex: none; width: var(--fd-icon-sm); height: var(--fd-icon-sm); margin-block-start: var(--fd-content-underline-offset); }
+.fd-preview[data-state="stale"] > .fd-preview-stale { display: flex; }
+
+/* ==========================================================================
+   Queue — what waits for a person, beside the case they are deciding (pattern)
+   <div class="fd-queue" [data-view="list|case"]>
+     <nav class="fd-queue-list" aria-label="Waiting for you">
+       <div class="fd-queue-group" role="group" aria-labelledby="qg-credits">
+         <p class="fd-queue-group-label" id="qg-credits">Credits <span class="fd-queue-count">2</span></p>
+         <button class="fd-queue-item" type="button" data-value="credit-northwind" aria-current="true">
+           <span class="fd-tile" data-size="28"><i data-icon="wallet"></i></span>
+           <span class="fd-queue-text"><span class="fd-queue-title">40,000 credits for Northwind Labs</span>
+             <span class="fd-queue-meta">Lena Ortiz · Growth plan</span></span>
+           <span class="fd-queue-age" [data-urgent]>2 h</span>
+         </button> …
+       </div>
+     </nav>
+     <div class="fd-queue-case">
+       <button class="fd-btn fd-queue-back" type="button" data-variant="ghost" data-size="sm">…Queue</button>
+       <section data-case="credit-northwind">…fd-decision, fd-commit…</section> …
+     </div>
+   </div>
+   Wide: the list and the case side by side. Narrower than the list plus a readable case, one shows at a time:
+   picking an item opens its case (data-view="case"), fd-queue-back returns to the list. Items: arrow keys, Home, End.
+   data-urgent on fd-queue-age  the wait is close to a deadline (warning text)
+   ========================================================================== */
+.fd-queue { container: fd-queue / inline-size; display: flex; align-items: stretch; min-width: 0; min-height: var(--fd-queue-min-h); }
+.fd-queue-list {
+  flex: 0 0 var(--fd-queue-list-w); min-width: 0; display: flex; flex-direction: column; gap: var(--fd-space-3);
+  padding: var(--fd-space-4) var(--fd-space-3); border-inline-end: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-queue-group { display: grid; gap: var(--fd-space-0-5); min-width: 0; }
+.fd-queue-group-label {
+  display: flex; align-items: center; gap: var(--fd-space-2); padding: var(--fd-space-1) var(--fd-space-2-5);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); letter-spacing: 0; text-transform: uppercase; color: var(--fd-text-3);
+}
+.fd-queue-count { font-variant-numeric: tabular-nums; color: var(--fd-text-3); }
+.fd-queue-count::before { content: "·"; margin-inline-end: var(--fd-space-2); }
+.fd-queue-item {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; column-gap: var(--fd-space-3);
+  width: 100%; min-width: 0; padding: var(--fd-space-2-5); border-radius: var(--fd-radius-lg);
+  text-align: start; text-decoration: none; color: var(--fd-text-2); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-queue-item:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-queue-item:active { scale: var(--fd-press-scale); }
+.fd-queue-item:focus-visible { box-shadow: var(--fd-ring); border-radius: var(--fd-radius-lg); }
+.fd-queue-item:is([aria-current="true"], [aria-current="page"]) { background: var(--fd-accent-8); }
+.fd-queue-item:is([aria-current="true"], [aria-current="page"]) .fd-queue-title { color: var(--fd-accent-text); }
+.fd-queue-item > .fd-tile { margin-block-start: var(--fd-content-nudge); }
+.fd-queue-text { display: grid; gap: var(--fd-space-0-5); min-width: 0; }
+.fd-queue-title {
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text);
+}
+.fd-queue-meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
+.fd-queue-age { padding-block-start: var(--fd-content-slide); font-family: var(--fd-font-mono); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fd-queue-age[data-urgent] { color: var(--fd-warning-text); }
+.fd-queue-case { flex: 1 1 0; min-width: 0; display: grid; align-content: start; gap: var(--fd-space-5); padding: var(--fd-space-6) var(--fd-gutter); }
+.fd-queue-case > [data-case] { display: grid; gap: var(--fd-space-5); min-width: 0; }
+.fd-queue-case > [data-case][hidden] { display: none; }
+.fd-queue-back { display: none; justify-self: start; }
+@container fd-queue (max-width: 799.98px) {
+  .fd-queue-list { flex: 1 1 100%; border-inline-end: 0; padding-inline: var(--fd-space-2); }
+  .fd-queue:not([data-view="case"]) > .fd-queue-case { display: none; }
+  .fd-queue[data-view="case"] > .fd-queue-list { display: none; }
+  .fd-queue-case { padding: var(--fd-space-3) var(--fd-space-4) var(--fd-space-6); gap: var(--fd-space-4); }
+  .fd-queue-back { display: inline-flex; margin-inline-start: calc(var(--fd-space-2) * -1); }
+}
+
+/* ==========================================================================
+   Page states — one set for a whole screen or one section (pattern)
+   <div class="fd-states" data-state="loading">
+     <div data-when="loading" aria-busy="true">…skeletons…</div>
+     <div data-when="ready">…the content…</div>
+     <div class="fd-empty" data-when="empty">…first use: what will appear and the action…</div>
+     <div class="fd-empty" data-when="filtered">…nothing matches: what to change, Clear filters…</div>
+     <div class="fd-empty" data-tone="danger" data-when="error" role="alert">…what failed, fd-empty-meta with the request ID, Try again…</div>
+     <div class="fd-empty" data-when="no-access">…who can grant it (fd-empty-meta), Ask for access…</div>
+     <div class="fd-empty" data-when="not-found">…what is missing and where to look…</div>
+     <div class="fd-empty" data-when="off">…the area is switched off and who can turn it on…</div>
+     <div class="fd-empty" data-when="expired">…the link ran out, when, and how to get a new one…</div>
+   </div>
+   data-state  loading | ready (the default) | empty | filtered | error | no-access | not-found | off | expired
+   Only the direct children whose data-when lists the state show; data-when may list several ("empty filtered").
+   The wrapper adds no box, so it can switch whole bands of a page. setState(el, state) in content.js, or a button
+   with data-fd-set-state="loading" inside it, changes it and fires fd:change.
+   ========================================================================== */
+.fd-states { display: contents; }
+.fd-states:not([data-state]) > [data-when]:not([data-when~="ready"]),
+.fd-states[data-state="ready"] > [data-when]:not([data-when~="ready"]),
+.fd-states[data-state="loading"] > [data-when]:not([data-when~="loading"]),
+.fd-states[data-state="empty"] > [data-when]:not([data-when~="empty"]),
+.fd-states[data-state="filtered"] > [data-when]:not([data-when~="filtered"]),
+.fd-states[data-state="error"] > [data-when]:not([data-when~="error"]),
+.fd-states[data-state="no-access"] > [data-when]:not([data-when~="no-access"]),
+.fd-states[data-state="not-found"] > [data-when]:not([data-when~="not-found"]),
+.fd-states[data-state="off"] > [data-when]:not([data-when~="off"]),
+.fd-states[data-state="expired"] > [data-when]:not([data-when~="expired"]) { display: none; }

@@ -1,11 +1,13 @@
 {
   "id": "toast",
   "job": "Confirm something that already happened, then get out of the way.",
-  "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise. It never asks a question. Toasts last 5 seconds, 8 for errors; loading lasts until settled. The stack is a polite live region.",
+  "purpose": "A short message at the bottom right (bottom centre on phones) that stacks, fans out on hover and fades. Created with toast({ title, description, tone, action }); toast.promise follows a promise; toast({ undo }) adds Undo; toast.hold counts down before anything is sent. It never asks a question. Toasts last 5 seconds, 8 for errors and Undo; loading lasts until settled. The stack is a polite live region.",
   "useWhen": [
     "An action finished and needs a quiet receipt: key copied, saved, deleted.",
     "Something finished elsewhere: a crawl completed, a webhook failed.",
-    "A long task needs a loading toast that turns into the result."
+    "A long task needs a loading toast that turns into the result.",
+    "It is done and the server can reverse it for a few seconds: toast({ undo }) gives Done · Undo.",
+    "The page moves on after a commit (a queue) and nothing may be sent for a few seconds: toast.hold."
   ],
   "avoidWhen": [
     {
@@ -23,6 +25,10 @@
     {
       "when": "A list of past events to read later.",
       "instead": "notification"
+    },
+    {
+      "when": "The person stays on the case while a commit waits.",
+      "instead": "hold"
     }
   ],
   "aka": [
@@ -58,6 +64,10 @@
     {
       "name": "loading",
       "how": "tone loading shows a spinner until toast.update or toast.promise settles"
+    },
+    {
+      "name": "held",
+      "how": "data-held, set by toast.hold: a countdown ring and Undo, no close button"
     }
   ],
   "variants": [
@@ -95,6 +105,11 @@
       "attribute": "data-tone",
       "value": "accent",
       "useWhen": "An accent receipt that is not a state."
+    },
+    {
+      "attribute": "data-held",
+      "value": "",
+      "useWhen": "Set by toast.hold: nothing has happened yet; it goes when the ring runs out."
     }
   ],
   "parts": [
@@ -139,12 +154,22 @@
     "callout",
     "banner",
     "dialog",
-    "notification"
+    "notification",
+    "hold",
+    "commit"
   ],
   "keyboard": [
     {
       "keys": "Tab",
       "does": "Reaches the action and close buttons of a toast."
+    },
+    {
+      "keys": "Ctrl+Z, Cmd+Z",
+      "does": "Outside a text field: presses Undo on the newest toast that has one."
+    },
+    {
+      "keys": "Escape",
+      "does": "Inside a held toast: presses its Undo."
     }
   ],
   "example": "docs/overlays.html#toasts",

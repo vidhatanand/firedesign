@@ -1,0 +1,110 @@
+{
+  "id": "states",
+  "job": "Show the one state a screen or a section is in: loading, ready, empty, error, no access and the rest.",
+  "purpose": "A pattern and a wrapper with no box of its own. Its direct children name the states they belong to in data-when; data-state on the wrapper shows them. Nine states: loading (skeletons), ready, empty (first use), filtered, error (with a request ID and Try again), no-access (who can grant it), not-found, off (who can turn it on) and expired. setState or a data-fd-set-state button switches it and fires fd:change.",
+  "useWhen": [
+    "Any screen or section that loads its own data.",
+    "A page reached from a link that can be gone, forbidden or out of date.",
+    "An area a team can switch off."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A table's own empty, loading and error rows inside its frame.",
+      "instead": "table"
+    },
+    {
+      "when": "A swap from skeleton to content with no other states.",
+      "instead": "skeleton"
+    },
+    {
+      "when": "A warning above content that loaded.",
+      "instead": "callout"
+    }
+  ],
+  "aka": [
+    "empty state",
+    "error state",
+    "zero state",
+    "no access",
+    "404",
+    "forbidden",
+    "feature off",
+    "expired link",
+    "page state"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "loading",
+      "how": "data-state=\"loading\"; the loading part holds skeletons and aria-busy=\"true\""
+    },
+    {
+      "name": "error",
+      "how": "data-state=\"error\"; an fd-empty data-tone=\"danger\" role=\"alert\" with an fd-empty-meta request ID"
+    },
+    {
+      "name": "no access",
+      "how": "data-state=\"no-access\"; an fd-empty-meta names who can grant it"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-state",
+      "value": "ready",
+      "useWhen": "The content shows; the default when data-state is absent."
+    },
+    {
+      "attribute": "data-state",
+      "value": "empty",
+      "useWhen": "First use: nothing exists yet; say what will appear and give the action."
+    },
+    {
+      "attribute": "data-state",
+      "value": "filtered",
+      "useWhen": "A filter or a search hides everything; offer Clear filters."
+    },
+    {
+      "attribute": "data-state",
+      "value": "not-found",
+      "useWhen": "The record in the address does not exist; link to its list."
+    },
+    {
+      "attribute": "data-state",
+      "value": "off",
+      "useWhen": "The area is switched off for this team; say who can turn it on."
+    },
+    {
+      "attribute": "data-state",
+      "value": "expired",
+      "useWhen": "A link ran out; say when, and how to get a new one."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-states",
+      "role": "The wrapper; it adds no box, so it can switch whole bands."
+    }
+  ],
+  "related": [
+    "empty",
+    "skeleton",
+    "loader",
+    "queue"
+  ],
+  "keyboard": [],
+  "example": "docs/content.html#page-states",
+  "provenance": [
+    "docs/content.html",
+    "docs/decisions.html",
+    "fire/components/content.css",
+    "fire/js/content.js"
+  ],
+  "since": "0.7.0"
+}

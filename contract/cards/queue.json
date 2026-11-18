@@ -1,0 +1,139 @@
+{
+  "id": "queue",
+  "job": "Work through what waits for a decision, one case at a time, beside the list.",
+  "purpose": "A pattern of a grouped list and the case it opens. Items show a kind tile, a two-line title, who asked and how long it waited. Picking one marks it current, shows its case and fires fd:select. Narrower than a list plus a readable case, it shows one at a time with a Queue button back. With fd-commit data-fd-hold-in=\"toast\", a committed case leaves at once while its toast counts down, and Undo returns it.",
+  "useWhen": [
+    "Several requests or agent proposals wait for one person: credits, hosts, access, changes.",
+    "A reviewer moves through items and should not lose their place."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The items are records to compare, sort or act on in bulk.",
+      "instead": "table"
+    },
+    {
+      "when": "One decision on a page of its own, reached from a link.",
+      "instead": "decision"
+    },
+    {
+      "when": "Sections of one settings area.",
+      "instead": "subnav"
+    }
+  ],
+  "aka": [
+    "inbox",
+    "review queue",
+    "needs you",
+    "approvals",
+    "master detail",
+    "list detail",
+    "triage"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "list",
+    "record"
+  ],
+  "states": [
+    {
+      "name": "current",
+      "how": "aria-current=\"true\" on one fd-queue-item"
+    },
+    {
+      "name": "list or case",
+      "how": "data-view=\"list|case\" on fd-queue, which a narrow queue reads"
+    },
+    {
+      "name": "empty",
+      "how": "wrap it in fd-states and show data-when=\"empty\" when removeItem returns null"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-urgent",
+      "value": "",
+      "useWhen": "On fd-queue-age: the wait is close to a deadline."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-queue",
+      "role": "The list and the case side by side."
+    },
+    {
+      "class": "fd-queue-list",
+      "role": "The nav that holds the groups."
+    },
+    {
+      "class": "fd-queue-group",
+      "role": "One kind of request, a group labelled by its heading."
+    },
+    {
+      "class": "fd-queue-group-label",
+      "role": "The kind, and its count in fd-queue-count."
+    },
+    {
+      "class": "fd-queue-count",
+      "role": "How many items the group holds; removeItem keeps it right."
+    },
+    {
+      "class": "fd-queue-item",
+      "role": "One request: a button or a link with data-value."
+    },
+    {
+      "class": "fd-queue-text",
+      "role": "The title and the meta line."
+    },
+    {
+      "class": "fd-queue-title",
+      "role": "What is asked, in two lines at most."
+    },
+    {
+      "class": "fd-queue-meta",
+      "role": "Who asked, and one fact."
+    },
+    {
+      "class": "fd-queue-age",
+      "role": "How long it has waited, or when it is due."
+    },
+    {
+      "class": "fd-queue-case",
+      "role": "The open case; holds [data-case] panels when the page keeps them all."
+    },
+    {
+      "class": "fd-queue-back",
+      "role": "Returns a narrow queue to the list."
+    }
+  ],
+  "related": [
+    "decision",
+    "commit",
+    "states",
+    "split",
+    "subnav"
+  ],
+  "keyboard": [
+    {
+      "keys": "Arrow Up, Arrow Down",
+      "does": "Moves between items."
+    },
+    {
+      "keys": "Home, End",
+      "does": "Moves to the first or the last item."
+    },
+    {
+      "keys": "Enter, Space",
+      "does": "Opens the item's case."
+    }
+  ],
+  "example": "docs/decisions.html#queue",
+  "provenance": [
+    "docs/decisions.html",
+    "fire/components/content.css",
+    "fire/js/content.js"
+  ],
+  "since": "0.7.0"
+}

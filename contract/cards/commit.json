@@ -1,0 +1,119 @@
+{
+  "id": "commit",
+  "job": "Take a reason and commit a decision with buttons named for their effect.",
+  "purpose": "A form with a line saying what each button does, a reason field with a word budget, the primary button named for its effect and a Decline that needs the reason too. It checks the reason, then fires fd:commit, or holds it first with data-fd-hold: inline, or in a toast with data-fd-hold-in=\"toast\" so a queue can move on. A visible fd-commit-lock disables the buttons and says who can decide.",
+  "useWhen": [
+    "A decision needs a reason that someone reads later: the audit log, the requester, the agent.",
+    "Approve and decline are both real answers and both need a why.",
+    "The viewer can read the case but not decide it, and must learn who can."
+  ],
+  "avoidWhen": [
+    {
+      "when": "A yes or no with nothing to record, such as dismissing a tip.",
+      "instead": "button"
+    },
+    {
+      "when": "The action destroys something with history and needs the name typed.",
+      "instead": "confirm"
+    },
+    {
+      "when": "A general form that edits a record.",
+      "instead": "form"
+    }
+  ],
+  "aka": [
+    "approve reject",
+    "reason field",
+    "audit reason",
+    "decision form",
+    "sign off"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "form"
+  ],
+  "states": [
+    {
+      "name": "invalid",
+      "how": "aria-invalid=\"true\" on the textarea and the fd-field-error shown, when the reason is missing or outside its budget"
+    },
+    {
+      "name": "near or over budget",
+      "how": "data-state=\"near\" or \"over\" on fd-commit-budget"
+    },
+    {
+      "name": "locked",
+      "how": "a visible fd-commit-lock; the commit buttons are disabled and described by it"
+    },
+    {
+      "name": "held",
+      "how": "data-state=\"held\" while a hold runs; the actions give way to fd-hold"
+    },
+    {
+      "name": "committed",
+      "how": "data-state=\"committed\" once sent; reopen(form) undoes it after a failed send"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-fd-hold",
+      "value": "*",
+      "useWhen": "Sending is hard to take back: hold the commit this many seconds with Undo."
+    },
+    {
+      "attribute": "data-fd-hold-in",
+      "value": "toast",
+      "useWhen": "The page moves on after a commit (a queue): hold it in a toast instead of in the form."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-commit",
+      "role": "The form (or a div inside another form)."
+    },
+    {
+      "class": "fd-commit-effect",
+      "role": "One line on what each button does."
+    },
+    {
+      "class": "fd-commit-budget",
+      "role": "The word count against data-min-words and data-max-words."
+    },
+    {
+      "class": "fd-commit-actions",
+      "role": "The commit buttons: type=\"submit\" with a value and data-verb."
+    },
+    {
+      "class": "fd-commit-lock",
+      "role": "Who can decide, when this viewer cannot."
+    }
+  ],
+  "related": [
+    "decision",
+    "draft",
+    "hold",
+    "textarea",
+    "button",
+    "toast"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "On a commit button: checks the reason, then commits or starts the hold."
+    },
+    {
+      "keys": "Escape",
+      "does": "While the hold runs: stops it and opens the form again."
+    }
+  ],
+  "example": "docs/decisions.html#commit",
+  "provenance": [
+    "docs/decisions.html",
+    "fire/components/content.css",
+    "fire/js/content.js"
+  ],
+  "since": "0.7.0"
+}

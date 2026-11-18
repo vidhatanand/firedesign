@@ -72,6 +72,17 @@
  *   toast.promise(promise, { loading, success, error }) → id   (each a string, options or fn(value))
  *   toast.update(id, options) · toast.dismiss(id?) · toast.success/error/warning/info(title, options)
  *   Declarative: <button data-fd-toast='{"title":"Key copied","tone":"success"}'>.
+ *   Done · Undo: toast({ title, description, undo: async () => …, undone }) adds an Undo action and lasts 8 seconds.
+ *     Undo runs the function (the button is busy meanwhile), fires fd:undo on the toast (detail { value: id }) and turns
+ *     it into "Undone" (or `undone`); a rejected promise turns it into a danger toast with the error's message.
+ *   Held: toast.hold({ title, description, seconds = 10, tone, target, detail, onCommit, onUndo }) → id. Nothing has
+ *     happened yet: a ring counts down beside Undo and the toast has data-held. fd:hold fires when it starts, fd:undo when
+ *     Undo is pressed, fd:commit when the time runs out (or the page is left, detail.cause "pagehide"), each on `target`
+ *     or else on the toast, with detail { ...detail, toast: id }. Cancel fd:commit to keep the toast as a loading toast
+ *     to update with toast.update(id, …); otherwise it goes. A held toast has no close button and cannot be swiped away.
+ *   Keys: Ctrl+Z or Cmd+Z, outside a text field, presses Undo on the newest toast that has one; Escape inside a held toast
+ *   presses its Undo. Labels: toast.undo "Undo" · toast.undone "Undone" · toast.undo-failed "Couldn't undo" ·
+ *   toast.stopped "Stopped" · toast.nothing-sent "Nothing was sent."
  *
  * Command palette
  *   <dialog class="fd-command" id="command" aria-label="Command palette">
@@ -1130,7 +1141,7 @@ function syncPause() {
   }
 }
 
-const toastDuration = (opts) => opts.duration ?? (opts.tone === 'loading' ? Infinity : opts.tone === 'danger' ? 8000 : 5000);
+const toastDuration = (opts) => opts.duration ?? (opts.hold ? 10000 : opts.tone === 'loading' ? Infinity : typeof opts.undo === 'function' ? 8000 : opts.tone === 'danger' ? 8000 : 5000);
 
 function renderToast(t) {
   const { el, opts } = t;
@@ -1141,7 +1152,9 @@ function renderToast(t) {
   const iconWrap = doc.createElement('span');
   iconWrap.className = 'fd-toast-icon';
   iconWrap.setAttribute('aria-hidden', 'true');
-  if (tone !== 'loading') iconWrap.innerHTML = icon(opts.icon || TONE_ICON[tone] || TONE_ICON.neutral);
+  el.toggleAttribute('data-held', !!opts.hold);
+  if (opts.hold) iconWrap.innerHTML = `<span class="fd-hold-ring" data-size="sm"><span class="fd-hold-count">${Math.ceil(toastDuration(opts) / 1000)}</span></span>`;
+  else if (tone !== 'loading') iconWrap.innerHTML = icon(opts.icon || TONE_ICON[tone] || TONE_ICON.neutral);
   const content = doc.createElement('div');
   content.className = 'fd-toast-content';
   const title = doc.createElement('p');
@@ -1155,7 +1168,19 @@ function renderToast(t) {
     content.append(desc);
   }
   const parts = [iconWrap, content];
-  if (opts.action?.label) {
+  if (opts.hold || typeof opts.undo === 'function') {
+    const undo = doc.createElement('button');
+    undo.type = 'button';
+    undo.className = 'fd-btn fd-toast-action';
+    undo.dataset.size = 'sm';
+    undo.dataset.fdToastUndo = '';
+    undo.innerHTML = icon('undo-2');
+    const text = doc.createElement('span');
+    text.textContent = fdLabel(el, 'toast.undo', 'Undo');
+    undo.append(text);
+    undo.addEventListener('click', () => (opts.hold ? undoHeld(t) : runUndo(t, undo)));
+    parts.push(undo);
+  } else if (opts.action?.label) {
     const action = doc.createElement('button');
     action.type = 'button';
     action.className = 'fd-btn fd-toast-action';
@@ -1167,7 +1192,7 @@ function renderToast(t) {
     });
     parts.push(action);
   }
-  if (opts.dismissible !== false) {
+  if (opts.dismissible !== false && !opts.hold) {
     const close = doc.createElement('button');
     close.type = 'button';
     close.className = 'fd-toast-close';
@@ -1216,11 +1241,12 @@ function startTimer(t) {
   const bar = t.el.querySelector('.fd-toast-progress');
   if (bar?.animate) {
     t.anim = bar.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: t.duration, easing: 'linear', fill: 'forwards' });
-    t.anim.onfinish = () => dismissToast(t.id);
+    t.anim.onfinish = () => (t.opts.hold ? commitHeld(t, 'time') : dismissToast(t.id));
     syncPause();
   } else {
-    t.timer = setTimeout(() => dismissToast(t.id), t.duration);
+    t.timer = setTimeout(() => (t.opts.hold ? commitHeld(t, 'time') : dismissToast(t.id)), t.duration);
   }
+  if (t.opts.hold) startHoldTick(t);
 }
 
 export function toast(input = {}) {
@@ -1240,6 +1266,8 @@ export function toast(input = {}) {
   el.getBoundingClientRect(); // commit the entering style, then rise into place
   el.dataset.state = 'open';
   startTimer(t);
+  if (opts.hold) emit(opts.target?.isConnected ? opts.target : el, 'fd:hold', { ...(opts.detail || {}), toast: id, seconds: Math.round(t.duration / 1000) });
+  watchUndoKeys();
   while (toasts.length > TOAST_MAX) dismissToast(toasts[toasts.length - 1].id);
   return id;
 }
@@ -1263,6 +1291,7 @@ function dismissToast(id) {
   const [t] = toasts.splice(index, 1);
   t.anim?.cancel();
   clearTimeout(t.timer);
+  clearInterval(t.tick);
   const hadFocus = t.el.contains(doc.activeElement);
   t.el.dataset.state = 'closing';
   layoutToasts();
@@ -1293,9 +1322,100 @@ toast.promise = (promise, messages = {}) => {
   return id;
 };
 
+/* ---------- Undo and held toasts ---------- */
+const findToast = (id) => toasts.find((x) => x.id === id);
+const holdTarget = (t) => (t.opts.target?.isConnected ? t.opts.target : t.el);
+
+/** Done · Undo: run the toast's undo function, then say it was undone (or that it could not be). */
+async function runUndo(t, button) {
+  if (t.undoing) return;
+  t.undoing = true;
+  button?.setAttribute('aria-busy', 'true');
+  t.anim?.pause();
+  clearTimeout(t.timer);
+  try {
+    await t.opts.undo();
+    emit(t.el, 'fd:undo', { value: t.id });
+    if (findToast(t.id)) updateToast(t.id, { title: t.opts.undone ?? fdLabel(t.el, 'toast.undone', 'Undone'), description: t.opts.undoneDescription, tone: 'neutral', icon: 'undo-2', undo: undefined, action: undefined, duration: undefined });
+  } catch (error) {
+    if (findToast(t.id)) updateToast(t.id, { title: fdLabel(t.el, 'toast.undo-failed', 'Couldn\u2019t undo'), description: error?.message || undefined, tone: 'danger', undo: undefined, action: undefined, duration: undefined });
+  } finally {
+    t.undoing = false;
+  }
+}
+
+/** A held toast: keep the ring and the count in step with the time left (the timer pauses with the stack). */
+function startHoldTick(t) {
+  clearInterval(t.tick);
+  const ring = t.el.querySelector('.fd-hold-ring');
+  const count = t.el.querySelector('.fd-hold-count');
+  const started = performance.now();
+  const update = () => {
+    const spent = t.anim ? Number(t.anim.currentTime) || 0 : performance.now() - started;
+    const left = Math.max(0, t.duration - spent);
+    const seconds = Math.ceil(left / 1000);
+    if (count && count.textContent !== String(seconds)) count.textContent = String(seconds);
+    ring?.style.setProperty('--_c-hold-p', String(reducedMotion() ? seconds / Math.ceil(t.duration / 1000) : left / t.duration));
+  };
+  update();
+  t.tick = setInterval(update, 100);
+}
+
+function endHeld(t) {
+  t.held = true;
+  t.anim?.cancel();
+  t.anim = null;
+  clearTimeout(t.timer);
+  clearInterval(t.tick);
+}
+
+function undoHeld(t) {
+  if (t.held || !findToast(t.id)) return;
+  endHeld(t);
+  emit(holdTarget(t), 'fd:undo', { ...(t.opts.detail || {}), toast: t.id });
+  t.opts.onUndo?.(t.id);
+  updateToast(t.id, { title: t.opts.undone ?? fdLabel(t.el, 'toast.stopped', 'Stopped'), description: fdLabel(t.el, 'toast.nothing-sent', 'Nothing was sent.'), tone: 'neutral', icon: 'undo-2', hold: false, target: undefined, duration: undefined });
+}
+
+function commitHeld(t, cause) {
+  if (t.held || !findToast(t.id)) return;
+  endHeld(t);
+  const go = emit(holdTarget(t), 'fd:commit', { ...(t.opts.detail || {}), toast: t.id, cause });
+  t.opts.onCommit?.(t.id, cause);
+  if (go) dismissToast(t.id);
+  else updateToast(t.id, { tone: 'loading', hold: false, description: undefined, target: undefined, duration: undefined });
+}
+
+toast.hold = (opts = {}) => {
+  const seconds = Math.max(1, Math.round(Number(opts.seconds) || 10));
+  return toast({ ...opts, hold: true, tone: opts.tone || 'neutral', duration: seconds * 1000 });
+};
+
+let undoKeys = false;
+function watchUndoKeys() {
+  if (undoKeys) return;
+  undoKeys = true;
+  doc.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      const t = toasts.find((x) => x.opts.hold && !x.held && x.el.contains(doc.activeElement));
+      if (t) { event.preventDefault(); event.stopPropagation(); undoHeld(t); }
+      return;
+    }
+    if (event.key.toLowerCase() !== 'z' || !(event.metaKey || event.ctrlKey) || event.shiftKey || event.altKey) return;
+    const a = doc.activeElement;
+    if (a && (a.isContentEditable || a.matches('input, textarea, select, [contenteditable]'))) return;
+    const t = toasts.find((x) => (x.opts.hold && !x.held) || (typeof x.opts.undo === 'function' && !x.undoing));
+    if (!t) return;
+    event.preventDefault();
+    if (t.opts.hold) undoHeld(t); else runUndo(t, t.el.querySelector('[data-fd-toast-undo]'));
+  }, true);
+  // Leaving the page sends what is held: the person decided and did not take it back.
+  window.addEventListener('pagehide', () => { for (const t of [...toasts]) if (t.opts.hold && !t.held) commitHeld(t, 'pagehide'); });
+}
+
 function swipeStart(event) {
   const el = event.target.closest('.fd-toast');
-  if (!el || event.button !== 0 || event.target.closest('button, a, input')) return;
+  if (!el || el.hasAttribute('data-held') || event.button !== 0 || event.target.closest('button, a, input')) return;
   swipe = { el, id: event.pointerId, x: event.clientX, y: event.clientY, t: performance.now(), dx: 0, active: false };
 }
 function swipeMove(event) {

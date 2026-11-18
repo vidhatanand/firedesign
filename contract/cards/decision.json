@@ -1,0 +1,137 @@
+{
+  "id": "decision",
+  "job": "Show what a decision changes, who it touches, the evidence and who signs, so a person can decide in seconds.",
+  "purpose": "A card that asks the question as its title, then four numbered parts in reading order: the change, who it touches, the evidence, and who signs or what happens if nobody decides. The parts sit two by two and stack into one column when the brief is narrow. Once decided, an outcome strip at the foot says who decided, when, why, and until when Undo works.",
+  "useWhen": [
+    "A person must approve or decline something that costs money, grants access or ships a change.",
+    "An agent proposes an action and a person signs it.",
+    "A decided case is opened again from a link or the history, and the reader needs what was decided, not only that it was."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The action is routine and the server can undo it.",
+      "instead": "toast"
+    },
+    {
+      "when": "The agent asks permission for one tool call in a run.",
+      "instead": "approval-bar"
+    },
+    {
+      "when": "The action deletes something with history and needs the name typed.",
+      "instead": "confirm"
+    },
+    {
+      "when": "The facts are a record's fields with no decision to make.",
+      "instead": "kv"
+    }
+  ],
+  "aka": [
+    "approval request",
+    "decision card",
+    "case page",
+    "review item",
+    "sign-off",
+    "change request",
+    "human in the loop"
+  ],
+  "surfaces": [
+    "app",
+    "phone",
+    "email"
+  ],
+  "data": [
+    "record"
+  ],
+  "states": [
+    {
+      "name": "waiting",
+      "how": "an fd-status pill data-tone=\"warning\" in fd-decision-head; the title ends in a question mark"
+    },
+    {
+      "name": "decided",
+      "how": "an fd-decision-outcome after fd-decision-parts, with its title, the reason and Undo"
+    },
+    {
+      "name": "expired",
+      "how": "fd-decision-outcome data-tone=\"warning\": nobody decided in time"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-decision",
+      "role": "The card; an article labelled by its title."
+    },
+    {
+      "class": "fd-decision-head",
+      "role": "Kind tile, heading and status pill."
+    },
+    {
+      "class": "fd-decision-heading",
+      "role": "The eyebrow, the title and the meta line."
+    },
+    {
+      "class": "fd-decision-title",
+      "role": "The question, with the object and the amount."
+    },
+    {
+      "class": "fd-decision-meta",
+      "role": "Who asked, when, and when it expires, separated by dots."
+    },
+    {
+      "class": "fd-decision-parts",
+      "role": "The dl that holds the parts and numbers them."
+    },
+    {
+      "class": "fd-decision-part",
+      "role": "One part: a label, a lead line and at most one detail line."
+    },
+    {
+      "class": "fd-decision-label",
+      "role": "The part's numbered mono label (dt)."
+    },
+    {
+      "class": "fd-decision-lead",
+      "role": "The part's one line; may hold an fd-delta."
+    },
+    {
+      "class": "fd-decision-detail",
+      "role": "A muted line under the lead."
+    },
+    {
+      "class": "fd-decision-facts",
+      "role": "Evidence as name and value rows."
+    },
+    {
+      "class": "fd-decision-quote",
+      "role": "Someone's own words, set in quotes."
+    },
+    {
+      "class": "fd-decision-outcome",
+      "role": "What was decided, by whom and when; tinted by data-tone."
+    },
+    {
+      "class": "fd-decision-outcome-title",
+      "role": "Who decided and when: \"Approved by you just now\"."
+    },
+    {
+      "class": "fd-decision-actions",
+      "role": "Undo and the date it stops working."
+    }
+  ],
+  "related": [
+    "commit",
+    "draft",
+    "delta",
+    "impact",
+    "hold",
+    "queue"
+  ],
+  "keyboard": [],
+  "example": "docs/decisions.html#brief",
+  "provenance": [
+    "docs/decisions.html",
+    "fire/components/content.css"
+  ],
+  "since": "0.7.0"
+}

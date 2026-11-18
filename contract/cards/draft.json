@@ -1,0 +1,103 @@
+{
+  "id": "draft",
+  "job": "Offer words an agent wrote for a person, which stay the agent's until the person uses them.",
+  "purpose": "A dashed block naming the agent and who it drafted for, the text in quotes, and Use and Discard. Use copies the text into the reason field and focuses it; the block folds to one line that stays as provenance, and the field records data-fd-drafted used, then edited once changed. Discard folds it away. The agent never commits.",
+  "useWhen": [
+    "An agent drafted the reason or the answer for a decision a person signs.",
+    "A suggested reply or note must not be mistaken for the person's own words."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The agent's text is its answer in a conversation.",
+      "instead": "message"
+    },
+    {
+      "when": "The agent asks to run a tool.",
+      "instead": "approval-bar"
+    },
+    {
+      "when": "Short completions offered while someone types.",
+      "instead": "suggestions"
+    }
+  ],
+  "aka": [
+    "AI draft",
+    "suggested reason",
+    "agent suggestion",
+    "proposed text",
+    "copilot draft"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "text"
+  ],
+  "states": [
+    {
+      "name": "waiting",
+      "how": "no data-state: the text in quotes with Use and Discard"
+    },
+    {
+      "name": "used",
+      "how": "data-state=\"used\", set by data-fd-draft=\"use\"; fd-draft-used shows"
+    },
+    {
+      "name": "edited",
+      "how": "data-state=\"edited\" once the person changes the words in the field"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-fd-draft-for",
+      "value": "*",
+      "useWhen": "The field to fill is not the textarea of the enclosing fd-commit: give its id."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-draft",
+      "role": "The block, an aside labelled as a draft."
+    },
+    {
+      "class": "fd-draft-by",
+      "role": "The agent, who it drafted for, and an icon."
+    },
+    {
+      "class": "fd-draft-when",
+      "role": "When it was drafted."
+    },
+    {
+      "class": "fd-draft-text",
+      "role": "The drafted words, in quotes."
+    },
+    {
+      "class": "fd-draft-actions",
+      "role": "Buttons with data-fd-draft=\"use\" and \"discard\"."
+    },
+    {
+      "class": "fd-draft-used",
+      "role": "The line shown once the draft is used."
+    }
+  ],
+  "related": [
+    "commit",
+    "decision",
+    "message",
+    "textarea"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "On Use: copies the draft into the field and moves focus there."
+    }
+  ],
+  "example": "docs/decisions.html#draft",
+  "provenance": [
+    "docs/decisions.html",
+    "fire/components/content.css",
+    "fire/js/content.js"
+  ],
+  "since": "0.7.0"
+}

@@ -920,6 +920,9 @@
      </li>
    </ol>
    data-tone  neutral | success | danger | warning | info | loading
+   data-held  a held toast (toast.hold): nothing has happened yet. Its icon is the countdown ring of fd-hold
+              (fd-hold-ring data-size="sm", content.css) beside Undo, and it has no close button.
+   Done · Undo: toast({ undo }) puts Undo in fd-toast-action; it lasts 8 seconds.
    ========================================================================== */
 .fd-toaster {
   --_o-w: var(--fd-toast-w);
@@ -1001,6 +1004,10 @@
   border: var(--fd-toast-spinner-w) solid var(--fd-a16); border-top-color: var(--fd-text-2);
   animation: fd-spin var(--fd-loop-spin) linear infinite;
 }
+/* Held: the ring takes the icon's place and counts down in the toast's tone. */
+.fd-toast[data-held] { align-items: center; }
+.fd-toast[data-held] .fd-toast-icon { width: auto; height: auto; --_c-c: var(--fd-text); }
+.fd-toast[data-held]:is([data-tone="danger"], [data-tone="warning"], [data-tone="accent"]) .fd-toast-icon { --_c-c: var(--_o-tone); }
 .fd-toast-content { flex: 1 1 auto; min-width: 0; display: grid; gap: var(--fd-space-0-5); }
 .fd-toast-title { font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .fd-toast-desc { font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); text-wrap: pretty; overflow-wrap: anywhere; }

@@ -189,7 +189,7 @@
 :is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):hover:not(:focus, :disabled, [readonly], span, div, output) { --_f-line: var(--fd-control-line-hover); --_f-bg: var(--fd-field-hover); }
 :is(.fd-input, .fd-textarea)[readonly] { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
 :is(.fd-tag-input, .fd-pairs) > textarea:only-child[readonly] { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
-:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):focus { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
+:is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):focus { --_f-line: var(--fd-focus); --_f-lw: var(--fd-form-focus-line); }
 :is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select)[aria-invalid="true"] { --_f-line: var(--fd-danger-solid); }
 :is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select)[aria-invalid="true"]:focus { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
 :is(.fd-input, .fd-textarea, :is(.fd-tag-input, .fd-pairs) > textarea:only-child, .fd-otp > input, .fd-select[data-variant="outline"] > select):disabled {
@@ -220,7 +220,7 @@
 }
 :is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):hover:not(:has(> :is(input, textarea):is(:focus, :disabled, [readonly]))) { --_f-line: var(--fd-control-line-hover); --_f-bg: var(--fd-field-hover); }
 :is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea)[readonly]) { --_f-bg: var(--fd-fill-subtle); --_f-line: var(--fd-line-faint); }
-:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea):focus) { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
+:is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea):focus) { --_f-line: var(--fd-focus); --_f-lw: var(--fd-form-focus-line); }
 :is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea, select)[aria-invalid="true"]),
 :is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"]))[aria-invalid="true"] { --_f-line: var(--fd-danger-solid); }
 :is(.fd-input-group, .fd-search, .fd-number, .fd-tag-input, .fd-secret:where([data-mode="entry"])):has(> :is(input, textarea)[aria-invalid="true"]:focus) { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
@@ -779,7 +779,7 @@
   box-shadow: inset 0 0 0 var(--_f-lw) var(--_f-line), 0 0 0 var(--fd-form-halo) var(--_f-halo);
   transition: box-shadow var(--fd-dur-2) var(--fd-ease-out), background-color var(--fd-dur-2) var(--fd-ease-out);
 }
-.fd-codefield:focus-within { --_f-line: var(--fd-accent); --_f-lw: var(--fd-form-focus-line); }
+.fd-codefield:focus-within { --_f-line: var(--fd-focus); --_f-lw: var(--fd-form-focus-line); }
 .fd-codefield:has(> .fd-codefield-input[aria-invalid="true"]) { --_f-line: var(--fd-danger-solid); }
 .fd-codefield:has(> .fd-codefield-input[aria-invalid="true"]):focus-within { --_f-halo: color-mix(in srgb, var(--fd-danger-solid) 18%, transparent); }
 .fd-codefield:has(> .fd-codefield-input:disabled) { --_f-line: var(--fd-line-faint); background: var(--fd-fill-disabled); color: var(--fd-text-4); }
@@ -914,6 +914,8 @@
   color: var(--fd-text);
 }
 .fd-secret-value[data-tone="accent"] { color: var(--fd-accent-text); }
+/* Accent text reads at 4.5:1 on the accent wash, not on every neutral fill: an accent value sits on the wash. */
+.fd-secret:has(> .fd-secret-value[data-tone="accent"]) { background: var(--fd-accent-8); }
 .fd-secret[data-state="revealed"] .fd-secret-value { user-select: all; }
 /* data-mask="end": a start that shortens with an ellipsis and an end that never does (forms.js draws both). */
 :is(.fd-secret, .fd-copy-field)[data-mask="end"] :is(.fd-secret-value, .fd-copy-field-value) { display: flex; }

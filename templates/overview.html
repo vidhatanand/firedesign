@@ -343,10 +343,11 @@
   const regions = ['ov-chart', 'ov-stats', 'ov-activity'].map((id) => document.getElementById(id));
   setTimeout(() => regions.forEach((el) => texture.setLoading(el, false)), 600);
 
-  // What's new: once per browser, 800ms after load. The band 6 button reopens it any time.
+  // What's new: once per browser, 800ms after load. The band 6 button reopens it any time. Not in a look preview
+  // (?look=, data-fd-look on <html>): the look gallery frames this page and wants the page, not the dialog.
   const KEY = 'ember-whats-new-seen';
   try {
-    if (!localStorage.getItem(KEY)) {
+    if (!localStorage.getItem(KEY) && !document.documentElement.hasAttribute('data-fd-look')) {
       setTimeout(() => {
         if (document.querySelector('dialog[open]')) return;
         overlays.openDialog('dlg-whats-new');

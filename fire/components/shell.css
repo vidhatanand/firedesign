@@ -473,13 +473,15 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
 }
 .fd-account:hover, .fd-account[aria-expanded="true"] { background: var(--fd-accent-8); color: var(--fd-text); }
-.fd-account:hover > .fd-account-avatar { background: var(--fd-fill-hover); }
+.fd-account:hover > .fd-account-avatar { background: var(--fd-surface); }
 .fd-account:active { scale: var(--fd-press-scale); }
 .fd-account:focus-visible { box-shadow: var(--fd-ring); border-radius: var(--fd-radius-xl); }
 .fd-account-avatar {
   flex: none; display: grid; place-items: center;
   width: var(--fd-account-avatar); height: var(--fd-account-avatar); border-radius: var(--fd-radius-md);
-  background: var(--fd-fill); color: var(--fd-accent-text);
+  /* The accent wash under the accent text: the pair the palette rules hold at 4.5:1 (accent text on a neutral fill is
+     not, on every palette and surface). */
+  background: var(--fd-accent-8); color: var(--fd-accent-text);
   box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint);
   font-size: var(--fd-text-3xs); line-height: 1; font-weight: var(--fd-weight-regular); text-transform: uppercase;
   transition: background-color var(--fd-dur-2) var(--fd-ease-out);
@@ -901,6 +903,8 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   .fd-app [data-only="desktop"] { display: none !important; }
   .fd-topbar { padding-inline-end: var(--fd-space-3); }
   .fd-topbar .fd-team-switch { flex: 0 1 auto; }
+  /* The actions keep their size; the team switch is the part that gives way (its name ellipsises). */
+  .fd-topbar .fd-topbar-actions { flex: none; }
 }
 @container fd-app (min-width: 640px) and (max-width: 899.98px) {
   /* Tablets: the menu is a right-hand sheet over a scrim. */
@@ -913,6 +917,9 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
 }
 @container fd-app (max-width: 639.98px) {
   .fd-topbar .fd-team-switch-meta { display: none; }
+  /* While all is well the status link gives way on a phone (the help menu keeps "Status"), so the menu button stays on
+     screen; a degraded service, an outage or maintenance still shows. */
+  .fd-topbar .fd-service-status[data-status="operational"] { display: none; }
 }
 /* Phones: the frame drops its rails; bands keep their full-bleed hairlines. */
 @container fd-page (max-width: 639.98px) {
@@ -1021,8 +1028,6 @@ body[data-shell=""] { visibility: hidden; animation: fd-shell-reveal 0s var(--fd
   .fd-running-label { display: none; }
   .fd-service-status:not([data-status="operational"]) > .fd-service-status-label { display: none; }
   .fd-service-status:not([data-status="operational"]) { padding-inline: 0; }
-  /* A phone's top bar has room for what needs attention, not for what is normal: a service that is fine is not shown. */
-  .fd-topbar .fd-service-status[data-status="operational"] { display: none; }
 }
 /* Narrow phones: the team switch keeps its tile and drops its name, so the indicators and the menu button fit. */
 @container fd-app (max-width: 419.98px) {

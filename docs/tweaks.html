@@ -33,6 +33,7 @@
     </div>
     <ul class="doc-notes">
       <li>Any element with <code class="fd-code">data-fd-tweaks-open</code> toggles the panel and carries its <code class="fd-code">aria-expanded</code> state. The docs top bar has one.</li>
+      <li>The Looks row at the top applies one of the eight <a class="fd-link" href="looks.html">named looks</a> whole and names the active one; any change after it reads Custom. <code class="fd-code">applyLook(name)</code> does the same from code.</li>
       <li>No trigger of your own? Put <code class="fd-code">data-fd-tweaks</code> on <code class="fd-code">&lt;html&gt;</code> and a round launcher appears bottom-left.</li>
       <li>Choices are saved in <code class="fd-code">localStorage["fd-tweaks"]</code> (only what differs from the default) and applied as soon as the module runs. Load <code class="fd-code">fire/boot.js</code> as a plain (non-module) script in <code class="fd-code">&lt;head&gt;</code>, before the stylesheet, and the saved look is on <code class="fd-code">&lt;html&gt;</code> before the first paint, so a reload never flashes the default. Reset leaves no attribute or inline style behind.</li>
       <li>The page's own look is the default. A page that declares <code class="fd-code">data-palette</code>, <code class="fd-code">data-type</code> or a structural dial (<code class="fd-code">data-surfaces</code>, <code class="fd-code">data-elevation</code>, <code class="fd-code">data-controls</code>, <code class="fd-code">data-headings</code>) on <code class="fd-code">&lt;html&gt;</code> keeps it on load and after Reset, and only a choice away from it is saved; a page that declares nothing defaults to Ember and Geist. Before <code class="fd-code">fire/boot.js</code> restores a saved palette or type set it keeps the page's values in <code class="fd-code">data-fd-default-palette</code> and <code class="fd-code">data-fd-default-type</code>, so the panel still knows them; never write those by hand.</li>
@@ -823,7 +824,7 @@ node scripts/fonts.mjs add "Plus Jakarta Sans" --out public/fonts
   <section class="doc-section" id="custom">
     <div class="doc-section-head">
       <h2 class="fd-h3">Make your own palette</h2>
-      <p>A palette sets nineteen tokens, each as a <code class="fd-code">light-dark()</code> pair. Start from Copy CSS in the panel (pick the nearest palette, tone it, copy) and rename the block.</p>
+      <p>A palette sets twenty tokens (the last, <code class="fd-code">--fd-focus</code>, is the focus ring), each as a <code class="fd-code">light-dark()</code> pair. Start from Copy CSS in the panel (pick the nearest palette, tone it, copy) and rename the block.</p>
     </div>
     <figure class="fd-codeblock">
       <button class="fd-codeblock-copy" aria-label="Copy code"><i data-icon="copy"></i></button>
@@ -887,7 +888,7 @@ node scripts/fonts.mjs add "Plus Jakarta Sans" --out public/fonts
         <tbody>
           <tr><td>contract</td><td>"fire/1"</td><td>The record format.</td></tr>
           <tr><td>palette</td><td>"ember"</td><td>A palette name (<code class="fd-code">data-palette</code>), or a spec Fire builds a palette from: an accent, brand colours, or the full spec form of <code class="fd-code">fire/js/palettes.js</code>.</td></tr>
-          <tr><td>tone</td><td>0 · 100 · 0 · 0</td><td><code class="fd-code">hue</code>, <code class="fd-code">vivid</code>, <code class="fd-code">light</code> and <code class="fd-code">warmth</code>, whole numbers in the ranges of <a class="fd-link" href="#tone">Tone</a>. A toned palette is written out as its nineteen colour tokens.</td></tr>
+          <tr><td>tone</td><td>0 · 100 · 0 · 0</td><td><code class="fd-code">hue</code>, <code class="fd-code">vivid</code>, <code class="fd-code">light</code> and <code class="fd-code">warmth</code>, whole numbers in the ranges of <a class="fd-link" href="#tone">Tone</a>. A toned palette is written out as its twenty colour tokens.</td></tr>
           <tr><td>type</td><td>"geist"</td><td>A type set name (<code class="fd-code">data-type</code>), or a type set spec: <code class="fd-code">display</code>, <code class="fd-code">sans</code> and <code class="fd-code">mono</code> families from the catalogue, <code class="fd-code">displayWeight</code>, <code class="fd-code">displayTracking</code>, <code class="fd-code">headingCase</code> and <code class="fd-code">figures</code>. See Type sets.</td></tr>
           <tr><td>dials</td><td></td><td><code class="fd-code">corners</code> 0–2 (<code class="fd-code">--fd-radius-scale</code>), <code class="fd-code">density</code> (<code class="fd-code">data-density</code>), <code class="fd-code">lines</code> 1 · 1.5 · 2 (<code class="fd-code">--fd-hairline</code>), <code class="fd-code">textSize</code> (<code class="fd-code">data-text-size</code>), <code class="fd-code">contrast</code> (<code class="fd-code">data-contrast</code>), <code class="fd-code">motion</code> off · default · slow (<code class="fd-code">--fd-motion</code>), <code class="fd-code">texture</code> 0–1.5 (<code class="fd-code">--fd-texture</code>).</td></tr>
         </tbody>

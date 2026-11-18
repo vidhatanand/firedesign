@@ -47,7 +47,7 @@
  *   The structural dials are attributes on <html> (tokens.css sets the semantic tokens for each value):
  *   surfaces  objects · flat · outlined → data-surfaces       elevation  soft · none · lifted → data-elevation
  *   controls  soft · outlined · filled → data-controls        headings   sentence · upper · mono → data-headings
- *   A named palette is data-palette; a toned or generated palette is written out as its nineteen colour tokens.
+ *   A named palette is data-palette; a toned or generated palette is written out as its twenty colour tokens.
  *   A type set is data-type; a spec's families are written to --fd-font-display, --fd-font-sans and --fd-font-mono (each
  *   with its fallback face first), displayWeight to --fd-weight-display, displayTracking to --fd-ls-display and
  *   --fd-ls-h1 to -h3, headingCase "upper" to data-heading-case="upper" and figures "tabular" to data-figures="tabular".

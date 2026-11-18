@@ -12,6 +12,9 @@
  *   --fd-accent-contrast                  4.5:1 on --fd-accent and on --fd-accent-hover
  *   --fd-accent-text                      4.5:1 on --fd-bg, --fd-surface and --fd-accent-8 over each
  *   --fd-ink                              12:1 on --fd-bg
+ *   --fd-focus                            3:1 on --fd-bg, --fd-bg-sunken, --fd-surface, --fd-surface-raised, --fd-fill on
+ *                                         each and the accent wash on the page and surface (the ring is read against
+ *                                         whatever the control sits on; WCAG 1.4.11)
  *   structure (presets and generated palettes, not toned maps): surfaces lighter than the page, lines stepping away
  *   from the page in order, the hover moving .02–.05 L away from its label.
  *
@@ -19,7 +22,7 @@
  * build-palettes.mjs reads the same ladder from tokens.css and fails when this copy differs from it.
  *
  * API
- *   TEXT_MIN, FAINT_MIN, BASES, BASE_SHORT, TEXT_STEPS, TEXT_LADDER
+ *   TEXT_MIN, FAINT_MIN, FOCUS_MIN, BASES, BASE_SHORT, TEXT_STEPS, TEXT_LADDER
  *   over(fg, alpha, bg)                               fg at alpha over an opaque bg, composited in sRGB
  *   measureText(tokens, m, level, ladder?)            each text step's worst ratio over every ground, in mode m
  *   checkText(tokens, name, context, fail, opts?)     the text rules; calls fail(message) per violation
@@ -27,10 +30,11 @@
  *   paletteFailures(tokens, { name, modes })          every violation of a palette's token map, as messages
  *   opts: { ladder, modes }   modes defaults to [0, 1] (light, dark)
  */
-import { contrast, toOklch, parse, format, washOver } from './palettes.js';
+import { contrast, toOklch, parse, format, washOver, focusGrounds } from './palettes.js';
 
 export const TEXT_MIN = 4.5;    // text that carries information
 export const FAINT_MIN = 3;     // --fd-text-4: placeholders, disabled text, decoration
+export const FOCUS_MIN = 3;     // --fd-focus on every ground
 export const BASES = ['--fd-bg', '--fd-bg-sunken', '--fd-surface', '--fd-surface-raised'];
 export const BASE_SHORT = { '--fd-bg': 'bg', '--fd-bg-sunken': 'sunken', '--fd-surface': 'surface', '--fd-surface-raised': 'raised' };
 export const TEXT_STEPS = ['--fd-text', '--fd-text-2', '--fd-text-3', '--fd-text-4'];
@@ -126,6 +130,7 @@ export function measure(tokens, name, context, fail, { modes = [0, 1] } = {}) {
     const label = contrast(v('--fd-accent-contrast'), v('--fd-accent'));
     const labelHover = contrast(v('--fd-accent-contrast'), v('--fd-accent-hover'));
     const ink = contrast(v('--fd-ink'), v('--fd-bg'));
+    const focus = Math.min(...focusGrounds(tokens, m).map((g) => contrast(v('--fd-focus'), g)));
     const hoverDL = L(v('--fd-accent-hover')) - L(v('--fd-accent'));
     const where = `${name} ${mode}${context ? ` (${context})` : ''}`;
     if (textBg < TEXT_MIN) fail(`${where}: accent-text on bg ${textBg.toFixed(2)} < ${TEXT_MIN}`);
@@ -134,6 +139,7 @@ export function measure(tokens, name, context, fail, { modes = [0, 1] } = {}) {
     if (label < TEXT_MIN) fail(`${where}: label on accent ${label.toFixed(2)} < ${TEXT_MIN}`);
     if (labelHover < TEXT_MIN) fail(`${where}: label on accent-hover ${labelHover.toFixed(2)} < ${TEXT_MIN}`);
     if (ink < 12) fail(`${where}: ink on bg ${ink.toFixed(2)} < 12`);
+    if (focus < FOCUS_MIN) fail(`${where}: focus ring ${focus.toFixed(2)} on the page, well, a surface or a fill < ${FOCUS_MIN}`);
     if (!context) {
       // Structure: surfaces lighter than the page, lines stepping darker (light) / lighter (dark), hover direction.
       const bgL = L(v('--fd-bg'));
@@ -146,7 +152,7 @@ export function measure(tokens, name, context, fail, { modes = [0, 1] } = {}) {
       if (!want) fail(`${where}: accent-hover moves toward its label (${hoverDL.toFixed(3)})`);
       if (Math.abs(hoverDL) > 0.05 || Math.abs(hoverDL) < 0.02) fail(`${where}: accent-hover moves ${hoverDL.toFixed(3)} L (want about .03–.04)`);
     }
-    rows.push({ mode, textBg, textSurface, textWash, label, labelHover, ink, hoverDL });
+    rows.push({ mode, textBg, textSurface, textWash, label, labelHover, ink, focus, hoverDL });
   }
   return rows;
 }

@@ -5,14 +5,17 @@ catalogue and run the build. `VOCABULARY.md` beside this file explains the parts
 
 For each component: its root class, its part classes, the attributes it reads with their values (on the root, then per
 part), the attributes Fire sets as state, its events, and its custom element where it has one. "(or bare)" means the
-attribute also works with no value.
+attribute also works with no value. In parentheses after a class, its structure, which `fire lint` checks: "required"
+(the component needs it), "on `<label>`" (the tags it works on), "child of" (its parent must carry that class),
+"inside" (an ancestor must), "holds a `<select>`" (a direct child), "needs" or "never" an attribute. "Write" is the
+one-line markup of the required structure.
 
 ## Content
 
 ### Accordion (`accordion`, component)
 
 - Root: `fd-accordion`, shown at `docs/content.html#accordion`
-- Parts: `fd-accordion-inner`, `fd-accordion-item`, `fd-accordion-panel`, `fd-accordion-trigger`, `fd-disclosure`, `fd-disclosure-inner`, `fd-disclosure-panel`, `fd-disclosure-trigger`
+- Parts: `fd-accordion-inner`, `fd-accordion-item` (child of `fd-accordion`), `fd-accordion-panel`, `fd-accordion-trigger` (child of `fd-accordion-item`), `fd-disclosure`, `fd-disclosure-inner`, `fd-disclosure-panel`, `fd-disclosure-trigger` (child of `fd-disclosure`)
 - On the root: `data-single`, `data-variant="card"`
 - On `fd-accordion-trigger`: `data-icon-lead`
 - State, set by Fire: `data-state="closed|closing|open"`
@@ -45,13 +48,14 @@ attribute also works with no value.
 ### Callout (`callout`, component)
 
 - Root: `fd-callout`, shown at `docs/content.html#callout`
-- Parts: `fd-callout-actions`, `fd-callout-body`, `fd-callout-content`, `fd-callout-dismiss`, `fd-callout-icon`, `fd-callout-title`
+- Parts: `fd-callout-actions`, `fd-callout-body`, `fd-callout-content`, `fd-callout-dismiss`, `fd-callout-icon` (required, or `fd-icon`, child of `fd-callout`), `fd-callout-title`
+- Write: `<div class="fd-callout" data-tone="info" role="note"><i class="fd-callout-icon" data-icon="info"></i><div class="fd-callout-content"><p class="fd-callout-body">…</p></div></div>`
 - On the root: `data-size="sm"`, `data-tone="accent|danger|info|neutral|success|violet|warning"`
 
 ### Card (`card`, component)
 
 - Root: `fd-card`, shown at `docs/content.html#card`
-- Parts: `fd-card-action`, `fd-card-arrow`, `fd-card-body`, `fd-card-cell`, `fd-card-cell-label`, `fd-card-cell-sub`, `fd-card-cell-value`, `fd-card-cells`, `fd-card-count`, `fd-card-desc`, `fd-card-foot`, `fd-card-grid`, `fd-card-head`, `fd-card-heading`, `fd-card-meta`, `fd-card-name`, `fd-card-note`, `fd-card-price`, `fd-card-text`
+- Parts: `fd-card-action`, `fd-card-arrow` (child of `fd-card`), `fd-card-body`, `fd-card-cell`, `fd-card-cell-label`, `fd-card-cell-sub`, `fd-card-cell-value`, `fd-card-cells`, `fd-card-count`, `fd-card-desc`, `fd-card-foot`, `fd-card-grid`, `fd-card-head` (child of `fd-card`), `fd-card-heading`, `fd-card-meta`, `fd-card-name`, `fd-card-note`, `fd-card-price`, `fd-card-text`
 - On the root: `data-flush`, `data-interactive`, `data-size="lg|sm"`, `data-variant="accent|quiet|sunken"`
 
 ### Decision brief (`decision`, component)
@@ -63,7 +67,7 @@ attribute also works with no value.
 ### Decision queue (`queue`, pattern)
 
 - Root: `fd-queue`, shown at `docs/decisions.html#queue`
-- Parts: `fd-queue-age`, `fd-queue-back`, `fd-queue-case`, `fd-queue-count`, `fd-queue-group`, `fd-queue-group-label`, `fd-queue-item`, `fd-queue-list`, `fd-queue-meta`, `fd-queue-text`, `fd-queue-title`
+- Parts: `fd-queue-age`, `fd-queue-back`, `fd-queue-case` (child of `fd-queue`), `fd-queue-count`, `fd-queue-group`, `fd-queue-group-label`, `fd-queue-item`, `fd-queue-list` (child of `fd-queue`), `fd-queue-meta`, `fd-queue-text`, `fd-queue-title`
 - On `fd-queue-age`: `data-urgent`
 - On `fd-queue-case`: `data-case`
 - State, set by Fire: `data-view="case|list"`
@@ -140,7 +144,7 @@ attribute also works with no value.
 ### Reason and commit (`commit`, component)
 
 - Root: `fd-commit`, shown at `docs/decisions.html#commit`
-- Parts: `fd-commit-actions`, `fd-commit-budget`, `fd-commit-effect`, `fd-commit-lock`
+- Parts: `fd-commit-actions` (child of `fd-commit`), `fd-commit-budget`, `fd-commit-effect` (child of `fd-commit`), `fd-commit-lock`
 - On the root: `data-fd-hold="*"`, `data-fd-hold-in="toast"`, `data-max-words="*"`, `data-min-words="*"`
 - On `fd-commit-lock`: `data-icon="*"`
 - State, set by Fire: `data-state="committed|held|near|over"`
@@ -154,7 +158,7 @@ attribute also works with no value.
 ### Setting (`setting`, component)
 
 - Root: `fd-setting`, shown at `docs/content.html#setting`
-- Parts: `fd-setting-control`, `fd-setting-desc`, `fd-setting-text`, `fd-setting-title`
+- Parts: `fd-setting-control` (child of `fd-setting`), `fd-setting-desc`, `fd-setting-text`, `fd-setting-title`
 - On the root: `data-align="end|start"`, `data-control="wide"`, `data-size="sm"`, `data-tone="danger"`
 
 ### Status (`status`, component)
@@ -178,7 +182,7 @@ attribute also works with no value.
 ### Timeline (`timeline`, component)
 
 - Root: `fd-timeline`, shown at `docs/content.html#timeline`
-- Parts: `fd-timeline-body`, `fd-timeline-card`, `fd-timeline-head`, `fd-timeline-item`, `fd-timeline-main`, `fd-timeline-more`, `fd-timeline-node`, `fd-timeline-time`, `fd-timeline-title`
+- Parts: `fd-timeline-body`, `fd-timeline-card`, `fd-timeline-head`, `fd-timeline-item`, `fd-timeline-main`, `fd-timeline-more`, `fd-timeline-node` (child of `fd-timeline-item`), `fd-timeline-time`, `fd-timeline-title`
 - On `fd-timeline-item`: `data-kind="group" (or bare)`, `data-live`, `data-tone="accent|danger|info|neutral|success|violet|warning"`
 
 ### Verified (`verified`, component)
@@ -228,7 +232,7 @@ attribute also works with no value.
 ### Reasoning (`reasoning`, component)
 
 - Root: `fd-reasoning`, shown at `docs/agent.html#reasoning`
-- Parts: `fd-reasoning-body`, `fd-reasoning-label`, `fd-reasoning-panel`, `fd-reasoning-text`, `fd-reasoning-toggle`
+- Parts: `fd-reasoning-body`, `fd-reasoning-label` (inside `fd-reasoning`), `fd-reasoning-panel`, `fd-reasoning-text`, `fd-reasoning-toggle`
 - On the root: `data-state="done|thinking"`
 
 ### Result (`result`, component)
@@ -247,7 +251,7 @@ attribute also works with no value.
 ### Session List (`session-list`, component)
 
 - Root: `fd-session-list`, shown at `docs/agent.html#sessions`
-- Parts: `fd-session-list-actions`, `fd-session-list-body`, `fd-session-list-empty`, `fd-session-list-head`, `fd-session-list-heading`, `fd-session-list-item`, `fd-session-list-label`, `fd-session-list-link`, `fd-session-list-live`, `fd-session-list-loading`, `fd-session-list-more`, `fd-session-list-new`, `fd-session-list-spinner`, `fd-session-list-time`
+- Parts: `fd-session-list-actions`, `fd-session-list-body`, `fd-session-list-empty`, `fd-session-list-head`, `fd-session-list-heading`, `fd-session-list-item`, `fd-session-list-label`, `fd-session-list-link`, `fd-session-list-live`, `fd-session-list-loading`, `fd-session-list-more` (child of `fd-session-list-item`), `fd-session-list-new`, `fd-session-list-spinner`, `fd-session-list-time` (child of `fd-session-list-item`)
 - On `fd-session-list-item`: `data-active`
 
 ### Sources (`sources`, component)
@@ -284,7 +288,8 @@ attribute also works with no value.
 ### App (`app`, component)
 
 - Root: `fd-app`, shown at `docs/shell.html#app`
-- Parts: `fd-app-fab`, `fd-main`
+- Parts: `fd-app-fab`, `fd-main` (child of `fd-app`)
+- Write: `<div class="fd-app"><aside class="fd-sidebar">…</aside><div class="fd-main"><header class="fd-topbar">…</header><main class="fd-page">…</main></div></div>`
 - On the root: `data-contained`, `data-fd-instant`, `data-only="desktop|mobile"`, `data-sidebar="collapsed|expanded"`
 - Events: `fd:change`
 
@@ -300,7 +305,7 @@ attribute also works with no value.
 
 ### Mobile Nav (`mobile-nav`, component)
 
-- Root: `fd-mobile-nav`, shown at `docs/shell.html#mobile`
+- Root: `fd-mobile-nav` (child of `fd-app`), shown at `docs/shell.html#mobile`
 - Parts: `fd-mobile-nav-account`, `fd-mobile-nav-actions`, `fd-mobile-nav-item`, `fd-mobile-nav-label`, `fd-mobile-nav-scrim`, `fd-mobile-nav-section`
 - On the root: `data-only="desktop|mobile"`
 - On `fd-mobile-nav-item`: `data-level="2"`
@@ -318,13 +323,13 @@ attribute also works with no value.
 ### Page Head (`page-head`, component)
 
 - Root: `fd-page-head`, shown at `docs/shell.html#compact-head`
-- Parts: `fd-page-head-actions`, `fd-page-head-desc`, `fd-page-head-text`, `fd-page-head-title`
+- Parts: `fd-page-head-actions` (child of `fd-page-head`), `fd-page-head-desc`, `fd-page-head-text` (child of `fd-page-head`), `fd-page-head-title`
 - On the root: `data-size="sm"`
 
 ### Page Hero (`page-hero`, component)
 
 - Root: `fd-page-hero`, shown at `docs/shell.html#hero`
-- Parts: `fd-page-hero-actions`, `fd-page-hero-art`, `fd-page-hero-desc`, `fd-page-hero-text`
+- Parts: `fd-page-hero-actions`, `fd-page-hero-art`, `fd-page-hero-desc`, `fd-page-hero-text` (child of `fd-page-hero`)
 
 ### Panel (`panel`, component)
 
@@ -348,7 +353,7 @@ attribute also works with no value.
 ### Service Status (`service-status`, component)
 
 - Root: `fd-service-status`, shown at `docs/shell.html#service-status`
-- Parts: `fd-service-status-label`
+- Parts: `fd-service-status-label` (child of `fd-service-status`)
 - On the root: `data-icon="*"`, `data-status="degraded|maintenance|operational|outage" (or bare)`
 - Events: `fd:change`
 
@@ -360,8 +365,8 @@ attribute also works with no value.
 
 ### Sidebar (`sidebar`, component)
 
-- Root: `fd-sidebar`, shown at `docs/shell.html#app`
-- Parts: `fd-account`, `fd-account-avatar`, `fd-account-email`, `fd-nav`, `fd-nav-badge`, `fd-nav-chevron`, `fd-nav-group`, `fd-nav-hint`, `fd-nav-item`, `fd-nav-key`, `fd-nav-label`, `fd-nav-sub`, `fd-nav-text`, `fd-rail-tip`, `fd-rail-tip-hint`, `fd-sidebar-body`, `fd-sidebar-foot`, `fd-sidebar-head`, `fd-sidebar-toggle`, `fd-team-switch`, `fd-team-switch-meta`, `fd-team-switch-tile`, `fd-usage-card`, `fd-usage-card-head`, `fd-usage-card-link`, `fd-usage-card-meta`, `fd-usage-card-meter`, `fd-usage-card-ring`, `fd-usage-card-title`
+- Root: `fd-sidebar` (child of `fd-app`), shown at `docs/shell.html#app`
+- Parts: `fd-account`, `fd-account-avatar`, `fd-account-email`, `fd-nav`, `fd-nav-badge`, `fd-nav-chevron`, `fd-nav-group`, `fd-nav-hint` (child of `fd-nav-item`), `fd-nav-item`, `fd-nav-key`, `fd-nav-label`, `fd-nav-sub`, `fd-nav-text`, `fd-rail-tip`, `fd-rail-tip-hint`, `fd-sidebar-body`, `fd-sidebar-foot`, `fd-sidebar-head`, `fd-sidebar-toggle`, `fd-team-switch`, `fd-team-switch-meta`, `fd-team-switch-tile`, `fd-usage-card`, `fd-usage-card-head`, `fd-usage-card-link`, `fd-usage-card-meta`, `fd-usage-card-meter`, `fd-usage-card-ring`, `fd-usage-card-title`
 - On `fd-rail-tip`: `data-side="left"`
 - On `fd-sidebar-toggle`: `data-icon-only`
 - On `fd-team-switch`: `data-fd-menu-value`
@@ -375,14 +380,14 @@ attribute also works with no value.
 
 ### Tabbar (`tabbar`, component)
 
-- Root: `fd-tabbar`, shown at `docs/shell.html#tabbar`
+- Root: `fd-tabbar` (child of `fd-app`), shown at `docs/shell.html#tabbar`
 - Parts: `fd-tabbar-badge`, `fd-tabbar-item`, `fd-tabbar-label`
 - On `fd-tabbar-item`: `data-dot`
 
 ### Toolbar (`toolbar`, component)
 
 - Root: `fd-toolbar`, shown at `docs/shell.html#toolbar`
-- Parts: `fd-toolbar-end`, `fd-toolbar-filters`, `fd-toolbar-search`, `fd-toolbar-sep`
+- Parts: `fd-toolbar-end` (child of `fd-toolbar`), `fd-toolbar-filters`, `fd-toolbar-search` (child of `fd-toolbar`), `fd-toolbar-sep`
 - On `fd-toolbar-search`: `data-size="full"`
 
 ### Topbar (`topbar`, component)
@@ -418,7 +423,7 @@ attribute also works with no value.
 ### Segmented (`segmented`, component)
 
 - Root: `fd-segmented`, shown at `docs/navigation.html#segmented`
-- Parts: `fd-segmented-count`, `fd-segmented-group`, `fd-segmented-item`, `fd-segmented-label`, `fd-segmented-thumb`
+- Parts: `fd-segmented-count`, `fd-segmented-group`, `fd-segmented-item` (inside `fd-segmented`), `fd-segmented-label`, `fd-segmented-thumb`
 - On the root: `data-block`, `data-icon-only`, `data-size="sm"`, `data-tone="accent"`, `data-tweak="theme"`, `data-variant="grouped"`
 - State, set by Fire: `data-empty`
 - Events: `fd:change`
@@ -426,7 +431,7 @@ attribute also works with no value.
 ### Steps (`steps`, component)
 
 - Root: `fd-steps`, shown at `docs/navigation.html#steps`
-- Parts: `fd-step`, `fd-step-action`, `fd-step-body`, `fd-step-desc`, `fd-step-marker`, `fd-step-owner`, `fd-step-title`
+- Parts: `fd-step` (child of `fd-steps`), `fd-step-action`, `fd-step-body`, `fd-step-desc`, `fd-step-marker`, `fd-step-owner`, `fd-step-title`
 - On the root: `data-current="*"`, `data-orientation="vertical"`, `data-variant="tracker"`
 - On `fd-step`: `data-state="current|done|error|failed|running|skipped|waiting"`
 - Events: `fd:change`
@@ -441,7 +446,7 @@ attribute also works with no value.
 ### Tabs (`tabs`, component)
 
 - Root: `fd-tabs`, shown at `docs/navigation.html#tabs`
-- Parts: `fd-tab`, `fd-tab-count`, `fd-tab-panel`, `fd-tabs-indicator`
+- Parts: `fd-tab` (inside `fd-tabs`), `fd-tab-count`, `fd-tab-panel`, `fd-tabs-indicator`
 - On the root: `data-size="sm"`
 - State, set by Fire: `data-indicator`, `data-overflow="both|end|start"`
 - Events: `fd:change`
@@ -554,7 +559,7 @@ attribute also works with no value.
 ### Chat launcher (`chat-launcher`, component)
 
 - Root: `fd-chat-launcher`, shown at `docs/chat.html#launcher`
-- Parts: `fd-chat-launcher-badge`, `fd-chat-launcher-icon`, `fd-chat-pill`
+- Parts: `fd-chat-launcher-badge`, `fd-chat-launcher-icon` (child of `fd-chat-launcher`), `fd-chat-pill`
 - On the root: `data-contained`, `data-float`
 - On `fd-chat-launcher-icon`: `data-role="close|open"`
 - State, set by Fire: `data-pop`
@@ -577,13 +582,14 @@ attribute also works with no value.
 
 ### Checkbox (`checkbox`, component)
 
-- Root: `fd-checkbox`, shown at `docs/forms.html#checkbox`
-- Parts: `fd-check-dash`, `fd-check-tick`, `fd-checkbox-box`, `fd-checkbox-desc`, `fd-checkbox-label`, `fd-checkbox-text`
+- Root: `fd-checkbox` (on `<label>`, holds a `<input>`), shown at `docs/forms.html#checkbox`
+- Parts: `fd-check-dash`, `fd-check-tick`, `fd-checkbox-box` (required, child of `fd-checkbox`), `fd-checkbox-desc`, `fd-checkbox-label`, `fd-checkbox-text`
+- Write: `<label class="fd-checkbox"><input type="checkbox"><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">…</span></span></label>`
 
 ### Choice (`choice`, component)
 
-- Root: `fd-choice`, shown at `docs/forms.html#choice`
-- Parts: `fd-choice-body`, `fd-choice-desc`, `fd-choice-group`, `fd-choice-mark`, `fd-choice-meta`, `fd-choice-title`
+- Root: `fd-choice` (on `<label>`, holds a `<input>`), shown at `docs/forms.html#choice`
+- Parts: `fd-choice-body` (child of `fd-choice`), `fd-choice-desc`, `fd-choice-group`, `fd-choice-mark` (child of `fd-choice`), `fd-choice-meta` (child of `fd-choice`), `fd-choice-title`
 - On `fd-choice-group`: `data-layout="grid"`
 
 ### Codefield (`codefield`, component)
@@ -646,7 +652,7 @@ attribute also works with no value.
 ### File upload (`file-upload`, component)
 
 - Root: `fd-dropzone`, shown at `docs/forms.html#dropzone`
-- Parts: `fd-dropzone-actions`, `fd-dropzone-hint`, `fd-dropzone-icon`, `fd-dropzone-preview`, `fd-dropzone-text`, `fd-dropzone-title`, `fd-file`, `fd-file-bar`, `fd-file-icon`, `fd-file-main`, `fd-file-meta`, `fd-file-name`, `fd-file-size`, `fd-file-status`, `fd-filelist`
+- Parts: `fd-dropzone-actions`, `fd-dropzone-hint`, `fd-dropzone-icon` (child of `fd-dropzone`), `fd-dropzone-preview`, `fd-dropzone-text` (child of `fd-dropzone`), `fd-dropzone-title`, `fd-file`, `fd-file-bar`, `fd-file-icon`, `fd-file-main`, `fd-file-meta`, `fd-file-name`, `fd-file-size`, `fd-file-status`, `fd-filelist`
 - On the root: `data-fd-file-clear`, `data-layout="inline|logo"`
 - State, set by Fire: `data-state="done|dragover|error|uploading"`
 - Events: `fd:change`, `fd:files`
@@ -654,7 +660,7 @@ attribute also works with no value.
 ### Form (`form`, component)
 
 - Root: `fd-form`, shown at `docs/forms.html#rows`
-- Parts: `fd-form-actions`, `fd-form-actions-text`, `fd-form-cols`, `fd-form-row`, `fd-form-row-control`, `fd-form-row-desc`, `fd-form-row-label`, `fd-form-row-text`
+- Parts: `fd-form-actions`, `fd-form-actions-text`, `fd-form-cols`, `fd-form-row`, `fd-form-row-control` (child of `fd-form-row`), `fd-form-row-desc`, `fd-form-row-label`, `fd-form-row-text`
 - On the root: `data-size="full|lg|sm"`
 - On `fd-form-actions`: `data-align="between"`, `data-variant="sticky"`
 - On `fd-form-cols`: `data-size="full|lg|sm"`
@@ -662,8 +668,9 @@ attribute also works with no value.
 
 ### Form Section (`form-section`, pattern)
 
-- Root: `fd-form-section`, shown at `docs/forms.html#form-sections`
-- Parts: `fd-form-section-body`, `fd-form-section-desc`, `fd-form-section-head`, `fd-form-section-title`
+- Root: `fd-form-section` (child of `fd-form`), shown at `docs/forms.html#form-sections`
+- Parts: `fd-form-section-body` (child of `fd-form-section`), `fd-form-section-desc`, `fd-form-section-head` (child of `fd-form-section`), `fd-form-section-title`
+- Write: `<form class="fd-form"><section class="fd-form-section"><div class="fd-form-section-head">…</div><div class="fd-form-section-body">…</div></section></form>`
 - On the root: `data-layout="stack"`
 
 ### Input (`input`, component)
@@ -677,7 +684,7 @@ attribute also works with no value.
 ### Input Group (`input-group`, component)
 
 - Root: `fd-input-group`, shown at `docs/forms.html#affixes`
-- Parts: `fd-input-affix`
+- Parts: `fd-input-affix` (child of `fd-input-group`)
 - On the root: `data-fit`, `data-mono`, `data-size="lg|sm"`
 - On `fd-input-affix`: `data-kind="action|chevron|tag|text|unit"`
 
@@ -698,7 +705,7 @@ attribute also works with no value.
 ### Number (`number`, component)
 
 - Root: `fd-number`, shown at `docs/forms.html#number`
-- Parts: `fd-number-input`, `fd-number-step`
+- Parts: `fd-number-input` (child of `fd-number`), `fd-number-step`
 - On the root: `data-block`, `data-fit`, `data-mono`, `data-size="lg|sm"`
 - Events: `fd:change`
 
@@ -717,8 +724,9 @@ attribute also works with no value.
 
 ### Radio (`radio`, component)
 
-- Root: `fd-radio`, shown at `docs/forms.html#radio`
-- Parts: `fd-radio-box`, `fd-radio-desc`, `fd-radio-label`, `fd-radio-text`
+- Root: `fd-radio` (on `<label>`, holds a `<input>`), shown at `docs/forms.html#radio`
+- Parts: `fd-radio-box` (required, child of `fd-radio`), `fd-radio-desc`, `fd-radio-label`, `fd-radio-text`
+- Write: `<label class="fd-radio"><input type="radio" name="…"><span class="fd-radio-box"></span><span class="fd-radio-text"><span class="fd-radio-label">…</span></span></label>`
 
 ### Reason (`reason`, component)
 
@@ -729,7 +737,7 @@ attribute also works with no value.
 ### Search (`search`, component)
 
 - Root: `fd-search`, shown at `docs/forms.html#search`
-- Parts: `fd-search-clear`, `fd-search-input`
+- Parts: `fd-search-clear` (child of `fd-search`), `fd-search-input` (child of `fd-search`)
 - On the root: `data-fit`, `data-mono`, `data-size="lg|sm"`, `data-variant="soft"`
 - Events: `fd:change`
 
@@ -744,7 +752,8 @@ attribute also works with no value.
 
 ### Select (`select`, component)
 
-- Root: `fd-select`, shown at `docs/forms.html#select`
+- Root: `fd-select` (holds a `<select>`), shown at `docs/forms.html#select`
+- Write: `<label class="fd-select"><select>…</select></label>`
 - On the root: `data-block`, `data-fit`, `data-size="lg|sm"`, `data-variant="outline"`
 
 ### Slider (`slider`, component)
@@ -762,14 +771,15 @@ attribute also works with no value.
 
 ### Switch (`switch`, component)
 
-- Root: `fd-switch`, shown at `docs/forms.html#switch`
-- Parts: `fd-switch-desc`, `fd-switch-label`, `fd-switch-lock`, `fd-switch-text`, `fd-switch-track`
+- Root: `fd-switch` (on `<label>`, holds a `<input>`), shown at `docs/forms.html#switch`
+- Parts: `fd-switch-desc`, `fd-switch-label`, `fd-switch-lock`, `fd-switch-text`, `fd-switch-track` (required, child of `fd-switch`)
+- Write: `<label class="fd-switch"><input type="checkbox" role="switch"><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">…</span></span></label>`
 - On the root: `data-label="start"`, `data-locked`, `data-size="sm"`
 
 ### Tag input (`tag-input`, component)
 
 - Root: `fd-tag-input`, shown at `docs/forms.html#tags`
-- Parts: `fd-tag-input-field`, `fd-token`, `fd-token-label`, `fd-token-remove`
+- Parts: `fd-tag-input-field` (child of `fd-tag-input`), `fd-token`, `fd-token-label`, `fd-token-remove`
 - On the root: `data-format="json"`, `data-mono`, `data-size="lg|sm"`
 - On `fd-token`: `data-invalid`
 - State, set by Fire: `data-new`
@@ -792,8 +802,9 @@ attribute also works with no value.
 
 ### Command (`command`, component)
 
-- Root: `fd-command`, shown at `docs/overlays.html#command-palette`
-- Parts: `fd-command-empty`, `fd-command-empty-text`, `fd-command-empty-title`, `fd-command-foot`, `fd-command-group`, `fd-command-group-label`, `fd-command-input`, `fd-command-item`, `fd-command-item-hint`, `fd-command-item-label`, `fd-command-list`, `fd-command-note`, `fd-command-search`
+- Root: `fd-command` (on `<dialog>`, never `hidden`), shown at `docs/overlays.html#command-palette`
+- Parts: `fd-command-empty`, `fd-command-empty-text`, `fd-command-empty-title`, `fd-command-foot`, `fd-command-group`, `fd-command-group-label`, `fd-command-input`, `fd-command-item` (child of `fd-command-group` or `fd-command-list`), `fd-command-item-hint`, `fd-command-item-label`, `fd-command-list`, `fd-command-note`, `fd-command-search`
+- Write: `<dialog class="fd-command" id="…" aria-label="…">…</dialog>`
 - On the root: `data-static-demo`
 - On `fd-command-item`: `data-icon="*"`
 - On `fd-command-note`: `data-state="error|loading"`
@@ -809,7 +820,7 @@ attribute also works with no value.
 ### Date picker (`date-picker`, component)
 
 - Root: `fd-daterange`, shown at `docs/overlays.html#date-range`
-- Parts: `fd-calendar`, `fd-calendar-cell`, `fd-calendar-day`, `fd-calendar-grid`, `fd-calendar-head`, `fd-calendar-row`, `fd-calendar-title`, `fd-calendar-weekday`, `fd-daterange-compare`, `fd-daterange-compare-dates`, `fd-daterange-compare-label`, `fd-daterange-foot`, `fd-daterange-main`, `fd-daterange-preset`, `fd-daterange-presets`, `fd-daterange-summary`, `fd-pick`, `fd-pick-check`, `fd-pick-foot`, `fd-pick-head`, `fd-pick-meta`, `fd-pick-name`, `fd-pick-text`
+- Parts: `fd-calendar`, `fd-calendar-cell`, `fd-calendar-day`, `fd-calendar-grid`, `fd-calendar-head`, `fd-calendar-row`, `fd-calendar-title`, `fd-calendar-weekday`, `fd-daterange-compare`, `fd-daterange-compare-dates`, `fd-daterange-compare-label`, `fd-daterange-foot`, `fd-daterange-main` (child of `fd-daterange`), `fd-daterange-preset`, `fd-daterange-presets`, `fd-daterange-summary`, `fd-pick`, `fd-pick-check`, `fd-pick-foot`, `fd-pick-head`, `fd-pick-meta`, `fd-pick-name`, `fd-pick-text`
 - On the root: `data-compare="*"`
 - On `fd-calendar`: `data-kind="one"`
 - On `fd-daterange-foot`: `data-kind="one"`
@@ -820,8 +831,9 @@ attribute also works with no value.
 
 ### Dialog (`dialog`, component)
 
-- Root: `fd-dialog`, shown at `docs/overlays.html#dialogs`
-- Parts: `fd-dialog-body`, `fd-dialog-close`, `fd-dialog-desc`, `fd-dialog-dots`, `fd-dialog-feature`, `fd-dialog-feature-text`, `fd-dialog-feature-title`, `fd-dialog-features`, `fd-dialog-foot`, `fd-dialog-foot-note`, `fd-dialog-foot-start`, `fd-dialog-grid`, `fd-dialog-head`, `fd-dialog-pager`, `fd-dialog-title`, `fd-dialog-toolbar`
+- Root: `fd-dialog` (on `<dialog>`, never `hidden`), shown at `docs/overlays.html#dialogs`
+- Parts: `fd-dialog-body`, `fd-dialog-close` (child of `fd-dialog-head`), `fd-dialog-desc`, `fd-dialog-dots`, `fd-dialog-feature`, `fd-dialog-feature-text`, `fd-dialog-feature-title`, `fd-dialog-features`, `fd-dialog-foot`, `fd-dialog-foot-note`, `fd-dialog-foot-start`, `fd-dialog-grid`, `fd-dialog-head`, `fd-dialog-pager`, `fd-dialog-title`, `fd-dialog-toolbar`
+- Write: `<dialog class="fd-dialog" id="…" aria-labelledby="…">…</dialog>`
 - On the root: `data-size="lg|md|sm|xl"`, `data-static-demo`
 - On `fd-dialog-close`: `data-icon-only`, `data-size="sm"`
 - On `fd-dialog-foot`: `data-start`
@@ -830,15 +842,16 @@ attribute also works with no value.
 
 ### Hovercard (`hovercard`, component)
 
-- Root: `fd-hovercard`, shown at `docs/overlays.html#hovercards`
+- Root: `fd-hovercard` (never `hidden`), shown at `docs/overlays.html#hovercards`
 - Parts: `fd-hovercard-head`, `fd-hovercard-meta`, `fd-hovercard-stats`, `fd-hovercard-text`, `fd-hovercard-title`
 - On the root: `data-static-demo`
 - State, set by Fire: `data-align="end|start"`, `data-measuring="true" (or bare)`, `data-side="bottom|left|right|top"`, `data-state="open"`
 
 ### Menu (`menu`, component)
 
-- Root: `fd-menu`, shown at `docs/overlays.html#menus`
-- Parts: `fd-menu-close`, `fd-menu-group`, `fd-menu-head`, `fd-menu-item`, `fd-menu-item-desc`, `fd-menu-item-hint`, `fd-menu-item-label`, `fd-menu-label`, `fd-menu-sep`, `fd-menu-title`
+- Root: `fd-menu` (never `hidden`), shown at `docs/overlays.html#menus`
+- Parts: `fd-menu-close`, `fd-menu-group`, `fd-menu-head`, `fd-menu-item` (inside `fd-menu`), `fd-menu-item-desc`, `fd-menu-item-hint`, `fd-menu-item-label`, `fd-menu-label`, `fd-menu-sep`, `fd-menu-title`
+- Write: `<div class="fd-menu" id="…" popover role="menu"><button class="fd-menu-item" type="button">…</button></div>`
 - On the root: `data-fd-doc-picker="example|lang"`, `data-fd-unless="*"`, `data-fd-when="*"`, `data-static-demo`, `data-variant="switcher"`
 - On `fd-menu-close`: `data-icon="*"`
 - On `fd-menu-item`: `data-fd-else="disable"`, `data-fd-submenu="*"`, `data-highlighted`, `data-icon="*"`, `data-tone="danger"`, `data-value="*"`
@@ -858,16 +871,18 @@ attribute also works with no value.
 
 ### Popover (`popover`, component)
 
-- Root: `fd-popover`, shown at `docs/overlays.html#popovers`
+- Root: `fd-popover` (never `hidden`), shown at `docs/overlays.html#popovers`
 - Parts: `fd-overlay-count`, `fd-popover-actions`, `fd-popover-body`, `fd-popover-empty`, `fd-popover-empty-text`, `fd-popover-empty-title`, `fd-popover-foot`, `fd-popover-glyph`, `fd-popover-head`, `fd-popover-search`, `fd-popover-title`, `fd-popover-toolbar`
+- Write: `<div class="fd-popover" id="…" popover aria-label="…">…</div>`
 - On the root: `data-arrow`, `data-size="auto|lg|md|sm"`, `data-static-demo`
 - On `fd-popover-foot`: `data-align="center|end"`
 - State, set by Fire: `data-align="end|start"`, `data-measuring="true" (or bare)`, `data-side="bottom|left|right|top"`, `data-state="open"`
 
 ### Sheet (`sheet`, component)
 
-- Root: `fd-sheet`, shown at `docs/overlays.html#sheets`
-- Parts: `fd-sheet-bar`, `fd-sheet-body`, `fd-sheet-close`, `fd-sheet-desc`, `fd-sheet-foot`, `fd-sheet-head`, `fd-sheet-section`, `fd-sheet-title`
+- Root: `fd-sheet` (on `<dialog>`, never `hidden`), shown at `docs/overlays.html#sheets`
+- Parts: `fd-sheet-bar`, `fd-sheet-body`, `fd-sheet-close`, `fd-sheet-desc`, `fd-sheet-foot`, `fd-sheet-head`, `fd-sheet-section`, `fd-sheet-title` (child of `fd-sheet-bar`)
+- Write: `<dialog class="fd-sheet" id="…" aria-labelledby="…">…</dialog>`
 - On the root: `data-side="bottom|left|right" (or bare)`, `data-size="lg|md"`, `data-static-demo`
 - On `fd-sheet-close`: `data-size="sm"`
 - On `fd-sheet-foot`: `data-start`
@@ -884,7 +899,7 @@ attribute also works with no value.
 
 ### Tooltip (`tooltip`, component)
 
-- Root: `fd-tooltip`, shown at `docs/overlays.html#tooltips`
+- Root: `fd-tooltip` (never `hidden`), shown at `docs/overlays.html#tooltips`
 - Parts: `fd-tooltip-keys`
 - On the root: `data-static-demo`
 - State, set by Fire: `data-align="end|start"`, `data-measuring="true" (or bare)`, `data-side="bottom|left|right|top"`, `data-state="open"`
@@ -894,7 +909,7 @@ attribute also works with no value.
 ### Code block (`codeblock`, component)
 
 - Root: `fd-codeblock`, shown at `docs/code.html#codeblock`
-- Parts: `fd-codeblock-actions`, `fd-codeblock-body`, `fd-codeblock-btn`, `fd-codeblock-copy`, `fd-codeblock-expand`, `fd-codeblock-file`, `fd-codeblock-head`, `fd-codeblock-lang`, `fd-codeblock-line`, `fd-codeblock-more`, `fd-codeblock-tab`, `fd-codeblock-tabs`, `fd-copied-label`, `fd-syntax-comment`, `fd-syntax-fn`, `fd-syntax-key`, `fd-syntax-keyword`, `fd-syntax-number`, `fd-syntax-plain`, `fd-syntax-punct`, `fd-syntax-string`
+- Parts: `fd-codeblock-actions`, `fd-codeblock-body` (child of `fd-codeblock`), `fd-codeblock-btn`, `fd-codeblock-copy`, `fd-codeblock-expand`, `fd-codeblock-file`, `fd-codeblock-head` (child of `fd-codeblock`), `fd-codeblock-lang`, `fd-codeblock-line`, `fd-codeblock-more`, `fd-codeblock-tab`, `fd-codeblock-tabs`, `fd-copied-label`, `fd-syntax-comment`, `fd-syntax-fn`, `fd-syntax-key`, `fd-syntax-keyword`, `fd-syntax-number`, `fd-syntax-plain`, `fd-syntax-punct`, `fd-syntax-string`
 - On the root: `data-collapse="*"`, `data-expanded`, `data-lines`, `data-variant="framed"`, `data-wrap`
 - On `fd-codeblock-btn`: `data-action="wrap"`
 - On `fd-codeblock-line`: `data-hl`
@@ -1006,7 +1021,7 @@ attribute also works with no value.
 ### Filter (`filter`, component)
 
 - Root: `fd-filter`, shown at `docs/data.html#filters`
-- Parts: `fd-filter-applied`, `fd-filter-bar`, `fd-filter-bar-end`, `fd-filter-chevron`, `fd-filter-clear`, `fd-filter-label`, `fd-filter-search`, `fd-filter-token`, `fd-filter-token-key`, `fd-filter-token-remove`, `fd-filter-token-value`, `fd-filter-trigger`, `fd-filter-value`
+- Parts: `fd-filter-applied`, `fd-filter-bar`, `fd-filter-bar-end`, `fd-filter-chevron` (inside `fd-filter`), `fd-filter-clear`, `fd-filter-label`, `fd-filter-search`, `fd-filter-token`, `fd-filter-token-key`, `fd-filter-token-remove`, `fd-filter-token-value`, `fd-filter-trigger`, `fd-filter-value`
 - On the root: `data-size="sm"`
 - State, set by Fire: `data-active`
 - Events: `fd:change`
@@ -1022,7 +1037,7 @@ attribute also works with no value.
 ### List (`list`, component)
 
 - Root: `fd-list`, shown at `docs/data.html#lists`
-- Parts: `fd-list-body`, `fd-list-chevron`, `fd-list-desc`, `fd-list-lead`, `fd-list-link`, `fd-list-meta`, `fd-list-row`, `fd-list-title`, `fd-list-trail`
+- Parts: `fd-list-body`, `fd-list-chevron`, `fd-list-desc`, `fd-list-lead`, `fd-list-link`, `fd-list-meta`, `fd-list-row` (child of `fd-list`), `fd-list-title`, `fd-list-trail`
 - On the root: `data-card`, `data-divided`, `data-interactive`
 - On `fd-list-lead`: `data-shape="round"`, `data-tone="accent|danger|info|success|violet|warning"`
 - On `fd-list-meta`: `data-end`, `data-mono`
@@ -1032,20 +1047,20 @@ attribute also works with no value.
 ### List and detail (`list-detail`, component)
 
 - Root: `fd-list-detail`, shown at `docs/data.html#list-detail`
-- Parts: `fd-list-detail-back`, `fd-list-detail-list`, `fd-list-detail-main`
+- Parts: `fd-list-detail-back`, `fd-list-detail-list` (child of `fd-list-detail`), `fd-list-detail-main` (child of `fd-list-detail`)
 - On the root: `data-view="detail|list"`
 - Events: `fd:change`, `fd:select`
 
 ### Meter (`meter`, component)
 
 - Root: `fd-meter`, shown at `docs/data.html#meters`
-- Parts: `fd-meter-figure`, `fd-meter-fill`, `fd-meter-foot`, `fd-meter-head`, `fd-meter-label`, `fd-meter-legend`, `fd-meter-legend-value`, `fd-meter-seg`, `fd-meter-track`
+- Parts: `fd-meter-figure`, `fd-meter-fill`, `fd-meter-foot`, `fd-meter-head`, `fd-meter-label`, `fd-meter-legend`, `fd-meter-legend-value`, `fd-meter-seg`, `fd-meter-track` (child of `fd-meter`)
 - On the root: `data-level="danger|warning"`, `data-series="1|2|3|4|5|6"`, `data-size="lg|sm"`, `data-tone="accent|danger|neutral|success|warning"`, `data-variant="inline|segmented"`
 
 ### Pipeline (`pipeline`, component)
 
 - Root: `fd-pipeline`, shown at `docs/data.html#pipeline`
-- Parts: `fd-pipeline-job`, `fd-pipeline-job-meta`, `fd-pipeline-job-name`, `fd-pipeline-jobs`, `fd-pipeline-stage`, `fd-pipeline-stage-label`, `fd-pipeline-stages`
+- Parts: `fd-pipeline-job`, `fd-pipeline-job-meta`, `fd-pipeline-job-name`, `fd-pipeline-jobs` (child of `fd-pipeline-stage`), `fd-pipeline-stage`, `fd-pipeline-stage-label`, `fd-pipeline-stages`
 - On the root: `data-fd-pipeline="manual"`, `data-orientation="horizontal|vertical"`, `data-size="sm"`
 - On `fd-pipeline-job`: `data-icon="*"`, `data-live`, `data-state="skipped"`, `data-tone="danger|info|neutral|success|violet|warning"`
 - On `fd-pipeline-stage`: `data-when="*"`
@@ -1069,8 +1084,9 @@ attribute also works with no value.
 
 ### Table (`table`, component)
 
-- Root: `fd-table`, shown at `docs/data.html#activity`
-- Parts: `fd-table-bulk`, `fd-table-bulk-actions`, `fd-table-bulk-count`, `fd-table-cell`, `fd-table-check`, `fd-table-detail`, `fd-table-empty`, `fd-table-empty-icon`, `fd-table-empty-text`, `fd-table-empty-title`, `fd-table-expand`, `fd-table-foot`, `fd-table-foot-actions`, `fd-table-foot-info`, `fd-table-group`, `fd-table-group-count`, `fd-table-group-head`, `fd-table-group-title`, `fd-table-group-toggle`, `fd-table-lead`, `fd-table-link`, `fd-table-rows`, `fd-table-scroll`, `fd-table-skeleton`, `fd-table-state`, `fd-table-sub`, `fd-table-title`, `fd-table-trunc`, `fd-table-two`, `fd-table-wrap`, `fd-th-sort`
+- Root: `fd-table` (on `<table>`, child of `fd-table-scroll` or `fd-table-wrap`), shown at `docs/data.html#activity`
+- Parts: `fd-table-bulk` (inside `fd-table-wrap`), `fd-table-bulk-actions`, `fd-table-bulk-count`, `fd-table-cell`, `fd-table-check`, `fd-table-detail` (inside `fd-table`), `fd-table-empty`, `fd-table-empty-icon`, `fd-table-empty-text`, `fd-table-empty-title`, `fd-table-expand`, `fd-table-foot`, `fd-table-foot-actions`, `fd-table-foot-info`, `fd-table-group` (inside `fd-table`), `fd-table-group-count`, `fd-table-group-head` (child of `fd-table-group`), `fd-table-group-title`, `fd-table-group-toggle`, `fd-table-lead`, `fd-table-link`, `fd-table-rows`, `fd-table-scroll` (child of `fd-table-wrap`), `fd-table-skeleton`, `fd-table-state`, `fd-table-sub`, `fd-table-title`, `fd-table-trunc`, `fd-table-two`, `fd-table-wrap`, `fd-th-sort`
+- Write: `<div class="fd-table-wrap"><div class="fd-table-scroll"><table class="fd-table" aria-label="…">…</table></div></div>`
 - On the root: `data-actions`, `data-col="fill|fit|lg|md|sm"`, `data-collapsible`, `data-expand`, `data-expanded`, `data-href`, `data-mono`, `data-muted`, `data-num`, `data-primary`, `data-select`, `data-skeleton`, `data-stack="hide" (or bare)`, `data-stack-only`, `data-stack-title`, `data-sticky`, `data-wrap`
 - On `fd-table-check`: `data-select-all`, `data-select-group`, `data-select-row`
 - On `fd-table-empty`: `data-tone="danger"`
@@ -1144,13 +1160,13 @@ attribute also works with no value.
 ### Doc Changelog (`doc-changelog`, component)
 
 - Root: `fd-doc-changelog`, shown at `docs/documentation.html#changelog`
-- Parts: `fd-doc-changelog-filters`, `fd-doc-release`, `fd-doc-release-body`, `fd-doc-release-date`, `fd-doc-release-tags`, `fd-doc-release-time`, `fd-doc-release-title`
+- Parts: `fd-doc-changelog-filters`, `fd-doc-release`, `fd-doc-release-body` (child of `fd-doc-release`), `fd-doc-release-date`, `fd-doc-release-tags`, `fd-doc-release-time`, `fd-doc-release-title`
 - On `fd-doc-release`: `data-latest`
 
 ### Doc Frame (`doc-frame`, component)
 
 - Root: `fd-doc-frame`, shown at `docs/documentation.html#picture-frame`
-- Parts: `fd-doc-frame-caption`, `fd-doc-frame-media`, `fd-doc-frame-placeholder`, `fd-doc-frame-play`
+- Parts: `fd-doc-frame-caption`, `fd-doc-frame-media` (child of `fd-doc-frame`), `fd-doc-frame-placeholder` (child of `fd-doc-frame-media`), `fd-doc-frame-play`
 - On the root: `data-fd-alt="*"`, `data-fd-hosts="*"`, `data-fd-src="*"`, `data-ratio="photo|square|wide"`, `data-state="failed|loaded|loading|refused" (or bare)`, `data-zoom`
 - On `fd-doc-frame-placeholder`: `data-ratio="wide"`
 - Events: `fd:change`
@@ -1234,7 +1250,7 @@ attribute also works with no value.
 ### Article (`site-article`, section)
 
 - Root: `fd-site-article`, shown at `docs/site-sections.html#article`
-- Parts: `fd-site-article-actions`, `fd-site-article-aside`, `fd-site-article-body`, `fd-site-article-cover`, `fd-site-article-foot`, `fd-site-article-head`, `fd-site-article-meta`, `fd-site-article-standfirst`, `fd-site-article-text`, `fd-site-article-title`, `fd-site-authors`, `fd-site-authors-item`, `fd-site-authors-name`, `fd-site-authors-role`, `fd-site-notes`, `fd-site-notes-back`, `fd-site-notes-ref`, `fd-site-refs`
+- Parts: `fd-site-article-actions`, `fd-site-article-aside`, `fd-site-article-body` (child of `fd-site-article`), `fd-site-article-cover` (child of `fd-site-article`), `fd-site-article-foot` (child of `fd-site-article`), `fd-site-article-head` (child of `fd-site-article`), `fd-site-article-meta`, `fd-site-article-standfirst`, `fd-site-article-text`, `fd-site-article-title`, `fd-site-authors`, `fd-site-authors-item`, `fd-site-authors-name`, `fd-site-authors-role`, `fd-site-notes`, `fd-site-notes-back`, `fd-site-notes-ref`, `fd-site-refs`
 - On the root: `data-layout="aside|cover|plain"`, `data-side="end|start"`
 - On `fd-site-article-aside`: `data-state="open"`
 - On `fd-site-article-text`: `data-breakout`
@@ -1263,7 +1279,7 @@ attribute also works with no value.
 ### Features section (`site-features`, section)
 
 - Root: `fd-site-features`, shown at `docs/site-sections.html#features`
-- Parts: `fd-site-features-icon`, `fd-site-features-item`, `fd-site-features-items`, `fd-site-features-link`, `fd-site-features-media`, `fd-site-features-text`, `fd-site-features-title`
+- Parts: `fd-site-features-icon`, `fd-site-features-item` (child of `fd-site-features-items`), `fd-site-features-items` (inside `fd-site-features`), `fd-site-features-link`, `fd-site-features-media`, `fd-site-features-text`, `fd-site-features-title`
 - On the root: `data-layout="bento|grid|list"`
 
 ### Hero (`site-hero`, section)
@@ -1282,7 +1298,7 @@ attribute also works with no value.
 ### Posts section (`site-posts`, section)
 
 - Root: `fd-site-posts`, shown at `docs/site-sections.html#posts`
-- Parts: `fd-site-posts-count`, `fd-site-posts-cover`, `fd-site-posts-cover-title`, `fd-site-posts-date`, `fd-site-posts-item`, `fd-site-posts-kind`, `fd-site-posts-list`, `fd-site-posts-media`, `fd-site-posts-meta`, `fd-site-posts-summary`, `fd-site-posts-title`, `fd-site-posts-tools`
+- Parts: `fd-site-posts-count`, `fd-site-posts-cover`, `fd-site-posts-cover-title`, `fd-site-posts-date`, `fd-site-posts-item`, `fd-site-posts-kind`, `fd-site-posts-list` (inside `fd-site-posts`), `fd-site-posts-media`, `fd-site-posts-meta`, `fd-site-posts-summary`, `fd-site-posts-title`, `fd-site-posts-tools`
 - On the root: `data-layout="featured|grid|list"`
 - On `fd-site-posts-cover`: `data-ground="inverse|raised"`
 - On `fd-site-posts-list`: `data-more`
@@ -1291,7 +1307,7 @@ attribute also works with no value.
 ### Pricing section (`site-pricing`, section)
 
 - Root: `fd-site-pricing`, shown at `docs/site-sections.html#pricing`
-- Parts: `fd-site-pricing-action`, `fd-site-pricing-amount`, `fd-site-pricing-includes`, `fd-site-pricing-name`, `fd-site-pricing-per`, `fd-site-pricing-period`, `fd-site-pricing-plan`, `fd-site-pricing-plans`, `fd-site-pricing-price`, `fd-site-pricing-summary`
+- Parts: `fd-site-pricing-action` (child of `fd-site-pricing-plan`), `fd-site-pricing-amount`, `fd-site-pricing-includes`, `fd-site-pricing-name`, `fd-site-pricing-per`, `fd-site-pricing-period`, `fd-site-pricing-plan`, `fd-site-pricing-plans` (inside `fd-site-pricing`), `fd-site-pricing-price`, `fd-site-pricing-summary` (child of `fd-site-pricing-plan`)
 - On the root: `data-layout="columns|rows|single"`, `data-period="*"`
 - On `fd-site-pricing-plan`: `data-featured`
 - Events: `fd:change`
@@ -1299,7 +1315,7 @@ attribute also works with no value.
 ### Quote section (`site-quote`, section)
 
 - Root: `fd-site-quote`, shown at `docs/site-sections.html#quote`
-- Parts: `fd-site-quote-cite`, `fd-site-quote-item`, `fd-site-quote-list`, `fd-site-quote-mark`, `fd-site-quote-name`, `fd-site-quote-role`, `fd-site-quote-stat`, `fd-site-quote-text`, `fd-site-quote-who`
+- Parts: `fd-site-quote-cite`, `fd-site-quote-item`, `fd-site-quote-list` (inside `fd-site-quote`), `fd-site-quote-mark`, `fd-site-quote-name`, `fd-site-quote-role`, `fd-site-quote-stat`, `fd-site-quote-text`, `fd-site-quote-who`
 - On the root: `data-layout="grid|pair|proof|single"`
 
 ### Section head (`site-head`, pattern)
@@ -1311,7 +1327,7 @@ attribute also works with no value.
 ### Site (`site`, pattern)
 
 - Root: `fd-site`, shown at `docs/site.html#shell`
-- Parts: `fd-site-backdrop`, `fd-site-display`, `fd-site-heading`, `fd-site-index`, `fd-site-lead`, `fd-site-section`, `fd-site-shot`, `fd-site-text`, `fd-site-title`
+- Parts: `fd-site-backdrop` (child of `fd-site-section`), `fd-site-display`, `fd-site-heading`, `fd-site-index`, `fd-site-lead`, `fd-site-section`, `fd-site-shot`, `fd-site-text`, `fd-site-title`
 - On the root: `data-contained`, `data-ground="page"`, `data-rhythm="tight"`
 - On `fd-site-backdrop`: `data-position="center|end|start"`
 - On `fd-site-section`: `data-ground="accent|image|inverse|page|raised|sunken|texture"`, `data-layout="center"`, `data-rhythm="loose|tight"`, `data-rule`, `data-scrim="dark|light"`, `data-treatment="duotone|mono|natural|wash"`
@@ -1344,19 +1360,19 @@ attribute also works with no value.
 ### Split section (`site-split`, section)
 
 - Root: `fd-site-split`, shown at `docs/site-sections.html#split`
-- Parts: `fd-site-points`, `fd-site-points-item`, `fd-site-points-text`, `fd-site-points-title`, `fd-site-split-media`, `fd-site-split-text`
+- Parts: `fd-site-points`, `fd-site-points-item` (child of `fd-site-points`), `fd-site-points-text`, `fd-site-points-title`, `fd-site-split-media`, `fd-site-split-text`
 - On the root: `data-ratio="even|media" (or bare)`, `data-side="end|start" (or bare)`, `data-sticky`
 
 ### Stats section (`site-stats`, section)
 
 - Root: `fd-site-stats`, shown at `docs/site-sections.html#stats`
-- Parts: `fd-site-stats-figure`, `fd-site-stats-item`, `fd-site-stats-label`, `fd-site-stats-list`, `fd-site-stats-note`, `fd-site-stats-unit`
+- Parts: `fd-site-stats-figure`, `fd-site-stats-item`, `fd-site-stats-label`, `fd-site-stats-list` (inside `fd-site-stats`), `fd-site-stats-note`, `fd-site-stats-unit`
 - On the root: `data-layout="grid|lead|row"`
 
 ### Steps section (`site-steps`, section)
 
 - Root: `fd-site-steps`, shown at `docs/site-sections.html#steps`
-- Parts: `fd-site-steps-aside`, `fd-site-steps-detail`, `fd-site-steps-item`, `fd-site-steps-list`, `fd-site-steps-text`, `fd-site-steps-title`
+- Parts: `fd-site-steps-aside`, `fd-site-steps-detail`, `fd-site-steps-item`, `fd-site-steps-list` (inside `fd-site-steps`), `fd-site-steps-text`, `fd-site-steps-title`
 - On the root: `data-layout="rail|row"`
 
 ## Tweaks

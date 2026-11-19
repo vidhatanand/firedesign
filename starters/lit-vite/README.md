@@ -91,7 +91,7 @@ npm run review     # build, then look at every screen: .fire-review/index.html
 ## Start a new project from it
 
 1. Copy this folder out of the Fire repository.
-2. In `package.json`, change `"fire-design": "file:../.."` to `"fire-design": "github:vidhatanand/firedesign#v0.9.1"`.
+2. In `package.json`, change `"fire-design": "file:../.."` to `"fire-design": "github:vidhatanand/firedesign#v0.10.0"`.
 3. `npm install`, then `npm run dev`.
 4. Choose your look: edit `theme.json` (a Fire theme record: palette, type, dials) and run `npm run dev` or
    `npm run build`. `scripts/prepare.mjs` turns it into `src/fire-theme.css` and puts the attributes it needs on

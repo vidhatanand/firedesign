@@ -72,10 +72,12 @@ scripts/
   build-facet.mjs      contract + catalog + WRITING.md → facet/
   find.mjs             `fire find`: search the parts by what they are for
   gate.mjs             the near-duplicate gate (fingerprint.mjs holds its fingerprints); fonts.mjs: adds a catalogue font to a product; looks-check.mjs: renders every look
-  lint-markup.mjs      lints product or board markup against catalog.json (runs in any project)
+  lint-markup.mjs      lints product or board markup against catalog.json, names and structure (runs in any project)
+  lib/structure.mjs    the structural rules on a tree of plain objects: the lint and the review share them
   lint-css.mjs         lints a product's CSS and tokens against fire-contract.json (section 7)
   render-equal.mjs     compares a reference page and a candidate page (structure, computed styles, pixels)
-  fire.mjs             the `fire` command: find, lint, lint-css, render-equal, slim
+  fire.mjs             the `fire` command: find, lint, lint-css, render-equal, slim, review
+  review.mjs           `fire review`: every screen in a browser, a gallery, structure and composition checks
   slim.mjs             writes a Fire trimmed to a product's source: stylesheet, behaviour entry, fonts, report
   build-slim-map.mjs   GENERATES contract/slim-map.json: each component's stylesheet, module and what its module builds
   audit.mjs            Fire's own source audit
@@ -85,7 +87,7 @@ scripts/
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
 `./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.9.1`); the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.10.0`); the
 starters in this repository use `file:../..`.
 
 ## 3. The theme record (the source of a Fire design system)
@@ -228,6 +230,9 @@ base class holds the shared rules for future elements. Elements are registered b
   Fire token, raw colours, sizes and durations, restyling of an `fd-` class. Eleven rules, four of them errors; the
   product declares its prefix with `--prefix` or `fire.prefix` in `package.json`. Exit code 1 on any error.
   `lint-markup.mjs` gained the warning `surface-mismatch` (section 10) in 0.8, and its JSON output counts `warnings`.
+  In 0.10 it gained the structural rules (`missing-part`, `wrong-element`, `wrong-parent`, `missing-attribute`,
+  `forbidden-attribute`, `missing-child`, and the warning `bare-control`), from the structure facts on the cards'
+  parts. `scripts/lib/structure.mjs` holds them; `review.mjs` runs the same rules on the rendered page.
 - **`gate.mjs`** (0.7) compares every component, pattern, layout, section and template with its peers, by structure, look
   and job, and fails a near-duplicate unless a card declares a `relation`. `--probe <page>` checks a candidate first.
   `build.mjs` runs it without the look comparison; `npm run gate` adds it.

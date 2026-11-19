@@ -20,7 +20,7 @@ Anything the project's own instructions say more specifically (its layouts, its 
 |---|---|
 | Build or change any screen | `GUIDE.md` |
 | Write any text that appears on a screen | `WRITING.md` |
-| Use a class or an attribute | `CLASSES.md`, the complete generated list (if it is not listed there, it does not exist); `VOCABULARY.md` explains the common ones |
+| Use a class or an attribute | `CLASSES.md`, the complete generated list (if it is not listed there, it does not exist). For each component it says which parts are required, which element a class goes on, where a part may sit, and gives a `Write:` line to copy. `VOCABULARY.md` explains the common ones |
 | Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Search with `--surface` set to where the page is used. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example`; `--json` gives the path of its picture, which you can open |
 | Build a public website | `GUIDE.md` section 5, "A public website", then `docs/site.html` and `docs/site-sections.html` (articles, listings, sign-up and pictures are there too) |
 | Add your own CSS or tokens | `GUIDE.md` section 7, "Your own CSS and tokens" |
@@ -28,6 +28,15 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Add to Fire itself | `DESIGN.md`, in the Fire repository |
 
 Copy markup from the Fire docs pages or the nearest template. Do not write components from memory. Run `fire find` before you compose a pattern or a screen: Fire may already have it, under another name.
+
+### Plan the app before the first screen
+
+Valid parts do not make a coherent app. Decide these once, write them where everyone building the app reads them (the project's spec or its agent instructions), and follow them on every screen.
+
+1. Map every screen to a Fire template before you build any of them: a list of records (`logs.html`), a create or edit form (`form.html`), one record (`record.html`), settings (`settings.html`), keys and secrets (`api-keys.html`), an audit trail (`audit.html`), a dashboard (`overview.html`), usage and billing (`usage.html`). `npx fire find --kind template "<what the screen is for>"` finds the nearest. A screen with no template is a gap: say so before you build it.
+2. One page head for the whole app: the same structure, the same place for the title, the description and the primary action. One form pattern. One way to show a list. Never a second.
+3. Compose from the template's structure. Copy its regions (page head, toolbar, table or sections, foot) and change the content. Do not assemble a page layout from loose parts.
+4. When several people or agents build at once, they share this plan and one shell. Nobody starts a screen before the plan exists.
 
 ## 2. Always
 
@@ -48,6 +57,12 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 15. Never set text over a picture except on the image ground (`data-ground="image"`), which keeps it readable. Everywhere else the text sits beside the picture.
 16. Every `<img>` on a site has `alt` (empty for decoration), `width` and `height`. The lint warns `img-attrs` when one is missing.
 17. Write `fd-` classes and Fire attribute values as whole strings. The production build is trimmed to what the source uses (`fire slim`), and a name built at run time (`fd-badge-${tone}`) cannot be seen: write the full names, or add the component to `fire.slim.include` in `package.json`.
+18. An action on a row lives in the row: a row menu or an icon button in the last cell. Never a button per row outside the table, and never an identifier in a button's label.
+19. A button keeps its natural width (put it in an `fd-row`). A full-width button is for a phone, or for the one action of a narrow sign-in card (`data-block`).
+20. A form is one column. An `fd-form-section` is a direct child of `fd-form`, never inside a grid or a narrow column, and a form never sits loose beside a card.
+21. An empty state sits inside the container it empties (the table's frame, the card), not loose on the page.
+22. A native `<select>`, `<table>` or `<fieldset>` is never bare: a select sits in `<label class="fd-select">`, a table in `.fd-table-wrap > .fd-table-scroll`. To turn off a group of controls, use `<fieldset disabled>` with a `<legend>` and say why beside it.
+23. Move focus by script to a heading, a title or a region with `focusQuiet(el)`, never `el.focus()` with a `tabindex`: a heading must not show the keyboard ring. Buttons, links and fields are focused as usual.
 
 ## 3. Forms
 
@@ -68,11 +83,12 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 
 ## 5. Before you say it is done
 
-1. Open every screen you touched in a browser. Check light and dark, 1440px and 375px wide, and keyboard use.
-2. Ask: does it look like a product, or like a database form? If the second, it is not done.
-3. Run the checklist in `WRITING.md` section 9 on each screen.
-4. Run Fire's markup lint on every file you changed (`node node_modules/fire-design/scripts/lint-markup.mjs <files>`, or `scripts/lint-markup.mjs` inside the Fire repository) and fix every finding, warnings included; never silence one with a `style` attribute. If you wrote CSS or tokens, run `lint-css` too (`npx fire lint-css <files> --prefix <yours>`) and fix every error. In the Fire repository, also run `scripts/audit.mjs`: no errors and nothing under `literals`, `inline` or `attrs`.
-5. Say plainly what you checked and what you did not.
+1. Run `npx fire review` (the starters run it inside `npm run check`; `docs/frameworks.html#review` has the options). It opens every screen at 1440px and 375px, light and dark, checks structure and composition on the rendered page, and writes a gallery (`.fire-review/index.html`). Fix every error.
+2. Open the gallery and look at every screen, then try the keyboard. The checks cannot judge hierarchy, rhythm, or whether a screen follows its template: someone has to look.
+3. Ask: does it look like a product, or like a database form? If the second, it is not done.
+4. Run the checklist in `WRITING.md` section 9 on each screen.
+5. Run Fire's markup lint on every file you changed (`node node_modules/fire-design/scripts/lint-markup.mjs <files>`, or `scripts/lint-markup.mjs` inside the Fire repository) and fix every finding, warnings included; never silence one with a `style` attribute. It checks names and structure (a missing part, a class on the wrong element, a part in the wrong place). "0 errors" means the markup it can see is valid; it does not mean the screen is good, and it cannot see what a template expression or a child component adds: `fire review` does. If you wrote CSS or tokens, run `lint-css` too (`npx fire lint-css <files> --prefix <yours>`) and fix every error. In the Fire repository, also run `scripts/audit.mjs`: no errors and nothing under `literals`, `inline` or `attrs`.
+6. Say plainly what you checked and what you did not.
 
 ## 6. When Fire does not have what you need
 

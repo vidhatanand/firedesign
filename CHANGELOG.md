@@ -2,6 +2,72 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.10.0 — 19 Nov 2026
+
+**The checks look at structure and at the rendered screen, not only at names.** The first product built on the Lit
+starter passed every lint and shipped screens that were composed badly. This release closes that gap. No class,
+attribute value, token, event or export was removed or renamed.
+
+### Added
+
+- **`fire lint` checks structure.** The cards now carry facts about each part (`required`, `or`, `element`, `parent`,
+  `inside`, `notInside`, `attrs`, `contains`, and a `skeleton` on the root; `contract/cards/README.md`), on 59 of the
+  184 components, each backed by Fire's CSS or behaviour. Six new errors: `missing-part` (a callout without
+  `fd-callout-icon`), `wrong-element` (`fd-select` on the `<select>`), `wrong-parent` (an `fd-form-section` that is not
+  a child of `fd-form`; an `fd-table` outside its wrap), `missing-attribute`, `forbidden-attribute` (`hidden` on a menu,
+  which never opens) and `missing-child`. One new warning: `bare-control`, a native select, table, fieldset or text
+  field with no Fire class and no Fire wrapper. The rules live in `scripts/lib/structure.mjs` (`fire-design/structure`).
+- **`CLASSES.md` shows the structure**: after each part, whether it is required, the element it goes on and where it
+  may sit, and a `Write:` line to copy for the main components. `fire find` prints the same line.
+- **`fire review`** (`scripts/review.mjs`, `npm run review`; `docs/frameworks.html#review`). It opens every screen of a
+  product in a browser at 1440 and 375, light and dark, and:
+  - writes a gallery (`.fire-review/index.html`): every screen as a row, its findings beneath, a crop of each element;
+  - runs the structural rules on the rendered page, where no template expression or child component hides anything;
+  - checks composition: `overflow-x`, `offscreen-control`, `one-h1`, `one-page-head`, `one-primary`,
+    `nested-surface`, `unstyled-control`, `console-error`, `failed-request` and `empty-main` (errors) and
+    `stretched-button` (a warning).
+  Options on the command line or in `package.json` under `fire.review`. It exits 1 on an error. The three starters run
+  it inside `npm run check`. It needs `playwright-core`.
+- **`focusQuiet(el)`** (`fire/js/core.js`): moves focus to a heading, a title or a region without the keyboard ring; a
+  button, link or field keeps its ring. Fire's own modules use it (a dialog with no field, list and detail, preview
+  results, footnotes), and so do the Lit starter's router and the three starters' settings tabs.
+- **A fieldset reset** in `fire/base.css` (`fieldset`, `legend`), and a rule that gives a legend at the head of a
+  stacked fieldset the stack's gap. `<fieldset disabled>` disables every Fire form control inside it
+  (`docs/forms.html#reason`, "A disabled group").
+- **Agent rules** (`AGENT-RULES.md`): "Plan the app before the first screen" (map every screen to a template; one page
+  head, one form pattern, one list), rules 18 to 23 on interaction (row actions in the row, buttons at their natural
+  width, a form in one column, empty states inside their container, no bare native control, `focusQuiet`), and
+  `fire review` as the first step before a screen is called done. `GUIDE.md` sections 3 and 6 say the same.
+- The Lit starter's README: testing signed-in screens with a `__Host-` cookie, and why the page title is focused
+  without a ring.
+
+### Changed
+
+- **The grouped segmented control scrolls on a phone** (under 640px) and drops its group labels there; the hairlines
+  still mark the groups. Before, it could not scroll and was cut off.
+- A dialog or sheet with no field still puts focus on its title, now without a ring on it.
+- `templates/provider.html`: the not-found state's title is the page's `h1`.
+
+### For products refreshing from 0.9.x
+
+- **`fire lint` will report new errors in code that linted clean.** Each one marks a screen that renders wrong: fix the
+  markup as the `fix` line says. The rules cannot be switched off for a line or a file.
+- Add `fire review` to your check. Start with the routes in `package.json` under `fire.review` (see the Lit starter),
+  fix its errors, then look at the gallery before each release.
+- If you focus a heading or region by script, call `focusQuiet(el)` in place of `el.focus()`.
+- If you carry a stopgap that resets `<fieldset>`, remove it.
+- Copy the new `AGENT-RULES.md`, `GUIDE.md` and `docs/_ref/CLASSES.md` into the project.
+
+### Known limits
+
+- The static lint reports only what a file shows. A part added by a template expression or a child component is never
+  reported missing, and the parent of a component's top element is unknown to it. `fire review` sees both.
+- Only four parts are marked required (the callout's icon; the checkbox, radio and switch marks). Most facts say where
+  a part must sit.
+- `fire review` has run in Chromium only. It cannot judge hierarchy, rhythm, or whether a screen follows its template.
+- A disabled fieldset was compared with disabled controls in Chromium only. Script that reads `el.disabled` on a
+  control inside a disabled fieldset gets `false`.
+
 ## 0.9.1 — 19 Nov 2026
 
 **Fire is public and under the MIT License.** No class, attribute value, token, event or export was added, removed or

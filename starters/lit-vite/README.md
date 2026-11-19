@@ -55,7 +55,11 @@ the logs screen, which opens the sheet, and the router leaves focus and scroll t
 What a page load would have done, the router does after each new screen: it sets the title, moves focus to the
 screen's `h1` (or its `main`) so that keyboard and screen-reader users start on the new page, scrolls to the top
 (or back to where the visitor was, on Back and Forward), and announces the title through a polite live region the
-shell owns. The first load does none of the focus or the announcement. While a screen's module loads, the current
+shell owns. The first load does none of the focus or the announcement. The heading is focused without a ring: it
+is not something to press, and Chromium counts focus moved by script as keyboard focus after a key press, so Fire's
+ring would otherwise be drawn around the page title. The router calls Fire's `focusQuiet(el)` for this; use it for
+any heading or region your own code focuses, and leave a button, link or field to be focused as usual, since those
+keep their ring. While a screen's module loads, the current
 screen stays, and Fire's page bar (`texture.pagebar`) shows when that takes over 150 ms. A module that fails to load
 shows Fire's error page with Try again; when the browser is online, the likely cause is a deploy that replaced the
 hashed files, so it offers Reload first. Offline, it says so. WebKit remembers a module that failed for the life of the
@@ -135,6 +139,13 @@ customElements.define('screen-example', ScreenExample);
 `document`-level listeners reach the markup, and it calls Fire's `init(this)` after every render. Add a route to
 `src/routes.ts` with `load: () => import('./screens/example/screen')`; do not import the screen anywhere else, or
 it stops being a chunk of its own.
+
+**Testing signed-in screens.** In a Playwright test, set the session cookie on the context. Chromium refuses a
+`__Host-` cookie given as a `url` on `http://`, even on localhost and even with `secure: true` (Playwright fails with
+"Invalid cookie fields"); give it `domain` and `path` instead:
+`await context.addCookies([{ name: '__Host-session', value, domain: 'localhost', path: '/', secure: true }])`. The
+cookie is then stored and sent to `http://localhost:<port>`. Seen in Chromium (Playwright 1.64.1); not tried in WebKit
+or Firefox.
 
 ## How the check works
 

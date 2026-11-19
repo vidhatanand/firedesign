@@ -1668,10 +1668,31 @@ team = growth</textarea>
         <p class="fd-reason-text" id="rs-export"><i data-icon="lock"></i><span><span class="fd-reason-why">Viewers cannot export.</span> <span class="fd-reason-who">Ask a member.</span></span></p>
       </div>
     </div>
+    <h3 class="doc-sub">A disabled group</h3>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="surface">
+      <fieldset class="fd-stack" data-frame="2xl" disabled aria-describedby="dg-why">
+        <legend class="fd-field-label">Billing contact</legend>
+        <div class="fd-field">
+          <label class="fd-field-label" for="dg-email">Email</label>
+          <input class="fd-input" id="dg-email" type="email" value="billing@northwind.dev" autocomplete="off">
+        </div>
+        <div class="fd-field">
+          <label class="fd-field-label" for="dg-plan">Plan</label>
+          <label class="fd-select"><select id="dg-plan"><option>Scale</option><option>Team</option></select></label>
+        </div>
+        <div class="fd-options">
+          <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Send invoices</span></span></label>
+          <label class="fd-switch"><input type="checkbox" role="switch" checked><span class="fd-switch-track"></span><span class="fd-switch-text"><span class="fd-switch-label">Receipts by email</span></span></label>
+        </div>
+        <button class="fd-btn" type="button" data-variant="primary">Save contact</button>
+      </fieldset>
+      <p class="fd-reason-text" id="dg-why"><i data-icon="lock"></i><span><span class="fd-reason-why">Only billing admins can edit the contact.</span> <span class="fd-reason-who">Ask Maya Chen.</span></span></p>
+    </div>
     <ul class="doc-notes">
       <li>A <code class="fd-code">disabled</code> button or switch is safe with no script, but it leaves the tab order, so keyboard users never meet the reason. Where they should hear it, use <code class="fd-code">aria-disabled="true"</code> instead: the control stays focusable, looks the same, and the script stops its click (also for a submit button). Fire's button already styles both.</li>
       <li>A link that cannot be followed becomes a <code class="fd-code">&lt;a&gt;</code> with no <code class="fd-code">href</code>, <code class="fd-code">role="button"</code>, <code class="fd-code">tabindex="0"</code> and <code class="fd-code">aria-disabled="true"</code>. Never leave the <code class="fd-code">href</code> on a link that looks off.</li>
       <li>Say why in one sentence (<code class="fd-code">fd-reason-why</code>), then who can change it (<code class="fd-code">fd-reason-who</code>), by name or role. Not a tooltip: hover and focus hide it from touch. <code class="fd-code">data-layout="inline"</code> puts the line beside the control.</li>
+      <li>To turn off a whole group, put the controls in a <code class="fd-code">&lt;fieldset disabled&gt;</code> with a <code class="fd-code">&lt;legend&gt;</code> and give the reason in text beside it. Fire's base styles remove the browser's border, padding and minimum width from a fieldset, so it takes no space of its own, and every Fire control inside matches <code class="fd-code">:disabled</code> and looks as if it had the attribute itself. The reason is the fieldset's <code class="fd-code">aria-describedby</code>.</li>
     </ul>
   </section>
 

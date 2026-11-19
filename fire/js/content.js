@@ -99,7 +99,7 @@
  * Exports: init(root), dismiss(el), toggle(details, open?), hold(el, options), cancelHold(el), reopen(form),
  *   select(item), removeItem(item), setState(el, state), safeImageUrl(url, options)
  */
-import { $, $$, on, once, emit, reducedMotion, ensureId, label } from './core.js';
+import { $, $$, on, once, emit, reducedMotion, ensureId, label, focusQuiet } from './core.js';
 import { icon } from './icons.js';
 import { toast } from './overlays.js';
 
@@ -476,7 +476,7 @@ function openPreview(preview, button) {
   emit(preview, 'fd:open', { value: form ? new FormData(form) : null, trigger: button });
   const result = $('.fd-preview-result', preview);
   const focusTo = result && ($('.fd-impact', result) || result);
-  if (focusTo) { if (!focusTo.hasAttribute('tabindex')) focusTo.tabIndex = -1; focusTo.focus({ preventScroll: false }); }
+  if (focusTo) focusQuiet(focusTo, { preventScroll: false });
 }
 
 /* ---------- Queue ---------- */
@@ -498,7 +498,7 @@ export function select(item, { focus = true } = {}) {
   if (focus && narrow(queue)) {
     const panel = panels.find((p) => p.dataset.case === value) || $('.fd-queue-case', queue);
     const heading = panel && $('h1, h2, h3', panel);
-    if (heading) { if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1; heading.focus(); }
+    if (heading) focusQuiet(heading, { preventScroll: false });
   }
 }
 
@@ -536,7 +536,7 @@ export function setState(el, state) {
   if (focusWasIn && getComputedStyle(focusWasIn).display === 'none') {
     const shown = [...el.children].find((c) => (c.dataset.when || '').split(/\s+/).includes(state));
     const heading = shown && ($('.fd-empty-title, h1, h2, h3', shown) || shown);
-    if (heading) { if (!heading.hasAttribute('tabindex')) heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+    if (heading) focusQuiet(heading);
   }
   if (previous !== state) emit(el, 'fd:change', { value: state, previous });
 }

@@ -137,7 +137,7 @@
  *     `error` (default "Could not search {group}") shows in a note when the search rejects. Selecting a record fires
  *     fd:select like any item, with detail.data the record. The palette's empty state waits for every search to settle.
  */
-import { $$, on, once, emit, position, autoUpdate, focusables, trapFocus, ensureId, clamp, reducedMotion, label as fdLabel } from './core.js';
+import { $$, on, once, emit, position, autoUpdate, focusables, trapFocus, ensureId, clamp, reducedMotion, focusQuiet, label as fdLabel } from './core.js';
 import { icon } from './icons.js';
 
 const doc = document;
@@ -1203,9 +1203,9 @@ function focusDialog(dialog) {
   if (auto || field) { focusEl(auto || field); return; }
   const title = scope.querySelector('.fd-dialog-title, .fd-sheet-title');
   if (title && visible(title)) {
-    if (!title.hasAttribute('tabindex')) { title.tabIndex = -1; titleMade.add(title); }
-    focusEl(title);
-  } else focusEl(dialog);
+    if (!title.hasAttribute('tabindex')) titleMade.add(title);
+    focusQuiet(title);
+  } else focusQuiet(dialog);
 }
 
 function showStep(dialog, target, moveFocus = true) {

@@ -61,7 +61,7 @@
  * API: init(root), openHeader(header), closeHeader(header, { focus }), setPeriod(section, period), showPlan(section, n),
  *      filterPosts(section, filters, { page, push, replace, focus, silent }), setSignup(form, state, { silent })
  */
-import { $, $$, on, once, emit, reducedMotion, focusables, copyText, label } from './core.js';
+import { $, $$, on, once, emit, reducedMotion, focusables, copyText, label, focusQuiet } from './core.js';
 import { validateControl } from './forms.js';
 import { copied } from './code.js';
 import { upgradeIcons } from './icons.js';
@@ -506,8 +506,7 @@ function bindArticle() {
   on(doc, 'click', 'a.fd-site-notes-ref, a.fd-site-notes-back', (event, link) => {
     const target = doc.getElementById(decodeURIComponent((link.getAttribute('href') || '').slice(1)));
     if (!target) return;
-    if (!target.matches('a, button, input, select, textarea, [tabindex]')) target.setAttribute('tabindex', '-1');
-    requestAnimationFrame(() => target.focus({ preventScroll: true }));
+    requestAnimationFrame(() => focusQuiet(target));
   });
   on(doc, 'click', 'button[data-fd-copy-link]', async (event, button) => {
     const canonical = $('link[rel="canonical"]')?.href;

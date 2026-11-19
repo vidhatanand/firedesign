@@ -79,7 +79,7 @@
  *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max), selectJob(pipeline, value),
  *      selectOption(listbox, value), showDetail(listDetail, value, { focus }), showList(listDetail, { focus }).
  */
-import { $$, on, once, emit, copyText, label, ensureId } from './core.js';
+import { $$, on, once, emit, copyText, label, ensureId, focusQuiet } from './core.js';
 import { icon } from './icons.js';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
@@ -799,7 +799,7 @@ export function showDetail(root, value, { focus } = {}) {
   setView(root, 'detail');
   if (focus ?? single) {
     const target = ldFocusTarget(root);
-    target?.focus({ preventScroll: true });
+    focusQuiet(target);
     if (single) (target ?? root).scrollIntoView({ block: 'nearest' });
   }
   return item ?? null;

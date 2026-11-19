@@ -53,7 +53,7 @@
  * API: init(root), buildToc(scope), toMarkdown(article), setNavGroup(button, open), openNavSheet(trigger),
  *      selectSetup(tile), setPanelLang(panel, lang), setPanelExample(panel, example), setPicture(frame, url)
  */
-import { $, $$, once, emit, copyText, ensureId, position, reducedMotion, label } from './core.js';
+import { $, $$, once, emit, copyText, ensureId, position, reducedMotion, label, focusQuiet } from './core.js';
 import { icon } from './icons.js';
 import { openDialog, closeDialog, toast } from './overlays.js';
 import { selectTab, renderJSON } from './code.js';
@@ -649,8 +649,7 @@ function vote(button) {
     form.hidden = false;
     $('textarea', form)?.focus();
   } else {
-    thanks?.setAttribute('tabindex', '-1');
-    thanks?.focus({ preventScroll: true });
+    focusQuiet(thanks);
   }
   emit(box, 'fd:change', { value });
 }
@@ -667,8 +666,7 @@ async function sendFeedback(form) {
   const thanks = box && $('.fd-doc-helpful-thanks', box);
   if (thanks) {
     ($('[data-fd-doc-thanks-text]', thanks) || thanks).textContent = 'Sent. The docs team reads every note.';
-    thanks.setAttribute('tabindex', '-1');
-    thanks.focus({ preventScroll: true });
+    focusQuiet(thanks);
   }
   if (box) emit(box, 'fd:change', { value: 'sent' });
 }

@@ -74,7 +74,7 @@ export function startSettings({ fire, on, later }: Kit) {
       next.searchParams.set('tab', id);
       history.replaceState(history.state, '', next);
     }
-    if (focus) $('h2', panel).focus();
+    if (focus) fire.focusQuiet($('h2', panel));
     document.title = `${$('h2', panel).textContent} settings · Ember`;
   }
 

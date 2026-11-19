@@ -36,9 +36,9 @@
 <main class="doc-main">
   <header class="ov-hero">
     <div class="ov-hero-art" aria-hidden="true"><div class="fd-ascii" data-fd-ascii="terrain" data-interactive></div></div>
-    <p class="fd-eyebrow" data-tone="accent">Design system · 0.4</p>
+    <p class="fd-eyebrow" data-tone="accent">Design system</p>
     <h1>Fire</h1>
-    <p class="doc-lede">A design system for developer, agent and AI products: consoles, playgrounds, catalogs, logs, billing and chat-style agent screens. Plain CSS and small ES modules. One ink, one accent, hairlines instead of boxes.</p>
+    <p class="doc-lede">A design system for developer, agent and AI products: consoles, playgrounds, catalogs, logs, billing and chat-style agent screens, and the website, phone screens and emails around them. Plain CSS and small ES modules. One ink, one accent, hairlines instead of boxes.</p>
     <div class="fd-row ov-hero-actions" data-wrap data-gap="2">
       <a class="fd-btn" data-variant="primary" data-size="lg" href="../templates/index.html"><span>See the screens</span><i data-icon="arrow-right" data-nudge></i></a>
       <a class="fd-btn" data-size="lg" href="foundations.html"><span>Foundations</span></a>
@@ -94,9 +94,23 @@
   <section class="doc-section" id="families">
     <div class="doc-section-head">
       <h2 class="fd-h3">What is in it</h2>
-      <p>Sixteen component families, a texture engine, pre-built skeleton screens, email and thirty-two full screens.</p>
+      <p>Component families for apps, websites, phones and email, a texture engine, pre-built skeleton screens, page transitions and 42 full screens. Every part says which surface it belongs to: app, website, phone or email.</p>
     </div>
     <div class="fd-grid" data-gap="3" id="ov-families"></div>
+  </section>
+
+  <section class="doc-section" id="surfaces">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Where to start</h2>
+      <p>Fire builds four kinds of page. Each part's card lists the surfaces it suits, and the Catalogue filters by them.</p>
+    </div>
+    <div class="doc-table-wrap"><table class="doc-table"><thead><tr><th>You are building</th><th>Start at</th><th>Mark the page</th></tr></thead><tbody>
+      <tr><td>An app: a console, a dashboard, settings</td><td><a class="fd-link" href="shell.html">App shell</a> and the <a class="fd-link" href="../templates/index.html">screens</a></td><td><code class="fd-code">data-fd-surface="app"</code></td></tr>
+      <tr><td>A website: a home page, pricing, a blog, a report</td><td><a class="fd-link" href="site.html">Site foundation</a> and <a class="fd-link" href="site-sections.html">Sections</a></td><td><code class="fd-code">data-fd-surface="website"</code></td></tr>
+      <tr><td>A phone screen</td><td><a class="fd-link" href="shell.html#tabbar">The tab bar</a> and <a class="fd-link" href="transitions.html">Page transitions</a></td><td><code class="fd-code">data-fd-surface="phone"</code></td></tr>
+      <tr><td>An email</td><td><a class="fd-link" href="email.html">Email</a></td><td><code class="fd-code">data-fd-surface="email"</code></td></tr>
+    </tbody></table></div>
+    <p class="fd-muted">To start a project, copy a starter and read <a class="fd-link" href="frameworks.html">Frameworks and checks</a>. To look for a part by its job, run <code class="fd-code">npx fire find "&lt;what you need&gt;"</code> or open the <a class="fd-link" href="catalogue.html">Catalogue</a>.</p>
   </section>
 
   <section class="doc-section" id="from-volt">
@@ -137,7 +151,8 @@
     </figure>
     <ul class="doc-notes">
       <li>Serve the folder over HTTP (ES modules do not load from <code class="fd-code">file://</code>): <code class="fd-code">npm run dev</code>, then open <code class="fd-code">/docs/index.html</code>.</li>
-      <li><code class="fd-code">DESIGN.md</code> is the contract for adding to the system; <code class="fd-code">npm run audit</code> checks icons, tokens, class names and links.</li>
+      <li><code class="fd-code">DESIGN.md</code> is the contract for adding to the system; <code class="fd-code">npm run audit</code> checks icons, tokens, class names and links. <code class="fd-code">GUIDE.md</code> says how to build a product with it.</li>
+      <li>Install the package from the tagged release, and check your markup and your own CSS with <code class="fd-code">npx fire lint</code> and <code class="fd-code">npx fire lint-css</code>. See <a class="fd-link" href="frameworks.html">Frameworks and checks</a>.</li>
       <li>Fonts are Geist and Geist Mono (OFL); icons are a subset of Lucide (ISC). All are vendored.</li>
     </ul>
   </section>
@@ -160,7 +175,12 @@
     ['decisions', 'Decisions', 'list-checks', 'Briefs, drafts, reasons, held commits with Undo, queues, previews and page states.'],
     ['signature', 'Texture & frame', 'grid-3x3', 'Generative character fields, dot grids, crosshair marks, shimmer text.'],
     ['skeletons', 'Skeletons & loading', 'loader', 'Spinners, text loaders and pre-built skeleton screens that swap without a jump.'],
-    ['email', 'Email', 'mail', 'A transactional email in the product\'s look, as HTML and text.'],
+    ['email', 'Email', 'mail', 'Transactional and newsletter emails in the product\'s look, as HTML and text.'],
+    ['site', 'Site foundation', 'globe', 'The container, breakpoints, fluid type, grounds, pictures and treatments of a public website.'],
+    ['site-sections', 'Sections', 'layout-list', 'Fifteen website sections: header, hero, pricing, FAQ, footer, an article and a filtered listing.'],
+    ['transitions', 'Page transitions', 'route', 'Opt in, and only the page changes: the sidebar, bars and header hold still.'],
+    ['elements', 'Custom elements', 'blocks', 'Icon, chart, code and texture as Lit elements, for frameworks that own the DOM.'],
+    ['catalogue', 'Catalogue', 'search', 'Every part, pattern and template, filtered by surface, kind and data, with a picture of each.'],
   ];
   document.getElementById('ov-families').innerHTML = families.map(([slug, name, ic, text]) => `
     <a class="fd-card" data-interactive href="${slug}.html">
@@ -180,7 +200,7 @@
   document.getElementById('ov-width').addEventListener('fd:change', (e) => { frame.dataset.width = e.detail.value; });
   // The preview follows this page live: the theme and every tweak are attributes and custom properties on <html>,
   // so they are copied across as they change. (It also shares localStorage, so a reload keeps them.)
-  const LOOK = ['data-theme', 'data-palette', 'data-type', 'data-density', 'data-contrast', 'data-text-size', 'style'];
+  const LOOK = ['data-theme', 'data-palette', 'data-type', 'data-density', 'data-contrast', 'data-text-size', 'data-surfaces', 'data-elevation', 'data-controls', 'data-headings', 'data-imagery', 'style'];
   const sync = () => {
     try {
       const from = document.documentElement;

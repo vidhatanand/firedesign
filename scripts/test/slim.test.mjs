@@ -70,6 +70,51 @@ test('API use: named, namespace and dynamic imports from fire-design keep their 
   assert.ok(!r.report.unknown.some((u) => /PageState/.test(u.name)), 'a type import is not a name');
 });
 
+const BY_PATH = path.join(ROOT, 'scripts/test/fixtures/slim/by-path');
+const byPath = async (sources) => (await slim({ sources, cwd: BY_PATH, out: path.join(tmp(), 'out'), level: 'component' })).report;
+
+test('Fire imported by path: every form keeps the modules it names, as the package does', async () => {
+  const r = await byPath(['index.html', 'shell.js']);
+  const mods = Object.keys(r.kept.modules);
+  for (const m of ['shell', 'overlays', 'tweaks', 'charts', 'nav', 'filters', 'content', 'code']) assert.ok(mods.includes(m), `${m} is kept: ${mods}`);
+  assert.match(r.kept.modules.tweaks, /^shell\.js:2 \(tweaks\)$/, 'a named import from /fire/fire.js');
+  assert.match(r.kept.modules.charts, /^shell\.js:3 \(charts\)$/, 'a relative path');
+  assert.match(r.kept.modules.content, /^shell\.js:4 \(\/fire\/js\/content\.js\)$/, 'one module file');
+  assert.match(r.kept.modules.nav, /^shell\.js:11 \(nav\)$/, 'a namespace import read through a member');
+  assert.match(r.kept.modules.filters, /^shell\.js:7 \(filters\)$/, 'a destructured import() of the entry');
+  assert.match(r.kept.modules.code, /^shell\.js:8 \(\/fire\/js\/code\.js\)$/, 'import() of one module file');
+  for (const m of ['agent', 'chat', 'site', 'docsite', 'texture', 'transitions']) assert.ok(r.dropped.modules.includes(m), `${m} is dropped`);
+  assert.deepEqual(r.loadedBy.unresolved, []);
+  assert.equal(r.unknown.length, 0, JSON.stringify(r.unknown));
+});
+
+test('Fire imported by path: a namespace used where no member can be read keeps every module and says where', async () => {
+  const r = await byPath(['loose.html']);
+  assert.deepEqual(Object.keys(r.kept.modules), Object.keys(map.modules));
+  assert.deepEqual(r.loadedBy.unresolved, [{ at: 'loose.html:10', specifier: '/fire/fire.js' }]);
+  assert.match(r.kept.modules.charts, /^loose\.html:10 .*no member can be read/);
+  assert.deepEqual(r.dropped.modules, []);
+  const lone = await product({ 'a.js': "const f = import('/fire/fire.js');", 'b.js': "const { init } = await import('/fire/fire.js');\nimport('/fire/fire.js').then((F) => F.nav.go());" });
+  assert.deepEqual(lone.report.loadedBy.unresolved.map((u) => u.at), ['a.js:1']);
+});
+
+test('Fire loaded by a script tag alone: the markup decides, and the report names the tag and the path', async () => {
+  const r = await byPath(['tag-only.html']);
+  assert.deepEqual(Object.keys(r.kept.modules), ['overlays', 'content'], 'what the card and the base need, nothing the tag adds');
+  assert.ok(r.kept.components.card && !r.kept.components.chart);
+  assert.deepEqual(r.loadedBy, { by: 'path', specifiers: ['../fire/fire.js'], tags: [{ at: 'tag-only.html:9', src: '../fire/fire.js' }], unresolved: [] });
+});
+
+test('loadedBy says package, path or both; package imports are read exactly as before', async () => {
+  const pkg = await product({ 'a.ts': "import { overlays } from 'fire-design';\nimport * as F from 'fire-design';\nregister(F);" });
+  assert.deepEqual(pkg.report.loadedBy, { by: 'package', specifiers: ['fire-design'], tags: [], unresolved: [] });
+  assert.deepEqual(Object.keys(kept(pkg).modules), ['overlays', 'content'], 'a package namespace passed around is not followed');
+  const both = await product({ 'a.ts': "import { overlays } from 'fire-design';", 'b.ts': "import { charts } from '/fire/fire.js';" });
+  assert.equal(both.report.loadedBy.by, 'both');
+  assert.deepEqual(both.report.loadedBy.specifiers, ['/fire/fire.js', 'fire-design']);
+  assert.equal((await product({ 'p.html': '<button class="fd-btn">Go</button>' })).report.loadedBy.by, 'none');
+});
+
 test('what Fire\'s behaviour builds is kept: a date field, the combined filter, a copy that raises a toast', async () => {
   const date = await product({ 'p.html': '<div class="fd-datefield" data-fd-datefield><input class="fd-input"></div>' });
   assert.ok(kept(date).modules.forms, 'forms runs the date field');

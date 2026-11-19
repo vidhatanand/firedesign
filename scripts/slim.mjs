@@ -37,6 +37,12 @@
  *     palette) and type set, plus any data-palette / data-type the source writes; @font-face rules for the families
  *     left; at `component`, dial values (data-density="compact" …) that neither the record, the source nor a kept
  *     module can set. A product with the Tweaks panel keeps every palette, type set and dial.
+ * Fire is read when it is imported by the package name or by a path whose last segments are fire/fire.js (all of Fire)
+ * or fire/js/<name>.js (one module, which is kept): static imports, import('…'), re-exports and namespace imports read
+ * through members (F.tweaks.open()). By path, a namespace or default import used where no member can be read, or an
+ * import() whose result is not taken apart in place, keeps every module, and slim.json says where (loadedBy). A
+ * <script src=".../fire/fire.js"> tag changes nothing (the markup decides) and is listed. A product that loads Fire by
+ * path must point that path at this output (replace the folder it names, or alias it) for the build to use it.
  * Class names built at run time from strings no scan can read (`fd-badge-${tone}`, className={cls}) are listed in
  * the report with file and line; keep what they make with --include.
  * It does not rewrite markup, split per route, or minify: the bundler does the last.
@@ -54,7 +60,13 @@ const DIALS = ['data-density', 'data-text-size', 'data-contrast', 'data-surfaces
   'data-imagery', 'data-heading-case', 'data-figures', 'data-signature-field', 'data-signature-mark', 'data-signature-cell',
   'data-signature-ramp', 'data-signature-marks', 'data-signature-intensity'];
 const TRACKED = (name) => name.startsWith('data-fd-') || /^data-(?:[\w-]+-)?shell$/.test(name) || name === 'data-only' || name === 'data-doc-show';
-const SPEC = /^(?:fire-design|fire-design\/fire\/fire\.js|(?:\.{1,2}\/)+(?:[\w.-]+\/)*fire\/fire\.js)$/;
+// A module specifier that is Fire: the package (`fire-design`), or a path whose last segments are fire/fire.js (all of
+// Fire) or fire/js/<name>.js (one module). Returns { kind: 'package' | 'path', mod: the one module, or null }.
+const SPEC = (s) => {
+  if (s === 'fire-design' || s === 'fire-design/fire/fire.js') return { kind: 'package', mod: null };
+  const p = !s.startsWith('fire-design/') && /(?:^|\/)fire\/(?:fire|js\/([\w-]+))\.js$/.exec(s.replace(/[?#].*$/, ''));
+  return p ? { kind: 'path', mod: p[1] || null } : null;
+};
 const camel = (attr) => attr.replace(/^data-/, '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 const size = (buf) => ({ raw: buf.length, gzip: zlib.gzipSync(buf, { level: 9 }).length });
 
@@ -64,7 +76,7 @@ export function scan(files, { map, catalog, cwd = process.cwd() }) {
   const classOf = new Map(Object.entries(catalog.classes));
   const tagOf = new Map(catalog.components.filter((c) => c.element).map((c) => [c.element, c.id]));
   const found = { components: new Map(), modules: new Map(), attributes: new Map(), names: new Map(), dynamic: [], unknown: [],
-    text: '', elements: false };
+    text: '', elements: false, loaded: { package: new Set(), path: new Set(), tags: [], unresolved: [] } };
   const first = (m, key, where) => { if (!m.has(key)) m.set(key, where); };
   const attr = (name, value, where) => {
     const a = found.attributes.get(name) ?? { values: new Set(), any: false, where };
@@ -87,6 +99,8 @@ export function scan(files, { map, catalog, cwd = process.cwd() }) {
     const parts = [[kind, text, 0]];
     if (kind === 'html' || kind === 'vue') {
       for (const m of text.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+        const src = /\bsrc\s*=\s*["']?([^"'\s>]+)/i.exec(m[1])?.[1];
+        if (src && SPEC(src)?.kind === 'path') { found.loaded.path.add(src); found.loaded.tags.push({ at: at(m.index), src }); }
         if (/type\s*=\s*["']?(?:application\/(?:ld\+)?json|importmap)/i.test(m[1])) continue;
         parts.push([/lang\s*=\s*["']?[jt]sx/.test(m[1]) ? 'jsx' : 'lit', m[2], m.index + m[0].indexOf('>') + 1]);
       }
@@ -133,48 +147,77 @@ export function scan(files, { map, catalog, cwd = process.cwd() }) {
 }
 
 function imports(code, base, at, found, map) {
-  const handles = new Set();
-  const name = (n, where) => {
+  const handles = new Set(), pathHandles = new Map();   // names bound to Fire's namespace; those of a path import, where
+  const name = (n, where, quiet) => {
     n = n.trim();
     if (!n || /^type\s/.test(n)) return;
-    if (!(n in map.exports)) { found.unknown.push({ at: where, name: `${n} (not an export of fire-design)` }); return; }
+    if (!(n in map.exports)) { if (!quiet) found.unknown.push({ at: where, name: `${n} (not an export of fire-design)` }); return; }
     if (!found.names.has(n)) found.names.set(n, where);
     const m = map.exports[n];
     if (map.modules[m]) { if (!found.modules.has(m)) found.modules.set(m, `${where} (${n})`); }
   };
-  const list = (clause, where) => { for (const part of clause.split(',')) name(part.split(/\s+as\s+/)[0], where); };
+  const list = (clause, where, quiet) => { for (const part of clause.split(',')) name(part.split(/\s+as\s+/)[0], where, quiet); };
+  // One module file (/fire/js/tweaks.js) keeps that module; the whole of Fire, by path, is read like the package.
+  const seen = (s, spec, where) => {
+    found.loaded[s.kind].add(spec);
+    if (s.mod && map.modules[s.mod] && !found.modules.has(s.mod)) found.modules.set(s.mod, `${where} (${spec})`);
+  };
+  const keepAll = (where, spec) => {   // a namespace read where no member can be named: every module stays
+    found.loaded.unresolved.push({ at: where, specifier: spec });
+    for (const m of Object.keys(map.modules)) if (!found.modules.has(m)) found.modules.set(m, `${where} (Fire's namespace is used where no member can be read)`);
+  };
   let fire = false;
   for (const m of code.matchAll(/\bimport\s+(type\s+)?([\w$*{}\s,]*?)\s*from\s*['"]([^'"]+)['"]/g)) {
     if (/^fire-design\/(elements|react)$|\/fire\/elements\.js$/.test(m[3])) found.elements = true;
     if (/^fire-design\/(react|vue)$/.test(m[3])) fire = true;
-    if (m[1] || !SPEC.test(m[3])) continue;
-    fire = true;
+    const spec = SPEC(m[3]);
+    if (m[1] || !spec) continue;
     const where = at(base + m.index);
+    seen(spec, m[3], where);
+    if (!spec.mod) fire = true;
     const ns = /\*\s*as\s+([\w$]+)/.exec(m[2]);
-    if (ns) handles.add(ns[1]);
+    const dflt = spec.kind === 'path' && /^\s*([\w$]+)\s*(?:,|$)/.exec(m[2]);
+    for (const h of [ns?.[1], dflt?.[1]]) if (h) { handles.add(h); if (spec.kind === 'path' && !spec.mod) pathHandles.set(h, [where, m[3]]); }
     const named = /\{([^}]*)\}/.exec(m[2]);
-    if (named) list(named[1], where);
+    if (named) list(named[1], where, !!spec.mod);
   }
+  for (const m of code.matchAll(/\bimport\s*['"]([^'"]+)['"]/g)) { const spec = SPEC(m[1]); if (spec) seen(spec, m[1], at(base + m.index)); }
   for (const m of code.matchAll(/\bexport\s+(\*|\{[^}]*\})\s*from\s*['"]([^'"]+)['"]/g)) {
-    if (!SPEC.test(m[2])) continue;
-    if (m[1] === '*') for (const n of Object.keys(map.exports)) name(n, at(base + m.index)); else list(m[1].slice(1, -1), at(base + m.index));
+    const spec = SPEC(m[2]);
+    if (!spec) continue;
+    seen(spec, m[2], at(base + m.index));
+    if (m[1] === '*') { if (!spec.mod) for (const n of Object.keys(map.exports)) name(n, at(base + m.index)); } else list(m[1].slice(1, -1), at(base + m.index), !!spec.mod);
   }
   for (const m of code.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)(?:\s*\.then\(\s*(?:\(\s*\{([^}]*)\}\s*\)|\(?\s*([\w$]+)))?/g)) {
     if (/^fire-design\/elements$|\/fire\/elements\.js$/.test(m[1])) found.elements = true;
-    if (!SPEC.test(m[1])) continue;
+    const spec = SPEC(m[1]);
+    if (!spec) continue;
+    const where = at(base + m.index);
+    seen(spec, m[1], where);
+    if (spec.mod) continue;
     fire = true;
-    if (m[2]) list(m[2], at(base + m.index));
-    if (m[3]) handles.add(m[3]);
+    if (m[2]) list(m[2], where);
+    if (m[3] && !/^(?:function|async)$/.test(m[3])) handles.add(m[3]);
     const before = code.slice(Math.max(0, m.index - 80), m.index);
     const bound = /(?:const|let|var)\s+(?:([\w$]+)|\{([^}]*)\})\s*=\s*await\s*$/.exec(before);
     if (bound?.[1]) handles.add(bound[1]);
-    if (bound?.[2]) list(bound[2], at(base + m.index));
+    if (bound?.[2]) list(bound[2], where);
+    if (spec.kind === 'path') {   // by path, a result that is not taken apart in place has to be followed
+      const first = m[3] && !/^(?:function|async)$/.test(m[3]) ? m[3] : bound?.[1];
+      if (first) pathHandles.set(first, [where, m[1]]); else if (!m[2] && !bound?.[2]) keepAll(where, m[1]);
+    }
   }
-  if (!fire) return;
-  handles.add('fire');   // the usual name for loadFire()'s result, a kit's `fire`, or import('fire-design')
+  if (!fire && !handles.size) return;
+  if (fire) handles.add('fire');   // the usual name for loadFire()'s result, a kit's `fire`, or import('fire-design')
   const h = [...handles].map((x) => x.replace(/\$/g, '\\$')).join('|');
   for (const m of code.matchAll(new RegExp(`(?<![\\w$])(?:${h})\\s*\\??\\.\\s*([A-Za-z_$][\\w$]*)`, 'g'))) if (m[1] in map.exports) name(m[1], at(base + m.index));
   for (const m of code.matchAll(new RegExp(`\\{([^{}]*)\\}\\s*=\\s*(?:await\\s+)?(?:${h})\\b`, 'g'))) list(m[1].replace(/:\s*[\w$]+/g, ''), at(base + m.index));
+  for (const [id, [where, spec]] of pathHandles) {   // anything left of the handle besides its binding, member reads and destructuring
+    const e = id.replace(/\$/g, '\\$');
+    const rest = code.replace(new RegExp(`\\*\\s*as\\s+${e}\\b|(?:const|let|var)\\s+${e}\\s*=\\s*await\\b|\\.then\\(\\s*\\(?\\s*${e}\\b|import\\s+${e}\\s*(?=,|from)|\\{[^{}]*\\}\\s*=\\s*(?:await\\s+)?${e}\\b`, 'g'), ' ')
+      .replace(new RegExp(`(?<![\\w$.])${e}\\s*\\??\\.\\s*[A-Za-z_$]`, 'g'), ' ');
+    if (new RegExp(`(?<![\\w$.])${e}(?![\\w$])`).test(rest)) keepAll(where, spec);
+  }
 }
 
 /* ------------------------------------------------------------------ the closure */
@@ -449,6 +492,11 @@ export async function slim(opts) {
       stylesheets: css.sheets.filter((s) => !s.kept).map((s) => s.file),
       fonts: fullFonts.filter((f) => !css.fonts.includes(f)).sort(),
     },
+    // How the product loads Fire: by the package name, by a path (/fire/fire.js, ../fire/js/content.js, a <script> tag), or both.
+    // By path, the product must point that path at this output (replace the folder, or alias it) for the build to use it;
+    // `unresolved` lists where Fire's namespace is used so that every module had to be kept.
+    loadedBy: { by: found.loaded.package.size && found.loaded.path.size ? 'both' : found.loaded.path.size ? 'path' : found.loaded.package.size ? 'package' : 'none',
+      specifiers: [...found.loaded.package, ...found.loaded.path].sort(), tags: found.loaded.tags, unresolved: found.loaded.unresolved },
     dynamic: found.dynamic,
     unknown: [...found.unknown, ...css.unknown.map((name) => ({ at: 'Fire\'s CSS', name }))],
     sizes: {
@@ -564,6 +612,10 @@ async function main(argv) {
       console.log(`modules: ${Object.entries(report.kept.modules).map(([m, w]) => `${m} (${w})`).join('\n         ')}`);
       console.log(`dropped modules: ${report.dropped.modules.join(', ') || 'none'}; stylesheets: ${report.dropped.stylesheets.join(', ') || 'none'}`);
       if (report.tweaks) console.log(report.tweaks);
+      const lb = report.loadedBy;
+      if (lb.by !== 'package' && lb.by !== 'none') console.log(`Fire is loaded by path (${lb.specifiers.join(', ')}): point that path at ${rel} for the build to use it`);
+      for (const t of lb.tags) console.log(`script ${t.src}  ${t.at}  (loads Fire by path; markup decides what is kept)`);
+      for (const u of lb.unresolved) console.log(`every module kept: Fire's namespace from ${u.specifier} is used where no member can be read  ${u.at}`);
       for (const d of report.dynamic) console.log(`dynamic class ${d.expr}  ${d.at}  (keep what it builds with --include)`);
       for (const u of report.unknown) console.log(`unknown ${u.name}  ${u.at}`);
     }

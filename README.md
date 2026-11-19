@@ -25,7 +25,7 @@ Then open http://127.0.0.1:4747/docs/index.html.
 | Writing the words on a screen | [WRITING.md](WRITING.md): how to write labels, buttons, help text, empty states and errors so the interface stays clean and useful |
 | Setting up an AI agent to build with Fire | [AGENT-RULES.md](AGENT-RULES.md): the rules, and the three-line pointer for a project's `AGENTS.md` |
 | Adding to or changing Fire itself | [DESIGN.md](DESIGN.md): the contract every contribution follows |
-| Looking up a class or attribute | [docs/_ref/VOCABULARY.md](docs/_ref/VOCABULARY.md) |
+| Looking up a class or attribute | [docs/_ref/CLASSES.md](docs/_ref/CLASSES.md), every class, generated from the catalogue; [docs/_ref/VOCABULARY.md](docs/_ref/VOCABULARY.md) explains the common ones |
 | Updating a product to a newer Fire | [CHANGELOG.md](CHANGELOG.md): what changed in each release and what to check |
 | Asking for a component or an extension | GUIDE.md section 7, then the "Component or extension request" issue template |
 

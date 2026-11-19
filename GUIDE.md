@@ -11,7 +11,7 @@ Read in this order: this guide, then the live docs (`npm run dev`, open `/docs/i
 | Every component, with markup to copy | `docs/*.html` (each specimen has a "Markup" view) |
 | Full screens to start from | `templates/*.html` (42: app screens, decisions, settings, audit, status pages, sign-in split or centred, onboarding, ten website pages, a docs site, the shell as plain markup) |
 | The part for a job | `npx fire find "<what you need>"` (section 8), the Catalogue page (`docs/catalogue.html`, with a picture of each part), or `contract/catalog.json` and `contract/index.json` |
-| The list of every class and attribute | `docs/_ref/VOCABULARY.md` |
+| The list of every class and attribute | `docs/_ref/CLASSES.md` (generated, complete); `docs/_ref/VOCABULARY.md` explains the common ones |
 | The rules of the system | `DESIGN.md` |
 | The styles and behaviour themselves | `fire/` (the only folder a product ships) |
 
@@ -29,7 +29,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 ```
 
 3. Serve over HTTP. ES modules do not load from `file://`.
-4. Copy `GUIDE.md`, `WRITING.md`, `AGENT-RULES.md` and `docs/_ref/VOCABULARY.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
+4. Copy `GUIDE.md`, `WRITING.md`, `AGENT-RULES.md`, `docs/_ref/VOCABULARY.md` and `docs/_ref/CLASSES.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
 
 **With a framework.** Fire's markup is the same in every framework; what changes is how a framework writes some attributes, owns some elements, and hears Fire's events. Start from a starter, which is already wired and proven to render exactly like Fire's own templates:
 
@@ -88,7 +88,7 @@ Every part belongs to one or more surfaces: app, website, phone or email (the `s
 
 These keep a product looking like one product. They apply to people and to AI agents equally.
 
-1. **Only Fire classes.** Every class in your markup starts with `fd-` and exists in `VOCABULARY.md`. No page-specific stylesheets and no `<style>` blocks.
+1. **Only Fire classes.** Every class in your markup starts with `fd-` and exists in `CLASSES.md`. No page-specific stylesheets and no `<style>` blocks.
 2. **No pixel values in markup, and no `style` attributes.** Pass a token to a component parameter (`data-fd-vars="--fd-panel-w: var(--fd-size-xl)"`), a relative value (`72%`) or a unitless number (`--value: 0.62`) with `data-fd-vars`, never with `style`. Custom properties are set from JS with `setProperty`, so pages work under a strict Content Security Policy. Nothing else.
 3. **Structure decides width.** Never set a width or a height on an element. Place things with a stack, a row, a grid or a column (section 5), and let components bring their own sizes.
 4. **Variants are attributes.** Use `data-variant`, `data-size`, `data-tone` and `data-state` as the docs show. Do not override a component's look from outside.

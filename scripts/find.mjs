@@ -2,7 +2,8 @@
 // fire find: search Fire by what a part is for.
 //   node scripts/find.mjs "approve a request" [--surface app|website|phone|email] [--data record|list|series|form|text]
 //                         [--kind component|pattern|section|template|module] [--json] [--limit 5]
-// --json results carry id, kind, family, surfaces, score, why, job, use, instead, docs and picture (a path, relative to the package root, to the PNG of the part; modules have none).
+// --json results carry id, kind, family, surfaces, score, why, job, use, instead, docs and picture (a path, relative to the
+// repository root, to the PNG of the part; modules have none, and so does every result when Fire is installed as a package, which leaves the pictures out).
 // Each result prints its surfaces. With --surface, a line says when parts for other surfaces match the query clearly
 // better (to stderr with --json, so stdout stays the array; each JSON result carries `surfaces`).
 // Reads contract/index.json (node scripts/build-index.mjs builds it). No dependencies, no network.
@@ -124,9 +125,16 @@ for (const row of SYNONYMS) for (const a of row) {
 
 export function load(file = INDEX) {
   const idx = JSON.parse(fs.readFileSync(file, 'utf8'));
-  // the picture rule is written once at the top of the index; every result carries the path it gives
+  // The picture rule is written once at the top of the index; every result carries the path it gives, when the file is
+  // there. The pictures live in the Fire repository and are left out of the installed package (they are 9 MB of
+  // screenshots no product page loads), so in a product's node_modules a result simply has no picture.
   const rule = idx.pictures;
-  if (rule) for (const e of idx.entries) if (!rule.none.includes(e.kind)) e.picture = rule.path.replace('{kind}', e.kind).replace('{id}', e.id);
+  const root = path.resolve(path.dirname(file), '..');
+  if (rule) for (const e of idx.entries) {
+    if (rule.none.includes(e.kind)) continue;
+    const rel = rule.path.replace('{kind}', e.kind).replace('{id}', e.id);
+    if (fs.existsSync(path.join(root, rel))) e.picture = rel;
+  }
   const docs = idx.entries.map((e) => ({
     e,
     id: toks(e.id.replace(/-/g, ' ')), name: toks(e.name),

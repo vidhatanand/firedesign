@@ -37,7 +37,7 @@ If you need another family's component in a demo, use its name from this list; i
 
 ## Added in 0.8
 
-These entries complement the family lines above. The catalogue, `contract/catalog.json`, is the complete list of classes and values.
+These entries complement the family lines above. `CLASSES.md`, beside this file, is the complete list of classes and values, generated from the catalogue (`contract/catalog.json`).
 
 **Shell**
 

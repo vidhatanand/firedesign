@@ -2,7 +2,7 @@
 
 These are the rules an AI agent follows when it builds or changes an interface in a product that uses Fire. They live in Fire, not in the product, so that updating Fire updates the rules.
 
-**For the product's owner.** Copy this file into the project beside `GUIDE.md`, `WRITING.md` and `VOCABULARY.md`, then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`). Adjust the three paths once; after that the pointer never needs to change.
+**For the product's owner.** Copy this file into the project beside `GUIDE.md`, `WRITING.md`, `VOCABULARY.md` and `CLASSES.md`, then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`). Adjust the three paths once; after that the pointer never needs to change.
 
 ```markdown
 ## Interface: the Fire design system
@@ -20,7 +20,7 @@ Anything the project's own instructions say more specifically (its layouts, its 
 |---|---|
 | Build or change any screen | `GUIDE.md` |
 | Write any text that appears on a screen | `WRITING.md` |
-| Use a class or an attribute | `VOCABULARY.md` (if it is not listed there, it does not exist) |
+| Use a class or an attribute | `CLASSES.md`, the complete generated list (if it is not listed there, it does not exist); `VOCABULARY.md` explains the common ones |
 | Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Search with `--surface` set to where the page is used. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example`; `--json` gives the path of its picture, which you can open |
 | Build a public website | `GUIDE.md` section 5, "A public website", then `docs/site.html` and `docs/site-sections.html` (articles, listings, sign-up and pictures are there too) |
 | Add your own CSS or tokens | `GUIDE.md` section 7, "Your own CSS and tokens" |

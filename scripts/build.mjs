@@ -17,6 +17,7 @@ const steps = [
   ['build-contract.mjs', check ? ['--check'] : []],
   ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card
   ['build-index.mjs', check ? ['--check'] : []],     // the search index, from the catalogue
+  ['build-classes.mjs', check ? ['--check'] : []],   // docs/_ref/CLASSES.md: every class, from the catalogue
   ['build-pictures.mjs', check ? ['--check'] : [], { onlyCheck: true }],   // a picture for every index entry (the render is `npm run build:pictures`)
   ['gate.mjs', check ? ['--check', '--no-look'] : ['--no-look']],   // near-duplicates by structure and job (npm run gate adds the look)
   ['build-wrappers.mjs', check ? ['--check'] : [], { optional: true }],

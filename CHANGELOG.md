@@ -187,6 +187,11 @@ removed or renamed: every class and attribute value in 0.7.0's catalogue is stil
   about 9 MB). `contract/index.json` names the rule in `pictures`, `npx fire find --json` returns each result's
   `picture`, and `npm run build:pictures` renders them again. `node scripts/build.mjs --check` fails when an entry has
   no picture or a picture has no entry.
+  The pictures are in the repository and are left out of the installed package, which stays under 2 MB; there a
+  result has no `picture`.
+- `docs/_ref/CLASSES.md` lists every class with its parts, attributes, values, state and events. It is generated from
+  the catalogue (`node scripts/build-classes.mjs`, part of the build), so it is always complete; `VOCABULARY.md`
+  explains the common parts in prose.
 - The catalogue lists 184 components, patterns, layouts and sections (154, 10, 5 and 15), up from 163, and 4 modules, up
   from 3 (`transitions` is new). `contract/index.json` has 230 entries, and the size check on it allows 30,000 tokens.
 - **Starters**: each has the tab bar, `data-fd-surface="app"` on `<html>`, lint-css beside the markup lint in its check

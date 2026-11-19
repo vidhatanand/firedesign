@@ -41,6 +41,12 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 
 Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.9.0"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
 
+**The Lit starter is the place to start an app.** Add a screen as a route in `src/routes.ts` with
+`load: () => import(…)` and import it nowhere else, so the build gives it its own file. Write links to app pages with
+`href()`. Replace `src/lib/session.ts` with your sign-in and permissions; guards read it. The starter's README lists
+what your host must do: answer every app path with `index.html`, cache the hashed files as immutable, never cache
+`index.html`, send the content-security policy as a header, and compress.
+
 **Production builds are trimmed.** `npx fire slim src index.html --out .fire-slim --theme theme.json` reads your source
 and writes a Fire with only the stylesheets, behaviour modules, palette and fonts it uses, with a report of what was
 kept and why. Point the production build at that folder (the starters do it with one alias) and keep the whole of

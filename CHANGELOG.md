@@ -33,6 +33,26 @@ removed or renamed.
   behaviour 241 to 219 kB in the Lit starter) because their shells carry the Tweaks panel and the support chat, which
   keep every palette, type set and font.
 
+- **The Lit starter has a production router** (`starters/lit-vite/src/lib/router.ts`, 243 lines, no dependency;
+  the table is `src/routes.ts`). Paths take parameters (`/logs/:id`); a route loads its screen on first visit
+  (`load: () => import(…)`) and prefetches it when its link is hovered or focused; guards may be async and return
+  true or a path to redirect to, with the session in `src/lib/session.ts` to replace; an unknown address shows a
+  not-found screen; a base path lets an app live under a prefix (Vite's `base` is the one setting). After each
+  navigation the title is set and announced, focus moves to the new screen's heading, and scroll goes to the top or
+  is restored on back and forward. While a screen loads the current one stays and Fire's page bar shows; a screen
+  that fails to load shows an error with Try again.
+- **The Lit starter's build splits per route**, with Lit, Fire and the starter's own library in stable shared files,
+  and preloads the interface font. Its check prints every file's size, fails when a budget in `package.json`
+  (`fire.budget`: first-route script, largest route, stylesheet) is exceeded, and proves the routing: a deep link,
+  the guard, not-found, back and forward, lazy loading, the title, a failed load. The script for the first route
+  goes from 221.6 kB gzipped in one file to 196.5 kB in five; Fire's behaviour is 178 kB of that and loads whole
+  (see "Known limits"). The starter's README has "Going to production": what the host must do.
+- **`fire slim` understands Fire loaded by a file path** (`/fire/fire.js`, `../fire/fire.js`, `…/fire/js/<name>.js`,
+  `import()` of either, and a namespace import read through its members), as it does imports from `fire-design`. A
+  namespace used where no member can be read keeps every module, and the report says where. `slim.json` gains
+  `loadedBy` (package, path, both or none). A product that loads Fire by path must point that path at the slim
+  output.
+
 ### Changed
 
 - `scripts/lint-markup.mjs` exports its tokeniser (`scanSource`, `HOLE`) for `fire slim`.
@@ -48,6 +68,15 @@ removed or renamed.
 
 - Behaviour is trimmed by module, not by function: one field keeps the whole forms module, one toast the whole
   overlays module. Splitting those modules would save more and is not done.
+- Fire's behaviour loads in one piece on the first route, even with routes split: its `init()` reaches every module
+  the build kept. Loading a module with the first screen that needs it would need a change in `fire slim`.
+- Under `style-src 'self'`, WebKit logs a `style-src-attr` report for every `<select>` element, with or without Fire
+  (a bare page does the same). Nothing is refused and nothing renders differently; seen in Playwright's WebKit, not
+  checked in Safari.
+- Fire's own templates wire their demonstration behaviour with an inline module script, so a template page served
+  as it is does not run under `script-src 'self'`. The starters, which are what a product copies, do.
+- The router's steps in the Lit starter's check run in Chromium only; a failed screen load was not tested in real
+  Safari, and no real host or CDN was tested.
 - A value written from an expression (`data-variant=${…}`) keeps every variant's rules.
 - With `--theme`, a saved Tweaks look or `?look=` cannot bring back a palette or type set the build dropped.
 - The comparison of Fire's own templates at component level ran in Chromium only; the starters' checks ran in all

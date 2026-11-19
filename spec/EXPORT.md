@@ -440,9 +440,12 @@ applies.
 - **Exercised by the starters since 0.8**: W1 (the lint runs with `--surface app`), W2 (the tab bar is in each shell and
   in the render-equal comparison; the Lit check presses More), W3 (the `?state=` checks) and R14 and R15 (the Next
   starter and the pixel shots). L8 is in all three starters, but no check asserts the motion; it was seen in Chromium.
+- **Exercised by the Lit starter since 0.9**: L3 for Lit. The starter's outlet creates one element per route tag, sets
+  `params` and `query`, awaits its `updateComplete`, and `FireLight` runs `init(this)`; its check proves a deep link, a
+  guard, not-found, back and forward, and lazy loading (Chromium).
 - **Assumptions the starters must prove** [A]:
   - C7, the typing.
-  - L3 for Lit and Vue routers.
+  - L3 for the Vue router.
   - L6 inside a shadow root.
   - N2's `next/script` claim.
   - N7, N8.

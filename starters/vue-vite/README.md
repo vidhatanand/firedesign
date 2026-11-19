@@ -8,7 +8,9 @@ written as Vue single-file components from Fire's own templates, and proves the 
 ## What it shows
 
 - **The shell** (`src/layouts/AppShell.vue`): sidebar, top bar and phone menu from `templates/shell-static.html`, with
-  go-to keys (`data-fd-keys`), the running-now pill, the service status, the command palette and the shortcut sheet. The
+  go-to keys (`data-fd-keys`), the running-now pill, the service status, the command palette and the shortcut sheet. On a
+  phone (below 640px) the tab bar (`fd-tabbar`) holds Overview, Logs, Decisions and Usage (the last two are plain links here, as the starter has no such routes) and a More button that opens the menu sheet; `index.html`
+  declares `data-fd-surface="app"`. The
   navigation is data; its icons are `<fd-icon>` elements, because their names come from data. The three screens are
   router links, and `RouterLink` sets the `aria-current="page"` that Fire's nav styles read.
 - **Three screens** (`src/pages/`): the `.fd-page` of `templates/overview.html`, `logs.html` and `settings.html`, with
@@ -46,7 +48,7 @@ on both sides) and with `VITE_FIRE_STATIC=1` (the screens stay in the state thei
 simulate a first load with timers). It serves the build and Fire's repository root, then for each screen runs
 `render-equal`: `.fd-page` of the template against `.fd-page` of the route, at 1440 and 375 wide, light and dark, in
 Chromium, WebKit and Firefox. It loads each screen in Chromium and fails on a CSP violation or a console message, and
-runs `lint-markup` and `lint-css` on `src`. It restores the starter's look and closes every server before it exits.
+runs `lint-markup` (with `--surface app`) and `lint-css` on `src`. It restores the starter's look and closes every server before it exits.
 
 Two things differ on purpose: the templates are served **without their inline demo scripts** (they simulate loading and
 Ember's demo logic, which the app replaces), and links between the three screens are router paths (`/settings`, not

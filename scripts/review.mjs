@@ -16,7 +16,9 @@
  *
  * A route is a path, or { path, name, state, states, setup }: `state` opens the screen at ?state=<state>; with
  * --states every name in `states` is reviewed too. `setup` (also a default for every route at the top of the config)
- * is { cookie: "name=value" | […], storage: { key: value } (localStorage before the page's scripts), waitFor: selector }.
+ * is { cookie: "name=value" | { name, value, httpOnly?, sameSite?, … } | […], storage: { key: value } (localStorage
+ * before the page's scripts), waitFor: selector }. A `__Host-` or `__Secure-` cookie is set by domain and path and
+ * marked secure, so a session cookie of that kind works on http://localhost (cookieFor below).
  *
  * Each screen, at each width x theme (prefers-color-scheme emulated; <html data-theme> set when the page carries it),
  * is loaded, then waited for: network idle (3 s at most), fonts, Fire's elements defined, no Fire loading marker left
@@ -395,6 +397,22 @@ export function structureFindings(tree, structure) {
   }));
 }
 
+/** One setup cookie in the shape the browser takes: "name=value", or an object with Playwright's cookie fields.
+ *  A plain cookie goes by `url`. A `__Host-` or `__Secure-` cookie cannot: a browser refuses one given by an http://
+ *  url, even on localhost ("Invalid cookie fields"), so it goes by domain and path, marked secure, which a browser
+ *  accepts for localhost. An object that sets `url` is passed as it is; one that sets `domain`, `path` or `secure`
+ *  goes by domain and path too. */
+export function cookieFor(c, url) {
+  const eq = typeof c === 'string' ? c.indexOf('=') : -1;
+  const given = typeof c === 'string' ? { name: (eq < 0 ? c : c.slice(0, eq)).trim(), value: eq < 0 ? '' : c.slice(eq + 1).trim() } : { ...c };
+  if (!given.name) throw new Error('setup.cookie: a cookie needs a name ("name=value" or { name, value })');
+  if (given.url) return given;
+  const prefixed = /^__(Host|Secure)-/.test(given.name);
+  if (!prefixed && given.domain === undefined && given.path === undefined && !given.secure) return { ...given, url: url.origin };
+  const { domain = url.hostname, path: cookiePath = '/', ...rest } = given;
+  return { ...rest, domain, path: given.name.startsWith('__Host-') ? '/' : cookiePath, secure: prefixed ? true : !!given.secure, sameSite: given.sameSite ?? 'Lax' };
+}
+
 async function capture(browser, o, origin, screen, width, theme, structure) {
   const context = await browser.newContext({ viewport: { width, height: 900 }, colorScheme: theme, reducedMotion: 'reduce', deviceScaleFactor: 1 });
   const problems = [];
@@ -405,7 +423,7 @@ async function capture(browser, o, origin, screen, width, theme, structure) {
     if (storage) await context.addInitScript((s) => { try { for (const [k, v] of Object.entries(s)) localStorage.setItem(k, String(v)); } catch { /* no storage */ } }, storage);
     const url = new URL(screen.path, origin);
     if (screen.state) url.searchParams.set('state', screen.state);
-    if (cookie) await context.addCookies([cookie].flat().map((c) => { const [name, ...v] = c.split('='); return { name: name.trim(), value: v.join('=').trim(), url: url.origin }; }));
+    if (cookie) await context.addCookies([cookie].flat().map((c) => cookieFor(c, url)));
     const page = await context.newPage();
     page.on('console', (m) => { if (m.type() === 'error' && !allowed(m.text())) problems.push(['console-error', m.text()]); });
     page.on('pageerror', (e) => { if (!allowed(e.message)) problems.push(['console-error', `uncaught: ${e.message}`]); });

@@ -11,7 +11,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { review, expandRoutes, parseArgs, loadStructure, slug } from '../review.mjs';
+import http from 'node:http';
+import { review, expandRoutes, parseArgs, loadStructure, slug, cookieFor } from '../review.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-review-'));
@@ -158,4 +159,34 @@ export function checkTree(root, rules, opts) {
   (function collect(n) { inside.push(n); n.children.forEach(collect); })(callout);
   assert.ok(inside.length > 3 && inside.every((n) => n.hidden === true), 'every node of a hidden subtree is marked hidden');
   assert.ok(all.filter(([n]) => n.hidden).every(([n, p]) => !p || p.hidden || n.hidden), 'hidden marks whole subtrees');
+});
+
+test('setup.cookie: a __Host- cookie signs the screen in over http://localhost; a cookie may be an object', async () => {
+  // A server that answers 401 unless the session cookie comes back: what an app with a __Host- session does.
+  const seen = [];
+  const server = http.createServer((req, res) => {
+    const cookies = req.headers.cookie ?? '';
+    seen.push(cookies);
+    const ok = /(^|; )__Host-a=1(;|$)/.test(cookies) && (!req.url.startsWith('/both') || /(^|; )plain=2(;|$)/.test(cookies));
+    res.writeHead(ok ? 200 : 401, { 'content-type': 'text/html' });
+    res.end(`<!doctype html><html lang="en"><head><title>Session</title></head><body><main><h1>${ok ? 'Signed in' : 'Sign in'}</h1></main></body></html>`);
+  });
+  await new Promise((r) => server.listen(0, 'localhost', r));
+  const base = `http://localhost:${server.address().port}`;
+  try {
+    const go = (routes, name) => review({ ...parseArgs(['--base', base, '--routes', 'x'], tmp), routes, out: path.join(tmp, name), widths: [1440], themes: ['light'], shots: false });
+    const without = await go([{ path: '/' }], 'cookie-0');
+    assert.ok(without.findings.some((f) => f.rule === 'failed-request'), 'with no cookie the server refuses the page');
+    const signedIn = await go([{ path: '/', setup: { cookie: '__Host-a=1' } }], 'cookie-1');
+    assert.deepEqual(signedIn.findings, []);
+    const objects = await go([{ path: '/both', setup: { cookie: [{ name: '__Host-a', value: '1', httpOnly: true, sameSite: 'Strict' }, 'plain=2'] } }], 'cookie-2');
+    assert.deepEqual(objects.findings, []);
+  } finally { server.close(); }
+  // the shape handed to the browser
+  const url = new URL('http://localhost:4010/x');
+  assert.deepEqual(cookieFor('plain=2', url), { name: 'plain', value: '2', url: 'http://localhost:4010' });
+  assert.deepEqual(cookieFor('__Host-s=a=b', url), { name: '__Host-s', value: 'a=b', domain: 'localhost', path: '/', secure: true, sameSite: 'Lax' });
+  assert.deepEqual(cookieFor({ name: '__Secure-t', value: '1', path: '/app' }, url), { name: '__Secure-t', value: '1', domain: 'localhost', path: '/app', secure: true, sameSite: 'Lax' });
+  assert.deepEqual(cookieFor({ name: 'x', value: '1', url: 'https://example.test' }, url), { name: 'x', value: '1', url: 'https://example.test' });
+  assert.throws(() => cookieFor({ value: '1' }, url), /name/);
 });

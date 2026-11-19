@@ -2,6 +2,26 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.10.1 — 19 Nov 2026
+
+**`fire review` can review signed-in screens whose session is a `__Host-` cookie.** Nothing else changed.
+
+### Fixed
+
+- `fire review` set every `setup.cookie` by its url. A browser refuses a `__Host-` or `__Secure-` cookie given by an
+  `http://` url, even on localhost ("Invalid cookie fields"), so a screen behind such a session never loaded. Those
+  cookies are now set by domain and path and marked secure, which a browser accepts for localhost. Found by the first
+  product to run the review signed in.
+
+### Added
+
+- `setup.cookie` also takes an object (`{ name, value, httpOnly, sameSite, secure, domain, path, url }`), alone or in
+  a list beside `"name=value"` strings. `scripts/review.mjs` exports `cookieFor`.
+
+### For products refreshing from 0.10.0
+
+- Remove any workaround that rewrites the cookie before calling the review.
+
 ## 0.10.0 — 19 Nov 2026
 
 **The checks look at structure and at the rendered screen, not only at names.** The first product built on the Lit

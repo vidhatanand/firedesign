@@ -91,7 +91,7 @@ npm run review     # build, then look at every screen: .fire-review/index.html
 ## Start a new project from it
 
 1. Copy this folder out of the Fire repository.
-2. In `package.json`, change `"fire-design": "file:../.."` to `"fire-design": "github:vidhatanand/firedesign#v0.10.0"`.
+2. In `package.json`, change `"fire-design": "file:../.."` to `"fire-design": "github:vidhatanand/firedesign#v0.10.1"`.
 3. `npm install`, then `npm run dev`.
 4. Choose your look: edit `theme.json` (a Fire theme record: palette, type, dials) and run `npm run dev` or
    `npm run build`. `scripts/prepare.mjs` turns it into `src/fire-theme.css` and puts the attributes it needs on
@@ -146,7 +146,8 @@ it stops being a chunk of its own.
 "Invalid cookie fields"); give it `domain` and `path` instead:
 `await context.addCookies([{ name: '__Host-session', value, domain: 'localhost', path: '/', secure: true }])`. The
 cookie is then stored and sent to `http://localhost:<port>`. Seen in Chromium (Playwright 1.64.1); not tried in WebKit
-or Firefox.
+or Firefox. `fire review` does this for you: put the cookie in `fire.review.setup.cookie` as `"__Host-session=<value>"`
+and the signed-in screens are reviewed.
 
 ## How the check works
 

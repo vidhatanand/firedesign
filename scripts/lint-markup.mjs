@@ -35,6 +35,20 @@
  *                            (unknown-attribute-value).
  *   img-attrs                (a warning, 0.8) an <img> inside .fd-site without alt (alt="" for decoration), or without
  *                            both width and height: the browser cannot hold its place before it loads, so the page shifts
+ *   Structure (0.10), from the facts on the cards' parts; scripts/lib/structure.mjs holds the rules and documents them:
+ *   missing-part             a part the component requires is absent (a callout without fd-callout-icon)
+ *   wrong-element            a class on a tag it does not work on, or on the native element it wraps (<select class="fd-select">)
+ *   wrong-parent             a part outside the place it may sit (fd-form-section not a child of fd-form)
+ *   missing-attribute        an attribute a part needs is absent; forbidden-attribute: one it must not carry (fd-menu hidden)
+ *   missing-child            a wrapper without the native element it styles (label.fd-select with no <select>)
+ *   bare-control             (a warning) a <select>, <table>, <fieldset>, <textarea> or text <input> with no class, outside
+ *                            every Fire class whose CSS styles it (catalogue nativeWrappers), in markup that uses Fire
+ *   The lint builds one tree per fragment (the page; each html`` template; each JSX expression; a Vue file's template)
+ *   and reports only what that tree shows. It cannot see: a part that a hole, an expression, a slot or a child component
+ *   may add (so it is never reported missing there); the parent of a fragment's top element (a template, a component, a
+ *   partial), so `parent` and `inside` are checked only within the fragment; attributes a spread may add; the value of an
+ *   expression. A check of the rendered page, which feeds the live DOM to the same rules, sees those. No comment turns a
+ *   rule off for a line or a file: the lint has no such mechanism.
  *
  * Each finding has file, line, column, rule, severity ("error" or "warning"), message and fix. Exit code 1 when there
  * is any error (warnings never change it), 2 on usage errors. --json: {catalog, files, errors, warnings, findings}.
@@ -42,19 +56,21 @@
  * An attribute whose catalogue values are ["*"] takes any value. `data-x=""` counts as the bare `data-x` (the JSX
  * spelling, EXPORT A7) where the attribute takes no value.
  *
- * Catalogue fields read: components[].{id, name, classes, attributes, partAttributes, stateAttributes, element, card.{surfaces, avoidWhen, related}}, classes, icons, and the tag names of
- * components[].element and elements[].{tagName|tag|name}.
+ * Catalogue fields read: components[].{id, name, root, classes, attributes, partAttributes, stateAttributes, element, card.{surfaces, avoidWhen, related, parts}}, classes, icons,
+ * nativeWrappers, and the tag names of components[].element and elements[].{tagName|tag|name}.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { structureRules, checkTree } from './lib/structure.mjs';
 
 const HOLE = '\u0001';
 const BAIL = Symbol('bail');
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 export const RULES = ['unknown-class', 'unknown-attribute-value', 'unknown-element', 'unknown-icon', 'no-style',
-  'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework', 'surface-mismatch', 'img-attrs'];
+  'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework', 'surface-mismatch', 'img-attrs',
+  'missing-part', 'wrong-element', 'wrong-parent', 'missing-attribute', 'forbidden-attribute', 'missing-child', 'bare-control'];
 export const SURFACES = ['app', 'website', 'phone', 'email'];
 
 const isWs = (c) => c === ' ' || c === '\n' || c === '\t' || c === '\r' || c === '\f';
@@ -63,7 +79,9 @@ const REGEX_PREV = new Set(['', '(', ',', '=', ':', '[', '!', '&', '|', '?', '{'
 
 /* ------------------------------------------------------------------ JS scanning */
 
-function emitEvent(ctx, ev) { (ctx.cur || ctx.out).push(ev); }
+// Every event carries `frag`: the markup it belongs to (0 the file, else one html`` template or one JSX expression),
+// so the structure check can rebuild each fragment's tree (buildTrees).
+function emitEvent(ctx, ev) { if (ev.frag === undefined) ev.frag = ctx.frag || 0; (ctx.cur || ctx.out).push(ev); }
 
 // Scans JS from i. With opts.stop it returns the index of the unmatched `}` that ends the scan. opts.collect receives
 // the string literals met outside nested JSX ({s, at}); template holes are masked with HOLE.
@@ -145,7 +163,7 @@ function scanTemplate(ctx, i, asMarkup, collect, n) {
     }
     masked += src.slice(at, end);
     if (collect) collect.push({ s: masked, at: i + 1, template: true });
-    if (asMarkup) markup(ctx, masked, i + 1, 'lit');
+    if (asMarkup) { const f = ctx.frag; ctx.frag = ctx.frags = (ctx.frags || 0) + 1; markup(ctx, masked, i + 1, 'lit'); ctx.frag = f; }
   }
   return end + 1;
 }
@@ -153,16 +171,17 @@ function scanTemplate(ctx, i, asMarkup, collect, n) {
 /* ------------------------------------------------------------------ JSX */
 
 function tryJsx(ctx, i, n) {
-  const saved = ctx.cur;
+  const saved = ctx.cur, frag = ctx.frag;
   ctx.cur = [];
+  ctx.frag = ctx.frags = (ctx.frags || 0) + 1;
   try {
     const r = parseJsx(ctx, i, n);
     const buf = ctx.cur;
-    ctx.cur = saved;
+    ctx.cur = saved; ctx.frag = frag;
     for (const ev of buf) emitEvent(ctx, ev);
     return r;
   } catch (e) {
-    ctx.cur = saved;
+    ctx.cur = saved; ctx.frag = frag;
     if (e === BAIL) return -1;
     throw e;
   }
@@ -280,7 +299,7 @@ function markup(ctx, text, base, mode) {
     while (j < n && !isWs(text[j]) && text[j] !== '/' && text[j] !== '>') j++;
     const tag = text.slice(lt + 1, j);
     const attrs = [];
-    let selfClosing = false;
+    let selfClosing = false, attrHole = false;
     for (;;) {
       while (j < n && isWs(text[j])) j++;
       if (j >= n) break;
@@ -311,7 +330,7 @@ function markup(ctx, text, base, mode) {
         attr.strings = [{ s: raw, at: base + vs }];
         if (raw.includes(HOLE)) attr.dynamic = true; else attr.value = raw;
       } else j = k;
-      if (name.includes(HOLE)) continue; // attribute-position hole
+      if (name.includes(HOLE)) { attrHole = true; continue; } // attribute-position hole: attributes the lint cannot see
       if (mode === 'vue') {
         if (name.startsWith(':') || name.startsWith('v-bind:')) {
           attr.name = name.replace(/^(:|v-bind:)/, '');
@@ -335,7 +354,7 @@ function markup(ctx, text, base, mode) {
       attrs.push(attr);
     }
     const lname = tag.toLowerCase();
-    emitEvent(ctx, { type: 'open', tag, attrs, selfClosing: selfClosing || VOID.has(lname), spread: false, at: base + lt });
+    emitEvent(ctx, { type: 'open', tag, attrs, selfClosing: selfClosing || VOID.has(lname), spread: false, attrHole, at: base + lt });
     i = j;
     if ((lname === 'script' || lname === 'style') && !selfClosing) {
       const re = new RegExp('</' + lname + '\\b', 'i');
@@ -359,7 +378,7 @@ export function prepareCatalog(raw) {
     const t = typeof e === 'string' ? e : (e.tagName || e.tag || e.name);
     if (typeof t === 'string' && t.includes('-')) tags.set(t.toLowerCase(), e.component || null);
   }
-  return { classes, byId, tags, icons: new Set(raw.icons || []), version: raw.fire };
+  return { classes, byId, tags, icons: new Set(raw.icons || []), version: raw.fire, structure: structureRules(raw) };
 }
 
 function distance(a, b) {
@@ -583,6 +602,13 @@ export function lintText(file, text, rawCatalog, kind, opts = {}) {
     }
   }
   for (const f of stack) evalFrame(f);
+
+  // structure (scripts/lib/structure.mjs): one tree per fragment; bare-control only in markup that uses Fire
+  const trees = buildTrees(events, kind);
+  const usesFire = events.some((e) => e.type === 'open' && e.attrs.some((a) => normName(a.name) === 'class' && a.strings.some(({ s }) => /(^|\s)fd-/.test(s))));
+  for (const tree of trees) {
+    for (const f of cat.structure ? checkTree(tree, cat.structure, { usesFire }) : []) report(f.node.ref.at + 1, f.rule, f.message, f.fix, f.severity);
+  }
   findings.sort((a, b) => a.line - b.line || a.col - b.col);
   return findings;
 }
@@ -599,6 +625,54 @@ export function scanSource(text, kind) {
   return { events, strings };
 }
 export { HOLE };
+
+/** The events as trees in the shape scripts/lib/structure.mjs reads: one root per fragment (the file, each html``
+ *  template, each JSX expression). A full HTML page's root is `#document`; every other root is `#fragment`, whose
+ *  children have parents the lint cannot see. A node is dynamic when a hole, an expression, v-html or v-text sits
+ *  among its children; dynamicAttrs when a spread or an attribute-position hole may add attributes. Vue's own
+ *  <template> wrappers (v-if, v-for, #slot) are transparent: their children are the parent's. */
+export function buildTrees(events, kind) {
+  const roots = new Map();
+  const doc = kind === 'html' && events.some((e) => e.type === 'open' && /^(html|body)$/i.test(e.tag));
+  for (const ev of events) {
+    const f = ev.frag || 0;
+    if (!roots.has(f)) roots.set(f, [{ tag: '', node: { tag: doc && f === 0 ? '#document' : '#fragment', classes: [], attrs: {}, children: [], dynamic: false } }]);
+    const stack = roots.get(f);
+    const top = stack[stack.length - 1].node;
+    if (ev.type === 'text') { if (ev.expr) top.dynamic = true; else top.text = true; continue; }
+    if (ev.type === 'close') {
+      let k = stack.length - 1;
+      while (k > 0 && stack[k].tag !== ev.tag.toLowerCase()) k--;
+      if (k > 0) stack.length = k;
+      continue;
+    }
+    const lower = ev.tag.toLowerCase();
+    if (kind === 'vue' && lower === 'template') {   // the SFC's own <template> is the fragment; inner ones are transparent
+      if (!ev.selfClosing) stack.push({ tag: lower, node: top });
+      continue;
+    }
+    const node = { tag: kind === 'html' ? lower : ev.tag, classes: [], attrs: {}, children: [], dynamic: false, ref: { at: ev.at } };
+    if (ev.spread || ev.attrHole) node.dynamicAttrs = true;
+    for (const a of ev.attrs) {
+      if (a.directive) {
+        if (a.name === 'v-bind') node.dynamicAttrs = true;
+        if (a.name === 'v-html' || a.name === 'v-text') node.dynamic = true;
+        continue;
+      }
+      const key = normName(a.name);
+      if (key === 'class') {
+        for (const { s } of a.strings) for (const t of s.split(/\s+/)) if (t.startsWith('fd-') && !t.includes(HOLE) && !node.classes.includes(t)) node.classes.push(t);
+        if (node.attrs.class !== null) node.attrs.class = a.dynamic ? null : `${node.attrs.class ?? ''} ${a.value ?? ''}`.trim();   // null: unseen classes may join
+        continue;
+      }
+      if (key === 'dangerouslysetinnerhtml' || key === 'innerhtml') node.dynamic = true;
+      node.attrs[key] = a.dynamic ? null : a.hasValue ? a.value : true;
+    }
+    top.children.push(node);
+    if (!ev.selfClosing) stack.push({ tag: lower, node });
+  }
+  return [...roots.values()].map((s) => s[0].node);
+}
 
 export function kindOf(file) {
   const ext = path.extname(file).toLowerCase();

@@ -4,7 +4,8 @@
 //   node scripts/build-classes.mjs --check   fail when the file is stale
 // docs/_ref/VOCABULARY.md is written by hand and explains the parts people use most; it cannot keep up with every
 // class. This file is generated, so it is always complete: every component with its root, every part class, every
-// attribute with its values (on the root, on a part, and set by Fire as state), its events and its custom element.
+// attribute with its values (on the root, on a part, and set by Fire as state), its events and its custom element, and
+// the structure facts on the card's parts (required, element, parent, inside, contains, attributes, the skeleton).
 // Run build-catalog first. Deterministic: the order is the catalogue's families, then component names.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,6 +21,17 @@ const values = (list) => {
   return `="${named.join('|')}"${list.includes('') ? ' (or bare)' : ''}`;
 };
 const attrs = (map) => Object.keys(map).sort().map((a) => code(`${a}${values(map[a])}`)).join(', ');
+// Structure facts from the card (0.10): what lint-markup's structure rules check, in a few words.
+const either = (list) => list.map(code).join(' or ');
+const structure = (p) => !p ? [] : [
+  p.required && `required${p.or ? `, or ${either(p.or)}` : ''}`,
+  p.element && `on ${p.element.map((t) => code(`<${t}>`)).join(' or ')}`,
+  p.parent && `child of ${either(p.parent)}`,
+  p.inside && `inside ${either(p.inside)}`,
+  p.notInside && `not inside ${either(p.notInside)}`,
+  p.contains && `holds a ${p.contains.map((t) => code(`<${t}>`)).join(' or ')}`,
+  ...Object.entries(p.attrs || {}).map(([a, v]) => (v === false ? `never ${code(a)}` : `needs ${code(v === true ? a : `${a}="${v}"`)}`)),
+].filter(Boolean);
 
 export function render(catalog) {
   const lines = [
@@ -30,7 +42,10 @@ export function render(catalog) {
     '',
     'For each component: its root class, its part classes, the attributes it reads with their values (on the root, then per',
     'part), the attributes Fire sets as state, its events, and its custom element where it has one. "(or bare)" means the',
-    'attribute also works with no value.',
+    'attribute also works with no value. In parentheses after a class, its structure, which `fire lint` checks: "required"',
+    '(the component needs it), "on `<label>`" (the tags it works on), "child of" (its parent must carry that class),',
+    '"inside" (an ancestor must), "holds a `<select>`" (a direct child), "needs" or "never" an attribute. "Write" is the',
+    'one-line markup of the required structure.',
     '',
   ];
   const families = [];
@@ -42,9 +57,12 @@ export function render(catalog) {
     for (const c of list) {
       classes += c.classes.length;
       lines.push(`### ${c.name} (${code(c.id)}, ${c.kind})`, '');
-      lines.push(`- Root: ${code(c.root)}${c.docs ? `, shown at \`${c.docs}\`` : ''}`);
+      const card = new Map((c.card?.parts || []).map((p) => [p.class, p]));
+      const own = structure(card.get(c.root));
+      lines.push(`- Root: ${code(c.root)}${own.length ? ` (${own.join(', ')})` : ''}${c.docs ? `, shown at \`${c.docs}\`` : ''}`);
       const parts = c.classes.filter((k) => k !== c.root);
-      if (parts.length) lines.push(`- Parts: ${parts.map(code).join(', ')}`);
+      if (parts.length) lines.push(`- Parts: ${parts.map((k) => { const f = structure(card.get(k)); return f.length ? `${code(k)} (${f.join(', ')})` : code(k); }).join(', ')}`);
+      if (card.get(c.root)?.skeleton) lines.push(`- Write: ${code(card.get(c.root).skeleton)}`);
       if (Object.keys(c.attributes).length) lines.push(`- On the root: ${attrs(c.attributes)}`);
       for (const part of Object.keys(c.partAttributes).sort()) lines.push(`- On ${code(part)}: ${attrs(c.partAttributes[part])}`);
       if (Object.keys(c.stateAttributes).length) lines.push(`- State, set by Fire: ${attrs(c.stateAttributes)}`);

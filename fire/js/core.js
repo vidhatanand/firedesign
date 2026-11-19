@@ -8,6 +8,8 @@
  *  - Components announce changes with bubbling CustomEvents: `fd:open`, `fd:close`,
  *    `fd:change` (detail: { value }), `fd:select` (detail: { value, item }).
  *  - Prefer event delegation on `document` so dynamically inserted markup just works.
+ *  - Focus moved by script to something that is not a control (a heading, a title, a region) goes through
+ *    `focusQuiet(el)`, which draws no keyboard ring on it; a control keeps its ring.
  */
 
 export const $ = (sel, root = document) => root.querySelector(sel);
@@ -78,6 +80,27 @@ export const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), details:not([disabled]) > summary, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 export function focusables(root) {
   return $$(FOCUSABLE, root).filter((el) => !el.closest('[hidden], [inert]') && el.getClientRects().length);
+}
+
+/* ---------- Focus moved by script ----------
+ * `focusQuiet(el, { preventScroll = true })` moves focus to `el` the way a screen reader needs (a new screen's heading,
+ * a dialog's title, a result region) without drawing the keyboard ring on it. Chromium counts a focus moved by script as
+ * focus-visible whenever the last input was a key press, and Fire's base ring is on every :focus-visible, so a plain
+ * .focus() on a heading draws a ring on text nobody can act on. focusQuiet gives `el` tabindex="-1" when it has none,
+ * calls focus({ focusVisible: false }) and, for browsers that ignore that option, marks it `data-fd-focus="quiet"`
+ * until it loses focus; base.css removes the ring for that mark. A control (a link, button, field, contenteditable, or
+ * an element whose role takes keyboard input) is focused normally and keeps its ring: only a non-control goes quiet.
+ */
+const CONTROL = 'a[href], area[href], button, input:not([type="hidden"]), select, textarea, summary, [contenteditable]:not([contenteditable="false"]), '
+  + ['button', 'link', 'textbox', 'searchbox', 'combobox', 'spinbutton', 'slider', 'checkbox', 'radio', 'switch', 'tab', 'menuitem', 'menuitemcheckbox', 'menuitemradio', 'option', 'treeitem', 'listbox', 'menu', 'tablist', 'grid', 'gridcell', 'scrollbar'].map((r) => `[role="${r}"]`).join(', ');
+export function focusQuiet(el, { preventScroll = true } = {}) {
+  if (!el?.focus) return;
+  if (el.matches(CONTROL)) { el.focus({ preventScroll }); return; }
+  if (!el.hasAttribute('tabindex')) el.tabIndex = -1;
+  el.setAttribute('data-fd-focus', 'quiet');
+  el.addEventListener('blur', () => el.removeAttribute('data-fd-focus'), { once: true });
+  el.focus({ preventScroll, focusVisible: false });
+  if (document.activeElement !== el) el.removeAttribute('data-fd-focus');
 }
 
 /** Keep Tab inside `container`. Returns a release function. */

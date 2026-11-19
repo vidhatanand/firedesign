@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { $ as query, $$ as queryAll, content, forms, nav, overlays, texture } from 'fire-design';
+import { $ as query, $$ as queryAll, content, focusQuiet, forms, nav, overlays, texture } from 'fire-design';
 import type { FireEventMap, PageState } from 'fire-design';
 import { LOAD_MS, SIMULATE_LOAD } from '../demo';
 
@@ -52,7 +52,7 @@ function onTab(event: MouseEvent) {
   const link = (event.target as Element).closest<HTMLElement>('[data-tab]');
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
   event.preventDefault();
-  void router.replace({ query: { ...route.query, tab: link.dataset.tab } }).then(() => nextTick(() => $(`#h-${tab.value}`)?.focus()));
+  void router.replace({ query: { ...route.query, tab: link.dataset.tab } }).then(() => nextTick(() => focusQuiet($(`#h-${tab.value}`))));
 }
 
 // ---------------------------------------------------------------- Team: one form, one save (data-fd-dirty shows the bar)

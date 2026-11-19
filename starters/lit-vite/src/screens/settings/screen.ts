@@ -1,5 +1,5 @@
 import type { PropertyValues } from 'lit';
-import { content, forms, init, nav, overlays, reducedMotion, setAccent, setDensity, setTheme, getTheme, texture, type PageState } from 'fire-design';
+import { content, focusQuiet, forms, init, nav, overlays, reducedMotion, setAccent, setDensity, setTheme, getTheme, texture, type PageState } from 'fire-design';
 import { FireLight } from '../../lib/fire-light';
 import { settingsView } from './view';
 
@@ -92,7 +92,7 @@ export class ScreenSettings extends FireLight {
     event.preventDefault(); // the router leaves a link alone once its handler has done this
     this.tab = tabFrom(link.dataset.tab ?? null);
     history.replaceState(history.state, '', `?tab=${this.tab}`); // keep the router's state (scroll restore)
-    this.updateComplete.then(() => { this.revealTab(true); this.querySelector<HTMLElement>(`#h-${this.tab}`)?.focus(); });
+    this.updateComplete.then(() => { this.revealTab(true); focusQuiet(this.querySelector<HTMLElement>(`#h-${this.tab}`)); });
   };
 
   /** On a phone the sub-navigation is one scrolling strip: bring the current tab to its middle (at once on load). */

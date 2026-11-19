@@ -894,6 +894,8 @@ export declare function coarsePointer(): boolean;
 export declare function clamp(n: number, min: number, max: number): number;
 /** Visible, enabled, focusable descendants of root. */
 export declare function focusables(root: ParentNode): HTMLElement[];
+/** Move focus to a non-control (a heading, a dialog title, a result region) with no keyboard ring; a control is focused normally and keeps its ring. Gives the element tabindex="-1" when it has none. `preventScroll` defaults to true. */
+export declare function focusQuiet(el: HTMLElement | null | undefined, options?: { preventScroll?: boolean }): void;
 /** Keep Tab inside `container`. Returns a release function. */
 export declare function trapFocus(container: HTMLElement): () => void;
 /** Roving focus for menus, tabs, listboxes, toolbars: arrows move, Home/End jump, typing jumps to a match. Returns a release function. */

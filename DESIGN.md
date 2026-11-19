@@ -75,7 +75,7 @@ The neutrals are alpha steps of two colours: `--fd-wash` (fills and tints) and `
 
 ## 5. JavaScript
 
-- ES modules in `fire/js/`. Each exports `init(root = document)`, is idempotent, and auto-runs from `fire/fire.js`. Import helpers from `./core.js` (`on`, `once`, `emit`, `position`, `autoUpdate`, `rove`, `trapFocus`, `focusables`, `copyText`, `ensureId`, `reducedMotion`, `ready`, `setTheme`…) and `icon` from `./icons.js`. Read `core.js` before writing a module.
+- ES modules in `fire/js/`. Each exports `init(root = document)`, is idempotent, and auto-runs from `fire/fire.js`. Import helpers from `./core.js` (`on`, `once`, `emit`, `position`, `autoUpdate`, `rove`, `trapFocus`, `focusables`, `focusQuiet` (focus a heading or region with no ring), `copyText`, `ensureId`, `reducedMotion`, `ready`, `setTheme`…) and `icon` from `./icons.js`. Read `core.js` before writing a module.
 - Behaviour attaches through `data-fd-*` attributes and ARIA, using delegated listeners on `document`, so markup inserted later works without re-init where possible.
 - State is written to the DOM (`data-state`, `hidden`, ARIA). Changes fire bubbling events: `fd:open`, `fd:close`, `fd:change` (`detail.value`), `fd:select`, and the ones a family adds (`fd:filter`, `fd:commit`, `fd:hold`, `fd:undo`, `fd:accept`, `fd:copy`, `fd:submit`, `fd:files`, `fd:keys`...). Each is listed with its `detail` in `contract/catalog.json`.
 - Floating surfaces use the native Popover API (`popover="auto"` or `"manual"`) for top-layer and light dismiss, positioned with `position()` from core. Modals use native `<dialog>` and `showModal()`.

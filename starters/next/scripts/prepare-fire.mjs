@@ -2,7 +2,10 @@
 //   1. copies Fire's boot.js to public/fire/boot.js, served as a blocking <script src> in <head> (spec N2);
 //   2. turns the look (contract/looks/<FIRE_LOOK>.json, default ocean) into app/fire-theme.css with themeToCss, and
 //      its <html> attributes into app/fire-look.ts (spec H1, H4). No <style> element at run time: a strict CSP blocks it.
+//   3. runs `fire slim` with the same look into .fire-slim/: the Fire `next build` uses (next.config.ts); `next dev`
+//      keeps the whole of Fire. Sources, out and level are "fire.slim" in package.json.
 // FIRE_LOOK=ember is what the check uses, so the screens compare against Fire's templates on the same palette.
+import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -17,7 +20,8 @@ mkdirSync(path.join(HERE, 'public/fire'), { recursive: true });
 for (const file of ['boot.js', 'favicon.svg']) copyFileSync(path.join(fire, 'fire', file), path.join(HERE, 'public/fire', file));
 
 const look = process.env.FIRE_LOOK || 'ocean';
-const record = JSON.parse(readFileSync(path.join(fire, `contract/looks/${look}.json`), 'utf8'));
+const recordFile = path.join(fire, `contract/looks/${look}.json`);
+const record = JSON.parse(readFileSync(recordFile, 'utf8'));
 const valid = validateTheme(record);
 if (!valid.ok) throw new Error(`contract/looks/${look}.json: ${valid.errors.join('; ')}`);
 const { attributes, notes } = expandTheme(record);
@@ -27,3 +31,5 @@ writeFileSync(path.join(HERE, 'app/fire-look.ts'),
   + `export const look = ${JSON.stringify(look)};\n`
   + `export const theme = ${JSON.stringify(attributes, null, 2)} as const;\n`);
 console.log(`fire: boot.js copied; look ${look} (${Object.entries(attributes).map(([k, v]) => `${k}="${v}"`).join(' ')})${notes.length ? `; ${notes.join('; ')}` : ''}`);
+const slim = spawnSync(process.execPath, [path.join(fire, 'scripts/slim.mjs'), '--theme', recordFile], { cwd: HERE, stdio: 'inherit' });
+if (slim.status) process.exit(slim.status);

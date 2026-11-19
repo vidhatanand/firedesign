@@ -2,7 +2,9 @@
 // npm run check: the starter against Fire's templates and Fire's rules.
 //
 //   1. Builds for production with Ember's look (FIRE_LOOK=ember, into .next-check), so the screens compare against
-//      Fire's templates on the same palette; the starter's own look (ocean) is restored afterwards.
+//      Fire's templates on the same palette; the starter's own look (ocean) is restored afterwards. The build uses the
+//      slim Fire (fire slim, through prepare-fire.mjs); `fire slim --verify` fails when the bundle still holds a rule
+//      or a module the report dropped, and prints the sizes before and after.
 //   2. Serves the build (next start) and the Fire repository (../..) as static files, each on a free port.
 //   3. Browser pass (Chromium, WebKit, Firefox) on every screen: no console error or warning, no uncaught error, no CSP
 //      violation; the served HTML carries a strict policy (no 'unsafe-inline', no 'unsafe-eval'), boot.js is a blocking
@@ -368,6 +370,10 @@ try {
     if (build.status) throw new Error(`next build failed\n${build.out.slice(-4000)}`);
     const sizes = build.out.split('\n').filter((l) => /First Load|kB|Route/.test(l));
     ok(`next build (production, look ember, ${DIST})${sizes.length ? '\n' + sizes.join('\n') : ''}`);
+    // The build uses the slim Fire (fire slim, run by prepare-fire.mjs): it must not hold a rule or a module the
+    // report dropped. Prints the sizes before and after.
+    const verified = run(process.execPath, [path.join(REPO, 'scripts/slim.mjs'), '--verify', path.join(DIST, 'static')]);
+    if (verified.status) fail(`the production build holds parts fire slim dropped\n${verified.out}`); else ok(`fire slim --verify\n${verified.out.trim()}`);
   }
   fire = await startServer(REPO);
   const fireBase = `http://127.0.0.1:${fire.port}`;

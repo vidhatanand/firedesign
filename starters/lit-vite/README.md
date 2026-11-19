@@ -85,6 +85,7 @@ npm install
 npm run dev        # http://127.0.0.1:5173, with hot reload
 npm run build      # typecheck, then a production build in dist/
 npm run check      # the full check, see below
+npm run review     # build, then look at every screen: .fire-review/index.html
 ```
 
 ## Start a new project from it
@@ -161,6 +162,7 @@ the build and Fire's repository on free ports, then:
    the title and the live region, route chunks fetched only on a visit or a hover, and a blocked chunk showing the
    error state until Try again loads it.
 3. **lint-markup** checks `src/` against Fire's catalogue with `--surface app` (`npm run lint:markup` runs it alone), and **lint-css** checks the starter's own CSS and tokens against Fire's token contract (`npm run lint:css`).
+4. **fire review** opens every screen of the production build and fails on an error (see "Review every screen" below).
 
 Three things to know when it fails or when you change a screen:
 
@@ -174,6 +176,21 @@ Three things to know when it fails or when you change a screen:
 
 Options: `--only logs`, `--engines chromium`, `--widths 1440`, `--themes light`, `--skip-build`, and
 `--diff-dir .check/diff` to keep the JSON reports and diff images.
+
+## Review every screen
+
+`npm run review` builds the app, then `fire review` opens every route in `package.json` (`"fire": { "review" }`),
+each `?state=` its screen supports, a request deep link and the not-found and no-access pages, at 1440 and 375 wide,
+light and dark: 76 captures. It writes `.fire-review/index.html` (ignored by git), a contact sheet with one row per
+screen, its four pictures side by side, and the findings under it, each with a picture of the element. Look at it
+before every release; it takes a minute. `npm run check` runs the same review as its last step.
+
+It fails on what a rendered page shows and markup alone does not: a page that runs past the edge of a phone, a
+control cut off, no `h1` or two, two page heads, more than one primary button in a view, a form section in a
+multi-column grid or a card in a card, a native control no Fire style reached, a console error or a failed request,
+an empty main region. A button stretched across its column is a warning. It cannot judge taste, hierarchy, the words,
+or whether a screen follows the right template: that is what the person looking at the gallery is for. Add a route
+there when you add one to `src/routes.ts`.
 
 ## Rules to remember (from `spec/EXPORT.md`)
 

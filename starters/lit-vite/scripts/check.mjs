@@ -16,6 +16,8 @@
 //      and proves the router: a deep link to /logs/:id, a guard's redirect, not-found, back and forward restoring
 //      scroll and focus, the title, route chunks loaded only on a visit or a hover, and a failed chunk's error state
 //   5. lint-markup over src, and lint-css over the starter's own CSS
+//   6. fire review: every route and ?state= in package.json "fire": { "review" }, at 1440 and 375, light and dark; fails
+//      on an error; the gallery a person looks at before a release is .fire-review/index.html
 // Everything it starts is closed before it exits.
 //
 //   npm run check -- [--only overview,logs] [--engines chromium] [--widths 1440] [--themes light] [--skip-build]
@@ -403,6 +405,10 @@ try {
   await compare.close();
   await ref.close();
 }
+
+/* ------------------------------------------------------------------ 6. review */
+console.log('\n== fire review (the gallery: .fire-review/index.html)');
+if (run('node', [path.join(fire, 'scripts/review.mjs'), '--states']).status) fail('fire review reported errors (see .fire-review/index.html)');
 
 if (failures.length) { console.error(`\nCHECK FAILED (${failures.length})\n${failures.map((f) => `  - ${f}`).join('\n')}`); process.exit(1); }
 console.log('\nCHECK PASSED');

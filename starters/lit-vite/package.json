@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "lint:markup": "node scripts/lint.mjs",
     "lint:css": "node scripts/lint.mjs --css",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "review": "npm run build && node node_modules/fire-design/scripts/review.mjs --states"
   },
   "dependencies": {
     "fire-design": "file:../..",
@@ -38,6 +39,21 @@
       "initialJs": 205,
       "routeJs": 25,
       "css": 100
+    },
+    "review": {
+      "serve": "dist",
+      "spa": true,
+      "out": ".fire-review",
+      "setup": { "storage": { "ember-whats-new-seen": "1" } },
+      "routes": [
+        { "path": "/overview", "name": "overview", "states": ["loading", "empty", "error"] },
+        { "path": "/logs", "name": "logs", "states": ["loaded", "loading", "empty", "error", "no-results"] },
+        { "path": "/logs/req_7c19be", "name": "logs/:id" },
+        { "path": "/settings", "name": "settings", "states": ["ready", "loading", "error", "member"] },
+        { "path": "/elements", "name": "elements" },
+        { "path": "/no-access", "name": "no-access" },
+        { "path": "/billing/plans", "name": "not-found" }
+      ]
     }
   }
 }

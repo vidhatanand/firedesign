@@ -17,6 +17,9 @@
 //   5. render-equal on each screen: templates/<name>.html (.fd-page) against the route (.fd-page), widths 1440 and 375,
 //      light and dark, Chromium, WebKit and Firefox: no structural or style difference, pixels under its default limit.
 //   6. lint-markup over the starter's source, and lint-css over its own CSS.
+//   7. fire review (scripts/review.mjs) on the production server, run after step 5 while it serves: every route and
+//      ?state= in package.json "fire": { "review" }, 1440 and 375, light and dark; fails on an error. The gallery to look
+//      at is .fire-review/index.html.
 // Every server is closed before exit. Exit code 1 on any failure.
 //
 // Options: --engines chromium,webkit,firefox  --widths 1440,375  --themes light,dark  --screens logs,settings,overview
@@ -390,6 +393,10 @@ try {
   if (!flag('skip-render')) {
     summary = await renderEqual(appBase, fireBase);
   }
+  // 7. fire review, while next start serves (asynchronous: this process reads the server's output)
+  const reviewed = await runAsync(process.execPath, [path.join(REPO, 'scripts/review.mjs'), '--base', appBase, '--states']);
+  console.log(reviewed.out.trimEnd());
+  if (reviewed.status) fail('fire review reported errors (see .fire-review/index.html)'); else ok('fire review: 0 errors (.fire-review/index.html)');
   await stopNext(prod);
 
   if (!flag('skip-dev')) {

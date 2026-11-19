@@ -11,11 +11,11 @@
 //                                         compare an unpublished page with every template (a candidate, before you add it)
 //
 // WHAT IS COMPARED (three pools; entries are only ever compared with entries of the same pool)
-//   templates   the 24 files in templates/ (job: the catalogue's templates[].job)
+//   templates   every screen in templates/ (job: the catalogue's templates[].job)
 //   specimens   every docs .doc-specimen with at least MIN_NODES Fire nodes (the pattern-sized ones; a lone button is not a
 //               pattern). Two specimens of the same component are one component showing its variants and are never
 //               compared: same docs page and first word of the section id (pipeline, pipeline-small, pipeline-vertical), or a shared top-level component.
-//   components  the 142 catalogue entries (job: the card's job). Their markup is the specimens above; here the job
+//   components  every catalogue entry (job: the card's job). Their markup is the specimens above; here the job
 //               sentence itself is compared, as a bag of content words.
 // A pair is FLAGGED when any of these holds:
 //   structure >= STRUCT   fingerprint.mjs structuralSimilarity (templates, specimens)

@@ -11,6 +11,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const check = process.argv.includes('--check');
 // Order matters: the catalogue reads the elements' manifest; the Facet export reads the contract and the catalogue.
 const steps = [
+  ['version.mjs', check ? ['--check'] : [], { onlyCheck: true }],   // the version is the same everywhere it is stated, and the changelog has its entry
   ['build-palettes.mjs', check ? ['--check'] : []],
   ['build-typefaces.mjs', check ? ['--check'] : []],   // fire/typefaces.css and fire/js/fonts.js from the specs
   ['build-elements.mjs', check ? ['--check'] : []],

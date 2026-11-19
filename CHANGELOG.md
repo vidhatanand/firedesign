@@ -2,6 +2,40 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.8.1 — 19 Nov 2026
+
+**The documents catch up with 0.8, and one boundary is made consistent.** No class, attribute value, token, event or
+export was removed or renamed.
+
+- **Documents.** Every docs page and every written document was read against the code. No page states an earlier
+  release as the present any more (`docs/frameworks.html` said "Fire 0.6", `docs/index.html` "0.4",
+  `spec/ARCHITECTURE.md` and `spec/EXPORT.md` "Fire 0.6", the starters version 0.6.0).
+  - `docs/frameworks.html` lists every check and command (`fire find`, `fire lint` with surfaces, `fire lint-css`,
+    `fire render-equal` with rules R14 and R15, the gate, the looks and palette checks, pictures, `CLASSES.md`) and
+    every entry of the package.
+  - `docs/index.html` covers apps, websites, phones and email, with a "Where to start" table by surface.
+  - `docs/tweaks.html` no longer says status and chart colours stay fixed (they follow the palette since 0.8.0), and
+    its theme record table has `fire`, `signature`, `brand` and every dial.
+  - New docs sections: "Dashes" on `docs/charts.html`, "Surfaces" on `docs/catalogue.html`; each named look shows
+    its picture treatment on `docs/looks.html`; the toolbar's wrapping on `docs/shell.html`.
+  - `spec/ARCHITECTURE.md` describes the system as built (layout, the 17 package entries, the theme record, the
+    catalogue's kinds and surfaces, the checks). `spec/EXPORT.md` and `spec/export-map.json` add what 0.7 and 0.8
+    mean for an exporter: seven more events, the attributes Fire sets itself, five more containers Fire rewrites,
+    page transitions per framework (L8), and surfaces, the tab bar, template states and website sections (W1 to W4,
+    `pages` in the map).
+  - `contract/cards/README.md` covers template cards, the kind `section`, the order of `surfaces` and the optional
+    `relation`; `README.md` and `GUIDE.md` list every package entry.
+- **Phone boundary.** Twenty-one older rules and two scripts counted a width of exactly 640px as a phone, while the
+  named breakpoints (phone below 640px) and everything built in 0.8 count it as a tablet. They now agree: phone
+  rules apply below 640px (`max-width: 639.98px`). Only a window or container exactly 640px wide changes. The Facet
+  export's `tablet` breakpoint is 640px, not 641px.
+- **Starters.** Versions and READMEs say what the starters are now (the tab bar, `data-fd-surface="app"`, the
+  checks they run).
+- **One command for the version.** `node scripts/version.mjs <x.y.z>` (`npm run release:version`) writes the
+  version in every place that states it (30 places: the package, the theme module, the named looks, the export map,
+  every dependency example, the starters), and `node scripts/build.mjs --check` fails when any of them, or the
+  changelog entry, is left behind.
+
 ## 0.8.0 — 19 Nov 2026
 
 Fire now covers public websites and phone apps as well as app screens. A site is built from a layout foundation and

@@ -141,7 +141,7 @@ export const INPUT_TOKENS = Object.freeze([
 ]);
 export const NEUTRALS = Object.freeze(['pure', 'cool', 'warm', 'tinted']);
 export const LABELS = Object.freeze(['white', 'dark']);
-export const FIRE_VERSION = '0.8.0';
+export const FIRE_VERSION = '0.8.1';
 
 export const DEFAULT_RECORD = Object.freeze({
   contract: CONTRACT, palette: DEFAULT_PALETTE, tone: TONE_DEFAULT, type: DEFAULT_TYPEFACE, dials: DIAL_DEFAULTS,

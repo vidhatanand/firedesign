@@ -48,7 +48,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const scope = (root, sel) => [...(root instanceof Element && root.matches(sel) ? [root] : []), ...$$(sel, root)];
 let uid = 0;
 const nextId = (p = 'cht') => `${p}-${(++uid).toString(36)}`;
-const isPhone = () => matchMedia('(max-width: 640px)').matches;
+const isPhone = () => matchMedia('(max-width: 639.98px)').matches;
 const toDate = (t) => { if (t == null || t === '') return null; const d = t instanceof Date ? t : new Date(t); return Number.isNaN(d.getTime()) ? null : d; };
 const fmtTime = (d) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 const fmtShort = (d) => fmtTime(d).replace(/\s?[AP]M$/i, '');

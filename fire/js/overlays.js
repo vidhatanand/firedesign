@@ -151,7 +151,7 @@ const LOCALE = doc.documentElement.lang || undefined;
 
 const byId = (ref) => (typeof ref === 'string' ? doc.getElementById(ref.replace(/^#/, '')) : ref || null);
 const isOpen = (el) => !!el && el.dataset.state === 'open';
-const isPhone = () => matchMedia('(max-width: 640px)').matches;
+const isPhone = () => matchMedia('(max-width: 639.98px)').matches;
 const enabled = (el) => !el.disabled && el.getAttribute('aria-disabled') !== 'true';
 const visible = (el) => !el.hidden && el.getClientRects().length > 0;
 const focusEl = (el, scroll = false) => el?.focus?.({ preventScroll: !scroll });

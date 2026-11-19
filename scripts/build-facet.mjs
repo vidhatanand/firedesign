@@ -303,7 +303,7 @@ function tokenSet(full) {
     alias(`--shadow-${n}`, t.name);
   }
 
-  const breakpoint = { tablet: { $type: 'dimension', $value: '641px' }, desktop: { $type: 'dimension', $value: '900px' } };
+  const breakpoint = { tablet: { $type: 'dimension', $value: '640px' }, desktop: { $type: 'dimension', $value: '900px' } };
 
   const ms = (v) => { const m = /^([\d.]+)(ms|s)$/.exec(v); return `${Math.round(m[2] === 's' ? m[1] * 1000 : +m[1])}ms`; };
   const duration = {};
@@ -822,7 +822,7 @@ if (variant === 'full') {
   w(`- **Sizes.** The fallback allows 12 \`size\` tokens, Fire has ${SIZE_CANDIDATES.length} pixel sizes. Kept: \`touch\` (40px) and the 11 most referenced by var() in Fire's CSS: ${SIZE_KEPT.map((c) => `${strip(c.name)} (${c.uses})`).join(', ')}. Left out: ${SIZE_DROPPED.map((c) => strip(c.name)).join(', ')}.`);
   w(`- **Type scale.** The fallback carries 14 of Fire's 16 type sizes. Left out: ${TYPE_DROPPED.join(', ')}. \`3xs\` borrows \`--fd-lh-2xs\`. Line heights are the ratio of Fire's line height to its size, and sizes such as 0.8125rem become 13px (three decimals, px).`);
 }
-w('- **Breakpoints.** Facet\'s breakpoints are min-width and mobile first; Fire writes `max-width: 640px` for the phone layout and `min-width: 900px` for the wide one. `tablet` is 641px (where the wide layout starts) and `desktop` is 900px. The contract names four widths (phone, tablet, desktop, wide from 1200px, as `breakpoints`); Facet takes only `tablet` and `desktop`. `responsive` overrides are not written: Fire\'s phone overrides (smaller display and h1, 16px gutter) are max-width rules that a mobile-first override cannot say without inverting the base values.');
+w('- **Breakpoints.** Facet\'s breakpoints are min-width and mobile first; Fire writes `max-width: 639.98px` for the phone layout and `min-width: 900px` for the wide one. `tablet` is 640px (where the phone layout ends) and `desktop` is 900px. The contract names four widths (phone, tablet, desktop, wide from 1200px, as `breakpoints`); Facet takes only `tablet` and `desktop`. `responsive` overrides are not written: Fire\'s phone overrides (smaller display and h1, 16px gutter) are max-width rules that a mobile-first override cannot say without inverting the base values.');
 w('- **Durations.** `duration` holds the five interaction durations and the stagger. The looping durations (spin 0.7s, shimmer 1.6s, pulse 1.8s, blink 1.1s, dots 1.2s) are left out: they are ambient loops, not transitions, and would make Facet report durations above 500ms. Reduced motion is `remove`: Fire sets `--fd-motion` to 0 and every duration is the token times that.');
 w('- **Dials and density.** Corners, density, line weight, text size, contrast, motion, texture, the four structural dials (surfaces, elevation, controls, headings), the imagery dial, the signature and the brand are theme-record fields, not tokens Facet can model; they travel in `theme.json`.');
 w('- **Surfaces and kind.** Facet\'s component entry has no field for tags, a group or a category, so the last line of every `purpose` is `Surfaces: app, website, phone. Kind: component.` (surfaces in the order app, website, phone, email, from the card; kind is component, pattern, layout or section). Split on the last line break to read it; the text before it is the card\'s purpose, cut to leave room.');

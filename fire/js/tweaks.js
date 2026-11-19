@@ -575,7 +575,7 @@ function markup() {
 
 let panel = null;
 let lastTrigger = null;
-const desktop = typeof matchMedia === 'function' ? matchMedia('(min-width: 641px)') : { matches: true };
+const desktop = typeof matchMedia === 'function' ? matchMedia('(min-width: 640px)') : { matches: true };
 const GRIDS = '.fd-tweaks-looks, .fd-tweaks-palettes, .fd-tweaks-faces, .fd-tweaks-chips'; // the radio grids; data-tweak names the state key
 const triggers = () => $$('[data-fd-tweaks-open]');
 const isOpen = () => panel?.dataset.state === 'open';

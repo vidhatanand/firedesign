@@ -194,3 +194,16 @@ test("Fire's docs, templates, starters and wrappers: no structure finding", () =
   const findings = files.flatMap((f) => lintText(path.relative(ROOT, f), fs.readFileSync(f, 'utf8'), real)).filter((f) => STRUCTURE.has(f.rule));
   assert.deepEqual(findings.map((f) => `${f.file}:${f.line} ${f.rule} ${f.message}`), []);
 });
+
+test('rendered pages: a custom element is a real parent, and a table inside fd-sr-only is not a bare control', async () => {
+  const { structureRules, checkTree } = await import('../lib/structure.mjs');
+  const rules = structureRules(JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/catalog.json'), 'utf8')));
+  const el = (tag, classes = [], children = [], attrs = {}) => ({ tag, classes, attrs, children, dynamic: false });
+  const page = (kids) => ({ tag: '#document', classes: [], attrs: {}, children: [el('body', [], kids)], dynamic: false });
+  // a form section under a custom element that sits in a form: unknown to the lint, a real wrong parent on the page
+  const wrapped = page([el('form', ['fd-form'], [el('my-section', [], [el('section', ['fd-form-section'])])])]);
+  assert.deepEqual(checkTree(wrapped, rules).map((f) => f.rule), []);
+  assert.deepEqual(checkTree(wrapped, rules, { rendered: true }).map((f) => f.rule), ['wrong-parent']);
+  const chart = page([el('div', ['fd-card'], [el('div', ['fd-sr-only'], [el('table')]), el('table')])]);
+  assert.deepEqual(checkTree(chart, rules, { rendered: true }).map((f) => f.rule), ['bare-control']);
+});

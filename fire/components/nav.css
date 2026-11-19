@@ -167,7 +167,8 @@
   background: var(--fd-fill); box-shadow: var(--fd-shadow-inset-control);
   vertical-align: middle;
 }
-/* Never wider than its container: it scrolls instead. The grouped variant keeps its labels outside the track, so it is left alone. */
+/* Never wider than its container: it scrolls instead. The grouped variant keeps its labels outside the track, so it
+   scrolls only on a phone, where it drops them (below). */
 .fd-segmented:not([data-variant="grouped"]) { overflow-x: auto; scrollbar-width: none; }
 /* So each item keeps its content width and the track scrolls, instead of the items shrinking into each other.
    data-block shares the width equally instead. nav.js scrolls the chosen item into view. */
@@ -259,6 +260,13 @@
   letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); font-weight: var(--fd-eyebrow-weight);
   color: var(--fd-text-3);
   white-space: nowrap; pointer-events: none;
+}
+/* On a phone the labels above the track cannot scroll with it, so the grouped control drops them (they are decoration:
+   the hairlines still mark the groups) and scrolls like the other variants. */
+@media (max-width: 639.98px) {
+  .fd-segmented[data-variant="grouped"] { margin-top: 0; overflow-x: auto; scrollbar-width: none; }
+  .fd-segmented[data-variant="grouped"] > .fd-segmented-group { flex-shrink: 0; }
+  .fd-segmented[data-variant="grouped"] .fd-segmented-label { display: none; }
 }
 
 /* ---------- Chip nav (category strip) ---------- */

@@ -22,11 +22,9 @@ const run = (routes, extra = {}) => review({ ...parseArgs(['--serve', ROOT, '--r
 const rulesOf = (result, route) => [...new Set(result.findings.filter((f) => f.path === route).map((f) => f.rule))].sort();
 
 /** Defects in Fire's own templates that the review found; reported, not hidden. Each is [template, state, rule, width]. */
-const KNOWN = [
-  ['provider', 'not-found', 'one-h1', 1440], ['provider', 'not-found', 'one-h1', 375],   // the not-found state has no h1
-  ...['', 'loading', 'empty', 'running', 'done', 'failed'].flatMap((s) =>                 // the mode switch is cut at 375
-    [['playground', s, 'overflow-x', 375], ['playground', s, 'offscreen-control', 375]]),
-];
+// Defects the review found in Fire's own templates are fixed where they are found, so none is expected. If a
+// template must carry one for a while, list it here as [template, state, rule, width] with the reason.
+const KNOWN = [];
 
 test('the bad app: exactly the expected rule on each page, at the widths where it applies', async () => {
   const routes = PAGES.map((p) => `${FIX}/bad/${p}.html`);
@@ -35,8 +33,9 @@ test('the bad app: exactly the expected rule on each page, at the widths where i
   // The form section squeezed into a grid column: beside the card at 1440; at 375 the grid has one column, and the
   // section, still laid out head beside body, runs past the page edge and cuts its select.
   const form = (w) => [...new Set(result.findings.filter((f) => f.path === `${FIX}/bad/form.html` && f.width === w).map((f) => f.rule))].sort();
-  assert.deepEqual(form(1440), ['nested-surface', 'unstyled-control']);
-  assert.deepEqual(form(375), ['offscreen-control', 'overflow-x', 'unstyled-control']);
+  // The catalogue's structural rules see the same page: the section's wrong parent and the bare select.
+  assert.deepEqual(form(1440), ['bare-control', 'nested-surface', 'unstyled-control', 'wrong-parent']);
+  assert.deepEqual(form(375), ['bare-control', 'offscreen-control', 'overflow-x', 'unstyled-control', 'wrong-parent']);
   assert.deepEqual(rulesOf(result, `${FIX}/bad/settings.html`), ['stretched-button']);
   assert.deepEqual(rulesOf(result, `${FIX}/bad/regions.html`), ['overflow-x']);
   const at = (rule) => [...new Set(result.findings.filter((f) => f.rule === rule).map((f) => f.width))];
@@ -46,8 +45,8 @@ test('the bad app: exactly the expected rule on each page, at the widths where i
   assert.ok(result.findings.filter((f) => f.rule === 'stretched-button').every((f) => f.severity === 'warning'));
   assert.equal(result.findings.find((f) => f.rule === 'unstyled-control').ref, '#ap-2fa');
   assert.match(result.findings.find((f) => f.rule === 'overflow-x' && f.path.endsWith('regions.html')).ref, /div\.fd-row$/);
-  assert.equal(result.errors, 20);
-  assert.equal(result.warnings, 2);
+  assert.equal(result.errors, 24);   // 20 from the composition checks, 4 wrong-parent from the structural rules
+  assert.equal(result.warnings, 6);  // 2 stretched buttons, 4 bare-control
 });
 
 test('the good app: no findings', async () => {
@@ -56,7 +55,7 @@ test('the good app: no findings', async () => {
   assert.equal(result.screens, 16);
 });
 
-test(`Fire's templates: no findings but the known defects (${process.env.FIRE_REVIEW_ALL ? 'all 42' : 'twelve'}, every ?state= their cards name)`, async () => {
+test(`Fire's templates: no findings (${process.env.FIRE_REVIEW_ALL ? 'all 42' : 'twelve'}, every ?state= their cards name)`, async () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/catalog.json'), 'utf8'));
   const DOZEN = ['overview', 'logs', 'settings', 'form', 'playground', 'provider', 'status', 'auth', 'support', 'docs-api', 'site-home', 'site-pricing'];
   const routes = catalog.templates.map((t) => {
@@ -132,7 +131,9 @@ export function checkTree(root, rules, opts) {
   assert.deepEqual([s[0].rule, s[0].severity, s[0].ref, s[0].fix], ['select-wrapper', 'error', '#ap-2fa', 'wrap it']);
   assert.ok(s[0].crop && fs.existsSync(path.join(tmp, 'structure', s[0].crop)), 'the finding has a crop of its element');
   const { trees } = await import(pathToFileURL(fake).href);
-  const body = trees[0];
+  // the root is the page ('#document': every parent is known); its one child is <body>
+  assert.equal(trees[0].tag, '#document');
+  const body = trees[0].children[0];
   assert.equal(body.tag, 'body');
   const all = [];
   const walk = (n, parent) => { all.push([n, parent]); n.children.forEach((c) => walk(c, n)); };

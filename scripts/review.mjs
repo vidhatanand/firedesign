@@ -53,7 +53,7 @@ export const RULES = {
   'one-primary': ['error', 'Keep one primary button per view (the main region, each dialog, sheet, card or empty state); make the others outline, ghost or text buttons.'],
   'stretched-button': ['warning', 'Let the button size to its label (an fd-row, or align it to the start); use data-block only where a button fills its row by design.'],
   'nested-surface': ['error', 'Put a form section straight in the form column (templates/form.html), never in a multi-column grid; do not set a card inside a card.'],
-  'unstyled-control': ['error', 'Use Fire\'s control: fd-input, fd-textarea, a select inside fd-select, fd-check or fd-radio, an fd-btn, an fd-table inside fd-table-wrap.'],
+  'unstyled-control': ['error', 'Use Fire\'s control: fd-input, fd-textarea, a select inside fd-select, fd-checkbox or fd-radio, an fd-btn, an fd-table inside fd-table-wrap.'],
   'console-error': ['error', 'Fix the error, or list its text in "allow" when it is expected.'],
   'failed-request': ['error', 'Fix the request, or list its URL in "allow" when the failure is the point of the screen.'],
   'empty-main': ['error', 'Render the screen\'s content, or its empty, loading or error state, in the main region.'],
@@ -364,7 +364,8 @@ function inspect({ structure }) {
       for (const c of kids) if (!SKIP.has(c.localName)) n.children.push(node(c, r, h, c.parentNode === el ? ' > ' : ' '));
       return n;
     };
-    tree = node(document.body, '', false);
+    // A whole page: every parent is known, so the root is '#document' (scripts/lib/structure.mjs).
+    tree = { tag: '#document', classes: [], attrs: {}, children: [node(document.body, '', false)], dynamic: false };
   }
   return { found, tree };
 }
@@ -493,7 +494,7 @@ export function gallery(rows, result, o) {
         groups.get(key).where.push(`${c.width} ${c.theme}`);
       }
     }
-    const shots = r.captures.map((c) => `<figure>${c.shot ? `<a href="${esc(c.shot)}"><img src="${esc(c.shot)}" alt="${esc(`${r.name}, ${c.width} ${c.theme}`)}" loading="lazy"></a>` : '<div class="none">no picture</div>'}<figcaption>${c.width} ${c.theme}</figcaption></figure>`).join('');
+    const shots = r.captures.map((c) => `<figure class="${c.width >= 900 ? 'wide' : 'narrow'}">${c.shot ? `<a href="${esc(c.shot)}"><img src="${esc(c.shot)}" alt="${esc(`${r.name}, ${c.width} ${c.theme}`)}" loading="lazy"></a>` : '<div class="none">no picture</div>'}<figcaption>${c.width} ${c.theme}</figcaption></figure>`).join('');
     const list = [...groups.values()].map((f) => `<li class="${f.severity}"><p><b>${esc(f.rule)}</b> ${esc(f.message)} <span class="where">${esc(f.where.length === cols.length ? 'every width and theme' : f.where.join(', '))}</span></p>${f.ref ? `<p><code>${esc(f.ref)}</code></p>` : ''}<p class="fix">${esc(f.fix)}</p>${f.crop ? `<img class="crop" src="${esc(f.crop)}" alt="${esc(`the element of ${f.rule}`)}" loading="lazy">` : ''}</li>`).join('');
     const errs = [...groups.values()].filter((f) => f.severity === 'error').length;
     return `<section class="screen${errs ? ' bad' : ''}" id="${esc(slug(r.name))}"><h2>${esc(r.name)}</h2><div class="shots">${shots}</div>${list ? `<ul class="findings">${list}</ul>` : '<p class="clean">No findings.</p>'}</section>`;
@@ -518,8 +519,9 @@ h1 { font-size: 20px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 12px;
 @media (max-width: 600px) { body { padding: 16px; } }
 .note, .where, .fix { color: var(--muted); } .ok { color: var(--ok); } .error { color: var(--bad); }
 .screen { border-top: 1px solid var(--line); padding: 20px 0; } .screen.bad h2 { color: var(--bad); }
-.shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; align-items: start; }
-figure { margin: 0; } figure img { display: block; width: 100%; max-height: 420px; object-fit: cover; object-position: top; border: 1px solid var(--line); }
+.shots { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+figure { margin: 0; flex: 1 1 160px; max-width: 220px; } figure.wide { flex: 3 1 420px; max-width: 640px; }
+figure img { display: block; width: 100%; max-height: 480px; object-fit: cover; object-position: top; border: 1px solid var(--line); }
 figcaption { color: var(--muted); font-size: 12px; margin-top: 4px; } .none { padding: 40px 0; text-align: center; border: 1px dashed var(--line); color: var(--muted); }
 .findings { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
 .findings li { border-left: 3px solid var(--warn); padding: 4px 12px; } .findings li.error { border-color: var(--bad); }

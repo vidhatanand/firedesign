@@ -7,7 +7,8 @@
  *                                  components[].card.parts[]: required, or, element, parent, inside, notInside, attrs,
  *                                  contains, skeleton; contract/cards/README.md) and the catalogue's nativeWrappers
  *   checkTree(root, rules, opts)   -> [{ rule, severity, message, fix, node }]   opts: { usesFire } (bare-control runs
- *                                  only when true; default: some node in the tree carries an fd- class)
+ *                                  only when true; default: some node in the tree carries an fd- class);
+ *                                  { rendered: true } for a live DOM: no element is opaque, every parent is real
  *
  * A node: { tag, classes: ['fd-…'], attrs: { name: 'value' | true | null }, children: [node…], dynamic, dynamicAttrs?,
  * text?, ref? }. attrs[name] is null when the value is an expression. dynamic: content the checker cannot see may be added
@@ -25,6 +26,7 @@
  *   missing-child        no direct child of the tags in `contains` (`.fd-select > select`)
  *   bare-control         a <select>, <table>, <fieldset>, <textarea> or text <input> with no class, outside every Fire
  *                        class whose CSS styles that element (nativeWrappers), in markup that uses Fire
+ *                        (not inside `fd-sr-only`: a table that is only read aloud needs no styling)
  *
  * What the tree cannot show is never reported. A required part or a child is not missing when the element that would
  * hold it has dynamic content or a child the checker cannot see into (a component, <slot>, <template>). `parent` and
@@ -78,13 +80,15 @@ const open = (tag, cls, more = '') => `<${tag} class="${cls}"${more}>`;
 export function checkTree(root, rules, opts = {}) {
   const out = [];
   const report = (rule, node, message, fix, severity = 'error') => out.push({ rule, severity, message, fix, node });
+  // On a rendered page nothing is out of sight: a custom element's children are in the tree, so nothing is opaque.
+  const isOpaque = (n) => !opts.rendered && opaque(n, rules);
   const usesFire = opts.usesFire ?? (function any(n) { return n.classes?.some((k) => k.startsWith('fd-')) || n.children.some(any); })(root);
-  const hidden = (n) => n.dynamic || n.children.some((ch) => opaque(ch, rules));
+  const hidden = (n) => n.dynamic || n.children.some((ch) => isOpaque(ch));
   // ancestors: nearest first, ending at the root. Returns 'yes', 'no', or 'unknown' (the chain leaves what is visible).
   const hasAncestor = (ancestors, classes) => {
     for (const a of ancestors) {
       if (a.classes?.some((k) => classes.includes(k))) return 'yes';
-      if (a.tag === '#fragment' || opaque(a, rules)) return 'unknown';
+      if (a.tag === '#fragment' || isOpaque(a)) return 'unknown';
     }
     return 'no';
   };
@@ -94,7 +98,7 @@ export function checkTree(root, rules, opts = {}) {
   function visit(node, ancestors) {
     const parent = ancestors[0];
     const tag = node.tag;
-    const native = !opaque(node, rules);
+    const native = !isOpaque(node);
     const demo = node.attrs && 'data-static-demo' in node.attrs;
     for (const cls of node.classes || []) {
       for (const e of rules.entries.get(cls) || []) {
@@ -108,7 +112,7 @@ export function checkTree(root, rules, opts = {}) {
           report('missing-child', node, `${where(e)}: \`${cls}\` must hold a <${e.contains.join('> or <')}> as a direct child`,
             e.skeleton || `${open(tag, cls)}<${e.contains[0]}>…</${e.contains[0]}></${tag}>`);
         }
-        if (e.parent && parent.tag !== '#fragment' && !opaque(parent, rules) && !parent.classes?.some((k) => e.parent.includes(k))) {
+        if (e.parent && parent.tag !== '#fragment' && !isOpaque(parent) && !parent.classes?.some((k) => e.parent.includes(k))) {
           report('wrong-parent', node, `${where(e)}: \`${cls}\` must be a direct child of ${quote(e.parent)}`,
             `${open(tagOf(e.parent[0]), e.parent[0])}${open(tag, cls)}…</${tag}>…</${tagOf(e.parent[0])}>`);
         }
@@ -142,7 +146,7 @@ export function checkTree(root, rules, opts = {}) {
         const holders = [];
         (function collect(n, top) {
           if (top || !r.parent || n.classes?.some((k) => r.parent.includes(k))) holders.push(n);
-          for (const ch of n.children) if (!opaque(ch, rules)) collect(ch, false);
+          for (const ch of n.children) if (!isOpaque(ch)) collect(ch, false);
         })(node, !r.parent || r.parent.includes(cls));
         if (holders.some(hidden)) continue;
         report('missing-part', node, `${r.name} (${r.id}): \`${cls}\` has no \`${r.cls}\`${r.or.length ? ` (or ${quote(r.or)})` : ''}`,
@@ -155,7 +159,8 @@ export function checkTree(root, rules, opts = {}) {
       // In a fragment the wrapper may sit above what is visible: report only a control laid inside Fire markup.
       const wrapped = hasAncestor(ancestors, [...(rules.wrappers[tag] || [])]);
       const inFire = ancestors.some((a) => a.classes?.some((k) => k.startsWith('fd-')));
-      if (control && !node.dynamicAttrs && (wrapped === 'no' || wrapped === 'unknown' && inFire)) {
+      const unseen = ancestors.some((a) => a.classes?.includes('fd-sr-only'));   // read aloud, never drawn (a chart's data table)
+      if (control && !unseen && !node.dynamicAttrs && (wrapped === 'no' || wrapped === 'unknown' && inFire)) {
         const as = { select: '<label class="fd-select"><select>…</select></label>', table: '<div class="fd-table-wrap"><div class="fd-table-scroll"><table class="fd-table">…</table></div></div>',
           fieldset: '<div class="fd-field" role="group" aria-labelledby="…">, or give the fieldset the Fire class of what it groups', textarea: '<textarea class="fd-textarea">',
           input: `<input class="fd-input" type="${type}">` };

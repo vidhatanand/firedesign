@@ -1,8 +1,9 @@
 # Fire starter: Lit + Vite
 
 The default starter for a new Fire app. [Lit](https://lit.dev) components that render to the light DOM, Vite,
-TypeScript, no other framework. Copy this folder and you have an app shell, a router, three real screens and the
-checks that prove they match Fire's own templates.
+TypeScript, no other framework. Copy this folder and you have an app shell, a router that a product with a few
+hundred routes can keep (parameters, guards, screens loaded on first visit, not-found, a base path), three real
+screens, a production build split per route, and the checks that prove the screens match Fire's own templates.
 
 ## What it shows
 
@@ -11,7 +12,9 @@ checks that prove they match Fire's own templates.
 | Overview | `/overview` | skeleton loading, an area chart and sparklines, a stats grid, a table, a first-visit dialog |
 | Activity logs | `/logs` | search, filters, a date range, sort, row selection, bulk and row-menu actions, toasts with Undo, table states, a detail sheet |
 | Settings | `/settings` | tabs kept in the URL, one dirty-tracked form, features as switches with Done · Undo, disabled-with-a-reason controls, delete confirmed on the page, a Demo state band (`?state=ready\|loading\|error\|member`), menus, a confirm dialog |
-| Elements | `/elements` | Fire's elements (`fd-chart`, `fd-code`, `fd-icon`, `fd-texture`) driven by Lit properties |
+| Elements | `/elements` | Fire's elements (`fd-chart`, `fd-code`, `fd-icon`, `fd-texture`) driven by Lit properties; behind a guard |
+| A request | `/logs/:id` | the logs screen with that request open in its detail sheet (a route parameter) |
+| Not found | any other path | Fire's 404 page (`templates/not-found.html`), inside the shell, with the address kept |
 
 The three screens are the `.fd-page` of Fire's `templates/overview.html`, `logs.html` and `settings.html`, converted
 to Lit. The shell is `templates/shell-static.html` (go-to keys, the running-now pill, the service status, the shortcut sheet and the command palette; the starter has no Decisions page). The sample data is Ember's, kept as it is.
@@ -21,8 +24,55 @@ On a phone (below 640px) the screens are reached from the tab bar (`fd-tabbar`, 
 States: `?state=` on `/overview` (`loading`, `empty`, `error`) and `/logs` (`loaded`, `loading`, `empty`, `error`, `no-results`) opens the screen in that state; any other value is ignored. A screen reads it with `askedState()` (`src/lib/page-state.ts`, through the router) and renders its blocks from a typed `PageState`.
 Retry on the error state is wired: the overview shows the skeleton and then the data, the logs reload.
 
-A route change is one view transition: `AppShell.onRoute` wraps it in Fire's `transition()`, so the sidebar and top bar hold
+A change of screen is one view transition: `AppShell.show` wraps it in Fire's `transition()`, so the sidebar and top bar hold
 still and the screen fades. A browser without View Transitions, or a visitor who asks for reduced motion, sees the screen swap at once.
+
+## Routing
+
+The route table is `src/routes.ts`; the router is `src/lib/router.ts` (about 240 lines, no dependency).
+
+```ts
+{ path: '/logs/:id', tag: 'screen-logs', load: () => import('./screens/logs/screen'),
+  title: ({ params }) => `Request ${params.id}`, guard: allow('logs:read') }
+```
+
+| Field | What it does |
+|---|---|
+| `path` | `/logs`, `/logs/:id` (a parameter), `/docs/*` (the rest of the path, in `params['*']`), `*` (anything: not-found). The first route that matches wins, so put `/logs/new` before `/logs/:id`. A trailing slash is ignored. |
+| `tag`, `load` | The custom element and the `import()` that defines it. Each screen is its own chunk, fetched on the first visit, or earlier when a link to it is hovered or focused. `load` is left out only for the status screens, which are in the shell's chunk. |
+| `title` | The document title (`Title · Ember`), a string or a function of the context. A screen may refine it as it renders (settings names its tab). |
+| `guard` | `(context) => true \| '/somewhere'`, may be async. The context has `route`, `params`, `query`, `path` and `session`. A path redirects there and replaces the history entry; more than 8 redirects in a row stop with a console error. |
+| `label`, `icon`, `group`, `keys`, `keywords` | Only for routes in the navigation: the sidebar, the tab bar and the command palette list the routes that have a label. A detail page has none, and keeps its parent marked (the current item is the one whose path the address starts with). |
+| `{ path, redirect }` | An address that moved: `{ path: '/', redirect: '/overview' }`. |
+
+A screen gets `params` and `query` (a `URLSearchParams`) as properties, so do not use those names for anything
+else. `ParamsOf<'/logs/:id'>` types them. `routeQuery()` still reads `?state=` where a screen needs it before it
+is given its properties. Two routes with the same tag share the element: `/logs` to `/logs/:id` sets `params` on
+the logs screen, which opens the sheet, and the router leaves focus and scroll to the screen. Navigate in code with
+`navigate('/logs/req_8f3a21')` or `navigate(path, { replace: true })`, and write every link to an app path with
+`href('/logs')`, so that it carries the base path.
+
+What a page load would have done, the router does after each new screen: it sets the title, moves focus to the
+screen's `h1` (or its `main`) so that keyboard and screen-reader users start on the new page, scrolls to the top
+(or back to where the visitor was, on Back and Forward), and announces the title through a polite live region the
+shell owns. The first load does none of the focus or the announcement. While a screen's module loads, the current
+screen stays, and Fire's page bar (`texture.pagebar`) shows when that takes over 150 ms. A module that fails to load
+shows Fire's error page with Try again; when the browser is online, the likely cause is a deploy that replaced the
+hashed files, so it offers Reload first. Offline, it says so. WebKit remembers a module that failed for the life of the
+page, so when Try again fails a second time while online, the router reloads the page.
+
+**Base path.** To serve the app under a prefix, build it with Vite's `base`: `vite build --base /app/` (or `base` in
+`vite.config.ts`). `main.ts` passes `import.meta.env.BASE_URL` to `startRouter`, so links, matching and asset URLs
+all follow the one setting. Two apps under `/app` and `/admin` are two builds with two bases; a link from one to the
+other is outside the base and is a normal page load. The route table stays as it is: paths are inside the app.
+
+**What a product replaces.** `src/lib/session.ts` is a stand-in that is signed in and allowed everything (for trying
+the guard, `sessionStorage['ember-deny'] = 'elements:view'` takes a permission away). Replace it with your own:
+read the session from your API or cookie before `startRouter`, call `setSession()` after sign-in and sign-out, and
+send a signed-out visitor to your sign-in page with a guard (`signedIn ? true : `/sign-in?next=${path}``). There is
+no API client: a screen fetches its own data in `connectedCallback` and shows Fire's loading, empty and error states
+(see `?state=` above). Delete the demo routes and screens, keep `screen-not-found`, `screen-no-access` and
+`screen-load-error` (`src/shell/status.ts`), and change their words.
 
 ## Start
 
@@ -50,12 +100,17 @@ theme.json                 the look of the app (a theme record)
 scripts/prepare.mjs        theme.json -> src/fire-theme.css; copies boot.js into public/fire
 scripts/check.mjs          npm run check
 scripts/lint.mjs           npm run lint:markup, npm run lint:css
-src/main.ts                imports, in order: Fire's CSS, the theme, Fire's elements, Fire's behaviours, the components
+scripts/first-font.mjs     finds the font file the first paint needs (vite.config.ts preloads it)
+src/main.ts                imports, in order: Fire's CSS, the theme, Fire's elements, Fire's behaviours, the shell;
+                           then starts the router
+src/routes.ts              the route table
 src/app.css                the one rule that hides the custom elements from layout
 src/lib/fire-light.ts      FireLight: the base class of every component
-src/lib/router.ts          the route table and a 25-line router
-src/shell/app-shell.ts     sidebar, top bar, phone menu, and the current screen
-src/screens/<name>/        screen.ts (state and events) and view.ts (the Fire markup)
+src/lib/router.ts          the router
+src/lib/session.ts         the session the guards read (a stand-in to replace)
+src/shell/app-shell.ts     sidebar, top bar, phone menu, and the current screen (the router's outlet)
+src/shell/status.ts        not-found, no-access and the load error
+src/screens/<name>/        screen.ts (state and events) and view.ts (the Fire markup); each folder is one chunk
 ```
 
 ## How a component is written
@@ -77,18 +132,23 @@ customElements.define('screen-example', ScreenExample);
 ```
 
 `FireLight` renders into the element itself (`createRenderRoot() { return this; }`) so Fire's global CSS and its
-`document`-level listeners reach the markup, and it calls Fire's `init(this)` after every render. Add the screen to
-`routes` in `src/lib/router.ts` and import it in `src/main.ts`.
+`document`-level listeners reach the markup, and it calls Fire's `init(this)` after every render. Add a route to
+`src/routes.ts` with `load: () => import('./screens/example/screen')`; do not import the screen anywhere else, or
+it stops being a chunk of its own.
 
 ## How the check works
 
-`npm run check` builds for production, serves the build and Fire's repository on free ports, then:
+`npm run check` builds for production, prints the size of every chunk and checks the budgets (see below), serves
+the build and Fire's repository on free ports, then:
 
 1. **render-equal** compares each screen's `.fd-page` with its Fire template: structure, computed styles and pixels,
    at 1440 and 375 wide, light and dark, in Chromium, WebKit and Firefox.
 2. A **browser run** on the production build visits every route by URL and by clicking, and fails on any console
    error, uncaught error, failed request or Content Security Policy violation. It also tries search, the row menu
-   with its toast, the detail sheet, tabs, a confirm dialog, the elements and the phone menu.
+   with its toast, the detail sheet, tabs, a confirm dialog, the elements and the phone menu. Then it proves the
+   router: a deep link to `/logs/:id`, the guard's redirect, not-found, Back and Forward restoring scroll and focus,
+   the title and the live region, route chunks fetched only on a visit or a hover, and a blocked chunk showing the
+   error state until Try again loads it.
 3. **lint-markup** checks `src/` against Fire's catalogue with `--surface app` (`npm run lint:markup` runs it alone), and **lint-css** checks the starter's own CSS and tokens against Fire's token contract (`npm run lint:css`).
 
 Three things to know when it fails or when you change a screen:
@@ -123,16 +183,73 @@ Options: `--only logs`, `--engines chromium`, `--widths 1440`, `--themes light`,
 - **After new markup** arrives by any other way than Lit (`innerHTML`), call `init(container)` (L4).
 - **Routes**: the shell creates one element per screen and `FireLight` runs `init` after it renders (L3). A new
   route needs nothing else.
-- **Production hosting**: send the policy in `vite.config.ts` as a `Content-Security-Policy` header as well as the
-  `<meta>` tag, and answer every route path with `index.html`.
 
 - **CSS target.** Fire's tokens use `light-dark()` (Chrome 123, Firefox 120, Safari 17.5). `vite.config.ts` sets
   `build.cssTarget` to those browsers. With Vite's default target the CSS minifier rewrites `light-dark()` into a
   custom-property toggle, and an element that sets `color-scheme: light` in a dark page (the QR code) turns dark.
 
-## Sizes
+## Going to production
 
-A production build carries Fire's whole stylesheet and all its type sets: 23 font files, 625 kB. `npm run build` prints the
-current JavaScript and CSS sizes; they grew in 0.8 with the website and filter code, which the starter does not use. A
-product that uses one type set can drop the others from `fire/typefaces.css`, which removes most of the font weight. The
-JavaScript holds two copies of Lit: Fire's own (bundled in `fire-design/elements`) and the app's.
+`npm run build` writes `dist/`. What the build does by itself:
+
+- **Minified and hashed.** Every script, stylesheet and font has a content hash in its name.
+- **Split per route.** Each screen is a chunk (`assets/logs-….js`), fetched on the first visit. Lit, Fire and
+  `src/lib` are three shared chunks: changing a screen changes that screen's file and the entry's, nothing else, so
+  a returning visitor keeps the rest cached.
+- **Slim Fire.** `fire slim` keeps the parts, modules and fonts the app uses (see Fire's frameworks page).
+- **One font preloaded.** The theme's interface face at the regular weight, found from `fire slim`'s report; the
+  other faces download when a page uses them.
+- **The policy** as a `<meta>` tag, and the theme's attributes on `<html>`.
+
+Sizes, measured with this starter (kB, gzip as the check computes it; fonts are the same 2 files, 52.5 kB):
+
+| | Before (0.9.0, one script) | Now |
+|---|---|---|
+| JavaScript for the first route | 221.6 | 196.5 (entry 5.3, `src/lib` 1.8, Lit 5.7, Fire 178.2, overview 5.4) |
+| Route chunks | (all in the one script) | logs 8.9, settings 21.8, elements 1.1 |
+| CSS | 98.0 | 98.0 |
+| Requests for the first route | 6 | 10 (the page, boot.js, 5 scripts, CSS, 2 fonts) |
+
+Fire's behaviour chunk is most of it: Fire's `init()` reaches every module it keeps, so it cannot be split per
+route from here. `npm run check` fails when a budget in `package.json` is exceeded:
+
+```json
+"fire": { "budget": { "initialJs": 205, "routeJs": 25, "css": 100 } }
+```
+
+`initialJs` is the entry, its static imports and the first route's chunk; `routeJs` the largest route chunk; `css`
+the stylesheets. They are set a little above what the starter measures: lower them as your product allows, and
+raise them only on purpose. `FIRST_ROUTE` in `scripts/check.mjs` names your landing screen's module.
+
+What the host must do:
+
+1. **Answer every app path with `index.html`** (status 200), so a deep link or a reload of `/logs/req_8f3a21` works.
+   Files that exist (`/assets/…`, `/fire/…`) are served as they are; a missing file under `/assets/` is a 404, not
+   `index.html`, or a stale chunk would load HTML as a script.
+2. **Cache `/assets/*` for a year as immutable** (`Cache-Control: public, max-age=31536000, immutable`): their names
+   change when their content does.
+3. **Never cache `index.html`** (`Cache-Control: no-cache`), nor `/fire/boot.js`, whose name has no hash.
+4. **Send the content-security policy as a header.** The `<meta>` tag is the starter's stand-in; a header also
+   covers what a meta tag cannot (`frame-ancestors`). Copy the policy from `vite.config.ts`.
+5. **Compress with Brotli** (gzip as the fallback) for scripts, stylesheets, HTML and JSON. Fonts are compressed
+   already.
+
+For example, nginx (with the Brotli module):
+
+```nginx
+location /assets/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
+location / {
+  add_header Cache-Control "no-cache";
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+  try_files $uri /index.html;
+}
+brotli on; brotli_types text/css text/javascript application/json image/svg+xml;
+```
+
+Under a base path, put the same rules under `/app/` and build with `--base /app/`.
+
+What was tested: the check serves the build from a small Node server that answers unknown paths with
+`index.html`, in Chromium (the router) and in Chromium, WebKit and Firefox (the screens). The router was also
+used by keyboard in WebKit and Firefox (Playwright's builds, not Safari), and a build with `--base /app/` in
+Chromium. No real host, CDN or Brotli setup was tested, and the nginx example above is
+untested: check your host's own documentation for the same five rules.

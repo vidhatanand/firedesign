@@ -1,5 +1,7 @@
 # Forms for structured values — build brief (0.4.0)
 
+> Written for Fire 0.4.0 and kept as a record. The current table of controls is `GUIDE.md` section 5, "Forms"; `fd-datefield`, `fd-period`, `fd-color`, `fd-confirm-inline`, `fd-reason` and `fd-codes` came later (0.7.0).
+
 ## Why
 A product built with Fire (server-rendered pages, plain form posts, a strict Content Security Policy) produced
 admin forms that showed raw JSON in text areas, typed-in option names ("off, optional or required" as a hint under a

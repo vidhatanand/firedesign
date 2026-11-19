@@ -230,7 +230,7 @@ export function validateTheme(record) {
   if (!isObj(record)) return { ok: false, errors: ['(record): must be an object'], notes };
   only(record, ['contract', 'fire', 'palette', 'tone', 'type', 'dials', 'signature', 'brand'], '', errors);
   if (record.contract !== undefined && record.contract !== CONTRACT) errors.push(`/contract: must be ${JSON.stringify(CONTRACT)}`);
-  if (record.fire !== undefined && !(typeof record.fire === 'string' && /^\d+\.\d+\.\d+$/.test(record.fire))) errors.push('/fire: must be a Fire release, such as "0.6.0"');
+  if (record.fire !== undefined && !(typeof record.fire === 'string' && /^\d+\.\d+\.\d+$/.test(record.fire))) errors.push('/fire: must be a Fire release, such as "0.8.0"');
   if (record.palette !== undefined) checkPalette(record.palette, errors);
   if (record.tone !== undefined) {
     if (!isObj(record.tone)) errors.push('/tone: must be { hue, vivid, light, warmth }');

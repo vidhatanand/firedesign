@@ -15,7 +15,7 @@ Then open http://127.0.0.1:4747/docs/index.html.
 - **Docs** (`/docs/index.html`): every component, live, with a "Markup" view to copy from.
 - **Templates** (`/templates/index.html`): 42 full screens for a fictional product, Ember, built only from Fire components and grouped by surface: the app, signed-out and system pages, public pages, a ten-page website (four product pages and six for publishing) and a documentation site.
 - **Catalogue** (`/docs/catalogue.html`): every part, pattern and template, filtered by surface, with a picture of each.
-- **Tweaks**: the button in the top bar of any page. Pick a palette, bend its tone, switch the typeface, change density, corners, contrast, motion and texture. Choices are saved and follow you across pages.
+- **Tweaks**: the button in the top bar of any page. Pick a whole look or a palette, bend its tone, switch the typeface, change density, corners, contrast, motion, texture and how pictures are treated. Choices are saved and follow you across pages.
 
 ## Read next
 
@@ -36,6 +36,7 @@ Fire's HTML and CSS are the contract. Everything else is built on them, generate
 | Part | Where | What it is for |
 |---|---|---|
 | Styles and behaviour | `fire/` | Copy it, or depend on `fire-design`. Plain CSS and ES modules, no build needed to use them. |
+| Package entries | `package.json` `exports`, `bin` | `fire-design` (`fire.js`), `/css`, `/boot`, `/transitions.css`, `/elements`, `/theme`, `/looks`, `/initial`, `/email`, `/fonts`, `/react`, `/vue`, `/contract`, `/catalog`, `/index`, `/fire/*` for any file, and the `fire` command (`find`, `lint`, `lint-css`, `render-equal`). The pictures in `contract/pictures/` are not in the package. |
 | Theme record | `fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/` | A product's whole look as one JSON object: palette, tone, type, dials and signature; `paletteFrom()` makes a palette from an accent or brand colours that passes every contrast rule. |
 | Named looks | `contract/looks/named/`, `fire/js/looks.js`, `docs/looks.html` | Eight complete looks to start from, far apart in palette, type and structure; `?look=<name>` previews one; `scripts/looks-check.mjs` proves every look and 40 random themes keep contrast on real screens. |
 | Looks: fonts and dials | `contract/fonts.json`, `fire/typefaces.css`, `scripts/fonts.mjs`, `fire/tokens.css` | A catalogue of 53 open-licensed font families and twelve type sets; `fonts.mjs add "<family>"` puts a family in a product. Four structural dials (surfaces, elevation, controls, headings), the signature dials (texture field, mark, cell, ramp, frame marks, intensity) and an imagery dial for a site's pictures restyle every component. |
@@ -104,7 +105,7 @@ overlays.toast({ title: 'Key created' });
 tweaks.set({ palette: 'midnight', corners: 1.5 });
 ```
 
-Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`, and for decisions `fd:commit`, `fd:hold` and `fd:undo`.
+`fire.js` also exports the helpers of `core.js` (`$`, `on`, `emit`, `label`, `position` and the rest), `icon`, `setIcon`, `ICONS`, `transition`, and each family's module as a namespace (`shell`, `nav`, `forms`, `overlays`, `data`, `filters`, `content`, `code`, `agent`, `chat`, `charts`, `texture`, `docsite`, `tweaks`, `site`, `transitions`); `fire/fire.d.ts` types them. Components report changes with bubbling events: `fd:change`, `fd:select`, `fd:open`, `fd:close`, `fd:submit`, `fd:copy`, for decisions `fd:commit`, `fd:hold` and `fd:undo`, and for the combined filter `fd:filter`. `contract/catalog.json` lists every event with its `detail`.
 
 A page declares where it is used with `data-fd-surface="app|website|phone|email"` on `<html>`. A multi-page site opts in to page transitions with `fire/transitions.css`, `data-fd-transition="fade"` on `<html>` and `blocking="render"` on its module scripts; a single-page app calls `transition()`.
 
@@ -123,7 +124,7 @@ A page declares where it is used with `data-fd-surface="app|website|phone|email"
 | `fire/` | The system itself; the only folder a product ships. |
 | `fire/tokens.css` | Global values: the ink ladder, surfaces, accent, status tones, type, space, sizes, radius, shadows, motion. Light and dark through `light-dark()`. |
 | `fire/palettes.css` | Fifteen palettes, generated from `fire/js/palettes.js`. |
-| `fire/typefaces.css`, `fire/fonts/` | Twelve type sets and their font files (17 families, SIL Open Font License; licences in `fire/fonts/licenses/`). |
+| `fire/typefaces.css`, `fire/fonts/` | Twelve type sets and their font files (Geist and Geist Mono, and 17 more families, SIL Open Font License; licences in `fire/fonts/licenses/`). |
 | `fire/base.css` | Reset, type roles, links, focus, icons, layout and motion primitives. |
 | `fire/components/*.css` | One file per family. Each declares its own `--fd-<component>-*` values at the top; rules contain no raw sizes or timings. |
 | `fire/layout.css` | Layout attributes: `data-gap`, `data-min`, `data-cols`, `data-span`. |
@@ -132,9 +133,9 @@ A page declares where it is used with `data-fd-surface="app|website|phone|email"
 | `fire/transitions.css` | The opt-in stylesheet for page transitions between pages; it is not part of `fire.css`. |
 | `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
-| `docs/` | The documentation site: 26 pages. Start at `docs/index.html`. |
+| `docs/` | The documentation site: 27 pages. Start at `docs/index.html`. `docs/_ref/` holds the class reference (`CLASSES.md`, generated), the vocabulary and the build briefs of earlier releases. |
 | `templates/` | 42 screens for Ember: the app, a long create form, decisions, settings, an audit log, status pages, a record hub, sign-in (split and centred), onboarding, a support page, ten website pages (`site-*.html`, with `site-shell.js`: home, pricing, customers, changelog, blog, post, resources, report, research, newsletter), a documentation site, and the shell as plain markup. 39 have states that open with `?state=` or the control their card names. `templates/media/` holds ten generated placeholder pictures. Start at `templates/index.html`. |
-| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `lint-css`, `render-equal`), `find.mjs` (search the parts), `lint-markup.mjs`, `lint-css.mjs`, `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-pictures.mjs` (a picture of every part: `npm run build:pictures`), `build-icons.mjs` (regenerates the icon set), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
+| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `lint-css`, `render-equal`), `find.mjs` (search the parts), `lint-markup.mjs`, `lint-css.mjs`, `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-pictures.mjs` (a picture of every part: `npm run build:pictures`), `build-icons.mjs` (regenerates the icon set), `looks-check.mjs` (renders real screens under every look), `build-contract.mjs`, `build-catalog.mjs`, `build-classes.mjs`, `build-elements.mjs`, `build-wrappers.mjs` and `build-facet.mjs` (the other generators that `build.mjs` runs), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
 | `.github/ISSUE_TEMPLATE/` | The component or extension request form. |
 
 ## Families

@@ -1,8 +1,11 @@
 # Writing Fire markup in Lit, React and Next.js, and Vue (the exporter's specification)
 
-Status: Fire 0.6. This file is the specification that the starters prove with `render-equal.mjs` and that Facet's
+Status: Fire 0.8. This file is the specification that the starters prove with `render-equal.mjs` and that Facet's
 exporter implements. `spec/export-map.json` holds the same rules as data, with the same rule ids. Prose is short. Each
-rule gives the Fire markup, what each target writes, and the reason.
+rule gives the Fire markup, what each target writes, and the reason. The rules were set in 0.6 and have not changed
+since. 0.7 and 0.8 added event names (section 8), Fire-owned attributes and containers (O1, O2), a lifecycle row for
+page transitions (L8), render-equal rules R14 and R15, and section 17 (W1 to W4: the surface, the tab bar, a screen's
+states and website sections).
 
 **Targets and pinned versions.** The rules were checked against these versions:
 
@@ -196,7 +199,8 @@ That the full sprite renders in Next without warnings is for the starter to prov
 
 Fire's events bubble and can be cancelled: `fd:open`, `fd:close`, `fd:change`, `fd:select`, `fd:copy`, `fd:submit`,
 `fd:stop`, `fd:action`, `fd:files`, `fd:invalid`, `fd:valid`, `fd:dirty`, `fd:confirm`, `fd:rotate`, `fd:hover`,
-`fd:theme`, `fd:accent`. Each is listed with its `detail` in `catalog.json`.
+`fd:theme`, `fd:accent`, and since 0.7 `fd:accept`, `fd:commit`, `fd:hold`, `fd:undo`, `fd:download`, `fd:keys`, and since
+0.8 `fd:filter`. Each is listed with its `detail` in `catalog.json`.
 
 | Id | Lit | React | Vue | Check |
 |---|---|---|---|---|
@@ -221,6 +225,7 @@ enhance markup inserted later, through their own observers. Everything else need
 | L5 | Never before hydration | — | Fire running before `hydrateRoot` changes the server markup. React then rebuilds the tree on the client, and Fire's changes are lost (the `<i>` comes back undrawn). | — | E3 |
 | L6 | Light DOM only | Fire's listeners are delegated on `document` and use `event.target.closest(…)`. Inside a shadow root the target is retargeted, so Fire markup must live in light DOM: `createRenderRoot() { return this; }`. A component's host element inside `.fd-page` is a node of its own for `render-equal` (R12): either each screen renders its own `.fd-page` and the hosts take `display: contents` (the Lit starter), or the check runs `render-equal --transparent '<host selectors>'`. | | | R, [A] |
 | L7 | Teardown | Fire has no destroy function. Removed elements stop mattering because the listeners are delegated. | | | R |
+| L8 | A route change that moves as one page (0.8; opt in) | `transition(() => …)` from `fire-design` wraps the render of the route, and the router's handler awaits it | `data-fd-transition="fade"` written once on `<html>` (N3) and a `<ViewTransition>` around each screen (React 19.3, Next App Router). No call to `transition()`: it is for a client router. R14 makes `render-equal` ignore the `vt-*` attributes React writes. | `router.beforeResolve` opens `transition()` with an update that lets the navigation go on, and `afterEach` and `onError` end it | Lit, Next and Vue starters. Chromium only. |
 
 ## 10. Ownership: what Fire writes, and what the framework must leave alone
 
@@ -229,7 +234,9 @@ enhance markup inserted later, through their own observers. Everything else need
 `aria-pressed`, `aria-current`, `aria-controls`, `aria-labelledby`, `aria-describedby`, `aria-haspopup`, `aria-busy`,
 `aria-invalid`, `aria-value*`, `aria-activedescendant`, and `aria-label` (where the trigger has none). Fire also writes
 its own `data-*` attributes: `data-fd-*`, `data-indicator`, `data-thumb`, `data-overflow`, `data-enter`, `data-side`,
-`data-align`, `data-active`, `data-ready`, `data-value` on secrets and comboboxes.
+`data-align`, `data-active`, `data-ready`, `data-value` on secrets and comboboxes, and since 0.8 `data-period` and
+`data-show` (pricing and compare sections), `data-scrolled` (the site header), `data-cloned` and `data-paused` (the logo
+strip). `data-fd-transition` and `data-fd-direction` on `<html>` are Fire's while `transition()` runs (L8).
 
 - **Rule**: write the value the Fire markup shows (for example `aria-expanded="false"`), and never bind it to state that changes.
 - **Changing Fire's state**: use Fire's API (`overlays.openDialog`, `openMenu`, `setTheme`, `setIcon`), or click the
@@ -261,6 +268,11 @@ container's `key` (`:key` in Vue, `keyed()` in Lit) and let L2 run `init`, or us
 | `.fd-tabs`, `.fd-segmented`, `.fd-toc` | appends or prepends an indicator, thumb or marker | items may change: no crash, and `init` on update keeps it right [E4] |
 | `.fd-checkbox-box`, `.fd-choice-mark` | inserts the check SVG when there is none | leave empty |
 | `.fd-prose` headings, `.fd-toc-list[data-fd-doc-toc]` | adds anchors and fills the list | static content |
+| `.fd-filters[data-fd-for]` (0.8) | adds the search, the chip list, the Clear button and a live region inside it; sets `hidden` (and `data-fd-hid`) on the rows or items of its target and on `[data-fd-none]` | render every row once as static markup, each with its `data-<field>`; to filter your own data, listen for `fd:filter` and call `matches()` |
+| `.fd-site-posts` with `data-filter` controls (0.8) | sets `hidden` on entries, on the list, on the `.fd-empty` and on the pager; fills an empty `nav.fd-pagination` with page buttons; writes the text of `.fd-site-posts-count` | render every entry once, with an empty `nav.fd-pagination`; set a listing from script with `filterPosts()` |
+| `.fd-site-logos[data-layout="marquee"]` (0.8) | copies the list after itself (`aria-hidden`, `inert`) and sets `data-cloned` | render the list once |
+| `.fd-brand` (0.8) | fills the mark, the name or the logo image from `data-fd-brand` or `setBrand()`; without a `mark` it draws the name's initial | render each `.fd-brand` once, with the name as its text; change the brand with `setBrand()`; the JSON script follows M2 |
+| `.fd-doc-frame[data-fd-src]` (0.8) | fills `.fd-doc-frame-media` with an `<img>` or a placeholder tile and writes `data-state` | render the figure with `data-fd-src`, `data-fd-alt` and an empty media; change the picture with `setPicture(frame, url)` |
 
 **O3. Fields Fire writes.** Never make these controlled in React (F7): use `defaultValue` or `defaultChecked` and read
 `fd:change` or the submitted form. In Vue, prefer `@fd:change` over `v-model` on these. The fields are:
@@ -405,13 +417,29 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
 | R14 | Ignore React's view-transition bookkeeping attributes (`vt-*`: `vt-name`, `vt-update`, `vt-enter`, `vt-exit`, `vt-share`). React 19.3's `<ViewTransition>` writes them into the server HTML and adds no element; they are not Fire markup. | Next starter |
 | R15 | The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors (the fixed phone tab bar, the support button, a toast) is made `visibility: hidden` and restored afterwards; layout is untouched and the root's own fixed or sticky descendants stay. The comparison is of the root; the shell around it belongs to the product. Structure and computed style are unchanged. | starters |
 
-## 17. Verified, and left to the starters
+## 17. Pages: surface, tab bar, states and websites (0.8)
+
+These are about a page, not an attribute. They add no new way of writing markup: each says which of the rules above
+applies.
+
+| Id | Rule | Lit | React | Vue | Check |
+|---|---|---|---|---|---|
+| W1 | **Surface.** `data-fd-surface="app|website|phone|email"` on `<html>`, or on one element, is an ordinary `data-*` attribute with a value (A9). Fire has no script for it; the markup lint reads it and warns `surface-mismatch` for a part whose card does not list it. Run the lint with `--surface app` for files that declare none. | in `index.html` | a static prop on `<html>` in the root layout, beside `suppressHydrationWarning` (N3) | in `index.html` | starters |
+| W2 | **Phone tab bar.** `nav.fd-tabbar` is a direct child of `.fd-app` and holds `a.fd-tabbar-item` with an icon and `fd-tabbar-label`; the last item may be a "More" button: `button.fd-tabbar-item[data-fd-mobile-nav][aria-controls][aria-expanded="false"]`. The router link sets `aria-current="page"`; `aria-expanded` is Fire's (O1). An icon that comes from data is an `fd-icon` (I1). | `data-fd-mobile-nav` | `data-fd-mobile-nav=""` (A7) | `data-fd-mobile-nav` | starters |
+| W3 | **A screen's states** (loading, empty, error, no results) are blocks of markup. The framework chooses one from a typed state that it reads from the address (`?state=`); it does not run the template's inline demo script, which is a specimen. `fd-states` is the Fire form: `data-state` shows the child with the matching `data-when`; `data-state` is Fire's (O1), so write the first value, change it with `setState()`, or remount with a `key`. | the route's `PageState` selects the template | `searchParams` on the server page selects the blocks | the route's query selects them with `v-if` | starters: each check opens the empty, error and no-results views and asserts which block shows |
+| W4 | **Website sections are plain markup**: `section.fd-site-section.fd-site-<type>` with one `.fd-site-container`, inside `.fd-site`; `data-layout`, `data-ground` and the rest are ordinary `data-*` attributes. There is no element for a section. What Fire changes in a section is the O2 rows for the listing, the logo strip, `.fd-brand` and the picture frame, and the sign-up form's `data-state` (O1), and after hydration it inserts one `span[data-fd-site-sentinel]` at the start of `.fd-site` (the header's scrolled state). Every `<img>` inside `.fd-site` carries `alt`, `width` and `height` (the lint warns `img-attrs`). Call `init(root)` after rendering one (L1, L2). | as the rules above | same | same | R. No starter builds a site: these are read from `fire/js/site.js`, not run in a framework. |
+
+## 18. Verified, and left to the starters
 
 - **Confirmed from `contract/custom-elements.json`**: the `fd-icon` and `fd-chart` attribute names (I1, C2).
 - **Verified by experiment** (E1–E12): every rule in sections 1–6 and 8; C1–C6 and C8; L1, L2, L3 (Next), L5; O1;
   O2 for icons, secrets, tabs and keyed remounts; O3's React and Vue behaviour; N1–N6; P1, and P3 in production; X2 in
   Next; the sprite marked `hidden`.
-- **Read from source, not run** (R): M7–M9, the rest of O2, L4, L6, L7, X1, B1–B13 (Facet's runtime).
+- **Read from source, not run** (R): M7–M9, the rest of O2 (including the 0.8 rows), L4, L6, L7, W4, X1, B1–B13
+  (Facet's runtime).
+- **Exercised by the starters since 0.8**: W1 (the lint runs with `--surface app`), W2 (the tab bar is in each shell and
+  in the render-equal comparison; the Lit check presses More), W3 (the `?state=` checks) and R14 and R15 (the Next
+  starter and the pixel shots). L8 is in all three starters, but no check asserts the motion; it was seen in Chromium.
 - **Assumptions the starters must prove** [A]:
   - C7, the typing.
   - L3 for Lit and Vue routers.

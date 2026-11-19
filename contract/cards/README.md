@@ -16,7 +16,7 @@ shows it. Write the card from that section's prose and the component's CSS heade
 
 ## Fields
 
-Every field is required; a list with nothing to say is `[]`.
+Every field is required except `relation`; a list with nothing to say is `[]`.
 
 | Field | What it holds |
 |---|---|
@@ -26,7 +26,7 @@ Every field is required; a list with nothing to say is `[]`.
 | `useWhen` | Situations that call for it, each one sentence. At least one. |
 | `avoidWhen` | Situations that look like a fit and are not. Each has `when` and `instead`: a component id, or a short instruction when no component fits. |
 | `aka` | Other names people and other design systems use (search terms): "modal" for a dialog. |
-| `surfaces` | Where it is used: `app`, `website`, `phone`, `email`. At least one. |
+| `surfaces` | Where it is used: `app`, `website`, `phone`, `email`, always in that order. At least one. List a surface only where the part is right as it is: the markup lint (`surface-mismatch`), `fire find --surface`, the Catalogue page and the Facet export all read it. A part that is right only on a phone lists only `phone`; a phone page also accepts parts that list `app`. |
 | `data` | The shape of data it shows or collects: `record`, `list`, `series`, `form`, `text`, `none`. At least one. |
 | `states` | Conditions it can be in. Each has `name` and `how`: the attribute, class or call that sets it, as written in markup. |
 | `variants` | Attribute values that change the look or role. Each has `attribute`, `value` (an empty string for an attribute set with no value) and `useWhen`. The build fails when the attribute or value is not one the CSS defines for the component. |
@@ -34,8 +34,17 @@ Every field is required; a list with nothing to say is `[]`.
 | `related` | Ids of components often used with it or mistaken for it. The build fails on an unknown id. |
 | `keyboard` | Keys the component handles: `keys` and `does`. |
 | `example` | The docs section whose specimen shows it, as `docs/<page>.html#<section id>`. The build fails when the section does not exist. |
+| `relation` | Optional. Declares that this part looks like another and is not a duplicate, so the near-duplicate gate (`scripts/gate.mjs`) lets the pair stand: exactly one of `variantOf` (a form of the other) or `distinctFrom` (looks alike, a different thing), a component id, and `because`, one sentence on when to use this one instead. |
 | `provenance` | Repository paths the card was written from. At least one. |
 | `since` | The Fire version that introduced the component, as `major.minor.patch`; read it from the git tags. |
+
+## Kinds, templates and pictures
+
+A card also exists for each kind of entry the catalogue lists: component, pattern, layout and `section`. The kind is not in the card; the build assigns it. A website section (`site-hero`, `site-posts`, `site-article` and the others) has an ordinary card with `surfaces: ["website"]`, and its variants are the values of its `data-layout`.
+
+A template has a card in `contract/cards/templates/<name>.json`, one for each file in `templates/`, with the same fields except `variants`, `parts`, `related` and `keyboard`. `example` is the template's path. `states` lists every state the screen has and how to reach it: `?state=<name>`, the screen's Demo state band, or the control that opens it. A screen with no states beyond the default says so in one `default` state. The ten website templates add `sections`, a list of `{ section, variant, why }`: which sections the page is composed of, in order, and why each variant. A template card may carry a `relation` too.
+
+A picture of each entry is not a card field: `contract/pictures/<kind>/<id>.png` is rendered from the part's first docs specimen (`npm run build:pictures`), and the build fails when an entry has none. The pictures are in the repository and are left out of the installed package.
 
 ## Writing rules
 

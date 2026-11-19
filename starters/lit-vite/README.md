@@ -16,6 +16,8 @@ checks that prove they match Fire's own templates.
 The three screens are the `.fd-page` of Fire's `templates/overview.html`, `logs.html` and `settings.html`, converted
 to Lit. The shell is `templates/shell-static.html` (go-to keys, the running-now pill, the service status, the shortcut sheet and the command palette; the starter has no Decisions page). The sample data is Ember's, kept as it is.
 
+On a phone (below 640px) the screens are reached from the tab bar (`fd-tabbar`, in `src/shell/app-shell.ts`): one item per route and a More button (`data-fd-mobile-nav`) that opens the menu sheet. `index.html` declares `data-fd-surface="app"`, so the markup lint knows which parts suit the page.
+
 States: `?state=` on `/overview` (`loading`, `empty`, `error`) and `/logs` (`loaded`, `loading`, `empty`, `error`, `no-results`) opens the screen in that state; any other value is ignored. A screen reads it with `askedState()` (`src/lib/page-state.ts`, through the router) and renders its blocks from a typed `PageState`.
 Retry on the error state is wired: the overview shows the skeleton and then the data, the logs reload.
 
@@ -87,7 +89,7 @@ customElements.define('screen-example', ScreenExample);
 2. A **browser run** on the production build visits every route by URL and by clicking, and fails on any console
    error, uncaught error, failed request or Content Security Policy violation. It also tries search, the row menu
    with its toast, the detail sheet, tabs, a confirm dialog, the elements and the phone menu.
-3. **lint-markup** checks `src/` against Fire's catalogue (`npm run lint:markup` runs it alone), and **lint-css** checks the starter's own CSS and tokens against Fire's token contract (`npm run lint:css`).
+3. **lint-markup** checks `src/` against Fire's catalogue with `--surface app` (`npm run lint:markup` runs it alone), and **lint-css** checks the starter's own CSS and tokens against Fire's token contract (`npm run lint:css`).
 
 Three things to know when it fails or when you change a screen:
 
@@ -130,7 +132,7 @@ Options: `--only logs`, `--engines chromium`, `--widths 1440`, `--themes light`,
 
 ## Sizes
 
-Production build with Fire's whole stylesheet and all its type sets: JavaScript 697 kB (190 kB gzip, Fire, Lit twice
-and the app), CSS 655 kB (98 kB gzip), 23 font files 625 kB, `index.html` 0.9 kB. A product that uses one type set
-can drop the others from `fire/typefaces.css`, which removes most of the font weight. The two copies of Lit are
-Fire's own (bundled in `fire-design/elements`) and the app's.
+A production build carries Fire's whole stylesheet and all its type sets: 23 font files, 625 kB. `npm run build` prints the
+current JavaScript and CSS sizes; they grew in 0.8 with the website and filter code, which the starter does not use. A
+product that uses one type set can drop the others from `fire/typefaces.css`, which removes most of the font weight. The
+JavaScript holds two copies of Lit: Fire's own (bundled in `fire-design/elements`) and the app's.

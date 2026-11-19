@@ -1,5 +1,7 @@
 # Building a template screen
 
+> Written for Fire 0.1.0 and kept as a record. A template today also has a card in `contract/cards/templates/`, declares `data-fd-surface` on `<html>` (the index apart), opens its states from `?state=` where it has any, and a website template mounts `site-shell.js` and a documentation template `docs-shell.js`; the current rules are `DESIGN.md`, `GUIDE.md` section 3 and `CLASSES.md`.
+
 Templates are full Ember app screens assembled ONLY from Fire components. They prove the system and are the starting point people copy.
 
 ## Read first

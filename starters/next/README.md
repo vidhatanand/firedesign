@@ -1,6 +1,6 @@
 # Fire on Next.js (App Router)
 
-A Next.js 16 starter for Fire 0.6: React 19, TypeScript, server-rendered Fire markup, Fire's behaviour loaded in the
+A Next.js 16 starter for Fire: React 19, TypeScript, server-rendered Fire markup, Fire's behaviour loaded in the
 browser, and a strict Content Security Policy with a nonce. It follows `spec/EXPORT.md`, and `npm run check` proves
 that its screens render the same as Fire's templates.
 
@@ -10,7 +10,8 @@ that its screens render the same as Fire's templates.
   (`data-fd-keys="g l"`), top bar (running-now pill, service status, search, shortcut sheet), phone menu, the
   running-now popover, the shortcut sheet and the command palette, plus the support launcher and chat panel every
   Ember screen has. The nav lists this starter's three routes only. Navigation uses `next/link`, so route changes are
-  client-side and Fire's `init` runs again after each one.
+  client-side and Fire's `init` runs again after each one. On a phone (below 640px) the same routes are the tab bar
+  (`fd-tabbar`) with a More button that opens the menu sheet, and `<html>` carries `data-fd-surface="app"`.
 - **Three screens**, each the `.fd-page` of a template converted to JSX:
   `/overview` (`templates/overview.html`), `/logs` (`templates/logs.html`) and `/settings` (`templates/settings.html`,
   with the tab from `?tab=` rendered on the server; `?state=` (loading, error, member) is applied in the browser, as
@@ -77,7 +78,7 @@ that its screens render the same as Fire's templates.
    to its terminal); two mismatches planted in the server HTML must be reported, which proves it would catch one;
 5. runs `render-equal.mjs` for each screen against `templates/<name>.html` (`.fd-page`), at 1440 and 375 wide,
    light and dark, in the three engines (36 runs);
-6. runs `lint-markup.mjs` and `lint-css.mjs` over `app/`.
+6. runs `lint-markup.mjs` (with `--surface app`) and `lint-css.mjs` over `app/`.
 
 Every server is closed before it exits; reports and pixel diffs go to `.check/`. Options: `--engines`, `--widths`,
 `--themes`, `--screens`, `--skip-build`, `--skip-dev`, `--skip-render`.

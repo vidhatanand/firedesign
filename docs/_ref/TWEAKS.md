@@ -1,5 +1,7 @@
 # Palettes and the tweak panel — build brief
 
+> Written for Fire 0.1.0 and kept as a record. Since then every palette derives its own status and chart colours, the panel gained a Looks row, the four structural dials, the signature and a Pictures row, and the display font became a type set. The current reference is `docs/tweaks.html` and the header of `fire/js/tweaks.js`.
+
 Fire's whole look is now driven by variables. This work adds (a) fifteen colour palettes that recolour the entire
 system, neutrals included, (b) tone controls that bend the chosen palette, and (c) a floating **Tweaks** panel where
 someone can play with palette, tone, density, corners, type, contrast, motion and texture, live, on any page.

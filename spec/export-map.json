@@ -36,10 +36,11 @@
     "csp": "Strict Content Security Policy per target.",
     "labels": "Translation rules.",
     "facet": "Facet board constructs → per-target templates. `confirm: true` marks shapes to confirm with the Facet session.",
-    "renderEqual": "Normalisations render-equal must apply for these rules to hold: id → description."
+    "renderEqual": "Normalisations render-equal must apply for these rules to hold: id → description.",
+    "pages": "Page-level rules added in 0.8 (EXPORT.md section 17): id → { rule, lit, react, vue, check }."
   },
   "version": 1,
-  "fire": "0.6.0",
+  "fire": "0.8.0",
   "targets": {
     "html": { "name": "Plain HTML", "versions": {}, "notes": "Fire markup as in docs/ and templates/." },
     "lit": { "name": "Lit", "versions": { "lit": "3.3.3" }, "notes": "Light DOM components (createRenderRoot() { return this; })." },
@@ -229,7 +230,7 @@
     "vueCompilerOptions": { "rule": "vite.config: vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('fd-'), whitespace: 'preserve' } } }); app.config.compilerOptions affects only templates compiled at run time", "check": ["E6"] }
   },
   "events": {
-    "names": ["fd:open", "fd:close", "fd:change", "fd:select", "fd:copy", "fd:submit", "fd:stop", "fd:action", "fd:files", "fd:invalid", "fd:valid", "fd:dirty", "fd:confirm", "fd:rotate", "fd:hover", "fd:theme", "fd:accent"],
+    "names": ["fd:open", "fd:close", "fd:change", "fd:select", "fd:copy", "fd:submit", "fd:stop", "fd:action", "fd:files", "fd:invalid", "fd:valid", "fd:dirty", "fd:confirm", "fd:rotate", "fd:hover", "fd:theme", "fd:accent", "fd:accept", "fd:commit", "fd:hold", "fd:undo", "fd:download", "fd:keys", "fd:filter"],
     "bubbles": true,
     "cancelable": true,
     "bind": {
@@ -254,12 +255,13 @@
     "L5": { "when": "never before hydration", "react": "Fire running before hydrateRoot makes React rebuild the tree, losing Fire's changes; load Fire inside useEffect", "check": ["E3"] },
     "L6": { "when": "always", "rule": "Fire markup lives in light DOM: Fire's listeners are delegated on document and use event.target.closest()", "lit": "createRenderRoot() { return this; }", "renderEqual": "a component's host element inside .fd-page is a node of its own: screens render their own .fd-page with hosts at display: contents, or render-equal runs with --transparent <host selectors> (R12)", "check": ["R", "A"] },
     "L7": { "when": "unmount", "rule": "no teardown; Fire has no destroy function", "check": ["R"] },
+    "L8": { "when": "a route change that moves as one page (0.8; opt in)", "lit": "transition(() => render the route) from fire-design, awaited by the router's handler", "react": "data-fd-transition=\"fade\" written once on <html> (N3) and a <ViewTransition> around each screen (React 19.3, Next App Router); no call to transition(); R14 ignores the vt-* attributes", "vue": "router.beforeResolve opens transition() with an update that lets the navigation go on; afterEach and onError end it", "check": ["R"] },
     "idempotent": "init(root) is a no-op for elements it has seen (once, keyed on the element); the forms and texture modules also enhance inserted markup through their own observers"
   },
   "ownership": {
     "rule": "Write the value the Fire markup shows, never bind these to changing state; change Fire's state through Fire's API, the trigger, or a key remount (O1)",
     "check": ["E3", "E4", "E7", "E8"],
-    "fireOwnedAttributes": ["id", "role", "tabindex", "type", "popover", "hidden", "inert", "data-state", "aria-expanded", "aria-selected", "aria-checked", "aria-pressed", "aria-current", "aria-controls", "aria-labelledby", "aria-describedby", "aria-haspopup", "aria-busy", "aria-invalid", "aria-valuenow", "aria-valuemin", "aria-valuemax", "aria-valuetext", "aria-activedescendant", "aria-label", "data-indicator", "data-thumb", "data-overflow", "data-enter", "data-side", "data-align", "data-active", "data-ready", "data-value"],
+    "fireOwnedAttributes": ["id", "role", "tabindex", "type", "popover", "hidden", "inert", "data-state", "aria-expanded", "aria-selected", "aria-checked", "aria-pressed", "aria-current", "aria-controls", "aria-labelledby", "aria-describedby", "aria-haspopup", "aria-busy", "aria-invalid", "aria-valuenow", "aria-valuemin", "aria-valuemax", "aria-valuetext", "aria-activedescendant", "aria-label", "data-indicator", "data-thumb", "data-overflow", "data-enter", "data-side", "data-align", "data-active", "data-ready", "data-value", "data-period", "data-show", "data-scrolled", "data-cloned", "data-paused"],
     "fireOwnedAttributePatterns": ["^data-fd-"],
     "scope": "These are Fire-owned on the elements Fire manages (component roots, triggers, panels, items); aria-label only where the element had none.",
     "filledContainers": [
@@ -282,7 +284,12 @@
       { "selector": ".fd-tabs, .fd-segmented, .fd-toc, .fd-toc-list", "fire": "appends or prepends an indicator, thumb or marker", "rule": "items may change; L2 keeps it right", "check": ["E4"] },
       { "selector": ".fd-checkbox-box, .fd-choice-mark", "fire": "inserts the check SVG when none", "rule": "render it empty", "check": ["R"] },
       { "selector": ".fd-prose > h2, .fd-prose > h3, .fd-prose > h4, .fd-toc-list[data-fd-doc-toc], .fd-doc-otp-list", "fire": "adds anchors and ids, fills empty lists", "rule": "static content", "check": ["R"] },
-      { "selector": ".fd-table-wrap > table, .fd-prose > table, nested .fd-menu", "fire": "wrapped or moved", "rule": "M7, M8, M9", "check": ["R"] }
+      { "selector": ".fd-table-wrap > table, .fd-prose > table, nested .fd-menu", "fire": "wrapped or moved", "rule": "M7, M8, M9", "check": ["R"] },
+      { "selector": ".fd-filters[data-fd-for]", "fire": "adds the search, the chip list, the Clear button and a live region; sets hidden (and data-fd-hid) on the rows or items of its target and on [data-fd-none]", "rule": "render every row once as static markup with its data-<field>; to filter your own data use fd:filter and matches()", "check": ["R"] },
+      { "selector": ".fd-site-posts with data-filter controls", "fire": "sets hidden on entries, list, .fd-empty and pager; fills an empty nav.fd-pagination; writes the text of .fd-site-posts-count", "rule": "render every entry once with an empty nav.fd-pagination; filterPosts() from script", "check": ["R"] },
+      { "selector": ".fd-site-logos[data-layout=marquee]", "fire": "copies the list after itself (aria-hidden, inert) and sets data-cloned", "rule": "render the list once", "check": ["R"] },
+      { "selector": ".fd-brand", "fire": "fills the mark, the name or the logo image from data-fd-brand or setBrand(); without a mark it draws the name's initial", "rule": "render each once with the name as its text; change the brand with setBrand(); the JSON script follows M2", "check": ["R"] },
+      { "selector": ".fd-doc-frame[data-fd-src]", "fire": "fills .fd-doc-frame-media with an <img> or a placeholder tile and writes data-state", "rule": "render the figure with data-fd-src, data-fd-alt and an empty media; setPicture(frame, url) changes it", "check": ["R"] }
     ],
     "fireWrittenFields": [".fd-search-input", "[data-fd-filter-list] input", ".fd-number input", ".fd-slider input", ".fd-segmented input[type=radio]", ".fd-otp input", "[data-fd-tag-input] input", "[data-fd-combobox] input", "[data-fd-pairs] input", ".fd-composer textarea", ".fd-chat textarea", ".fd-command input", "[data-fd-confirm-input]", ".fd-dialog form[data-reset] :is(input, select, textarea)", "input[data-fd-checkall]", ".fd-table input[type=checkbox]", "input[data-indeterminate]", ".fd-secret[data-mode=entry] input"],
     "fieldRule": { "react": "defaultValue / defaultChecked; read fd:change or the submitted form (F7)", "vue": "prefer @fd:change over v-model", "lit": "attribute value for the start; read fd:change", "check": ["E5"] }
@@ -350,5 +357,11 @@
     "R13": "Capture a settled page: no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms, up to the ready timeout; wait only for fd- elements to be defined; the page's CSP is bypassed for the capture (the starters check the policy in their own browser pass).",
     "R14": "Ignore React's view-transition bookkeeping attributes (vt-*: vt-name, vt-update, vt-enter, vt-exit, vt-share): <ViewTransition> writes them into the server HTML and adds no element.",
     "R15": "The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors is made visibility:hidden and restored afterwards (layout untouched; the root's own fixed or sticky descendants stay): the comparison is of the root, the shell around it belongs to the product."
+  },
+  "pages": {
+    "W1": { "rule": "data-fd-surface=\"app|website|phone|email\" on <html> or one element is an ordinary data-* attribute with a value (A9); Fire has no script for it; the markup lint reads it (surface-mismatch, a warning) and --surface sets it for files that declare none", "lit": "in index.html", "react": "a static prop on <html> in the root layout, beside suppressHydrationWarning (N3)", "vue": "in index.html", "check": ["R"] },
+    "W2": { "rule": "nav.fd-tabbar is a direct child of .fd-app with a.fd-tabbar-item (icon and fd-tabbar-label); a More button is button.fd-tabbar-item[data-fd-mobile-nav][aria-controls][aria-expanded=false]; the router link sets aria-current=page, aria-expanded is Fire's (O1)", "lit": "data-fd-mobile-nav", "react": "data-fd-mobile-nav=\"\" (A7)", "vue": "data-fd-mobile-nav", "check": ["R"] },
+    "W3": { "rule": "a screen's states are blocks of markup chosen by the framework from a typed state read from the address (?state=); the template's inline demo script is a specimen and is not exported; fd-states is the Fire form (data-state shows the child with the matching data-when; data-state is Fire's, O1: setState() or a key remount)", "lit": "the route's PageState selects the template", "react": "searchParams on the server page selects the blocks", "vue": "the route's query selects them with v-if", "check": ["R"] },
+    "W4": { "rule": "a website section is plain markup: section.fd-site-section.fd-site-<type> with one .fd-site-container inside .fd-site, with ordinary data-* attributes; no element exists for a section; what Fire changes in one is the O2 rows for the listing, the logo strip, .fd-brand and the picture frame, and the sign-up form's data-state (O1), and after hydration it inserts one span[data-fd-site-sentinel] at the start of .fd-site (the header's scrolled state); every img inside .fd-site has alt, width and height (lint: img-attrs); call init(root) after rendering (L1, L2)", "check": ["R"] }
   }
 }

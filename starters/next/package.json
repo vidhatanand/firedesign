@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "lint:markup": "node ../../scripts/lint-markup.mjs app",
     "lint:css": "node ../../scripts/lint-css.mjs app",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "review": "node ../../scripts/review.mjs --states"
   },
   "dependencies": {
     "@lit/react": "1.0.8",
@@ -42,6 +43,16 @@
       ],
       "out": ".fire-slim",
       "level": "component"
+    },
+    "review": {
+      "base": "http://127.0.0.1:3000",
+      "out": ".fire-review",
+      "setup": { "storage": { "ember-whats-new-seen": "1" } },
+      "routes": [
+        { "path": "/overview", "name": "overview", "states": ["loading", "empty", "error"] },
+        { "path": "/logs", "name": "logs", "states": ["loaded", "loading", "empty", "error", "no-results"] },
+        { "path": "/settings", "name": "settings", "states": ["ready", "loading", "error", "member"] }
+      ]
     }
   }
 }

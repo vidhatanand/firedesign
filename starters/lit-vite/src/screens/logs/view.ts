@@ -322,7 +322,7 @@ export const logsView = (s: ScreenLogs) => html`
         </div>
       </div>
 
-      <dialog class="fd-sheet" id="sheet-log" data-side="right" data-size="md">
+      <dialog class="fd-sheet" id="sheet-log" data-side="right" data-size="md" @fd:close=${s.onSheetClose}>
         <div class="fd-sheet-head">
           <div class="fd-sheet-bar">
             <span class="fd-status" id="lg-status" data-tone=${s.detail?.tone ?? 'success'} ?data-live=${s.detail?.live} data-variant="pill" data-size="sm">${s.detail?.code ?? 200}</span>

@@ -4,18 +4,24 @@
 //      look (in .check/dist): the reference pages are Ember's, so both sides of a comparison need the same palette.
 //      Both builds use the slim Fire (fire slim, through scripts/prepare.mjs); `fire slim --verify` fails when a
 //      bundle still holds a rule or a module the report dropped, and prints the sizes before and after
+//      Then the sizes: a table of every chunk (raw and gzip) and the budgets in package.json ("fire": { "budget" }):
+//      the JavaScript of the first route (the entry, its static imports and the route's chunk), the largest route
+//      chunk, and the CSS, in kB gzip
 //   2. serves both builds (with a fallback to index.html, as a host would) and Fire's repository (the references)
 //      on free ports
 //   3. render-equal.mjs compares each screen's `.fd-page` with its template: structure, computed styles, pixels,
 //      at 1440 and 375 wide, light and dark, in Chromium, WebKit and Firefox
 //   4. a browser run visits every route (by URL and by clicking the navigation) and fails on a console error, an
 //      uncaught error, a failed request or a Content Security Policy violation, and tries the Fire behaviours
+//      and proves the router: a deep link to /logs/:id, a guard's redirect, not-found, back and forward restoring
+//      scroll and focus, the title, route chunks loaded only on a visit or a hover, and a failed chunk's error state
 //   5. lint-markup over src, and lint-css over the starter's own CSS
 // Everything it starts is closed before it exits.
 //
 //   npm run check -- [--only overview,logs] [--engines chromium] [--widths 1440] [--themes light] [--skip-build]
 //                    [--diff-dir .check/diff]   keeps render-equal's JSON reports and diff images there
 import fs from 'node:fs';
+import zlib from 'node:zlib';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
@@ -79,6 +85,52 @@ if (!process.argv.includes('--skip-build')) {
   if (built.status) { console.error('build failed'); process.exit(1); }
 }
 
+/* ------------------------------------------------------------------ 1b. sizes and budgets */
+
+/** The module of the first route a visitor sees (`/` redirects to /overview). */
+const FIRST_ROUTE = 'src/screens/overview/screen.ts';
+{
+  const budget = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).fire?.budget ?? {};
+  const manifest = JSON.parse(fs.readFileSync(path.join(realDist, '.vite/manifest.json'), 'utf8'));
+  const kB = (n) => (n / 1000).toFixed(2).padStart(8);
+  const sizes = new Map();
+  const size = (file) => {
+    if (!sizes.has(file)) { const buf = fs.readFileSync(path.join(realDist, file)); sizes.set(file, { raw: buf.length, gzip: zlib.gzipSync(buf).length }); }
+    return sizes.get(file);
+  };
+  /** A manifest entry's file and its static imports, recursively. */
+  const closure = (key, seen = new Set()) => {
+    if (seen.has(key)) return seen;
+    seen.add(key);
+    for (const k of manifest[key].imports ?? []) closure(k, seen);
+    return seen;
+  };
+  const entry = Object.keys(manifest).find((k) => manifest[k].isEntry);
+  const first = new Set([...closure(entry), ...closure(FIRST_ROUTE)].map((k) => manifest[k].file));
+  const routeChunks = Object.values(manifest).filter((m) => m.isDynamicEntry).map((m) => m.file);
+  const assets = fs.readdirSync(path.join(realDist, 'assets')).filter((f) => /\.(js|css)$/.test(f)).map((f) => `assets/${f}`);
+  console.log('\n== sizes (kB; gzip is what the browser downloads from a host that compresses)');
+  console.log(`${'file'.padEnd(34)}${'raw'.padStart(8)}${'gzip'.padStart(8)}  role`);
+  for (const file of assets.sort((a, b) => size(b).gzip - size(a).gzip)) {
+    const role = [first.has(file) && 'first route', routeChunks.includes(file) && 'route', file.endsWith('.css') && 'css'].filter(Boolean).join(', ');
+    console.log(`${file.padEnd(34)}${kB(size(file).raw)}${kB(size(file).gzip)}  ${role}`);
+  }
+  const fonts = fs.readdirSync(path.join(realDist, 'assets')).filter((f) => f.endsWith('.woff2'));
+  console.log(`${fonts.length} font files, ${kB(fonts.reduce((n, f) => n + fs.statSync(path.join(realDist, 'assets', f)).size, 0)).trim()} kB (a page downloads only the faces it uses)`);
+  const sum = (files) => [...files].reduce((n, f) => n + size(f).gzip, 0);
+  const measured = {
+    initialJs: sum(first),
+    routeJs: Math.max(...routeChunks.map((f) => size(f).gzip)),
+    css: sum(assets.filter((f) => f.endsWith('.css'))),
+  };
+  for (const [name, value] of Object.entries(measured)) {
+    const limit = budget[name];
+    const over = limit !== undefined && value / 1000 > limit;
+    console.log(`${over ? 'FAIL' : 'ok  '} budget ${name}: ${(value / 1000).toFixed(2)} kB gzip of ${limit ?? '(no budget)'} kB`);
+    if (over) fail(`budget ${name}: ${(value / 1000).toFixed(2)} kB gzip is over ${limit} kB (package.json "fire": { "budget" })`);
+  }
+}
+
 /* ------------------------------------------------------------------ 2. servers */
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.png': 'image/png' };
@@ -136,10 +188,10 @@ try {
     try { localStorage.setItem('ember-whats-new-seen', '1'); } catch { /* the overview's first-visit dialog would cover the page */ }
     document.addEventListener('securitypolicyviolation', (e) => window.__csp.push(`${e.violatedDirective} ${e.blockedURI}`));
   });
-  const step = async (label, fn) => {
+  const step = async (label, fn, on = page) => {
     const before = problems.length;
     try { await fn(); } catch (error) { problems.push(`${label}: ${error.message.split('\n')[0]}`); }
-    const csp = await page.evaluate(() => window.__csp.splice(0)).catch(() => []);
+    const csp = await on.evaluate(() => window.__csp.splice(0)).catch(() => []);
     for (const v of csp) problems.push(`CSP violation: ${v}`);
     const found = problems.slice(before);
     console.log(`${found.length ? 'FAIL' : 'ok  '} ${label}${found.map((p) => `\n       ${p}`).join('')}`);
@@ -237,6 +289,102 @@ try {
     await page.goBack();
     await page.locator('#panel-team').waitFor();
   });
+  /* ---------------------------------------------------------------- 4b. the router */
+  console.log('\n== router: deep link, guard, not-found, history, lazy chunks, a failed chunk');
+  // A page of its own, so a request the step blocks on purpose (the failed chunk) is not a problem of the others.
+  const routing = await context.newPage();
+  routing.setDefaultTimeout(6000);
+  const blocked = /\/assets\/elements-[\w-]+\.js/;
+  const fetched = [];
+  routing.on('request', (r) => fetched.push(r.url()));
+  routing.on('console', (m) => { if ((m.type() === 'error' || m.type() === 'warning') && !blocked.test(m.text()) && !m.text().includes('net::ERR_FAILED')) problems.push(`console ${m.type()}: ${m.text()}`); });
+  routing.on('pageerror', (e) => problems.push(`uncaught: ${e.message}`));
+  routing.on('requestfailed', (r) => { if (!blocked.test(r.url())) problems.push(`request failed: ${r.url()}`); });
+  routing.on('response', (r) => { if (r.status() >= 400) problems.push(`HTTP ${r.status()}: ${r.url()}`); });
+  await routing.addInitScript(() => {
+    window.__csp = [];
+    try { localStorage.setItem('ember-whats-new-seen', '1'); } catch { /* see above */ }
+    document.addEventListener('securitypolicyviolation', (e) => window.__csp.push(`${e.violatedDirective} ${e.blockedURI}`));
+  });
+  const title = async (expected) => { await routing.waitForFunction((t) => document.title === t, expected).catch(() => { throw new Error(`the title is not "${expected}"`); }); };
+
+  await step('a deep link to /logs/:id opens that request; closing it leaves /logs', async () => {
+    await routing.goto(`${app.origin}/logs/req_7c19be`);
+    await routing.locator('#sheet-log[open] #lg-id', { hasText: 'req_7c19be' }).waitFor();
+    await title('Request req_7c19be · Ember');
+    await routing.keyboard.press('Escape');
+    await routing.waitForURL(`${app.origin}/logs`);
+    if (await routing.locator('#sheet-log[open]').count()) throw new Error('the sheet is still open');
+  }, routing);
+  await step('a row pushes /logs/:id; Back closes the sheet', async () => {
+    await routing.locator('#logs-body > tr:not([hidden])').first().click({ position: { x: 200, y: 10 } });
+    await routing.waitForURL(/\/logs\/req_\w+$/);
+    await routing.locator('#sheet-log[open]').waitFor();
+    await routing.goBack();
+    await routing.waitForURL(`${app.origin}/logs`);
+    await routing.waitForFunction(() => !document.querySelector('#sheet-log[open]'));
+  }, routing);
+  await step('an unknown address shows not-found, in the shell, with the address kept', async () => {
+    await routing.goto(`${app.origin}/billing/plans`);
+    await routing.locator('screen-not-found h1', { hasText: 'This page moved or never existed' }).waitFor();
+    if (!routing.url().endsWith('/billing/plans')) throw new Error(`the address changed to ${routing.url()}`);
+    if (await routing.locator('screen-not-found .fd-empty-hint').textContent() !== '/billing/plans') throw new Error('the hint does not name the address');
+    if (!await routing.locator('.fd-sidebar').isVisible()) throw new Error('the shell is missing');
+    await title('Page not found · Ember');
+  }, routing);
+  await step('a guard that says no redirects, replacing the history entry', async () => {
+    await routing.goto(`${app.origin}/overview`);
+    await routing.locator('screen-overview h1').waitFor({ state: 'attached' });
+    await routing.evaluate(() => sessionStorage.setItem('ember-deny', 'elements:view'));
+    await routing.locator('.fd-nav a[href="/elements"]').click();
+    await routing.waitForURL(`${app.origin}/no-access`);
+    await routing.locator('screen-no-access h1').waitFor();
+    await title('No access · Ember');
+    await routing.goBack();
+    await routing.waitForURL(`${app.origin}/overview`);
+    await routing.evaluate(() => sessionStorage.removeItem('ember-deny'));
+  }, routing);
+  await step('back and forward restore scroll and focus; the title and the live region follow', async () => {
+    await routing.goto(`${app.origin}/overview`);
+    await routing.locator('screen-overview h1').waitFor({ state: 'attached' });
+    await routing.evaluate(() => scrollTo(0, 600));
+    await routing.waitForFunction(() => scrollY === 600);
+    await routing.locator('.fd-nav a[href="/logs"]').focus();
+    await routing.keyboard.press('Enter');
+    await routing.waitForFunction(() => document.activeElement?.matches('screen-logs h1'));
+    await title('Activity logs · Ember');
+    await routing.waitForFunction(() => document.querySelector('#ember-route-status')?.textContent === 'Activity logs · Ember');
+    if (await routing.evaluate(() => scrollY) !== 0) throw new Error('a new page did not start at the top');
+    await routing.goBack();
+    await routing.waitForFunction(() => document.activeElement?.matches('screen-overview h1') && scrollY === 600);
+    await title('Overview · Ember');
+    await routing.goForward();
+    await routing.waitForFunction(() => document.activeElement?.matches('screen-logs h1') && scrollY === 0);
+  }, routing);
+  await step('a route chunk is fetched on a visit or a hover, not before', async () => {
+    const chunk = (name) => fetched.some((url) => new RegExp(`/assets/${name}-[\\w-]+\\.js$`).test(url));
+    await routing.goto('about:blank');
+    fetched.length = 0;
+    await routing.goto(`${app.origin}/overview`);
+    await routing.locator('screen-overview h1').waitFor({ state: 'attached' });
+    if (!chunk('overview')) throw new Error('the first route was not fetched');
+    if (['logs', 'settings', 'elements'].some(chunk)) throw new Error('another route was fetched up front');
+    await routing.locator('.fd-nav a[href="/settings"]').hover();
+    await routing.waitForFunction(() => performance.getEntriesByType('resource').some((e) => /\/assets\/settings-/.test(e.name)));
+    if (chunk('elements') || chunk('logs')) throw new Error('hovering one link fetched another route');
+  }, routing);
+  await step('a chunk that fails to load shows the error state; Try again loads it', async () => {
+    await routing.route(blocked, (r) => r.abort());
+    await routing.locator('.fd-nav a[href="/elements"]').click();
+    await routing.locator('screen-load-error h1').waitFor();
+    if (!await routing.locator('screen-load-error [data-action="reload"]').isVisible()) throw new Error('no Reload for a stale deploy');
+    if (!await routing.locator('.fd-sidebar').isVisible()) throw new Error('the shell is missing');
+    await routing.unroute(blocked);
+    await routing.locator('screen-load-error [data-action="retry"]').click();
+    await routing.locator('screen-elements fd-chart svg').first().waitFor();
+  }, routing);
+  await routing.close();
+
   await step('phone width: the menu opens', async () => {
     await page.setViewportSize({ width: 375, height: 800 });
     await page.locator('.fd-tabbar [data-fd-mobile-nav]').click();   // at phone width the tab bar's More opens the menu (the top bar's button is hidden)

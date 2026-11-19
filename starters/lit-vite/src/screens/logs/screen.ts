@@ -3,6 +3,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { code, copyText, data, nav, overlays } from 'fire-design';
 import { FireLight } from '../../lib/fire-light';
 import { askedState } from '../../lib/page-state';
+import { navigate, type ParamsOf } from '../../lib/router';
 import { logOf, requestBody, responseBody, type LogRow } from './detail';
 import { emptyRow, errorRow } from './states';
 import { logsView } from './view';
@@ -36,17 +37,22 @@ export class ScreenLogs extends FireLight {
   static override properties = {
     tableState: { state: true },
     page: { state: true },
-    query: { state: true },
+    searchText: { state: true },
     filters: { state: true },
     deleted: { state: true },
     detail: { state: true },
+    params: { attribute: false },
   };
   declare tableState: TableState;
   declare page: number;
-  declare query: string;
+  declare searchText: string;
   declare filters: Filters;
   declare deleted: Set<string>;
   declare detail: LogRow | null;
+  /** Set by the router: `/logs/:id` opens that request in the detail sheet. */
+  declare params: Partial<ParamsOf<'/logs/:id'>>;
+  /** The sheet was opened from a row here, so closing it goes back in history rather than replacing the entry. */
+  private pushed = false;
   /** How many rows pass the search and filters; set before each render. */
   shown = 0;
   private timer = 0;
@@ -55,7 +61,7 @@ export class ScreenLogs extends FireLight {
     super();
     this.tableState = 'loading';
     this.page = 1;
-    this.query = '';
+    this.searchText = '';
     this.filters = { endpoint: [], key: [], status: [], range: { preset: '7d' } };
     this.deleted = new Set();
     this.detail = null;
@@ -67,7 +73,7 @@ export class ScreenLogs extends FireLight {
     const asked = askedState(ASKED);
     if (asked === 'no-results') {
       this.tableState = 'loaded';
-      this.query = 'invoice-export.pdf';
+      this.searchText = 'invoice-export.pdf';
     } else if (asked) {
       this.tableState = asked;
     } else {
@@ -83,8 +89,8 @@ export class ScreenLogs extends FireLight {
   protected override firstUpdated(): void {
     // A search from the URL (no-results) is also in the search box.
     const search = this.querySelector<HTMLInputElement>('#logs-search');
-    if (search && this.query) {
-      search.value = this.query;
+    if (search && this.searchText) {
+      search.value = this.searchText;
       // The rows exist now: show and hide them for the search (willUpdate ran before they were rendered).
       this.requestUpdate();
     }
@@ -96,7 +102,7 @@ export class ScreenLogs extends FireLight {
   private get rows() { return [...this.querySelectorAll<HTMLTableRowElement>('#logs-body > tr')]; }
   private get filtered() {
     const f = this.filters;
-    return Boolean(this.query.trim() || f.endpoint.length || f.key.length || f.status.length || f.range.preset !== '7d');
+    return Boolean(this.searchText.trim() || f.endpoint.length || f.key.length || f.status.length || f.range.preset !== '7d');
   }
   get tokens() { return FILTER_KEYS.flatMap((key) => this.filters[key].map((value) => ({ key, value }))); }
   get paged() { return this.tableState === 'loaded' && !this.filtered; }
@@ -126,7 +132,7 @@ export class ScreenLogs extends FireLight {
   }
 
   protected override willUpdate(): void {
-    const q = this.query.trim().toLowerCase();
+    const q = this.searchText.trim().toLowerCase();
     this.shown = 0;
     for (const tr of this.rows) {
       tr.hidden = !this.passes(tr, q);
@@ -144,6 +150,22 @@ export class ScreenLogs extends FireLight {
       // Fire draws a JSON tree into these containers; it owns their content.
       code.renderJSON(this.querySelector<HTMLElement>('#lg-request-json')!, requestBody(this.detail), { depth: 3 });
       code.renderJSON(this.querySelector<HTMLElement>('#lg-response-json')!, responseBody(this.detail), { depth: 3 });
+    }
+    if (changed.has('params')) this.showRequest(this.params?.id);
+  }
+
+  /** The address names a request (or no longer does): open the sheet on it, or close it. */
+  private showRequest(id: string | undefined): void {
+    if (!id) {
+      this.pushed = false;
+      closeDialog('sheet-log');
+      return;
+    }
+    const tr = this.rows.find((row) => row.dataset.value === id);
+    if (tr) this.open(tr);
+    else {
+      toast.error(`No request ${id}`, { description: 'It may have been deleted, or the link is wrong.' });
+      void navigate('/logs', { replace: true });
     }
   }
 
@@ -188,7 +210,7 @@ export class ScreenLogs extends FireLight {
 
   /* ------------------------------------------------------------------ events (bound in view.ts) */
 
-  onSearch = (event: Event): void => { this.query = (event.target as HTMLInputElement).value; };
+  onSearch = (event: Event): void => { this.searchText = (event.target as HTMLInputElement).value; };
   onPrev = (): void => this.goToPage(Math.max(1, this.page - 1));
   onNext = (): void => this.goToPage(Math.min(12, this.page + 1));
   onState = (event: Change): void => {
@@ -215,7 +237,7 @@ export class ScreenLogs extends FireLight {
   /** Row actions, bulk actions, the row menu and the empty state's buttons all send fd:select. */
   onSelect = (event: Select): void => {
     const { action, value, row, item, trigger } = event.detail;
-    if (action === 'open' && row) { event.preventDefault(); this.open(row); return; }
+    if (action === 'open' && row) { event.preventDefault(); this.request(row); return; }
     if (action === 'clear-filters') return this.clearFilters();
     if (action === 'reload') { this.setTableState('loading'); setTimeout(() => this.setTableState('loaded'), 900); return; }
     const ids = Array.isArray(value) ? value : [];
@@ -226,7 +248,7 @@ export class ScreenLogs extends FireLight {
       const tr = trigger?.closest('tr');
       if (!tr) return;
       const id = tr.dataset.value ?? '';
-      if (item.dataset.value === 'open') requestAnimationFrame(() => this.open(tr));
+      if (item.dataset.value === 'open') requestAnimationFrame(() => this.request(tr));
       if (item.dataset.value === 'copy') copyText(id).then(() => toast.success('Request ID copied', { description: id }));
       if (item.dataset.value === 'retry') this.retry([id]);
       if (item.dataset.value === 'delete') this.removeLogs([id]);
@@ -244,9 +266,23 @@ export class ScreenLogs extends FireLight {
     });
   };
 
+  /** A row asks for its detail: the address becomes /logs/:id, and the router hands the id back (showRequest). */
+  private request(tr: HTMLTableRowElement): void {
+    this.pushed = true;
+    void navigate(`/logs/${encodeURIComponent(tr.dataset.value ?? '')}`);
+  }
+
+  /** The sheet closed (Escape, its close button, Retry): the address goes back to /logs. */
+  onSheetClose = (): void => {
+    if (!this.params?.id) return;
+    if (this.pushed) history.back();
+    else void navigate('/logs', { replace: true });
+  };
+
   private open(tr: HTMLTableRowElement): void {
     this.detail = logOf(tr);
-    this.updateComplete.then(() => openDialog('sheet-log', { trigger: tr }));
+    // Focus returns to the row's actions button when the sheet closes (a row cannot take focus).
+    this.updateComplete.then(() => openDialog('sheet-log', { trigger: tr.querySelector<HTMLElement>('[data-fd-menu]') ?? tr }));
   }
 
   private retry(ids: string[]): void {
@@ -268,7 +304,7 @@ export class ScreenLogs extends FireLight {
   }
 
   private clearFilters(): void {
-    this.query = '';
+    this.searchText = '';
     const search = this.querySelector<HTMLInputElement>('#logs-search');
     if (search) search.value = '';
     for (const key of FILTER_KEYS) this.querySelector<HTMLElement>(`#pop-${key} [data-fd-filter-clear]`)?.click();

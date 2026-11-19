@@ -91,7 +91,7 @@ export class ScreenSettings extends FireLight {
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.button) return;
     event.preventDefault(); // the router leaves a link alone once its handler has done this
     this.tab = tabFrom(link.dataset.tab ?? null);
-    history.replaceState(null, '', `?tab=${this.tab}`);
+    history.replaceState(history.state, '', `?tab=${this.tab}`); // keep the router's state (scroll restore)
     this.updateComplete.then(() => { this.revealTab(true); this.querySelector<HTMLElement>(`#h-${this.tab}`)?.focus(); });
   };
 
@@ -355,7 +355,7 @@ export class ScreenSettings extends FireLight {
     if (!url) return;
     const next = new URL(location.href);
     if (state === 'ready') next.searchParams.delete('state'); else next.searchParams.set('state', state);
-    history.replaceState(null, '', next);
+    history.replaceState(history.state, '', next);
   }
   private pageState = 'ready';
 

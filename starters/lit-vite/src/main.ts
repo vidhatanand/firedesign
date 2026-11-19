@@ -11,11 +11,16 @@ import 'fire-design/elements';
 // after they render (see lib/fire-light.ts).
 import 'fire-design';
 
+// The shell is the router's outlet. No screen is imported here: src/routes.ts loads each one when it is first
+// visited, so each is its own chunk.
+import type { AppShell } from './shell/app-shell';
 import './shell/app-shell';
-import './screens/overview/screen';
-import './screens/logs/screen';
-import './screens/settings/screen';
-import './screens/elements/screen';
-
 import { startRouter } from './lib/router';
-startRouter();
+import { routes } from './routes';
+
+void startRouter({
+  routes,
+  outlet: document.querySelector<AppShell>('app-shell')!,
+  base: import.meta.env.BASE_URL, // Vite's `base` (vite.config.ts): the one place the app's path prefix is set
+  title: (title) => `${title} · Ember`,
+});

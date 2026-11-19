@@ -176,6 +176,10 @@ Then open `/scripts/style-diff.html?base=/.baseline&pages=templates/logs.html,do
 
 Fire uses `light-dark()`, `color-mix()`, `@property`, container queries, the Popover API and `<dialog>`. That means current Chrome, Edge, Safari and Firefox. It has been reviewed in Chromium only; Safari and Firefox are untested. Page transitions are verified in Chromium; Firefox has no cross-document transitions and loads pages as usual, and Safari is not verified.
 
+## Licence
+
+MIT: see [LICENSE](LICENSE). The icons, Lit and the fonts keep their own licences, which ship beside them (`fire/LICENSE-lucide.txt`, `fire/LICENSE-lit.txt`, `fire/fonts/licenses/`).
+
 ## Credits
 
 The default interface face is Geist and the mono face is Geist Mono; the other type sets use Space Grotesk, Space Mono, Fraunces, Instrument Sans, Newsreader, Bricolage Grotesque, Big Shoulders Display, Archivo, JetBrains Mono, Pixelify Sans, Doto, Oxanium, Unbounded, Manrope, Syne, DM Sans and DM Mono. All are under the SIL Open Font License 1.1 (licences in `fire/fonts/`). `fire/fonts/README.md` explains the choice and how to swap in a licensed face. Icons are a subset of Lucide, ISC License (`fire/LICENSE-lucide.txt`). The interaction patterns were studied from well-made developer consoles; no third-party brand assets, names or artwork are included.

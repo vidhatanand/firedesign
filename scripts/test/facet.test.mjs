@@ -3,7 +3,7 @@
 //     are reimplemented here: field patterns, caps, references, required pairings, WCAG AA in light and dark, the web
 //     app state coverage, the API card rules, 128 KiB), and, when Facet's built command-line tool is present on this
 //     machine, `facet system check` and `facet system build` agree (they only read the file). Set FACET_CLI to its
-//     path, or it looks for ../design-kit/dist/cli.js, then ../codecrystal/vendor/facet/dist/cli.js;
+//     path, or it looks beside this repository for `../design-kit/dist/cli.js`, then `../codecrystal/vendor/facet/dist/cli.js`;
 //     without one that test is skipped and the reimplementation stands. The full variant (Facet's 0.6.2 schema: 200
 //     components, 128 KiB + 768 KiB caps, the extra colour roles, rem line heights, numeric figures, 5-layer and dark
 //     shadows, 48 sizes, 24 type steps, `contract`) and the fallback (the 0.6.1 rules) are each checked by their own rules.
@@ -29,7 +29,7 @@ const readJson = (rel) => JSON.parse(readText(rel));
 const content = readJson('facet/content.json');
 const extras = readJson('facet/extras.json');
 const DARK = 'org.codecrystal.dark';
-const CLI = (process.env.FACET_CLI ? [process.env.FACET_CLI] : ['../design-kit/dist/cli.js', '../codecrystal/vendor/facet/dist/cli.js']).find((c) => fs.existsSync(c)) || '/nonexistent/facet/cli.js';
+const CLI = (process.env.FACET_CLI ? [process.env.FACET_CLI] : ['../design-kit/dist/cli.js', '../codecrystal/vendor/facet/dist/cli.js'].map((p) => path.resolve(ROOT, p))).find((c) => fs.existsSync(c)) || '/nonexistent/facet/cli.js';
 
 /* ---------- Facet's rules, reimplemented ---------- */
 const ROLES = ['background', 'surface', 'text', 'muted', 'primary', 'on-primary', 'accent', 'border', 'success', 'warning', 'danger', 'focus'];

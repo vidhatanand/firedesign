@@ -5,7 +5,7 @@
 //   --out <dir>                             write to (or check) <dir> instead of facet/ (used by the tests)
 //
 // Two variants, and the build writes the richest the installed Facet accepts. It probes with Facet's own checker
-// (`node <cli.js> system check <file>`, read-only; the path is $FACET_CLI, else ../design-kit/dist/cli.js, else the old vendored ../codecrystal/vendor/facet/dist/cli.js):
+// (`node <cli.js> system check <file>`, read-only; the path is $FACET_CLI, else `../design-kit/dist/cli.js` beside this repository, else the old vendored `../codecrystal/vendor/facet/dist/cli.js`):
 //   full      all components with full cards, a top-level `contract` field holding facet/theme.json exactly, and every token
 //             Facet's 0.6.2 schema takes (extra colour roles, 16 type steps in rem with numeric figures, 5-layer light and dark shadows, all sizes)
 //   fallback  100 components chosen by the curated rule, cut to the richest detail level that fits 128 KiB, no `contract`
@@ -628,7 +628,7 @@ const themeRecord = { contract: recordContract, fire: FIRE_VERSION, ...recordRes
    Which variant: ask the installed Facet
    ========================================================================== */
 // $FACET_CLI when set (even if it names nothing: then there is no Facet to ask), else the first of the two known builds that exists.
-const CLI_CANDIDATES = process.env.FACET_CLI ? [process.env.FACET_CLI] : ['../design-kit/dist/cli.js', '../codecrystal/vendor/facet/dist/cli.js'];
+const CLI_CANDIDATES = process.env.FACET_CLI ? [process.env.FACET_CLI] : ['../design-kit/dist/cli.js', '../codecrystal/vendor/facet/dist/cli.js'].map((p) => path.resolve(ROOT, p));
 const CLI = CLI_CANDIDATES.find((c) => fs.existsSync(c)) || CLI_CANDIDATES[0];
 const cliFound = fs.existsSync(CLI);
 // A name for the Facet build: its MANIFEST.json commit when the CLI sits in a vendored tree, else the CLI file's hash.

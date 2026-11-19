@@ -39,7 +39,14 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 | React and Next.js | `starters/next` | `fire-design/react`: `FireIcon`, `FireChart`, `FireCode`, `FireTexture`, `useFire`, `useFireEvent`, `loadFire` and the exporter's helpers `jsonForScript`, `ccAttr`, `ccText`, `ccTruthy` (`spec/EXPORT.md` section 0) |
 | Vue | `starters/vue-vite` | `fire-design/vue`: the plugin (default export, `Fire`), the `v-fire` directive (`fireDirective`), `fireRouter()`, `fireVueOptions()` for `vite.config` and `isFireElement()` |
 
-Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.8.1"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
+Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.9.0"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
+
+**Production builds are trimmed.** `npx fire slim src index.html --out .fire-slim --theme theme.json` reads your source
+and writes a Fire with only the stylesheets, behaviour modules, palette and fonts it uses, with a report of what was
+kept and why. Point the production build at that folder (the starters do it with one alias) and keep the whole of
+Fire in development. A class name built from a string at run time cannot be seen: `fire slim --report` lists them, and
+`--include` keeps what they make. `fire slim --check` fails in CI when the output is stale, and `--verify <build>` fails
+when a build still carries something the report dropped. See `docs/frameworks.html#slim` for measured sizes.
 
 - Behaviour attaches through `data-fd-*` attributes with listeners on `document`, so most components work on markup inserted later. After rendering new markup that contains icons, charts, textures or sliders, call `init(root)`:
 

@@ -75,7 +75,9 @@ scripts/
   lint-markup.mjs      lints product or board markup against catalog.json (runs in any project)
   lint-css.mjs         lints a product's CSS and tokens against fire-contract.json (section 7)
   render-equal.mjs     compares a reference page and a candidate page (structure, computed styles, pixels)
-  fire.mjs             the `fire` command: find, lint, lint-css, render-equal
+  fire.mjs             the `fire` command: find, lint, lint-css, render-equal, slim
+  slim.mjs             writes a Fire trimmed to a product's source: stylesheet, behaviour entry, fonts, report
+  build-slim-map.mjs   GENERATES contract/slim-map.json: each component's stylesheet, module and what its module builds
   audit.mjs            Fire's own source audit
   test/*.test.mjs      node --test, no dependencies beyond devDependencies
 ```
@@ -83,7 +85,7 @@ scripts/
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
 `./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.8.1`); the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.9.0`); the
 starters in this repository use `file:../..`.
 
 ## 3. The theme record (the source of a Fire design system)

@@ -4,7 +4,7 @@ import type { NextConfig } from 'next';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 
 // In this repository fire-design is `file:../..`, a symlink out of the project: Turbopack's root must hold the files
-// it points at. A project that depends on github:vidhatanand/firedesign#v0.8.1 has a real folder and needs no root.
+// it points at. A project that depends on github:vidhatanand/firedesign#v0.9.0 has a real folder and needs no root.
 const here = process.cwd();
 const fire = realpathSync(path.join(here, 'node_modules/fire-design'));
 const common = (a: string, b: string) => {

@@ -2,6 +2,57 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.9.0 — 19 Nov 2026
+
+**A production build carries only the Fire a product uses.** No class, attribute value, token, event or export was
+removed or renamed.
+
+### Added
+
+- **`fire slim`** (`scripts/slim.mjs`, `npm run slim`; `docs/frameworks.html#slim`). It reads a product's source
+  (HTML, JSX, Vue, Lit templates) and its theme record, and writes a trimmed Fire into a folder: one stylesheet in
+  Fire's cascade order, a behaviour entry that imports and initialises only the modules needed (with the same
+  `init()` and the same exports, so importing a dropped module fails the build), the font files of the theme's type
+  set, and `slim.json`, a report of what was kept, the file and line that needed it, what was dropped and the sizes.
+  - A part is kept when its class, element or attribute is in the source, when a function of its module is imported
+    from `fire-design`, or when a kept module builds it at run time (a date field's popover, a copy button's toast).
+    That map is `contract/slim-map.json`, generated from Fire's own sources by `scripts/build-slim-map.mjs` in the
+    build, so it cannot go stale.
+  - `--level family` keeps whole stylesheets; `--level component` also drops the rules of unused components inside
+    them. `--theme theme.json` keeps one palette and one type set. A product that ships the Tweaks panel keeps every
+    palette, type set and dial.
+  - `--include` keeps named parts regardless, for class names built at run time; `--report` lists every such
+    expression with its file and line. `--check` fails when the output is stale (for CI). `--verify <build dir>`
+    fails when a production build still holds a rule or a module the report dropped.
+- **The three starters build with it.** `npm run build` runs `fire slim` and aliases `fire-design` and
+  `fire-design/css` to the trimmed folder; development keeps the whole of Fire. Each starter's check builds the slim
+  production app and still matches Fire's templates on all 36 render comparisons, which is the proof that nothing a
+  screen needs was dropped. `vite build --mode full` and `FIRE_SLIM=0 next build` build with the whole of Fire.
+- Measured on production builds (gzip): a one-page product with a button, a field and a toast goes from 125 kB of
+  CSS, 192 kB of behaviour and 610 kB of fonts to 22 kB, 65 kB and 82 kB. The starters save less (CSS 125 to 95 kB,
+  behaviour 241 to 219 kB in the Lit starter) because their shells carry the Tweaks panel and the support chat, which
+  keep every palette, type set and font.
+
+### Changed
+
+- `scripts/lint-markup.mjs` exports its tokeniser (`scanSource`, `HOLE`) for `fire slim`.
+
+### Removed
+
+- Three one-off refactoring scripts whose work is finished (`layout-pass`, `tokenise-pass`, `scope-private-props`)
+  and five build briefs of releases 0.1 to 0.4 in `docs/_ref/`. One unused keyframe and three unused component
+  tokens (`--fd-site-h`, `--fd-site-media-min`, `--fd-decision-part-min`). None was public: no class, documented
+  token or export went.
+
+### Known limits
+
+- Behaviour is trimmed by module, not by function: one field keeps the whole forms module, one toast the whole
+  overlays module. Splitting those modules would save more and is not done.
+- A value written from an expression (`data-variant=${…}`) keeps every variant's rules.
+- With `--theme`, a saved Tweaks look or `?look=` cannot bring back a palette or type set the build dropped.
+- The comparison of Fire's own templates at component level ran in Chromium only; the starters' checks ran in all
+  three browsers.
+
 ## 0.8.1 — 19 Nov 2026
 
 **The documents catch up with 0.8, and one boundary is made consistent.** No class, attribute value, token, event or

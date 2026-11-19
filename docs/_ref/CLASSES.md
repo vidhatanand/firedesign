@@ -1,6 +1,6 @@
 # Fire: every class
 
-Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.8.1). Do not edit: change the CSS or the
+Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.9.0). Do not edit: change the CSS or the
 catalogue and run the build. `VOCABULARY.md` beside this file explains the parts in prose; this file is the complete list.
 
 For each component: its root class, its part classes, the attributes it reads with their values (on the root, then per

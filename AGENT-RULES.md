@@ -47,6 +47,7 @@ Copy markup from the Fire docs pages or the nearest template. Do not write compo
 14. A public listing (a blog, a library, releases) is `fd-site-posts` with its tools bar, `data-kind`, `data-tags` and `data-filter`. Do not write a new block for it.
 15. Never set text over a picture except on the image ground (`data-ground="image"`), which keeps it readable. Everywhere else the text sits beside the picture.
 16. Every `<img>` on a site has `alt` (empty for decoration), `width` and `height`. The lint warns `img-attrs` when one is missing.
+17. Write `fd-` classes and Fire attribute values as whole strings. The production build is trimmed to what the source uses (`fire slim`), and a name built at run time (`fd-badge-${tone}`) cannot be seen: write the full names, or add the component to `fire.slim.include` in `package.json`.
 
 ## 3. Forms
 

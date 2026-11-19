@@ -1,6 +1,6 @@
 # Writing Fire markup in Lit, React and Next.js, and Vue (the exporter's specification)
 
-Status: Fire 0.8. This file is the specification that the starters prove with `render-equal.mjs` and that Facet's
+Status: current with the release in `package.json`. This file is the specification that the starters prove with `render-equal.mjs` and that Facet's
 exporter implements. `spec/export-map.json` holds the same rules as data, with the same rule ids. Prose is short. Each
 rule gives the Fire markup, what each target writes, and the reason. The rules were set in 0.6 and have not changed
 since. 0.7 and 0.8 added event names (section 8), Fire-owned attributes and containers (O1, O2), a lifecycle row for

@@ -147,6 +147,8 @@ test('the Lit starter: after a keyboard navigation the heading is focused with n
     try {
       for (const engine of engines) {
         const page = await engine.browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+        // The overview opens a first-visit dialog after a moment; it would cover the link this test presses.
+        await page.addInitScript(() => { try { localStorage.setItem('ember-whats-new-seen', '1'); } catch { /* no storage */ } });
         await page.goto(urlOf(app, 'overview'), { waitUntil: 'load' });
         await page.waitForSelector('screen-overview h1');
         const link = page.locator('a.fd-nav-item[href$="/logs"]').first();

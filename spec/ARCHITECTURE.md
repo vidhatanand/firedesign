@@ -48,7 +48,7 @@ contract/
   looks/<name>.json    theme records, one per palette; looks/named/<name>.json: the eight named looks (0.7)
 wrappers/react/        GENERATED components + hand-written hooks, with .d.ts
 wrappers/vue/          a plugin (isCustomElement, the v-fire directive) and GlobalComponents types
-docs/                  the documentation site; docs/_ref/ holds the class reference (CLASSES.md, generated) and earlier build briefs
+docs/                  the documentation site; docs/_ref/ holds the class reference (CLASSES.md, generated) and the vocabulary
 templates/             42 Ember screens, templates/media/ the placeholder pictures
 spec/
   ARCHITECTURE.md      this file

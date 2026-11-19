@@ -587,6 +587,19 @@ export function lintText(file, text, rawCatalog, kind, opts = {}) {
   return findings;
 }
 
+/** The tokeniser on its own (fire slim reads product source with it): the open/close/text events of the markup, and
+ *  for code (`lit`, `jsx`) every string literal met outside markup, holes masked with HOLE. */
+export function scanSource(text, kind) {
+  const events = [];
+  const strings = [];
+  const ctx = { src: text, out: events, cur: null, jsx: kind === 'jsx', lit: kind === 'jsx' || kind === 'lit' };
+  if (kind === 'html') markup(ctx, text, 0, 'html');
+  else if (kind === 'vue') markup(ctx, text, 0, 'vue');
+  else scanCode(ctx, 0, { collect: strings });
+  return { events, strings };
+}
+export { HOLE };
+
 export function kindOf(file) {
   const ext = path.extname(file).toLowerCase();
   if (ext === '.html' || ext === '.htm') return 'html';

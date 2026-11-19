@@ -24,13 +24,24 @@ const csp = (): Plugin => ({
   }],
 });
 
-export default defineConfig({
+/** The production build uses the slim Fire that `npm run theme` writes with `fire slim` (.fire-slim/: only the parts,
+ *  modules and fonts this app uses); `npm run dev` keeps the whole of Fire, and `vite build --mode full` builds with
+ *  it (to compare). fire-design/vue loads fire.js by a relative path (../../fire/fire.js): that goes to the slim
+ *  entry too, so the app has one Fire. fire-design/elements stays: it shares Fire's module files with the entry. */
+const slim = (file: string) => decodeURIComponent(new URL(`./.fire-slim/${file}`, import.meta.url).pathname);
+
+export default defineConfig(({ command, mode }) => ({
   // fireVueOptions: `fd-` tags are custom elements, and whitespace between inline elements is kept (EXPORT C8, T1).
   plugins: [vue(fireVueOptions()), htmlAttributes(), csp()],
+  resolve: command === 'build' && mode !== 'full' ? { alias: [
+    { find: /^fire-design$/, replacement: slim('fire.js') },
+    { find: /^fire-design\/css$/, replacement: slim('fire.css') },
+    { find: /^(?:\.\.\/)+fire\/fire\.js$/, replacement: slim('fire.js') },
+  ] } : {},
   build: {
     // Vite's default CSS target lowers light-dark(), which breaks color-scheme overrides.
     cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5'],
     // Small files stay files: `data:` URLs would need their own CSP source.
     assetsInlineLimit: 0,
   },
-});
+}));

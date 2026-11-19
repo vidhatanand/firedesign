@@ -7,6 +7,8 @@ import theme from './src/fire-theme.attributes.json';
  *     first paint already has them (spec H1). They come from theme.json through scripts/prepare.mjs.
  *  2. A strict Content Security Policy in the production build (spec P1): no inline styles or scripts.
  *     Vite's dev server injects <style> elements, so the policy is only added to `vite build`.
+ * And the production build uses the slim Fire that scripts/prepare.mjs writes with `fire slim` (.fire-slim/: only
+ * the parts, modules and fonts this app uses); `npm run dev` keeps the whole of Fire.
  */
 const CSP = [
   "default-src 'self'",
@@ -34,8 +36,18 @@ function fireHtml(): Plugin {
   };
 }
 
-export default defineConfig({
+const slim = (file: string) => decodeURIComponent(new URL(`./.fire-slim/${file}`, import.meta.url).pathname);
+
+export default defineConfig(({ command, mode }) => ({
   plugins: [fireHtml()],
+  // `vite build --mode full` builds with the whole of Fire (to compare). fire-design/elements stays as it is: it
+  // shares Fire's module files with the slim entry. Fire's wrappers load
+  // fire.js by a relative path (../../fire/fire.js), so that is pointed at the slim entry too.
+  resolve: command === 'build' && mode !== 'full' ? { alias: [
+    { find: /^fire-design$/, replacement: slim('fire.js') },
+    { find: /^fire-design\/css$/, replacement: slim('fire.css') },
+    { find: /^(?:\.\.\/)+fire\/fire\.js$/, replacement: slim('fire.js') },
+  ] } : {},
   server: { host: '127.0.0.1' },
   build: {
     target: 'es2022',
@@ -44,4 +56,4 @@ export default defineConfig({
     // the page's theme only, and a `color-scheme: light` on one element (the QR code in a dark page) would be ignored.
     cssTarget: ['chrome123', 'edge123', 'firefox120', 'safari17.5'],
   },
-});
+}));

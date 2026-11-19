@@ -58,6 +58,11 @@ try {
     const r = run(cmd, args, { env: { ...process.env, ...env } });
     if (r.status !== 0) { console.error(r.stdout + r.stderr); throw new Error(`${path.basename(cmd)} ${args.join(' ')} failed`); }
   }
+  // The build uses the slim Fire (fire slim, run by build-theme.mjs): it must not hold a rule or a module the report
+  // dropped. Prints the sizes before and after.
+  const verified = run(process.execPath, [path.join(fireRoot, 'scripts/slim.mjs'), '--verify', 'dist']);
+  process.stdout.write(verified.stdout); process.stderr.write(verified.stderr);
+  if (verified.status !== 0) fail('the production build holds parts fire slim dropped');
   const dist = path.join(here, 'dist');
   const index = readFileSync(path.join(dist, 'index.html'), 'utf8').replaceAll('&#39;', "'");
   if (!/<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self'; style-src 'self'/.test(index)) fail('dist/index.html has no strict Content-Security-Policy');

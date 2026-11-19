@@ -1,7 +1,9 @@
 // `npm run check`: proves that the starter renders Fire's screens the way Fire's own templates do.
 //
 //   1. builds the app for production (typecheck, bundle sizes) with the starter's look, then once more with Ember's
-//      look (in .check/dist): the reference pages are Ember's, so both sides of a comparison need the same palette
+//      look (in .check/dist): the reference pages are Ember's, so both sides of a comparison need the same palette.
+//      Both builds use the slim Fire (fire slim, through scripts/prepare.mjs); `fire slim --verify` fails when a
+//      bundle still holds a rule or a module the report dropped, and prints the sizes before and after
 //   2. serves both builds (with a fallback to index.html, as a host would) and Fire's repository (the references)
 //      on free ports
 //   3. render-equal.mjs compares each screen's `.fd-page` with its template: structure, computed styles, pixels,
@@ -67,9 +69,12 @@ const realDist = path.join(root, 'dist');
 if (!process.argv.includes('--skip-build')) {
   console.log('\n== build: production, the starter\'s look');
   if (run('npm', ['run', 'build']).status) { console.error('build failed'); process.exit(1); }
+  // The slim build (fire slim, run by prepare.mjs): the bundle must not hold a rule or a module slim.json dropped.
+  if (run('node', [path.join(fire, 'scripts/slim.mjs'), '--verify', realDist]).status) fail('the production build holds parts fire slim dropped');
   console.log('\n== build: production, Ember\'s look (for the comparison)');
   run('node', ['scripts/prepare.mjs', '--theme', path.join(fire, 'contract/looks/ember.json')]);
   const built = run('npx', ['vite', 'build', '--outDir', checkDist, '--emptyOutDir', '--logLevel', 'warn']);
+  if (!built.status && run('node', [path.join(fire, 'scripts/slim.mjs'), '--verify', checkDist]).status) fail('the Ember build holds parts fire slim dropped');
   run('node', ['scripts/prepare.mjs']); // back to the starter's own look
   if (built.status) { console.error('build failed'); process.exit(1); }
 }

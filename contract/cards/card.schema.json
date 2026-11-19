@@ -63,7 +63,16 @@
         "required": ["class", "role"],
         "properties": {
           "class": { "type": "string", "pattern": "^fd-[a-z0-9-]+$" },
-          "role": { "type": "string", "minLength": 4, "maxLength": 160 }
+          "role": { "type": "string", "minLength": 4, "maxLength": 160 },
+          "required": { "description": "Structure (0.10): the part must be inside the root whenever the root is.", "const": true },
+          "or": { "description": "With required: other classes that fill the part's place.", "$ref": "#/$defs/classes" },
+          "element": { "description": "The tags the class works on.", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*$" } },
+          "parent": { "description": "Its parent element must carry one of these classes.", "$ref": "#/$defs/classes" },
+          "inside": { "description": "An ancestor must carry one of these classes.", "$ref": "#/$defs/classes" },
+          "notInside": { "description": "No ancestor may carry one of these classes.", "$ref": "#/$defs/classes" },
+          "attrs": { "description": "Attributes it must carry (true, or the one value) or must not (false).", "type": "object", "minProperties": 1, "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" }, "additionalProperties": { "anyOf": [{ "type": "boolean" }, { "type": "string", "minLength": 1 }] } },
+          "contains": { "description": "It must hold a direct child with one of these tags.", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*$" } },
+          "skeleton": { "description": "On the root's entry: the one-line markup of its required structure.", "type": "string", "minLength": 8, "maxLength": 400 }
         }
       }
     },
@@ -96,5 +105,8 @@
       }
     },
     "since": { "description": "The Fire version that introduced the component.", "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+  },
+  "$defs": {
+    "classes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^fd-[a-z0-9-]+$" } }
   }
 }

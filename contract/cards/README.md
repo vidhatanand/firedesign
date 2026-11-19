@@ -30,13 +30,38 @@ Every field is required except `relation`; a list with nothing to say is `[]`.
 | `data` | The shape of data it shows or collects: `record`, `list`, `series`, `form`, `text`, `none`. At least one. |
 | `states` | Conditions it can be in. Each has `name` and `how`: the attribute, class or call that sets it, as written in markup. |
 | `variants` | Attribute values that change the look or role. Each has `attribute`, `value` (an empty string for an attribute set with no value) and `useWhen`. The build fails when the attribute or value is not one the CSS defines for the component. |
-| `parts` | The classes that make the component up, each with its `role`. The build fails when a class does not belong to the component. |
+| `parts` | The classes that make the component up, each with its `role`, and optionally its structure (below). The build fails when a class does not belong to the component. |
 | `related` | Ids of components often used with it or mistaken for it. The build fails on an unknown id. |
 | `keyboard` | Keys the component handles: `keys` and `does`. |
 | `example` | The docs section whose specimen shows it, as `docs/<page>.html#<section id>`. The build fails when the section does not exist. |
 | `relation` | Optional. Declares that this part looks like another and is not a duplicate, so the near-duplicate gate (`scripts/gate.mjs`) lets the pair stand: exactly one of `variantOf` (a form of the other) or `distinctFrom` (looks alike, a different thing), a component id, and `because`, one sentence on when to use this one instead. |
 | `provenance` | Repository paths the card was written from. At least one. |
 | `since` | The Fire version that introduced the component, as `major.minor.patch`; read it from the git tags. |
+
+## Structure (0.10)
+
+An entry of `parts` may also say how the part fits: `scripts/lib/structure.mjs` turns these facts into the markup lint's
+structure rules (and the same rules run on a rendered page), and `docs/_ref/CLASSES.md` and `fire find` show them. The
+entry whose `class` is the root describes the root. Each fact must hold for every specimen in Fire's docs, templates and
+starters, and rest on Fire's CSS or behaviour: a grid column for the part, a selector such as `.fd-select > select`, a
+module that queries it. When in doubt, leave it out: a rule that reports a correct page is worse than none.
+
+| Field | What it says | Rule |
+|---|---|---|
+| `required` | `true`: the part must be inside the root whenever the root is. | `missing-part` |
+| `or` | With `required`: other classes that fill the same place (`fd-icon` for the callout's icon). | |
+| `element` | The tags the class works on: `["label"]`. | `wrong-element` |
+| `parent` | Its parent element must carry one of these classes. | `wrong-parent` |
+| `inside` | An ancestor must carry one of these classes. | `wrong-parent` |
+| `notInside` | No ancestor may carry one of these classes. | `wrong-parent` |
+| `attrs` | `{ "name": true }` it must carry the attribute, `"value"` with that value, `false` it must not (`hidden` on a menu). | `missing-attribute`, `forbidden-attribute` |
+| `contains` | It must hold a direct child with one of these tags (`["select"]`); the class on such an element itself is `wrong-element`. | `missing-child` |
+| `skeleton` | On the root's entry only: one line of markup with the required structure, quoted in the lint's fixes, `CLASSES.md` and `fire find`. | |
+
+The build fails when a fact names a class that is not Fire's, when `or` comes without `required`, when the root is its
+own required part, when a skeleton sits on another entry, or when a skeleton does not carry its root or breaks a rule.
+The schema rejects any other field. `data-static-demo` (an overlay drawn in place in the docs) is exempt from `element`
+and `attrs`.
 
 ## Kinds, templates and pictures
 

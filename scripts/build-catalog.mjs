@@ -20,6 +20,8 @@ import { ROOT, read, stripCss, topFiles, loadIconNames, attributeSheets, collect
 import { sourceEvidence, scriptWrites, scriptValues } from './lib/evidence.mjs';
 import { parseVocabulary } from './lib/vocabulary.mjs';
 import { readModuleEvents, summariseEvents } from './lib/events.mjs';
+import { scanSource, buildTrees } from './lint-markup.mjs';
+import { structureRules, checkTree } from './lib/structure.mjs';
 import { EXTRA_ROOTS, PART_OF, ID_ALIASES, PATTERNS, FAMILY_PAGES, FAMILY_MODULES, EVENT_SUBJECTS, LAYOUT_PRIMITIVES, LISTENED_EVENTS, ELEMENT_COMPONENT, GROUPS, NAMES, EVENT_EXTRA, FREE_ATTRIBUTES, DEFAULT_VALUES, STATE_ATTRIBUTES, LAYOUT_ATTRIBUTES, MODULES, SECTION_FAMILIES, SECTION_PARTS } from './lib/catalog-assign.mjs';
 
 const OUT = path.join(ROOT, 'contract/catalog.json');
@@ -58,6 +60,29 @@ function docSections() {
     });
   }
   return sections;
+}
+
+/** The Fire classes whose CSS styles a bare native control inside them (`.fd-select > select`, `.fd-prose table`): the
+ *  wrappers lint-markup's bare-control accepts. Element names are the controls that rule watches. */
+function nativeWrappers() {
+  const files = [path.join(ROOT, 'fire/base.css'), path.join(ROOT, 'fire/layout.css'), ...topFiles('fire/components', ['.css'])];
+  const out = { fieldset: new Set(), input: new Set(), select: new Set(), table: new Set(), textarea: new Set() };
+  // Splits at top-level commas or combinators (whitespace, >), leaving :is(…) and :where(…) whole.
+  const split = (text, at) => { const list = []; let depth = 0, cur = ''; for (const ch of text) { if (ch === '(') depth++; if (ch === ')') depth--; if (!depth && at.test(ch)) { list.push(cur); cur = ''; } else cur += ch; } list.push(cur); return list.map((x) => x.trim()).filter(Boolean); };
+  for (const f of files) {
+    for (const rule of stripCss(read(f)).matchAll(/([^{}]+)\{/g)) {
+      if (rule[1].trim().startsWith('@')) continue;
+      for (const sel of split(rule[1], /,/)) {
+        const compounds = split(sel.replace(/\s*>\s*/g, ' '), /\s/);
+        if (compounds.length < 2) continue;
+        const last = compounds.pop().replace(/:(?:has|not)\((?:[^()]|\([^()]*\))*\)/g, '');
+        const tags = [last.match(/^[a-z]+/)?.[0], ...[...last.matchAll(/:(?:is|where)\(([^()]*)\)/g)].flatMap((m) => m[1].split(',').map((x) => x.trim()))];
+        const wrappers = compounds.flatMap((x) => [...x.replace(/:(?:has|not)\((?:[^()]|\([^()]*\))*\)/g, '').matchAll(/\.(fd-[a-z0-9-]+)/g)].map((m) => m[1]));
+        for (const t of tags) if (out[t]) for (const w of wrappers) out[t].add(w);
+      }
+    }
+  }
+  return Object.fromEntries(Object.entries(out).map(([t, set]) => [t, [...set].sort()]));
 }
 
 function readTemplates() {
@@ -99,6 +124,34 @@ function readElements() {
     }
   }
   return out.sort((a, b) => a.tagName.localeCompare(b.tagName));
+}
+
+/** Structure facts on a card's parts (0.10, contract/cards/README.md): every class they name is a Fire class; `or` only with
+ *  required; the root is not its own required part; a skeleton only on the root's entry. The schema rejects unknown fields. */
+export function structureFactErrors(card, component, classToId) {
+  const errors = [];
+  for (const p of card.parts) {
+    for (const k of ['or', 'parent', 'inside', 'notInside']) for (const cls of p[k] || []) if (!classToId[cls]) errors.push(`cards/${card.id}.json: part ${p.class} ${k} names ${cls}, which is not a Fire class`);
+    if (p.or && !p.required) errors.push(`cards/${card.id}.json: part ${p.class} has or without required`);
+    if (p.required && p.class === component.root) errors.push(`cards/${card.id}.json: the root ${component.root} cannot be its own required part`);
+    if (p.skeleton && p.class !== component.root) errors.push(`cards/${card.id}.json: part ${p.class} has a skeleton; only the root's entry (${component.root}) carries one`);
+  }
+  return errors;
+}
+
+/** Each skeleton must show what it promises: its root, and no structure finding under the rules the cards state. */
+export function skeletonErrors(components, elements = []) {
+  const errors = [];
+  const rules = structureRules({ components: components.filter((c) => c.card), elements });
+  for (const c of components) {
+    const sk = c.card?.parts.find((p) => p.skeleton)?.skeleton;
+    if (!sk) continue;
+    const [tree] = buildTrees(scanSource(sk, 'html').events, 'html');
+    const has = (n) => n.classes.includes(c.root) || n.children.some(has);
+    if (!tree || !has(tree)) { errors.push(`cards/${c.id}.json: the skeleton does not carry ${c.root}`); continue; }
+    for (const f of checkTree(tree, rules, { usesFire: false })) errors.push(`cards/${c.id}.json: the skeleton fails its own rules: ${f.rule}: ${f.message}`);
+  }
+  return errors;
 }
 
 // ---------- the build ----------
@@ -340,6 +393,7 @@ export async function buildCatalog({ allowMissing = false } = {}) {
     }
     if (!anchors.has(card.example)) errors.push(`cards/${c.id}.json: example ${card.example} is not a docs section`);
     else c.docs = card.example;
+    errors.push(...structureFactErrors(card, c, classToId));
     c.card = card;
   }
   if (cardProblems.length && !allowMissing) errors.push(...cardProblems);
@@ -363,6 +417,8 @@ export async function buildCatalog({ allowMissing = false } = {}) {
   }
   jsModules.sort((a, b) => a.id.localeCompare(b.id));
 
+  errors.push(...skeletonErrors(components, elements));
+
   const pkg = JSON.parse(read(path.join(ROOT, 'package.json')));
   const catalog = {
     fire: pkg.version.replace(/-.*$/, ''),
@@ -375,6 +431,7 @@ export async function buildCatalog({ allowMissing = false } = {}) {
     icons: [...(await loadIconNames())].sort(),
     tokens: readTokens(),
     templates: readTemplates(),
+    nativeWrappers: nativeWrappers(),
   };
   return { catalog, missing, cardProblems, errors, unplacedHooks, unplacedEvidence: [...unplacedEvidence].sort() };
 }

@@ -4,6 +4,7 @@
 //                         [--kind component|pattern|section|template|module] [--json] [--limit 5]
 // --json results carry id, kind, family, surfaces, score, why, job, use, instead, docs and picture (a path, relative to the
 // repository root, to the PNG of the part; modules have none, and so does every result when Fire is installed as a package, which leaves the pictures out).
+// A component whose card states its required structure prints it as `write:`, one line of markup (contract/catalog.json).
 // Each result prints its surfaces. With --surface, a line says when parts for other surfaces match the query clearly
 // better (to stderr with --json, so stdout stays the array; each JSON result carries `surfaces`).
 // Reads contract/index.json (node scripts/build-index.mjs builds it). No dependencies, no network.
@@ -253,12 +254,22 @@ function main(argv) {
     return 0;
   }
   if (!res.length) { console.log(`No match for "${query}". Try other words (what it does, not what it is called), or drop a filter.`); if (note) console.log(note); return 1; }
+  // The one-line skeleton of a component's required structure, from its card in contract/catalog.json (0.10).
+  const catalogFile = path.join(path.dirname(INDEX), 'catalog.json');
+  const skeletons = new Map();
+  if (res.some((r) => r.kind !== 'template' && r.kind !== 'module') && fs.existsSync(catalogFile)) {
+    for (const c of JSON.parse(fs.readFileSync(catalogFile, 'utf8')).components || []) {
+      const sk = c.card?.parts?.find((p) => p.skeleton)?.skeleton;
+      if (sk) skeletons.set(c.id, sk);
+    }
+  }
   for (const r of res) {
     console.log(`${r.id}  [${r.kind}]  ${surfaceList(r.surfaces).join(' · ')}  ${r.score}`);
     console.log(`  matched: ${r.why}`);
     console.log(`  use when: ${r.use}`);
     if (r.not.length) console.log(`  instead of: see ${r.not.join(', ')} when it does not fit`);
     console.log(`  docs: ${r.docs}`);
+    if (skeletons.has(r.id) && r.kind !== 'template' && r.kind !== 'module') console.log(`  write: ${skeletons.get(r.id)}`);
     if (r.picture) console.log(`  picture: ${r.picture}`);
   }
   if (note) console.log(note);

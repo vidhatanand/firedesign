@@ -2,6 +2,36 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.9.1 — 19 Nov 2026
+
+**Fire is public and under the MIT License.** No class, attribute value, token, event or export was added, removed or
+renamed; the styles and behaviour are those of 0.9.0.
+
+### Added
+
+- **`LICENSE`** (MIT) and **`NOTICE`** at the root and in the package, and `"license": "MIT"` in `package.json`. The
+  fonts (SIL Open Font License), the Lucide icons (ISC) and Lit (BSD 3-Clause) keep their own licences, which ship
+  beside them in `fire/`.
+- README: the slim build, its package entries (`/slim`, `/slim-map`), and the Lit starter's router and budgets.
+
+### Changed
+
+- The repository `github.com/vidhatanand/firedesign` is public. A product can depend on Fire by tag from a public
+  clone or CI with no access token.
+- The repository's history was rewritten before it was made public. Every tag keeps its name and its content, and
+  every commit id is new.
+- Nine template cards (`contract/cards/templates/`) named their sources by a path on one machine; `provenance` now
+  names the product and the screen.
+- `scripts/build-facet.mjs` and its test look for Facet's command-line tool in `$FACET_CLI`, then beside the
+  repository (`../design-kit/dist/cli.js`), not at a fixed path.
+
+### For products refreshing from 0.9.0
+
+- Nothing to change in markup, styles or scripts.
+- A lock file that records a Fire commit id (npm does for a `github:` dependency) holds an id that no longer exists:
+  reinstall the dependency to record the new one. A fresh clone replaces an old clone of Fire.
+- A product that vendors Fire takes `LICENSE` and `NOTICE` with the copy.
+
 ## 0.9.0 — 19 Nov 2026
 
 **A production build carries only the Fire a product uses.** No class, attribute value, token, event or export was

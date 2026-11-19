@@ -178,7 +178,7 @@ Fire uses `light-dark()`, `color-mix()`, `@property`, container queries, the Pop
 
 ## Licence
 
-MIT: see [LICENSE](LICENSE). The icons, Lit and the fonts keep their own licences, which ship beside them (`fire/LICENSE-lucide.txt`, `fire/LICENSE-lit.txt`, `fire/fonts/licenses/`).
+MIT: see [LICENSE](LICENSE). The icons, Lit and the fonts keep their own licences, listed in [NOTICE](NOTICE), which ship beside them (`fire/LICENSE-lucide.txt`, `fire/LICENSE-lit.txt`, `fire/fonts/licenses/`).
 
 ## Credits
 

@@ -118,16 +118,16 @@ These keep a product looking like one product. They apply to people and to AI ag
 | To do this | Use |
 |---|---|
 | Things one above another | `fd-stack` |
-| Things side by side | `fd-row` (`data-wrap`, `data-justify="between|end|center"`, `data-align="start|end|baseline|stretch"`); `fd-grow` on the child that takes the leftover space |
+| Things side by side | `fd-row` (`data-wrap`, `data-justify="between\|end\|center"`, `data-align="start\|end\|baseline\|stretch"`); `fd-grow` on the child that takes the leftover space |
 | A field with a button beside it (search, filter) | `fd-row` with `data-align="end"`, so the button lines up with the input and not with the label |
 | Equal columns that fill the width | `fd-grid` with `data-min="md"` (narrowest column) and `data-cols="3"` (most columns) |
 | One child across several columns | `data-span="2"` (or `full`) on the child |
-| A narrow block on a wide page | `fd-column` (`data-size="xs|sm|md|lg|xl"`, `data-align="center"`) |
+| A narrow block on a wide page | `fd-column` (`data-size="xs\|sm\|md\|lg\|xl"`, `data-align="center"`) |
 | Space between children | `data-gap="3"` on the parent (space steps 0 to 24) |
-| A form | `fd-form` or `fd-form-cols`: they stop at a readable width by themselves (`data-size="sm|lg|full"`). Fields fill the form or one column |
+| A form | `fd-form` or `fd-form-cols`: they stop at a readable width by themselves (`data-size="sm\|lg\|full"`). Fields fill the form or one column |
 | A short control | `data-fit` on the input, input group or select; it sizes to its content (the input's `size` attribute) |
 | A setting with a control | `fd-setting`: text, control, and anything else underneath at full width |
-| Table column widths | `data-col="fit|sm|md|lg|fill"` on the header cell |
+| Table column widths | `data-col="fit\|sm\|md\|lg\|fill"` on the header cell |
 | A main area with a side panel | `fd-split` |
 
 Grids, stacks and rows nest freely. If you are about to write a width, you are missing one of the rows above.

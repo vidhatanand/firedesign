@@ -2,6 +2,61 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.12.0 — 20 Nov 2026
+
+**An exporter can prove its output against Fire.** `render-equal` now applies every normalisation the export spec
+lists, says which in data, and captures each page under its own Content Security Policy. The starters install the
+release they ship in, so `npm ci` works in one outside Fire's repository. These are what Facet's exporter checks before
+it exports against a Fire tag. No class, attribute value, token, event or behaviour export was removed or renamed; in
+`fire/` only the version number changed.
+
+### Added
+
+- **`renderEqual.rules`** in `spec/export-map.json`: the ids of the section 16 normalisations `scripts/render-equal.mjs`
+  applies, R1 to R15 (`RULES` in the script; a test holds the two equal). A tool may rely on every id listed.
+- **Four normalisations `render-equal` did not apply:**
+  - R2: whitespace is dropped where the browser drops it (at the start and end of a block, beside a block-level
+    sibling, in a flex or grid container); between two inline boxes a space is drawn, so it is compared. Text in
+    `<pre>` is compared as it is, and a no-break space is not whitespace.
+  - R5: form state through properties: `value` of an input, textarea and select, `checked` of a checkbox or radio,
+    `selected` of an option, `open` of a details or dialog, reported as `property` differences. Those attributes and a
+    textarea's text are not compared.
+  - R6: `autofocus` is ignored.
+  - R7: `data-fd-vars` is not compared as an attribute; the custom properties it set are, by computed value, as
+    `style` differences named after the property.
+- R8: `#fd-icon-sprite` is skipped wherever it sits; it was only left out when it sat outside every Fire node.
+- `scripts/pin-starters.mjs`: locks the starters to a release commit, and `--check`.
+
+### Changed
+
+- **`render-equal` captures under each page's own Content Security Policy**; it no longer sets `bypassCSP`. The
+  stylesheet that freezes animations and the one that hides the shell for the R15 shot are constructed stylesheets
+  (`document.adoptedStyleSheets`), which `style-src` does not block (checked in Chromium, Firefox and WebKit). A run
+  whose freeze did not apply stops with an error (exit 2). R13 says so.
+- **The starters depend on `github:vidhatanand/firedesign#v0.12.0`**, locked in their `package-lock.json` as an
+  installed package, instead of `file:../..`. A copied starter needs no change to its dependency. In Fire's repository,
+  `npm install --no-save ../..` in a starter tries it against the working copy.
+- The Vue and Next starters run `lint:markup`, `lint:css` and `review` from `node_modules/fire-design/scripts`; they
+  used `../../scripts`, which a copied starter does not have. The Lit starter's check takes the reference templates
+  from Fire's repository when the installed Fire does not ship them.
+
+### For products refreshing from 0.11.0
+
+- Nothing to change in markup, styles or scripts.
+- If you run `render-equal`, it now reports four things it passed before: a space between two inline elements that
+  one side has and the other lacks (it is drawn), a different `<pre>` text, a different form state set through a
+  property, and a different custom property from `data-fd-vars`. A page now loads under its own policy, so what that
+  policy blocks (fonts or images from another origin) is blocked in the comparison too.
+- If you copied a starter, nothing changes. To take the lock, set `fire-design` to
+  `github:vidhatanand/firedesign#v0.12.0` and run `npm install`.
+
+### Known limits
+
+- R2 follows the box each text sits in, not the whole CSS whitespace algorithm: a space at the end of one inline
+  element and another at the start of the next are two spaces to `render-equal` and one to the browser.
+- Facet's B9 (`<cc-component>`) reads a root part's `element` from the catalogue, which most components do not have
+  yet. Facet's lint refuses `<cc-component>` on Fire boards, so nothing reaches it; the facts come in a later release.
+
 ## 0.11.0 — 20 Nov 2026
 
 **Fire carries no tool's format.** Fire is a design system that tools adapt. Since 0.6 it also wrote itself in one

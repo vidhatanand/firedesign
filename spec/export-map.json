@@ -36,11 +36,11 @@
     "csp": "Strict Content Security Policy per target.",
     "labels": "Translation rules.",
     "facet": "Facet board constructs → per-target templates. `confirm: true` marks shapes to confirm with the Facet session.",
-    "renderEqual": "Normalisations render-equal must apply for these rules to hold: id → description.",
+    "renderEqual": "Normalisations render-equal must apply for these rules to hold: rules lists the ids scripts/render-equal.mjs implements (a tool may rely on every one listed); then id → description.",
     "pages": "Page-level rules added in 0.8 (EXPORT.md section 17): id → { rule, lit, react, vue, check }."
   },
   "version": 1,
-  "fire": "0.11.0",
+  "fire": "0.12.0",
   "targets": {
     "html": { "name": "Plain HTML", "versions": {}, "notes": "Fire markup as in docs/ and templates/." },
     "lit": { "name": "Lit", "versions": { "lit": "3.3.3" }, "notes": "Light DOM components (createRenderRoot() { return this; })." },
@@ -342,19 +342,20 @@
     "B13": {"board": "<cc-head> styles and links", "all": "dropped; a board with its own <cc-head> CSS is refused for export with the reason", "confirmedBy": "Facet"}
   },
   "renderEqual": {
+    "rules": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15"],
     "R1": "Ignore comments, including framework markers (<!-- -->, <!--[-->, <!--?lit$…$-->).",
     "R2": "Outside <pre> and <textarea>: collapse whitespace runs to one space; whitespace-only text between block or flex children counts as absent.",
     "R3": "Attributes compared as a set, names in lowercase, order ignored.",
     "R4": "class compared as a set of tokens.",
-    "R5": "Form state compared through properties (value, checked, selected, open), not attributes or a textarea's text child.",
+    "R5": "Form state compared through properties (value, checked, selected, open), not attributes or a textarea's text child; the value attribute of other elements (li, option, meter, data) is an ordinary attribute.",
     "R6": "Ignore autofocus.",
     "R7": "data-fd-vars is removed by Fire; compare the custom properties it set (computed styles).",
-    "R8": "Ignore #fd-icon-sprite and framework root and wrapper elements.",
+    "R8": "Ignore #fd-icon-sprite (wherever it sits) and framework root and wrapper elements.",
     "R9": "Generated ids (Fire's core.js id(): fd-<words>-<base-36 counter>; ids that only url(#…) or href=\"#…\" inside the same <svg> reference; framework ids) are renamed in the document order of the elements that carry them, with every reference (for, the aria-* id lists, popovertarget, href=\"#…\", url(#…) in attributes and computed styles): compare the referenced element, not the id string.",
     "R10": "SVG geometry (x, y, width, height, cx, cy, r, rx, ry, x1…y2, and the numbers in d, points, transform, viewBox) is equal within 0.5 px.",
     "R11": "Margins count only when the two boxes (relative to the root) differ by more than 0.5 px (Chromium can report a stale computed auto margin).",
     "R12": "--transparent <selector> (repeatable) treats matching elements as wrappers, inside Fire nodes too (a component's host element).",
-    "R13": "Capture a settled page: no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms, up to the ready timeout; wait only for fd- elements to be defined; the page's CSP is bypassed for the capture (the starters check the policy in their own browser pass).",
+    "R13": "Capture a settled page: no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms, up to the ready timeout; wait only for fd- elements to be defined; the page keeps its own Content Security Policy: the freeze and the R15 hiding are constructed stylesheets (adoptedStyleSheets), which style-src does not block, and a run whose freeze did not apply stops with an error.",
     "R14": "Ignore React's view-transition bookkeeping attributes (vt-*: vt-name, vt-update, vt-enter, vt-exit, vt-share): <ViewTransition> writes them into the server HTML and adds no element.",
     "R15": "The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors is made visibility:hidden and restored afterwards (layout untouched; the root's own fixed or sticky descendants stay): the comparison is of the root, the shell around it belongs to the product."
   },

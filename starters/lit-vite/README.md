@@ -88,12 +88,15 @@ npm run check      # the full check, see below
 npm run review     # build, then look at every screen: .fire-review/index.html
 ```
 
+`npm install` gets the Fire release in `package.json`. In Fire's repository, `npm install --no-save ../..` tries the
+starter against your working copy instead, without changing `package.json` or the lockfile.
+
 ## Start a new project from it
 
-1. Copy this folder out of the Fire repository.
-2. In `package.json`, change `"fire-design": "file:../.."` to `"fire-design": "github:vidhatanand/firedesign#v0.11.0"`.
-3. `npm install`, then `npm run dev`.
-4. Choose your look: edit `theme.json` (a Fire theme record: palette, type, dials) and run `npm run dev` or
+1. Copy this folder out of the Fire repository. Its `package.json` already depends on the release,
+   `"fire-design": "github:vidhatanand/firedesign#v0.12.0"`, locked in `package-lock.json`.
+2. `npm ci`, then `npm run dev`. Delete the `check` script: it compares against templates in Fire's repository.
+3. Choose your look: edit `theme.json` (a Fire theme record: palette, type, dials) and run `npm run dev` or
    `npm run build`. `scripts/prepare.mjs` turns it into `src/fire-theme.css` and puts the attributes it needs on
    `<html>` in `index.html`. Fire's `contract/looks/*.json` are ready-made records.
 

@@ -54,7 +54,9 @@ for (const engine of ['chromium', 'webkit']) {
 
     r = run(engine, page('moved.html'), ['--widths', '1440', '--themes', 'light']);
     assert.equal(r.status, 1);
-    assert.deepEqual(kinds(r.report).sort(), ['extra', 'missing']);
+    // the moved button, and the space drawn between the two inline-block buttons (R2), which moves with it
+    assert.deepEqual([...new Set(kinds(r.report))].sort(), ['extra', 'missing']);
+    assert.ok(r.report.runs[0].structure.some((d) => d.kind === 'missing' && d.ref === '<button.fd-btn>'));
     assert.ok(r.report.runs[0].pixels.ratio > 0.001);
   });
 }
@@ -136,13 +138,66 @@ test('compareTrees: a margin difference counts only when the boxes differ by mor
   assert.deepEqual(d.map((x) => x.property).sort(), ['margin-left', 'margin-right']);
 });
 
-test('settle and CSP: a page that changes 600 ms after load and runs an animation under a strict policy is captured settled and frozen (R13)', () => {
-  const r = run('chromium', page('late.html'), ['--widths', '1440', '--themes', 'light']);
-  assert.equal(r.status, 0, r.stdout);
-  assert.equal(r.report.summary.structuralDifferences + r.report.summary.styleDifferences, 0);
-  const { cand } = r.report.runs[0].settle;
-  assert.ok(cand.quiet && cand.ms >= 400, JSON.stringify(cand));
+test('compareTrees: whitespace collapses to one space, dropped where the browser drops it; <pre> and a no-break space are kept (R2)', () => {
+  const t = (text, flow = 'block', pre = false) => ({ t: 'text', text, flow, pre });
+  const el = (tag, display, children = []) => node(tag, {}, children, { styles: { display } });
+  // a block drops it at its start and end
+  assert.deepEqual(compareTrees([el('p', 'block', [t('\n  Three   services\n')])], [el('p', 'block', [t('Three services')])]), []);
+  // a flex container drops it around and between its items
+  const btn = (...kids) => [el('button', 'inline-flex', kids)];
+  assert.deepEqual(compareTrees(btn(t(' ', 'flex'), el('svg', 'inline'), t('\n Save ', 'flex')), btn(el('svg', 'inline'), t('Save', 'flex'))), []);
+  // between two inline boxes a space is drawn: any run is one space, none is a difference
+  const p = (gap) => [el('p', 'block', [el('b', 'inline', [t('a', 'inline')]), ...(gap ? [t(gap)] : []), el('i', 'inline', [t('b', 'inline')])])];
+  assert.deepEqual(compareTrees(p('\n   '), p(' ')), []);
+  assert.deepEqual(compareTrees(p(' '), p('')).map((d) => d.kind), ['missing']);
+  // beside a block-level sibling it is dropped
+  const div = (gap) => [el('div', 'block', [el('span', 'inline-block'), ...(gap ? [t(gap)] : []), el('section', 'block')])];
+  assert.deepEqual(compareTrees(div('\n  '), div('')), []);
+  // <pre> is compared as it is; a no-break space is not whitespace
+  assert.equal(compareTrees([el('pre', 'block', [t('a  b', 'block', true)])], [el('pre', 'block', [t('a b', 'block', true)])]).length, 1);
+  assert.equal(compareTrees([el('p', 'block', [t('a b')])], [el('p', 'block', [t('a b')])]).length, 1);
 });
+
+test('compareTrees: form state is compared through properties, not the value, checked, selected or open attributes (R5)', () => {
+  const input = (attrs, state) => [node('input', { class: 'fd-input', ...attrs }, [], { state })];
+  assert.deepEqual(compareTrees(input({ value: 'api', checked: '' }, { value: 'api' }), input({}, { value: 'api' })), []);
+  assert.deepEqual(compareTrees(input({}, { value: 'api' }), input({}, { value: 'web' })).map((d) => [d.kind, d.property]), [['property', 'value']]);
+  // the value attribute of another element is an ordinary attribute
+  const li = (value) => [node('li', { value })];
+  assert.equal(compareTrees(li('2'), li('3')).length, 1);
+});
+
+const pair = (engine, ref, cand, extra = []) => {
+  const out = path.join(tmp, `${engine}-${ref}-${cand}.json`);
+  const r = spawnSync(process.execPath, [script, '--ref', page(ref), '--cand', page(cand), '--engines', engine, '--json', out, ...extra], { encoding: 'utf8' });
+  assert.ok(fs.existsSync(out), `no report: ${r.stderr}`);
+  return { status: r.status, report: JSON.parse(fs.readFileSync(out, 'utf8')), stdout: r.stdout };
+};
+
+for (const engine of ['chromium', 'firefox', 'webkit']) {
+  test(`${engine}: settle and CSP: a page that changes 600 ms after load and runs an animation under a strict policy is captured settled and frozen (R13)`, () => {
+    const r = run(engine, page('late.html'), ['--widths', '1440', '--themes', 'light']);
+    assert.equal(r.status, 0, r.stdout);
+    assert.equal(r.report.summary.structuralDifferences + r.report.summary.styleDifferences, 0);
+    const { cand } = r.report.runs[0].settle;
+    assert.ok(cand.quiet && cand.ms >= 400, JSON.stringify(cand));
+  });
+
+  test(`${engine}: under a strict policy, state set through properties, focus in script, a custom property set either way and the icon sprite equal the static markup (R2, R5–R8)`, () => {
+    const r = pair(engine, 'state.html', 'state-props.html');
+    assert.equal(r.status, 0, r.stdout);
+    assert.equal(r.report.runs.length, 4);
+    assert.ok(r.report.runs.every((x) => x.ok && x.nodes.ref === 13 && x.nodes.cand === 13), r.stdout);
+  });
+
+  test(`${engine}: a different checked state, textarea value, custom property and <pre> text are each a difference (R2, R5, R7)`, () => {
+    const r = pair(engine, 'state.html', 'state-wrong.html', ['--widths', '1440', '--themes', 'light']);
+    assert.equal(r.status, 1);
+    const [run0] = r.report.runs;
+    assert.deepEqual(run0.structure.map((d) => [d.kind, d.property]).sort(), [['property', 'checked'], ['property', 'value'], ['text', 'text']]);
+    assert.deepEqual(run0.styles.map((d) => d.property).filter((p) => p.startsWith('--')).sort(), ['--fd-i', '--value']);
+  });
+}
 
 test('pixels: chrome painted over the root from outside is not part of the shot, a different root still fails (R15)', () => {
   const root = ['--ref-root', '.fd-page', '--cand-root', '.fd-page', '--widths', '375', '--themes', 'light'];

@@ -399,13 +399,16 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
 
 ## 16. What `render-equal` must normalise for these rules to hold
 
+`scripts/render-equal.mjs` applies every row below, and `spec/export-map.json` lists their ids in `renderEqual.rules`
+(`RULES` in the script): a tool may rely on each id listed there.
+
 | Id | Normalisation | Comes from |
 |---|---|---|
 | R1 | Ignore comments, including the markers React, Vue and Lit leave (`<!-- -->`, `<!--[-->`, `<!--?lit$…$-->`). | T4 |
-| R2 | Text outside `<pre>` and `<textarea>`: collapse runs of whitespace to one space, and treat whitespace-only text between block or flex children as absent. | T1 |
+| R2 | Text outside `<pre>` and `<textarea>`: collapse runs of whitespace to one space, and treat whitespace-only text between block or flex children as absent. The space is dropped where the browser drops it: at the start and end of a block, beside a block-level sibling, and in a flex or grid container. Between two inline boxes it is drawn, so it is compared. A no-break space is not whitespace. | T1 |
 | R3 | Compare attributes as a set, not in order. Names are compared in lowercase. | F5, A15 |
 | R4 | Compare `class` as a set of tokens. | I2 |
-| R5 | Compare form state through properties (`value`, `checked`, `selected`, `open`), not through the `value` or `checked` attributes or a textarea's text child. | F1–F4 |
+| R5 | Compare form state through properties (`value`, `checked`, `selected`, `open`), not through the `value`, `checked`, `selected` or `open` attributes or a textarea's text child. The `value` attribute of other elements (`li`, `option`, `meter`, `data`) is an ordinary attribute. | F1–F4 |
 | R6 | Ignore `autofocus`. | A3 |
 | R7 | `data-fd-vars` is gone once Fire has run. Compare the custom properties it set, through computed styles. | A14 |
 | R8 | Ignore `#fd-icon-sprite` (where it sits and whether it is `hidden`), and the framework's root and wrapper elements. | I2, N8 |
@@ -413,7 +416,7 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
 | R10 | SVG geometry: `x`, `y`, `width`, `height`, `cx`, `cy`, `r`, `rx`, `ry`, `x1`…`y2` and the numbers in `d`, `points`, `transform` and `viewBox` are equal within 0.5 px (a chart redrawn at a plot a fraction of a pixel wider). | charts |
 | R11 | Margins count only when the two boxes (relative to the root) differ by more than 0.5 px. Chromium can report a stale computed `auto` margin after a late layout change while the box is in place. | Vue starter |
 | R12 | `--transparent <selector>` (repeatable) treats matching elements as wrappers, inside Fire nodes too: a component's host element. | L6 |
-| R13 | Capture a settled page: wait until there has been no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms (up to the ready timeout), so a chart redrawn after load or a skeleton swapped at 600 ms is captured in its final state on both sides. Wait only for Fire's own (`fd-`) elements to be defined: a framework's (Next's `next-route-announcer`) may never be. The page's Content Security Policy is bypassed for the capture (the freeze stylesheet is inline); the policy is checked by the starters' own browser pass. | starters |
+| R13 | Capture a settled page: wait until there has been no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms (up to the ready timeout), so a chart redrawn after load or a skeleton swapped at 600 ms is captured in its final state on both sides. Wait only for Fire's own (`fd-`) elements to be defined: a framework's (Next's `next-route-announcer`) may never be. The page keeps its own Content Security Policy: the stylesheet that freezes animations and transitions, and the one that hides the shell for the R15 shot, are constructed stylesheets (`document.adoptedStyleSheets`), which `style-src` does not block (checked in Chromium, Firefox and WebKit), and a run whose freeze did not apply stops with an error. | starters |
 | R14 | Ignore React's view-transition bookkeeping attributes (`vt-*`: `vt-name`, `vt-update`, `vt-enter`, `vt-exit`, `vt-share`). React 19.3's `<ViewTransition>` writes them into the server HTML and adds no element; they are not Fire markup. | Next starter |
 | R15 | The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors (the fixed phone tab bar, the support button, a toast) is made `visibility: hidden` and restored afterwards; layout is untouched and the root's own fixed or sticky descendants stay. The comparison is of the root; the shell around it belongs to the product. Structure and computed style are unchanged. | starters |
 

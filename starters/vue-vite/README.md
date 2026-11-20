@@ -33,18 +33,19 @@ written as Vue single-file components from Fire's own templates, and proves the 
 
 ## Start a new project from it
 
-1. Copy this folder.
-2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.11.0"`.
-3. `npm install`, then `npm run dev` (it runs `npm run theme` first), or `npm run build`.
-4. Remove `scripts/check.mjs` and the `check` script if you do not compare against Fire's templates. Keep
+1. Copy this folder. Its `package.json` already depends on the release,
+   `"fire-design": "github:vidhatanand/firedesign#v0.12.0"`, locked in `package-lock.json`.
+2. `npm ci`, then `npm run dev` (it runs `npm run theme` first), or `npm run build`.
+3. Remove `scripts/check.mjs` and the `check` script if you do not compare against Fire's templates. Keep
    `npm run lint:markup` and `npm run lint:css`.
 
 To change the look, edit `look.json` (or copy another record from `fire-design/contract/looks`) and run `npm run theme`.
 
 ## `npm run check`
 
-Builds for production with the `ember` look (the templates use Ember's palette, so the starter's own look would differ
-on both sides) and with `VITE_FIRE_STATIC=1` (the screens stay in the state their markup is written in; otherwise they
+Run it in Fire's repository (`npm install --no-save ../..` first to check your working copy of Fire rather than the
+release in `package.json`). It builds for production with the `ember` look (the templates use Ember's palette, so the
+starter's own look would differ on both sides) and with `VITE_FIRE_STATIC=1` (the screens stay in the state their markup is written in; otherwise they
 simulate a first load with timers). It serves the build and Fire's repository root, then for each screen runs
 `render-equal`: `.fd-page` of the template against `.fd-page` of the route, at 1440 and 375 wide, light and dark, in
 Chromium, WebKit and Firefox. It loads each screen in Chromium and fails on a CSP violation or a console message, and

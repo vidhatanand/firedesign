@@ -34,7 +34,14 @@ import { chromium } from 'playwright-core';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fire = path.dirname(createRequire(import.meta.url).resolve('fire-design/package.json'));
-const arg = (name, fallback) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : fallback; };
+// The reference pages are Fire's templates. The pinned release does not ship them (nor does a linked working copy need
+// another place): they come from the installed Fire when it has them, else from the Fire repository this starter sits in.
+const references = [fire, path.resolve(root, '../..')].find((dir) => fs.existsSync(path.join(dir, 'templates/overview.html')));
+if (!references) {
+  console.error('npm run check compares the starter with Fire\'s templates, which are in Fire\'s repository: run it in its starters/lit-vite, or delete the check script in a project of your own.');
+  process.exit(2);
+}
+const arg =(name, fallback) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : fallback; };
 const only = arg('only', 'overview,logs,settings').split(',');
 const engines = arg('engines', 'chromium,webkit,firefox');
 const widths = arg('widths', '1440,375');
@@ -158,7 +165,7 @@ function serve(dir, { fallback = false } = {}) {
 }
 const app = await serve(realDist, { fallback: true });       // the production build: the browser run
 const compare = await serve(checkDist, { fallback: true });  // Ember's look, with the policy: render-equal
-const ref = await serve(fire);
+const ref = await serve(references);
 console.log(`\nApp ${app.origin}   App with Ember's look ${compare.origin}   Fire (references) ${ref.origin}`);
 
 try {

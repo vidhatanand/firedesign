@@ -12,9 +12,10 @@
  * Roots default to `body`. Engines: chromium, firefox, webkit (playwright-core must be installed with the browsers;
  * pixelmatch and pngjs are needed too).
  *
- * For every engine x width x theme, both pages are loaded (with the page's Content Security Policy bypassed, so the
- * freeze stylesheet applies; a page's policy is for its own checks), <html data-theme> is set, animations and
- * transitions are frozen (an injected stylesheet), and the script waits for fonts, for Fire's custom elements (`fd-`
+ * For every engine x width x theme, both pages are loaded under their own Content Security Policy (nothing is
+ * bypassed: the freeze and the shot's hiding are constructed stylesheets in document.adoptedStyleSheets, which a
+ * style-src policy does not block; the run stops with an error if the freeze did not apply), <html data-theme> is set,
+ * animations and transitions are frozen, and the script waits for fonts, for Fire's custom elements (`fd-`
  * tags) to be defined, and for `document.documentElement.dataset.fdReady` when the page has it (or loads a
  * fire/boot/elements script). Then it waits until the page is quiet (R13): no DOM mutation, no change of the root's
  * box and no pending timeout of the page of 2 s or less, for 400 ms, up to --ready-timeout (a run that never settles
@@ -24,11 +25,18 @@
  *      tag; everything inside a Fire node is kept (elements and text). Elements outside any Fire node with no `fd-`
  *      class (framework wrappers, app shells) are transparent: their Fire descendants are hoisted. Elements that match
  *      a --transparent selector (repeatable; a component's host element, say `screen-logs, logs-detail`) are
- *      transparent too, inside Fire nodes as well: their children take their place. Comments and
- *      whitespace-only text are ignored; adjacent text is merged and whitespace collapsed. Compared per node: tag, `fd-`
+ *      transparent too, inside Fire nodes as well: their children take their place. Comments are ignored (R1) and
+ *      adjacent text is merged. Text inside <pre> is compared as it is; elsewhere (R2) runs of whitespace collapse to
+ *      one space, which is dropped where the browser drops it: at the start and end of a block, beside a block-level
+ *      sibling, and in a flex or grid container, where whitespace-only text is absent. Compared per node: tag, `fd-`
  *      classes, attributes, text. Siblings are aligned by longest common subsequence, so one moved element shows
  *      up as one `missing` plus one `extra`, a changed text as `text`, a changed class list as `classes`.
- *      Ignored: comments, `class` (only `fd-` classes are compared), `style`, and framework attributes:
+ *      Form state (R5) is compared through properties, as `property` differences: `value` of an input (not a file
+ *      input), textarea and select, `checked` of a checkbox or radio, `selected` of an option, `open` of a details or
+ *      dialog; their `value`, `checked`, `selected` and `open` attributes and a textarea's text are not compared.
+ *      `data-fd-vars` (R7) is not compared as an attribute (Fire removes it); the custom properties it set are, as
+ *      `style` differences of the property's computed value. #fd-icon-sprite is skipped (R8).
+ *      Ignored: comments, `class` (only `fd-` classes are compared), `style`, `autofocus` (R6), and framework attributes:
  *        data-reactroot, data-reactid, data-react-checksum, data-v-* (Vue scoped styles, data-v-app),
  *        data-server-rendered, data-allow-mismatch, data-svelte-h, data-astro-cid-*, data-nextjs-*, data-lit-*,
  *        data-hk, defer-hydration, ng-version, ng-reflect-*, ng-server-context, _ngcontent-*, _nghost-*,
@@ -63,6 +71,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 /* ------------------------------------------------------------------ options */
 
+/** The normalisations of spec/EXPORT.md section 16 this script applies; spec/export-map.json renderEqual.rules lists
+ *  the same ids, and a tool may rely on every one of them. */
+export const RULES = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15'];
+
 export const PROPS = [
   // layout
   'display', 'position', 'top', 'right', 'bottom', 'left', 'float', 'z-index', 'flex-direction', 'flex-wrap', 'flex-grow',
@@ -86,7 +98,11 @@ export const PROPS = [
 
 const IGNORED_ATTRS = [/^data-reactroot$/, /^data-reactid$/, /^data-react-checksum$/, /^data-v-/, /^data-server-rendered$/,
   /^data-allow-mismatch$/, /^data-svelte-h$/, /^data-astro-cid-/, /^data-nextjs-/, /^data-lit-/, /^data-hk$/,
-  /^defer-hydration$/, /^ng-version$/, /^ng-reflect-/, /^ng-server-context$/, /^_ngcontent-/, /^_nghost-/, /^vt-/, /^style$/, /^class$/];
+  /^defer-hydration$/, /^ng-version$/, /^ng-reflect-/, /^ng-server-context$/, /^_ngcontent-/, /^_nghost-/, /^vt-/, /^style$/, /^class$/,
+  /^autofocus$/,       // R6: React focuses in script and writes no attribute
+  /^data-fd-vars$/];   // R7: Fire removes it; the custom properties it set are compared instead
+/** R5: form state is compared through properties; these attributes only give the initial state. */
+const STATE_ATTRS = { input: ['value', 'checked'], textarea: ['value'], select: ['value'], option: ['selected'], details: ['open'], dialog: ['open'] };
 const ID_ATTRS = new Set(['id', 'for', 'aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns', 'aria-activedescendant',
   'aria-errormessage', 'aria-details', 'aria-flowto', 'list', 'form', 'popovertarget', 'headers']);
 const GENERATED_ID = [/^:r[0-9a-z]+:$/, /^«[0-9a-z]+»$/, /^_r_[0-9a-z]+_$/, /^v-\d+$/, /^radix-/, /^headlessui-/, /^react-aria/,
@@ -183,6 +199,40 @@ function settleRecorder(limit) {
   Object.defineProperty(window, '__fdSettle', { value: { timeout, pending } });
 }
 
+// Runs in the page before its own scripts (R7): notes, per element, the custom properties each data-fd-vars names.
+// Fire copies them onto the element and removes the attribute; the removal's old value still names them.
+function varsRecorder() {
+  const names = new WeakMap();
+  const note = (el, value) => {
+    for (const pair of (value ?? '').split(';')) {
+      const at = pair.indexOf(':');
+      const name = pair.slice(0, at).trim();
+      if (at > 0 && name.startsWith('--')) (names.get(el) ?? names.set(el, new Set()).get(el)).add(name);
+    }
+  };
+  const sweep = (node) => {
+    if (node.nodeType !== 1) return;
+    for (const el of [node, ...node.querySelectorAll('[data-fd-vars]')]) note(el, el.getAttribute('data-fd-vars'));
+  };
+  new MutationObserver((records) => {
+    for (const r of records) {
+      if (r.type === 'attributes') { note(r.target, r.oldValue); note(r.target, r.target.getAttribute('data-fd-vars')); }
+      else r.addedNodes.forEach(sweep);
+    }
+  }).observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-fd-vars'], attributeOldValue: true });
+  Object.defineProperty(window, '__fdVarNames', { value: names });
+}
+
+/** Adds a constructed stylesheet to the document: allowed under a style-src policy, unlike a <style> element. */
+function adoptSheet(page, css) {
+  return page.evaluate((text) => {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(text);
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+    return getComputedStyle(document.documentElement).transitionProperty;
+  }, css);
+}
+
 async function preparePage(page, theme, readyTimeout, rootSel) {
   await page.evaluate(async (timeout) => {
     const wait = (ms) => new Promise((r) => (window.__fdSettle?.timeout ?? setTimeout)(r, ms));
@@ -199,7 +249,9 @@ async function preparePage(page, theme, readyTimeout, rootSel) {
       await Promise.all(undef.map((n) => Promise.race([customElements.whenDefined(n), wait(Math.min(timeout, 1000))])));
     }
   }, readyTimeout);
-  await page.addStyleTag({ content: FREEZE_CSS });
+  // The freeze is a constructed stylesheet, so it applies under the page's own policy; check that it did.
+  const frozen = await adoptSheet(page, FREEZE_CSS);
+  if (frozen !== 'none') throw new Error(`the freeze stylesheet did not apply (transition-property is ${JSON.stringify(frozen)})`);
   await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
   await page.evaluate(async () => {
     await document.fonts.ready;
@@ -237,6 +289,41 @@ function extractInPage({ sel, props, transparent }) {
   const r2 = (v) => Math.round(v * 100) / 100;
   const SKIP = new Set(['script', 'style', 'link', 'meta', 'template', 'noscript', 'title', 'head']);
   const isFire = (el) => el.localName.startsWith('fd-') || [...el.classList].some((c) => c.startsWith('fd-'));
+  // R5: form state as the element's properties.
+  const state = (el) => {
+    const s = {};
+    const tag = el.localName;
+    if (tag === 'input') {
+      if (el.type !== 'file') s.value = el.value;
+      if (el.type === 'checkbox' || el.type === 'radio') s.checked = String(el.checked);
+    } else if (tag === 'textarea' || tag === 'select') s.value = el.value;
+    else if (tag === 'option') s.selected = String(el.selected);
+    else if (tag === 'details' || tag === 'dialog') s.open = String(el.open);
+    return s;
+  };
+  // R7: the custom properties data-fd-vars set (recorded before Fire removed it, or still on the element), and every
+  // custom property set on the element itself, for a side that set one some other way.
+  const recorded = window.__fdVarNames;
+  const custom = (el, cs) => {
+    const names = new Set(recorded?.get(el) ?? []);
+    for (const pair of (el.getAttribute('data-fd-vars') ?? '').split(';')) {
+      const at = pair.indexOf(':');
+      const name = pair.slice(0, at).trim();
+      if (at > 0 && name.startsWith('--')) names.add(name);
+    }
+    const vars = {};
+    for (const n of names) vars[n] = cs.getPropertyValue(n).trim();
+    const own = {};
+    for (let i = 0; i < el.style.length; i++) if (el.style[i].startsWith('--')) own[el.style[i]] = cs.getPropertyValue(el.style[i]).trim();
+    return { vars, own };
+  };
+  // R2: the box text sits in decides where whitespace is dropped: a flex or grid container drops it around and
+  // between its items; an inline box keeps it at its edges; a block drops it at its start and end.
+  const flowOf = (el) => {
+    while (el && getComputedStyle(el).display === 'contents') el = el.parentElement;
+    const d = el ? getComputedStyle(el).display : 'block';
+    return /flex|grid/.test(d) ? 'flex' : d === 'inline' ? 'inline' : 'block';
+  };
   const make = (el) => {
     const cs = getComputedStyle(el);
     const styles = {};
@@ -245,17 +332,20 @@ function extractInPage({ sel, props, transparent }) {
     for (const a of el.attributes) attrs[a.name] = a.value;
     const b = el.getBoundingClientRect();
     const box = [r2(b.left - origin.left), r2(b.top - origin.top), r2(b.width), r2(b.height)];
-    return { t: 'el', tag: el.localName, classes: [...el.classList].filter((c) => c.startsWith('fd-')).sort(), attrs, styles, box, children: [] };
+    return { t: 'el', tag: el.localName, classes: [...el.classList].filter((c) => c.startsWith('fd-')).sort(), attrs, styles, box,
+      state: state(el), ...custom(el, cs), children: [] };
   };
   const walk = (node, inFire, out) => {
     for (const ch of node.childNodes) {
       if (ch.nodeType === 3) {
-        if (inFire) {
+        // a textarea's text is its initial value; its value is compared as a property (R5)
+        if (inFire && node.localName !== 'textarea') {
           const last = out[out.length - 1];
-          if (last && last.t === 'text') last.text += ch.data; else out.push({ t: 'text', text: ch.data });
+          if (last && last.t === 'text') last.text += ch.data;
+          else out.push({ t: 'text', text: ch.data, pre: !!node.closest?.('pre'), flow: flowOf(node) });
         }
       } else if (ch.nodeType === 1) {
-        if (SKIP.has(ch.localName)) continue;
+        if (SKIP.has(ch.localName) || ch.id === 'fd-icon-sprite') continue;
         if (transparent && ch.matches(transparent)) { walk(ch, inFire, out); continue; }
         if (inFire || isFire(ch)) { const n = make(ch); out.push(n); walk(ch, true, n.children); } else walk(ch, false, out);
       }
@@ -324,27 +414,43 @@ export function normalizeTree(nodes) {
     if (HREF_ATTRS.has(name) && value.startsWith('#') && generated(value.slice(1))) return `#${rename(value.slice(1))}`;
     return value.includes('url(') ? urls(value) : value;
   };
+  const value = (v) => num(v.includes('url(') ? urls(v) : v);
+  const values = (o) => Object.fromEntries(Object.entries(o ?? {}).map(([k, v]) => [k, value(v)]));
   const fix = (list, inSvg) => {
     const out = [];
-    for (const n of list) {
+    list.forEach((n, i) => {
       if (n.t === 'text') {
-        const text = n.text.replace(/\s+/g, ' ').trim();
+        const text = n.pre ? n.text : collapse(n, list[i - 1], list[i + 1]);
         if (text) out.push({ t: 'text', text });
-        continue;
+        return;
       }
       const svg = inSvg || n.tag === 'svg';
+      const stateAttrs = STATE_ATTRS[n.tag] ?? [];
       const attrs = {};
       for (const k of Object.keys(n.attrs).sort()) {
-        if (IGNORED_ATTRS.some((re) => re.test(k))) continue;
+        if (IGNORED_ATTRS.some((re) => re.test(k)) || stateAttrs.includes(k)) continue;
         attrs[k] = canon(k, n.attrs[k]);
       }
-      const styles = {};
-      for (const [k, v] of Object.entries(n.styles)) styles[k] = num(v.includes('url(') ? urls(v) : v);
-      out.push({ ...n, attrs, styles, svg, children: fix(n.children, svg) });
-    }
+      out.push({ ...n, attrs, styles: values(n.styles), state: n.state ?? {}, vars: values(n.vars), own: values(n.own), svg,
+        children: fix(n.children, svg) });
+    });
     return out;
   };
   return fix(nodes, false);
+}
+
+/** R2: HTML's whitespace (not a no-break space) collapses to one space, which goes where the browser drops it. */
+const WHITESPACE = /[ \t\n\r\f]+/g;
+const blockLevel = (n) => n?.t === 'el' && !/^(inline|contents|none|ruby)/.test(n.styles?.display || 'inline');
+function collapse(n, prev, next) {
+  let text = n.text.replace(WHITESPACE, ' ');
+  const flex = n.flow === 'flex', edge = n.flow !== 'inline';
+  const start = flex || (!prev && edge) || blockLevel(prev);
+  const end = flex || (!next && edge) || blockLevel(next);
+  if (text === ' ') return start || end ? '' : ' ';
+  if (start) text = text.replace(/^ /, '');
+  if (end) text = text.replace(/ $/, '');
+  return text;
 }
 
 /** Two values of an SVG geometry attribute: the same apart from numbers, and every number within the tolerance. */
@@ -364,7 +470,7 @@ function sig(n) {
   let v = sigCache.get(n);
   if (!v) {
     const attrs = Object.entries(n.attrs).map(([k, a]) => [k, isGeometry(n, k) ? a.replace(NUMBER, '#') : a]).sort();
-    v = `${n.tag}|${n.classes.join('.')}|${JSON.stringify(attrs)}|(${n.children.map(sig).join(',')})`;
+    v = `${n.tag}|${n.classes.join('.')}|${JSON.stringify(attrs)}|${JSON.stringify(Object.entries(n.state ?? {}).sort())}|(${n.children.map(sig).join(',')})`;
     sigCache.set(n, v);
   }
   return v;
@@ -392,6 +498,16 @@ function diffNodes(r, c, p, out) {
   for (const k of new Set([...Object.keys(r.attrs), ...Object.keys(c.attrs)])) {
     if (r.attrs[k] === c.attrs[k] || (isGeometry(r, k) && sameGeometry(r.attrs[k], c.attrs[k]))) continue;
     out.push({ kind: 'attribute', path: p, property: k, ref: r.attrs[k] ?? null, cand: c.attrs[k] ?? null });
+  }
+  // R5: form state through properties.
+  for (const k of new Set([...Object.keys(r.state ?? {}), ...Object.keys(c.state ?? {})])) {
+    if (r.state?.[k] !== c.state?.[k]) out.push({ kind: 'property', path: p, property: k, ref: r.state?.[k] ?? null, cand: c.state?.[k] ?? null });
+  }
+  // R7: the custom properties data-fd-vars set on either side, by computed value; a side that set one another way
+  // (on the element itself) is read the same.
+  for (const k of [...new Set([...Object.keys(r.vars ?? {}), ...Object.keys(c.vars ?? {})])].sort()) {
+    const a = r.vars?.[k] ?? r.own?.[k] ?? null, b = c.vars?.[k] ?? c.own?.[k] ?? null;
+    if (a !== b) out.push({ kind: 'style', path: p, property: k, ref: a, cand: b });
   }
   // R11: a margin that differs while the box sits in the same place is the engine's stale computed value.
   const sameBox = r.box && c.box && r.box.every((v, i) => Math.abs(v - c.box[i]) <= GEOMETRY_TOLERANCE);
@@ -445,20 +561,22 @@ export function compareTrees(refNodes, candNodes) {
  *  (a fixed tab bar, a support button, a toast) is made visibility:hidden for the shot (no layout change), then restored. */
 const HIDE_ATTR = 'data-re-hide';
 async function shootRoot(page, root) {
+  // A constructed stylesheet, like the freeze: a <style> element would be blocked by the page's style-src.
   await page.evaluate(({ sel, attr }) => {
     const r = document.querySelector(sel);
     if (!r) return;
-    const st = document.createElement('style');
-    st.id = 're-hide-style';
-    st.textContent = `[${attr}]{visibility:hidden!important}`;
-    document.head.append(st);
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(`[${attr}]{visibility:hidden!important}`);
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+    Object.defineProperty(window, '__reHide', { value: sheet, configurable: true });
     for (const el of document.body.querySelectorAll('*')) if (!r.contains(el) && !el.contains(r)) el.setAttribute(attr, '');
   }, { sel: root, attr: HIDE_ATTR });
   try {
     return await page.locator(root).first().screenshot({ animations: 'disabled', caret: 'hide' });
   } finally {
     await page.evaluate((attr) => {
-      document.getElementById('re-hide-style')?.remove();
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter((s) => s !== window.__reHide);
+      delete window.__reHide;
       document.querySelectorAll(`[${attr}]`).forEach((el) => el.removeAttribute(attr));
     }, HIDE_ATTR);
   }
@@ -472,6 +590,7 @@ async function load(deps, ctxOptions, url, root, theme, readyTimeout, wantShot, 
   const context = await deps.browser.newContext(ctxOptions);
   try {
     await context.addInitScript(settleRecorder, SETTLE_TIMERS_MS);
+    await context.addInitScript(varsRecorder);
     const page = await context.newPage();
     await page.goto(url, { waitUntil: 'load' });
     const settle = await preparePage(page, theme, readyTimeout, root);
@@ -517,9 +636,9 @@ export async function run(opts) {
       const browser = await pwx[engine].launch();
       try {
         for (const width of opts.widths) for (const theme of opts.themes) {
-          // bypassCSP: the freeze stylesheet is an inline <style>, which a page's strict policy would block. The policy
-          // itself is for the page's own checks.
-          const ctxOptions = { viewport: { width, height: 900 }, colorScheme: theme, reducedMotion: 'reduce', deviceScaleFactor: 1, bypassCSP: true };
+          // The page keeps its own Content Security Policy (R13): the freeze and the shot's hiding are constructed
+          // stylesheets, which style-src does not block.
+          const ctxOptions = { viewport: { width, height: 900 }, colorScheme: theme, reducedMotion: 'reduce', deviceScaleFactor: 1 };
           const deps = { browser };
           const r = await load(deps, ctxOptions, refUrl, opts.refRoot, theme, opts.readyTimeout, true, transparent);
           const c = await load(deps, ctxOptions, candUrl, opts.candRoot, theme, opts.readyTimeout, true, transparent);

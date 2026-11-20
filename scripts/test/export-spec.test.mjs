@@ -36,6 +36,23 @@ test('rule ids in the data form are rows in the prose', () => {
   }
 });
 
+test('renderEqual.rules lists exactly what render-equal.mjs implements, each with a description and a prose row', async () => {
+  const { RULES } = await import(new URL('scripts/render-equal.mjs', root).href);
+  assert.deepEqual(map.renderEqual.rules, RULES);
+  for (const id of RULES) {
+    assert.equal(typeof map.renderEqual[id], 'string', `renderEqual.${id} has no description`);
+    assert.ok(proseIds.has(id), `${id} has no row in EXPORT.md`);
+  }
+  // what a tool's export proof relies on (Facet: R1–R9 for the markup it writes, R12 for --transparent)
+  for (const id of ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R12']) assert.ok(RULES.includes(id), id);
+});
+
+test('render-equal captures under the page\'s own Content Security Policy (R13)', () => {
+  const source = readFileSync(new URL('scripts/render-equal.mjs', root), 'utf8');
+  assert.doesNotMatch(source, /\bbypassCSP:\s*true\b/);
+  assert.doesNotMatch(source, /addStyleTag|createElement\(['"]style['"]\)/);
+});
+
 test('no template writes a style attribute or prop', () => {
   const { forbidden } = map.attributes;
   const text = JSON.stringify({ ...map, attributes: { ...map.attributes, forbidden: [] }, schema: {} });

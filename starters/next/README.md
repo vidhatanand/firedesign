@@ -35,10 +35,10 @@ that its screens render the same as Fire's templates.
 
 ## Start a project from it
 
-1. Copy this folder.
-2. In `package.json`, replace `"fire-design": "file:../.."` with `"fire-design": "github:vidhatanand/firedesign#v0.11.0"`,
-   and delete the `check` script (it compares against the templates in Fire's repository).
-3. `npm install`, then `npm run dev`. `next.config.ts` sets Turbopack's root only when Fire is linked from outside the
+1. Copy this folder. Its `package.json` already depends on the release,
+   `"fire-design": "github:vidhatanand/firedesign#v0.12.0"`, locked in `package-lock.json`. Delete the `check` script
+   (it compares against the templates in Fire's repository).
+2. `npm ci`, then `npm run dev`. `next.config.ts` sets Turbopack's root only when Fire is linked from outside the
    project, and its rewrites only serve the templates' `*.html` links: remove them when your screens use routes.
 
 ## The rules to remember (spec/EXPORT.md)
@@ -65,7 +65,8 @@ that its screens render the same as Fire's templates.
 
 ## The check
 
-`npm run check` (in this repository):
+`npm run check` (in this repository; `npm install --no-save ../..` first checks your working copy of Fire rather than
+the release in `package.json`):
 
 1. builds for production with Ember's look (`FIRE_LOOK=ember`, into `.next-check`), so the screens compare with the
    templates on the same palette, and puts the starter's own look back afterwards;

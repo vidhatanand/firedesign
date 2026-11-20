@@ -71,6 +71,7 @@ Valid parts do not make a coherent app. Decide these once, write them where ever
 3. Do not write one helper that renders any setting as a text box. Each setting gets the control that fits it.
 4. A long create or edit form is a column of `fd-form-section`s. Start from `templates/form.html`.
 5. A hint never lists the allowed answers. If you are about to write one that does, the control is wrong.
+6. A value to type is a field (label, the input with its button in an `fd-row data-align="end"`, hint) inside an `fd-form`, which stops at a readable width. It is never an `fd-setting`: a setting row is a title, a description and one control on the right, and its text column holds no input.
 
 ## 4. Text
 

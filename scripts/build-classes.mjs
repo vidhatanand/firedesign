@@ -29,6 +29,7 @@ const structure = (p) => !p ? [] : [
   p.parent && `child of ${either(p.parent)}`,
   p.inside && `inside ${either(p.inside)}`,
   p.notInside && `not inside ${either(p.notInside)}`,
+  p.excludes && `holds no ${p.excludes.map((k) => `\`${k}\``).join(', ')}`,
   p.contains && `holds a ${p.contains.map((t) => code(`<${t}>`)).join(' or ')}`,
   ...Object.entries(p.attrs || {}).map(([a, v]) => (v === false ? `never ${code(a)}` : `needs ${code(v === true ? a : `${a}="${v}"`)}`)),
 ].filter(Boolean);

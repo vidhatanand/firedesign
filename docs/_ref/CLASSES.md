@@ -1,6 +1,6 @@
 # Fire: every class
 
-Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.10.1). Do not edit: change the CSS or the
+Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.10.2). Do not edit: change the CSS or the
 catalogue and run the build. `VOCABULARY.md` beside this file explains the parts in prose; this file is the complete list.
 
 For each component: its root class, its part classes, the attributes it reads with their values (on the root, then per
@@ -158,7 +158,7 @@ one-line markup of the required structure.
 ### Setting (`setting`, component)
 
 - Root: `fd-setting`, shown at `docs/content.html#setting`
-- Parts: `fd-setting-control` (child of `fd-setting`), `fd-setting-desc`, `fd-setting-text`, `fd-setting-title`
+- Parts: `fd-setting-control` (child of `fd-setting`), `fd-setting-desc`, `fd-setting-text` (holds no `fd-input`, `fd-textarea`, `fd-select`, `fd-field`, `fd-input-group`, `fd-input-pair`, `fd-codefield`, `fd-tag-input`, `fd-number`, `fd-secret`, `fd-search`), `fd-setting-title`
 - On the root: `data-align="end|start"`, `data-control="wide"`, `data-size="sm"`, `data-tone="danger"`
 
 ### Status (`status`, component)

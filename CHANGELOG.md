@@ -2,6 +2,34 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.10.2 — 20 Nov 2026
+
+**The checks catch a field dropped into a setting row.** A product put a text input in a setting's text column: the
+input ran the width of the card and its button lined up with the middle of the text. Both checks passed it. No class,
+attribute value, token, event or export was removed or renamed.
+
+### Added
+
+- **A structure fact, `excludes`** (with `instead`, one sentence on what to write): a part that may hold none of some
+  classes, at any depth (`contract/cards/README.md`). `fd-setting-text` now holds no `fd-input`, `fd-textarea`,
+  `fd-select`, `fd-field`, `fd-input-group`, `fd-input-pair`, `fd-codefield`, `fd-tag-input`, `fd-number`, `fd-secret`
+  or `fd-search`. `fire lint` and `fire review` report one as `wrong-parent`, and `CLASSES.md` shows the fact.
+- **`fire review`: `wide-field`** (an error, at 900px and wider): a text field, textarea or select wider than the
+  widest form measure, 768px. A table, `fd-form[data-size="full"]`, a search, a toolbar, a composer, a code field and
+  a public site's sections are left alone.
+- `AGENT-RULES.md` section 3, rule 6: a value to type is a field inside an `fd-form`, never an `fd-setting`.
+
+### For products refreshing from 0.10.1
+
+- `fire lint` reports a field inside `fd-setting-text`; move it into a field in a form, as the finding says.
+- `fire review` reports a field wider than 768px. Put it in an `fd-form`, or give the form `data-size="full"` where it
+  really needs the whole width.
+
+### Known limits
+
+- `wide-field` was measured on Fire's 42 templates and every state their cards list, in Chromium, where it reports
+  nothing. A product with a deliberately wide field outside the cases above will see it.
+
 ## 0.10.1 — 19 Nov 2026
 
 **`fire review` can review signed-in screens whose session is a `__Host-` cookie.** Nothing else changed.

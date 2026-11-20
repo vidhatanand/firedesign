@@ -54,6 +54,7 @@ module that queries it. When in doubt, leave it out: a rule that reports a corre
 | `parent` | Its parent element must carry one of these classes. | `wrong-parent` |
 | `inside` | An ancestor must carry one of these classes. | `wrong-parent` |
 | `notInside` | No ancestor may carry one of these classes. | `wrong-parent` |
+| `excludes` | It may hold none of these classes, at any depth (`fd-setting-text` holds no `fd-input`). `instead` says in one sentence what to write, and the finding shows it. | `wrong-parent` |
 | `attrs` | `{ "name": true }` it must carry the attribute, `"value"` with that value, `false` it must not (`hidden` on a menu). | `missing-attribute`, `forbidden-attribute` |
 | `contains` | It must hold a direct child with one of these tags (`["select"]`); the class on such an element itself is `wrong-element`. | `missing-child` |
 | `skeleton` | On the root's entry only: one line of markup with the required structure, quoted in the lint's fixes, `CLASSES.md` and `fire find`. | |

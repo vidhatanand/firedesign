@@ -207,3 +207,21 @@ test('rendered pages: a custom element is a real parent, and a table inside fd-s
   const chart = page([el('div', ['fd-card'], [el('div', ['fd-sr-only'], [el('table')]), el('table')])]);
   assert.deepEqual(checkTree(chart, rules, { rendered: true }).map((f) => f.rule), ['bare-control']);
 });
+
+test('excludes: a part that may hold none of some classes, with what to write instead', async () => {
+  const { structureRules, checkTree } = await import('../lib/structure.mjs');
+  const rules = structureRules(JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/catalog.json'), 'utf8')));
+  const el = (tag, classes = [], children = [], attrs = {}) => ({ tag, classes, attrs, children, dynamic: false });
+  const setting = (inText, inControl) => ({ tag: '#document', classes: [], attrs: {}, dynamic: false, children: [
+    el('div', ['fd-setting'], [el('div', ['fd-setting-text'], [el('div', ['fd-setting-title']), ...inText]), el('div', ['fd-setting-control'], inControl)])] });
+  const wrong = checkTree(setting([el('input', ['fd-input'], [], { type: 'text' })], [el('button', ['fd-btn'])]), rules);
+  assert.deepEqual(wrong.map((f) => f.rule), ['wrong-parent']);
+  assert.match(wrong[0].message, /`fd-setting-text` holds no `fd-input`: a value to type is a field/);
+  // deeper in the text column counts too; the control column is where a control belongs
+  assert.deepEqual(checkTree(setting([el('div', ['fd-stack'], [el('label', ['fd-select'], [el('select')])])], []), rules).map((f) => f.rule), ['wrong-parent']);
+  assert.deepEqual(checkTree(setting([], [el('label', ['fd-select'], [el('select')])]), rules), []);
+  // the catalogue build refuses a fact that names no Fire class, or an instead with no excludes
+  const { structureFactErrors } = await import('../build-catalog.mjs');
+  const errs = structureFactErrors({ id: 'x', parts: [{ class: 'fd-x', role: 'r', excludes: ['fd-nope'] }, { class: 'fd-x-a', role: 'r', instead: 'write something else here' }] }, { root: 'fd-x' }, { 'fd-x': 'x', 'fd-x-a': 'x' });
+  assert.equal(errs.length, 2);
+});

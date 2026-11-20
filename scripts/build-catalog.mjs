@@ -127,12 +127,14 @@ function readElements() {
 }
 
 /** Structure facts on a card's parts (0.10, contract/cards/README.md): every class they name is a Fire class; `or` only with
- *  required; the root is not its own required part; a skeleton only on the root's entry. The schema rejects unknown fields. */
+ *  required; `instead` only with excludes; the root is not its own required part; a skeleton only on the root's entry. The schema rejects unknown fields. */
 export function structureFactErrors(card, component, classToId) {
   const errors = [];
   for (const p of card.parts) {
-    for (const k of ['or', 'parent', 'inside', 'notInside']) for (const cls of p[k] || []) if (!classToId[cls]) errors.push(`cards/${card.id}.json: part ${p.class} ${k} names ${cls}, which is not a Fire class`);
+    for (const k of ['or', 'parent', 'inside', 'notInside', 'excludes']) for (const cls of p[k] || []) if (!classToId[cls]) errors.push(`cards/${card.id}.json: part ${p.class} ${k} names ${cls}, which is not a Fire class`);
     if (p.or && !p.required) errors.push(`cards/${card.id}.json: part ${p.class} has or without required`);
+    if (p.instead && !p.excludes) errors.push(`cards/${card.id}.json: part ${p.class} has instead without excludes`);
+    if (p.excludes?.includes(p.class)) errors.push(`cards/${card.id}.json: part ${p.class} cannot exclude itself`);
     if (p.required && p.class === component.root) errors.push(`cards/${card.id}.json: the root ${component.root} cannot be its own required part`);
     if (p.skeleton && p.class !== component.root) errors.push(`cards/${card.id}.json: part ${p.class} has a skeleton; only the root's entry (${component.root}) carries one`);
   }

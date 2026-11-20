@@ -18,7 +18,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fire-review-'));
 test.after(() => fs.rmSync(tmp, { recursive: true, force: true }));
 const FIX = '/scripts/test/fixtures/review';
-const PAGES = ['heads', 'form', 'settings', 'regions'];
+const PAGES = ['heads', 'form', 'settings', 'regions', 'field'];
 const run = (routes, extra = {}) => review({ ...parseArgs(['--serve', ROOT, '--routes', 'x'], tmp), routes, out: path.join(tmp, extra.name ?? 'out'), jobs: 6, ...extra });
 const rulesOf = (result, route) => [...new Set(result.findings.filter((f) => f.path === route).map((f) => f.rule))].sort();
 
@@ -39,6 +39,11 @@ test('the bad app: exactly the expected rule on each page, at the widths where i
   assert.deepEqual(form(375), ['bare-control', 'offscreen-control', 'overflow-x', 'unstyled-control', 'wrong-parent']);
   assert.deepEqual(rulesOf(result, `${FIX}/bad/settings.html`), ['stretched-button']);
   assert.deepEqual(rulesOf(result, `${FIX}/bad/regions.html`), ['overflow-x']);
+  // A text field in a setting's text column: the structural rule at every width, and at 1440 the field is far wider
+  // than a form (at 375 the column is narrow, so only the structure tells).
+  const field = (w) => [...new Set(result.findings.filter((f) => f.path === `${FIX}/bad/field.html` && f.width === w).map((f) => f.rule))].sort();
+  assert.deepEqual(field(1440), ['wide-field', 'wrong-parent']);
+  assert.deepEqual(field(375), ['wrong-parent']);
   const at = (rule) => [...new Set(result.findings.filter((f) => f.rule === rule).map((f) => f.width))];
   assert.deepEqual(at('overflow-x'), [375]);
   assert.deepEqual(at('nested-surface'), [1440]);
@@ -46,14 +51,14 @@ test('the bad app: exactly the expected rule on each page, at the widths where i
   assert.ok(result.findings.filter((f) => f.rule === 'stretched-button').every((f) => f.severity === 'warning'));
   assert.equal(result.findings.find((f) => f.rule === 'unstyled-control').ref, '#ap-2fa');
   assert.match(result.findings.find((f) => f.rule === 'overflow-x' && f.path.endsWith('regions.html')).ref, /div\.fd-row$/);
-  assert.equal(result.errors, 24);   // 20 from the composition checks, 4 wrong-parent from the structural rules
+  assert.equal(result.errors, 30);   // 22 from the composition checks, 8 wrong-parent from the structural rules
   assert.equal(result.warnings, 6);  // 2 stretched buttons, 4 bare-control
 });
 
 test('the good app: no findings', async () => {
   const result = await run(PAGES.map((p) => ({ path: `${FIX}/good/${p}.html` })), { name: 'good' });
   assert.deepEqual(result.findings, []);
-  assert.equal(result.screens, 16);
+  assert.equal(result.screens, 20);
 });
 
 test(`Fire's templates: no findings (${process.env.FIRE_REVIEW_ALL ? 'all 42' : 'twelve'}, every ?state= their cards name)`, async () => {
@@ -75,7 +80,7 @@ test(`Fire's templates: no findings (${process.env.FIRE_REVIEW_ALL ? 'all 42' : 
 
 test('the gallery lists every screen and holds no inline style or script', () => {
   const html = fs.readFileSync(path.join(tmp, 'bad', 'index.html'), 'utf8');
-  assert.equal((html.match(/<section class="screen/g) ?? []).length, 4);
+  assert.equal((html.match(/<section class="screen/g) ?? []).length, PAGES.length);
   for (const p of PAGES) assert.ok(html.includes(`id="${slug(`${FIX}/bad/${p}.html`)}"`), p);
   assert.ok(!/\sstyle=|<style|<script|\son[a-z]+=/i.test(html), 'no inline style, script or handler');
   assert.ok(!/(src|href)="(https?:)?\/\//.test(html), 'no external request');

@@ -54,6 +54,7 @@ export const RULES = {
   'one-page-head': ['error', 'Open the screen with one page head (fd-page-head or fd-page-hero); title the sections inside with their own heads.'],
   'one-primary': ['error', 'Keep one primary button per view (the main region, each dialog, sheet, card or empty state); make the others outline, ghost or text buttons.'],
   'stretched-button': ['warning', 'Let the button size to its label (an fd-row, or align it to the start); use data-block only where a button fills its row by design.'],
+  'wide-field': ['error', 'Put the field in a form or a field at a readable width (fd-form, or an fd-field in a column with data-frame); a value to type is not an fd-setting. Use fd-form[data-size="full"] only where the form really needs the whole width.'],
   'nested-surface': ['error', 'Put a form section straight in the form column (templates/form.html), never in a multi-column grid; do not set a card inside a card.'],
   'unstyled-control': ['error', 'Use Fire\'s control: fd-input, fd-textarea, a select inside fd-select, fd-checkbox or fd-radio, an fd-btn, an fd-table inside fd-table-wrap.'],
   'console-error': ['error', 'Fix the error, or list its text in "allow" when it is expected.'],
@@ -292,6 +293,21 @@ function inspect({ structure }) {
       const need = range.getBoundingClientRect().width + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
       const w = box(el).width;
       if (w > need * 2 && w - need > 120) add('stretched-button', el, `the button is ${Math.round(w)}px wide for a ${Math.round(need)}px label`);
+    }
+  }
+  // wide-field (900px and wider): a text field, textarea or select wider than Fire's widest form measure
+  // (--fd-form-measure-lg, 768px): nobody types a line that long, and it means the field was dropped into a wide
+  // box (a setting's text column, a full-width card) and not into a form or a field. A table, a form that asks for
+  // the full width (fd-form[data-size="full"]), and the parts built around one wide input (WIDE_OK) are left alone.
+  const WIDE_OK = '.fd-table, .fd-form[data-size="full"], .fd-search, .fd-toolbar, .fd-command, .fd-composer, .fd-codefield, .fd-chat, .fd-doc-try, .fd-site';
+  if (vw >= 900) {
+    const limit = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fd-form-measure-lg')) || 768) + 1;
+    const TEXT = new Set(['text', 'email', 'password', 'search', 'url', 'tel', 'number', '']);
+    for (const el of document.querySelectorAll('input.fd-input, textarea.fd-textarea, label.fd-select, .fd-input-group')) {
+      if (!shown(el) || el.closest(WIDE_OK) || (el.localName === 'input' && !TEXT.has((el.getAttribute('type') ?? '').toLowerCase()))) continue;
+      if (el.matches('.fd-input') && el.closest('.fd-input-group')) continue;   // the group is measured, not the input inside it
+      const w = box(el).width;
+      if (w > limit) add('wide-field', el, `the field is ${Math.round(w)}px wide; a form stops at ${limit - 1}px`);
     }
   }
   // nested-surface: a form section that shares a row with a sibling in a multi-column grid; a card inside a card

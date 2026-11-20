@@ -4,8 +4,8 @@
  * rendered page, which serialises the live DOM into the same shape.
  *
  *   structureRules(catalog)        the rules, from the structure facts on the cards (contract/catalog.json,
- *                                  components[].card.parts[]: required, or, element, parent, inside, notInside, attrs,
- *                                  contains, skeleton; contract/cards/README.md) and the catalogue's nativeWrappers
+ *                                  components[].card.parts[]: required, or, element, parent, inside, notInside, excludes,
+ *                                  attrs, contains, skeleton; contract/cards/README.md) and the catalogue's nativeWrappers
  *   checkTree(root, rules, opts)   -> [{ rule, severity, message, fix, node }]   opts: { usesFire } (bare-control runs
  *                                  only when true; default: some node in the tree carries an fd- class);
  *                                  { rendered: true } for a live DOM: no element is opaque, every parent is real
@@ -21,6 +21,7 @@
  *   wrong-element        a class on a tag it does not work on (`element`), or on the native element it must wrap (`contains`)
  *   wrong-parent         a part whose parent lacks the class it must sit in (`parent`), with no ancestor that carries one
  *                        of `inside`, or inside an ancestor that carries one of `notInside`
+ *                        or inside a part that `excludes` it (an fd-input in fd-setting-text)
  *   missing-attribute    `attrs` { name: true } absent, or { name: "value" } absent or another value
  *   forbidden-attribute  `attrs` { name: false } present
  *   missing-child        no direct child of the tags in `contains` (`.fd-select > select`)
@@ -49,6 +50,7 @@ export function opaque(node, rules) {
 export function structureRules(catalog) {
   const entries = new Map();   // class -> [entry]
   const required = new Map();  // root class -> [{ cls, or, parent }]
+  const excluded = new Map();  // class -> [{ holder, instead }]: the parts that may not hold it
   const comps = catalog.components || [];
   for (const c of comps) {
     const parts = c.card?.parts || [];
@@ -61,6 +63,10 @@ export function structureRules(catalog) {
         if (!entries.has(p.class)) entries.set(p.class, []);
         entries.get(p.class).push(e);
       }
+      for (const cls of p.excludes || []) {
+        if (!excluded.has(cls)) excluded.set(cls, []);
+        excluded.get(cls).push({ holder: p.class, instead: p.instead || '', id: c.id, name: c.name || c.id });
+      }
       if (p.required) {
         if (!required.has(c.root)) required.set(c.root, []);
         required.get(c.root).push({ cls: p.class, or: p.or || [], parent: p.parent || null, id: c.id, name: c.name || c.id, skeleton });
@@ -70,7 +76,7 @@ export function structureRules(catalog) {
   const elements = new Set([...comps.map((c) => c.element).filter((t) => typeof t === 'string'),
     ...(catalog.elements || []).map((e) => (typeof e === 'string' ? e : e.tagName)).filter(Boolean)]);
   const wrappers = Object.fromEntries(Object.entries(catalog.nativeWrappers || {}).map(([t, list]) => [t, new Set(list)]));
-  return { entries, required, elements, wrappers };
+  return { entries, required, excluded, elements, wrappers };
 }
 
 const TEXT_INPUT = new Set(['text', 'email', 'password', 'search', 'url', 'tel', 'number']);
@@ -137,6 +143,11 @@ export function checkTree(root, rules, opts = {}) {
             }
           }
         }
+      }
+      for (const x of rules.excluded?.get(cls) || []) {
+        if (!ancestors.some((an) => an.classes?.includes(x.holder))) continue;
+        report('wrong-parent', node, `${x.name} (${x.id}): \`${x.holder}\` holds no \`${cls}\`${x.instead ? `: ${x.instead}` : ''}`,
+          `move the ${open(tag, cls)} out of \`${x.holder}\``);
       }
       for (const r of native ? rules.required.get(cls) || [] : []) {   // a component carrying the class renders its own inside
         const want = [r.cls, ...r.or];

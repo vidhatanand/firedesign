@@ -21,13 +21,13 @@ test('the starter has the files a new project starts from', () => {
   }
 });
 
-test('versions are pinned exactly, and Fire comes from the repository', () => {
+test('versions are pinned exactly, and Fire is the release it ships in (scripts/pin-starters.mjs)', () => {
   const pkg = JSON.parse(read('package.json'));
   const all = { ...pkg.dependencies, ...pkg.devDependencies };
   assert.equal(all.lit, '3.3.3');
   assert.equal(all.vite, '8.3.8');
   assert.equal(all.typescript, '5.9.3');
-  assert.equal(all['fire-design'], 'file:../..');
+  assert.equal(all['fire-design'], `github:vidhatanand/firedesign#v${JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version}`);
   for (const [name, version] of Object.entries(all)) if (name !== 'fire-design') assert.match(version, /^\d+\.\d+\.\d+$/, `${name} is not pinned`);
 });
 

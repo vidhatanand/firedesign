@@ -7,6 +7,8 @@
 // spec/ARCHITECTURE.md, the starters' READMEs, starters/next/next.config.ts); the three starters' own version in their
 // package.json and package-lock.json; and the minor version in the docs sidebar (docs/docs.js).
 // A release also needs its CHANGELOG.md entry, which is written by hand: --check requires a heading for the version.
+// The starters depend on the release they ship in: after pushing the release commit, lock them to it in the next
+// commit (node scripts/pin-starters.mjs <release commit>) and tag that one.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +31,8 @@ const PLACES = [
   ...['GUIDE.md', 'docs/frameworks.html', 'spec/ARCHITECTURE.md', 'starters/next/next.config.ts', ...STARTERS.map((s) => `${s}/README.md`)]
     .map((f) => [f, new RegExp(`(firedesign#v)(${V})()`, 'g')]),
   ...STARTERS.flatMap((s) => [[`${s}/package.json`, new RegExp(`("version": ")(${V})(")`)], [`${s}/package-lock.json`, lockRoot], [`${s}/package-lock.json`, lockSelf]]),
+  // the starters' dependency on the release (scripts/pin-starters.mjs locks it to the release commit)
+  ...STARTERS.flatMap((s) => [[`${s}/package.json`, new RegExp(`(firedesign#v)(${V})()`, 'g')], [`${s}/package-lock.json`, new RegExp(`(firedesign#v)(${V})()`, 'g')]]),
 ];
 const MINOR = ['docs/docs.js', /(Fire <small>)(\d+\.\d+)(<\/small>)/];
 

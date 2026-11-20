@@ -1,4 +1,4 @@
-# Fire architecture: one system for plain pages, Lit, React and Next.js, Vue, and Facet
+# Fire architecture: one system for plain pages, Lit, React and Next.js, and Vue
 
 Status: decided for 0.6 by the Fire maintainer (18 Nov 2026), built in v0.6.0, and kept true to the system as it is in
 0.8.0 (see CHANGELOG.md for what each release added; section 10 is what 0.8 added). Every work package follows this
@@ -36,7 +36,7 @@ fire/
   LICENSE-lit.txt      Lit's BSD-3-Clause licence, because elements.js bundles it
 elements/src/*.ts      Lit + TypeScript source of the custom elements
 contract/
-  fire-contract.json   GENERATED: every global token with tier, type, group, default and Facet role, and the named breakpoints
+  fire-contract.json   GENERATED: every global token with tier, type, group, default, and the named breakpoints
   theme.schema.json    JSON Schema of the theme record
   catalog.json         GENERATED: components, modules, classes, attribute values, elements, events, icons, tokens, templates, cards
   index.json           GENERATED: one compact entry per part (what `fire find` and the Catalogue page read)
@@ -58,7 +58,6 @@ starters/
   lit-vite/            the default
   next/
   vue-vite/
-facet/                 GENERATED: Fire as a Facet design system (content.json and extras)
 scripts/
   build.mjs            runs every generator below; `--check` fails when a committed output is stale
   build-elements.mjs   elements/src → fire/elements.js, fire/elements.d.ts, contract/custom-elements.json
@@ -69,7 +68,6 @@ scripts/
   build-pictures.mjs   index entries + docs specimens → contract/pictures (section 10)
   build-palettes.mjs, build-typefaces.mjs   palettes.css and typefaces.css from their specs; `--check` holds every contrast rule
   build-wrappers.mjs, build-wrappers-vue.mjs   custom-elements.json → wrappers
-  build-facet.mjs      contract + catalog + WRITING.md → facet/
   find.mjs             `fire find`: search the parts by what they are for
   gate.mjs             the near-duplicate gate (fingerprint.mjs holds its fingerprints); fonts.mjs: adds a catalogue font to a product; looks-check.mjs: renders every look
   lint-markup.mjs      lints product or board markup against catalog.json, names and structure (runs in any project)
@@ -92,7 +90,7 @@ starters in this repository use `file:../..`.
 
 ## 3. The theme record (the source of a Fire design system)
 
-A product's look is one JSON record. Tweaks, Imprim's branding, Facet and agents all read and write it; Fire's
+A product's look is one JSON record. Tweaks, Imprim's branding, other tools and agents all read and write it; Fire's
 expander turns it into tokens. Version 1. 0.6 had `contract`, `palette`, `tone`, `type` and seven dials; `fire` came in 0.6.2, the
 structural dials and `signature` in 0.7, and `imagery` and `brand` in 0.8:
 
@@ -115,7 +113,7 @@ structural dials and `signature` in 0.7, and `imagery` and `brand` in 0.8:
 - `palette` is a palette name, or a spec: `{ "from": "accent", "accent": "#1f6feb", "neutral": "cool" }`, or
   `{ "from": "brand", "colors": ["#14342b", "#f2c14e"] }`, or the full spec form `palettes.js` uses internally
   (hue, tint, ink, accent, on, L). `neutral` is `pure`, `cool`, `warm` or a hue in degrees.
-- `fire` (0.6.2) is the release the record was written against, so Facet and products can pin the expander by it.
+- `fire` (0.6.2) is the release the record was written against, so tools and products can pin the expander by it.
 - `type` is a type set name, or a spec (0.7): `display`, `sans` and `mono` families from the font catalogue
   (`contract/fonts.json`), `displayWeight`, `displayTracking`, `headingCase` and `figures`. `validateTheme()` enforces
   the pairing rules, and `expandTheme()` writes each family's metric-matched fallback face.
@@ -139,16 +137,13 @@ structural dials and `signature` in 0.7, and `imagery` and `brand` in 0.8:
 
 ## 4. The contract file and the catalogue
 
-**`contract/fire-contract.json`** lists every global token: `{ name, type, tier, group, default, facetRole? }`, and the
+**`contract/fire-contract.json`** lists every global token: `{ name, type, tier, group, default }`, and the
 four named breakpoints as `breakpoints` (phone below 640px, tablet 640 to 899px, desktop from 900px, wide from 1200px).
 Tiers: `input` (set by a theme record: the palette's colour inputs, fonts, dials), `scale` (type, space, radius,
 shadow, motion, sizes, status tones, chart and code colours: values may change, steps may not be added or renamed),
-`derived` (computed by Fire, never authored). It carries the Facet role mapping: background ← `--fd-bg`, surface ←
-`--fd-surface`, text ← `--fd-ink`, muted ← opaque `--fd-text-3` on the page, primary ← `--fd-accent`, on-primary ←
-`--fd-accent-contrast`, border ← `--fd-line`, focus ← `--fd-focus`, success/warning/danger/info ←
-`--fd-<tone>-fill` with `--fd-<tone>-contrast`, link ← `--fd-accent-text`; `accent` is left to Facet.
+`derived` (computed by Fire, never authored).
 
-**`contract/catalog.json`** is what agents, the lint, the wrappers and Facet read. Facts are generated from the
+**`contract/catalog.json`** is what agents, the lint, the wrappers and other tools read. Facts are generated from the
 source; judgement comes from the cards. Shape (see `catalog.schema.json`):
 
 ```
@@ -237,22 +232,20 @@ base class holds the shared rules for future elements. Elements are registered b
   and job, and fails a near-duplicate unless a card declares a `relation`. `--probe <page>` checks a candidate first.
   `build.mjs` runs it without the look comparison; `npm run gate` adds it.
 - **`build.mjs --check`** fails when any committed output is stale: palettes, type sets, elements, contract, catalogue,
-  index, `docs/_ref/CLASSES.md`, wrappers and `facet/`; it also fails when an index entry has no picture or a picture has
+  index, `docs/_ref/CLASSES.md`, and wrappers; it also fails when an index entry has no picture or a picture has
   no entry (section 10).
-- **`render-equal.mjs`** compares a reference page (Fire markup, a Facet board) with a candidate (the exported
+- **`render-equal.mjs`** compares a reference page (Fire markup, a design board) with a candidate (the exported
   screen running in its framework): the Fire nodes' structure (framework wrappers, comments and framework attributes
   ignored), their computed styles, and a pixel comparison with animations frozen, at 1440 and 375 wide, light and
-  dark. Output JSON with every difference; exit code 1 beyond the tolerance. Fire runs it on every starter; Facet runs
+  dark. Output JSON with every difference; exit code 1 beyond the tolerance. Fire runs it on every starter; an exporter can run
   it on every export. What it must normalise for the rules in `spec/EXPORT.md` to hold is its section 16 (R1 to R15).
 
-## 8. Facet
+## 8. Other tools
 
-`scripts/build-facet.mjs` writes `facet/`: a Facet design-system `content.json` that passes Facet's
-`validateContent` (colour roles from the mapping above, typography, space, radius, shadow, motion, components from the
-cards with `api` for `<cc-component>`, voice from WRITING.md, pairings), plus the extras Facet will carry: the Fire
-stylesheet and fonts, `fire/fire.js` and `fire/elements.js`, the contract file and the catalogue. Facet owns the
-exporter, board templates in its board format, running Fire's checks before an export is offered, and recording
-which board revision each exported screen implements.
+Fire writes no tool's own format. A tool that adapts Fire reads neutral data: `contract/fire-contract.json` (the
+tokens), `contract/catalog.json` (the parts and their cards), the theme record and its schema, and
+`spec/EXPORT.md` with `spec/export-map.json` (the rules an exporter follows). The exporter, its board templates and
+its checks live with the tool, not here.
 
 ## 9. Verification for every package
 
@@ -266,7 +259,7 @@ has its own `npm run check`. The maintainer reviews every diff and looks at ever
 **The surface model.** Where a part belongs is one fact, kept in one place: the `surfaces` of its card (`app`,
 `website`, `phone`, `email`, always in that order). `build-catalog.mjs` carries it into `catalog.json`, `build-index.mjs`
 into `index.json`, and everything else reads it from there: `fire find --surface`, the Catalogue page (`docs/catalogue.html`,
-filters kept in the address), the surface tags beside each docs heading, `lint-markup.mjs` and the Facet export. A page
+filters kept in the address), the surface tags beside each docs heading, and `lint-markup.mjs`. A page
 or an element declares where it is used with `data-fd-surface` (a global attribute with no CSS, listed by the
 catalogue in `globalAttributes`); the lint reports `surface-mismatch` for a part whose card does not list that surface,
 names the card's alternative, treats `phone` as accepting `app`, and says nothing where nothing is declared. Every
@@ -276,7 +269,7 @@ components, because an email is written by `renderEmail()`, and added `website` 
 **The website family.** `fire/components/site.css` and `fire/js/site.js` add a foundation and section types, as a family
 of their own. A section is `section.fd-site-section.fd-site-<type>` inside
 `fd-site`, a size container named `fd-site`: every section measures the container, so a site renders the same inside a
-Facet board or a docs specimen. The catalogue kind is `section`, with family Website in `scripts/lib/catalog-assign.mjs`; the
+design board or a docs specimen. The catalogue kind is `section`, with family Website in `scripts/lib/catalog-assign.mjs`; the
 gate compares sections like any other part. Breakpoints are named (phone, tablet, desktop, wide) in the
 `fire/tokens.css` header and in the contract's `breakpoints`. Fluid type is computed where it is used (`:root`, `.fd-site` and
 `[data-type]`), so a subtree with its own type set gets its own steps. There are no block variants that only change

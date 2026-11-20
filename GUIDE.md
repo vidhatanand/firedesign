@@ -39,7 +39,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 | React and Next.js | `starters/next` | `fire-design/react`: `FireIcon`, `FireChart`, `FireCode`, `FireTexture`, `useFire`, `useFireEvent`, `loadFire` and the exporter's helpers `jsonForScript`, `ccAttr`, `ccText`, `ccTruthy` (`spec/EXPORT.md` section 0) |
 | Vue | `starters/vue-vite` | `fire-design/vue`: the plugin (default export, `Fire`), the `v-fire` directive (`fireDirective`), `fireRouter()`, `fireVueOptions()` for `vite.config` and `isFireElement()` |
 
-Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.12.0"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
+Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.12.1"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
 
 **The Lit starter is the place to start an app.** Add a screen as a route in `src/routes.ts` with
 `load: () => import(…)` and import it nowhere else, so the build gives it its own file. Write links to app pages with
@@ -74,8 +74,8 @@ init(containerElement);   // safe to call more than once
 
 **Plan the app first.** Before the first screen, map every screen to a template (a list is `logs.html`, a form is `form.html`, one record is `record.html`, settings is `settings.html`), and fix one page head, one form pattern and one way to show a list for the whole app. Write the plan where everyone building reads it. Valid parts composed without a plan give three page heads and forms squeezed into grids; nothing in a lint can put that right afterwards.
 
-1. **Start from the nearest template.** Open `templates/index.html`, pick the screen closest to what you need, and copy it. `templates/blank.html` is the empty app screen. A single task outside the app (sign in, a second step, consent, a result) is a centred screen: start from `templates/auth-centered.html`. Fire has templates for the screens products repeat: decisions and a single decision case, answering from an email link without signing in, a record hub (one team on one page), settings, an audit log, a status page and its admin, and a shared proof page. A public site starts from `templates/site-home.html`, `site-pricing.html`, `site-customers.html`, `site-changelog.html` or one of the six for publishing (section 5, "A public website"). Each template that has states (39 of the 42) opens every one of them (loading, empty, error, no access, and its own) from its Demo state band, from `?state=` in the address, or with the control its card names, so you can see and test them before you replace the demo content; its card in `contract/cards/templates/` lists them. The three starters open the overview and logs states the same way. Ask `npx fire find` before you build a screen of your own: it may already be one of these.
-2. **Keep the shell, replace the content.** `templates/shell.js` builds the sidebar, top bar, menus and command palette for the demo product. Copy it into your project and change its navigation, account and labels to your own. The page itself is:
+1. **Read the nearest template, then build fresh.** Open `templates/index.html` and read the screen closest to what you need: its regions, its page head, its states. Then write your screen in that structure, each component from its own markup in the docs. A template is a reference to read, never a file to copy and edit. `templates/blank.html` is the empty app screen. A single task outside the app (sign in, a second step, consent, a result) is a centred screen: follow `templates/auth-centered.html`. Fire has templates for the screens products repeat: decisions and a single decision case, answering from an email link without signing in, a record hub (one team on one page), settings, an audit log, a status page and its admin, and a shared proof page. A public site follows `templates/site-home.html`, `site-pricing.html`, `site-customers.html`, `site-changelog.html` or one of the six for publishing (section 5, "A public website"). Each template that has states (39 of the 42) opens every one of them (loading, empty, error, no access, and its own) from its Demo state band, from `?state=` in the address, or with the control its card names, so you can see each one before you build yours; its card in `contract/cards/templates/` lists them. The three starters open the overview and logs states the same way. Ask `npx fire find` before you build a screen of your own: it may already be one of these.
+2. **Take the shell once.** The shell is the one part you take as it is, not a screen: `templates/shell.js` builds the sidebar, top bar, menus and command palette for the demo product (each starter has its own). Copy it into your project once and change its navigation, account and labels to your own. The page itself is:
 
 ```html
 <body data-shell data-active="logs">
@@ -234,11 +234,11 @@ A site is not an app screen with a wide column. Wrap the page in `fd-site` (a si
 
 This will happen. How you handle it decides whether the product stays consistent, so follow the steps in order.
 
-**Step 1: look again.** Search `VOCABULARY.md` and the docs for the thing by what it does, not by what you would call it. Most "missing" components exist under another name (a "pill" is a badge, a "drawer" is a sheet, a "wizard" is steps).
+**Step 1: search first.** Search by what the thing does, not by what you would call it: `npx fire find "<what it does>"` searches every component, pattern and template by its job and other names, and `VOCABULARY.md` explains the common ones. Read the cards and the template pages. Most "missing" components exist under another name (a "pill" is a badge, a "drawer" is a sheet, a "wizard" is steps). Templates are references to read, never starters.
 
-**Step 2: compose.** Most new things are arrangements of existing components: a card with a table inside it, a setting row with a secret field. Build it from parts with the layout primitives. This needs no request.
+**Step 2: compose or customise.** Most new things are arrangements of existing components, or an existing component with one of its variants and states: a card with a table inside it, a setting row with a secret field. Build it from parts with the layout primitives. This needs no proposal.
 
-**Step 3: decide whether it is a gap.** It is a gap in the system, and worth a request, when any of these is true:
+**Step 3: decide whether it is a gap.** It is a gap in the system when nothing is close, or when any of these is true:
 
 - You wanted to write a custom class, a `<style>` block, a pixel value or a width to make it work.
 - An existing component needs a variant, size, tone or state it does not have.
@@ -247,26 +247,28 @@ This will happen. How you handle it decides whether the product stays consistent
 - A component cannot be operated by keyboard or reads wrongly to a screen reader in your case.
 - The same need will plainly come up on other screens or in other products.
 
-**Step 4: file a request, then continue.** Do not stop the product work, and do not quietly build a one-off.
+**Step 4: build it to Fire's standard.** When nothing is close, build the component yourself, the way Fire would (`DESIGN.md` is the standard):
 
-File an issue in the Fire repository using the "Component or extension request" template (`.github/ISSUE_TEMPLATE/component-request.md`). If you cannot reach the repository, add the same fields as a new entry at the top of `REQUESTS.md` in your project and tell the project owner. A request contains:
+- An `x-<name>` root class and `x-<name>-<part>` parts; variants and sizes as `data-*` attributes, states as ARIA states, as Fire's own components do.
+- Every value from a Fire token: no raw colours or lengths, no `url()`, no `@import`.
+- Every state (empty, loading, error, disabled), light and dark, phone and desktop, keyboard and screen reader.
+- Its CSS in one file named `fire-local.css`, loaded after `fire.css`, with the proposal's link in a comment above its rules.
+- Never style or override an `fd-` class or a `--fd-` token, never edit files inside `fire/`, and never copy a Fire component and modify the copy.
+
+**Step 5: propose it, then continue.** Never build a one-off silently, and do not stop the product work. Record the component so Fire can adopt it. A proposal carries the component itself, and it is internal: never post one publicly, as an issue in Fire's repository or anywhere else. In Facet, `propose_component` records it, and every board that uses it marks the root with `data-proposal="<id>"`. Elsewhere, add it as a new entry at the top of `docs/fire/REQUESTS.md` in your project and tell the project owner. A proposal contains:
 
 | Field | What to write |
 |---|---|
 | Kind | New component · new variant, size or state · new token · new pattern (arrangement) · bug or accessibility fix |
 | What you were building | The screen and the user's task, in two sentences |
 | What is missing | The thing, named by what it does |
-| What you tried | Which existing components you looked at and why they do not fit |
-| Proposed shape | Markup sketch using Fire's naming (`fd-<block>`, `data-variant`, …), the variants and states it needs, how it behaves on a phone and by keyboard |
+| What you searched | The queries you ran (`fire find`, the docs, the templates), and for each near Fire entry one sentence on why it does not fit |
+| The component | A card in Fire's format (`contract/cards/README.md`), the markup and the CSS, with `x-` names |
 | Where else it applies | Other screens or products that would use it |
-| Stopgap in use | What you did in the meantime (see below), with file and line |
+| Where it is used | File and line of each use |
 | Evidence | A screenshot or a link to the screen |
 
-**Step 5: use a stopgap that is easy to remove.** Until the request is answered:
-
-- Prefer the closest existing component, even if it is not perfect.
-- If you must write styles, put them in one file named `fire-local.css`, loaded after `fire.css`. Use the prefix `x-` for classes (never `fd-`), use only Fire tokens for every value, and put the request's link in a comment above each rule.
-- Never edit files inside `fire/`, and never copy a Fire component and modify the copy.
+**Step 6: when Fire answers.** A proposal is sent, then adopted or declined. Adopted, it ships as an `fd-` component in a release: update `fire/`, replace the `x-` component with Fire's, and delete its rules from `fire-local.css`. Declined, the answer says why: follow it (often: compose these parts instead), or keep the component as your own. An empty `fire-local.css` is the goal.
 
 **Your own CSS and tokens.** Fire is constrained at the edge, not closed. A product may add its own tokens and rules under these limits, and `lint-css` enforces them:
 
@@ -275,9 +277,7 @@ File an issue in the Fire repository using the "Component or extension request" 
 - Write a colour only inside a token definition, take sizes and durations from tokens, and never restyle an `fd-` class beyond where it sits: ask for a variant, or style a class of your own (`x-`) on a wrapper.
 - Run `npx fire lint-css src --prefix acme`. Errors fail; warnings print. Fire's own stylesheets are checked by `npm run audit`, not by this.
 
-**Step 6: when the request ships,** update `fire/`, replace the stopgap with the real component, and delete its rules from `fire-local.css`. An empty `fire-local.css` is the goal.
-
-**For whoever maintains Fire.** A request is accepted when the need is real on more than one screen and cannot be met by composition. The new part follows `DESIGN.md` exactly: tokens only, the naming rules, every state, light and dark, phone and desktop, keyboard operation, a docs section with live specimens, an entry in `VOCABULARY.md`, and a clean `npm run audit`.
+**For whoever maintains Fire.** Every proposal gets an answer: adopted as an `fd-` component in a release, or declined with a reason. One is adopted when the need is real on more than one screen and cannot be met by composition. The new part follows `DESIGN.md` exactly: tokens only, the naming rules, every state, light and dark, phone and desktop, keyboard operation, a docs section with live specimens, an entry in `VOCABULARY.md`, and a clean `npm run audit`.
 
 ## 8. Instructions for an AI agent working in a project
 
@@ -292,7 +292,7 @@ Copy `AGENT-RULES.md` into the project beside this guide, then put this pointer 
 
 - For any interface work, read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
 - Fire is in `public/fire`. Never edit it.
-- Gaps in Fire go in `docs/fire/REQUESTS.md`. Stopgap styles go in `fire-local.css`.
+- When Fire has nothing close, build to Fire's standard with `x-` classes in `fire-local.css`, and propose it in `docs/fire/REQUESTS.md`.
 ```
 
 Keep the project's instruction file for what only the project knows: its layouts, its helpers, its security policy. Do not copy Fire's rules into it; a copy goes stale the next time Fire changes.

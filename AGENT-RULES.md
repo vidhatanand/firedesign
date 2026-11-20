@@ -9,7 +9,7 @@ These are the rules an AI agent follows when it builds or changes an interface i
 
 - For any interface work, read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
 - Fire is in `public/fire`. Never edit it.
-- Gaps in Fire go in `docs/fire/REQUESTS.md`. Stopgap styles go in `fire-local.css`.
+- When Fire has nothing close, build to Fire's standard with `x-` classes in `fire-local.css`, and propose it in `docs/fire/REQUESTS.md`.
 ```
 
 Anything the project's own instructions say more specifically (its layouts, its helpers, its security policy) wins over this file.
@@ -27,15 +27,15 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Write Fire markup in Lit, React, Next.js or Vue | `spec/EXPORT.md` in the Fire package, and the matching starter in `starters/` |
 | Add to Fire itself | `DESIGN.md`, in the Fire repository |
 
-Copy markup from the Fire docs pages or the nearest template. Do not write components from memory. Run `fire find` before you compose a pattern or a screen: Fire may already have it, under another name.
+Copy each component's markup from the Fire docs pages. Do not write components from memory. Run `fire find` before you compose a pattern or a screen: Fire may already have it, under another name.
 
 ### Plan the app before the first screen
 
 Valid parts do not make a coherent app. Decide these once, write them where everyone building the app reads them (the project's spec or its agent instructions), and follow them on every screen.
 
-1. Map every screen to a Fire template before you build any of them: a list of records (`logs.html`), a create or edit form (`form.html`), one record (`record.html`), settings (`settings.html`), keys and secrets (`api-keys.html`), an audit trail (`audit.html`), a dashboard (`overview.html`), usage and billing (`usage.html`). `npx fire find --kind template "<what the screen is for>"` finds the nearest. A screen with no template is a gap: say so before you build it.
+1. Map every screen to the Fire template it follows before you build any of them: a list of records (`logs.html`), a create or edit form (`form.html`), one record (`record.html`), settings (`settings.html`), keys and secrets (`api-keys.html`), an audit trail (`audit.html`), a dashboard (`overview.html`), usage and billing (`usage.html`). `npx fire find --kind template "<what the screen is for>"` finds the nearest. A screen with no template is a gap: say so before you build it.
 2. One page head for the whole app: the same structure, the same place for the title, the description and the primary action. One form pattern. One way to show a list. Never a second.
-3. Compose from the template's structure. Copy its regions (page head, toolbar, table or sections, foot) and change the content. Do not assemble a page layout from loose parts.
+3. Build each screen fresh in its template's structure: the same regions (page head, toolbar, table or sections, foot) in the same order, each written from the components' own markup. A template is a reference to read, never a file to copy and edit. Do not assemble a page layout from loose parts.
 4. When several people or agents build at once, they share this plan and one shell. Nobody starts a screen before the plan exists.
 
 ## 2. Always
@@ -95,10 +95,11 @@ Valid parts do not make a coherent app. Decide these once, write them where ever
 
 Follow `GUIDE.md` section 7, in order:
 
-1. Look again in the vocabulary, by what the thing does and not by what you would call it.
-2. Compose it from existing components.
-3. If it is a real gap, write a request (the fields are in `GUIDE.md` section 7), tell the owner, and carry on with a stopgap that is easy to remove: classes prefixed `x-`, Fire tokens only, in the project's stopgap file.
-4. Never build a one-off silently.
+1. Search first, by what the thing does: Fire's index (`npx fire find`; in Facet, `search_components`, templates included). Read the cards and the template pages. Templates are references to read, never starters.
+2. Compose or customise existing components with their variants and states.
+3. If nothing is close, build the component to Fire's standard: an `x-<name>` root class and `x-<name>-<part>` parts, Fire tokens only (no raw colours or lengths), `data-*` variants, ARIA states, every state, light and dark, phone and keyboard. Its CSS goes in the project's `fire-local.css`. Never style or override an `fd-` class or token.
+4. Record it as a proposal: a card in Fire's format (`contract/cards/README.md`), the markup, the CSS, and what you searched (the queries, and for each near Fire entry one sentence on why it does not fit). In Facet, use `propose_component` and mark the root with `data-proposal="<id>"`; elsewhere, add it to the project's `docs/fire/REQUESTS.md` and tell the owner (`GUIDE.md` section 7). Proposals are internal: never post one publicly, as an issue or anywhere else.
+5. Never build a one-off silently. Fire reviews proposals: sent, then adopted as `fd-…` in a release or declined with a reason. When one is adopted, replace the `x-` component with Fire's.
 
 In the Fire repository: a new pattern or template must pass the near-duplicate gate (`node scripts/gate.mjs --probe <page>`) or declare a `relation` in its card (`variantOf` or `distinctFrom`, with one sentence on when to use it instead).
 

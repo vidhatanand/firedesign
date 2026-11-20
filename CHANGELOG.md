@@ -2,6 +2,49 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.12.1 — 20 Nov 2026
+
+**When Fire has nothing close, an agent builds the component to Fire's standard and proposes it.** This is the owner's
+rule, drafted with Facet. Templates are references to read, never starters. A component Fire lacks is built with `x-`
+classes and recorded as a proposal that Fire adopts or declines, so Fire learns from what products had to build. Only
+documents changed: no class, attribute value, token, event, behaviour export or check changed.
+
+### Changed
+
+- **`AGENT-RULES.md` section 6**, in order:
+  1. Search first (`fire find`; in Facet, `search_components`).
+  2. Compose or customise what Fire has.
+  3. If nothing is close, build the component to Fire's standard:
+     - an `x-<name>` root and `x-<name>-<part>` parts;
+     - Fire tokens only, `data-*` variants and ARIA states;
+     - every state, light and dark, phone and keyboard;
+     - its CSS in `fire-local.css`, never touching an `fd-` class or token.
+  4. Record it as a proposal: a card in Fire's format, the markup, the CSS and what you searched. In Facet, use
+     `propose_component` and `data-proposal="<id>"`.
+  5. Fire adopts it as an `fd-` component in a release, or declines it with a reason.
+- **Templates are references, never starters.** `AGENT-RULES.md` section 1 and `GUIDE.md` section 3 now say to read the
+  nearest template and build each screen fresh in its structure, never to copy a template file and edit it. The shell
+  is still copied once.
+- `GUIDE.md` section 7 follows the same steps. A proposal gains "What you searched" and "The component" (card, markup,
+  CSS) and drops "Stopgap in use".
+- **Proposals are internal.** A proposal carries the component itself and is never posted publicly. In Facet,
+  `propose_component` records it; elsewhere it goes at the top of the project's `docs/fire/REQUESTS.md`, and the owner
+  is told. The public issue template (`.github/ISSUE_TEMPLATE/component-request.md`) is removed.
+- The pointer a product copies into its agent instructions now says: "When Fire has nothing close, build to Fire's
+  standard with `x-` classes in `fire-local.css`, and propose it in `docs/fire/REQUESTS.md`."
+
+### For products refreshing from 0.12.0
+
+- In your agent instructions, replace "Gaps in Fire go in `docs/fire/REQUESTS.md`. Stopgap styles go in
+  `fire-local.css`." with the line above. The old line points at the same files, so leaving it does no harm.
+- Each stopgap in `fire-local.css` is now a proposal: add what you searched and a card to its open request, in
+  `docs/fire/REQUESTS.md`, not as an issue in Fire's repository.
+
+### Known limits
+
+- `search_components` and `propose_component` are Facet's tools, on a Facet branch not yet deployed. Until they ship,
+  an agent in Facet files the request as it would anywhere else.
+
 ## 0.12.0 — 20 Nov 2026
 
 **An exporter can prove its output against Fire.** `render-equal` now applies every normalisation the export spec

@@ -28,7 +28,8 @@
  *      transparent too, inside Fire nodes as well: their children take their place. Comments are ignored (R1) and
  *      adjacent text is merged. Text inside <pre> is compared as it is; elsewhere (R2) runs of whitespace collapse to
  *      one space, which is dropped where the browser drops it: at the start and end of a block, beside a block-level
- *      sibling, and in a flex or grid container, where whitespace-only text is absent. Compared per node: tag, `fd-`
+ *      sibling, and in a flex or grid container, where whitespace-only text is absent; so is whitespace-only text the
+ *      browser does not draw (inside a hidden element, between table parts). Compared per node: tag, `fd-`
  *      classes, attributes, text. Siblings are aligned by longest common subsequence, so one moved element shows
  *      up as one `missing` plus one `extra`, a changed text as `text`, a changed class list as `classes`.
  *      Form state (R5) is compared through properties, as `property` differences: `value` of an input (not a file
@@ -324,6 +325,15 @@ function extractInPage({ sel, props, transparent }) {
     const d = el ? getComputedStyle(el).display : 'block';
     return /flex|grid/.test(d) ? 'flex' : d === 'inline' ? 'inline' : 'block';
   };
+  // R2: whether the browser draws a whitespace-only text at all (not inside a hidden element, not between table parts,
+  // not collapsed away at a line's edge): a box of some width.
+  const blank = /^[ \t\n\r\f]*$/;
+  const drawn = (t) => {
+    if (!blank.test(t.data)) return true;
+    const range = document.createRange();
+    range.selectNodeContents(t);
+    return [...range.getClientRects()].some((b) => b.width > 0);
+  };
   const make = (el) => {
     const cs = getComputedStyle(el);
     const styles = {};
@@ -341,8 +351,8 @@ function extractInPage({ sel, props, transparent }) {
         // a textarea's text is its initial value; its value is compared as a property (R5)
         if (inFire && node.localName !== 'textarea') {
           const last = out[out.length - 1];
-          if (last && last.t === 'text') last.text += ch.data;
-          else out.push({ t: 'text', text: ch.data, pre: !!node.closest?.('pre'), flow: flowOf(node) });
+          if (last && last.t === 'text') { last.text += ch.data; last.drawn ||= drawn(ch); }
+          else out.push({ t: 'text', text: ch.data, pre: !!node.closest?.('pre'), flow: flowOf(node), drawn: drawn(ch) });
         }
       } else if (ch.nodeType === 1) {
         if (SKIP.has(ch.localName) || ch.id === 'fd-icon-sprite') continue;
@@ -439,7 +449,8 @@ export function normalizeTree(nodes) {
   return fix(nodes, false);
 }
 
-/** R2: HTML's whitespace (not a no-break space) collapses to one space, which goes where the browser drops it. */
+/** R2: HTML's whitespace (not a no-break space) collapses to one space, which goes where the browser drops it. A
+ *  whitespace-only text the browser does not draw (`drawn` false, measured in the page) is absent. */
 const WHITESPACE = /[ \t\n\r\f]+/g;
 const blockLevel = (n) => n?.t === 'el' && !/^(inline|contents|none|ruby)/.test(n.styles?.display || 'inline');
 function collapse(n, prev, next) {
@@ -447,7 +458,7 @@ function collapse(n, prev, next) {
   const flex = n.flow === 'flex', edge = n.flow !== 'inline';
   const start = flex || (!prev && edge) || blockLevel(prev);
   const end = flex || (!next && edge) || blockLevel(next);
-  if (text === ' ') return start || end ? '' : ' ';
+  if (text === ' ') return start || end || n.drawn === false ? '' : ' ';
   if (start) text = text.replace(/^ /, '');
   if (end) text = text.replace(/ $/, '');
   return text;

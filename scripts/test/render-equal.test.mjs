@@ -153,6 +153,9 @@ test('compareTrees: whitespace collapses to one space, dropped where the browser
   // beside a block-level sibling it is dropped
   const div = (gap) => [el('div', 'block', [el('span', 'inline-block'), ...(gap ? [t(gap)] : []), el('section', 'block')])];
   assert.deepEqual(compareTrees(div('\n  '), div('')), []);
+  // so is whitespace the browser does not draw: between two hidden elements, or table parts
+  const hidden = (gap) => [el('div', 'block', [el('span', 'none'), ...(gap ? [{ ...t(gap), drawn: false }] : []), el('span', 'none')])];
+  assert.deepEqual(compareTrees(hidden('\n  '), hidden('')), []);
   // <pre> is compared as it is; a no-break space is not whitespace
   assert.equal(compareTrees([el('pre', 'block', [t('a  b', 'block', true)])], [el('pre', 'block', [t('a b', 'block', true)])]).length, 1);
   assert.equal(compareTrees([el('p', 'block', [t('a b')])], [el('p', 'block', [t('a b')])]).length, 1);

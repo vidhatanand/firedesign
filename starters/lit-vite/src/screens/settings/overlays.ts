@@ -79,9 +79,9 @@ export const settingsOverlays = (s: ScreenSettings) => html`
           <figure class="fd-codeblock">
             <button class="fd-codeblock-copy" aria-label="Copy recovery codes"><svg class="fd-icon" data-icon="copy" aria-hidden="true"><use href="#i-copy"></use></svg></button>
             <pre class="fd-codeblock-body"><code data-lang="text">k7f2-9xqm  p4vd-83hn
-    t2zc-6wje  m9ra-4ukb
-    h5ns-1dyq  x8gp-7ltv
-    c3bw-0fok  v6ie-2rnz</code></pre>
+t2zc-6wje  m9ra-4ukb
+h5ns-1dyq  x8gp-7ltv
+c3bw-0fok  v6ie-2rnz</code></pre>
           </figure>
         </div>
         <div class="fd-dialog-foot">

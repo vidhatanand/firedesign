@@ -9,6 +9,8 @@
 //                                            and tag that one. npm resolves the tag to a commit with the same files.
 //   node scripts/pin-starters.mjs --check    fail when a starter is not pinned and locked to this version
 //
+// $NPM names another npm to write the lockfiles with (the starters' locks are written by npm 11).
+//
 // In Fire's repository, `npm install --no-save ../..` in a starter tries it against the working copy instead; neither
 // package.json nor the lockfile changes.
 import fs from 'node:fs';
@@ -47,14 +49,16 @@ export function pin(commit) {
   const at = `github:${REPO}#${commit}`;
   for (const s of STARTERS) {
     const cwd = path.join(ROOT, s);
-    const r = spawnSync('npm', ['install', '--package-lock-only', '--save-exact', '--ignore-scripts', '--no-audit', '--no-fund', `fire-design@${at}`],
+    const manifest = path.join(cwd, 'package.json');
+    const written = fs.readFileSync(manifest, 'utf8');
+    const r = spawnSync(process.env.NPM || 'npm', ['install', '--package-lock-only', '--save-exact', '--ignore-scripts', '--no-audit', '--no-fund', `fire-design@${at}`],
       { cwd, stdio: 'inherit' });
     if (r.status) throw new Error(`npm install failed in ${s}`);
-    // The commit resolved the dependency; the release's tag names it.
-    for (const file of ['package.json', 'package-lock.json']) {
-      const f = path.join(cwd, file);
-      fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replaceAll(`"${at}"`, `"${spec(version)}"`));
-    }
+    // npm rewrites package.json in its own layout: keep the file as written, with only the dependency changed. The
+    // commit resolved the dependency; the release's tag names it, in package.json and in the lockfile.
+    fs.writeFileSync(manifest, written.replace(/("fire-design":\s*)"[^"]*"/, `$1"${spec(version)}"`));
+    const lock = path.join(cwd, 'package-lock.json');
+    fs.writeFileSync(lock, fs.readFileSync(lock, 'utf8').replaceAll(`"${at}"`, `"${spec(version)}"`));
   }
   return check();
 }

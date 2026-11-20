@@ -16,7 +16,8 @@ it exports against a Fire tag. No class, attribute value, token, event or behavi
   applies, R1 to R15 (`RULES` in the script; a test holds the two equal). A tool may rely on every id listed.
 - **Four normalisations `render-equal` did not apply:**
   - R2: whitespace is dropped where the browser drops it (at the start and end of a block, beside a block-level
-    sibling, in a flex or grid container); between two inline boxes a space is drawn, so it is compared. Text in
+    sibling, in a flex or grid container), and whitespace-only text the browser does not draw (inside a hidden
+    element, between table parts) is absent; between two inline boxes a space is drawn, so it is compared. Text in
     `<pre>` is compared as it is, and a no-break space is not whitespace.
   - R5: form state through properties: `value` of an input, textarea and select, `checked` of a checkbox or radio,
     `selected` of an option, `open` of a details or dialog, reported as `property` differences. Those attributes and a
@@ -39,6 +40,12 @@ it exports against a Fire tag. No class, attribute value, token, event or behavi
 - The Vue and Next starters run `lint:markup`, `lint:css` and `review` from `node_modules/fire-design/scripts`; they
   used `../../scripts`, which a copied starter does not have. The Lit starter's check takes the reference templates
   from Fire's repository when the installed Fire does not ship them.
+
+### Fixed
+
+- The Lit starter's recovery codes (settings, in a dialog) had four spaces of template indentation on three lines
+  inside their `<pre>`. `render-equal` passed it while it trimmed all text; R2 compares `<pre>` text as it is and
+  found it.
 
 ### For products refreshing from 0.11.0
 

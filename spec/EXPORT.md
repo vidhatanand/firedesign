@@ -405,7 +405,7 @@ values directly, as the setup returns them. A hole path `a.b` is written as `a?.
 | Id | Normalisation | Comes from |
 |---|---|---|
 | R1 | Ignore comments, including the markers React, Vue and Lit leave (`<!-- -->`, `<!--[-->`, `<!--?lit$…$-->`). | T4 |
-| R2 | Text outside `<pre>` and `<textarea>`: collapse runs of whitespace to one space, and treat whitespace-only text between block or flex children as absent. The space is dropped where the browser drops it: at the start and end of a block, beside a block-level sibling, and in a flex or grid container. Between two inline boxes it is drawn, so it is compared. A no-break space is not whitespace. | T1 |
+| R2 | Text outside `<pre>` and `<textarea>`: collapse runs of whitespace to one space, and treat whitespace-only text between block or flex children as absent. The space is dropped where the browser drops it: at the start and end of a block, beside a block-level sibling, and in a flex or grid container. Whitespace-only text the browser does not draw (inside a hidden element, between table parts) is absent too. Between two inline boxes a space is drawn, so it is compared. A no-break space is not whitespace. | T1 |
 | R3 | Compare attributes as a set, not in order. Names are compared in lowercase. | F5, A15 |
 | R4 | Compare `class` as a set of tokens. | I2 |
 | R5 | Compare form state through properties (`value`, `checked`, `selected`, `open`), not through the `value`, `checked`, `selected` or `open` attributes or a textarea's text child. The `value` attribute of other elements (`li`, `option`, `meter`, `data`) is an ordinary attribute. | F1–F4 |

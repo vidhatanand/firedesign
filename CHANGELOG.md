@@ -2,6 +2,49 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.11.0 — 20 Nov 2026
+
+**Fire carries no tool's format.** Fire is a design system that tools adapt. Since 0.6 it also wrote itself in one
+tool's format, and its own build ran that tool's command line: when the tool changed, Fire's checks broke with nothing
+in Fire changed. The adapter now lives with the tool. No class, attribute value, token, event or behaviour export was
+removed or renamed; styles and behaviour are those of 0.10.2.
+
+### Removed
+
+- **The Facet adapter**: `scripts/build-facet.mjs`, its test, the generated `facet/` folder (`content.json`,
+  `extras.json`, `theme.json`, `README.md`) and the `npm run build:facet` script. Fire's build no longer runs Facet's
+  command-line tool, and no longer looks for `$FACET_CLI` or a Facet folder beside the repository.
+- **The Facet colour role on the token contract**: `facetRole` on a token, and the top-level `facet` key with its
+  `roles`, in `contract/fire-contract.json`.
+- The last copy of all of it is at tag `v0.10.2`. A tool that read `facet/` or `facetRole` now reads the neutral files
+  below, which are unchanged.
+
+### Added
+
+- `contract/fire-contract.json` names the default look: `"defaultLook": "contract/looks/ember.json"`, the theme record
+  the token defaults describe. It is `DEFAULT_RECORD` of `fire/js/theme.js` as data.
+- A test holds two facts a tool relies on (`scripts/test/standalone.test.mjs`; `spec/ARCHITECTURE.md` section 8): the
+  folder `fire/` is a complete install, with nothing in it loading a file from outside it; and the default look is the
+  default theme record.
+- `AGENT-RULES.md`: the lint does not follow markup into a helper that wraps what it is given; for markup composed
+  through helpers the review is the authority.
+
+### Fixed
+
+- `GUIDE.md` and `spec/EXPORT.md`: five table rows had unescaped `|` inside code spans, so they had too many cells
+  and rendered wrongly (markdownlint MD056).
+
+### Unchanged, for tools
+
+- `contract/catalog.json`, `contract/fire-contract.json` (the tokens, without the roles), the theme record
+  (`fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/`), the cards and `docs/_ref/CLASSES.md`.
+- `spec/EXPORT.md` and `spec/export-map.json`, every key included, and the `fire-export` helpers.
+
+### For products refreshing from 0.10.2
+
+- Nothing to change in markup, styles or scripts.
+- If a script of yours read `facet/` or `facetRole`, read the files above instead, or take the adapter from `v0.10.2`.
+
 ## 0.10.2 — 20 Nov 2026
 
 **The checks catch a field dropped into a setting row.** A product put a text input in a setting's text column: the

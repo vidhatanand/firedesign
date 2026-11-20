@@ -18,6 +18,7 @@
 //             transparent written as rgb(r g b / a), calc(n × scale) at the default scale written as its result
 // "breakpoints" names the widths (phone < 640, tablet 640–899, desktop >= 900, wide >= 1200), as fire/tokens.css's header says.
 // looks/<palette>.json is the theme record of each preset palette, as the Tweaks panel's Copy theme writes it.
+// fire-contract.json names Fire's default among them under "defaultLook" (a path from the repository root).
 // looks/named/<name>.json are the named looks, written by hand: { name, label, note, record }. Each record must pass
 // validateTheme and be one the Tweaks panel can hold (a named palette, toned or not, and a named type set), so the
 // panel and ?look= can apply it whole; build-palettes.mjs --check holds each to the contrast rules under its own
@@ -230,6 +231,9 @@ const contract = {
     wide: { min: 1200 },
   },
 };
+
+// The look the defaults above describe: the theme record a tool starts from when it is given none.
+contract.defaultLook = `contract/looks/${toThemeRecord({}).palette}.json`;
 
 const outputs = new Map();
 outputs.set('contract/fire-contract.json', `${JSON.stringify(contract, null, 2)}\n`);

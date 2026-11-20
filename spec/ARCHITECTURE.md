@@ -85,7 +85,7 @@ scripts/
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
 `./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.10.2`); the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.11.0`); the
 starters in this repository use `file:../..`.
 
 ## 3. The theme record (the source of a Fire design system)
@@ -246,6 +246,15 @@ Fire writes no tool's own format. A tool that adapts Fire reads neutral data: `c
 tokens), `contract/catalog.json` (the parts and their cards), the theme record and its schema, and
 `spec/EXPORT.md` with `spec/export-map.json` (the rules an exporter follows). The exporter, its board templates and
 its checks live with the tool, not here.
+
+Two facts such a tool can rely on, each held by `scripts/test/standalone.test.mjs`:
+
+- **A standalone install is the folder `fire/` and nothing else.** No stylesheet or module in it loads a file from
+  outside it: the styles, the behaviour, the elements bundle, the icons, the fonts and their licences are all there.
+  `contract/`, `spec/`, `scripts/`, `wrappers/` and the starters are data and tools around it, never needed at run time.
+- **The default look is named.** `contract/fire-contract.json` has `defaultLook`, the path of the theme record the
+  token defaults describe (`contract/looks/ember.json`). It is the record a tool starts from when it is given none;
+  `DEFAULT_RECORD` in `fire/js/theme.js` is the same record in code.
 
 ## 9. Verification for every package
 

@@ -2,7 +2,7 @@
 
 A card is the judgement about one component that cannot be generated from the source: when to use it, when not to,
 and what it is called elsewhere. `contract/cards/<component id>.json` holds one card; `scripts/build-catalog.mjs`
-merges it into the component's entry in `contract/catalog.json`, where the lint, the wrappers, Facet and agents read it.
+merges it into the component's entry in `contract/catalog.json`, where the lint, the wrappers and agents read it.
 `card.schema.json` is the format. Component ids, roots, classes and attribute values come from the build, never from a card.
 
 ```
@@ -26,7 +26,7 @@ Every field is required except `relation`; a list with nothing to say is `[]`.
 | `useWhen` | Situations that call for it, each one sentence. At least one. |
 | `avoidWhen` | Situations that look like a fit and are not. Each has `when` and `instead`: a component id, or a short instruction when no component fits. |
 | `aka` | Other names people and other design systems use (search terms): "modal" for a dialog. |
-| `surfaces` | Where it is used: `app`, `website`, `phone`, `email`, always in that order. At least one. List a surface only where the part is right as it is: the markup lint (`surface-mismatch`), `fire find --surface`, the Catalogue page and the Facet export all read it. A part that is right only on a phone lists only `phone`; a phone page also accepts parts that list `app`. |
+| `surfaces` | Where it is used: `app`, `website`, `phone`, `email`, always in that order. At least one. List a surface only where the part is right as it is: the markup lint (`surface-mismatch`), `fire find --surface`, and the Catalogue page all read it. A part that is right only on a phone lists only `phone`; a phone page also accepts parts that list `app`. |
 | `data` | The shape of data it shows or collects: `record`, `list`, `series`, `form`, `text`, `none`. At least one. |
 | `states` | Conditions it can be in. Each has `name` and `how`: the attribute, class or call that sets it, as written in markup. |
 | `variants` | Attribute values that change the look or role. Each has `attribute`, `value` (an empty string for an attribute set with no value) and `useWhen`. The build fails when the attribute or value is not one the CSS defines for the component. |

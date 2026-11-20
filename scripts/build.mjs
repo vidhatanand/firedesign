@@ -9,7 +9,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const check = process.argv.includes('--check');
-// Order matters: the catalogue reads the elements' manifest; the Facet export reads the contract and the catalogue.
+// Order matters: the catalogue reads the elements' manifest.
 const steps = [
   ['version.mjs', check ? ['--check'] : [], { onlyCheck: true }],   // the version is the same everywhere it is stated, and the changelog has its entry
   ['build-palettes.mjs', check ? ['--check'] : []],
@@ -24,7 +24,6 @@ const steps = [
   ['gate.mjs', check ? ['--check', '--no-look'] : ['--no-look']],   // near-duplicates by structure and job (npm run gate adds the look)
   ['build-wrappers.mjs', check ? ['--check'] : [], { optional: true }],
   ['build-wrappers-vue.mjs', check ? ['--check'] : [], { optional: true }],
-  ['build-facet.mjs', check ? ['--check'] : [], { optional: true }],
 ];
 let failed = 0;
 for (const [script, args, opts = {}] of steps) {

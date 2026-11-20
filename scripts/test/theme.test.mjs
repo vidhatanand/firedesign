@@ -408,7 +408,7 @@ test('build-contract.mjs --check: the committed contract and looks are current',
   execFileSync(process.execPath, [path.join(ROOT, 'scripts/build-contract.mjs'), '--check'], { stdio: 'pipe' });
 });
 
-test('fire-contract.json: every token typed and tiered; inputs are what a record sets; Facet roles mapped', () => {
+test('fire-contract.json: every token typed and tiered; inputs are what a record sets', () => {
   const c = readJson('contract/fire-contract.json');
   const TYPES = ['color', 'dimension', 'duration', 'number', 'shadow', 'fontFamily', 'cubicBezier', 'other'];
   const names = c.tokens.map((t) => t.name);
@@ -432,18 +432,6 @@ test('fire-contract.json: every token typed and tiered; inputs are what a record
   assert.equal(by['--fd-chart-1'].tier, 'input');
   assert.equal(by['--fd-chart-3'].tier, 'input');
   assert.equal(by['--fd-chart-3'].group, 'chart');
-  const roles = Object.fromEntries(c.tokens.filter((t) => t.facetRole).map((t) => [t.facetRole, t.name]));
-  assert.deepEqual(roles, {
-    background: '--fd-bg', surface: '--fd-surface', text: '--fd-ink', muted: '--fd-text-3', primary: '--fd-accent',
-    'on-primary': '--fd-accent-contrast', border: '--fd-line', focus: '--fd-focus', link: '--fd-accent-text',
-    success: '--fd-success-fill', 'on-success': '--fd-success-contrast', warning: '--fd-warning-fill', 'on-warning': '--fd-warning-contrast',
-    danger: '--fd-danger-fill', 'on-danger': '--fd-danger-contrast', info: '--fd-info-fill', 'on-info': '--fd-info-contrast',
-  });
-  // Muted is opaque: --fd-text-3 laid over the page, and still 4.5:1 on it.
-  for (const m of ['light', 'dark']) {
-    assert.match(c.facet.roles.muted[m], /^#[0-9a-f]{6}$/);
-    assert.ok(contrast(c.facet.roles.muted[m], c.facet.roles.background[m]) >= 4.5);
-  }
 });
 
 test('contract/looks: one valid record per preset palette', () => {

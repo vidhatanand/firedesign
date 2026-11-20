@@ -298,7 +298,7 @@ export const LAYOUT_ATTRIBUTES = {
 
 /**
  * Attributes Fire's scripts set as state (open, dragging, copied, measured overflow, animation phases, what a renderer
- * stamps): the lint accepts them, Facet does not offer them as props. Key: a component id (the attribute on any of its
+ * stamps): the lint accepts them, a tool that offers props does not offer them. Key: a component id (the attribute on any of its
  * classes) or a class (on that class only; the root class means the root alone) -> attribute -> extra values the
  * scripts write that no style or comment lists (usually none: the evidence's values move here). The build fails when
  * no Fire script writes the attribute, or a listed value is not a literal of a script that writes it. Reviewed against the writes in fire/js/*.js (`dataset.x =`, setAttribute, toggleAttribute).
@@ -407,7 +407,7 @@ export const STATE_ATTRIBUTES = {
  * JS-only parts: a module with no CSS root class, so the class-based build cannot find it. id (also the card's file
  * name, contract/cards/<id>.json), name, module (path from the repository root). The build reads the module's exports
  * from its source. A module is not a component: the catalogue lists it under `modules`, `fire find` finds it (kind
- * "module"), and the Facet export does not carry it.
+ * "module"), and an exporter does not carry it.
  */
 export const MODULES = [
   { id: 'email', name: 'Email', module: 'fire/email/email.js' },

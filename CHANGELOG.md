@@ -2,6 +2,20 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.12.2 — 22 Nov 2026
+
+**render-equal compares an sRGB colour by what it is, not how it is written (R16).** Only the check, its spec and its
+tests changed: no class, attribute value, token, event or behaviour export changed.
+
+### Fixed
+
+- `rgb(38 38 38 / 0.67)` and `color-mix(in srgb, #262626 67%, transparent)` were reported as a style difference with no
+  pixel difference. They are equal now in the colour properties, in `box-shadow`, and in a gradient of one colour at
+  any alphas. A gradient of two colours is still compared as written: the notation changes how it interpolates.
+- A check can now fail that passed before: two `color(srgb …)` colours one channel level apart are different (two
+  decimals used to hide up to 2.55 levels).
+- `spec/export-map.json` `renderEqual.rules` adds `R16`.
+
 ## 0.12.1 — 20 Nov 2026
 
 **When Fire has nothing close, an agent builds the component to Fire's standard and proposes it.** This is the owner's

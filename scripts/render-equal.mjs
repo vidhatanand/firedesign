@@ -56,6 +56,8 @@
  *      d, points, transform and viewBox are equal when every number is within 0.5 px and the rest of the value is the
  *      same (a chart drawn again at a plot a fraction of a pixel wider).
  *  (b) computed styles of matched nodes: a fixed list of layout, box, type and colour properties (PROPS below).
+ *      An sRGB colour is the same in either notation, `rgb()` or `color(srgb …)` (R16), except in a gradient of
+ *      more than one colour: there the notation picks the interpolation space, so it changes what is painted.
  *      Margins (R11) count only when the two boxes (relative to the root) differ by more than 0.5 px: engines can
  *      report a stale computed `auto` margin after a late layout change while the box is where it should be.
  *  (c) pixels: a screenshot of each root, same size required; the ratio of differing pixels (pixelmatch) must not
@@ -74,7 +76,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 /** The normalisations of spec/EXPORT.md section 16 this script applies; spec/export-map.json renderEqual.rules lists
  *  the same ids, and a tool may rely on every one of them. */
-export const RULES = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15'];
+export const RULES = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16'];
 
 export const PROPS = [
   // layout
@@ -370,6 +372,39 @@ function extractInPage({ sel, props, transparent }) {
 
 const num = (v) => v.replace(/-?\d*\.\d+/g, (m) => String(Math.round(parseFloat(m) * 100) / 100));
 
+/* R16: one notation for an sRGB colour. This runs before num(): two decimals of a 0–1 channel are 2.55 levels. */
+const COLOUR_PROPS = new Set(['color', 'background-color', 'border-top-color', 'border-right-color', 'border-bottom-color',
+  'border-left-color', 'outline-color', 'text-decoration-color', 'fill', 'stroke', 'box-shadow']);
+const SRGB = /\bcolor\(srgb ([-+\d.e]+) ([-+\d.e]+) ([-+\d.e]+)(?: \/ ([-+\d.e]+))?\)/g;
+const RGB = /\brgba?\((\d+), (\d+), (\d+)(?:, ([-+\d.e]+))?\)/g;
+const OTHER_COLOUR = /\b(?:color|color-mix|lab|oklab|lch|oklch|hsla?|hwb|light-dark)\(|\bcurrentcolor\b/i;
+/** 0–1 as a byte. CSS rounds a half up, and six printed digits can leave one just short of it (36.5 reads 36.49994). */
+const toByte = (x) => Math.round(x * 255 + 5e-4);
+/** As Chromium and WebKit print rgb(): alpha is a byte, in two decimals when they give that byte back, else three. */
+function rgbText(channels, alpha) {
+  const a = toByte(alpha);
+  if (a >= 255) return `rgb(${channels.join(', ')})`;
+  const short = Math.round((a / 255) * 100) / 100;
+  return `rgba(${channels.join(', ')}, ${toByte(short) === a ? short : Math.round((a / 255) * 1000) / 1000})`;
+}
+const oneNotation = (value) => value
+  .replace(SRGB, (m, r, g, b, a = '1') => {
+    const c = [r, g, b].map(Number);
+    return c.every((x) => x >= 0 && x <= 1) ? rgbText(c.map(toByte), Number(a)) : m;   // outside rgb()'s range: as written
+  })
+  .replace(RGB, (m, r, g, b, a = '1') => rgbText([r, g, b], Number(a)));
+/** A computed style with its colours in one notation. A gradient interpolates color(srgb) in Oklab and rgb() in sRGB,
+ *  so its notation is dropped only when that cannot show: every colour in it that is not fully transparent has the
+ *  same channels, and only alpha varies. */
+function colours(prop, value) {
+  if (COLOUR_PROPS.has(prop)) return oneNotation(value);
+  if (prop !== 'background-image' || !value.includes('gradient(')) return value;
+  const one = oneNotation(value);
+  if (OTHER_COLOUR.test(one)) return value;
+  const seen = new Set([...one.matchAll(RGB)].filter((m) => Number(m[4] ?? 1) > 0).map((m) => `${m[1]},${m[2]},${m[3]}`));
+  return seen.size > 1 ? value : one;
+}
+
 /** The ids a value points at: id references (for, aria-*…), `#id` in href, and url(#id) anywhere. */
 function referencedIds(name, value) {
   const out = [];
@@ -426,6 +461,7 @@ export function normalizeTree(nodes) {
   };
   const value = (v) => num(v.includes('url(') ? urls(v) : v);
   const values = (o) => Object.fromEntries(Object.entries(o ?? {}).map(([k, v]) => [k, value(v)]));
+  const styles = (o) => Object.fromEntries(Object.entries(o ?? {}).map(([k, v]) => [k, value(colours(k, v))]));
   const fix = (list, inSvg) => {
     const out = [];
     list.forEach((n, i) => {
@@ -441,7 +477,7 @@ export function normalizeTree(nodes) {
         if (IGNORED_ATTRS.some((re) => re.test(k)) || stateAttrs.includes(k)) continue;
         attrs[k] = canon(k, n.attrs[k]);
       }
-      out.push({ ...n, attrs, styles: values(n.styles), state: n.state ?? {}, vars: values(n.vars), own: values(n.own), svg,
+      out.push({ ...n, attrs, styles: styles(n.styles), state: n.state ?? {}, vars: values(n.vars), own: values(n.own), svg,
         children: fix(n.children, svg) });
     });
     return out;

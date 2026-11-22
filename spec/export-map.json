@@ -40,7 +40,7 @@
     "pages": "Page-level rules added in 0.8 (EXPORT.md section 17): id → { rule, lit, react, vue, check }."
   },
   "version": 1,
-  "fire": "0.12.1",
+  "fire": "0.12.2",
   "targets": {
     "html": { "name": "Plain HTML", "versions": {}, "notes": "Fire markup as in docs/ and templates/." },
     "lit": { "name": "Lit", "versions": { "lit": "3.3.3" }, "notes": "Light DOM components (createRenderRoot() { return this; })." },
@@ -342,7 +342,7 @@
     "B13": {"board": "<cc-head> styles and links", "all": "dropped; a board with its own <cc-head> CSS is refused for export with the reason", "confirmedBy": "Facet"}
   },
   "renderEqual": {
-    "rules": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15"],
+    "rules": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15", "R16"],
     "R1": "Ignore comments, including framework markers (<!-- -->, <!--[-->, <!--?lit$…$-->).",
     "R2": "Outside <pre> and <textarea>: collapse whitespace runs to one space; whitespace-only text between block or flex children counts as absent, as does whitespace-only text the browser does not draw (inside a hidden element, between table parts); between two inline boxes a space is drawn and compared; <pre> text is compared as it is.",
     "R3": "Attributes compared as a set, names in lowercase, order ignored.",
@@ -357,7 +357,8 @@
     "R12": "--transparent <selector> (repeatable) treats matching elements as wrappers, inside Fire nodes too (a component's host element).",
     "R13": "Capture a settled page: no DOM mutation, no change of the root's box and no pending timeout of 2 s or less for 400 ms, up to the ready timeout; wait only for fd- elements to be defined; the page keeps its own Content Security Policy: the freeze and the R15 hiding are constructed stylesheets (adoptedStyleSheets), which style-src does not block, and a run whose freeze did not apply stops with an error.",
     "R14": "Ignore React's view-transition bookkeeping attributes (vt-*: vt-name, vt-update, vt-enter, vt-exit, vt-share): <ViewTransition> writes them into the server HTML and adds no element.",
-    "R15": "The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors is made visibility:hidden and restored afterwards (layout untouched; the root's own fixed or sticky descendants stay): the comparison is of the root, the shell around it belongs to the product."
+    "R15": "The pixel shot is of the root alone: for the shot only, on both sides, every element that is neither the root, inside it, nor one of its ancestors is made visibility:hidden and restored afterwards (layout untouched; the root's own fixed or sticky descendants stay): the comparison is of the root, the shell around it belongs to the product.",
+    "R16": "An sRGB colour is equal in rgb()/rgba() and color(srgb …) notation: 8-bit channels (a half rounds up), alpha as its 8-bit value to two decimals; in the colour properties and box-shadow, and in a background-image gradient only when every colour that is not fully transparent has the same channels (with two colours the notation picks the interpolation space); other colour spaces, values outside 0–1 and custom properties are compared as written."
   },
   "pages": {
     "W1": { "rule": "data-fd-surface=\"app|website|phone|email\" on <html> or one element is an ordinary data-* attribute with a value (A9); Fire has no script for it; the markup lint reads it (surface-mismatch, a warning) and --surface sets it for files that declare none", "lit": "in index.html", "react": "a static prop on <html> in the root layout, beside suppressHydrationWarning (N3)", "vue": "in index.html", "check": ["R"] },

@@ -85,7 +85,7 @@ scripts/
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
 `./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.12.1`), and so do the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.12.2`), and so do the
 starters in this repository, each locked to the release it ships in (`scripts/pin-starters.mjs`), so a starter copied
 out, or installed with `npm ci` anywhere, gets the same Fire. In the repository, `npm install --no-save ../..` in a
 starter tries it against the working copy without changing its `package.json` or lockfile.
@@ -240,7 +240,7 @@ base class holds the shared rules for future elements. Elements are registered b
   screen running in its framework): the Fire nodes' structure (framework wrappers, comments and framework attributes
   ignored), their computed styles, and a pixel comparison with animations frozen, at 1440 and 375 wide, light and
   dark. Output JSON with every difference; exit code 1 beyond the tolerance. Fire runs it on every starter; an exporter can run
-  it on every export. What it must normalise for the rules in `spec/EXPORT.md` to hold is its section 16 (R1 to R15).
+  it on every export. What it must normalise for the rules in `spec/EXPORT.md` to hold is its section 16 (R1 to R16).
 
 ## 8. Other tools
 

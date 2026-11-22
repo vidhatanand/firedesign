@@ -202,6 +202,55 @@ for (const engine of ['chromium', 'firefox', 'webkit']) {
   });
 }
 
+test('compareTrees: one sRGB colour in two notations is equal, another colour is not (R16)', () => {
+  const diff = (ref, cand, prop = 'color') => compareTrees([node('i', {}, [], { styles: { [prop]: ref } })], [node('i', {}, [], { styles: { [prop]: cand } })]).length;
+  const mix = (n, a) => `color(srgb ${[n, n, n].map((x) => Number((x / 255).toPrecision(6))).join(' ')}${a === undefined ? '' : ` / ${a}`})`;
+  // the same colour: every level, every half level as six printed digits leave it, translucent, inside a shadow
+  for (let n = 0; n < 256; n++) {
+    assert.equal(diff(`rgb(${n}, ${n}, ${n})`, mix(n)), 0, `level ${n}`);
+    if (n < 255) assert.equal(diff(`rgb(${n + 1}, ${n + 1}, ${n + 1})`, mix(n + 0.5)), 0, `half ${n}`);
+  }
+  assert.equal(diff('rgba(38, 38, 38, 0.67)', 'color(srgb 0.14902 0.14902 0.14902 / 0.67)'), 0);
+  assert.equal(diff('rgba(38, 38, 38, 0.016)', mix(38, 0.014)), 0);   // alpha stored as a byte
+  assert.equal(diff('rgba(38, 38, 38, 0.06)', mix(38, 0.055)), 0);    // two decimals, as before
+  assert.equal(diff('rgb(38, 38, 38)', mix(38, 0.999)), 0);
+  assert.equal(diff('rgba(0, 0, 0, 0.3) 0px 1px 2px 0px', `${mix(0, 0.3)} 0px 1px 2px 0px`, 'box-shadow'), 0);
+  // another colour
+  assert.equal(diff('rgb(38, 38, 38)', mix(39)), 1);
+  assert.equal(diff(mix(38), mix(39)), 1);   // num() alone hid this
+  assert.equal(diff('rgba(38, 38, 38, 0.67)', mix(38, 0.68)), 1);
+  assert.equal(diff('rgb(38, 38, 38)', 'color(display-p3 0.14902 0.14902 0.14902)'), 1);
+  assert.equal(diff('rgb(255, 0, 0)', 'color(srgb 1.2 0 0)'), 1);
+  assert.equal(diff('rgb(0, 0, 0)', 'color(srgb -0.1 0 0)'), 1);
+});
+
+test('compareTrees: a gradient drops the notation only when it has one colour (R16)', () => {
+  const diff = (ref, cand) => compareTrees([node('i', {}, [], { styles: { 'background-image': ref } })], [node('i', {}, [], { styles: { 'background-image': cand } })]).length;
+  const fade = (a, b = 'rgba(0, 0, 0, 0)') => `linear-gradient(90deg, ${a}, ${b})`;
+  assert.equal(diff(fade('rgba(250, 93, 25, 0.16)'), fade('color(srgb 0.980392 0.364706 0.0980392 / 0.16)')), 0);
+  assert.equal(diff(fade('rgba(0, 0, 0, 0.06)', 'rgba(0, 0, 0, 0.1)'), fade('color(srgb 0 0 0 / 0.06)', 'color(srgb 0 0 0 / 0.1)')), 0);
+  // two colours: color(srgb) interpolates in Oklab, rgb() in sRGB
+  assert.equal(diff(fade('rgb(255, 0, 0)', 'rgb(0, 0, 255)'), fade('color(srgb 1 0 0)', 'color(srgb 0 0 1)')), 1);
+  assert.equal(diff(fade('rgb(255, 0, 0)', 'rgb(0, 0, 255)'), fade('color(srgb 1 0 0)', 'rgb(0, 0, 255)')), 1);
+  assert.equal(diff(fade('rgb(255, 0, 0)', 'oklab(0.5 0 0)'), fade('color(srgb 1 0 0)', 'oklab(0.5 0 0)')), 1);
+});
+
+for (const engine of ['chromium', 'firefox', 'webkit']) {
+  test(`${engine}: rgb() and color-mix(in srgb) of one colour are equal, in a shadow and a gradient of one colour too (R16)`, () => {
+    const r = pair(engine, 'colour.html', 'colour-mix.html');
+    assert.equal(r.status, 0, r.stdout);
+    assert.equal(r.report.runs.length, 4);
+  });
+
+  test(`${engine}: a channel, an alpha or a gradient's second colour that differs is a difference (R16)`, () => {
+    const r = pair(engine, 'colour.html', 'colour-wrong.html', ['--widths', '1440', '--themes', 'light']);
+    assert.equal(r.status, 1);
+    const at = (i, prop) => r.report.runs[0].styles.some((d) => d.path.endsWith(`[${i}]`) && d.property === prop);
+    assert.ok(at(0, 'color') && at(1, 'background-color') && at(3, 'box-shadow') && at(4, 'background-image') && at(5, 'background-image'), r.stdout);
+    assert.ok(!at(2, 'background-color'), r.stdout);
+  });
+}
+
 test('pixels: chrome painted over the root from outside is not part of the shot, a different root still fails (R15)', () => {
   const root = ['--ref-root', '.fd-page', '--cand-root', '.fd-page', '--widths', '375', '--themes', 'light'];
   const bar = (cand) => spawnSync(process.execPath, [script, '--ref', page('bar.html'), '--cand', cand, '--engines', 'chromium', '--json', path.join(tmp, `${path.basename(cand)}.json`), ...root], { encoding: 'utf8' });

@@ -22,9 +22,11 @@ node scripts/gate.mjs --check
 node scripts/looks-check.mjs --check
 ```
 
-- On Linux add `--with-deps` to the browser install.
+- On Linux add `--with-deps` to the browser install. If a download fails, run the install again.
 - `npm run check` skips five tests until each starter has run `npm ci` (`starters/lit-vite`, `starters/next`,
   `starters/vue-vite`).
+- If the gate reports only `templates/record: look changed at w375`, run it again (up to a few times): it can capture
+  that template while it is still loading. Do not rewrite the fingerprints for it, whatever the message advises.
 - The gate's screenshots were taken on macOS on Apple silicon. If only looks drift on another system, compare with the
   last tag before touching `contract/fingerprints.json`.
 - `npm run dev` serves the docs; the templates are listed at <http://localhost:4747/templates/index.html>.

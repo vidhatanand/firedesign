@@ -2,6 +2,33 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.12.3 — 22 Nov 2026
+
+**`boot.js` goes after the stylesheets.** Before them, Chromium can style a page without Fire's CSS when someone
+moves between pages in a tab, and the buttons then fade in from link blue for 160 ms. No class, attribute value,
+token, event or behaviour export changed.
+
+### What a product needs to do
+
+Refreshing Fire does not fix a page: its `<head>` has to change.
+
+- **A page with `boot.js`:** move its `<script>` after every stylesheet link in `<head>`. The saved theme is still on
+  `<html>` before the first paint: that paint waits for the stylesheets anyway.
+- **A page without `boot.js`:** add it there, or another classic script with no `async` or `defer`. A module or
+  deferred script does not prevent the fade.
+- **A Vite app:** Vite adds the built stylesheet at the end of `<head>`, so the script has to move at build time: copy
+  `bootLast` from `starters/lit-vite/vite.config.ts` or `starters/vue-vite/vite.config.ts`.
+- **A Next app on the starter's layout:** nothing. Next already puts its stylesheets first.
+
+### Fixed
+
+- The templates, the docs, the setup in `GUIDE.md` and `README.md`, and the Lit and Vue builds have that order.
+  `spec/EXPORT.md` H5 and N2 state it, and `scripts/test/load-order.test.mjs` and each starter's check hold it.
+- The template listing and the Blank template's card no longer say to copy a template: templates are references, read
+  and built fresh (0.12.1 missed these two).
+- The image ground's contrast test measures at rest. It could read a button's colour part of the way through a
+  transition and fail, or pass, on a colour that is not the button's.
+
 ## 0.12.2 — 22 Nov 2026
 
 **render-equal compares an sRGB colour by what it is, not how it is written (R16).** Only the check, its spec and its

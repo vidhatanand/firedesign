@@ -23,7 +23,7 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 
 const item = (value, label, extra = '') => `<button class="fd-menu-item" type="button" data-value="${value}"${extra}><span class="fd-menu-item-label">${label}</span><span class="fd-filters-count"></span></button>`;
 const PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>filters test</title><script src="/fire/boot.js"></script><link rel="stylesheet" href="/fire/fire.css"><script type="module" src="/fire/fire.js"></script></head>
+<title>filters test</title><link rel="stylesheet" href="/fire/fire.css"><script src="/fire/boot.js"></script><script type="module" src="/fire/fire.js"></script></head>
 <body><main class="fd-cq">
 <input id="before" aria-label="Before">
 <div class="fd-filters" id="f" data-fd-for="#items" data-fd-url data-now="2026-11-18">

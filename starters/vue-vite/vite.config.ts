@@ -9,6 +9,21 @@ const htmlAttributes = (): Plugin => ({
   transformIndexHtml: (html) => html.replace('<html lang="en">', () => `<html lang="en"${Object.entries(themeAttributes).map(([k, v]) => ` ${k}="${v}"`).join('')}>`),
 });
 
+/** boot.js goes at the end of <head>, after the stylesheet Vite adds there (EXPORT H5): it waits for that stylesheet,
+ *  so nothing in the body is styled without it. */
+const bootLast = (): Plugin => ({
+  name: 'fire-boot-last',
+  apply: 'build',
+  transformIndexHtml: {
+    order: 'post',
+    handler(html) {
+      const tag = /<script src="[^"]*fire\/boot\.js"><\/script>\r?\n/.exec(html)?.[0];
+      if (!tag) throw new Error('index.html: no boot.js script to put after the stylesheets');
+      return html.replace(tag, '').replace('</head>', (end) => tag + end);
+    },
+  },
+});
+
 /** The production build runs under a strict Content Security Policy (EXPORT P1): no inline script, no inline style.
  *  The development server injects <style> elements for CSS (P2), so the policy is only added to the build. */
 const csp = (): Plugin => ({
@@ -32,7 +47,7 @@ const slim = (file: string) => decodeURIComponent(new URL(`./.fire-slim/${file}`
 
 export default defineConfig(({ command, mode }) => ({
   // fireVueOptions: `fd-` tags are custom elements, and whitespace between inline elements is kept (EXPORT C8, T1).
-  plugins: [vue(fireVueOptions()), htmlAttributes(), csp()],
+  plugins: [vue(fireVueOptions()), htmlAttributes(), csp(), bootLast()],
   resolve: command === 'build' && mode !== 'full' ? { alias: [
     { find: /^fire-design$/, replacement: slim('fire.js') },
     { find: /^fire-design\/css$/, replacement: slim('fire.css') },

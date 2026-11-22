@@ -10,6 +10,8 @@ import theme from './src/fire-theme.attributes.json';
  *     Vite's dev server injects <style> elements, so the policy is only added to `vite build`.
  *  3. In the production build, a preload of the one font file the first paint needs: the theme's interface face
  *     at the regular weight, found from what `fire slim` reports (.fire-slim/slim.json and its fire.css).
+ *  4. In the production build, boot.js at the end of <head>, after the stylesheet Vite adds there (spec H5): it
+ *     waits for that stylesheet, so nothing in the body is styled without it.
  * And the production build uses the slim Fire that scripts/prepare.mjs writes with `fire slim` (.fire-slim/: only
  * the parts, modules and fonts this app uses); `npm run dev` keeps the whole of Fire.
  *
@@ -30,6 +32,13 @@ const CSP = [
 
 const slim = (file: string) => decodeURIComponent(new URL(`./.fire-slim/${file}`, import.meta.url).pathname);
 
+/** boot.js, moved to the end of <head>. */
+function bootLast(html: string) {
+  const tag = /[ \t]*<script src="[^"]*fire\/boot\.js"><\/script>\r?\n/.exec(html)?.[0];
+  if (!tag) throw new Error('index.html: no boot.js script to put after the stylesheets');
+  return html.replace(tag, '').replace(/[ \t]*<\/head>/, (end) => tag + end);
+}
+
 function fireHtml(): Plugin {
   let base = '/';
   return {
@@ -45,7 +54,8 @@ function fireHtml(): Plugin {
         const asset = font && Object.values(ctx.bundle!).find((out) => out.type === 'asset' && out.originalFileNames.some((name) => name.endsWith(`/${font}`)));
         if (asset) tags.push({ tag: 'link', injectTo: 'head', attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href: base + asset.fileName, crossorigin: true } });
         else if (ctx.bundle) this.warn('no font to preload: fire slim reports no Latin regular face for the theme');
-        return { html: html.replace('<html lang="en">', `<html lang="en"${onHtml}>`).replace('<!-- csp -->\n', policy), tags };
+        const out = html.replace('<html lang="en">', `<html lang="en"${onHtml}>`).replace('<!-- csp -->\n', policy);
+        return { html: ctx.server ? out : bootLast(out), tags };
       },
     },
   };

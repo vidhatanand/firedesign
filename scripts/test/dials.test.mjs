@@ -23,7 +23,7 @@ const SPECIMEN = `
   <div class="fd-menu" data-static-demo role="menu" aria-label="Monitor" id="menu"><button class="fd-menu-item" role="menuitem">Pause</button></div>`;
 
 function page(head = '<html>') {
-  return `<!doctype html>${head}<head><meta charset="utf-8"><script src="/fire/boot.js"></script><link rel="stylesheet" href="/fire/fire.css"></head><body>${SPECIMEN}<script type="module" src="/fire/fire.js"></script></body></html>`;
+  return `<!doctype html>${head}<head><meta charset="utf-8"><link rel="stylesheet" href="/fire/fire.css"><script src="/fire/boot.js"></script></head><body>${SPECIMEN}<script type="module" src="/fire/fire.js"></script></body></html>`;
 }
 
 async function withPage(fn) {

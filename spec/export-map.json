@@ -40,7 +40,7 @@
     "pages": "Page-level rules added in 0.8 (EXPORT.md section 17): id → { rule, lit, react, vue, check }."
   },
   "version": 1,
-  "fire": "0.12.2",
+  "fire": "0.12.3",
   "targets": {
     "html": { "name": "Plain HTML", "versions": {}, "notes": "Fire markup as in docs/ and templates/." },
     "lit": { "name": "Lit", "versions": { "lit": "3.3.3" }, "notes": "Light DOM components (createRenderRoot() { return this; })." },
@@ -296,7 +296,7 @@
   },
   "next": {
     "N1": { "rule": "Server components render plain Fire markup; Fire's modules load in the browser only, after hydration: import('fire-design') inside useEffect in a client component", "check": ["E3", "E9"] },
-    "N2": { "rule": "boot.js: a blocking <script src=\"/fire/boot.js\" nonce={nonce} /> in the root layout <head>, served from public/fire/boot.js (copied from node_modules/fire-design/fire/boot.js before build); not next/script", "check": ["E9", "A"] },
+    "N2": { "rule": "boot.js: a blocking <script src=\"/fire/boot.js\" nonce={nonce} /> in the root layout <head>, after the stylesheets (Next puts those it imports first), served from public/fire/boot.js (copied from node_modules/fire-design/fire/boot.js before build); not next/script", "check": ["E9", "A"] },
     "N3": { "rule": "<html {...themeAttributes} suppressHydrationWarning>", "devLogs": "Next 16 dev logs attribute hydration mismatches to the browser console, text and structure mismatches only to its overlay and terminal ([browser] lines): a check reads both", "check": ["E9"] },
     "N4": { "rule": "suppressHydrationWarning on every server-rendered element with data-fd-vars; a check reads the console and the dev server output (N3)", "check": ["E3", "E9"] },
     "N5": { "rule": "JSON scripts via dangerouslySetInnerHTML and jsonForScript", "check": ["E3"] },
@@ -312,7 +312,7 @@
     "H2": { "target": "html", "rule": "<link rel=\"stylesheet\" href=\"fire/fire.css\"><link rel=\"stylesheet\" href=\"theme.css\"> and the attributes on <html>", "check": ["A"] },
     "H3": { "target": "lit, vue", "rule": "import 'fire-design/css'; import './fire-theme.css'; in main.ts; attributes on <html> in index.html", "check": ["A"] },
     "H4": { "target": "react", "rule": "the same imports in app/layout.tsx; attributes spread on <html> (N3); the browserslist of N6 keeps light-dark() as written", "check": ["A"] },
-    "H5": { "rule": "a look chosen at run time goes through setTheme, setDensity and tweaks.js; boot.js restores it before first paint", "check": ["R"] }
+    "H5": { "rule": "a look chosen at run time goes through setTheme, setDensity and tweaks.js; boot.js restores it before first paint and comes after every stylesheet link in <head> (Vite adds the built CSS link last: the starters move boot.js after it)", "check": ["R"] }
   },
   "csp": {
     "P1": { "target": "html, lit, vue (production)", "policy": "script-src 'self'; style-src 'self'", "rule": "works: Vite emits external module scripts and stylesheet links; Fire uses CSSOM setProperty; JSON scripts need no nonce", "webkitArtefact": "Playwright's WebKit reports every <select> under a strict style-src as a style-src-attr violation (empty sample) with a console error that begins \"Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline'\", even on a bare page; a starter's CSP check may ignore that report, by that exact message only, in WebKit only", "check": ["E10"] },

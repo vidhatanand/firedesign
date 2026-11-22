@@ -23,11 +23,12 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 2. Load it on every page:
 
 ```html
-<script src="/fire/boot.js"></script>              <!-- before first paint: restores saved theme and tweaks, applies data-fd-vars -->
 <link rel="stylesheet" href="/fire/fire.css">
+<script src="/fire/boot.js"></script>              <!-- after the stylesheets, before first paint: restores saved theme and tweaks, applies data-fd-vars -->
 <script type="module" src="/fire/fire.js"></script>
 ```
 
+   Keep `boot.js` in `<head>`, after every stylesheet link (your own too). A classic script waits for the stylesheets before it, so the body is not parsed, and cannot be styled, without them. Before them, Chromium can style the page too early when you move between pages in a tab, and buttons fade in from link blue. A page without `boot.js` needs another classic script there, with no `async` or `defer`; a module script does not wait.
 3. Serve over HTTP. ES modules do not load from `file://`.
 4. Copy `GUIDE.md`, `WRITING.md`, `AGENT-RULES.md`, `docs/_ref/VOCABULARY.md` and `docs/_ref/CLASSES.md` into the project too (for example into `fire-docs/`), so that people and agents working there can read the rules and look up class names without opening this repository.
 
@@ -39,7 +40,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 | React and Next.js | `starters/next` | `fire-design/react`: `FireIcon`, `FireChart`, `FireCode`, `FireTexture`, `useFire`, `useFireEvent`, `loadFire` and the exporter's helpers `jsonForScript`, `ccAttr`, `ccText`, `ccTruthy` (`spec/EXPORT.md` section 0) |
 | Vue | `starters/vue-vite` | `fire-design/vue`: the plugin (default export, `Fire`), the `v-fire` directive (`fireDirective`), `fireRouter()`, `fireVueOptions()` for `vite.config` and `isFireElement()` |
 
-Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.12.2"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
+Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.12.3"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
 
 **The Lit starter is the place to start an app.** Add a screen as a route in `src/routes.ts` with
 `load: () => import(…)` and import it nowhere else, so the build gives it its own file. Write links to app pages with

@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     // boot.js rewrites <html>'s attributes before React hydrates (saved theme, density, tweaks): N3.
     <html lang="en" data-fd-surface="app" data-fd-transition="fade" {...theme} suppressHydrationWarning>
       <head>
-        {/* Classic and blocking, so the saved look is on <html> in the first paint (N2). Not next/script. */}
+        {/* Classic and blocking, so the saved look is on <html> in the first paint (N2); Next puts the stylesheets before it. Not next/script. */}
         <script src="/fire/boot.js" nonce={nonce} />
       </head>
       <body>

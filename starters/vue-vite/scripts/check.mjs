@@ -70,6 +70,8 @@ try {
   if (!/<meta http-equiv="Content-Security-Policy" content="[^"]*script-src 'self'; style-src 'self'/.test(index)) fail('dist/index.html has no strict Content-Security-Policy');
   if (/unsafe-inline|unsafe-eval/.test(index)) fail('the policy allows unsafe-inline or unsafe-eval');
   if (/<style\b|\sstyle=|<script(?![^>]*\bsrc=)/.test(index.replace(/<script[^>]*type="application\/json"[^>]*>[\s\S]*?<\/script>/g, ''))) fail('dist/index.html has an inline script or style');
+  const css = index.lastIndexOf('rel="stylesheet"'), boot = index.search(/<script src="[^"]*fire\/boot\.js"><\/script>/);
+  if (css < 0 || boot < css || boot > index.indexOf('</head>')) fail('dist/index.html: boot.js is not in <head> after the stylesheet (EXPORT H5)');
   const sizes = {};
   for (const f of ['assets']) {
     const dir = path.join(dist, f);

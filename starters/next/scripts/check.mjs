@@ -156,6 +156,7 @@ async function checkServedHtml(base) {
     else {
       if (/\s(async|defer)\b/.test(boot[0]) || /type="module"/.test(boot[0])) problems.push(`boot.js is not a blocking classic script: ${boot[0]}`);
       if (!boot[0].includes(`nonce="${nonce}"`)) problems.push('boot.js lacks the nonce');
+      if (head.lastIndexOf('rel="stylesheet"') > head.indexOf(boot[0])) problems.push('boot.js is before a stylesheet');
     }
     for (const m of html.matchAll(/<script\b([^>]*)>/g)) {
       const attrs = m[1];

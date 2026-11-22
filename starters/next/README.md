@@ -36,7 +36,7 @@ that its screens render the same as Fire's templates.
 ## Start a project from it
 
 1. Copy this folder. Its `package.json` already depends on the release,
-   `"fire-design": "github:vidhatanand/firedesign#v0.12.2"`, locked in `package-lock.json`. Delete the `check` script
+   `"fire-design": "github:vidhatanand/firedesign#v0.12.3"`, locked in `package-lock.json`. Delete the `check` script
    (it compares against the templates in Fire's repository).
 2. `npm ci`, then `npm run dev`. `next.config.ts` sets Turbopack's root only when Fire is linked from outside the
    project, and its rewrites only serve the templates' `*.html` links: remove them when your screens use routes.

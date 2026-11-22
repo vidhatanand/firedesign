@@ -2,7 +2,8 @@
 // and the imagery dial.
 //   - a picture's place is held before it loads (data-ratio, or its own width and height)
 //   - the image ground's text keeps 4.5:1 over a white and a black picture, both scrims, both schemes, 1440 and 375,
-//     measured from pixels (the text is made transparent, the section shot, each line compared with what is under it)
+//     measured from pixels at rest (transitions off, then the text is made transparent, the section shot, each line
+//     compared with what is under it)
 //   - dials.imagery through the theme record (validate, expand, record round trip, themeToCss) and the Tweaks panel
 //     (the attribute on <html>, toTheme, reset), and a picture's own data-treatment winning over the dial
 //   - the lint's img-attrs warning
@@ -184,6 +185,8 @@ test('browser: ratio before load, the ground over white and black, the dial and 
       for (const theme of ['light', 'dark']) for (const pic of ['white', 'black']) for (const scrim of ['dark', 'light']) {
         await p.goto(`${server.base}/g-${theme}-${pic}-${scrim}.html`);
         await p.waitForFunction(() => document.documentElement.hasAttribute('data-fd-ready') && [...document.images].every((i) => i.complete) && document.fonts.status === 'loaded');
+        // at rest, before any colour is read: a transition still running would be measured part of the way
+        await p.addStyleTag({ content: '#sec, #sec *, #sec *::before, #sec *::after { transition: none !important; }' });
         const lines = await p.evaluate(() => {
           const cv = document.createElement('canvas'); cv.width = cv.height = 1; const cx = cv.getContext('2d', { willReadFrequently: true });
           const rgba = (c) => { cx.clearRect(0, 0, 1, 1); cx.fillStyle = c; cx.fillRect(0, 0, 1, 1); return [...cx.getImageData(0, 0, 1, 1).data]; };
@@ -199,7 +202,7 @@ test('browser: ratio before load, the ground over white and black, the dial and 
           return out;
         });
         assert.ok(lines.length >= 6, `the text lines were found (${lines.length})`);
-        await p.addStyleTag({ content: '#sec, #sec * { color: transparent !important; transition: none !important; } #sec svg { visibility: hidden }' });
+        await p.addStyleTag({ content: '#sec, #sec * { color: transparent !important; } #sec svg { visibility: hidden }' });
         const png = PNG.sync.read(await p.screenshot({ fullPage: true }));
         for (const ln of lines) {
           const [tr, tg, tb, ta] = ln.color; const a = ta / 255;

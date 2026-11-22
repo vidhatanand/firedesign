@@ -65,7 +65,7 @@ const APP = (attrs) => `<div class="fd-app" data-sidebar="expanded"${attrs}>
   <button class="fd-fab fd-app-fab" id="fab" type="button" aria-label="Chat with support"><i data-icon="message-circle"></i></button>
 </div>`;
 const page = (attrs) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tabbar test</title><script src="/fire/boot.js"></script><link rel="stylesheet" href="/fire/fire.css"><script type="module" src="/fire/fire.js"></script></head>
+<title>tabbar test</title><link rel="stylesheet" href="/fire/fire.css"><script src="/fire/boot.js"></script><script type="module" src="/fire/fire.js"></script></head>
 <body>${APP(attrs)}</body></html>`;
 
 async function serve() {

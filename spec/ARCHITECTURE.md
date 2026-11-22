@@ -24,7 +24,7 @@ and says so in its report.
 ```
 fire/
   fire.css, fire.js    everything in one import each; fire.d.ts: hand-written types for the fire.js exports, the fd:* event map and the theme record
-  boot.js              a classic script for <head>: restores the saved look before the first paint
+  boot.js              a classic script for <head>, after the stylesheets: restores the saved look before the first paint
   transitions.css      the opt-in page-transition rule (0.8); not imported by fire.css
   components/*.css     one file per family, including site.css (websites, 0.8) and transitions.css (named regions, 0.8)
   js/*.js              behaviour per family; core.js, icons.js, theme.js (the theme record, pure ES module: Node and browser),
@@ -85,7 +85,7 @@ scripts/
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
 `./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.12.2`), and so do the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.12.3`), and so do the
 starters in this repository, each locked to the release it ships in (`scripts/pin-starters.mjs`), so a starter copied
 out, or installed with `npm ci` anywhere, gets the same Fire. In the repository, `npm install --no-save ../..` in a
 starter tries it against the working copy without changing its `package.json` or lockfile.

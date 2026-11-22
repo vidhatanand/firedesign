@@ -62,8 +62,8 @@ Fire's HTML and CSS are the contract. Everything else is built on them, generate
 ## Use it
 
 ```html
-<script src="fire/boot.js"></script>
 <link rel="stylesheet" href="fire/fire.css">
+<script src="fire/boot.js"></script>
 <script type="module" src="fire/fire.js"></script>
 
 <div class="fd-stack fd-column" data-gap="4">
@@ -132,7 +132,7 @@ A page declares where it is used with `data-fd-surface="app|website|phone|email"
 | `fire/js/*.js` | Behaviour per family as ES modules, plus `core.js` (shared helpers), `icons.js` (274 Lucide icons), `initial.js` (the first-letter mark, no DOM), `site.js` (the website family), `transitions.js` (page transitions), `palettes.js` (palette data and the tone engine), `palette-rules.js` (the contrast rules every palette meets), `theme.js` (the theme record) and `tweaks.js` (the Tweaks panel). |
 | `fire/email/` | `email.js`: transactional email as HTML and text. |
 | `fire/transitions.css` | The opt-in stylesheet for page transitions between pages; it is not part of `fire.css`. |
-| `fire/boot.js` | A small plain script for `<head>` that restores the saved theme and tweaks before the first paint. |
+| `fire/boot.js` | A small plain script for `<head>`, after the stylesheets, that restores the saved theme and tweaks before the first paint and keeps the page from being styled without its CSS. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site: 27 pages. Start at `docs/index.html`. `docs/_ref/` holds the class reference (`CLASSES.md`, generated) and the vocabulary. |
 | `templates/` | 42 screens for Ember: the app, a long create form, decisions, settings, an audit log, status pages, a record hub, sign-in (split and centred), onboarding, a support page, ten website pages (`site-*.html`, with `site-shell.js`: home, pricing, customers, changelog, blog, post, resources, report, research, newsletter), a documentation site, and the shell as plain markup. 39 have states that open with `?state=` or the control their card names. `templates/media/` holds ten generated placeholder pictures. Start at `templates/index.html`. |

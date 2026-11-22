@@ -61,7 +61,7 @@ const QUAD = {
   ],
 };
 const PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>shell test</title><script src="/fire/boot.js"></script><link rel="stylesheet" href="/fire/fire.css">
+<title>shell test</title><link rel="stylesheet" href="/fire/fire.css"><script src="/fire/boot.js"></script>
 <script type="module" src="/fire/fire.js"></script><script type="module" src="/fire/elements.js"></script></head>
 <body>
 <div id="q-markup" class="fd-chart" data-fd-chart="quadrant" data-height="360"><script type="application/json">${JSON.stringify(QUAD)}</script></div>

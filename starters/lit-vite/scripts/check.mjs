@@ -94,6 +94,12 @@ if (!process.argv.includes('--skip-build')) {
   if (built.status) { console.error('build failed'); process.exit(1); }
 }
 
+for (const dist of [realDist, checkDist]) {
+  const html = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+  const css = html.lastIndexOf('rel="stylesheet"'), boot = html.search(/<script src="[^"]*fire\/boot\.js"><\/script>/);
+  if (css < 0 || boot < css || boot > html.indexOf('</head>')) fail(`${path.relative(root, dist)}/index.html: boot.js is not in <head> after the stylesheet (spec H5)`);
+}
+
 /* ------------------------------------------------------------------ 1b. sizes and budgets */
 
 /** The module of the first route a visitor sees (`/` redirects to /overview). */

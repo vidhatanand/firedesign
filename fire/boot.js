@@ -1,6 +1,10 @@
 /* Fire boot — optional, and the only script that is not a module.
  *
- *   <script src="fire/boot.js"></script>      in <head>, before the stylesheet
+ *   <script src="fire/boot.js"></script>      in <head>, after every stylesheet link
+ *
+ * After them: a classic script waits for the stylesheets before it, so there is no body, and nothing to style,
+ * until they have loaded. Before them, Chromium can style the body without Fire's CSS on a navigation within a tab,
+ * and buttons then fade in from link blue. It still runs before the first paint, which waits for the stylesheets.
  *
  * Module scripts run after the first paint, so a saved theme, density or set of tweaks would flash in.
  * This runs first and puts the saved look on <html> straight away: the theme and density that core.js

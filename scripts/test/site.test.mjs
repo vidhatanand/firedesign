@@ -17,7 +17,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.json': 'application/json' };
 
 const PAGE = `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>site test</title><script src="/fire/boot.js"></script><link rel="stylesheet" href="/fire/fire.css">
+<title>site test</title><link rel="stylesheet" href="/fire/fire.css"><script src="/fire/boot.js"></script>
 <script type="module" src="/fire/fire.js"></script></head>
 <body>
 <div class="fd-site" id="site">

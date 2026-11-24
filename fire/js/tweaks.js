@@ -54,6 +54,7 @@
  *  textSize  sm · md · lg                   data-text-size
  *  contrast  default · high                 data-contrast="high"
  *  motion    off · default · slow           --fd-motion 0 · 1 · 1.75
+ *            (with the reduced-motion setting on, the dial has no effect: fire/tokens.css keeps --fd-motion at 0)
  *  texture   0…1.5 (step .05)               --fd-texture
  *  surfaces  objects · flat · outlined      data-surfaces on <html>     (the Structure section; tokens.css sets the
  *  elevation none · soft · lifted           data-elevation               semantic tokens each value moves)

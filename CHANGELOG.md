@@ -2,6 +2,30 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## 0.12.4 — 24 Nov 2026
+
+**A person's reduced-motion setting wins over every look, and removing a logo stops its upload.** Two bug fixes. No
+class, attribute value, token, event or behaviour export changed.
+
+### Fixed
+
+- **Reduced motion.** With `prefers-reduced-motion: reduce`, setting the motion dial to `slow` brought motion back:
+  `--fd-motion` read 1.75 and transitions took 0.28 s. It happened through a theme written by `themeToCss`, the Tweaks
+  panel, a named look (Folio, Gentle) and a rule of a product's own, because each sets `--fd-motion` after Fire's rule
+  or inline on `<html>`. The rule in `fire/tokens.css` now keeps `--fd-motion` at 0 and the press scale at 1 over all
+  of them. `scripts/test/reduced-motion.test.mjs` holds it for the four ways in, in Chromium, Firefox and WebKit.
+- **Logo field.** Pressing Remove while a logo uploaded cleared the tile, and the upload then wrote `uploading` and
+  `done` back with no picture. A second file left two uploads running, and a refused file's `error` was overwritten.
+  Each simulated upload is now tied to its row or zone: Remove, a refused file and a new file end the one in progress,
+  and it also stops when something else has set the row's state.
+
+### For products refreshing from 0.12.3
+
+- Nothing to change in markup, styles or scripts.
+- A tool that mirrors Fire's cascade for themes (it writes `--fd-motion` itself) needs the same rule: under reduced
+  motion, `--fd-motion: 0` must beat whatever the theme sets.
+- For someone with reduced motion on, the Tweaks panel's motion control now has no effect. The panel does not say so.
+
 ## 0.12.3 — 22 Nov 2026
 
 **`boot.js` goes after the stylesheets.** Before them, Chromium can style a page without Fire's CSS when someone

@@ -1426,6 +1426,7 @@ function logoPreview(zone, file) {
 function setLogo(zone, files) {
   const file = [...files][0];
   if (!file) return;
+  stopUpload(zone);   // an accepted file starts its own; a refused one leaves an error that nothing may overwrite
   const problem = acceptProblem(zone, file);
   if (problem) { zone.dataset.state = 'error'; logoError(zone, problem); return; }
   logoError(zone, '');
@@ -1437,6 +1438,7 @@ function setLogo(zone, files) {
   if (proceed) simulateUpload(zone);
 }
 function clearLogo(zone) {
+  stopUpload(zone);
   logoPreview(zone, null);
   zone.fdFile = null;
   logoError(zone, '');
@@ -1468,11 +1470,17 @@ export function addFiles(zone, files) {
   if (proceed) rows.forEach(simulateUpload);
 }
 
+/** End the simulated upload running on a row or a logo zone, if one is: its timer finds another run and stops. */
+function stopUpload(row) { row.fdUpload = (row.fdUpload || 0) + 1; }
 function simulateUpload(row) {
+  stopUpload(row);
+  const run = row.fdUpload;
   let pct = 0;
   const speed = 6 + Math.random() * 10;
   const tick = () => {
-    if (!row.isConnected) return;
+    // A logo zone stays in the page when its picture is removed or replaced, so being connected is not enough: the
+    // run must still be the row's own, and the row still uploading (a page may have set done or error itself).
+    if (!row.isConnected || row.fdUpload !== run || row.dataset.state !== 'uploading') return;
     pct = Math.min(100, pct + speed * (0.5 + Math.random()));
     setFileProgress(row, pct);
     if (pct < 100) setTimeout(tick, 180 + Math.random() * 160);

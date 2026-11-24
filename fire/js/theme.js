@@ -51,6 +51,7 @@
  * The dials map to exactly what the Tweaks panel sets (fire/js/tweaks.js inlineProps and apply):
  *   corners   0…2     --fd-radius-scale          lines     1 · 1.5 · 2      --fd-hairline (px)
  *   motion    off · default · slow → --fd-motion 0 · 1 · 1.75
+ *             (a person's reduced-motion setting wins over the dial: fire/tokens.css keeps --fd-motion at 0 for them)
  *   texture   0…1.5   --fd-texture               density   compact · comfortable · spacious → data-density
  *   textSize  sm · md · lg → data-text-size      contrast  default · high → data-contrast="high"
  *   The structural dials are attributes on <html> (tokens.css sets the semantic tokens for each value):
@@ -141,7 +142,7 @@ export const INPUT_TOKENS = Object.freeze([
 ]);
 export const NEUTRALS = Object.freeze(['pure', 'cool', 'warm', 'tinted']);
 export const LABELS = Object.freeze(['white', 'dark']);
-export const FIRE_VERSION = '0.12.3';
+export const FIRE_VERSION = '0.12.4';
 
 export const DEFAULT_RECORD = Object.freeze({
   contract: CONTRACT, palette: DEFAULT_PALETTE, tone: TONE_DEFAULT, type: DEFAULT_TYPEFACE, dials: DIAL_DEFAULTS,

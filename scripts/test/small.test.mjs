@@ -253,6 +253,55 @@ test('logo field: Upload opens the picker, a file previews at once, errors are f
   await page.close();
 });
 
+test('logo field: Remove, a refused file and a second file each stop the upload that was running', { skip }, async () => {
+  const page = await browser.newPage();
+  await open(page, '/docs/forms.html');
+  const sel = '#logo-live-label + [data-layout="logo"]';
+  const zone = page.locator(sel);
+  const state = () => zone.getAttribute('data-state');
+  // The upload shown here is simulated on timers: each step is at most 340 ms after the last, so 1.2 s is three steps.
+  const steps = () => page.waitForTimeout(1200);
+  const pick = (name, mimeType = 'image/png', buffer = PNG) => zone.locator('input[type="file"]').setInputFiles({ name, mimeType, buffer });
+
+  // Remove while it uploads: the tile is back and nothing writes a state again
+  await pick('logo.png');
+  assert.equal(await state(), 'uploading');
+  await zone.locator('[data-fd-file-clear]').click();
+  assert.equal(await state(), null);
+  await steps();
+  assert.equal(await state(), null, 'the removed upload did not come back');
+  assert.equal(await zone.locator('.fd-dropzone-preview > img').count(), 0);
+
+  // a refused file while one uploads: the error stays an error
+  await pick('logo.png');
+  assert.equal(await state(), 'uploading');
+  await pick('notes.txt', 'text/plain', Buffer.from('hello'));
+  assert.equal(await state(), 'error');
+  await steps();
+  assert.equal(await state(), 'error', 'the earlier upload did not overwrite the error');
+  await zone.locator('[data-fd-file-clear]').click();
+
+  // a second file while the first uploads: one upload runs, so the progress never steps back
+  await pick('logo.png');
+  await page.waitForTimeout(700);
+  await page.evaluate((s) => {
+    const z = document.querySelector(s);
+    window.__progress = [];
+    new MutationObserver(() => window.__progress.push(Number(z.style.getPropertyValue('--fd-progress')))).observe(z, { attributes: true, attributeFilter: ['style'] });
+  }, sel);
+  await pick('logo2.png');
+  await page.waitForFunction((s) => document.querySelector(s).dataset.state === 'done', sel);
+  const seen = await page.evaluate(() => window.__progress);
+  // The first upload may write once more before the second file arrives; from the second file's 0 on, one upload runs.
+  const from = seen.lastIndexOf(0);
+  assert.ok(from >= 0, 'the second file starts from nothing');
+  assert.ok(seen.length - from > 2, 'the progress was written');
+  for (let i = from + 1; i < seen.length; i++) assert.ok(seen[i] >= seen[i - 1], `progress went from ${seen[i - 1]} to ${seen[i]}`);
+  await steps();
+  assert.equal(await state(), 'done');
+  await page.close();
+});
+
 test('logo field: cancelling fd:files leaves the upload to the page, which reports with setFileProgress', { skip }, async () => {
   const page = await browser.newPage();
   await open(page, '/docs/forms.html');

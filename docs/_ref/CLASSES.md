@@ -883,7 +883,7 @@ one-line markup of the required structure.
 - Root: `fd-sheet` (on `<dialog>`, never `hidden`), shown at `docs/overlays.html#sheets`
 - Parts: `fd-sheet-bar`, `fd-sheet-body`, `fd-sheet-close`, `fd-sheet-desc`, `fd-sheet-foot`, `fd-sheet-head`, `fd-sheet-section`, `fd-sheet-title` (child of `fd-sheet-bar`)
 - Write: `<dialog class="fd-sheet" id="…" aria-labelledby="…">…</dialog>`
-- On the root: `data-side="bottom|left|right" (or bare)`, `data-size="lg|md"`, `data-static-demo`
+- On the root: `data-modeless`, `data-side="bottom|left|right" (or bare)`, `data-size="lg|md"`, `data-static-demo`
 - On `fd-sheet-close`: `data-size="sm"`
 - On `fd-sheet-foot`: `data-start`
 - State, set by Fire: `data-dragging`, `data-step`

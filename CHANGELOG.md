@@ -2,6 +2,31 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
 
+## Unreleased (next: 0.13.0)
+
+**A sheet can stay open beside a live page.** One new attribute, `data-modeless` on `fd-sheet`
+(for #1). No existing class, attribute, token or export changed, and a sheet without it behaves as before.
+
+### Added
+
+- **Modeless sheet (an inspector).** `<dialog class="fd-sheet" data-modeless data-side="right|left">` opens with the
+  same `openDialog(id)` and `[data-fd-dialog-open]` triggers, but with `show()`: no scrim, no scroll lock, no focus
+  trap, nothing inert, and a click outside does not close it. Focus moves quietly to the title; Tab can leave; Escape
+  closes it when focus is inside (a menu or popover open in it closes first), and focus returns to the trigger only if
+  focus was in the sheet and the trigger is still there. Opening it again while it is open, for another item, plays no
+  slide-in, leaves focus where it is, makes that trigger the one focus returns to and fires no event: the page swaps the
+  content. `fd:open` and `fd:close` fire as for a modal sheet.
+- **Layer.** It is `position: fixed` at `--fd-z-overlay`, not in the top layer, so menus, popovers, toasts and modal
+  dialogs open above it. Put it in `<body>` or the app root, not inside a parent with a transform.
+- **Below 640px** it is a bottom sheet capped at the new token `--fd-sheet-peek-h` (56dvh), drawn down to close, with
+  the page above it usable.
+- Docs: a run's detail beside a live list, and a left filters panel, in `docs/overlays.html#sheets`; the sheet card has
+  the variant, states, `useWhen`, `avoidWhen` and keys. `scripts/test/sheet-modeless.test.mjs` holds the behaviour.
+
+### For products refreshing from 0.12.4
+
+- Nothing to change. To use it, add `data-modeless` to a sheet and swap its content when another item is picked.
+
 ## 0.12.4 — 24 Nov 2026
 
 **A person's reduced-motion setting wins over every look, and removing a logo stops its upload.** Two bug fixes. No

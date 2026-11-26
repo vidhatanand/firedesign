@@ -20727,6 +20727,9 @@
         "fd-sheet-title"
       ],
       "attributes": {
+        "data-modeless": [
+          ""
+        ],
         "data-side": [
           "",
           "bottom",
@@ -20771,10 +20774,11 @@
       "card": {
         "id": "sheet",
         "job": "Show the detail of something picked from a list without losing the list.",
-        "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. Escape, a close button and a backdrop click close it. Focus never opens on a footer action. It can run in steps and fires fd:open, fd:close and fd:change.",
+        "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. By default it is modal: Escape, a close button and a backdrop click close it. With data-modeless it opens beside a live page, with no scrim, scroll lock or focus trap. Focus never opens on a footer action. It can run in steps and fires fd:open, fd:close and fd:change.",
         "useWhen": [
           "A row in a table or a log opens its full detail beside the list.",
           "A filter or navigation panel slides in from the left on a small screen.",
+          "A detail panel opens beside something the person keeps working with, such as a map, a canvas or a list, and stays open while they pick other items (data-modeless).",
           "A multi-step flow needs more room than a dialog."
         ],
         "avoidWhen": [
@@ -20787,7 +20791,7 @@
             "instead": "popover"
           },
           {
-            "when": "A permanent side panel.",
+            "when": "A permanent side panel that is part of the layout.",
             "instead": "split"
           },
           {
@@ -20817,6 +20821,10 @@
           {
             "name": "open",
             "how": "data-state=\"open\"; openDialog(id) or [data-fd-dialog-open]"
+          },
+          {
+            "name": "modeless",
+            "how": "data-modeless on the sheet; opened with show(), so the page behind stays live"
           },
           {
             "name": "dragging",
@@ -20862,6 +20870,11 @@
             "attribute": "data-start",
             "value": "",
             "useWhen": "On a footer child: pushes it to the start edge, as a secondary action."
+          },
+          {
+            "attribute": "data-modeless",
+            "value": "",
+            "useWhen": "A detail panel beside a map, a canvas or a list the person keeps using: no scrim, scroll lock or focus trap, outside clicks do not close it, and below 640px it stops at about half the screen."
           }
         ],
         "parts": [
@@ -20916,16 +20929,17 @@
           "dialog",
           "popover",
           "table",
-          "menu"
+          "menu",
+          "list-detail"
         ],
         "keyboard": [
           {
             "keys": "Escape",
-            "does": "Closes the sheet and returns focus to the trigger."
+            "does": "Closes the sheet and returns focus to the trigger. Modeless: only with focus inside and no menu open."
           },
           {
             "keys": "Tab",
-            "does": "Stays inside the sheet."
+            "does": "Stays inside a modal sheet; a modeless sheet lets focus leave."
           }
         ],
         "example": "docs/overlays.html#sheets",

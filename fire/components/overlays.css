@@ -92,6 +92,7 @@
   --fd-sheet-w-md: 420px;           /* default */
   --fd-sheet-w-lg: 560px;
   --fd-sheet-max-h: 760px;          /* bottom sheet */
+  --fd-sheet-peek-h: 56dvh;         /* a modeless sheet on a phone: the page above it stays usable */
   --fd-sheet-demo-h: 560px;
   /* toast */
   --fd-toast-w: 360px;
@@ -860,6 +861,10 @@
    </dialog>
    data-side  right (default) | left | bottom        data-size  md 420 (default) | lg 560
    Opened like a dialog: data-fd-dialog-open="log-detail". Below 640px every sheet is a bottom sheet.
+   data-modeless  an inspector: opened with show(), so it has no scrim, no scroll lock and no focus trap, and the page
+                  behind it stays live. It is position: fixed in the page's layer (--fd-z-overlay), not the top layer:
+                  menus, popovers, toasts and modal dialogs open above it, and it needs no ancestor with a transform.
+                  Below 640px it is a bottom sheet capped at --fd-sheet-peek-h, drawn down to close.
    ========================================================================== */
 .fd-sheet {
   --_o-w: var(--fd-sheet-w-md);
@@ -903,6 +908,9 @@
 .fd-sheet[data-side="bottom"] .fd-sheet-head { padding-block-start: var(--fd-space-6); touch-action: none; }
 .fd-sheet[data-static-demo] { display: flex; width: min(var(--_o-w), 100%); height: var(--h, var(--fd-sheet-demo-h)); max-height: none; }
 
+.fd-sheet[data-modeless] { z-index: var(--fd-z-overlay); }
+.fd-sheet[data-modeless][data-side="bottom"] { max-height: min(var(--fd-sheet-peek-h), var(--fd-sheet-max-h)); }
+
 .fd-sheet-head {
   flex: none; display: grid; gap: var(--fd-space-3);
   padding: var(--fd-space-4) var(--fd-space-4) 0 var(--fd-space-5);
@@ -934,6 +942,7 @@
     padding-block-end: env(safe-area-inset-bottom, 0px);
     translate: 0 100%;
   }
+  .fd-sheet[data-modeless]:not([data-static-demo]) { max-height: min(var(--fd-sheet-peek-h), calc(100dvh - var(--fd-overlay-clear))); }
   .fd-sheet[open]:not([data-static-demo]) { translate: 0 var(--_o-drag, 0px); }
   @starting-style {
     .fd-sheet[open]:not([data-static-demo]), .fd-sheet[data-side][open]:not([data-static-demo]) { translate: 0 100%; }

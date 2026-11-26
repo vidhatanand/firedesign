@@ -93,6 +93,16 @@
  *   .fd-dialog-dots > span reflect the step. Fires fd:open, fd:close (detail.value = returnValue; once per close, after the native close event, however it closed)
  *   and fd:change (detail.value = step name). openDialog(id, { trigger }), closeDialog(id, value).
  *   Below 640px dialogs and sheets are bottom sheets that can be dragged down to close.
+ *   Modeless sheet (an inspector): <dialog class="fd-sheet" data-modeless data-side="right|left">. Opened by the same
+ *   triggers and openDialog(id, { trigger }), but with show(): no scrim, no scroll lock, no focus trap, no inert page,
+ *   and a click outside does not close it, so the page stays live (a map or canvas the person keeps working with).
+ *   It stays in the page's layer (fixed, above the top bar, below dialogs, popovers and toasts), so author it as a
+ *   child of <body> or of the app root. Focus moves quietly to the title on open, never to a field. Escape closes it
+ *   when focus is inside it, unless a menu or popover is open (that closes first). Closing returns focus to the
+ *   trigger only if focus was in the sheet and the trigger is still in the page. Opening it again while it is open
+ *   (the trigger of another item) keeps focus and the slide-in where they are, makes that trigger the one focus
+ *   returns to, and fires no event: the page swaps the content. fd:open and fd:close fire as for a modal sheet.
+ *   Below 640px it is a bottom sheet capped at --fd-sheet-peek-h, so the page above stays usable.
  *
  * Type-to-confirm
  *   <dialog class="fd-dialog fd-confirm" data-confirm="ember-prod"><form method="dialog">…
@@ -147,6 +157,7 @@ const FLOATING = '.fd-menu, .fd-popover, .fd-hovercard, .fd-tooltip';
 const MODAL = '.fd-dialog, .fd-sheet, .fd-command';
 const MENU_ITEM = '.fd-menu-item';
 const SCROLLERS = '.fd-dialog-body, .fd-sheet-body';
+const isModeless = (dialog) => dialog.matches('.fd-sheet[data-modeless]');
 const LOCALE = doc.documentElement.lang || undefined;
 
 const byId = (ref) => (typeof ref === 'string' ? doc.getElementById(ref.replace(/^#/, '')) : ref || null);
@@ -1099,6 +1110,7 @@ const modalStack = [];
 const dialogOrigin = new WeakMap();
 const dialogWatch = new WeakMap();
 const fallbackTraps = new WeakMap();
+const focusWas = new WeakMap();   // a modeless sheet: did focus sit inside it when closeDialog ran
 
 const steps = (dialog) => $$('[data-step]', dialog).filter((s) => s.closest(MODAL) === dialog);
 const currentStep = (dialog) => steps(dialog).find((s) => !s.hidden) || null;
@@ -1121,7 +1133,11 @@ function setupDialog(dialog) {
 export function openDialog(ref, { trigger = null } = {}) {
   const dialog = byId(ref);
   if (!dialog || isStatic(dialog) || !dialog.matches(MODAL)) return null;
-  if (dialog.open || dialog.hasAttribute('open')) return dialog;
+  if (dialog.open || dialog.hasAttribute('open')) {
+    // A modeless sheet that is already open is being given another item: nothing slides in again and focus stays put.
+    if (trigger && isModeless(dialog)) dialogOrigin.set(dialog, trigger);
+    return dialog;
+  }
   setupDialog(dialog);
   hideTip();
   hideCard();
@@ -1131,17 +1147,22 @@ export function openDialog(ref, { trigger = null } = {}) {
   if (layer && !isOpen(layer)) origin = doc.activeElement;
   dialogOrigin.set(dialog, origin);
   resetDialog(dialog);
+  const modeless = isModeless(dialog);
   if (HAS_DIALOG && dialog instanceof HTMLDialogElement) {
-    try { dialog.showModal(); } catch { return null; }
+    try { if (modeless) dialog.show(); else dialog.showModal(); } catch { return null; }
   } else {
     dialog.setAttribute('open', '');
-    dialog.setAttribute('aria-modal', 'true');
-    fallbackTraps.set(dialog, trapFocus(dialog));
+    if (!modeless) {
+      dialog.setAttribute('aria-modal', 'true');
+      fallbackTraps.set(dialog, trapFocus(dialog));
+    }
   }
   dialog.dataset.state = 'open';
-  modalStack.push(dialog);
-  lastLayerAt = performance.now();
-  doc.documentElement.setAttribute('data-fd-modal-lock', '');
+  if (!modeless) {
+    modalStack.push(dialog);
+    lastLayerAt = performance.now();
+    doc.documentElement.setAttribute('data-fd-modal-lock', '');
+  }
   focusDialog(dialog);
   watchDialog(dialog);
   remountToaster();
@@ -1152,6 +1173,7 @@ export function openDialog(ref, { trigger = null } = {}) {
 export function closeDialog(ref, value) {
   const dialog = ref == null ? modalStack[modalStack.length - 1] : byId(ref);
   if (!dialog || !(dialog.open || dialog.hasAttribute('open'))) return;
+  if (isModeless(dialog)) focusWas.set(dialog, dialog.contains(doc.activeElement));
   if (HAS_DIALOG && dialog instanceof HTMLDialogElement) {
     if (value === undefined) dialog.close(); else dialog.close(String(value));
   } else {
@@ -1176,7 +1198,11 @@ function afterClose(dialog) {
   const origin = dialogOrigin.get(dialog);
   dialogOrigin.delete(dialog);
   const top = modalStack[modalStack.length - 1];
-  if (origin?.isConnected && origin !== doc.body && (!top || top.contains(origin))) restoreFocus(origin);
+  // A modeless sheet gives focus back only when focus was in it: the person may be working in the page by now.
+  const active = doc.activeElement;
+  const returns = !isModeless(dialog) || (focusWas.get(dialog) ?? (!active || active === doc.body || dialog.contains(active)));
+  focusWas.delete(dialog);
+  if (returns && origin?.isConnected && origin !== doc.body && (!top || top.contains(origin))) restoreFocus(origin);
   remountToaster();
   emit(dialog, 'fd:close', { value: dialog.returnValue });
 }
@@ -1198,6 +1224,14 @@ const titleMade = new WeakSet();
 /** Where focus starts: [autofocus], else the first form field of the body, else the title (or the surface). Never a footer action. */
 function focusDialog(dialog) {
   const scope = currentStep(dialog) || dialog;
+  if (isModeless(dialog)) {   // an inspector never pulls focus into a field
+    const title = scope.querySelector('.fd-sheet-title');
+    if (title && visible(title)) {
+      if (!title.hasAttribute('tabindex')) titleMade.add(title);
+      focusQuiet(title);
+    } else focusQuiet(dialog);
+    return;
+  }
   const auto = $$('[autofocus]', scope).find(visible);
   const field = focusables(scope).find((el) => el.matches(FIELD) && !el.closest('.fd-dialog-close, .fd-sheet-close'));
   if (auto || field) { focusEl(auto || field); return; }
@@ -2209,7 +2243,8 @@ function bindGlobal() {
       event.stopImmediatePropagation();
       return;
     }
-    if (event.key === 'Escape' && card && isOpen(card)) hideCard();
+    const escCard = event.key === 'Escape' && card && isOpen(card);
+    if (escCard) hideCard();
     // ⌘K / Ctrl+K
     if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'k') {
       const palette = palettes()[0];
@@ -2276,7 +2311,13 @@ function bindGlobal() {
     // Popovers: Escape closes and returns focus
     if (event.key === 'Escape') {
       const pop = target.closest('.fd-popover');
-      if (pop && isOpen(pop)) { event.preventDefault(); event.stopPropagation(); closePopover(pop, true); }
+      if (pop && isOpen(pop)) { event.preventDefault(); event.stopPropagation(); closePopover(pop, true); return; }
+      // A modeless sheet has no native Escape: close the one that holds focus, once nothing floating is open.
+      const sheet = target.closest('.fd-sheet[data-modeless]');
+      if (sheet && !escCard && !event.defaultPrevented && sheet.open && !isStatic(sheet) && target.closest(MODAL) === sheet && !$$(FLOATING).some(isOpen)) {
+        event.preventDefault();
+        closeDialog(sheet, 'dismiss');
+      }
     }
   });
 
@@ -2323,6 +2364,7 @@ function bindGlobal() {
   doc.addEventListener('click', (event) => {
     const dialog = event.target;
     if (!(dialog instanceof HTMLElement) || !dialog.matches(MODAL) || !dialog.open || isStatic(dialog) || pressTarget !== dialog) return;
+    if (isModeless(dialog)) return;
     const r = dialog.getBoundingClientRect();
     if (event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom) return;
     if (dialog.hasAttribute('data-static')) bump(dialog); else closeDialog(dialog, 'dismiss');

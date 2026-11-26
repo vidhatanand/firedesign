@@ -1089,8 +1089,126 @@
       </dialog>
     </div>
     <ul class="doc-notes">
-      <li>Sheets are modal <code class="fd-code">&lt;dialog&gt;</code>s and open with the same <code class="fd-code">data-fd-dialog-open</code>. They float 8px from the edges with a 16px radius; the bottom sheet is flush with 20px top corners and a drag handle.</li>
+      <li>Sheets are modal <code class="fd-code">&lt;dialog&gt;</code>s unless they carry <code class="fd-code">data-modeless</code> (below), and open with the same <code class="fd-code">data-fd-dialog-open</code>. They float 8px from the edges with a 16px radius; the bottom sheet is flush with 20px top corners and a drag handle.</li>
       <li>Head and foot keep their hairlines; only the body scrolls. Put tabs at the bottom of the head so they sit on its hairline.</li>
+    </ul>
+
+    <h3 class="doc-sub" id="sheet-modeless-demo">Modeless sheet</h3>
+    <p>An inspector for something the person keeps working with, such as a list, a map or a canvas. <code class="fd-code">data-modeless</code> opens the sheet without a scrim, a scroll lock or a focus trap, so the page behind it stays live: pick another run and the sheet keeps its place and swaps its content. A click outside does not close it; the close button, a swipe down on a phone and Escape do. Below 640px it is a bottom sheet that stops at about half the screen, so the list above stays in reach.</p>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-row" data-gap="2">
+        <button class="fd-btn" type="button" data-fd-dialog-open="sheet-runs-filter"><i data-icon="panel-left"></i><span>Filters</span></button>
+      </div>
+      <div class="fd-list" data-card role="group" aria-label="Recent runs">
+        <button class="fd-list-row" type="button" data-fd-dialog-open="sheet-run" data-run="run_8f2a91">
+          <span class="fd-list-lead" data-tone="success"><i data-icon="workflow"></i></span>
+          <span class="fd-list-body"><span class="fd-list-title fd-mono">run_8f2a91</span><span class="fd-list-desc">Crawl docs.ember.dev</span></span>
+          <span class="fd-list-meta"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></span>
+        </button>
+        <button class="fd-list-row" type="button" data-fd-dialog-open="sheet-run" data-run="run_c41d07">
+          <span class="fd-list-lead" data-tone="danger"><i data-icon="globe"></i></span>
+          <span class="fd-list-body"><span class="fd-list-title fd-mono">run_c41d07</span><span class="fd-list-desc">Scrape pricing.ember.dev</span></span>
+          <span class="fd-list-meta"><span class="fd-status" data-tone="danger" data-size="sm">Failed</span></span>
+        </button>
+        <button class="fd-list-row" type="button" data-fd-dialog-open="sheet-run" data-run="run_5be3f2">
+          <span class="fd-list-lead" data-tone="info"><i data-icon="database"></i></span>
+          <span class="fd-list-body"><span class="fd-list-title fd-mono">run_5be3f2</span><span class="fd-list-desc">Extract 48 product pages</span></span>
+          <span class="fd-list-meta"><span class="fd-status" data-tone="info" data-size="sm">Running</span></span>
+        </button>
+        <button class="fd-list-row" type="button" data-fd-dialog-open="sheet-run" data-run="run_91a6e8">
+          <span class="fd-list-lead" data-tone="success"><i data-icon="bell"></i></span>
+          <span class="fd-list-body"><span class="fd-list-title fd-mono">run_91a6e8</span><span class="fd-list-desc">Monitor changelog.ember.dev</span></span>
+          <span class="fd-list-meta"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></span>
+        </button>
+      </div>
+
+      <dialog class="fd-sheet" id="sheet-run" data-modeless data-side="right" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <h2 class="fd-sheet-title fd-mono" data-run-title>run_8f2a91</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc" data-run-desc>Crawl docs.ember.dev</p>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-stack" data-run-panel="run_8f2a91">
+            <dl class="fd-kv" data-cols="2">
+              <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono">/crawl</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">3 min 12 s</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">1,204</dd></div>
+            </dl>
+            <div class="fd-sheet-section">
+              <p class="fd-eyebrow">Last event</p>
+              <p>Crawled 1,204 pages up to 3 hops from the start URL. 12 pages were skipped as duplicates.</p>
+            </div>
+          </div>
+          <div class="fd-stack" data-run-panel="run_c41d07" hidden>
+            <dl class="fd-kv" data-cols="2">
+              <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono">/scrape</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-tone="danger" data-size="sm">Failed</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">30.0 s</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">0</dd></div>
+            </dl>
+            <div class="fd-sheet-section">
+              <p class="fd-eyebrow">Last event</p>
+              <p>The page did not answer within the 30 s timeout. No credits were charged.</p>
+            </div>
+          </div>
+          <div class="fd-stack" data-run-panel="run_5be3f2" hidden>
+            <dl class="fd-kv" data-cols="2">
+              <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono">/extract</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-tone="info" data-size="sm">Running</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">41 s so far</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">31</dd></div>
+            </dl>
+            <div class="fd-sheet-section">
+              <p class="fd-eyebrow">Last event</p>
+              <p>Extracted 31 of 48 pages. The schema matched on every page so far.</p>
+            </div>
+          </div>
+          <div class="fd-stack" data-run-panel="run_91a6e8" hidden>
+            <dl class="fd-kv" data-cols="2">
+              <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono">/scrape</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Status</dt><dd class="fd-kv-value"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num">2.1 s</dd></div>
+              <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num">1</dd></div>
+            </dl>
+            <div class="fd-sheet-section">
+              <p class="fd-eyebrow">Last event</p>
+              <p>Checked at 4:00 PM. The page changed in 3 places since the last check.</p>
+            </div>
+          </div>
+        </div>
+        <div class="fd-sheet-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-start><i data-icon="code"></i><span>Copy run ID</span></button>
+          <button class="fd-btn" type="button" data-variant="primary"><i data-icon="play"></i><span>Run again</span></button>
+        </div>
+      </dialog>
+
+      <dialog class="fd-sheet" id="sheet-runs-filter" data-modeless data-side="left" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <h2 class="fd-sheet-title">Filters</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-sheet-section" role="group" aria-labelledby="srf-status">
+            <p class="fd-eyebrow" id="srf-status">Status</p>
+            <div class="fd-options">
+              <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Completed</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Failed</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Running</span></span></label>
+            </div>
+          </div>
+        </div>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>The sheet is <code class="fd-code">position: fixed</code> in the page's own layer, above the top bar and below dialogs, menus, popovers and toasts, which open over it. Put it directly in <code class="fd-code">&lt;body&gt;</code> or the app root, not inside a parent with a transform.</li>
+      <li>Opening it from the first row moves focus quietly to its title; Tab leaves it freely. Opening it again while it is open (another row) keeps the sheet where it is and keeps focus on the list, so arrow keys and clicks carry on. The page swaps the content, here on the row's click. Escape closes it when focus is inside, and focus returns to the row that opened it.</li>
+      <li>For a permanent panel use a <a href="data.html#list-detail">list and detail</a>; for a task that must finish first, a modal sheet or a dialog.</li>
     </ul>
   </section>
 
@@ -1284,6 +1402,21 @@
 
 <script type="module">
   import { toast, command, openDialog, closeDialog } from '../fire/js/overlays.js';
+
+  // Modeless sheet: Fire opens it once; the page puts the picked run in it and marks the row.
+  const runSheet = document.getElementById('sheet-run');
+  document.addEventListener('click', (event) => {
+    const row = event.target.closest?.('[data-run]');
+    if (!row || !runSheet) return;
+    const run = row.dataset.run;
+    for (const other of document.querySelectorAll('[data-run]')) other.setAttribute('aria-current', String(other === row));
+    for (const panel of runSheet.querySelectorAll('[data-run-panel]')) panel.hidden = panel.dataset.runPanel !== run;
+    runSheet.querySelector('[data-run-title]').textContent = run;
+    runSheet.querySelector('[data-run-desc]').textContent = row.querySelector('.fd-list-desc').textContent;
+  }, true);
+  runSheet?.addEventListener('fd:close', () => {
+    for (const row of document.querySelectorAll('[data-run]')) row.removeAttribute('aria-current');
+  });
 
   // Team switcher: the trigger's tile follows the chosen team.
   document.getElementById('menu-team')?.addEventListener('fd:change', (event) => {

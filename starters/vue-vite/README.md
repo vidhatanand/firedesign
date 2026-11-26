@@ -34,7 +34,7 @@ written as Vue single-file components from Fire's own templates, and proves the 
 ## Start a new project from it
 
 1. Copy this folder. Its `package.json` already depends on the release,
-   `"fire-design": "github:vidhatanand/firedesign#v0.13.0"`, locked in `package-lock.json`.
+   `"fire-design": "github:vidhatanand/firedesign#v0.13.1"`, locked in `package-lock.json`.
 2. `npm ci`, then `npm run dev` (it runs `npm run theme` first), or `npm run build`.
 3. Remove `scripts/check.mjs` and the `check` script if you do not compare against Fire's templates. Keep
    `npm run lint:markup` and `npm run lint:css`.

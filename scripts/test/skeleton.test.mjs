@@ -118,6 +118,34 @@ test('skeleton.js: every preset as a string; unknown presets throw; numbers are 
   assert.doesNotMatch(skeletonApp(), /fd-skeleton-app-tabbar/);
 });
 
+// 0.13.1: the markup is written into a page's static HTML, so it has to pass the lint a product runs on that page.
+// Four presets (chart, thread, form, page) wrote pixel widths into data-fd-vars, which the lint reports as no-raw-px.
+test('skeleton() and skeletonApp() write markup that passes the markup lint: no pixel value, only declared width tokens', async () => {
+  const { lintText } = await import('../lint-markup.mjs');
+  const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/catalog.json'), 'utf8'));
+  const css = fs.readFileSync(path.join(ROOT, 'fire/components/skeleton.css'), 'utf8');
+  const page = (body) => `<!doctype html><html lang="en" data-fd-surface="app"><body>${body}</body></html>`;
+  const outputs = [
+    ...SKELETON_PRESETS.map((p) => [p, skeleton(p, { rows: 4 })]),
+    ...SKELETON_PRESETS.map((p) => [`app with ${p}`, skeletonApp({ preset: p, nav: 9, tabbar: 5, rows: 4 })]),
+  ];
+  let tokens = 0;
+  for (const [name, html] of outputs) {
+    assert.doesNotMatch(html, /\d(?:\.\d+)?px/, `${name}: no pixel value`);
+    assert.doesNotMatch(html, /\sstyle=/, `${name}: no style attribute`);
+    for (const m of html.matchAll(/var\((--fd-skeleton-w-\d+)\)/g)) {
+      tokens += 1;
+      assert.match(css, new RegExp(`^\\s*${m[1]}: \\d+px;`, 'm'), `${name}: ${m[1]} is declared in skeleton.css`);
+    }
+    const errors = lintText(`${name}.html`, page(name.startsWith('app') ? html : `<main class="fd-page">${html}</main>`), catalog, 'html').filter((x) => x.severity === 'error');
+    assert.deepEqual(errors.map((x) => `${x.rule}: ${x.message}`), [], `${name} lints clean`);
+  }
+  assert.ok(tokens >= 11, 'the fixed widths are still written (as tokens)');
+  // Every width token the stylesheet declares is one a preset uses: none is left behind.
+  const used = new Set(outputs.flatMap(([, html]) => [...html.matchAll(/--fd-skeleton-w-\d+/g)].map((m) => m[0])));
+  for (const m of css.matchAll(/^\s*(--fd-skeleton-w-\d+):/gm)) assert.ok(used.has(m[1]), `${m[1]} is used by a preset`);
+});
+
 test('texture.js writes the same markup as skeleton.js, and leaves a filled preset alone', async () => {
   const empty = SKELETON_PRESETS.map((name) => `<div class="fd-skeleton-${name}" data-kind="${name}"${name === 'text' ? ' data-lines="4"' : ''}></div>`).join('');
   await withPage(`<div id="empty">${empty}</div><div id="filled">${SKELETON_PRESETS.map((name) => skeleton(name, name === 'text' ? { lines: 4 } : {})).join('')}</div>`, async (page) => {

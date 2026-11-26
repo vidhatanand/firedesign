@@ -2,6 +2,31 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (in its `package.json`, or in its agent instructions when Fire is copied in) and reads every entry after it before refreshing.
 
+## 0.13.1 — 27 Nov 2026
+
+**A skeleton written into a page passes Fire's own lint.** One bug fix. Nothing looks different, and no class,
+attribute value, event or behaviour export changed.
+
+### Fixed
+
+- **Skeleton presets.** `skeleton()` and `skeletonApp()` wrote pixel widths into the markup of four presets: `chart`
+  (1), `thread` (3), `form` (2) and `page` (5), as `data-fd-vars="--_sk-w:72px"`. A page that put that markup in its
+  static HTML, as 0.13.0 tells a product to do for first load, failed `lint-markup` with `no-raw-px`. Those widths
+  are now tokens at the same sizes (`--_sk-w:var(--fd-skeleton-w-72)`), declared in `fire/components/skeleton.css`.
+  The other presets and the app skeleton's own shell wrote no pixel value. `scripts/test/skeleton.test.mjs` now runs
+  every preset's output through the markup lint.
+
+### Added
+
+- Eleven width tokens, `--fd-skeleton-w-44` to `--fd-skeleton-w-148`, one for each fixed width the presets use.
+
+### For products refreshing from 0.13.0
+
+- If your static HTML holds the output of `skeleton()` or `skeletonApp()` for `chart`, `thread`, `form` or `page`,
+  write it again from 0.13.1, or replace each `--_sk-w:<n>px` with `--_sk-w:var(--fd-skeleton-w-<n>)`.
+- A page that calls `skeleton()` at run time needs nothing: refresh Fire's script and stylesheet together.
+- A slim bundle that keeps the skeleton: build it again, so it carries the new tokens.
+
 ## 0.13.0 — 27 Nov 2026
 
 **A page that is loading shows its shape.** Skeleton bars were fainter than Fire's own hairlines, every preset needed

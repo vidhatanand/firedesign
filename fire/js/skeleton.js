@@ -53,6 +53,9 @@ function counts(name, options) {
 
 const block = (cls = 'fd-skeleton', attrs = '') => `<span class="${cls}"${attrs}></span>`;
 const w = (value) => ` data-fd-vars="--_sk-w:${value}"`;
+// A fixed width is one of skeleton.css's --fd-skeleton-w-<n> tokens, never a pixel value: the markup this module
+// writes goes into a page's static HTML, where the markup lint (no-raw-px) and Fire's own rules allow no raw size.
+const wide = (n) => w(`var(--fd-skeleton-w-${n})`);
 const widths = [62, 44, 78, 54, 70, 38, 86, 48, 66, 58];
 const pick = (i, j = 0) => widths[(i * 3 + j * 7) % widths.length];
 const repeat = (n, fn) => Array.from({ length: n }, (_, i) => fn(i)).join('');
@@ -71,7 +74,7 @@ const parts = {
   },
   stat: ({ count }) => repeat(count, (i) => `<div class="fd-skeleton-stat-tile" data-fd-vars="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="eyebrow"${w(`${36 + (i * 11) % 24}%`)}`)}${block('fd-skeleton-title', ` data-size="stat"${w(`${48 + (i * 17) % 26}%`)}`)}${block('fd-skeleton-title', ` data-size="caption"${w(`${54 + (i * 7) % 20}%`)}`)}</div>`),
   chart: () =>
-    `<div class="fd-skeleton-chart-head"><div class="fd-skeleton-chart-titles">${block('fd-skeleton-title', w('44%'))}${block('fd-skeleton-title', ` data-size="caption"${w('28%')}`)}</div>${block('fd-skeleton-title', ` data-size="stat"${w('72px')}`)}</div>`
+    `<div class="fd-skeleton-chart-head"><div class="fd-skeleton-chart-titles">${block('fd-skeleton-title', w('44%'))}${block('fd-skeleton-title', ` data-size="caption"${w('28%')}`)}</div>${block('fd-skeleton-title', ` data-size="stat"${wide(72)}`)}</div>`
     + `<div class="fd-skeleton-chart-body"><div class="fd-skeleton-chart-y">${repeat(5, () => block())}</div>`
     + '<div class="fd-skeleton-chart-plot"><span class="fd-skeleton-chart-area"></span><span class="fd-skeleton-chart-line"></span></div>'
     + `<div class="fd-skeleton-chart-x">${repeat(6, () => block())}</div></div>`,
@@ -79,18 +82,18 @@ const parts = {
   thread: () =>
     `<div class="fd-skeleton-thread-user">${textLines(2)}</div>`
     + `<div class="fd-skeleton-thread-reply" data-fd-vars="--fd-i:1">${textLines(3)}`
-    + `<div class="fd-skeleton-thread-tool">${block('fd-skeleton-tile', ' data-size="16"')}${block('fd-skeleton-title', ` data-size="mono"${w('96px')}`)}${block('fd-skeleton-title', ` data-size="mono"${w('140px')}`)}<span class="fd-grow"></span>${block('fd-skeleton-title', ` data-size="caption"${w('44px')}`)}</div>`
+    + `<div class="fd-skeleton-thread-tool">${block('fd-skeleton-tile', ' data-size="16"')}${block('fd-skeleton-title', ` data-size="mono"${wide(96)}`)}${block('fd-skeleton-title', ` data-size="mono"${wide(140)}`)}<span class="fd-grow"></span>${block('fd-skeleton-title', ` data-size="caption"${wide(44)}`)}</div>`
     + `${textLines(2)}</div>`,
   form: ({ count }) =>
     repeat(count, (i) => `<div class="fd-skeleton-form-field" data-fd-vars="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="label"${w(`${22 + (i * 9) % 18}%`)}`)}<div class="fd-skeleton-form-control">${block('fd-skeleton', w(`${30 + (i * 13) % 26}%`))}</div>${block('fd-skeleton-title', ` data-size="caption"${w(`${46 + (i * 11) % 24}%`)}`)}</div>`)
-    + `<div class="fd-skeleton-form-actions">${block('fd-skeleton-button', w('76px'))}${block('fd-skeleton-button', w('112px'))}</div>`,
+    + `<div class="fd-skeleton-form-actions">${block('fd-skeleton-button', wide(76))}${block('fd-skeleton-button', wide(112))}</div>`,
   hero: () => `${block('fd-skeleton-title', ` data-size="display"${w('38%')}`)}${block('fd-skeleton-title', ` data-size="lead"${w('56%')}`)}`,
   page: () => {
     const rail = repeat(9, (i) => (i === 3 || i === 6 ? '<span class="fd-skeleton-page-sep"></span>' : '') + block('fd-skeleton-tile', ' data-size="20"'));
     return `<div class="fd-skeleton-page-rail">${block('fd-skeleton-tile', ' data-size="24"')}<div class="fd-skeleton-page-icons">${rail}</div>${block('fd-skeleton-avatar', ' data-size="24"')}</div>`
-      + `<div class="fd-skeleton-page-main"><div class="fd-skeleton-page-top">${block('fd-skeleton-button', w('148px'))}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', w('84px'))}</div>`
+      + `<div class="fd-skeleton-page-main"><div class="fd-skeleton-page-top">${block('fd-skeleton-button', wide(148))}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', wide(84))}</div>`
       + `<div class="fd-skeleton-page-body"><div class="fd-skeleton-hero">${parts.hero()}</div>`
-      + `<div class="fd-skeleton-page-toolbar"><div class="fd-skeleton-form-control" data-search>${block('fd-skeleton', w('44%'))}</div>${block('fd-skeleton-button', w('132px'))}${block('fd-skeleton-button', w('120px'))}<span class="fd-grow"></span>${block('fd-skeleton-button', w('108px'))}</div>`
+      + `<div class="fd-skeleton-page-toolbar"><div class="fd-skeleton-form-control" data-search>${block('fd-skeleton', w('44%'))}</div>${block('fd-skeleton-button', wide(132))}${block('fd-skeleton-button', wide(120))}<span class="fd-grow"></span>${block('fd-skeleton-button', wide(108))}</div>`
       + `<div class="fd-skeleton-table" data-rows="6" data-cols="5">${parts.table({ rows: 6, cols: 5 })}</div></div></div>`;
   },
 };

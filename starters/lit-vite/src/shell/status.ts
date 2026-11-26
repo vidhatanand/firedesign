@@ -9,7 +9,7 @@ import { href, retry, type Params } from '../lib/router';
  */
 const icon = (name: string) => html`<svg class="fd-icon" data-icon=${name} aria-hidden="true"><use href="#i-${name}"></use></svg>`;
 const page = (label: string, body: TemplateResult, tone?: string) => html`
-  <main class="fd-page">
+  <main class="fd-page" id="main" tabindex="-1">
     <div class="fd-frame">
       <section class="fd-band" data-pad="none" data-grow aria-label=${label}>
         <div class="fd-empty" data-size="lg" data-tone=${tone ?? nothing}>${body}</div>

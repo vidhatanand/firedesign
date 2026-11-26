@@ -21,5 +21,5 @@ export function LogsScreen({ children, asked }: { children: ReactNode; asked?: A
   });
   useFireEvent(ref, 'fd:select', (event) => behaviour.current?.onSelect(event));
   useFireEvent(ref, 'fd:change', (event) => behaviour.current?.onChange(event));
-  return <ViewTransition><main className="fd-page" ref={ref}>{children}</main></ViewTransition>;
+  return <ViewTransition><main className="fd-page" id="main" tabIndex={-1} ref={ref}>{children}</main></ViewTransition>;
 }

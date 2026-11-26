@@ -41,7 +41,14 @@ export class AppShell extends FireLight implements Outlet {
       await this.updateComplete;
       await (screen as LitElement).updateComplete;
     };
+    if (first) {
+      // The first screen takes over from the first-load skeleton in index.html, so its own skeletons show at once:
+      // waiting --fd-skeleton-delay there would blank the page for a moment.
+      screen.style.setProperty('--fd-skeleton-delay', '0s');
+    }
     if (first || !changed) await update(); else await transition(update);
+    // The shell and the screen are drawn: the first-load skeleton goes in the same frame (it holds no focus).
+    if (first) document.querySelector('body > .fd-skeleton-app')?.remove();
     return { screen, changed };
   }
 

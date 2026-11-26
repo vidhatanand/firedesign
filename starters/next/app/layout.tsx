@@ -24,6 +24,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <script src="/fire/boot.js" nonce={nonce} />
       </head>
       <body>
+        {/* The skip link (fd-skip): the first stop for a keyboard, to the screen's <main id="main">. */}
+        <a className="fd-skip" href="#main">Skip to content</a>
         <FireSprite />
         <AppShell>{children}</AppShell>
         <FireRuntime />

@@ -204,7 +204,7 @@ there when you add one to `src/routes.ts`.
 - **No `<i data-icon>`.** Fire replaces the `<i>` with an SVG behind Lit's back. Use `<fd-icon icon="home">` when the
   name can change, or the SVG form `<svg class="fd-icon" data-icon="home" aria-hidden="true"><use href="#i-home"></use></svg>` (I1, I2).
 - **Data that changes goes to an element.** Charts, code and textures are drawn from `.data` / `.code` properties
-  (`<fd-chart .data=${config}>`), not rewritten JSON (C3). Import `fire-design/elements` before the first render (C1).
+  (`<fd-chart .data=${config}>`), not rewritten JSON (C3). Import `fire-design/elements/lit` before the first render (C1): it is Fire's elements on this app's own Lit, so the page loads Lit once.
 - **Fire owns what it writes.** Write the starting value of `aria-expanded`, `hidden` on panels, `data-state`, and
   never bind them to state that changes (O1). Containers Fire fills (secrets, code blocks, JSON trees, chart plots,
   `.fd-ascii`) are rendered once; use `keyed()` or an element to change their content (O2).
@@ -246,7 +246,7 @@ Fire's behaviour chunk is most of it: Fire's `init()` reaches every module it ke
 route from here. `npm run check` fails when a budget in `package.json` is exceeded:
 
 ```json
-"fire": { "budget": { "initialJs": 205, "routeJs": 25, "css": 100 } }
+"fire": { "budget": { "initialJs": 205, "routeJs": 25, "css": 105 } }
 ```
 
 `initialJs` is the entry, its static imports and the first route's chunk; `routeJs` the largest route chunk; `css`

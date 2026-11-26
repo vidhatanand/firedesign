@@ -4,7 +4,7 @@ import { FireLight } from '../../lib/fire-light';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const ICONS: IconName[] = ['home', 'bell', 'key-round', 'chart-column', 'settings'];
-const SNIPPET = `import 'fire-design/elements';
+const SNIPPET = `import 'fire-design/elements/lit';
 
 // In a template: the element draws from the property.
 html\`<fd-chart type="area" .data=\${config}></fd-chart>\``;
@@ -40,7 +40,7 @@ export class ScreenElements extends FireLight {
 
   protected override render() {
     return html`
-      <main class="fd-page">
+      <main class="fd-page" id="main" tabindex="-1">
         <div class="fd-frame">
           <section class="fd-band fd-page-hero fd-rise">
             <div class="fd-page-hero-art" aria-hidden="true"><fd-texture pattern="orbit" tone="accent" fade="left"></fd-texture></div>

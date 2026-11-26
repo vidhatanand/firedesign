@@ -14,6 +14,12 @@ screen-load-error {
   display: contents;
 }
 
+/* While index.html's first-load skeleton is on the page the shell renders out of sight; the shell removes the
+   skeleton once the first screen is drawn, and both change in one frame. */
+body:has(> .fd-skeleton-app) > app-shell {
+  display: none;
+}
+
 /* The router focuses a new screen's heading (or main) so keyboard and screen-reader users start there. It is not a
    control, so it shows no focus ring; Tab moves on from it as from the start of the page. */
 :is(h1, main)[tabindex="-1"]:focus-visible {

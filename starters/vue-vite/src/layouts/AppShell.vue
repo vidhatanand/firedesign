@@ -70,7 +70,7 @@ const route = useRoute();
 
       <!-- v-fire: Fire's init runs on the page after it mounts and after each update. The router option of the plugin
            runs it once more on the whole document after a route change. -->
-      <main class="fd-page" v-fire>
+      <main class="fd-page" id="main" tabindex="-1" v-fire>
         <RouterView :key="route.path" />
       </main>
     </div>

@@ -11,8 +11,15 @@ import Fire from 'fire-design/vue';
 import App from './App.vue';
 import { router } from './router';
 
-createApp(App)
+const app = createApp(App)
   .use(router)
   // `v-fire` runs Fire's init on a subtree; `router` makes Fire run again after each route change (EXPORT L3).
-  .use(Fire, { router })
-  .mount('#app');
+  .use(Fire, { router });
+
+// index.html's first-load skeleton stays until the first page's code has loaded; mounting replaces it in one frame.
+// That first page's own skeletons then show at once: waiting --fd-skeleton-delay would blank it for a moment.
+// Later pages wait as usual.
+const root = document.getElementById('app')!;
+root.style.setProperty('--fd-skeleton-delay', '0s');
+router.afterEach((_to, from) => { if (from.matched.length) root.style.removeProperty('--fd-skeleton-delay'); });
+void router.isReady().then(() => app.mount(root));

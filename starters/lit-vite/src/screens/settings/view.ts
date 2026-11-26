@@ -17,7 +17,7 @@ const item = (s: ScreenSettings, tab: string, icon: string, label: string, bind?
  * the current one is the only one not hidden, so a form keeps what the user typed when they change tabs.
  */
 export const settingsView = (s: ScreenSettings) => html`
-    <main class="fd-page">
+    <main class="fd-page" id="main" tabindex="-1">
       <div class="fd-frame">
 
         <section class="fd-band fd-rise" data-pad="sm" aria-label="Page head">

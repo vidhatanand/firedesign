@@ -5,7 +5,7 @@ import './app.css';
 
 // Fire's elements (fd-icon, fd-chart, fd-code, fd-texture) register themselves on import. Do this before the first
 // render (spec C1): a property set on an element that is not defined yet would be lost.
-import 'fire-design/elements';
+import 'fire-design/elements/lit';
 
 // Fire's behaviours. Importing it runs `init(document)` once the page is ready; components call `init` again
 // after they render (see lib/fire-light.ts).

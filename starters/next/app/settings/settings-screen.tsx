@@ -10,5 +10,5 @@ import { startSettings } from './settings-behaviour';
 // under <html data-fd-transition> (components/transitions.css), so the sidebar and top bar hold still and the page fades.
 export function SettingsScreen({ children }: { children: ReactNode }) {
   useBehaviour(startSettings);
-  return <ViewTransition><main className="fd-page">{children}</main></ViewTransition>;
+  return <ViewTransition><main className="fd-page" id="main" tabIndex={-1}>{children}</main></ViewTransition>;
 }

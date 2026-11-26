@@ -5,7 +5,7 @@ import type { ScreenLogs } from './screen';
 
 /** The logs screen's markup: the .fd-page content of templates/logs.html, as Lit. */
 export const logsView = (s: ScreenLogs) => html`
-    <main class="fd-page">
+    <main class="fd-page" id="main" tabindex="-1">
       <div class="fd-frame">
 
         <section class="fd-band fd-page-hero fd-rise">

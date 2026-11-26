@@ -63,8 +63,8 @@ function fireHtml(): Plugin {
 
 export default defineConfig(({ command, mode }) => ({
   plugins: [fireHtml()],
-  // `vite build --mode full` builds with the whole of Fire (to compare). fire-design/elements stays as it is: it
-  // shares Fire's module files with the slim entry. Fire's wrappers load
+  // `vite build --mode full` builds with the whole of Fire (to compare). fire-design/elements/lit stays as it is: it
+  // shares Fire's module files with the slim entry, and imports the app's own Lit. Fire's wrappers load
   // fire.js by a relative path (../../fire/fire.js), so that is pointed at the slim entry too.
   resolve: command === 'build' && mode !== 'full' ? { alias: [
     { find: /^fire-design$/, replacement: slim('fire.js') },
@@ -91,7 +91,7 @@ export default defineConfig(({ command, mode }) => ({
         codeSplitting: {
           groups: [
             { name: 'lit', test: /[\\/]node_modules[\\/](?:lit|lit-html|lit-element|@lit[\\/]reactive-element)[\\/]/, priority: 3 },
-            { name: 'fire', test: /[\\/](?:\.fire-slim[\\/]fire\.js|fire[\\/](?:fire\.js|elements\.js|js[\\/]))/, priority: 2 },
+            { name: 'fire', test: /[\\/](?:\.fire-slim[\\/]fire\.js|fire[\\/](?:fire\.js|elements\.js|js[\\/])|wrappers[\\/]lit[\\/]elements\.js)/, priority: 2 },
             { name: 'app', test: /[\\/]src[\\/]lib[\\/]/, priority: 1 },
           ],
         },

@@ -11,5 +11,5 @@ import { startOverview } from './overview-behaviour';
 // under <html data-fd-transition> (components/transitions.css), so the sidebar and top bar hold still and the page fades.
 export function OverviewScreen({ children, state }: { children: ReactNode; state: PageState }) {
   useBehaviour((kit) => startOverview(kit, state));
-  return <ViewTransition><main className="fd-page">{children}</main></ViewTransition>;
+  return <ViewTransition><main className="fd-page" id="main" tabIndex={-1}>{children}</main></ViewTransition>;
 }

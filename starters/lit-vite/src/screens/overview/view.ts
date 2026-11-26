@@ -3,7 +3,7 @@ import type { ScreenOverview } from './screen';
 
 /** The overview screen's markup: the .fd-page content of templates/overview.html, as Lit. */
 export const overviewView = (s: Pick<ScreenOverview, 'region' | 'onRetry'>) => html`
-    <main class="fd-page">
+    <main class="fd-page" id="main" tabindex="-1">
       <div class="fd-frame">
 
         

@@ -56,7 +56,9 @@ test('the bundle order is Fire CSS, then the theme, and elements are registered 
   const main = read('src/main.ts');
   const at = (s) => main.indexOf(s);
   assert.ok(at("'fire-design/css'") >= 0 && at("'fire-design/css'") < at("'./fire-theme.css'"));
-  assert.ok(at("'fire-design/elements'") >= 0 && at("'fire-design/elements'") < at("'./shell/app-shell'"));
+  // The Lit starter has Lit, so it takes the elements built on the app's own Lit: the page loads Lit once (0.13).
+  assert.ok(at("'fire-design/elements/lit'") >= 0 && at("'fire-design/elements/lit'") < at("'./shell/app-shell'"));
+  assert.ok(!main.includes("'fire-design/elements'"), 'not the entry that bundles a second Lit');
 });
 
 test('index.html loads boot.js as a classic script before the app, and carries no inline script or style (N2, P1)', () => {
@@ -65,6 +67,9 @@ test('index.html loads boot.js as a classic script before the app, and carries n
   assert.ok(html.indexOf('boot.js') < html.indexOf('src/main.ts'));
   assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>[^<]/);
   assert.doesNotMatch(html, /<style|\sstyle=/);
+  // The skip link is the first thing in <body> (0.13), before the first-load skeleton and the shell.
+  assert.match(html, /<body>\s*(?:<!--[\s\S]*?-->\s*)?<a class="fd-skip" href="#main">Skip to content<\/a>/);
+  assert.ok(html.indexOf('class="fd-skip"') < html.indexOf('class="fd-skeleton-app"') && html.indexOf('class="fd-skeleton-app"') < html.indexOf('<app-shell>'));
 });
 
 test('the production policy has no unsafe-inline and no unsafe-eval (P1)', () => {
@@ -74,10 +79,10 @@ test('the production policy has no unsafe-inline and no unsafe-eval (P1)', () =>
   assert.doesNotMatch(config, /unsafe-inline|unsafe-eval/);
 });
 
-test('the three screens are the .fd-page of Fire\'s templates, and each begins with <main class="fd-page">', () => {
+test('the three screens are the .fd-page of Fire\'s templates, and each begins with the <main> the skip link points to', () => {
   for (const [dir, template] of [['overview', 'overview'], ['logs', 'logs'], ['settings', 'settings']]) {
     const view = read(`src/screens/${dir}/view.ts`);
-    assert.match(view, /<main class="fd-page">/, dir);
+    assert.match(view, /<main class="fd-page" id="main" tabindex="-1">/, dir);
     assert.ok(fs.existsSync(path.join(root, 'templates', `${template}.html`)));
   }
 });

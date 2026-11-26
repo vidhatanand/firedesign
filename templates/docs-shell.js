@@ -9,7 +9,8 @@
  * On load the page's <main> becomes .fd-doc-main inside the full docs shell: the two-row top bar,
  * the section's nav, the "On this page" column (filled from the article's h2/h3 by docsite.js),
  * the article footer (helpful vote, edit links, last updated, previous / next), the site footer,
- * and the search palette with every page and endpoint. Or call it yourself:
+ * and the search palette with every page and endpoint, and a skip link (fd-skip) to the main goes first in <body>.
+ * Or call it yourself:
  *
  *   import { mountDocs } from './docs-shell.js';
  *   mountDocs({ section: 'api', active: 'api-scrape' });
@@ -18,7 +19,7 @@
  * page body; `contained: true` renders the boxed variant used in docs specimens.
  * Overlay ids: `${prefix}-command` (palette), `-version`, `-lang`, `-more`, `-copy` (menus).
  */
-import { EMBER_MARK } from './shell.js';
+import { EMBER_MARK, addSkipLink } from './shell.js';
 
 const PAGES = { introduction: 'docs-guide.html', 'api-scrape': 'docs-api.html', changelog: 'docs-changelog.html', home: 'docs-home.html' };
 const href = (id) => PAGES[id] || `#${id}`;
@@ -28,6 +29,13 @@ export const SECTIONS = [
   { id: 'sdks', label: 'SDKs', icon: 'package', href: 'docs-guide.html#build-directly-with-the-api' },
   { id: 'api', label: 'API reference', icon: 'braces', href: 'docs-api.html' },
   { id: 'ai', label: 'Build with AI', icon: 'sparkles', href: 'docs-guide.html#set-up-with-an-agent' },
+];
+
+/** The website's main links, in the top bar's links slot (hidden below 900px); the docs are the current one. */
+export const SITE_LINKS = [
+  { id: 'pricing', label: 'Pricing', icon: 'credit-card', href: 'site-pricing.html' },
+  { id: 'changelog', label: 'Changelog', icon: 'scroll-text', href: 'site-changelog.html' },
+  { id: 'docs', label: 'Docs', icon: 'book-open', href: 'docs-home.html' },
 ];
 
 export const LINKS = [
@@ -210,9 +218,10 @@ export function renderTop({ section = 'docs', active = '', prefix = 'docs' } = {
     </div>
     <button class="fd-doc-search" type="button" data-fd-command-open="${prefix}-command" aria-label="Search the docs" aria-keyshortcuts="Meta+K Control+K">${i('search')}<span>Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
     <div class="fd-doc-top-end">
+      <nav class="fd-doc-top-links" aria-label="Ember">
+        ${SITE_LINKS.map((l) => `<a href="${esc(l.href)}"${l.id === 'docs' ? ' aria-current="page"' : ''}>${esc(l.label)}</a>`).join('')}
+      </nav>
       <a class="fd-doc-repo" href="https://code.ember.dev/ember/ember" target="_blank" rel="noopener" data-doc-hide="md sm" aria-label="Ember repository, 48,213 stars">${i('git-branch')}<span class="fd-doc-repo-name">ember/ember</span><span class="fd-doc-repo-stars">${i('star')}48,213</span></a>
-      <a class="fd-btn" href="https://status.ember.dev" target="_blank" rel="noopener" data-doc-hide="lg md sm">Status</a>
-      <a class="fd-btn" href="mailto:support@ember.dev" data-doc-hide="lg md sm">Support</a>
       <a class="fd-btn" data-variant="primary" href="auth.html" data-doc-hide="sm">Sign up</a>
       <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-hide="sm" data-fd-tweaks-open data-fd-tooltip="Tweaks" aria-label="Tweaks" aria-expanded="false">${i('sliders-horizontal')}</button>
       <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-hide="sm" data-fd-theme-toggle data-fd-tooltip="Theme" aria-label="Theme">${i('monitor')}</button>
@@ -381,6 +390,8 @@ export function renderOverlays({ prefix = 'docs' } = {}) {
     ${radio('ja', '日本語', false)}
   </div>
   <div class="fd-menu" id="${prefix}-more" popover role="menu" aria-label="More">
+    ${SITE_LINKS.filter((l) => l.id !== 'docs').map((l) => `<a class="fd-menu-item" href="${esc(l.href)}">${i(l.icon)}<span class="fd-menu-item-label">${esc(l.label)}</span></a>`).join('\n    ')}
+    <hr class="fd-menu-sep">
     <a class="fd-menu-item" href="auth.html">${i('log-in')}<span class="fd-menu-item-label">Sign up</span></a>
     <a class="fd-menu-item" href="https://status.ember.dev" target="_blank" rel="noopener">${i('activity')}<span class="fd-menu-item-label">Status</span></a>
     <a class="fd-menu-item" href="mailto:support@ember.dev">${i('mail')}<span class="fd-menu-item-label">Support</span></a>
@@ -389,7 +400,7 @@ export function renderOverlays({ prefix = 'docs' } = {}) {
     <button class="fd-menu-item" data-value="tweaks" data-fd-tweaks-open>${i('sliders-horizontal')}<span class="fd-menu-item-label">Tweaks</span></button>
     <button class="fd-menu-item" data-value="theme" data-fd-theme-toggle>${i('moon')}<span class="fd-menu-item-label">Switch theme</span></button>
   </div>
-  <div class="fd-menu" id="${prefix}-copy" popover role="menu" aria-label="Use this page" data-fd-doc-copy-menu>
+  <div class="fd-menu" id="${prefix}-copy" popover role="menu" aria-label="Use this page" data-fd-doc-copy-menu data-name="Ember" data-mcp-url="https://mcp.ember.dev/v2/mcp">
     <button class="fd-menu-item" data-value="copy-md">${i('copy')}<span class="fd-menu-item-label">Copy page as Markdown<span class="fd-menu-item-desc">For pasting into an LLM</span></span></button>
     <button class="fd-menu-item" data-value="view-md">${i('file-text')}<span class="fd-menu-item-label">View as Markdown<span class="fd-menu-item-desc">Opens the plain text in a new tab</span></span></button>
     <button class="fd-menu-item" data-value="open-ai">${i('sparkles')}<span class="fd-menu-item-label">Open in an AI assistant<span class="fd-menu-item-desc">Copies a prompt with this page</span></span></button>
@@ -505,6 +516,7 @@ export function mountDocs({ section, active, title } = {}) {
   generated.replaceWith(main);
 
   body.prepend(shell);
+  addSkipLink(main);
   const item = findItem(sec, id);
   const heading = title ?? body.dataset.title ?? item?.label;
   if (heading) document.title = `${heading} · Ember docs`;

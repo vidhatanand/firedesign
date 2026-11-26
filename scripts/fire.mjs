@@ -6,12 +6,13 @@
 //   fire render-equal <args>                compare renders (scripts/render-equal.mjs)
 //   fire slim [sources] --out <dir> [opts]  a Fire trimmed to what the product uses (scripts/slim.mjs)
 //   fire review [--base url | --serve dir] every screen in a browser: a gallery and composition checks (scripts/review.mjs)
+//   fire propose new|check|send <args>      a proposal for what Fire lacks, filed as a public issue (scripts/propose.mjs)
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const COMMANDS = { find: 'find.mjs', lint: 'lint-markup.mjs', 'lint-css': 'lint-css.mjs', 'render-equal': 'render-equal.mjs', slim: 'slim.mjs', review: 'review.mjs' };
+const COMMANDS = { find: 'find.mjs', lint: 'lint-markup.mjs', 'lint-css': 'lint-css.mjs', 'render-equal': 'render-equal.mjs', slim: 'slim.mjs', review: 'review.mjs', propose: 'propose.mjs' };
 const [cmd, ...rest] = process.argv.slice(2);
 if (!COMMANDS[cmd]) {
   console.error(`usage: fire <${Object.keys(COMMANDS).join('|')}> [args]`);

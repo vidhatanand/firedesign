@@ -30,11 +30,17 @@
  *   surface-mismatch         (a warning) a part whose card's `surfaces` does not include the surface the page declares
  *                            with data-fd-surface="app|website|phone|email" (on <html> or any element; the nearest
  *                            ancestor that carries it decides). On a phone page a part that lists app is fine too.
+ *                            On a website, what an fd-site-shot or an fd-doc-frame-media holds is a product specimen:
+ *                            a part that lists app is fine there too (0.13); the shot and the frame are website parts.
  *                            Silent where nothing is declared. --surface <name> sets the surface for files that declare
  *                            none; --no-surface turns the rule off. An unknown data-fd-surface value is an error
  *                            (unknown-attribute-value).
  *   img-attrs                (a warning, 0.8) an <img> inside .fd-site without alt (alt="" for decoration), or without
  *                            both width and height: the browser cannot hold its place before it loads, so the page shifts
+ *   loading-without-shell    (a warning, 0.13) a page (a whole HTML document, or a fragment with fd-page) whose only content
+ *                            is bare skeleton parts (fd-skeleton, -title, -text, -avatar, -button, -tile) in layout
+ *                            wrappers: no app, site or docs shell, no page head, and no preset shaped like a screen. Keep
+ *                            the shell and the head; on first load use fd-skeleton-app (GUIDE.md, "Loading a page")
  *   Structure (0.10), from the facts on the cards' parts; scripts/lib/structure.mjs holds the rules and documents them:
  *   missing-part             a part the component requires is absent (a callout without fd-callout-icon)
  *   wrong-element            a class on a tag it does not work on, or on the native element it wraps (<select class="fd-select">)
@@ -70,7 +76,7 @@ const BAIL = Symbol('bail');
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
 export const RULES = ['unknown-class', 'unknown-attribute-value', 'unknown-element', 'unknown-icon', 'no-style',
   'no-raw-color', 'no-raw-px', 'icon-only-name', 'no-i-icon-in-framework', 'surface-mismatch', 'img-attrs',
-  'missing-part', 'wrong-element', 'wrong-parent', 'missing-attribute', 'forbidden-attribute', 'missing-child', 'bare-control'];
+  'loading-without-shell', 'missing-part', 'wrong-element', 'wrong-parent', 'missing-attribute', 'forbidden-attribute', 'missing-child', 'bare-control'];
 export const SURFACES = ['app', 'website', 'phone', 'email'];
 
 const isWs = (c) => c === ' ' || c === '\n' || c === '\t' || c === '\r' || c === '\f';
@@ -499,11 +505,14 @@ export function lintText(file, text, rawCatalog, kind, opts = {}) {
         `allowed: ${SURFACES.map((v) => `"${v}"`).join(', ')}`);
     }
     const flagged = new Set(parent ? parent.flagged : []);
+    // A specimen on a website (what an fd-site-shot or an fd-doc-frame-media holds) shows the product working: an app
+    // part is right there too. The shot and the frame themselves are website parts, checked as usual.
+    const inSpecimen = Boolean(parent?.specimen) && surface === 'website';
     if (surface && !opts.noSurface) {
       for (const id of comps) {
         const card = cat.byId.get(id)?.card;
         if (!card || !Array.isArray(card.surfaces) || flagged.has(id)) continue;
-        if (card.surfaces.includes(surface) || (surface === 'phone' && card.surfaces.includes('app'))) continue;
+        if (card.surfaces.includes(surface) || ((surface === 'phone' || inSpecimen) && card.surfaces.includes('app'))) continue;
         flagged.add(id);
         const here = (x) => { const k = cat.byId.get(x)?.card?.surfaces || []; return k.includes(surface) || (surface === 'phone' && k.includes('app')); };
         const alt = [...(card.avoidWhen || []).map((a) => a.instead), ...(card.related || [])].filter((x, i, a) => cat.byId.has(x) && x !== id && here(x) && a.indexOf(x) === i)[0];
@@ -521,7 +530,8 @@ export function lintText(file, text, rawCatalog, kind, opts = {}) {
         missing.includes('alt') ? 'add alt="…" that says what the picture shows (alt="" when it is decoration, as a backdrop is), and the picture\'s own width and height'
           : 'add the picture\'s own width and height (its pixel size): the browser holds its place before it loads, so nothing moves', 'warning');
     }
-    if (!ev.selfClosing) surfaceStack.push({ tag, surface, flagged, site: inSite || classTokens.some((c) => c.t === 'fd-site') });
+    const specimen = surface === 'website' && (inSpecimen || classTokens.some((c) => c.t === 'fd-site-shot' || c.t === 'fd-doc-frame-media'));
+    if (!ev.selfClosing) surfaceStack.push({ tag, surface, specimen, flagged, site: inSite || classTokens.some((c) => c.t === 'fd-site') });
 
     // data-* values the component defines
     for (const a of attrs) {
@@ -609,8 +619,43 @@ export function lintText(file, text, rawCatalog, kind, opts = {}) {
   for (const tree of trees) {
     for (const f of cat.structure ? checkTree(tree, cat.structure, { usesFire }) : []) report(f.node.ref.at + 1, f.rule, f.message, f.fix, f.severity);
   }
+  for (const tree of trees) {
+    const bare = loadingWithoutShell(tree);
+    if (bare) report(bare.ref.at + 1, 'loading-without-shell', 'this page loads as a bare box of skeleton bars: no shell, no page head, no shape of the screen',
+      'keep the shell and the page head and put a preset shaped like the content in the content region (fd-skeleton-table, -list, -grid, -form…); before any script, use fd-skeleton-app (GUIDE.md, "Loading a page")', 'warning');
+  }
   findings.sort((a, b) => a.line - b.line || a.col - b.col);
   return findings;
+}
+
+/* loading-without-shell: kept in its own function. A tree is reported when it is a page (a whole document, or a
+   fragment that holds fd-page) and everything it shows is bare skeleton parts inside layout wrappers. Returns the
+   first skeleton part, or null. A hole, an expression or a slot anywhere may add content, so such a tree is left. */
+const LOADING_SHELL = /^fd-(app|site|doc|skeleton-app|skeleton-page|sidebar|topbar|tabbar|page-head|page-hero|site-header|site-head)$/;
+const LOADING_SCREEN = /^fd-skeleton-(card|grid|table|stat|chart|list|thread|form|hero)$/;
+const LOADING_PART = /^fd-skeleton(-title|-text|-avatar|-button|-tile)?$/;
+const LOADING_LAYOUT = /^fd-(page|frame|band|stack|row|grid|column|split|split-main|grow|cq)$/;
+const LOADING_QUIET = new Set(['head', 'title', 'meta', 'link', 'script', 'style', 'noscript', 'template']);
+function loadingWithoutShell(tree) {
+  let isPage = tree.tag === '#document';
+  let first = null;
+  let other = false;
+  const visit = (node, inPart) => {
+    if (other || LOADING_QUIET.has(node.tag)) return;
+    if (node.dynamic) { other = true; return; }
+    if (node.classes?.includes('fd-page')) isPage = true;
+    const part = node.classes?.some((c) => LOADING_PART.test(c));
+    for (const c of node.classes || []) {
+      if (LOADING_SHELL.test(c) || LOADING_SCREEN.test(c)) { other = true; return; }
+      if (!LOADING_PART.test(c) && !LOADING_LAYOUT.test(c)) { other = true; return; }
+    }
+    if (node.text && !inPart && !['#document', '#fragment', 'html', 'body'].includes(node.tag)) { other = true; return; }
+    if (part && !first) first = node;
+    if (!node.classes?.length && !['#document', '#fragment', 'html', 'body', 'div', 'main', 'section', 'span'].includes(node.tag) && !inPart) { other = true; return; }
+    for (const child of node.children || []) visit(child, inPart || part);
+  };
+  visit(tree, false);
+  return isPage && first && !other ? first : null;
 }
 
 /** The tokeniser on its own (fire slim reads product source with it): the open/close/text events of the markup, and

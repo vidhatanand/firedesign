@@ -27,6 +27,7 @@
   --fd-column-xl: 768px;
   /* utilities and motion */
   --fd-base-sr-size: 1px;             /* the visually hidden box */
+  --fd-skip-inset: var(--fd-space-3);  /* the skip link's distance from the top start corner */
   --fd-base-rise: 8px;                /* how far .fd-rise travels */
   --fd-base-spin: 0.8s;               /* .fd-spin (the button spinner uses --fd-loop-spin) */
   --fd-base-motion-off: 0.01ms;       /* animation length when the user asks for reduced motion */
@@ -69,6 +70,8 @@ hr { border: 0; border-top: var(--fd-hairline) solid var(--fd-line-faint); margi
 :focus-visible { outline: none; box-shadow: var(--fd-ring); border-radius: var(--fd-radius-sm); }
 /* Focus moved by script to a non-control (focusQuiet in core.js): the element holds focus, the ring stays off. */
 [data-fd-focus="quiet"]:focus-visible { box-shadow: none; }
+/* The page's main region takes focus from the skip link (main[tabindex="-1"]); a ring around the whole page says nothing. */
+main[tabindex="-1"]:focus-visible { box-shadow: none; }
 
 /* Scrollbars: thin, ink-tinted, invisible until needed. */
 * { scrollbar-width: thin; scrollbar-color: var(--fd-a16) transparent; }
@@ -118,6 +121,22 @@ hr { border: 0; border-top: var(--fd-hairline) solid var(--fd-line-faint); margi
 .fd-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .fd-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .fd-sr-only { position: absolute; width: var(--fd-base-sr-size); height: var(--fd-base-sr-size); padding: 0; margin: calc(var(--fd-base-sr-size) * -1); overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ---------- Skip link (0.13) ----------
+   <a class="fd-skip" href="#main">Skip to content</a>, first in <body>; the target is <main id="main" tabindex="-1">.
+   Out of sight until it has focus, then a raised control at the top start corner, above everything. No script; it is
+   fixed (absolute in a contained shell), so showing it moves nothing. */
+.fd-skip {
+  position: fixed; inset-block-start: var(--fd-skip-inset); inset-inline-start: var(--fd-skip-inset); z-index: var(--fd-z-tooltip);
+  display: inline-flex; align-items: center;
+  height: var(--fd-control-md); padding-inline: var(--fd-control-px); border-radius: var(--fd-radius-lg);
+  background: var(--fd-surface-raised); color: var(--fd-text); box-shadow: var(--fd-shadow-lg);
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); white-space: nowrap;
+}
+.fd-skip:not(:focus) { width: var(--fd-base-sr-size); height: var(--fd-base-sr-size); padding: 0; margin: calc(var(--fd-base-sr-size) * -1); overflow: hidden; clip-path: inset(50%); border: 0; box-shadow: none; }
+.fd-skip:focus-visible { border-radius: var(--fd-radius-lg); box-shadow: var(--fd-ring), var(--fd-shadow-lg); }
+/* In a contained shell (a preview box: fd-app, fd-site or fd-doc with data-contained) it sits in the box's corner. */
+[data-contained] > .fd-skip { position: absolute; }
 
 /* ---------- Links ---------- */
 .fd-link {

@@ -67,7 +67,7 @@ const ERRORS = new Set(['unknown-token', 'reserved-prefix', 'duplicate-token', '
 // Documented component and layout parameters: set through data-fd-vars or CSS, read by Fire's CSS. They are not global
 // tokens, so the contract does not list them (a contract record for them would replace this list).
 export const PARAMS = new Set(['--fd-gap', '--fd-min', '--fd-cols', '--fd-i', '--fd-panel-w', '--fd-chat-h', '--fd-swatch-color',
-  '--fd-progress', '--fd-table-max']);
+  '--fd-progress', '--fd-table-max', '--fd-skeleton-delay', '--fd-skeleton-late']);
 
 const MASK = '\u0002';   // the inside of a string
 const HOLE = '\u0003';   // a ${…} in a css`` template

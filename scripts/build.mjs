@@ -18,6 +18,8 @@ const steps = [
   ['build-contract.mjs', check ? ['--check'] : []],
   ['build-catalog.mjs', check ? ['--check'] : []],   // strict: every component has a valid card
   ['build-index.mjs', check ? ['--check'] : []],     // the search index, from the catalogue
+  ['build-skill.mjs', check ? ['--check'] : []],     // skills/fire/screens.md and parts.md: the lists the skill reads whole
+  ['propose.mjs', check ? ['forms', '--check'] : ['forms']],   // .github/ISSUE_TEMPLATE, from the proposal's own text
   ['build-classes.mjs', check ? ['--check'] : []],   // docs/_ref/CLASSES.md: every class, from the catalogue
   ['build-slim-map.mjs', check ? ['--check'] : []],  // contract/slim-map.json: what fire slim knows of Fire's sources
   ['build-pictures.mjs', check ? ['--check'] : [], { onlyCheck: true }],   // a picture for every index entry (the render is `npm run build:pictures`)

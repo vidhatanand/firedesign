@@ -235,7 +235,7 @@ test('1. data-variant is not pooled across the forms module', () => {
 test('2. data-state is not pooled: each component has its own, as state the scripts set', () => {
   assert.deepEqual(comp('combobox').stateAttributes['data-state'], ['closed', 'open']);
   assert.deepEqual(comp('secret').stateAttributes['data-state'], ['masked', 'revealed']);
-  assert.deepEqual(comp('file-upload').stateAttributes['data-state'], ['done', 'dragover', 'error', 'uploading']);
+  assert.deepEqual(comp('file-upload').stateAttributes['data-state'], ['done', 'dragover', 'error', 'paused', 'uploading']);   // paused: 0.13
   assert.deepEqual(comp('field').stateAttributes['data-state'], ['limit', 'near']);
   for (const id of ['combobox', 'field', 'file-upload', 'secret']) {
     assert.equal(comp(id).attributes['data-state'], undefined, `${id}: data-state is not a prop`);

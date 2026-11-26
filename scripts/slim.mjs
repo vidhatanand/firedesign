@@ -257,7 +257,9 @@ function themeInfo(record, theme) {
 export function slimCss({ K, M, tweaks }, found, { map, catalog, level, theme, typeSpec }) {
   const classOf = new Map(Object.entries(catalog.classes));
   const tagOf = new Map(catalog.components.filter((c) => c.element).map((c) => [c.element, c.id]));
-  const moduleText = [...M.keys()].map((m) => readFire(map.modules[m].file).replace(/\/\*[\s\S]*?\*\//g, "")).join("\n");   // code, not the headers
+  // Kept modules' code (not their headers), and their helpers' (skeleton.js writes the presets texture.js fills).
+  const helperFiles = [...new Set([...M.keys()].flatMap((m) => (map.modules[m].imports || []).filter((i) => !map.modules[i] && i !== 'core' && i !== 'icons').map((i) => `fire/js/${i}.js`)))];
+  const moduleText = [...[...M.keys()].map((m) => map.modules[m].file), ...helperFiles].map((f) => readFire(f).replace(/\/\*[\s\S]*?\*\//g, "")).join("\n");
   const said = (name) => found.text.includes(name) || moduleText.includes(name) || new RegExp(`dataset\\.${camel(name)}\\b|dataset\\[['"]${camel(name)}`).test(found.text + moduleText);
   const unknown = new Set();
   const variants = new Set(catalog.components.flatMap((c) => [...Object.keys(c.attributes || {}), ...Object.values(c.partAttributes || {}).flatMap(Object.keys)])

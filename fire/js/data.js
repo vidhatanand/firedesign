@@ -12,7 +12,8 @@
  *             in each row. Rows get aria-selected; the bulk bar (.fd-table-bulk) slides up with [data-bulk-count] filled in.
  *             Shift-click selects a range. Escape clears. [data-bulk-clear] clears. Row identity is tr[data-value] (or id).
  *  Expand     <button class="fd-table-expand" aria-expanded="false" aria-controls="detail-id"> and a following
- *             <tr class="fd-table-detail" id="detail-id" hidden>.
+ *             <tr class="fd-table-detail" id="detail-id" hidden>. When the table stacks, the toggle is a full-width button
+ *             at the foot of the card whose words are the expand cell's data-label (filled from the header text).
  *  Rows       tr[data-href] navigates on click or Enter (tabindex is added). Prefer a stretched .fd-table-link in markup.
  *  Groups     <tbody class="fd-table-group" [data-state="closed"]> whose first row is <tr class="fd-table-group-head"> with a
  *             <th scope="rowgroup" colspan="…">. The th is given scope and an id that labels the tbody (aria-labelledby), and
@@ -212,7 +213,8 @@ function syncLabels(table) {
       const label = labels[column] || '';
       column += td.colSpan || 1;
       if (td.hasAttribute('data-label') || td.hasAttribute('data-stack-title')) return;
-      if (td.hasAttribute('data-actions') || td.hasAttribute('data-select') || td.hasAttribute('data-expand')) return;
+      // an expand cell keeps its caption: it is the words of the stacked card's full-width toggle
+      if (td.hasAttribute('data-actions') || td.hasAttribute('data-select')) return;
       if (label) td.setAttribute('data-label', label);
     });
   });

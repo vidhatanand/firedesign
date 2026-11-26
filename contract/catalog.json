@@ -1,5 +1,5 @@
 {
-  "fire": "0.12.4",
+  "fire": "0.13.0",
   "components": [
     {
       "id": "accordion",
@@ -461,7 +461,8 @@
         "purpose": "The app shell: a sidebar on the left, a main column with the top bar and the page, and a mobile nav. The sidebar is expanded or a 64px icon rail; the choice is remembered. The shell is a size container, so under 900px of its own width the sidebar gives way to the top bar and a menu button. It also holds the floating support button.",
         "useWhen": [
           "The product has several screens that share navigation, an account and a top bar.",
-          "A screen is a working page inside the product, not a single task on its own page."
+          "A screen is a working page inside the product, not a single task on its own page.",
+          "Its first load: the same geometry as fd-skeleton-app in the page's static HTML, until the shell mounts."
         ],
         "avoidWhen": [
           {
@@ -556,7 +557,8 @@
           "topbar",
           "page",
           "mobile-nav",
-          "screen"
+          "screen",
+          "skeleton"
         ],
         "keyboard": [
           {
@@ -4455,6 +4457,7 @@
         "fd-codeblock-tab",
         "fd-codeblock-tabs",
         "fd-copied-label",
+        "fd-copy-next",
         "fd-syntax-comment",
         "fd-syntax-fn",
         "fd-syntax-key",
@@ -4466,6 +4469,9 @@
       ],
       "attributes": {
         "data-collapse": [
+          "*"
+        ],
+        "data-copy-next": [
           "*"
         ],
         "data-expanded": [
@@ -4508,16 +4514,19 @@
       },
       "stateAttributes": {
         "data-state": [
-          "copied"
+          "copied",
+          "shown"
         ]
       },
       "element": "fd-code",
-      "events": [],
+      "events": [
+        "fd:copy"
+      ],
       "docs": "docs/code.html#codeblock",
       "card": {
         "id": "codeblock",
         "job": "Show code a developer will read or paste, with copy, line numbers and language tabs.",
-        "purpose": "A framed block on a sunken well with a header and a pre. Fire tokenises JSON, shell and cURL, JavaScript and TypeScript, and Python; unknown text stays plain. The header holds a filename or language tabs, never both. Options: line numbers, a highlighted range, a folded height, soft wrap. Copy takes the raw text.",
+        "purpose": "A framed block on a sunken well with a header and a pre. Fire tokenises JSON, shell and cURL, JavaScript and TypeScript, and Python; unknown text stays plain. The header holds a filename or language tabs, never both. Options: line numbers, a highlighted range, a folded height, soft wrap. Copy takes the raw text; data-copy-next adds the step after copying in a line under the block.",
         "useWhen": [
           "A request, a config or a response is shown in docs or a detail panel.",
           "The same request is offered in several languages: use tabs; the choice syncs across the page.",
@@ -4552,7 +4561,9 @@
           "pre",
           "source view",
           "code fence",
-          "code panel"
+          "code panel",
+          "next step after copying",
+          "what to do after copying"
         ],
         "surfaces": [
           "app",
@@ -4573,6 +4584,10 @@
           {
             "name": "wrapped",
             "how": "data-wrap; toggled by the wrap button"
+          },
+          {
+            "name": "next step shown",
+            "how": "data-state=\"shown\" on the fd-copy-next after Copy; it stays until the page changes"
           }
         ],
         "variants": [
@@ -4600,6 +4615,11 @@
             "attribute": "data-wrap",
             "value": "",
             "useWhen": "Soft wrap long lines."
+          },
+          {
+            "attribute": "data-copy-next",
+            "value": "*",
+            "useWhen": "The step after copying is one a first-time reader gets wrong: it shows under the block once Copy is pressed."
           }
         ],
         "parts": [
@@ -4641,6 +4661,10 @@
           {
             "class": "fd-copied-label",
             "role": "The \"Copied\" text shown after copy."
+          },
+          {
+            "class": "fd-copy-next",
+            "role": "The line right after a block with data-copy-next (code block, snippet, copy field): empty, its space held, until Copy shows the step. Added if missing."
           },
           {
             "class": "fd-codeblock-body",
@@ -5413,7 +5437,8 @@
           "An app has many pages and actions and power users want the keyboard.",
           "People should reach a recent run, a doc or a setting without navigating.",
           "Actions need shortcuts and hints shown beside them.",
-          "A search should return records, such as runs, keys or monitors, beside pages and actions: register a records group."
+          "A search should return records, such as runs, keys or monitors, beside pages and actions: register a records group.",
+          "The search of a docs site: the docs shell's palette (data-fd-doc-search) finds pages, endpoints and guides on Cmd+K."
         ],
         "avoidWhen": [
           {
@@ -5444,7 +5469,8 @@
           "go to anything"
         ],
         "surfaces": [
-          "app"
+          "app",
+          "website"
         ],
         "data": [
           "list"
@@ -6259,6 +6285,9 @@
         "fd-copy-field-value"
       ],
       "attributes": {
+        "data-copy-next": [
+          "*"
+        ],
         "data-mask": [
           "end",
           "full",
@@ -6302,7 +6331,9 @@
           "copy to clipboard",
           "copy input",
           "read-only field",
-          "clipboard field"
+          "clipboard field",
+          "next step after copying",
+          "what to do after copying"
         ],
         "surfaces": [
           "app",
@@ -6317,6 +6348,10 @@
           {
             "name": "copied",
             "how": "data-state=\"copied\" for a moment after the copy"
+          },
+          {
+            "name": "next step shown",
+            "how": "data-copy-next: after Copy the step shows in the fd-copy-next line under the field (data-state=\"shown\")"
           }
         ],
         "variants": [
@@ -6334,6 +6369,11 @@
             "attribute": "data-mask",
             "value": "full",
             "useWhen": "Show only dots."
+          },
+          {
+            "attribute": "data-copy-next",
+            "value": "*",
+            "useWhen": "The step after copying is one a first-time user gets wrong (where to paste an invite link): it shows in an fd-copy-next line under the field once Copy is pressed."
           }
         ],
         "parts": [
@@ -7771,9 +7811,6 @@
         "fd-doc-shot-bar",
         "fd-doc-shot-code",
         "fd-doc-shot-pane",
-        "fd-doc-step",
-        "fd-doc-step-body",
-        "fd-doc-step-title",
         "fd-doc-switch",
         "fd-doc-table",
         "fd-doc-tabs",
@@ -7782,6 +7819,7 @@
         "fd-doc-toc-title",
         "fd-doc-top",
         "fd-doc-top-end",
+        "fd-doc-top-links",
         "fd-doc-top-row",
         "fd-doc-top-start",
         "fd-doc-updated",
@@ -7847,11 +7885,6 @@
           "data-tone": [
             "accent",
             "strong"
-          ]
-        },
-        "fd-doc-step": {
-          "data-state": [
-            "done"
           ]
         },
         "fd-doc-switch": {
@@ -7967,7 +8000,7 @@
           {
             "attribute": "data-row",
             "value": "tools",
-            "useWhen": "The top bar's first row: brand, search, repository, theme, sign up."
+            "useWhen": "The top bar's first row: brand, search, the website's links, repository, theme, sign up."
           },
           {
             "attribute": "data-row",
@@ -8017,6 +8050,13 @@
           {
             "class": "fd-doc-search",
             "role": "The search pill that opens the command palette."
+          },
+          {
+            "class": "fd-doc-top-links",
+            "role": "The website's main links in the tools row, the current one a[aria-current=\"page\"]; hidden below 900px.",
+            "element": [
+              "nav"
+            ]
           },
           {
             "class": "fd-doc-nav",
@@ -8796,7 +8836,7 @@
     },
     {
       "id": "doc-setup",
-      "name": "Setup steps",
+      "name": "Setup card",
       "family": "Documentation",
       "kind": "component",
       "root": "fd-doc-setup",
@@ -8810,8 +8850,7 @@
         "fd-doc-setup-panel",
         "fd-doc-setup-tile",
         "fd-doc-setup-tiles",
-        "fd-doc-setup-title",
-        "fd-doc-steps"
+        "fd-doc-setup-title"
       ],
       "attributes": {},
       "partAttributes": {},
@@ -8824,10 +8863,9 @@
       "card": {
         "id": "doc-setup",
         "job": "Get a reader connected by choosing their tool, with the steps for it below.",
-        "purpose": "A card with a row of tiles (one per tool or client) and a panel for the chosen one. The chosen tile has an accent top rule and a 4% accent wash. Use it once, near the top of an introduction. The same file also holds the numbered steps (fd-doc-steps), where each step holds prose and code on a rail.",
+        "purpose": "A card with a row of tiles (one per tool or client) and a panel for the chosen one. The chosen tile has an accent top rule and a 4% accent wash. Use it once, near the top of an introduction. Numbered steps for a setup everyone follows are doc-steps.",
         "useWhen": [
-          "The same setup differs by tool and the reader needs only their own.",
-          "A setup must happen in order and each step has prose and code."
+          "The same setup differs by tool and the reader needs only their own."
         ],
         "avoidWhen": [
           {
@@ -8841,6 +8879,10 @@
           {
             "when": "A single command to copy.",
             "instead": "snippet"
+          },
+          {
+            "when": "One setup for everyone, in order, with prose and code per step.",
+            "instead": "doc-steps"
           }
         ],
         "aka": [
@@ -8849,8 +8891,7 @@
           "getting started",
           "client picker",
           "integration setup",
-          "MCP setup",
-          "numbered steps"
+          "MCP setup"
         ],
         "surfaces": [
           "website"
@@ -8890,14 +8931,11 @@
           {
             "class": "fd-doc-setup-hint",
             "role": "A muted line under a step."
-          },
-          {
-            "class": "fd-doc-steps",
-            "role": "Numbered steps on a rail; each step holds prose and code."
           }
         ],
         "related": [
           "doc",
+          "doc-steps",
           "tabs",
           "steps",
           "snippet",
@@ -8920,6 +8958,117 @@
           "fire/js/docsite.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "doc-steps",
+      "name": "Numbered steps",
+      "family": "Documentation",
+      "kind": "component",
+      "root": "fd-doc-steps",
+      "classes": [
+        "fd-doc-step",
+        "fd-doc-step-body",
+        "fd-doc-step-title",
+        "fd-doc-steps"
+      ],
+      "attributes": {},
+      "partAttributes": {
+        "fd-doc-step": {
+          "data-state": [
+            "done"
+          ]
+        }
+      },
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/documentation.html#steps",
+      "card": {
+        "id": "doc-steps",
+        "job": "Follow a setup in order, one numbered step at a time, each with its prose and code.",
+        "purpose": "An ordered list on a rail: each step has a number disc, a title and a body of prose, code or media, and a done step shows a tick. Pure CSS: it needs no script, so a site's steps rail (fd-site-steps data-layout=\"rail\") keeps none of the docs behaviour in a slim build.",
+        "useWhen": [
+          "A setup must happen in order and each step has prose and code.",
+          "A site's steps section with code or media beside each step: fd-site-steps with data-layout=\"rail\" holds this list."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The setup differs by tool and the reader picks theirs first.",
+            "instead": "doc-setup"
+          },
+          {
+            "when": "A first-run flow or a wizard in the product.",
+            "instead": "steps"
+          },
+          {
+            "when": "Live progress of a run or an agent's work.",
+            "instead": "run-steps"
+          }
+        ],
+        "aka": [
+          "numbered steps",
+          "step list",
+          "install steps",
+          "how to",
+          "tutorial steps"
+        ],
+        "surfaces": [
+          "website"
+        ],
+        "data": [
+          "list",
+          "text"
+        ],
+        "states": [
+          {
+            "name": "done",
+            "how": "data-state=\"done\" on the fd-doc-step: a tick in the disc"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-doc-steps",
+            "role": "The ordered list; it numbers its steps.",
+            "element": [
+              "ol"
+            ],
+            "skeleton": "<ol class=\"fd-doc-steps\"><li class=\"fd-doc-step\"><h3 class=\"fd-doc-step-title\">…</h3><div class=\"fd-doc-step-body\">…</div></li></ol>"
+          },
+          {
+            "class": "fd-doc-step",
+            "role": "One step: its number disc and the rail to the next.",
+            "element": [
+              "li"
+            ],
+            "parent": [
+              "fd-doc-steps"
+            ]
+          },
+          {
+            "class": "fd-doc-step-title",
+            "role": "The action the step asks for."
+          },
+          {
+            "class": "fd-doc-step-body",
+            "role": "Prose, code or media; add fd-prose for rendered Markdown."
+          }
+        ],
+        "related": [
+          "doc-setup",
+          "site-steps",
+          "steps",
+          "codeblock"
+        ],
+        "keyboard": [],
+        "example": "docs/documentation.html#steps",
+        "provenance": [
+          "docs/documentation.html",
+          "docs/site-sections.html#steps",
+          "fire/components/docsite.css"
+        ],
+        "since": "0.13.0"
       }
     },
     {
@@ -10025,6 +10174,7 @@
         "fd-dropzone-text",
         "fd-dropzone-title",
         "fd-file",
+        "fd-file-actions",
         "fd-file-bar",
         "fd-file-icon",
         "fd-file-main",
@@ -10049,6 +10199,7 @@
           "done",
           "dragover",
           "error",
+          "paused",
           "uploading"
         ]
       },
@@ -10061,10 +10212,11 @@
       "card": {
         "id": "file-upload",
         "job": "Add files by dropping them or browsing; one image as a settings row for a logo.",
-        "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Accepted files appear as rows with progress, status and size. fd:files is cancelable so your app can run the upload and report with setFileProgress(); data-max-mb and accept reject files that do not fit. With data-layout=\"logo\" it is one row for a single image: preview, Upload, Remove, a progress bar and a field error. Fire uploads nothing.",
+        "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Files appear as rows with progress, size, a status line and their own buttons. fd:files is cancelable so your app can run the upload and report with setFileProgress(); data-max-mb and accept reject files that do not fit. With data-layout=\"logo\" it is one row for a single image: preview, Upload, Remove, a progress bar and a field error. Fire uploads nothing.",
         "useWhen": [
           "People attach one or several files, such as a sitemap, a CSV or a document.",
           "Upload progress and per-file errors should show as rows.",
+          "Large uploads that people pause, resume, retry or cancel one file at a time, with the speed and time left in words.",
           "A team uploads its logo or another single image in a settings row, with a preview and a way to remove it."
         ],
         "avoidWhen": [
@@ -10089,7 +10241,12 @@
           "attachment",
           "logo upload",
           "logo field",
-          "image upload row"
+          "image upload row",
+          "resumable upload",
+          "pause and resume an upload",
+          "upload queue",
+          "large file upload",
+          "upload progress rows"
         ],
         "surfaces": [
           "app",
@@ -10107,6 +10264,10 @@
           {
             "name": "uploading",
             "how": "data-state=\"uploading\" on a file row"
+          },
+          {
+            "name": "paused",
+            "how": "data-state=\"paused\" on a file row: the bar holds still in a neutral tone; the status says \"Paused at 42%\" or the message"
           },
           {
             "name": "error",
@@ -10190,7 +10351,14 @@
           },
           {
             "class": "fd-file-status",
-            "role": "Progress, ready or the reason it failed."
+            "role": "Progress, ready or the reason it failed; a sentence wraps (\"42% · 12.3 MB/s · about 2 min left\")."
+          },
+          {
+            "class": "fd-file-actions",
+            "role": "The last column for several icon buttons (Pause, Resume, Try again, Cancel, Open), each named for its file; under the text on a narrow row.",
+            "parent": [
+              "fd-file"
+            ]
           },
           {
             "class": "fd-file-bar",
@@ -13689,6 +13857,10 @@
           "A change shows at once at half strength and settles when the server confirms."
         ],
         "avoidWhen": [
+          {
+            "when": "A whole page waiting to load: never a spinner or a box of bars in the middle of an empty page.",
+            "instead": "skeleton"
+          },
           {
             "when": "A page or a region whose layout is known; sketch it.",
             "instead": "skeleton"
@@ -20727,6 +20899,9 @@
         "fd-sheet-title"
       ],
       "attributes": {
+        "data-modeless": [
+          ""
+        ],
         "data-side": [
           "",
           "bottom",
@@ -20734,6 +20909,7 @@
           "right"
         ],
         "data-size": [
+          "half",
           "lg",
           "md"
         ],
@@ -20771,9 +20947,10 @@
       "card": {
         "id": "sheet",
         "job": "Show the detail of something picked from a list without losing the list.",
-        "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. Escape, a close button and a backdrop click close it. Focus never opens on a footer action. It can run in steps and fires fd:open, fd:close and fd:change.",
+        "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. Modal by default: Escape, a close button and a backdrop click close it. data-modeless leaves the page in use: no scrim or trap, it swaps content when opened from another row, and is a half-height bottom sheet on phones. Fires fd:open, fd:close and fd:change.",
         "useWhen": [
           "A row in a table or a log opens its full detail beside the list.",
+          "A detail panel beside something the person keeps working with, such as a map, a canvas or a live list (data-modeless).",
           "A filter or navigation panel slides in from the left on a small screen.",
           "A multi-step flow needs more room than a dialog."
         ],
@@ -20787,8 +20964,12 @@
             "instead": "popover"
           },
           {
-            "when": "A permanent side panel.",
+            "when": "A permanent column beside the page, never dismissed.",
             "instead": "split"
+          },
+          {
+            "when": "A task the person must finish or cancel, shown in a modeless sheet.",
+            "instead": "The modal sheet (leave out data-modeless), or a dialog"
           },
           {
             "when": "A preview on hover.",
@@ -20802,7 +20983,13 @@
           "off-canvas",
           "bottom sheet",
           "inspector",
-          "detail pane"
+          "detail pane",
+          "right side drawer",
+          "detail drawer",
+          "modeless drawer",
+          "non-modal panel",
+          "panel that keeps the page usable",
+          "half-width drawer"
         ],
         "surfaces": [
           "app",
@@ -20816,7 +21003,7 @@
         "states": [
           {
             "name": "open",
-            "how": "data-state=\"open\"; openDialog(id) or [data-fd-dialog-open]"
+            "how": "data-state=\"open\"; openDialog(id) or [data-fd-dialog-open] / [data-fd-sheet-open]"
           },
           {
             "name": "dragging",
@@ -20825,6 +21012,14 @@
           {
             "name": "step",
             "how": "data-step on a section; [data-fd-dialog-step] buttons move between steps"
+          },
+          {
+            "name": "current item",
+            "how": "aria-expanded=\"true\" on the trigger a modeless sheet shows, \"false\" on its other triggers"
+          },
+          {
+            "name": "loading",
+            "how": "aria-busy=\"true\" on a modeless sheet while detail.wait(promise) from fd:open holds"
           }
         ],
         "variants": [
@@ -20844,6 +21039,11 @@
             "useWhen": "A phone-style sheet."
           },
           {
+            "attribute": "data-modeless",
+            "value": "",
+            "useWhen": "The page behind stays in use: no scrim, lock or trap, and opening it from another row swaps its content."
+          },
+          {
             "attribute": "data-size",
             "value": "sm",
             "useWhen": "A narrow panel."
@@ -20852,6 +21052,11 @@
             "attribute": "data-size",
             "value": "lg",
             "useWhen": "Wide content such as a response body, 560px."
+          },
+          {
+            "attribute": "data-size",
+            "value": "half",
+            "useWhen": "A full record, a decision or a comparison that needs room: half the window, and never narrower than lg. On a phone it is the bottom sheet like every size."
           },
           {
             "attribute": "data-size",
@@ -20921,11 +21126,15 @@
         "keyboard": [
           {
             "keys": "Escape",
-            "does": "Closes the sheet and returns focus to the trigger."
+            "does": "Closes the sheet and returns focus to the trigger; a modeless sheet only while focus is inside it."
           },
           {
             "keys": "Tab",
-            "does": "Stays inside the sheet."
+            "does": "Stays inside a modal sheet. A modeless sheet follows its trigger: Tab on it goes in, Tab past the end goes on."
+          },
+          {
+            "keys": "Shift+Tab",
+            "does": "From the start of a modeless sheet, back to its trigger."
           }
         ],
         "example": "docs/overlays.html#sheets",
@@ -21561,7 +21770,8 @@
         "purpose": "The reading page, as one section: a head (breadcrumb, eyebrow, title, standfirst, authors and date, actions), an optional cover, the body (fd-prose at reading size, with figures, tables and pull quotes breaking out of the measure) and a foot of ruled rows (notes, references, cite this, tags, copy link, the authors, a sign-up). plain is one column, aside adds a sticky rail that becomes a disclosure below desktop, cover spans the head over a wide frame.",
         "useWhen": [
           "A post, a newsletter issue or a story on the site.",
-          "A report or a research paper read on the page before or instead of the PDF."
+          "A report or a research paper read on the page before or instead of the PDF.",
+          "A privacy policy, terms of service or another legal page: aside, with the section list in the rail, and \"Last changed\" as a time in fd-site-article-meta."
         ],
         "avoidWhen": [
           {
@@ -21582,7 +21792,11 @@
           "blog post",
           "report",
           "paper",
-          "long read"
+          "long read",
+          "privacy policy",
+          "terms of service",
+          "legal page",
+          "policy"
         ],
         "surfaces": [
           "website"
@@ -24043,7 +24257,7 @@
         "avoidWhen": [
           {
             "when": "Steps in a docs article.",
-            "instead": "doc-setup"
+            "instead": "doc-steps"
           },
           {
             "when": "A wizard the user moves through.",
@@ -24111,7 +24325,7 @@
         ],
         "related": [
           "steps",
-          "doc-setup",
+          "doc-steps",
           "codeblock"
         ],
         "keyboard": [],
@@ -24132,6 +24346,16 @@
       "classes": [
         "fd-shimmer",
         "fd-skeleton",
+        "fd-skeleton-app",
+        "fd-skeleton-app-account",
+        "fd-skeleton-app-brand",
+        "fd-skeleton-app-head",
+        "fd-skeleton-app-main",
+        "fd-skeleton-app-nav",
+        "fd-skeleton-app-page",
+        "fd-skeleton-app-side",
+        "fd-skeleton-app-tabbar",
+        "fd-skeleton-app-top",
         "fd-skeleton-avatar",
         "fd-skeleton-button",
         "fd-skeleton-card",
@@ -24153,6 +24377,7 @@
         "fd-skeleton-form-field",
         "fd-skeleton-grid",
         "fd-skeleton-hero",
+        "fd-skeleton-late",
         "fd-skeleton-list",
         "fd-skeleton-list-row",
         "fd-skeleton-list-text",
@@ -24178,11 +24403,23 @@
         "fd-skeleton-tile",
         "fd-skeleton-title"
       ],
-      "attributes": {},
+      "attributes": {
+        "data-when": [
+          "loading"
+        ]
+      },
       "partAttributes": {
         "fd-shimmer": {
           "data-tone": [
             "accent"
+          ]
+        },
+        "fd-skeleton-app": {
+          "data-contained": [
+            ""
+          ],
+          "data-sidebar": [
+            "collapsed"
           ]
         },
         "fd-skeleton-avatar": {
@@ -24192,6 +24429,9 @@
             "24",
             "40",
             "48"
+          ],
+          "data-when": [
+            "loading"
           ]
         },
         "fd-skeleton-button": {
@@ -24201,6 +24441,9 @@
           ],
           "data-square": [
             ""
+          ],
+          "data-when": [
+            "loading"
           ]
         },
         "fd-skeleton-chart": {
@@ -24213,12 +24456,29 @@
             ""
           ]
         },
+        "fd-skeleton-late": {
+          "data-fd-late": [
+            "shown",
+            "wait"
+          ]
+        },
         "fd-skeleton-page-toolbar": {
           "data-search": [
             ""
           ]
         },
         "fd-skeleton-text": {
+          "data-lines": [
+            "",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8"
+          ],
           "data-size": [
             "lg",
             "sm",
@@ -24232,6 +24492,9 @@
             "24",
             "32",
             "48"
+          ],
+          "data-when": [
+            "loading"
           ]
         },
         "fd-skeleton-title": {
@@ -24246,6 +24509,9 @@
             "lead",
             "mono",
             "stat"
+          ],
+          "data-when": [
+            "loading"
           ]
         }
       },
@@ -24256,13 +24522,19 @@
       "card": {
         "id": "skeleton",
         "job": "Hold a place for content that is loading, with the same shape as the real thing.",
-        "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button and tile. Presets for cards, grids, tables, stats, charts, lists, threads, forms, a hero and a whole page fill themselves from an empty element. Skeletons are aria-hidden; set aria-busy on the container.",
+        "purpose": "Blocks with the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button, tile. Presets fill themselves from an empty element; fire-design/skeleton returns the same markup for static HTML. fd-skeleton-app is the first load. In a loading region a skeleton waits a moment before it shows.",
         "useWhen": [
-          "A region has a known layout and its data is on the way.",
-          "A route paints for the first time and the page needs rail, top bar and table in place.",
-          "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false)."
+          "A region has a known layout and its data is on the way: the preset shaped like it, a table for a table, a list for a list.",
+          "The first load, before any script: fd-skeleton-app in the page's static HTML, with the shell's own geometry.",
+          "Moving between pages: the shell and the page head stay, and only the content region is a skeleton.",
+          "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false).",
+          "A load can be slow: one fd-skeleton-late line in the loading region says so after a few seconds."
         ],
         "avoidWhen": [
+          {
+            "when": "A whole page drawn as a bare box of bars, with no shell and no page head.",
+            "instead": "Keep the shell and the head; use fd-skeleton-app on first load, or a preset in the content region"
+          },
           {
             "when": "A small control or one line of text.",
             "instead": "loader"
@@ -24286,7 +24558,13 @@
           "ghost loader",
           "content loader",
           "loading state",
-          "placeholder blocks"
+          "placeholder blocks",
+          "loading screen",
+          "app loading screen",
+          "page loading",
+          "first load",
+          "still loading",
+          "slow load"
         ],
         "surfaces": [
           "app",
@@ -24299,11 +24577,15 @@
         "states": [
           {
             "name": "loading",
-            "how": "aria-busy=\"true\" on the container; data-fd-loading=\"true\" for a swap"
+            "how": "aria-busy=\"true\" on the container; data-fd-loading=\"true\" for a swap, shown after --fd-skeleton-delay"
           },
           {
             "name": "ready",
             "how": "setLoading(el, false); the skeleton fades and the content rises 8px"
+          },
+          {
+            "name": "late",
+            "how": "fd-skeleton-late shows after --fd-skeleton-late and is announced once; it goes when loading ends"
           },
           {
             "name": "stagger",
@@ -24311,6 +24593,16 @@
           }
         ],
         "variants": [
+          {
+            "attribute": "data-sidebar",
+            "value": "collapsed",
+            "useWhen": "An app skeleton whose shell starts with the sidebar as a 64px rail."
+          },
+          {
+            "attribute": "data-contained",
+            "value": "",
+            "useWhen": "An app skeleton that fills its parent's box, in docs and previews, like a contained app shell."
+          },
           {
             "attribute": "data-variant",
             "value": "bars",
@@ -24439,6 +24731,77 @@
             "role": "A page hero."
           },
           {
+            "class": "fd-skeleton-app",
+            "role": "The first-load app skeleton in static HTML (0.13.0): the shell's geometry, drawn without script. role=\"status\" and a label."
+          },
+          {
+            "class": "fd-skeleton-app-side",
+            "role": "The sidebar column; hidden under 900px.",
+            "parent": [
+              "fd-skeleton-app"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-brand",
+            "role": "The sidebar head: the brand's mark and name.",
+            "parent": [
+              "fd-skeleton-app-side"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-nav",
+            "role": "Nav rows: one empty <i> per row.",
+            "parent": [
+              "fd-skeleton-app-side"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-account",
+            "role": "The account row at the sidebar's foot.",
+            "parent": [
+              "fd-skeleton-app-side"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-main",
+            "role": "The main column: top bar and page.",
+            "parent": [
+              "fd-skeleton-app"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-top",
+            "role": "The top bar: four empty <i> (title, search, two buttons).",
+            "parent": [
+              "fd-skeleton-app-main"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-page",
+            "role": "The page's frame: a page head, then one filled preset.",
+            "parent": [
+              "fd-skeleton-app-main"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-head",
+            "role": "The page head: a title and a line.",
+            "parent": [
+              "fd-skeleton-app-page"
+            ]
+          },
+          {
+            "class": "fd-skeleton-app-tabbar",
+            "role": "The phone tab bar, only when the app has one: an empty <i> per item.",
+            "parent": [
+              "fd-skeleton-app"
+            ]
+          },
+          {
+            "class": "fd-skeleton-late",
+            "role": "One muted line in the product's words, shown when loading takes longer than --fd-skeleton-late (0.13.0)."
+          },
+          {
             "class": "fd-skeleton-page",
             "role": "A whole first paint: rail, top bar, hero, toolbar and table."
           },
@@ -24459,9 +24822,105 @@
         "provenance": [
           "docs/skeletons.html",
           "fire/components/skeleton.css",
-          "fire/js/texture.js"
+          "fire/js/texture.js",
+          "fire/js/skeleton.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "skip",
+      "name": "Skip link",
+      "family": "Navigation",
+      "kind": "component",
+      "root": "fd-skip",
+      "classes": [
+        "fd-skip"
+      ],
+      "attributes": {},
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [],
+      "docs": "docs/navigation.html#skip",
+      "card": {
+        "id": "skip",
+        "job": "Skip past the header and the navigation to the page's content in one key press.",
+        "purpose": "A link first in the body, \"Skip to content\", pointing at the page's main. It is out of sight until it has keyboard focus, then shows at the top start corner above everything as a raised control with the focus ring. It needs no script and, being fixed, moves nothing when it shows. The main takes focus with no ring.",
+        "useWhen": [
+          "Every page with a header, a sidebar or a top bar before its content: the app shell, a site and a docs site.",
+          "A page rendered on a server: write the link and the main's id and tabindex yourself, as templates/shell-static.html does."
+        ],
+        "avoidWhen": [
+          {
+            "when": "Moving focus to a new screen's heading after a route change.",
+            "instead": "Call focusQuiet(heading) from fire/js/core.js."
+          },
+          {
+            "when": "Jumping between sections of one long page.",
+            "instead": "toc"
+          }
+        ],
+        "aka": [
+          "skip link",
+          "skip to content",
+          "skip to main",
+          "skip navigation",
+          "bypass block",
+          "jump to content"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "focused",
+            "how": ":focus on the a.fd-skip (the first Tab on the page): shown with the ring"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-skip",
+            "role": "The link, first in the body; its href is the main's id (#main), and the main carries tabindex=\"-1\".",
+            "element": [
+              "a"
+            ],
+            "attrs": {
+              "href": true
+            },
+            "skeleton": "<a class=\"fd-skip\" href=\"#main\">Skip to content</a>"
+          }
+        ],
+        "related": [
+          "app",
+          "site-header",
+          "doc",
+          "toc"
+        ],
+        "keyboard": [
+          {
+            "keys": "Tab",
+            "does": "The first Tab on the page shows the link."
+          },
+          {
+            "keys": "Enter",
+            "does": "Moves focus to the main, past the header and the navigation."
+          }
+        ],
+        "example": "docs/navigation.html#skip",
+        "provenance": [
+          "docs/navigation.html",
+          "fire/base.css",
+          "templates/shell.js",
+          "templates/shell-static.html"
+        ],
+        "since": "0.13.0"
       }
     },
     {
@@ -24617,6 +25076,9 @@
         "fd-snippet-text"
       ],
       "attributes": {
+        "data-copy-next": [
+          "*"
+        ],
         "data-size": [
           "sm"
         ],
@@ -24637,7 +25099,9 @@
         ]
       },
       "element": null,
-      "events": [],
+      "events": [
+        "fd:copy"
+      ],
       "docs": "docs/code.html#snippet",
       "card": {
         "id": "snippet",
@@ -24674,7 +25138,9 @@
           "shell command",
           "terminal command",
           "copy box",
-          "setup steps"
+          "setup steps",
+          "next step after copying",
+          "what to do after copying"
         ],
         "surfaces": [
           "app",
@@ -24687,6 +25153,10 @@
           {
             "name": "copied",
             "how": "data-state=\"copied\" for 1.4s after copy"
+          },
+          {
+            "name": "next step shown",
+            "how": "data-copy-next: after Copy the step shows in the fd-copy-next line under the snippet (data-state=\"shown\")"
           },
           {
             "name": "step done",
@@ -24703,6 +25173,11 @@
             "attribute": "data-size",
             "value": "sm",
             "useWhen": "A 36px well in tight spaces."
+          },
+          {
+            "attribute": "data-copy-next",
+            "value": "*",
+            "useWhen": "A setup command or a prompt whose next step a first-time user gets wrong: it shows in an fd-copy-next line under the snippet once Copy is pressed."
           }
         ],
         "parts": [
@@ -25379,7 +25854,8 @@
           "ready"
         ],
         "data-when": [
-          ""
+          "",
+          "loading"
         ]
       },
       "partAttributes": {},
@@ -25396,7 +25872,8 @@
         "useWhen": [
           "Any screen or section that loads its own data.",
           "A page reached from a link that can be gone, forbidden or out of date.",
-          "An area a team can switch off."
+          "An area a team can switch off.",
+          "A page or section loading: the loading child holds the preset shaped like the content, under the page head that stays."
         ],
         "avoidWhen": [
           {
@@ -25410,6 +25887,10 @@
           {
             "when": "A warning above content that loaded.",
             "instead": "callout"
+          },
+          {
+            "when": "The first load, before any script has run.",
+            "instead": "skeleton"
           }
         ],
         "aka": [
@@ -26957,7 +27438,11 @@
           "activity log",
           "grouped table",
           "row groups",
-          "section rows"
+          "section rows",
+          "expandable row",
+          "row detail",
+          "expand a row on a phone",
+          "stacked table"
         ],
         "surfaces": [
           "app",
@@ -26992,6 +27477,10 @@
           {
             "name": "expanded",
             "how": "tr[data-expanded] followed by a tr.fd-table-detail row"
+          },
+          {
+            "name": "expanded, stacked",
+            "how": "data-stack: fd-table-expand is a full-width button at the card's foot, worded by its cell's data-label"
           },
           {
             "name": "group closed",
@@ -27099,11 +27588,11 @@
           },
           {
             "class": "fd-table-expand",
-            "role": "The disclosure button of an expandable row."
+            "role": "The disclosure button of an expandable row. Stacked, it is a full-width button at the card's foot, worded by its cell's data-label (from the header text)."
           },
           {
             "class": "fd-table-detail",
-            "role": "The row that holds an expanded row's detail.",
+            "role": "The row that holds an expanded row's detail. Stacked, it is the last part of its row's card.",
             "inside": [
               "fd-table"
             ]
@@ -27174,6 +27663,10 @@
           {
             "keys": "Enter, Space",
             "does": "On a group heading's toggle: opens or closes the group."
+          },
+          {
+            "keys": "Enter, Space",
+            "does": "On a row's expand toggle: opens or closes its detail; focus stays on the toggle."
           }
         ],
         "example": "docs/data.html#activity",
@@ -28323,6 +28816,173 @@
           "fire/js/agent.js"
         ],
         "since": "0.1.0"
+      }
+    },
+    {
+      "id": "thumb",
+      "name": "Thumbnail",
+      "family": "Content",
+      "kind": "component",
+      "root": "fd-thumb",
+      "classes": [
+        "fd-thumb",
+        "fd-thumb-img",
+        "fd-thumb-label"
+      ],
+      "attributes": {
+        "data-ratio": [
+          "photo",
+          "square",
+          "tall",
+          "wide"
+        ],
+        "data-size": [
+          "fill",
+          "row"
+        ]
+      },
+      "partAttributes": {},
+      "stateAttributes": {
+        "data-state": [
+          "failed"
+        ]
+      },
+      "element": null,
+      "events": [],
+      "docs": "docs/content.html#thumb",
+      "card": {
+        "id": "thumb",
+        "job": "Show a small picture of a record, such as a video's poster frame, cropped to a fixed shape.",
+        "purpose": "A box at a fixed ratio that crops its picture to fill it (object-fit: cover) and shows a centred stand-in icon while there is no picture. Sizes are heights: row fits a table or list row without growing it, the default is a little larger, fill takes its container's width. An optional mono label sits in the corner. When the picture fails to load, the script shows the stand-in instead of the browser's broken mark.",
+        "useWhen": [
+          "A row or a card stands for something with a picture: a run's screen recording, a document's first page, a product image.",
+          "Rows of a table or a list each carry a small preview, with a duration or a count in the corner.",
+          "A card's head shows the picture at the full width of the card."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The picture is a person.",
+            "instead": "avatar"
+          },
+          {
+            "when": "A screenshot in the docs with a caption and a zoom.",
+            "instead": "doc-frame"
+          },
+          {
+            "when": "A picture that belongs to a section of a public website.",
+            "instead": "site-media"
+          },
+          {
+            "when": "A logo, a glyph or one or two letters in a square.",
+            "instead": "tile"
+          }
+        ],
+        "aka": [
+          "thumbnail",
+          "poster",
+          "poster frame",
+          "preview image",
+          "image placeholder",
+          "media thumbnail",
+          "video thumbnail",
+          "cover image"
+        ],
+        "surfaces": [
+          "app",
+          "website",
+          "phone"
+        ],
+        "data": [
+          "record"
+        ],
+        "states": [
+          {
+            "name": "empty",
+            "how": "no fd-thumb-img: the quiet fill and the stand-in icon (<i data-icon>)"
+          },
+          {
+            "name": "loading",
+            "how": "aria-busy=\"true\" with <span class=\"fd-skeleton\"></span> inside"
+          },
+          {
+            "name": "failed",
+            "how": "data-state=\"failed\", written by fire/js/content.js when the picture does not load; the stand-in shows"
+          }
+        ],
+        "variants": [
+          {
+            "attribute": "data-ratio",
+            "value": "wide",
+            "useWhen": "A 21:9 strip, as fd-doc-frame and fd-site-media mean by wide. Without data-ratio the box is 16:9."
+          },
+          {
+            "attribute": "data-ratio",
+            "value": "photo",
+            "useWhen": "A 4:3 picture: a photo or a document page seen across."
+          },
+          {
+            "attribute": "data-ratio",
+            "value": "square",
+            "useWhen": "A 1:1 picture: a product image or an album of results."
+          },
+          {
+            "attribute": "data-ratio",
+            "value": "tall",
+            "useWhen": "A 9:16 picture: a phone recording or a vertical video."
+          },
+          {
+            "attribute": "data-size",
+            "value": "row",
+            "useWhen": "In a table cell or a list row: the row height less a little above and below, so the row does not grow."
+          },
+          {
+            "attribute": "data-size",
+            "value": "fill",
+            "useWhen": "The full width of its container, as the head of a card."
+          }
+        ],
+        "parts": [
+          {
+            "class": "fd-thumb",
+            "role": "The box that holds the ratio, the fill and the stand-in icon.",
+            "skeleton": "<span class=\"fd-thumb\"><img class=\"fd-thumb-img\" src=\"…\" width=\"1536\" height=\"1024\" alt=\"…\"><i data-icon=\"video\"></i></span>"
+          },
+          {
+            "class": "fd-thumb-img",
+            "role": "The picture, cropped to fill; it carries width, height and alt.",
+            "element": [
+              "img"
+            ],
+            "parent": [
+              "fd-thumb"
+            ]
+          },
+          {
+            "class": "fd-thumb-label",
+            "role": "An optional corner label in mono: a duration or a count.",
+            "parent": [
+              "fd-thumb"
+            ]
+          }
+        ],
+        "related": [
+          "avatar",
+          "tile",
+          "doc-frame",
+          "site-media",
+          "table",
+          "list",
+          "card",
+          "skeleton"
+        ],
+        "keyboard": [],
+        "example": "docs/content.html#thumb",
+        "provenance": [
+          "docs/content.html",
+          "fire/components/content.css",
+          "fire/js/content.js"
+        ],
+        "since": "0.13.0"
       }
     },
     {
@@ -31129,6 +31789,7 @@
     "fd-copy-field-label": "copy-field",
     "fd-copy-field-start": "copy-field",
     "fd-copy-field-value": "copy-field",
+    "fd-copy-next": "codeblock",
     "fd-corners": "texture",
     "fd-cq": "utilities",
     "fd-crosshair": "page",
@@ -31343,10 +32004,10 @@
     "fd-doc-shot-bar": "doc",
     "fd-doc-shot-code": "doc",
     "fd-doc-shot-pane": "doc",
-    "fd-doc-step": "doc",
-    "fd-doc-step-body": "doc",
-    "fd-doc-step-title": "doc",
-    "fd-doc-steps": "doc-setup",
+    "fd-doc-step": "doc-steps",
+    "fd-doc-step-body": "doc-steps",
+    "fd-doc-step-title": "doc-steps",
+    "fd-doc-steps": "doc-steps",
     "fd-doc-switch": "doc",
     "fd-doc-table": "doc",
     "fd-doc-tabs": "doc",
@@ -31355,6 +32016,7 @@
     "fd-doc-toc-title": "doc",
     "fd-doc-top": "doc",
     "fd-doc-top-end": "doc",
+    "fd-doc-top-links": "doc",
     "fd-doc-top-row": "doc",
     "fd-doc-top-start": "doc",
     "fd-doc-try": "doc-endpoint",
@@ -31433,6 +32095,7 @@
     "fd-field-tag": "field",
     "fd-field-type": "field",
     "fd-file": "file-upload",
+    "fd-file-actions": "file-upload",
     "fd-file-bar": "file-upload",
     "fd-file-icon": "file-upload",
     "fd-file-main": "file-upload",
@@ -32092,6 +32755,16 @@
     "fd-site-text": "site",
     "fd-site-title": "site",
     "fd-skeleton": "skeleton",
+    "fd-skeleton-app": "skeleton",
+    "fd-skeleton-app-account": "skeleton",
+    "fd-skeleton-app-brand": "skeleton",
+    "fd-skeleton-app-head": "skeleton",
+    "fd-skeleton-app-main": "skeleton",
+    "fd-skeleton-app-nav": "skeleton",
+    "fd-skeleton-app-page": "skeleton",
+    "fd-skeleton-app-side": "skeleton",
+    "fd-skeleton-app-tabbar": "skeleton",
+    "fd-skeleton-app-top": "skeleton",
     "fd-skeleton-avatar": "skeleton",
     "fd-skeleton-button": "skeleton",
     "fd-skeleton-card": "skeleton",
@@ -32113,6 +32786,7 @@
     "fd-skeleton-form-field": "skeleton",
     "fd-skeleton-grid": "skeleton",
     "fd-skeleton-hero": "skeleton",
+    "fd-skeleton-late": "skeleton",
     "fd-skeleton-list": "skeleton",
     "fd-skeleton-list-row": "skeleton",
     "fd-skeleton-list-text": "skeleton",
@@ -32137,6 +32811,7 @@
     "fd-skeleton-thread-user": "skeleton",
     "fd-skeleton-tile": "skeleton",
     "fd-skeleton-title": "skeleton",
+    "fd-skip": "skip",
     "fd-slider": "slider",
     "fd-slider-bubble": "slider",
     "fd-slider-ticks": "slider",
@@ -32270,6 +32945,9 @@
     "fd-textarea": "textarea",
     "fd-th-sort": "table",
     "fd-thread": "thread",
+    "fd-thumb": "thumb",
+    "fd-thumb-img": "thumb",
+    "fd-thumb-label": "thumb",
     "fd-tile": "tile",
     "fd-timeline": "timeline",
     "fd-timeline-body": "timeline",

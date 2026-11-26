@@ -40,7 +40,7 @@ Fire is plain CSS and ES modules. There is no build step and no package to insta
 | React and Next.js | `starters/next` | `fire-design/react`: `FireIcon`, `FireChart`, `FireCode`, `FireTexture`, `useFire`, `useFireEvent`, `loadFire` and the exporter's helpers `jsonForScript`, `ccAttr`, `ccText`, `ccTruthy` (`spec/EXPORT.md` section 0) |
 | Vue | `starters/vue-vite` | `fire-design/vue`: the plugin (default export, `Fire`), the `v-fire` directive (`fireDirective`), `fireRouter()`, `fireVueOptions()` for `vite.config` and `isFireElement()` |
 
-Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.12.4"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. Without a framework, everything below still applies:
+Depend on Fire by tag (`"fire-design": "github:vidhatanand/firedesign#v0.13.0"`). `spec/EXPORT.md` lists every rule for writing Fire markup in each framework (presence attributes, `<template>` and JSON data, icons, events, when to call `init`, server rendering and hydration, strict CSP); follow it, or let an exporter that implements it write the code. Fire's custom elements (`fd-icon`, `fd-chart`, `fd-code`, `fd-texture`) exist for the four components that build their own DOM; each element is its component's root, so Fire's CSS applies unchanged. `fire-design/elements` bundles Lit, for a page with no build step; an app that has Lit of its own imports `fire-design/elements/lit`, the same elements on the app's Lit, so the page loads Lit once. Without a framework, everything below still applies:
 
 **The Lit starter is the place to start an app.** Add a screen as a route in `src/routes.ts` with
 `load: () => import(…)` and import it nowhere else, so the build gives it its own file. Write links to app pages with
@@ -89,9 +89,21 @@ init(containerElement);   // safe to call more than once
 </body>
 ```
 
+   The shell puts a skip link first in the body, `<a class="fd-skip" href="#main">Skip to content</a>`, and gives the `main` `id="main" tabindex="-1"`, so the first Tab offers to pass the sidebar and the top bar (the site and docs shells do the same). A page rendered on a server writes both itself, as `templates/shell-static.html` does.
+
 3. **Fill each band with components from the docs.** Find the component in `docs/`, open its "Markup" view, paste, and change the content. Do not retype components from memory.
 4. **Add every state.** A screen is not finished with only the happy path: add the empty state, the loading state (skeletons), the error state and disabled states. The templates show each one.
 5. **Check it** (section 6).
+
+### Loading a page
+
+A loading page keeps its frame and shows the shape of what is coming. There are three moments:
+
+1. **First load**, before any script has run: put `fd-skeleton-app` in the page's static HTML (`index.html`). It draws the app shell (sidebar, top bar, a page head and one skeleton) with the stylesheet alone, at the shell's own sizes, so the real shell lands on it without a jump. Remove it when the app mounts. `skeletonApp()` from `fire-design/skeleton` writes the markup; the Lit and Vue starters show it.
+2. **Moving between pages**: the shell stays and the page head shows its real title at once. Only the content region is a skeleton, the preset shaped like the screen: `fd-skeleton-table` for a table, `fd-skeleton-list` for a list, `fd-skeleton-grid` for cards, `fd-skeleton-form` for a form, `fd-skeleton-stat` and `fd-skeleton-text` for a record.
+3. **A section loading inside a page**: the same, at the section's size.
+
+Never a bare box of bars for a whole page (`lint-markup` warns with `loading-without-shell`). Skeleton presets are filled by a script; in HTML that must draw before any script, write the filled markup that `skeleton()` from `fire-design/skeleton` returns. Inside `data-fd-loading="true"` or `fd-states` in its loading state, a skeleton appears only after `--fd-skeleton-delay` (160ms), so a fast load does not flash one. When loading can be slow, add one `fd-skeleton-late` line in your own words ("Still loading. This is taking longer than usual."): it shows after `--fd-skeleton-late` (6s) and is read out once. Specimens: `docs/skeletons.html#loading`.
 
 ### On a phone
 
@@ -253,23 +265,30 @@ This will happen. How you handle it decides whether the product stays consistent
 - An `x-<name>` root class and `x-<name>-<part>` parts; variants and sizes as `data-*` attributes, states as ARIA states, as Fire's own components do.
 - Every value from a Fire token: no raw colours or lengths, no `url()`, no `@import`.
 - Every state (empty, loading, error, disabled), light and dark, phone and desktop, keyboard and screen reader.
-- Its CSS in one file named `fire-local.css`, loaded after `fire.css`, with the proposal's link in a comment above its rules.
+- Its CSS in one file named `fire-local.css`, loaded after `fire.css`, with the proposal's issue link and where the component is used in a comment above its rules.
 - Never style or override an `fd-` class or a `--fd-` token, never edit files inside `fire/`, and never copy a Fire component and modify the copy.
 
-**Step 5: propose it, then continue.** Never build a one-off silently, and do not stop the product work. Record the component so Fire can adopt it. A proposal carries the component itself, and it is internal: never post one publicly, as an issue in Fire's repository or anywhere else. In Facet, `propose_component` records it, and every board that uses it marks the root with `data-proposal="<id>"`. Elsewhere, add it as a new entry at the top of `docs/fire/REQUESTS.md` in your project and tell the project owner. A proposal contains:
+**Step 5: propose it, then continue.** Never build a one-off silently, and do not stop the product work. A proposal is an issue on Fire's repository, and it carries the component itself, so Fire can adopt it without a conversation.
+
+- `npx fire propose new <slug> --kind component` writes the proposal file, `docs/fire/proposals/<slug>.md`, with every section to fill. The kinds are `component`, `variant`, `token`, `pattern`, `bug` and `accessibility`.
+- `npx fire propose check <file>` says what is missing and what is private.
+- `npx fire propose send <file>` files it with the `gh` command and writes the issue's link into the file. `--dry-run` shows what it would post.
+
+Without `gh`, open the "Component or extension request" template in Fire's repository and paste the file. A tool with its own record of proposals (in Facet, `propose_component`) may keep it as well; the issue is what reaches Fire. Tell the project owner what was filed. A proposal contains:
 
 | Field | What to write |
 |---|---|
 | Kind | New component · new variant, size or state · new token · new pattern (arrangement) · bug or accessibility fix |
-| What you were building | The screen and the user's task, in two sentences |
+| What you were building | The kind of screen and the user's task, in two sentences |
 | What is missing | The thing, named by what it does |
 | What you searched | The queries you ran (`fire find`, the docs, the templates), and for each near Fire entry one sentence on why it does not fit |
-| The component | A card in Fire's format (`contract/cards/README.md`), the markup and the CSS, with `x-` names |
-| Where else it applies | Other screens or products that would use it |
-| Where it is used | File and line of each use |
-| Evidence | A screenshot or a link to the screen |
+| The component | A card in Fire's format (`contract/cards/README.md`), one complete example of the markup and the CSS, with `x-` names, and its script or what it does on each key |
+| What you checked | Light and dark, the widths, keyboard, reduced motion, the states: only what you did check |
+| Where else it applies | Other kinds of screen that would use it |
 
-**Step 6: when Fire answers.** A proposal is sent, then adopted or declined. Adopted, it ships as an `fd-` component in a release: update `fire/`, replace the `x-` component with Fire's, and delete its rules from `fire-local.css`. Declined, the answer says why: follow it (often: compose these parts instead), or keep the component as your own. An empty `fire-local.css` is the goal.
+**The issue is public.** It describes a component, never a product: no product, company or person's name, no file paths, no private or local addresses, no email addresses, no keys, and no screenshot of a real screen (a picture shows the component with demo data). Example data comes from Ember, Fire's demo product. Where the component is used stays in your project, in the comment above its rules in `fire-local.css`. List your project's private words in `package.json` (`"fire": { "private": ["Acme"] }`) and `fire propose check` refuses a file that holds one. An agent files the issue when the project's instructions allow it; otherwise it shows the owner the file.
+
+**Step 6: when Fire answers.** Fire answers on the issue. Adopted, the issue is closed with the release that ships it as an `fd-` component: update Fire, replace the `x-` component with Fire's, and delete its rules from `fire-local.css`. Declined, the issue says why: follow it (often: compose these parts instead), or keep the component as your own. An empty `fire-local.css` is the goal.
 
 **Your own CSS and tokens.** Fire is constrained at the edge, not closed. A product may add its own tokens and rules under these limits, and `lint-css` enforces them:
 
@@ -278,22 +297,25 @@ This will happen. How you handle it decides whether the product stays consistent
 - Write a colour only inside a token definition, take sizes and durations from tokens, and never restyle an `fd-` class beyond where it sits: ask for a variant, or style a class of your own (`x-`) on a wrapper.
 - Run `npx fire lint-css src --prefix acme`. Errors fail; warnings print. Fire's own stylesheets are checked by `npm run audit`, not by this.
 
-**For whoever maintains Fire.** Every proposal gets an answer: adopted as an `fd-` component in a release, or declined with a reason. One is adopted when the need is real on more than one screen and cannot be met by composition. The new part follows `DESIGN.md` exactly: tokens only, the naming rules, every state, light and dark, phone and desktop, keyboard operation, a docs section with live specimens, an entry in `VOCABULARY.md`, and a clean `npm run audit`.
+**For whoever maintains Fire.** Read the open issues before planning a release. Every proposal gets an answer on its issue: adopted as an `fd-` component and closed with the release that ships it, or declined with a reason. An answer holds nothing private either. One is adopted when the need is real on more than one screen and cannot be met by composition. The new part follows `DESIGN.md` exactly: tokens only, the naming rules, every state, light and dark, phone and desktop, keyboard operation, a docs section with live specimens, an entry in `VOCABULARY.md`, and a clean `npm run audit`.
 
 ## 8. Instructions for an AI agent working in a project
 
 The rules an agent follows are in [AGENT-RULES.md](AGENT-RULES.md). They are kept in one file, in Fire, so that updating Fire updates the rules and the project's own instruction file never has to change.
 
-**Search before you compose.** Run `npx fire find "<what you need>"` (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`). It ranks Fire's components, patterns, templates and modules by what each is for, using the job and other names on every card, and prints the one to open. Narrow it with `--surface app|website|phone|email`, `--data record|list|series|form|text` and `--kind component|pattern|section|template|module` (a layout counts as a component); `--json` is for scripts. Each result lists its surfaces, and with `--surface` a line says when a clearly better match belongs to another surface. `--json` also gives each result's `picture`: the path of a PNG in `contract/pictures/` (modules have none), which an agent can open to see the part before it chooses. Only when nothing fits, go to step 1 of section 7. To add a part to Fire itself, it must pass the near-duplicate gate (`node scripts/gate.mjs --probe <page>`) or its card must declare a `relation` to the part it resembles.
+**Search before you compose.** Run `npx fire find "<what you need>"` (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`). It ranks Fire's components, patterns, templates and modules by what each is for, using the job and other names on every card, and prints the one to open. Narrow it with `--surface app|website|phone|email`, `--data record|list|series|form|text` and `--kind component|pattern|section|template|module` (a layout counts as a component); `--json` is for scripts. Each result lists its surfaces, and with `--surface` a line says when a clearly better match belongs to another surface. `--json` also gives each result's `picture`: the path of a PNG in `contract/pictures/` (modules have none), which an agent can open to see the part before it chooses. To choose a screen, read `skills/fire/screens.md` whole: it lists every reference screen with when to use it, and the screens (`templates/`), the docs pages and the pictures are in the package. Only when nothing fits, go to step 1 of section 7. To add a part to Fire itself, it must pass the near-duplicate gate (`node scripts/gate.mjs --probe <page>`) or its card must declare a `relation` to the part it resembles.
 
-Copy `AGENT-RULES.md` into the project beside this guide, then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`) and adjust the three paths:
+**The skill.** `skills/fire/` is an agent skill (the open Agent Skills format): it finds the nearest reference screen by use case, searches the parts, runs the checks and files proposals. Link or copy the folder into the agent's skills folder once (for Claude Code, `~/.claude/skills/fire`), and it works in every project that uses Fire.
+
+Put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`) and adjust the paths. Where Fire is installed as a package, the rules are at `node_modules/fire-design/AGENT-RULES.md`; where Fire is copied in, copy `AGENT-RULES.md` beside this guide:
 
 ```markdown
 ## Interface: the Fire design system
 
-- For any interface work, read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
+- For any interface work, use the `fire` skill if you have it; otherwise read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
 - Fire is in `public/fire`. Never edit it.
-- When Fire has nothing close, build to Fire's standard with `x-` classes in `fire-local.css`, and propose it in `docs/fire/REQUESTS.md`.
+- Every screen follows a Fire reference screen. Say which one before you build.
+- When Fire has nothing close, build to Fire's standard with `x-` classes in `fire-local.css`, and file it as an issue on Fire's repository with `fire propose`. Agents may file these; nothing about this product goes in one.
 ```
 
 Keep the project's instruction file for what only the project knows: its layouts, its helpers, its security policy. Do not copy Fire's rules into it; a copy goes stale the next time Fire changes.

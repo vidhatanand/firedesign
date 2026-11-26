@@ -231,3 +231,36 @@ test('browser: header sheet, scrolled state, pricing period, marquee, compare on
     server.close();
   }
 });
+
+test('browser (0.13): a long unbroken address in a footer column wraps; nothing scrolls sideways at 320 and 390', async () => {
+  const server = await serve();
+  const browser = await chromium.launch();
+  try {
+    for (const width of [320, 390]) {
+      const context = await browser.newContext({ reducedMotion: 'reduce', viewport: { width, height: 800 } });
+      const page = await context.newPage();
+      await page.goto(`http://127.0.0.1:${server.address().port}/templates/site-pricing.html`, { waitUntil: 'load' });
+      await page.waitForFunction(() => document.documentElement.hasAttribute('data-fd-ready') && document.querySelector('.fd-site-footer-col'));
+      const r = await page.evaluate(() => {
+        const out = [];
+        // In every column, so the last one (at the page edge) is tried too.
+        for (const col of document.querySelectorAll('.fd-site-footer-col')) {
+          const a = document.createElement('a');
+          a.href = 'mailto:enterprisepartnerships@emberlabs.example';
+          a.textContent = 'enterprisepartnerships@emberlabs.example';
+          col.append(a);
+          const c = col.getBoundingClientRect(), l = a.getBoundingClientRect();
+          out.push({ inside: l.right <= c.right + 0.5 && l.left >= c.left - 0.5, lines: Math.round(l.height / parseFloat(getComputedStyle(a).lineHeight)) });
+        }
+        return { out, scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth };
+      });
+      assert.equal(r.scroll, r.client, `no sideways scroll at ${width}: ${JSON.stringify(r)}`);
+      assert.ok(r.out.length >= 3 && r.out.every((x) => x.inside), `each address stays in its column at ${width}: ${JSON.stringify(r.out)}`);
+      assert.ok(r.out.some((x) => x.lines > 1), `the address wraps at ${width}`);
+      await context.close();
+    }
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});

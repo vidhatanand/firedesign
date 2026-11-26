@@ -96,6 +96,12 @@
  *   scheme (javascript:, blob:, file:, http: on another origin), addresses with a user name or password, control
  *   characters, and anything that is not a string.
  *
+ * Thumb (0.13; CSS in components/content.css)
+ *   <span class="fd-thumb"><img class="fd-thumb-img" src width height alt><i data-icon="video"></i></span>
+ *   A picture that fails to load (its error event, or already broken when init runs) sets data-state="failed" on the
+ *   fd-thumb: the picture is hidden and the stand-in icon shows (an "image" icon is added when the thumb has none). A
+ *   later load of the same img (a new src) takes the state off. Without script a broken picture is the product's to handle.
+ *
  * Exports: init(root), dismiss(el), toggle(details, open?), hold(el, options), cancelHold(el), reopen(form),
  *   select(item), removeItem(item), setState(el, state), safeImageUrl(url, options)
  */
@@ -578,6 +584,18 @@ export function safeImageUrl(url, { hosts = [], data = false, base } = {}) {
   return [].concat(hosts).some((rule) => hostMatches(rule, u)) ? u.href : null;
 }
 
+/* ---------- Thumb: a picture that did not load gives way to the stand-in ---------- */
+const THUMB_IMG = '.fd-thumb > .fd-thumb-img';
+function thumbFailed(img) {
+  const thumb = img.parentElement;
+  thumb.dataset.state = 'failed';
+  if (!$(':scope > .fd-icon, :scope > i[data-icon]', thumb)) img.insertAdjacentHTML('afterend', icon('image'));
+}
+function initThumbs(root) {
+  const imgs = [...(root instanceof Element && root.matches(THUMB_IMG) ? [root] : []), ...$$(THUMB_IMG, root)];
+  for (const img of imgs) if (img.complete && img.getAttribute('src') && !img.naturalWidth) thumbFailed(img);
+}
+
 /* ---------- Init ---------- */
 let delegated = false;
 export function init(root = document) {
@@ -585,9 +603,17 @@ export function init(root = document) {
   restoreDismissed(root);
   $$('[data-fd-scroller]', root).forEach(initScroller);
   initDecisions(root);
+  initThumbs(root);
 
   if (delegated) return;
   delegated = true;
+
+  // error and load do not bubble: a thumb's picture is watched in the capture phase.
+  document.addEventListener('error', (event) => { if (event.target instanceof Element && event.target.matches(THUMB_IMG)) thumbFailed(event.target); }, true);
+  document.addEventListener('load', (event) => {
+    const img = event.target;
+    if (img instanceof Element && img.matches(THUMB_IMG) && img.parentElement.dataset.state === 'failed') img.parentElement.removeAttribute('data-state');
+  }, true);
 
   on(document, 'click', '.fd-accordion-item > summary, .fd-disclosure > summary', (event, summary) => {
     event.preventDefault();

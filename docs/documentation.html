@@ -43,7 +43,7 @@
 <!-- docs-shell.js renders: -->
 <div class="fd-doc" [data-contained]>
   <header class="fd-doc-top">
-    <div class="fd-doc-top-row" data-row="tools">brand · v2 · English · .fd-doc-search · repo · Status · Support · Sign up · theme</div>
+    <div class="fd-doc-top-row" data-row="tools">brand · v2 · English · .fd-doc-search · nav.fd-doc-top-links · repo · Sign up · theme</div>
     <div class="fd-doc-top-row" data-row="sections"><nav class="fd-tabs fd-doc-sections">…</nav></div>
     <div class="fd-doc-top-row" data-row="crumbs"><button class="fd-doc-crumbs" data-fd-doc-nav-open>…</button></div>
   </header>
@@ -210,9 +210,12 @@ console.log(page.markdown.slice(0, 400));</code></pre>
             </div>
             <button class="fd-doc-search" type="button" data-fd-command-open="dm1-command" aria-label="Search the docs"><i data-icon="search"></i><span>Search…</span><kbd class="fd-kbd">⌘K</kbd></button>
             <div class="fd-doc-top-end">
+              <nav class="fd-doc-top-links" aria-label="Ember">
+                <a href="../templates/site-pricing.html">Pricing</a>
+                <a href="../templates/site-changelog.html">Changelog</a>
+                <a href="../templates/docs-home.html" aria-current="page">Docs</a>
+              </nav>
               <a class="fd-doc-repo" href="https://code.ember.dev/ember/ember" data-doc-hide="md sm" aria-label="Ember repository, 48,213 stars"><i data-icon="git-branch"></i><span class="fd-doc-repo-name">ember/ember</span><span class="fd-doc-repo-stars"><i data-icon="star"></i>48,213</span></a>
-              <a class="fd-btn" href="https://status.ember.dev" data-doc-hide="lg md sm">Status</a>
-              <a class="fd-btn" href="mailto:support@ember.dev" data-doc-hide="lg md sm">Support</a>
               <a class="fd-btn" data-variant="primary" href="../templates/auth.html" data-doc-hide="sm">Sign up</a>
               <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-hide="sm" data-fd-theme-toggle aria-label="Theme"><i data-icon="monitor"></i></button>
               <button class="fd-btn" type="button" data-variant="ghost" data-icon-only data-doc-show="sm" data-fd-command-open="dm1-command" aria-label="Search the docs"><i data-icon="search"></i></button>
@@ -234,6 +237,7 @@ console.log(page.markdown.slice(0, 400));</code></pre>
       </div>
     </div>
     <ul class="doc-notes">
+      <li>The website's main links go in <code class="fd-code">nav.fd-doc-top-links</code> at the start of the tools row's end, with <code class="fd-code">aria-current="page"</code> on Docs. They read like the site header's links, keep their width (the search gives way) and hide below 900px with the site header's; put them in the phone menu too.</li>
       <li>Mark controls with <code class="fd-code">data-doc-hide="lg md sm"</code> to drop them below 1200, 1100 and 900px; <code class="fd-code">data-doc-show="sm"</code> shows the phone-only search and menu buttons.</li>
       <li>The repository count is mono with tabular figures. One primary per bar: “Sign up”.</li>
     </ul>
@@ -337,7 +341,7 @@ console.log(page.markdown.slice(0, 400));</code></pre>
         <p class="fd-doc-lead">Follow links across a site and scrape every page you allow, as one job you can watch, pause and page through.</p>
       </header>
       </article>
-      <div class="fd-menu" id="hd-copy" popover role="menu" aria-label="Use this page" data-fd-doc-copy-menu data-for="hd-article">
+      <div class="fd-menu" id="hd-copy" popover role="menu" aria-label="Use this page" data-fd-doc-copy-menu data-for="hd-article" data-name="Ember" data-mcp-url="https://mcp.ember.dev/v2/mcp">
         <button class="fd-menu-item" data-value="copy-md"><i data-icon="copy"></i><span class="fd-menu-item-label">Copy page as Markdown<span class="fd-menu-item-desc">For pasting into an LLM</span></span></button>
         <button class="fd-menu-item" data-value="view-md"><i data-icon="file-text"></i><span class="fd-menu-item-label">View as Markdown<span class="fd-menu-item-desc">Opens the plain text in a new tab</span></span></button>
         <button class="fd-menu-item" data-value="open-ai"><i data-icon="sparkles"></i><span class="fd-menu-item-label">Open in an AI assistant<span class="fd-menu-item-desc">Copies a prompt with this page</span></span></button>
@@ -347,6 +351,8 @@ console.log(page.markdown.slice(0, 400));</code></pre>
     <ul class="doc-notes">
       <li>The eyebrow is the nav group, not a breadcrumb trail. Titles are sentence case; leads are one or two sentences that say what the page lets you do.</li>
       <li>Under 640px the copy button moves under the lead.</li>
+      <li>The menu names the product from the page: <code class="fd-code">data-name</code> goes into the prompt ("this docs page" without it) and <code class="fd-code">data-mcp-url</code> is the address "Connect via MCP" copies. A product with no MCP server leaves that item out.</li>
+      <li>When the page has a Markdown twin, make "View as Markdown" a link: <code class="fd-code">&lt;a class=&quot;fd-menu-item&quot; data-value=&quot;view-md&quot; href=&quot;crawl.md&quot;&gt;</code> opens that file instead of converting the article.</li>
     </ul>
   </section>
 

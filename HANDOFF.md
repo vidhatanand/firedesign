@@ -8,6 +8,9 @@ For whoever picks Fire up on another machine, a person or an agent.
   the tag by commits that change no packaged file, like this one.
 - Open work, the owner's decisions and the follow-ups in products are private: `docs/FIRE-HANDOFF.md` in Facet's
   private repository. Read it before starting. Do not copy it here: this repository is public.
+- Products ask for parts and report faults as issues on this repository (`gh issue list`; `GUIDE.md` section 7 says
+  what one holds). Read the open ones before planning a release. Answer on the issue, with nothing private: close it
+  with the release that ships it, or with the reason it was declined.
 
 ## Set up
 
@@ -50,3 +53,4 @@ Only with the owner's yes for that release. A release is a tag: no GitHub Releas
    a pushed tag.
 8. Verify from a fresh clone of the tag, a starter copied outside the repository and an empty project that installs
    `github:vidhatanand/firedesign#v<x.y.z>`.
+9. Close each issue the release answers, naming the version. Posting on an issue needs the owner's yes, like a push.

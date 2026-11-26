@@ -112,8 +112,7 @@
   --fd-form-drop-icon: 40px;
   --fd-form-drop-lift: 4px;            /* icon lift while dragging over */
   --fd-form-file-icon: 36px;           /* file tile, and the inline dropzone icon */
-  --fd-form-file-nudge: 1px;           /* aligns file text with its tile */
-  --fd-form-logo-tile: 64px;           /* the logo field's preview tile */
+  --fd-form-file-nudge: 1px;           /* aligns file text with its tile */  --fd-form-logo-tile: 64px;           /* the logo field's preview tile */
   --fd-form-hidden-input: 1px;         /* the visually hidden file input */
   /* one-time code */
   --fd-form-otp-h: 48px;
@@ -1003,16 +1002,36 @@
 .fd-file-icon { display: grid; place-items: center; inline-size: var(--fd-form-file-icon); block-size: var(--fd-form-file-icon); border-radius: var(--fd-radius-lg); background: var(--fd-fill); color: var(--fd-text-2); }
 .fd-file-main { min-inline-size: 0; padding-block: var(--fd-form-file-nudge); }
 .fd-file-name { font-weight: var(--fd-weight-label); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fd-file-meta { display: flex; align-items: center; gap: var(--fd-space-2); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
-.fd-file-size { font-family: var(--fd-font-mono); }
+.fd-file-meta { display: flex; align-items: flex-start; gap: var(--fd-space-2); font-size: var(--fd-text-xs); line-height: var(--fd-lh-xs); color: var(--fd-text-3); font-variant-numeric: tabular-nums; }
+.fd-file-size { flex: none; font-family: var(--fd-font-mono); }
 .fd-file-status { display: inline-flex; align-items: center; gap: var(--fd-space-1); }
 .fd-file-status > .fd-icon { inline-size: var(--fd-icon-xs); block-size: var(--fd-icon-xs); }
+/* The status line can be a sentence ("42% · 12.3 MB/s · about 2 min left"): it wraps beside the size, its icon on the first line. */
+.fd-file .fd-file-status { align-items: flex-start; min-inline-size: 0; text-wrap: pretty; }
+.fd-file .fd-file-status > .fd-icon { flex: none; margin-block: calc((var(--fd-lh-xs) - var(--fd-icon-xs)) / 2); }
+/* Several actions (0.13): the row's last column holds icon buttons, end-aligned. In a list that has them, the rows share
+   one grid (subgrid), so that column is as wide as the widest row's buttons and every bar ends at the same place; on a
+   narrow list the buttons go under the text. A list whose rows have the one remove button written the old way keeps
+   the grid above. */
+.fd-filelist:has(> .fd-file > .fd-file-actions) {
+  container: fd-filelist / inline-size;
+  grid-template-columns: calc(var(--fd-form-file-icon) + var(--fd-space-3)) minmax(0, 1fr) auto;   /* a subgrid's padding sits in its edge tracks */
+  column-gap: var(--fd-space-3);   /* the rows' own gap: a subgrid whose gap differs is nudged by half the difference */
+}
+.fd-filelist:has(> .fd-file > .fd-file-actions) > .fd-file { grid-column: 1 / -1; grid-template-columns: subgrid; }
+.fd-file-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--fd-space-0-5); }
+@container fd-filelist (max-width: 480px) {
+  .fd-filelist:has(> .fd-file > .fd-file-actions) > .fd-file { grid-template-columns: var(--fd-form-file-icon) minmax(0, 1fr); row-gap: var(--fd-space-1); }
+  .fd-filelist:has(> .fd-file > .fd-file-actions) > .fd-file > :is(.fd-file-actions, .fd-btn) { grid-column: 2; justify-self: end; }
+}
 .fd-file-bar { block-size: var(--fd-form-rail); margin-block-start: var(--fd-space-2); border-radius: var(--fd-radius-full); background: var(--fd-a8); overflow: hidden; }
 .fd-file-bar > span { display: block; block-size: 100%; inline-size: calc(var(--fd-progress, 0) * 1%); border-radius: inherit; background: var(--fd-accent); transition: inline-size var(--fd-dur-3) linear; }
 .fd-file[data-state="done"] .fd-file-bar, .fd-file[data-state="error"] .fd-file-bar { display: none; }
 .fd-file[data-state="done"] .fd-file-status { color: var(--fd-success-text); }
 .fd-file[data-state="error"] .fd-file-status { color: var(--fd-danger-text); }
 .fd-file[data-state="error"] .fd-file-icon { background: var(--fd-danger-bg); color: var(--fd-danger-text); }
+/* Paused (0.13): the bar holds where it stopped, in a neutral tone, and does not move. */
+.fd-file[data-state="paused"] .fd-file-bar > span { background: var(--fd-a40); transition: none; }
 
 /* ==========================================================================
    One-time code

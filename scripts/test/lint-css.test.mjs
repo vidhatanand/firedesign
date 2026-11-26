@@ -272,3 +272,8 @@ test('performance: all of Fire\'s docs pages, in well under a second of lint tim
   lintFiles(inputs, { contract, prefixes: [] });
   assert.ok(performance.now() - t0 < 1000);
 });
+
+test('the skeleton timing tokens are parameters a product may set (0.13): --fd-skeleton-delay, --fd-skeleton-late', () => {
+  assert.deepEqual(lint('a.css', '.acme-region { --fd-skeleton-delay: 0s; --fd-skeleton-late: 10s; }').filter((f) => f.rule === 'reserved-prefix'), []);
+  assert.ok(lint('a.css', '.acme-region { --fd-skeleton-wait: 0s; }').some((f) => f.rule === 'reserved-prefix'));
+});

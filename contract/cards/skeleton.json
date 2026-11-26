@@ -1,13 +1,19 @@
 {
   "id": "skeleton",
   "job": "Hold a place for content that is loading, with the same shape as the real thing.",
-  "purpose": "Grey blocks that have the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button and tile. Presets for cards, grids, tables, stats, charts, lists, threads, forms, a hero and a whole page fill themselves from an empty element. Skeletons are aria-hidden; set aria-busy on the container.",
+  "purpose": "Blocks with the exact geometry of what they stand in for, so the real content swaps in without a line moving. Parts: text lines, titles by type role, avatar, button, tile. Presets fill themselves from an empty element; fire-design/skeleton returns the same markup for static HTML. fd-skeleton-app is the first load. In a loading region a skeleton waits a moment before it shows.",
   "useWhen": [
-    "A region has a known layout and its data is on the way.",
-    "A route paints for the first time and the page needs rail, top bar and table in place.",
-    "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false)."
+    "A region has a known layout and its data is on the way: the preset shaped like it, a table for a table, a list for a list.",
+    "The first load, before any script: fd-skeleton-app in the page's static HTML, with the shell's own geometry.",
+    "Moving between pages: the shell and the page head stay, and only the content region is a skeleton.",
+    "Content swaps in place: wrap skeleton and content in data-fd-loading and call setLoading(el, false).",
+    "A load can be slow: one fd-skeleton-late line in the loading region says so after a few seconds."
   ],
   "avoidWhen": [
+    {
+      "when": "A whole page drawn as a bare box of bars, with no shell and no page head.",
+      "instead": "Keep the shell and the head; use fd-skeleton-app on first load, or a preset in the content region"
+    },
     {
       "when": "A small control or one line of text.",
       "instead": "loader"
@@ -31,7 +37,13 @@
     "ghost loader",
     "content loader",
     "loading state",
-    "placeholder blocks"
+    "placeholder blocks",
+    "loading screen",
+    "app loading screen",
+    "page loading",
+    "first load",
+    "still loading",
+    "slow load"
   ],
   "surfaces": [
     "app",
@@ -44,11 +56,15 @@
   "states": [
     {
       "name": "loading",
-      "how": "aria-busy=\"true\" on the container; data-fd-loading=\"true\" for a swap"
+      "how": "aria-busy=\"true\" on the container; data-fd-loading=\"true\" for a swap, shown after --fd-skeleton-delay"
     },
     {
       "name": "ready",
       "how": "setLoading(el, false); the skeleton fades and the content rises 8px"
+    },
+    {
+      "name": "late",
+      "how": "fd-skeleton-late shows after --fd-skeleton-late and is announced once; it goes when loading ends"
     },
     {
       "name": "stagger",
@@ -56,6 +72,16 @@
     }
   ],
   "variants": [
+    {
+      "attribute": "data-sidebar",
+      "value": "collapsed",
+      "useWhen": "An app skeleton whose shell starts with the sidebar as a 64px rail."
+    },
+    {
+      "attribute": "data-contained",
+      "value": "",
+      "useWhen": "An app skeleton that fills its parent's box, in docs and previews, like a contained app shell."
+    },
     {
       "attribute": "data-variant",
       "value": "bars",
@@ -184,6 +210,77 @@
       "role": "A page hero."
     },
     {
+      "class": "fd-skeleton-app",
+      "role": "The first-load app skeleton in static HTML (0.13.0): the shell's geometry, drawn without script. role=\"status\" and a label."
+    },
+    {
+      "class": "fd-skeleton-app-side",
+      "role": "The sidebar column; hidden under 900px.",
+      "parent": [
+        "fd-skeleton-app"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-brand",
+      "role": "The sidebar head: the brand's mark and name.",
+      "parent": [
+        "fd-skeleton-app-side"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-nav",
+      "role": "Nav rows: one empty <i> per row.",
+      "parent": [
+        "fd-skeleton-app-side"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-account",
+      "role": "The account row at the sidebar's foot.",
+      "parent": [
+        "fd-skeleton-app-side"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-main",
+      "role": "The main column: top bar and page.",
+      "parent": [
+        "fd-skeleton-app"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-top",
+      "role": "The top bar: four empty <i> (title, search, two buttons).",
+      "parent": [
+        "fd-skeleton-app-main"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-page",
+      "role": "The page's frame: a page head, then one filled preset.",
+      "parent": [
+        "fd-skeleton-app-main"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-head",
+      "role": "The page head: a title and a line.",
+      "parent": [
+        "fd-skeleton-app-page"
+      ]
+    },
+    {
+      "class": "fd-skeleton-app-tabbar",
+      "role": "The phone tab bar, only when the app has one: an empty <i> per item.",
+      "parent": [
+        "fd-skeleton-app"
+      ]
+    },
+    {
+      "class": "fd-skeleton-late",
+      "role": "One muted line in the product's words, shown when loading takes longer than --fd-skeleton-late (0.13.0)."
+    },
+    {
       "class": "fd-skeleton-page",
       "role": "A whole first paint: rail, top bar, hero, toolbar and table."
     },
@@ -204,7 +301,8 @@
   "provenance": [
     "docs/skeletons.html",
     "fire/components/skeleton.css",
-    "fire/js/texture.js"
+    "fire/js/texture.js",
+    "fire/js/skeleton.js"
   ],
   "since": "0.1.0"
 }

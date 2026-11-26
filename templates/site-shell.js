@@ -13,7 +13,7 @@
  *     <script type="module" src="./site-shell.js"></script>
  *
  * On load the page's <main> moves into div.fd-site between the site header and the site footer, written once here, so
- * the four pages link to each other through the same chrome. The bare page stays hidden until then
+ * the four pages link to each other through the same chrome, with a skip link (fd-skip) to the main first in <body>. The bare page stays hidden until then
  * (body[data-site-shell=""] in fire/components/site.css, the way docs-shell.js does it), and is shown anyway after a
  * moment if this script never runs. Or call it yourself:
  *
@@ -23,7 +23,7 @@
  * renderHeader(options), renderFooter(options) and renderSignup() return the markup as strings (no DOM needed).
  * Links are relative to templates/. Ids: site-nav (the header's links), site-menu-product (the Product menu).
  */
-import { EMBER_MARK } from './shell.js';
+import { EMBER_MARK, addSkipLink } from './shell.js';
 
 export const PAGES = [
   { id: 'home', label: 'Home', href: 'site-home.html' },
@@ -120,6 +120,7 @@ export function mountSite({ active, header, footer, signup } = {}) {
   const site = t.content.firstElementChild;
   site.querySelector('template[data-slot]').replaceWith(main);
   body.prepend(site);
+  addSkipLink(main);
   body.setAttribute('data-site-shell', 'mounted');
 
   // fire.js initialises the document once on load; if that already happened, initialise the new markup.

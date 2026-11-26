@@ -128,6 +128,24 @@ test('what Fire\'s behaviour builds is kept: a date field, the combined filter, 
   assert.match(copy.css, /\.fd-toast\b/);
 });
 
+test('a site with a steps rail and no other docs part keeps neither docsite.js nor overlays.js (0.13)', async () => {
+  const rail = '<html data-fd-surface="website"><body><div class="fd-site"><section class="fd-site-section fd-site-steps" data-layout="rail"><div class="fd-site-container">'
+    + '<div class="fd-site-head"><h2 class="fd-site-title">Your first page in three calls.</h2></div><ol class="fd-doc-steps">'
+    + '<li class="fd-doc-step"><h3 class="fd-doc-step-title">Create a key</h3><div class="fd-doc-step-body"><div class="fd-site-steps-detail"><p class="fd-site-steps-text">Copy a key from the dashboard.</p></div></div></li>'
+    + '</ol></div></section></div></body></html>';
+  const r = await product({ 'index.html': rail });
+  assert.equal(map.components['doc-steps'].modules.length, 0, 'the steps are pure CSS');
+  assert.ok(kept(r).components['doc-steps'] && kept(r).components['site-steps'], 'the steps and the section are kept');
+  assert.ok(!kept(r).modules.docsite, `docsite is dropped: ${JSON.stringify(kept(r).modules)}`);
+  assert.ok(!kept(r).modules.overlays, `overlays is dropped: ${JSON.stringify(kept(r).modules)}`);
+  assert.ok(!kept(r).components.doc && !kept(r).components['doc-setup'], 'no other docs part comes with the steps');
+  assert.match(r.css, /\.fd-doc-step\b/);
+  assert.doesNotMatch(r.js, /docsite\.js/);
+  // A docs article with the same steps still keeps the docs behaviour, through the article.
+  const article = await product({ 'doc.html': `<article class="fd-doc-article"><header class="fd-doc-head"><h1 class="fd-doc-title">Webhooks</h1></header>${rail.replace(/^.*?(<ol)/s, '$1').replace(/<\/ol>.*$/s, '</ol>')}</article>` });
+  assert.ok(kept(article).modules.docsite, 'an article keeps docsite');
+});
+
 test('--include keeps what no scan can see; a class built from a string is reported with its line', async () => {
   const src = { 'v.ts': "const tone = 'ok';\nexport const t = html`<span class=\"fd-badge fd-badge-${tone}\">x</span>`;\nel.className = cls;" };
   const r = await product(src, { include: ['charts', 'site'] });

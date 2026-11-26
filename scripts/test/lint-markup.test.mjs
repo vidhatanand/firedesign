@@ -262,3 +262,60 @@ test('surface-mismatch CLI: warnings never change the exit code; JSON counts the
   assert.match(run('--surface', 'email', plain).stdout, /surface-mismatch/);
   assert.equal(run('--surface', 'tablet', file).status, 2);
 });
+
+/* ------------------------------------------------------------------ 0.13: surfaces on a website, with Fire's own catalogue */
+
+const fireCatalog = prepareCatalog(JSON.parse(fs.readFileSync(path.join(here, '..', '..', 'contract', 'catalog.json'), 'utf8')));
+const fireSurf = (text) => lintText('a.html', text, fireCatalog).filter((f) => f.rule === 'surface-mismatch').map((f) => /\(([\w-]+)\) is for/.exec(f.message)[1]);
+
+test('surface-mismatch: the docs search palette (fd-command) is right on a website page', () => {
+  const t = '<html data-fd-surface="website"><body><dialog class="fd-command" aria-label="Search the docs" data-fd-doc-search>'
+    + '<div class="fd-command-search"><input class="fd-command-input" aria-label="Search the docs"></div><div class="fd-command-list"></div></dialog></body></html>';
+  assert.deepEqual(fireSurf(t), []);
+});
+
+test('surface-mismatch: what a site shot or a media frame holds is a specimen, checked as app; the shot stays a website part', () => {
+  const parts = '<div class="fd-message" data-role="assistant"><div class="fd-message-body"><div class="fd-sources"></div></div></div><div class="fd-decision"></div>';
+  const shot = `<div class="fd-site"><section class="fd-site-section"><div class="fd-site-container"><figure class="fd-doc-frame"><div class="fd-doc-frame-media"><div class="fd-site-shot">${parts}</div></div></figure></div></section></div>`;
+  assert.deepEqual(fireSurf(`<html data-fd-surface="website"><body>${shot}</body></html>`), [], 'app parts inside a shot do not warn');
+  const frame = `<figure class="fd-doc-frame"><div class="fd-doc-frame-media">${parts}</div></figure>`;
+  assert.deepEqual(fireSurf(`<html data-fd-surface="website"><body>${frame}</body></html>`), [], 'nor inside a media frame');
+  // Outside a specimen the same parts still warn, and the shot itself is never moved to app.
+  assert.deepEqual(fireSurf(`<html data-fd-surface="website"><body>${parts}</body></html>`), ['message', 'sources']);
+  assert.deepEqual(fireSurf('<html data-fd-surface="app"><body><div class="fd-site-shot"></div></body></html>'), ['site'], 'the shot is a website part');
+  // On an app page the rule is unchanged inside a frame: a website-only part there still warns.
+  assert.deepEqual(fireSurf('<html data-fd-surface="app"><body><figure class="fd-doc-frame"><div class="fd-doc-frame-media"><section class="fd-site-hero"></section></div></figure></body></html>').filter((x) => x === 'site-hero'), ['site-hero']);
+});
+
+/* loading-without-shell (0.13): a page that loads as a bare box of bars. */
+const BARE_BOOT = `<!doctype html><html lang="en"><head><title>Ember</title></head><body>
+<div id="app" aria-busy="true">
+  <main class="fd-page"><div class="fd-frame"><section class="fd-band" data-pad="sm" aria-label="Loading">
+    <div class="fd-stack" data-gap="3"><span class="fd-skeleton-title" data-size="h2"></span>
+    <div class="fd-skeleton-text" data-lines="2"></div></div></section></div></main>
+</div></body></html>`;
+const loadingFindings = (file, text) => lint(file, text).filter((f) => f.rule === 'loading-without-shell');
+
+test('loading-without-shell: a page that is only skeleton bars is a warning, at the first bar', () => {
+  const found = loadingFindings('index.html', BARE_BOOT);
+  assert.equal(found.length, 1);
+  assert.equal(found[0].severity, 'warning');
+  assert.equal(found[0].line, 4);
+  assert.match(found[0].fix, /fd-skeleton-app/);
+  // The same in a Lit template that renders the page.
+  assert.equal(loadingFindings('a.ts', 'const v = html`<main class="fd-page"><div class="fd-frame"><section class="fd-band"><span class="fd-skeleton-title" data-size="h2"></span><div class="fd-skeleton-text" data-lines="3"></div></section></div></main>`;').length, 1);
+});
+
+test('loading-without-shell: a shell, a page head, a screen-shaped preset or real content each keep it quiet', () => {
+  const app = '<!doctype html><html><body><div class="fd-skeleton-app" role="status" aria-label="Loading"><div class="fd-skeleton-app-side" aria-hidden="true"></div><div class="fd-skeleton-app-main" aria-hidden="true"><span class="fd-skeleton-app-top"><i></i></span><div class="fd-skeleton-app-page"><span class="fd-skeleton-app-head"></span></div></div></div></body></html>';
+  const templateState = `<!doctype html><html><body><div class="fd-app"><div class="fd-main"><main class="fd-page"><div class="fd-frame">
+    <section class="fd-band"><div class="fd-page-head"><div class="fd-page-head-text"><h1 class="fd-page-head-title">Settings</h1></div></div></section>
+    <section class="fd-band"><div class="fd-stack" data-when="loading" aria-busy="true"><div class="fd-skeleton-text" data-lines="2"></div></div></section>
+  </div></main></div></div></body></html>`;
+  const sectionInPage = '<main class="fd-page"><div class="fd-frame"><section class="fd-band"><h2 class="fd-h3">Members</h2><div class="fd-skeleton-text" data-lines="3"></div></section></div></main>';
+  const screenShaped = '<main class="fd-page"><div class="fd-frame"><section class="fd-band"><span class="fd-skeleton-title" data-size="h2"></span><div class="fd-skeleton-table" data-rows="5"></div></section></div></main>';
+  const component = '<section class="fd-band"><span class="fd-skeleton-title"></span><div class="fd-skeleton-text" data-lines="2"></div></section>';
+  for (const [name, text] of [['app skeleton', app], ['template loading state', templateState], ['section in a page', sectionInPage], ['screen-shaped preset', screenShaped], ['a component, not a page', component]]) {
+    assert.deepEqual(loadingFindings('a.html', text), [], name);
+  }
+});

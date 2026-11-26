@@ -7,7 +7,8 @@
    Shell
    <div class="fd-doc" [data-contained]>
      <header class="fd-doc-top">
-       <div class="fd-doc-top-row" data-row="tools">brand · switchers · .fd-doc-search · .fd-doc-top-end</div>
+       <div class="fd-doc-top-row" data-row="tools">brand · switchers · .fd-doc-search · .fd-doc-top-end
+         (.fd-doc-top-end may open with nav.fd-doc-top-links: the website's links, a[aria-current="page"] for docs)</div>
        <div class="fd-doc-top-row" data-row="sections"><nav class="fd-tabs fd-doc-sections">route tabs</nav></div>
        <div class="fd-doc-top-row" data-row="crumbs"><button class="fd-doc-crumbs" data-fd-doc-nav-open>…</button></div>
      </header>
@@ -184,14 +185,28 @@ body[data-docs-shell=""] { visibility: hidden; animation: fd-doc-reveal 0s var(-
   display: flex; align-items: center; gap: var(--fd-space-2); min-width: 0;
   height: var(--_doc-tools-h); padding-inline: var(--fd-space-6);
 }
-.fd-doc-top-row[data-row="tools"] {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, var(--fd-doc-search-w)) minmax(0, 1fr); column-gap: var(--fd-space-4);
+.fd-doc-top-row[data-row="tools"] {   /* the end column never shrinks below its content: the search gives way instead */
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, var(--fd-doc-search-w)) minmax(max-content, 1fr); column-gap: var(--fd-space-4);
 }
 .fd-doc-top-row[data-row="sections"] { height: var(--_doc-tabs-h); align-items: stretch; padding-inline: calc(var(--fd-space-6) + var(--fd-space-3-5)); }   /* tabs line up with the mark */
 .fd-doc-top-row[data-row="crumbs"] { display: none; }
 .fd-doc-top-start, .fd-doc-top-end { display: flex; align-items: center; gap: var(--fd-space-1); min-width: 0; }
 .fd-doc-top-end { justify-content: flex-end; gap: var(--fd-space-2); }
 .fd-doc-top-end > .fd-btn { flex: none; }
+/* The website's main links in the tools row (0.13): the same family as fd-site-header-link, hidden below 900px as the
+   site header hides its links. They keep their width; the current one is in ink. */
+.fd-doc-top-links { display: flex; flex: none; align-items: center; gap: var(--fd-space-1); }
+.fd-doc-top-links > a {
+  display: inline-flex; flex: none; align-items: center;
+  height: var(--fd-control-md); padding-inline: var(--fd-space-3); border-radius: var(--fd-radius-lg);
+  font-size: var(--fd-text-md); line-height: var(--fd-lh-md); font-weight: var(--fd-weight-label); color: var(--fd-text-2);
+  white-space: nowrap;
+  transition: background-color var(--fd-dur-2) var(--fd-ease-out), color var(--fd-dur-2) var(--fd-ease-out), scale var(--fd-dur-1) var(--fd-ease-out);
+}
+.fd-doc-top-links > a:hover { background: var(--fd-fill); color: var(--fd-text); }
+.fd-doc-top-links > a:active { scale: var(--fd-press-scale); }
+.fd-doc-top-links > a:focus-visible { border-radius: var(--fd-radius-lg); }
+.fd-doc-top-links > a[aria-current="page"] { color: var(--fd-text); }
 .fd-doc-top .fd-brand { flex: none; margin-inline-end: var(--fd-space-2); }
 .fd-doc-brand-tag {
   margin-inline-start: var(--fd-space-2); padding-inline-start: var(--fd-space-2);
@@ -675,7 +690,7 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
 .fd-doc-frame[data-state="loaded"] > .fd-doc-frame-media > img { opacity: 1; }
 .fd-doc-frame[data-state] > .fd-doc-frame-media > .fd-doc-frame-placeholder { position: absolute; inset: 0; aspect-ratio: auto; min-block-size: 0; }
 .fd-doc-frame[data-state="loading"] > .fd-doc-frame-media {
-  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a4) 50%, transparent 70%);
+  background-image: linear-gradient(90deg, transparent 30%, var(--fd-skeleton-sheen, light-dark(color-mix(in srgb, var(--fd-wash) 6%, transparent), color-mix(in srgb, var(--fd-wash) 9%, transparent))) 50%, transparent 70%);
   background-size: 150% 100%; background-repeat: no-repeat;
   animation: fd-shimmer var(--fd-loop-shimmer) var(--fd-ease-in-out) infinite both;
 }
@@ -692,7 +707,7 @@ a.fd-doc-eyebrow:hover { color: var(--fd-text-2); }
   aspect-ratio: 16 / 9; padding: var(--fd-space-6);
 }
 .fd-doc-shot-pane { display: grid; align-content: start; gap: var(--fd-space-2); padding: var(--fd-space-3); border-radius: var(--fd-radius-lg); background: var(--fd-surface); box-shadow: 0 0 0 var(--fd-hairline) var(--fd-line-faint), var(--fd-shadow-xs); min-width: 0; }
-.fd-doc-shot-bar { height: var(--fd-doc-shot-bar); border-radius: var(--fd-radius-full); background: var(--fd-a8); width: var(--w, 100%); }
+.fd-doc-shot-bar { height: var(--fd-doc-shot-bar); border-radius: var(--fd-radius-full); background: var(--fd-skeleton-fill, light-dark(color-mix(in srgb, var(--fd-wash) 11%, transparent), color-mix(in srgb, var(--fd-wash) 17%, transparent))); width: var(--w, 100%); }
 .fd-doc-shot-bar[data-tone="accent"] { background: var(--fd-accent-24); }
 .fd-doc-shot-bar[data-tone="strong"] { background: var(--fd-a16); height: var(--fd-doc-shot-bar-strong); }
 .fd-doc-shot-code { margin-top: var(--fd-space-1); padding: var(--fd-space-2-5); border-radius: var(--fd-radius-md); background: var(--fd-bg-sunken); display: grid; gap: var(--fd-space-1-5); }
@@ -1180,7 +1195,7 @@ button.fd-doc-endpoint-path:hover .fd-doc-endpoint-copy { color: var(--fd-text-2
   .fd-doc-top-row[data-row="sections"] { display: none; }
   .fd-doc-top-row[data-row="crumbs"] { display: flex; height: var(--_doc-crumbs-h); padding-inline: var(--fd-space-5); border-top: var(--fd-hairline) solid var(--fd-line-faint); }
   .fd-doc-top-start { flex: 1 1 auto; }
-  .fd-doc-top .fd-doc-search, .fd-doc-top [data-doc-hide~="sm"] { display: none; }
+  .fd-doc-top .fd-doc-search, .fd-doc-top [data-doc-hide~="sm"], .fd-doc-top-links { display: none; }
   .fd-doc-top [data-doc-show="sm"] { display: inline-flex; }
   .fd-doc-body { grid-template-columns: minmax(0, 1fr); }
   .fd-doc-body > .fd-doc-nav { display: none; }

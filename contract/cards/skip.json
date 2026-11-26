@@ -1,0 +1,75 @@
+{
+  "id": "skip",
+  "job": "Skip past the header and the navigation to the page's content in one key press.",
+  "purpose": "A link first in the body, \"Skip to content\", pointing at the page's main. It is out of sight until it has keyboard focus, then shows at the top start corner above everything as a raised control with the focus ring. It needs no script and, being fixed, moves nothing when it shows. The main takes focus with no ring.",
+  "useWhen": [
+    "Every page with a header, a sidebar or a top bar before its content: the app shell, a site and a docs site.",
+    "A page rendered on a server: write the link and the main's id and tabindex yourself, as templates/shell-static.html does."
+  ],
+  "avoidWhen": [
+    {
+      "when": "Moving focus to a new screen's heading after a route change.",
+      "instead": "Call focusQuiet(heading) from fire/js/core.js."
+    },
+    {
+      "when": "Jumping between sections of one long page.",
+      "instead": "toc"
+    }
+  ],
+  "aka": [
+    "skip link",
+    "skip to content",
+    "skip to main",
+    "skip navigation",
+    "bypass block",
+    "jump to content"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "focused",
+      "how": ":focus on the a.fd-skip (the first Tab on the page): shown with the ring"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-skip",
+      "role": "The link, first in the body; its href is the main's id (#main), and the main carries tabindex=\"-1\".",
+      "element": ["a"],
+      "attrs": { "href": true },
+      "skeleton": "<a class=\"fd-skip\" href=\"#main\">Skip to content</a>"
+    }
+  ],
+  "related": [
+    "app",
+    "site-header",
+    "doc",
+    "toc"
+  ],
+  "keyboard": [
+    {
+      "keys": "Tab",
+      "does": "The first Tab on the page shows the link."
+    },
+    {
+      "keys": "Enter",
+      "does": "Moves focus to the main, past the header and the navigation."
+    }
+  ],
+  "example": "docs/navigation.html#skip",
+  "provenance": [
+    "docs/navigation.html",
+    "fire/base.css",
+    "templates/shell.js",
+    "templates/shell-static.html"
+  ],
+  "since": "0.13.0"
+}

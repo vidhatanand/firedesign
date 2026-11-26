@@ -53,8 +53,15 @@
  *
  * Skeleton screens
  *   An empty .fd-skeleton-{card|grid|table|stat|chart|list|thread|form|hero|page} or
- *   .fd-skeleton-text[data-lines] is filled with its parts on init.
+ *   .fd-skeleton-text[data-lines] is filled with its parts on init, from fire/js/skeleton.js (fire-design/skeleton),
+ *   which returns the same markup as a string for a page's static HTML. A preset that has children is left alone.
  *   data-rows, data-cols (table, list), data-count (grid, stat, form fields), data-variant="bars" (chart).
+ *
+ * Late line
+ *   <p class="fd-skeleton-late">Still loading. This is taking longer than usual.</p>   inside a loading region
+ *   Hidden (its space kept) until --fd-skeleton-late (6s) has passed while the region loads, then shown; the script
+ *   adds a polite status inside it and writes the words there at that moment, so they are announced once per load,
+ *   and empties it when loading ends.
  *
  * Content swap
  *   <div data-fd-loading="true">
@@ -71,6 +78,7 @@
  * ------------------------------------------------------------------------- */
 
 import { emit, reducedMotion, clamp } from './core.js';
+import { SKELETON_PRESETS, skeletonParts } from './skeleton.js';
 
 /* ======================================================================
    Noise: a seeded integer hash, value noise in 3D, fBm with rotated octaves.
@@ -1059,84 +1067,14 @@ function fillLoader(el) {
    Skeleton screens: an empty preset is filled with its parts
    ====================================================================== */
 
-const intAttr = (el, name, fallback, min = 1, max = 48) => {
-  const n = parseInt(el.getAttribute(name), 10);
-  return Number.isFinite(n) ? clamp(n, min, max) : fallback;
-};
-const block = (cls = 'fd-skeleton', attrs = '') => `<span class="${cls}"${attrs}></span>`;
-const widths = [62, 44, 78, 54, 70, 38, 86, 48, 66, 58];
-const pick = (i, j = 0) => widths[(i * 3 + j * 7) % widths.length];
-
-const builders = {
-  'fd-skeleton-text'(el) {
-    const lines = intAttr(el, 'data-lines', 3, 1, 24);
-    el.innerHTML = Array.from({ length: lines }, () => '<span></span>').join('');
-  },
-  'fd-skeleton-card'(el) {
-    el.innerHTML = `
-      <div class="fd-skeleton-card-head">${block('fd-skeleton-tile')}<div class="fd-skeleton-card-titles">${block('fd-skeleton-title', ' data-fd-vars="--_sk-w:58%"')}${block('fd-skeleton-title', ' data-size="label" data-fd-vars="--_sk-w:34%"')}</div></div>
-      <div class="fd-skeleton-text" data-lines="2"></div>
-      <div class="fd-skeleton-card-foot">${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:28%"')}${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:24%"')}</div>`;
-  },
-  'fd-skeleton-grid'(el) {
-    const count = intAttr(el, 'data-count', 4, 1, 24);
-    el.innerHTML = Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-card" data-fd-vars="--fd-i:${i}"></div>`).join('');
-  },
-  'fd-skeleton-table'(el) {
-    const rows = intAttr(el, 'data-rows', 5, 1, 40);
-    const cols = intAttr(el, 'data-cols', 4, 1, 8);
-    const cells = (r, head) => Array.from({ length: cols }, (_, c) => `<span class="fd-skeleton-table-cell">${block('fd-skeleton', ` data-fd-vars="--_sk-w:${head ? 24 + ((c * 13) % 22) : pick(r, c)}%"`)}</span>`).join('');
-    el.innerHTML = `<div class="fd-skeleton-table-head">${cells(0, true)}</div>${Array.from({ length: rows }, (_, r) => `<div class="fd-skeleton-table-row" data-fd-vars="--fd-i:${r}">${cells(r + 1, false)}</div>`).join('')}`;
-  },
-  'fd-skeleton-stat'(el) {
-    const count = intAttr(el, 'data-count', 4, 1, 6);
-    el.innerHTML = Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-stat-tile" data-fd-vars="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="eyebrow" data-fd-vars="--_sk-w:${36 + (i * 11) % 24}%"`)}${block('fd-skeleton-title', ` data-size="stat" data-fd-vars="--_sk-w:${48 + (i * 17) % 26}%"`)}${block('fd-skeleton-title', ` data-size="caption" data-fd-vars="--_sk-w:${54 + (i * 7) % 20}%"`)}</div>`).join('');
-  },
-  'fd-skeleton-chart'(el) {
-    const ticks = (n, cls) => Array.from({ length: n }, () => block(cls)).join('');
-    el.innerHTML = `
-      <div class="fd-skeleton-chart-head"><div class="fd-skeleton-chart-titles">${block('fd-skeleton-title', ' data-fd-vars="--_sk-w:44%"')}${block('fd-skeleton-title', ' data-size="caption" data-fd-vars="--_sk-w:28%"')}</div>${block('fd-skeleton-title', ' data-size="stat" data-fd-vars="--_sk-w:72px"')}</div>
-      <div class="fd-skeleton-chart-body">
-        <div class="fd-skeleton-chart-y">${ticks(5, 'fd-skeleton')}</div>
-        <div class="fd-skeleton-chart-plot"><span class="fd-skeleton-chart-area"></span><span class="fd-skeleton-chart-line"></span></div>
-        <div class="fd-skeleton-chart-x">${ticks(6, 'fd-skeleton')}</div>
-      </div>`;
-  },
-  'fd-skeleton-list'(el) {
-    const rows = intAttr(el, 'data-rows', 4, 1, 24);
-    el.innerHTML = Array.from({ length: rows }, (_, r) => `<div class="fd-skeleton-list-row" data-fd-vars="--fd-i:${r}">${block('fd-skeleton-avatar')}<div class="fd-skeleton-list-text">${block('fd-skeleton-title', ` data-size="label" data-fd-vars="--_sk-w:${pick(r, 1) - 10}%"`)}${block('fd-skeleton-title', ` data-size="caption" data-fd-vars="--_sk-w:${pick(r, 2) - 4}%"`)}</div>${block('fd-skeleton-button', ' data-size="sm"')}</div>`).join('');
-  },
-  'fd-skeleton-thread'(el) {
-    el.innerHTML = `
-      <div class="fd-skeleton-thread-user"><div class="fd-skeleton-text" data-lines="2"></div></div>
-      <div class="fd-skeleton-thread-reply" data-fd-vars="--fd-i:1">
-        <div class="fd-skeleton-text" data-lines="3"></div>
-        <div class="fd-skeleton-thread-tool">${block('fd-skeleton-tile', ' data-size="16"')}${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:96px"')}${block('fd-skeleton-title', ' data-size="mono" data-fd-vars="--_sk-w:140px"')}<span class="fd-grow"></span>${block('fd-skeleton-title', ' data-size="caption" data-fd-vars="--_sk-w:44px"')}</div>
-        <div class="fd-skeleton-text" data-lines="2"></div>
-      </div>`;
-  },
-  'fd-skeleton-form'(el) {
-    const count = intAttr(el, 'data-count', 3, 1, 12);
-    el.innerHTML = `${Array.from({ length: count }, (_, i) => `<div class="fd-skeleton-form-field" data-fd-vars="--fd-i:${i}">${block('fd-skeleton-title', ` data-size="label" data-fd-vars="--_sk-w:${22 + (i * 9) % 18}%"`)}<div class="fd-skeleton-form-control">${block('fd-skeleton', ` data-fd-vars="--_sk-w:${30 + (i * 13) % 26}%"`)}</div>${block('fd-skeleton-title', ` data-size="caption" data-fd-vars="--_sk-w:${46 + (i * 11) % 24}%"`)}</div>`).join('')}
-      <div class="fd-skeleton-form-actions">${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:76px"')}${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:112px"')}</div>`;
-  },
-  'fd-skeleton-hero'(el) {
-    el.innerHTML = `${block('fd-skeleton-title', ' data-size="display" data-fd-vars="--_sk-w:38%"')}${block('fd-skeleton-title', ' data-size="lead" data-fd-vars="--_sk-w:56%"')}`;
-  },
-  'fd-skeleton-page'(el) {
-    const rail = Array.from({ length: 9 }, (_, i) => (i === 3 || i === 6 ? '<span class="fd-skeleton-page-sep"></span>' : '') + block('fd-skeleton-tile', ' data-size="20"')).join('');
-    el.innerHTML = `
-      <div class="fd-skeleton-page-rail">${block('fd-skeleton-tile', ' data-size="24"')}<div class="fd-skeleton-page-icons">${rail}</div>${block('fd-skeleton-avatar', ' data-size="24"')}</div>
-      <div class="fd-skeleton-page-main">
-        <div class="fd-skeleton-page-top">${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:148px"')}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-square')}${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:84px"')}</div>
-        <div class="fd-skeleton-page-body">
-          <div class="fd-skeleton-hero"></div>
-          <div class="fd-skeleton-page-toolbar"><div class="fd-skeleton-form-control" data-search>${block('fd-skeleton', ' data-fd-vars="--_sk-w:44%"')}</div>${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:132px"')}${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:120px"')}<span class="fd-grow"></span>${block('fd-skeleton-button', ' data-fd-vars="--_sk-w:108px"')}</div>
-          <div class="fd-skeleton-table" data-rows="6" data-cols="5"></div>
-        </div>
-      </div>`;
-  },
-};
+// The markup comes from skeleton.js (fire-design/skeleton), which a server or a build step can use to write the same
+// filled presets into the first HTML; a preset that already has children is left as it is.
+const PRESET_ATTRIBUTES = ['rows', 'cols', 'count', 'lines', 'variant'];
+const builders = Object.fromEntries(SKELETON_PRESETS.map((name) => [`fd-skeleton-${name}`, (el) => {
+  const options = {};
+  for (const key of PRESET_ATTRIBUTES) if (el.hasAttribute(`data-${key}`)) options[key] = el.getAttribute(`data-${key}`);
+  el.innerHTML = skeletonParts(name, options);
+}]));
 const SKELETON_SELECTOR = Object.keys(builders).map((cls) => `.${cls}`).join(', ');
 
 function buildSkeleton(el) {
@@ -1160,6 +1098,54 @@ export function setLoading(el, loading) {
   el.dataset.fdLoading = String(value);
   el.setAttribute('aria-busy', String(value));
   emit(el, 'fd:change', { value: value ? 'loading' : 'ready' });
+}
+
+/* The late line (.fd-skeleton-late): a muted sentence, hidden until --fd-skeleton-late has passed while its region
+   loads. CSS shows it on its own. With this script its words stay in place (hidden from assistive technology, so the
+   line keeps its height and nothing moves), and a polite status inside it gets the same words when the time is up,
+   so a screen reader announces them once per load; the status is emptied when loading ends. The region is the
+   nearest [data-fd-loading] or .fd-states; with neither (the first-load app skeleton) it loads while it is on the page. */
+const lateStatus = new WeakMap();
+const lateTimers = new WeakMap();
+
+function lateRegionLoading(el) {
+  const region = el.closest('[data-fd-loading], .fd-states');
+  if (!region) return true;
+  return region.matches('[data-fd-loading]') ? region.dataset.fdLoading === 'true' : region.dataset.state === 'loading';
+}
+
+// The time as the browser resolves it (a calc() or a var() included): the waiting line carries it as its animation-delay.
+function lateDelay(el) {
+  const value = getComputedStyle(el).animationDelay.split(',')[0].trim();
+  const n = parseFloat(value);
+  if (!Number.isFinite(n)) return 6000;
+  return value.endsWith('ms') ? n : n * 1000;
+}
+
+function syncLate(el) {
+  let status = lateStatus.get(el);
+  if (!status) {
+    const words = document.createElement('span');
+    words.setAttribute('aria-hidden', 'true');
+    words.append(...el.childNodes);
+    status = document.createElement('span');
+    status.className = 'fd-sr-only';
+    status.setAttribute('role', 'status');
+    el.append(words, status);
+    lateStatus.set(el, status);
+  }
+  const loading = el.isConnected && lateRegionLoading(el);
+  if (loading && lateTimers.has(el)) return;   // this load is already timed (or the line already shows)
+  clearTimeout(lateTimers.get(el));
+  lateTimers.delete(el);
+  status.textContent = '';
+  el.dataset.fdLate = 'wait';
+  if (!loading) return;
+  lateTimers.set(el, setTimeout(() => {
+    if (!el.isConnected) return;
+    status.textContent = el.firstElementChild.textContent.trim();
+    el.dataset.fdLate = 'shown';
+  }, lateDelay(el)));
 }
 
 /** A 2px accent progress line. Pass a positioned element to scope it; defaults to the top of the page. */
@@ -1263,6 +1249,14 @@ function install() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeAll(); });
   document.fonts?.ready.then(() => { atlasCache.clear(); refreshAll(); });
 
+  // A region that starts or stops loading restarts or clears the timers of its late lines.
+  new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      const region = m.target;
+      if (region.matches('[data-fd-loading], .fd-states')) region.querySelectorAll('.fd-skeleton-late').forEach(syncLate);
+    }
+  }).observe(root, { subtree: true, attributes: true, attributeFilter: ['data-fd-loading', 'data-state'] });
+
   new MutationObserver((mutations) => {
     let removed = false;
     for (const m of mutations) {
@@ -1285,6 +1279,7 @@ function scan(root) {
   collect(root, '.fd-braille').forEach(mountBraille);
   collect(root, '.fd-dots, .fd-bars-loader').forEach(fillLoader);
   collect(root, '[data-fd-loading]').forEach((el) => el.setAttribute('aria-busy', String(el.dataset.fdLoading === 'true')));
+  collect(root, '.fd-skeleton-late').forEach(syncLate);
 }
 
 /** Mount every texture, loader and skeleton preset inside `root`. Idempotent. */

@@ -1,0 +1,128 @@
+{
+  "id": "thumb",
+  "job": "Show a small picture of a record, such as a video's poster frame, cropped to a fixed shape.",
+  "purpose": "A box at a fixed ratio that crops its picture to fill it (object-fit: cover) and shows a centred stand-in icon while there is no picture. Sizes are heights: row fits a table or list row without growing it, the default is a little larger, fill takes its container's width. An optional mono label sits in the corner. When the picture fails to load, the script shows the stand-in instead of the browser's broken mark.",
+  "useWhen": [
+    "A row or a card stands for something with a picture: a run's screen recording, a document's first page, a product image.",
+    "Rows of a table or a list each carry a small preview, with a duration or a count in the corner.",
+    "A card's head shows the picture at the full width of the card."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The picture is a person.",
+      "instead": "avatar"
+    },
+    {
+      "when": "A screenshot in the docs with a caption and a zoom.",
+      "instead": "doc-frame"
+    },
+    {
+      "when": "A picture that belongs to a section of a public website.",
+      "instead": "site-media"
+    },
+    {
+      "when": "A logo, a glyph or one or two letters in a square.",
+      "instead": "tile"
+    }
+  ],
+  "aka": [
+    "thumbnail",
+    "poster",
+    "poster frame",
+    "preview image",
+    "image placeholder",
+    "media thumbnail",
+    "video thumbnail",
+    "cover image"
+  ],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
+  "data": [
+    "record"
+  ],
+  "states": [
+    {
+      "name": "empty",
+      "how": "no fd-thumb-img: the quiet fill and the stand-in icon (<i data-icon>)"
+    },
+    {
+      "name": "loading",
+      "how": "aria-busy=\"true\" with <span class=\"fd-skeleton\"></span> inside"
+    },
+    {
+      "name": "failed",
+      "how": "data-state=\"failed\", written by fire/js/content.js when the picture does not load; the stand-in shows"
+    }
+  ],
+  "variants": [
+    {
+      "attribute": "data-ratio",
+      "value": "wide",
+      "useWhen": "A 21:9 strip, as fd-doc-frame and fd-site-media mean by wide. Without data-ratio the box is 16:9."
+    },
+    {
+      "attribute": "data-ratio",
+      "value": "photo",
+      "useWhen": "A 4:3 picture: a photo or a document page seen across."
+    },
+    {
+      "attribute": "data-ratio",
+      "value": "square",
+      "useWhen": "A 1:1 picture: a product image or an album of results."
+    },
+    {
+      "attribute": "data-ratio",
+      "value": "tall",
+      "useWhen": "A 9:16 picture: a phone recording or a vertical video."
+    },
+    {
+      "attribute": "data-size",
+      "value": "row",
+      "useWhen": "In a table cell or a list row: the row height less a little above and below, so the row does not grow."
+    },
+    {
+      "attribute": "data-size",
+      "value": "fill",
+      "useWhen": "The full width of its container, as the head of a card."
+    }
+  ],
+  "parts": [
+    {
+      "class": "fd-thumb",
+      "role": "The box that holds the ratio, the fill and the stand-in icon.",
+      "skeleton": "<span class=\"fd-thumb\"><img class=\"fd-thumb-img\" src=\"…\" width=\"1536\" height=\"1024\" alt=\"…\"><i data-icon=\"video\"></i></span>"
+    },
+    {
+      "class": "fd-thumb-img",
+      "role": "The picture, cropped to fill; it carries width, height and alt.",
+      "element": ["img"],
+      "parent": ["fd-thumb"]
+    },
+    {
+      "class": "fd-thumb-label",
+      "role": "An optional corner label in mono: a duration or a count.",
+      "parent": ["fd-thumb"]
+    }
+  ],
+  "related": [
+    "avatar",
+    "tile",
+    "doc-frame",
+    "site-media",
+    "table",
+    "list",
+    "card",
+    "skeleton"
+  ],
+  "keyboard": [],
+  "example": "docs/content.html#thumb",
+  "provenance": [
+    "docs/content.html",
+    "fire/components/content.css",
+    "fire/js/content.js"
+  ],
+  "since": "0.13.0"
+}

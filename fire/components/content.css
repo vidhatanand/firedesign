@@ -1,6 +1,6 @@
 /* ==========================================================================
    Content — cards and feedback.
-   fd-card · fd-tile · fd-qr · fd-avatar · fd-badge · fd-tag · fd-verified · fd-status
+   fd-card · fd-tile · fd-thumb · fd-qr · fd-avatar · fd-badge · fd-tag · fd-verified · fd-status
    fd-callout · fd-banner · fd-empty · fd-accordion · fd-disclosure
    fd-timeline · fd-setting · fd-plan · fd-feature-list · fd-feature-row
    Decisions: fd-decision · fd-delta · fd-draft · fd-commit · fd-impact · fd-hold · fd-preview · fd-queue
@@ -39,6 +39,19 @@
   --fd-tile-2xl: 56px;
   --fd-tile-wide-w: 56px;                   /* stat tile */
   --fd-tile-wide-h: 40px;
+  /* thumb (a picture at a fixed ratio, 0.13): sizes are heights, so mixed ratios in one list share a line */
+  --fd-thumb-h: 72px;                       /* default */
+  --fd-thumb-row-inset: 6px;                /* data-size="row": the row height minus this above and below */
+  --fd-thumb-icon-fill: 32px;               /* the stand-in icon of a thumb that fills its container */
+  --fd-thumb-label-h: 18px;
+  --fd-thumb-label-h-row: 14px;
+  --fd-thumb-label-inset: 6px;
+  --fd-thumb-label-inset-row: 2px;
+  --fd-thumb-ratio: 16 / 9;                 /* default, as fd-doc-frame */
+  --fd-thumb-ratio-wide: 21 / 9;            /* the words and values of fd-doc-frame and fd-site-media */
+  --fd-thumb-ratio-photo: 4 / 3;
+  --fd-thumb-ratio-square: 1;
+  --fd-thumb-ratio-tall: 9 / 16;            /* a phone recording or a vertical video */
   /* avatar */
   --fd-avatar-xs: 20px;
   --fd-avatar-sm: 24px;
@@ -300,6 +313,58 @@ button.fd-card[data-interactive] { font: inherit; width: 100%; }
 .fd-tile[data-tone="success"], .fd-tile[data-tone="warning"], .fd-tile[data-tone="danger"], .fd-tile[data-tone="info"], .fd-tile[data-tone="violet"] { --_c-l: transparent; }
 .fd-tile[data-bordered] { --_c-l: var(--fd-line-faint); }
 .fd-tile[data-tone="accent"][data-bordered] { --_c-l: var(--fd-accent-16); }
+
+/* ==========================================================================
+   Thumb (0.13) — a picture cropped to a fixed ratio, with a stand-in icon while there is none
+   <span class="fd-thumb" [data-ratio="wide|photo|square|tall"] [data-size="row|fill"]>
+     <img class="fd-thumb-img" src="…" width="1536" height="1024" alt="…">
+     <i data-icon="video"></i>                                  the stand-in: shows while there is no picture
+     <span class="fd-thumb-label">1:48</span>                  optional corner label: a duration or a count
+   </span>
+   data-ratio  16:9 by default; wide 21:9 · photo 4:3 · square 1:1 · tall 9:16 (fd-doc-frame's and fd-site-media's words)
+   data-size   row: fits a table or list row (the row height less --fd-thumb-row-inset each side, so it follows
+               density) · default: --fd-thumb-h tall · fill: the width of its container (a card's head)
+   aria-busy="true" with <span class="fd-skeleton"></span> inside: loading, in the skeleton look
+   data-state="failed"  written by fire/js/content.js when the picture does not load: the stand-in shows instead of the
+               browser's broken-image mark. Without script a broken picture is the product's to handle.
+   ========================================================================== */
+.fd-thumb {
+  --_c-h: var(--fd-thumb-h); --_c-ratio: var(--fd-thumb-ratio); --_c-r: var(--fd-radius-lg); --_c-i: var(--fd-icon-lg);
+  position: relative; isolation: isolate; flex: none;
+  display: inline-grid; place-items: center; overflow: hidden; vertical-align: middle;
+  block-size: var(--_c-h); aspect-ratio: var(--_c-ratio); max-inline-size: 100%;
+  border-radius: var(--_c-r); background: var(--fd-fill); color: var(--fd-text-4);
+}
+.fd-thumb::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line-faint); pointer-events: none; }
+.fd-thumb[data-ratio="wide"] { --_c-ratio: var(--fd-thumb-ratio-wide); }
+.fd-thumb[data-ratio="photo"] { --_c-ratio: var(--fd-thumb-ratio-photo); }
+.fd-thumb[data-ratio="square"] { --_c-ratio: var(--fd-thumb-ratio-square); }
+.fd-thumb[data-ratio="tall"] { --_c-ratio: var(--fd-thumb-ratio-tall); }
+.fd-thumb[data-size="row"] { --_c-h: calc(var(--fd-row) - 2 * var(--fd-thumb-row-inset)); --_c-r: var(--fd-radius-md); --_c-i: var(--fd-icon-sm); }
+.fd-thumb[data-size="fill"] { display: grid; inline-size: 100%; block-size: auto; --_c-i: var(--fd-thumb-icon-fill); }
+.fd-thumb > .fd-icon { inline-size: var(--_c-i); block-size: var(--_c-i); }
+.fd-thumb-img { position: absolute; inset: 0; z-index: 1; display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.fd-thumb[data-state="failed"] > .fd-thumb-img { display: none; }
+.fd-thumb-label {
+  --_c-lh: var(--fd-thumb-label-h);
+  position: absolute; z-index: 3; inset-block-end: var(--fd-thumb-label-inset); inset-inline-end: var(--fd-thumb-label-inset);
+  block-size: var(--_c-lh); padding-inline: var(--fd-space-1-5); border-radius: var(--fd-radius-sm);
+  background: var(--fd-surface-inverse); color: var(--fd-text-inverse);
+  font-family: var(--fd-font-mono); font-size: var(--fd-text-2xs); line-height: var(--_c-lh); font-variant-numeric: tabular-nums; white-space: nowrap;
+  max-inline-size: calc(100% - 2 * var(--fd-thumb-label-inset-row)); overflow: hidden; text-overflow: ellipsis;
+}
+/* A row thumb, and a narrow tall one, take the small label. */
+:is(.fd-thumb[data-size="row"], .fd-thumb[data-ratio="tall"]:not([data-size="fill"])) > .fd-thumb-label {
+  --_c-lh: var(--fd-thumb-label-h-row);
+  inset-block-end: var(--fd-thumb-label-inset-row); inset-inline-end: var(--fd-thumb-label-inset-row);
+  padding-inline: var(--fd-space-1); border-radius: var(--fd-radius-xs); font-size: var(--fd-text-3xs);
+}
+/* Loading: the skeleton block fills the box; what it stands in for waits underneath. */
+.fd-thumb[aria-busy="true"] { background: none; }
+.fd-thumb[aria-busy="true"] > :not(.fd-skeleton) { visibility: hidden; }
+.fd-thumb > .fd-skeleton { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; border-radius: 0; }
+/* In a list row the thumb takes the lead column. */
+.fd-list-row > .fd-thumb { grid-column: 1; margin-inline-end: var(--fd-space-3); }
 
 /* ==========================================================================
    QR code

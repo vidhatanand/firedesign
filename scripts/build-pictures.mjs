@@ -37,6 +37,7 @@ const FREEZE = '*,*::before,*::after{animation:none!important;transition:none!im
 //   crop: 'css selector'       picture this element inside the chosen specimen instead of the whole specimen
 //   spec: n | 'css selector'   which specimen of the section (index among the section's .doc-specimen, or a selector inside the section)
 //   open: 'css selector'       a trigger to click first (the first visible match), for a part that is closed until it is used
+//   focus: 'css selector'      an element in the specimen to give focus first, for a part that shows only when it has it
 //   shot: selector             what to frame once open (an element in the page, often the overlay); with `union` the specimen too
 //   union: true                frame the specimen and `shot` together
 //   w: css px                  window width instead of the kind's default
@@ -71,6 +72,7 @@ const OVERRIDES = {
   'layout/stack': { docs: 'docs/data.html#progress', spec: 0, crop: '.fd-stack' },
   'layout/grow': { docs: 'docs/foundations.html#layout', crop: '.fd-search.fd-grow' },
   tweaks: { open: '[data-fd-tweaks-open]', shot: '.fd-tweaks', h: 1400, m: 0 },
+  skip: { focus: '.fd-skip' },   // out of sight until it has focus (the first Tab on a page)
 };
 
 const override = (t) => OVERRIDES[t.key] || OVERRIDES[t.id] || {};
@@ -156,6 +158,7 @@ async function frame(page, t, o, scale) {
     await trig.click();
     await page.waitForTimeout(400);
   }
+  if (o.focus) { await holder.locator(o.focus).first().focus(); await page.waitForTimeout(200); }
   if (o.top != null) {
     // a part that lives at the window's edge (the page bar): bring the specimen to `top` px from the top and frame everything above it
     await page.evaluate(({ at }) => { const r = document.querySelector('[data-pic-target]').getBoundingClientRect(); window.scrollBy(0, r.top - at); }, { at: o.top });

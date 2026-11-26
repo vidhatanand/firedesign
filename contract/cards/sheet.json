@@ -1,9 +1,10 @@
 {
   "id": "sheet",
   "job": "Show the detail of something picked from a list without losing the list.",
-  "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. Escape, a close button and a backdrop click close it. Focus never opens on a footer action. It can run in steps and fires fd:open, fd:close and fd:change.",
+  "purpose": "A native dialog that slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones. Modal by default: Escape, a close button and a backdrop click close it. data-modeless leaves the page in use: no scrim or trap, it swaps content when opened from another row, and is a half-height bottom sheet on phones. Fires fd:open, fd:close and fd:change.",
   "useWhen": [
     "A row in a table or a log opens its full detail beside the list.",
+    "A detail panel beside something the person keeps working with, such as a map, a canvas or a live list (data-modeless).",
     "A filter or navigation panel slides in from the left on a small screen.",
     "A multi-step flow needs more room than a dialog."
   ],
@@ -17,8 +18,12 @@
       "instead": "popover"
     },
     {
-      "when": "A permanent side panel.",
+      "when": "A permanent column beside the page, never dismissed.",
       "instead": "split"
+    },
+    {
+      "when": "A task the person must finish or cancel, shown in a modeless sheet.",
+      "instead": "The modal sheet (leave out data-modeless), or a dialog"
     },
     {
       "when": "A preview on hover.",
@@ -32,9 +37,19 @@
     "off-canvas",
     "bottom sheet",
     "inspector",
-    "detail pane"
+    "detail pane",
+    "right side drawer",
+    "detail drawer",
+    "modeless drawer",
+    "non-modal panel",
+    "panel that keeps the page usable",
+    "half-width drawer"
   ],
-  "surfaces": ["app", "website", "phone"],
+  "surfaces": [
+    "app",
+    "website",
+    "phone"
+  ],
   "data": [
     "record",
     "form"
@@ -42,7 +57,7 @@
   "states": [
     {
       "name": "open",
-      "how": "data-state=\"open\"; openDialog(id) or [data-fd-dialog-open]"
+      "how": "data-state=\"open\"; openDialog(id) or [data-fd-dialog-open] / [data-fd-sheet-open]"
     },
     {
       "name": "dragging",
@@ -51,6 +66,14 @@
     {
       "name": "step",
       "how": "data-step on a section; [data-fd-dialog-step] buttons move between steps"
+    },
+    {
+      "name": "current item",
+      "how": "aria-expanded=\"true\" on the trigger a modeless sheet shows, \"false\" on its other triggers"
+    },
+    {
+      "name": "loading",
+      "how": "aria-busy=\"true\" on a modeless sheet while detail.wait(promise) from fd:open holds"
     }
   ],
   "variants": [
@@ -70,6 +93,11 @@
       "useWhen": "A phone-style sheet."
     },
     {
+      "attribute": "data-modeless",
+      "value": "",
+      "useWhen": "The page behind stays in use: no scrim, lock or trap, and opening it from another row swaps its content."
+    },
+    {
       "attribute": "data-size",
       "value": "sm",
       "useWhen": "A narrow panel."
@@ -78,6 +106,11 @@
       "attribute": "data-size",
       "value": "lg",
       "useWhen": "Wide content such as a response body, 560px."
+    },
+    {
+      "attribute": "data-size",
+      "value": "half",
+      "useWhen": "A full record, a decision or a comparison that needs room: half the window, and never narrower than lg. On a phone it is the bottom sheet like every size."
     },
     {
       "attribute": "data-size",
@@ -94,8 +127,12 @@
     {
       "class": "fd-sheet",
       "role": "The dialog.",
-      "element": ["dialog"],
-      "attrs": { "hidden": false },
+      "element": [
+        "dialog"
+      ],
+      "attrs": {
+        "hidden": false
+      },
       "skeleton": "<dialog class=\"fd-sheet\" id=\"…\" aria-labelledby=\"…\">…</dialog>"
     },
     {
@@ -109,7 +146,9 @@
     {
       "class": "fd-sheet-title",
       "role": "The sheet title.",
-      "parent": ["fd-sheet-bar"]
+      "parent": [
+        "fd-sheet-bar"
+      ]
     },
     {
       "class": "fd-sheet-desc",
@@ -141,11 +180,15 @@
   "keyboard": [
     {
       "keys": "Escape",
-      "does": "Closes the sheet and returns focus to the trigger."
+      "does": "Closes the sheet and returns focus to the trigger; a modeless sheet only while focus is inside it."
     },
     {
       "keys": "Tab",
-      "does": "Stays inside the sheet."
+      "does": "Stays inside a modal sheet. A modeless sheet follows its trigger: Tab on it goes in, Tab past the end goes on."
+    },
+    {
+      "keys": "Shift+Tab",
+      "does": "From the start of a modeless sheet, back to its trigger."
     }
   ],
   "example": "docs/overlays.html#sheets",

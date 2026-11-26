@@ -116,6 +116,8 @@ document.body.addEventListener('fd:change', (e) => {
 });
 chartEl?.addEventListener('fd:hover', (e) => { const i: number = e.detail.index; void i; });
 document.addEventListener('fd:open', (e) => { const trigger = e.detail?.trigger; void trigger; });
+// A modeless sheet: swap the content, busy until the run has loaded.
+document.addEventListener('fd:open', (e) => { const swap: boolean | undefined = e.detail?.swap; void swap; e.detail?.wait?.(fetch('/v1/runs/run_8f2a91')); e.detail?.wait?.(() => Promise.resolve()); });
 document.addEventListener('fd:theme', (e) => { const theme: 'light' | 'dark' | 'system' = e.detail.theme; void theme; });
 type ChangeDetail = FireEventMap['fd:change']['detail'];
 const tweakChange: ChangeDetail = { name: 'tweaks', value: tweaks.get() };

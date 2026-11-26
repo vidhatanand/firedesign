@@ -3,7 +3,7 @@
 //   node scripts/find.mjs "approve a request" [--surface app|website|phone|email] [--data record|list|series|form|text]
 //                         [--kind component|pattern|section|template|module] [--json] [--limit 5]
 // --json results carry id, kind, family, surfaces, score, why, job, use, instead, docs and picture (a path, relative to the
-// repository root, to the PNG of the part; modules have none, and so does every result when Fire is installed as a package, which leaves the pictures out).
+// root of Fire, to the PNG of the part; modules have none. The pictures are in the package from 0.13.0).
 // A component whose card states its required structure prints it as `write:`, one line of markup (contract/catalog.json).
 // Each result prints its surfaces. With --surface, a line says when parts for other surfaces match the query clearly
 // better (to stderr with --json, so stdout stays the array; each JSON result carries `surfaces`).
@@ -127,8 +127,8 @@ for (const row of SYNONYMS) for (const a of row) {
 export function load(file = INDEX) {
   const idx = JSON.parse(fs.readFileSync(file, 'utf8'));
   // The picture rule is written once at the top of the index; every result carries the path it gives, when the file is
-  // there. The pictures live in the Fire repository and are left out of the installed package (they are 9 MB of
-  // screenshots no product page loads), so in a product's node_modules a result simply has no picture.
+  // there. The pictures are in the package from 0.13.0; an older installed Fire has none, and there a result simply
+  // has no picture.
   const rule = idx.pictures;
   const root = path.resolve(path.dirname(file), '..');
   if (rule) for (const e of idx.entries) {

@@ -15,6 +15,11 @@
  *                  shows "Link copied". Prose tables are wrapped in .fd-doc-table so they scroll.
  *  Copy page       [data-fd-doc-copy-page] copies the article as Markdown and swaps its .fd-btn-swap label.
  *                  .fd-menu[data-fd-doc-copy-menu] items: data-value="copy-md | view-md | open-ai | mcp".
+ *                  The product comes from the page (0.13): data-name (its name) names it in the open-ai prompt ("this docs
+ *                  page" without it) and data-mcp-url is the address the mcp item copies; both on the menu or on the
+ *                  button that opens it. A page with no MCP server leaves the mcp item out (with no address it does
+ *                  nothing). view-md as an a.fd-menu-item with its own href (the page's Markdown twin) is followed
+ *                  as a link; as a button it opens the article converted to Markdown in a new tab.
  *  Setup card      .fd-doc-setup-tiles > .fd-doc-setup-tile[data-value] ↔ .fd-doc-setup-panel[data-value]
  *                  (tabs pattern: arrows, Home, End). fd:change { value } on the .fd-doc-setup.
  *  API panels      .fd-doc-panel[data-kind="request"][data-lang][data-example] with panes
@@ -493,21 +498,37 @@ async function copyPage(button) {
   emit(button, 'fd:copy', { value: md });
 }
 
-async function onCopyMenu(item, value) {
+/** What the copy menu says about the product: data-name and data-mcp-url on the menu, else on the button that opened it. */
+function copyMenuData(item, trigger) {
+  const menu = item.closest('.fd-menu');
+  const opener = trigger || (menu?.id && doc.querySelector(`[data-fd-menu="${CSS.escape(menu.id)}"]`)) || null;
+  const read = (name) => (menu?.getAttribute(name) || opener?.getAttribute?.(name) || '').trim();
+  return { name: read('data-name'), mcp: read('data-mcp-url') };
+}
+// A link item with its own address (the page's Markdown twin) is followed as a link; only a button builds the blob.
+const ownHref = (item) => item.matches('a[href]') && !/^#?$/.test(item.getAttribute('href').trim());
+
+async function onCopyMenu(item, value, trigger) {
   const article = articleOf(item);
   const md = toMarkdown(article);
-  const title = textOf($('.fd-doc-title', article)) || 'this page';
+  const title = textOf($('.fd-doc-title', article));
+  const { name, mcp } = copyMenuData(item, trigger);
   if (value === 'copy-md') {
     if (await copyText(md)) toast({ title: 'Page copied as Markdown', description: `${md.split('\n').length.toLocaleString()} lines, ready to paste.`, tone: 'success' });
   } else if (value === 'view-md') {
-    const url = URL.createObjectURL(new Blob([md], { type: 'text/plain;charset=utf-8' }));
-    window.open(url, '_blank', 'noopener');
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    if (!ownHref(item)) {
+      const url = URL.createObjectURL(new Blob([md], { type: 'text/plain;charset=utf-8' }));
+      window.open(url, '_blank', 'noopener');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
   } else if (value === 'open-ai') {
-    const prompt = `Read the Ember docs page "${title}" below and help me use it.\n\n${md}`;
+    const page = name ? `the ${name} docs page` : 'this docs page';
+    const prompt = `Read ${page}${title ? ` "${title}"` : ''} below and help me use it.\n\n${md}`;
     if (await copyText(prompt)) toast({ title: 'Prompt copied', description: 'Paste it into your assistant to ask about this page.', tone: 'success' });
   } else if (value === 'mcp') {
-    if (await copyText('https://mcp.ember.dev/v2/mcp')) toast({ title: 'MCP server URL copied', description: 'Add it to your agent as a remote MCP server.', tone: 'success' });
+    // A page with no MCP server leaves this item out; without an address there is nothing to copy.
+    if (!mcp) return;
+    if (await copyText(mcp)) toast({ title: 'MCP server URL copied', description: 'Add it to your agent as a remote MCP server.', tone: 'success' });
   } else return;
   emit(item, 'fd:copy', { value });
 }
@@ -982,7 +1003,7 @@ function onSelect(event) {
   const menu = item?.closest('.fd-menu');
   if (!menu) return;
   const value = event.detail?.value ?? item.dataset.value;
-  if (menu.matches('[data-fd-doc-copy-menu]')) { onCopyMenu(item, value); return; }
+  if (menu.matches('[data-fd-doc-copy-menu]')) { onCopyMenu(item, value, event.detail?.trigger); return; }
   const kind = menu.dataset.fdDocPicker;
   const panel = kind && doc.getElementById(menu.dataset.for || '');
   if (!panel) return;

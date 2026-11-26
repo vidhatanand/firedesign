@@ -79,7 +79,7 @@ test('every card this package touches points at a docs section that exists', () 
 
 let chromium;
 try { ({ chromium } = await import('playwright-core')); } catch { /* not installed */ }
-const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
+const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.jpg': 'image/jpeg' };
 let server;
 let browser;
 let base = '';
@@ -319,6 +319,192 @@ test('logo field: cancelling fd:files leaves the upload to the page, which repor
     return { stalled, at40, done: zone.dataset.state, text: zone.querySelector('.fd-file-status').textContent };
   });
   assert.deepEqual(out, { stalled: 'uploading', at40: '40', done: 'done', text: 'Uploaded' });
+  await page.close();
+});
+
+/* ---------- 0.13: a thumbnail, the line after copying, upload rows that pause ---------- */
+
+test('0.13 cards and docs: thumb is a card of its own, and the new sections exist without style attributes', () => {
+  const thumb = JSON.parse(read('contract/cards/thumb.json'));
+  assert.equal(thumb.since, '0.13.0');
+  for (const id of ['avatar', 'doc-frame', 'site-media']) assert.ok(thumb.avoidWhen.some((a) => a.instead === id), `thumb points at ${id}`);
+  for (const [file, anchor] of [['docs/content.html', 'thumb'], ['docs/code.html', 'copy-next'], ['docs/forms.html', 'long-upload']]) {
+    const html = read(file);
+    assert.ok(html.includes(`id="${anchor}"`), `${file}#${anchor}`);
+    assert.ok(!/\sstyle="/.test(html), `${file} has a style attribute`);
+  }
+  const catalog = JSON.parse(read('contract/catalog.json'));
+  const entry = (id) => catalog.components.find((c) => c.id === id);
+  assert.deepEqual(entry('thumb').attributes['data-ratio'], ['photo', 'square', 'tall', 'wide']);
+  assert.deepEqual(entry('thumb').attributes['data-size'], ['fill', 'row']);
+  for (const id of ['codeblock', 'snippet', 'copy-field']) assert.deepEqual(entry(id).attributes['data-copy-next'], ['*'], id);
+  assert.ok(entry('codeblock').classes.includes('fd-copy-next'));
+  assert.ok(entry('file-upload').classes.includes('fd-file-actions'));
+  assert.ok(read('fire/fire.d.ts').includes("export type FileRowState = 'uploading' | 'paused' | 'done' | 'error';"));
+});
+
+test('thumb: holds its ratio at every size, never grows a row, and a broken picture shows the stand-in', { skip }, async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await open(page, '/docs/content.html');
+  const boxes = await page.$eval('#thumb .doc-specimen', (specimen) => [...specimen.querySelectorAll('.fd-thumb')].map((el) => { const r = el.getBoundingClientRect(); return [el.dataset.ratio || '', Math.round((r.width / r.height) * 100) / 100, r.height]; }));
+  assert.deepEqual(boxes.map(([ratio, q]) => [ratio, q]), [['', 1.78], ['wide', 2.33], ['photo', 1.33], ['square', 1], ['tall', 0.56]]);
+  assert.ok(boxes.every(([, , h]) => h === boxes[0][2]), 'one height for every ratio');
+  // every label stays inside its box
+  const labels = await page.$$eval('#thumb .fd-thumb-label', (els) => els.map((el) => { const a = el.getBoundingClientRect(); const b = el.parentElement.getBoundingClientRect(); return a.left >= b.left && a.right <= b.right && a.bottom <= b.bottom; }));
+  assert.ok(labels.length >= 4 && labels.every(Boolean), 'labels inside their thumbs');
+  // a row thumb never grows a table or list row, in every density
+  for (const density of ['', 'compact', 'spacious']) {
+    if (density) await page.evaluate((d) => { document.documentElement.dataset.density = d; }, density);
+    const rows = await page.$$eval('#thumb tbody tr, #thumb .fd-list-row', (els) => els.map((row) => {
+      const t = row.querySelector('.fd-thumb');
+      const with_ = row.getBoundingClientRect().height;
+      const th = t.getBoundingClientRect().height;
+      const place = [t.parentNode, t.nextSibling];
+      t.remove();
+      const without = row.getBoundingClientRect().height;
+      place[0].insertBefore(t, place[1]);
+      return { with_, without, th, row: parseFloat(getComputedStyle(row).getPropertyValue('--fd-row')) };
+    }));
+    for (const r of rows) {
+      assert.equal(r.with_, r.without, `${density || 'default'}: the thumb does not grow the row`);
+      assert.ok(r.th < r.row, `${density || 'default'}: ${r.th} fits in --fd-row ${r.row}`);
+    }
+  }
+  await page.evaluate(() => { delete document.documentElement.dataset.density; });
+  // the specimen's broken picture: failed, hidden, the stand-in shows
+  const broken = page.locator('#thumb .fd-thumb:has(> img[src^="data:"])');
+  await page.waitForFunction(() => document.querySelector('#thumb .fd-thumb:has(> img[src^="data:"])').dataset.state === 'failed');
+  assert.equal(await broken.locator('.fd-thumb-img').evaluate((img) => getComputedStyle(img).display), 'none');
+  assert.equal(await broken.locator('.fd-icon').evaluate((i) => getComputedStyle(i).visibility), 'visible');
+  // a thumb with no icon of its own gets one; a picture that loads again takes the state off
+  const after = await page.evaluate(async () => {
+    const t = document.querySelector('#thumb .fd-thumb:has(> img[src*="coast"])');
+    t.querySelector('.fd-icon')?.remove();
+    const img = t.querySelector('.fd-thumb-img');
+    const good = img.src;
+    img.src = 'data:image/png;base64,AAAA';
+    await new Promise((r) => setTimeout(r, 200));
+    const failed = [t.dataset.state, t.querySelectorAll(':scope > .fd-icon[data-icon="image"]').length];
+    img.src = good;
+    await new Promise((r) => { if (img.complete && img.naturalWidth) r(); else img.addEventListener('load', r, { once: true }); });
+    await new Promise((r) => setTimeout(r, 50));
+    return [...failed, t.dataset.state ?? null];
+  });
+  assert.deepEqual(after, ['failed', 1, null]);
+  // loading: the skeleton fills the box and the rest waits
+  const busy = await page.$eval('#thumb .fd-thumb[aria-busy="true"]', (t) => { const s = t.querySelector('.fd-skeleton').getBoundingClientRect(); const r = t.getBoundingClientRect(); return [s.width === r.width && s.height === r.height, getComputedStyle(t.querySelector('.fd-icon')).visibility]; });
+  assert.deepEqual(busy, [true, 'hidden']);
+  // nothing overflows at 320
+  await page.setViewportSize({ width: 320, height: 800 });
+  assert.ok(await page.evaluate(() => [...document.querySelectorAll('#thumb .fd-thumb')].every((t) => t.getBoundingClientRect().right <= innerWidth)), 'no thumb past the edge at 320');
+  await page.close();
+});
+
+test('copy next: the line holds its space, shows the step after Copy, says one message, and never doubles', { skip }, async () => {
+  const context = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'] });
+  const page = await context.newPage();
+  await open(page, '/docs/code.html');
+  const blocks = ['#copy-next .fd-snippet', '#copy-next .fd-codeblock', '#copy-next .fd-copy-field'];
+  const buttons = { '#copy-next .fd-snippet': '.fd-snippet-copy', '#copy-next .fd-codeblock': '.fd-codeblock-copy', '#copy-next .fd-copy-field': '[data-fd-field-action="copy"]' };
+  const state = (sel) => page.$eval(sel, (block) => {
+    const line = block.nextElementSibling;
+    const step = line?.querySelector(':scope > :not(.fd-sr-only)');
+    return { isLine: !!line?.matches('p.fd-copy-next'), lines: block.parentElement.querySelectorAll('.fd-copy-next').length, role: line?.getAttribute('role'), shown: line?.dataset.state ?? null, visible: step ? getComputedStyle(step).visibility : null, step: step?.textContent, said: line?.querySelector('.fd-sr-only')?.textContent ?? null, height: line?.getBoundingClientRect().height, specimen: block.closest('.doc-specimen').getBoundingClientRect().height };
+  });
+  const global = () => page.evaluate(() => [...document.querySelectorAll('body > .fd-sr-only[aria-live]')].map((n) => n.textContent).join(''));
+  for (const sel of blocks) {
+    const before = await state(sel);
+    const want = await page.$eval(sel, (b) => b.dataset.copyNext);
+    assert.ok(before.isLine, `${sel}: a line right after the block (written or added)`);
+    assert.equal(before.role, 'status');
+    assert.equal(before.shown, null);
+    assert.equal(before.visible, 'hidden', `${sel}: the step is hidden before Copy`);
+    assert.ok(before.height >= 20, `${sel}: the line holds its space (${before.height})`);
+    await page.locator(`${sel} ${buttons[sel]}`).click();
+    await page.waitForFunction((s) => document.querySelector(s).nextElementSibling.dataset.state === 'shown', sel);
+    const after = await state(sel);
+    assert.equal(after.visible, 'visible');
+    assert.equal(after.step, want);
+    assert.equal(after.said, 'Copied to clipboard. ', `${sel}: the confirmation comes first, in the same message`);
+    assert.equal(after.height, before.height, `${sel}: nothing moves`);
+    assert.equal(after.specimen, before.specimen);
+    assert.equal(await global(), '', `${sel}: no second announcement`);
+    // again: one line, one step
+    await page.locator(`${sel} ${buttons[sel]}`).click();
+    await page.waitForTimeout(100);
+    const again = await state(sel);
+    assert.equal(again.lines, 1);
+    assert.equal(again.step, want);
+    assert.equal(again.said, 'Copied to clipboard. ');
+  }
+  // a snippet without data-copy-next still announces through the shared live region
+  await page.locator('#snippet .fd-snippet-copy').first().click();
+  await page.waitForFunction(() => /Copied to clipboard/.test([...document.querySelectorAll('body > .fd-sr-only[aria-live]')].map((n) => n.textContent).join('')));
+  // init twice adds nothing
+  const lines = await page.evaluate(async () => { const { code, forms } = await import('/fire/fire.js'); code.init(document); forms.init(document); return document.querySelectorAll('#copy-next .fd-copy-next').length; });
+  assert.equal(lines, 3);
+  // reduced motion: no fade
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  await page.waitForFunction(() => document.documentElement.hasAttribute('data-fd-ready'));
+  await page.locator('#copy-next .fd-snippet-copy').click();
+  await page.waitForFunction(() => document.querySelector('#copy-next .fd-copy-next').dataset.state === 'shown');
+  const duration = await page.$eval('#copy-next .fd-copy-next > :not(.fd-sr-only)', (s) => parseFloat(getComputedStyle(s).transitionDuration));
+  assert.equal(duration, 0);
+  await context.close();
+});
+
+test('upload rows: several actions, a paused state the demo upload honours, a status sentence, and the old row unchanged', { skip }, async () => {
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await open(page, '/docs/forms.html');
+  // the old row (one remove button, no fd-file-actions) keeps its grid
+  const old = await page.$eval('#dz-inline-files', (list) => { const row = list.querySelector('.fd-file'); const cs = getComputedStyle(row); return [cs.display, cs.gridTemplateColumns.split(' ').length, getComputedStyle(list).containerType]; });
+  assert.deepEqual(old, ['grid', 3, 'normal']);
+  // the rows with actions share one grid: every bar ends at the same place, the buttons end-aligned
+  const list = page.locator('#long-upload + .doc-specimen .fd-filelist');
+  const ends = await list.evaluate((l) => [...l.querySelectorAll('.fd-file-main')].map((m) => Math.round(m.getBoundingClientRect().right)));
+  assert.equal(new Set(ends).size, 1, `text columns end together: ${ends}`);
+  const labelled = await list.evaluate((l) => [...l.querySelectorAll('.fd-file-actions .fd-btn')].every((b) => b.getAttribute('aria-label')?.includes(b.closest('.fd-file').querySelector('.fd-file-name').textContent)));
+  assert.ok(labelled, 'every action is named for its file');
+  // paused: neutral, still bar
+  const paused = await list.evaluate((l) => { const s = getComputedStyle(l.querySelector('.fd-file[data-state="paused"] .fd-file-bar > span')); const u = getComputedStyle(l.querySelector('.fd-file[data-state="uploading"] .fd-file-bar > span')); return [s.backgroundColor !== u.backgroundColor, parseFloat(s.transitionDuration)]; });
+  assert.deepEqual(paused, [true, 0]);
+  // narrow: the buttons go under the text, nothing overflows at 320
+  await page.setViewportSize({ width: 320, height: 800 });
+  const narrow = await list.evaluate((l) => [...l.querySelectorAll('.fd-file')].map((r) => { const a = r.querySelector('.fd-file-actions').getBoundingClientRect(); const m = r.querySelector('.fd-file-main').getBoundingClientRect(); const b = r.getBoundingClientRect(); return a.top >= m.bottom - 1 && a.right <= b.right && m.right <= b.right; }));
+  assert.ok(narrow.every(Boolean), 'actions under the text, inside the row');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no sideways scroll at 320');
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  // setFileProgress: paused stops the demo upload, uploading goes on from there; a message replaces the status
+  const out = await page.evaluate(async () => {
+    const { forms } = await import('/fire/fire.js');
+    const zone = document.querySelector('[data-fd-dropzone][data-list="#dz-files"]');
+    const file = new File([new Uint8Array(2048)], 'crawl-export.jsonl', { type: '' });
+    zone.querySelector('input[type="file"]').accept = '';
+    forms.addFiles(zone, [file]);
+    const row = document.querySelector('#dz-files .fd-file:last-child');
+    const pct = () => Number(row.style.getPropertyValue('--fd-progress'));
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    await wait(450);
+    const at = Math.round(pct());
+    forms.setFileProgress(row, at, { state: 'paused' });
+    const status = row.querySelector('.fd-file-status').textContent;
+    await wait(1200);
+    const held = [row.dataset.state, Math.round(pct())];
+    forms.setFileProgress(row, at, { state: 'uploading', message: `${at}% · 12.3 MB/s · about 2 min left` });
+    const message = row.querySelector('.fd-file-status').textContent;
+    const states = [];
+    await new Promise((resolve) => { const ob = new MutationObserver(() => { states.push(pct()); if (row.dataset.state === 'done') { ob.disconnect(); resolve(); } }); ob.observe(row, { attributes: true }); setTimeout(resolve, 8000); });
+    return { at, status, held, message, first: states[0], done: row.dataset.state, mono: states.every((v, i) => !i || v >= states[i - 1]) };
+  });
+  assert.ok(out.at > 0 && out.at < 100, `the demo had started (${out.at})`);
+  assert.equal(out.status, `Paused at ${out.at}%`);
+  assert.deepEqual(out.held, ['paused', out.at], 'nothing moved while paused');
+  assert.equal(out.message, `${out.at}% · 12.3 MB/s · about 2 min left`);
+  assert.ok(out.first >= out.at, `it went on from ${out.at}, not from 0 (${out.first})`);
+  assert.ok(out.mono, 'progress never stepped back');
+  assert.equal(out.done, 'done');
   await page.close();
 });
 

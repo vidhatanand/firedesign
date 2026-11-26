@@ -60,12 +60,22 @@
  *                        data-mask-from, eight dots and the last data-mask-keep characters, and masks even with no reveal
  *                        button. The value is drawn as .fd-secret-start + .fd-secret-end (.fd-copy-field-start / -end):
  *                        the start shortens with an ellipsis, the end never does. Copy always copies data-value.
+ *                        A copy field with data-copy-next="…" (0.13) shows that step in the .fd-copy-next line after it
+ *                        once Copy is pressed, announced with the copy as one message (fire/js/code.js does it, on fd:copy).
  *                        Entry: <div class="fd-secret" data-mode="entry" [data-noun="password"]><input class="fd-secret-input"
  *                        type="password" name id autocomplete="new-password"><div class="fd-secret-actions"><button
  *                        data-fd-field-action="reveal"></div></div>. Reveal switches the input to text and back (aria-pressed);
  *                        it is masked again on submit and reset. No data-value, no copy, no rotate. Posts as a plain field.
  * Dropzone               <label class="fd-dropzone" data-fd-dropzone data-list="#files" data-max-mb="50"><input type="file" multiple accept=".pdf,.docx">…</label>
  *                        <ul class="fd-filelist" id="files"></ul>
+ * File row               <li class="fd-file" data-state="uploading|paused|done|error"> .fd-file-icon · .fd-file-main (.fd-file-name,
+ *                          .fd-file-meta > .fd-file-size + .fd-file-status, .fd-file-bar) · the remove button, or (0.13)
+ *                          <div class="fd-file-actions"> with several icon buttons (Pause, Resume, Try again, Cancel, Open),
+ *                          each named for its file. Fire wires only data-fd-file-remove; the product listens for the others
+ *                          and drives the row with setFileProgress(row, pct, { state, message }). "paused" holds the bar
+ *                          where it stopped and says "Paused at 42%" (or the message); a message on "uploading" replaces
+ *                          "Uploading 42%" ("42% · 12.3 MB/s · about 2 min left"). The demo upload of a row stops while it
+ *                          is paused and goes on from where it was when the row is set back to "uploading".
  * Logo field (0.8)       the dropzone as one setting row: a preview, an Upload button and a Remove button, for one image.
  *                        <div class="fd-field"><span class="fd-field-label" id="logo-l">Team logo</span>
  *                         <div class="fd-dropzone" data-fd-dropzone data-layout="logo" data-max-mb="2" role="group" aria-labelledby="logo-l">
@@ -1366,18 +1376,24 @@ function acceptProblem(zone, file) {
   return '';
 }
 
-/** Update a file row: pct 0-100 and an optional state ("uploading" | "done" | "error"). */
+/** Update a file row: pct 0-100 and an optional state ("uploading" | "paused" | "done" | "error") and status line. */
 export function setFileProgress(row, pct, { state, message } = {}) {
   const next = state ?? (pct >= 100 ? 'done' : 'uploading');
+  const previous = row.dataset.state;
+  const at = clamp(Number(pct) || 0, 0, 100);
   row.dataset.state = next;
-  row.style.setProperty('--fd-progress', String(clamp(pct, 0, 100)));
+  row.style.setProperty('--fd-progress', String(at));
   const bar = $('.fd-file-bar', row);
-  bar?.setAttribute('aria-valuenow', String(Math.round(pct)));
+  bar?.setAttribute('aria-valuenow', String(Math.round(at)));
   const status = $('.fd-file-status', row);
-  if (!status) return;
-  if (next === 'done') status.innerHTML = `${icon('circle-check')}<span>${esc(message ?? 'Ready')}</span>`;
-  else if (next === 'error') status.innerHTML = `${icon('circle-alert')}<span>${esc(message ?? 'Upload failed')}</span>`;
-  else status.textContent = `Uploading ${Math.round(pct)}%`;
+  if (status) {
+    if (next === 'done') status.innerHTML = `${icon('circle-check')}<span>${esc(message ?? 'Ready')}</span>`;
+    else if (next === 'error') status.innerHTML = `${icon('circle-alert')}<span>${esc(message ?? 'Upload failed')}</span>`;
+    else if (next === 'paused') status.innerHTML = `${icon('circle-pause')}<span>${esc(message ?? `Paused at ${Math.round(at)}%`)}</span>`;
+    else status.textContent = message ?? `Uploading ${Math.round(at)}%`;
+  }
+  // The demo upload stopped at the pause (its timer finds the row not uploading); it goes on from here.
+  if (previous === 'paused' && next === 'uploading' && row.fdDemo) simulateUpload(row, at);
 }
 
 function fileRow(file, problem) {
@@ -1472,10 +1488,11 @@ export function addFiles(zone, files) {
 
 /** End the simulated upload running on a row or a logo zone, if one is: its timer finds another run and stops. */
 function stopUpload(row) { row.fdUpload = (row.fdUpload || 0) + 1; }
-function simulateUpload(row) {
+function simulateUpload(row, from = 0) {
   stopUpload(row);
+  row.fdDemo = true;
   const run = row.fdUpload;
-  let pct = 0;
+  let pct = from;
   const speed = 6 + Math.random() * 10;
   const tick = () => {
     // A logo zone stays in the page when its picture is removed or replaced, so being connected is not enough: the

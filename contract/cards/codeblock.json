@@ -1,7 +1,7 @@
 {
   "id": "codeblock",
   "job": "Show code a developer will read or paste, with copy, line numbers and language tabs.",
-  "purpose": "A framed block on a sunken well with a header and a pre. Fire tokenises JSON, shell and cURL, JavaScript and TypeScript, and Python; unknown text stays plain. The header holds a filename or language tabs, never both. Options: line numbers, a highlighted range, a folded height, soft wrap. Copy takes the raw text.",
+  "purpose": "A framed block on a sunken well with a header and a pre. Fire tokenises JSON, shell and cURL, JavaScript and TypeScript, and Python; unknown text stays plain. The header holds a filename or language tabs, never both. Options: line numbers, a highlighted range, a folded height, soft wrap. Copy takes the raw text; data-copy-next adds the step after copying in a line under the block.",
   "useWhen": [
     "A request, a config or a response is shown in docs or a detail panel.",
     "The same request is offered in several languages: use tabs; the choice syncs across the page.",
@@ -36,7 +36,9 @@
     "pre",
     "source view",
     "code fence",
-    "code panel"
+    "code panel",
+    "next step after copying",
+    "what to do after copying"
   ],
   "surfaces": [
     "app",
@@ -57,6 +59,10 @@
     {
       "name": "wrapped",
       "how": "data-wrap; toggled by the wrap button"
+    },
+    {
+      "name": "next step shown",
+      "how": "data-state=\"shown\" on the fd-copy-next after Copy; it stays until the page changes"
     }
   ],
   "variants": [
@@ -84,6 +90,11 @@
       "attribute": "data-wrap",
       "value": "",
       "useWhen": "Soft wrap long lines."
+    },
+    {
+      "attribute": "data-copy-next",
+      "value": "*",
+      "useWhen": "The step after copying is one a first-time reader gets wrong: it shows under the block once Copy is pressed."
     }
   ],
   "parts": [
@@ -123,6 +134,10 @@
     {
       "class": "fd-copied-label",
       "role": "The \"Copied\" text shown after copy."
+    },
+    {
+      "class": "fd-copy-next",
+      "role": "The line right after a block with data-copy-next (code block, snippet, copy field): empty, its space held, until Copy shows the step. Added if missing."
     },
     {
       "class": "fd-codeblock-body",

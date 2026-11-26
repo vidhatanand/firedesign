@@ -15,7 +15,8 @@
 //               Fire pairs components/<x>.css with js/<x>.js, so a component whose home is overlays.css belongs to
 //               overlays.js. A home with no module of its name (button.css, base.css, skeleton.css) gives the modules
 //               that query one of its classes on the page (a selector handed to a query on root or document) and
-//               document that class in their header, if any.
+//               document that class in their header, if any. A component in UNDRIVEN (below) has no module: its home's
+//               module does not drive it.
 //               Other modules that select a class do it inside their own parts (a filter item's icon, a docs menu);
 //               counting them would keep the docs kit for every app with a menu.
 //   attributes  data-fd-* attribute -> the modules whose code selects it (`[data-fd-x`) or reads dataset.fdX most
@@ -30,6 +31,13 @@ import { scanSource, HOLE } from './lint-markup.mjs';
 import { splitCss, selectorsOf, needs, named } from './lib/slim-css.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+/** Components whose home stylesheet is paired with a module that does not drive them: pure CSS, so they keep no
+ *  module of their own (whatever reads them does so inside a part that keeps the module). Component id -> why. */
+export const UNDRIVEN = {
+  // docsite.js reads the steps only inside a docs article (the Markdown copy, the contents list), and the article keeps
+  // docsite itself; a site's steps rail (fd-site-steps data-layout="rail") must not carry docsite.js and overlays.js.
+  'doc-steps': 'pure CSS: docsite.js reads it only inside a docs article',
+};
 const OUT = path.join(ROOT, 'contract/slim-map.json');
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
@@ -100,7 +108,9 @@ export function build({ check = false } = {}) {
   const names = /const modules = \{([^}]+)\}/.exec(entry)[1].split(',').map((s) => s.trim());
   const sources = {};
   for (const f of fs.readdirSync(path.join(ROOT, 'fire/js')).filter((f) => f.endsWith('.js'))) sources[f.slice(0, -3)] = read(`fire/js/${f}`);
-  const literals = (src) => scanSource(src, 'lit').strings;
+  // The key of a module's one global binding, once(document, 'fd-nav'), is a name, not markup: nav.js does not put the
+  // sidebar's fd-nav on the page (counting it kept the shell, content and overlays modules for any page with tabs).
+  const literals = (src) => scanSource(src, 'lit').strings.filter(({ at }) => !/\bonce\(\s*(?:document|doc)\s*,\s*$/.test(src.slice(Math.max(0, at - 41), at - 1)));
   const counts = new Map();
   for (const src of Object.values(sources)) for (const s of new Set(literals(src).map((x) => x.s))) counts.set(s, (counts.get(s) || 0) + 1);
   const modules = {}, handlers = {}, documents = {}, selects = {};
@@ -145,7 +155,8 @@ export function build({ check = false } = {}) {
     const home = Object.entries(c.owned).sort((a, b) => b[1] - a[1])[0]?.[0] ?? Object.keys(c.css)[0];
     c.home = home;
     const paired = home && /^components\/([\w-]+)\.css$/.exec(home)?.[1];
-    if (paired && modules[paired] && names.includes(paired)) c.modules = [paired];
+    if (UNDRIVEN[id]) c.modules = [];
+    else if (paired && modules[paired] && names.includes(paired)) c.modules = [paired];
     else c.modules = [...new Set(classesOf[id].flatMap((k) => [...(selects[k] || [])].filter((m) => documents[k]?.has(m))))];
   }
   const attributes = {};

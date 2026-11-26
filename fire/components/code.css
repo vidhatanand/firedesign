@@ -337,6 +337,22 @@
 .fd-snippet-step-hint { margin-top: calc(-1 * var(--fd-space-1-5)); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-3); }
 
 /* ==========================================================================
+   After copying (0.13) — the step a first-time user gets wrong, under the block they copied from
+   <div class="fd-snippet" data-copy-next="Paste it into your agent, then open the sign-in link it sends.">…</div>
+   <p class="fd-copy-next"></p>      right after the block (fire/js/core.js adds it when it is missing)
+   On a .fd-codeblock, .fd-snippet or .fd-copy-field. The line holds its space from the start and is empty until Copy is
+   pressed; then the step fades in (no fade with reduced motion) and stays until the page changes. It is the polite live
+   region: one message, the copied confirmation and then the step. Without script it stays empty.
+   ========================================================================== */
+.fd-copy-next {
+  min-block-size: var(--fd-lh-sm); margin: var(--fd-space-2) 0 0;
+  font-family: var(--fd-font-sans); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); color: var(--fd-text-2); text-wrap: pretty;
+}
+.fd-snippet-step > .fd-copy-next { margin-block-start: 0; }
+.fd-copy-next > :not(.fd-sr-only) { visibility: hidden; opacity: 0; }
+.fd-copy-next[data-state="shown"] > :not(.fd-sr-only) { visibility: visible; opacity: 1; transition: opacity var(--fd-dur-3) var(--fd-ease-out); }
+
+/* ==========================================================================
    Endpoint — method + path.
    <span class="fd-endpoint" data-method="post"><span class="fd-endpoint-method">POST</span><span class="fd-endpoint-path">/v2/crawl/{id}</span></span>
    data-size="sm"         22px

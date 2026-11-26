@@ -929,7 +929,7 @@
   <section class="doc-section" id="sheets">
     <div class="doc-section-head">
       <h2 class="fd-h3">Sheets</h2>
-      <p>A sheet holds the detail of something picked from a list, a log entry or a run, without losing the list. It slides in from the right at 420px (560px for wide content), from the left for navigation and filters, and from the bottom on phones.</p>
+      <p>A sheet holds the detail of something picked from a list, a log entry or a run, without losing the list. It slides in from the right at 420px, at 560px for wide content (<code class="fd-code">data-size="lg"</code>) or across half the window for a full record or a decision (<code class="fd-code">data-size="half"</code>), from the left for navigation and filters, and from the bottom on phones.</p>
       <p>Focus never opens on a footer action, so a second Enter cannot confirm a decision. It goes to <code>[autofocus]</code> if the sheet or dialog has one, else to the first form field in the body, else to the title. Open <em>Review decision</em> with the keyboard: focus starts on the title, and the footer waits until you have read the body.</p>
     </div>
     <div class="doc-specimen" data-code data-layout="center">
@@ -986,7 +986,7 @@
         </div>
       </dialog>
 
-      <dialog class="fd-sheet" id="sheet-decision" data-side="right" data-size="md">
+      <dialog class="fd-sheet" id="sheet-decision" data-side="right" data-size="half">
         <div class="fd-sheet-head">
           <div class="fd-sheet-bar">
             <h2 class="fd-sheet-title">Approve crawl of docs.ember.dev?</h2>
@@ -1091,6 +1091,129 @@
     <ul class="doc-notes">
       <li>Sheets are modal <code class="fd-code">&lt;dialog&gt;</code>s and open with the same <code class="fd-code">data-fd-dialog-open</code>. They float 8px from the edges with a 16px radius; the bottom sheet is flush with 20px top corners and a drag handle.</li>
       <li>Head and foot keep their hairlines; only the body scrolls. Put tabs at the bottom of the head so they sit on its hairline.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== MODELESS SHEET ===================== -->
+  <section class="doc-section" id="modeless">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Modeless sheet</h2>
+      <p>A modeless sheet shows one item’s detail while the page behind stays in use. Use it beside something the person keeps working with, such as a map, a canvas or a live list. Click one run after another: the sheet stays open and swaps what it shows.</p>
+      <p>Add <code class="fd-code">data-modeless</code> to an <code class="fd-code">fd-sheet</code> and open it with the same triggers. For a task the person must finish or cancel, keep the modal sheet.</p>
+    </div>
+    <div class="doc-specimen" data-code data-layout="stack" data-surface="sunken">
+      <div class="fd-column fd-stack" data-size="md" data-gap="3">
+        <div class="fd-row" data-justify="between">
+          <p class="fd-eyebrow" id="runs-title">Runs today</p>
+          <button class="fd-btn" type="button" data-size="sm" data-fd-sheet-open="runs-filters"><i data-icon="list-filter"></i><span>Filters</span></button>
+        </div>
+        <div class="fd-list" data-card role="group" aria-labelledby="runs-title" data-runs>
+          <button class="fd-list-row" type="button" data-fd-sheet-open="run-sheet" data-value="run_8f2a91" data-status="running">
+            <span class="fd-list-lead" data-tone="accent"><i data-icon="network"></i></span>
+            <span class="fd-list-body"><span class="fd-list-title">Crawl docs.ember.dev</span><span class="fd-list-desc"><span class="fd-mono">run_8f2a91</span> · 312 of 500 pages</span></span>
+            <span class="fd-list-meta"><span class="fd-status" data-tone="info" data-size="sm" data-live>Running</span></span>
+            <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+          </button>
+          <button class="fd-list-row" type="button" data-fd-sheet-open="run-sheet" data-value="run_7c1d04" data-status="completed">
+            <span class="fd-list-lead" data-tone="success"><i data-icon="file-search"></i></span>
+            <span class="fd-list-body"><span class="fd-list-title">Extract pricing tiers</span><span class="fd-list-desc"><span class="fd-mono">run_7c1d04</span> · 3 pages</span></span>
+            <span class="fd-list-meta"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></span>
+            <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+          </button>
+          <button class="fd-list-row" type="button" data-fd-sheet-open="run-sheet" data-value="run_6b9e22" data-status="running">
+            <span class="fd-list-lead" data-tone="violet"><i data-icon="bot"></i></span>
+            <span class="fd-list-body"><span class="fd-list-title">Compare plans on 3 sites</span><span class="fd-list-desc"><span class="fd-mono">run_6b9e22</span> · Reading 4 pages</span></span>
+            <span class="fd-list-meta"><span class="fd-status" data-tone="info" data-size="sm" data-live>Running</span></span>
+            <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+          </button>
+          <button class="fd-list-row" type="button" data-fd-sheet-open="run-sheet" data-value="run_5a3f17" data-status="failed">
+            <span class="fd-list-lead" data-tone="danger"><i data-icon="globe"></i></span>
+            <span class="fd-list-body"><span class="fd-list-title">Scrape ember.dev/blog</span><span class="fd-list-desc"><span class="fd-mono">run_5a3f17</span> · Timed out after 60 s</span></span>
+            <span class="fd-list-meta"><span class="fd-status" data-tone="danger" data-size="sm">Failed</span></span>
+            <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+          </button>
+          <button class="fd-list-row" type="button" data-fd-sheet-open="run-sheet" data-value="run_4e8c90" data-status="completed">
+            <span class="fd-list-lead" data-tone="success"><i data-icon="radar"></i></span>
+            <span class="fd-list-body"><span class="fd-list-title">Check status.ember.dev</span><span class="fd-list-desc"><span class="fd-mono">run_4e8c90</span> · No change</span></span>
+            <span class="fd-list-meta"><span class="fd-status" data-tone="success" data-size="sm">Completed</span></span>
+            <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+          </button>
+          <button class="fd-list-row" type="button" data-fd-sheet-open="run-sheet" data-value="run_3d2b55" data-status="queued">
+            <span class="fd-list-lead"><i data-icon="network"></i></span>
+            <span class="fd-list-body"><span class="fd-list-title">Crawl api.ember.dev/reference</span><span class="fd-list-desc"><span class="fd-mono">run_3d2b55</span> · Starts after run_8f2a91</span></span>
+            <span class="fd-list-meta"><span class="fd-status" data-size="sm">Queued</span></span>
+            <span class="fd-list-trail"><i data-icon="chevron-right" class="fd-list-chevron"></i></span>
+          </button>
+        </div>
+      </div>
+
+      <dialog class="fd-sheet" id="run-sheet" data-modeless data-side="right" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <span class="fd-status" data-tone="info" data-variant="pill" data-size="sm" data-run-status>Running</span>
+            <h2 class="fd-sheet-title"><span class="fd-mono" data-run-id>run_8f2a91</span></h2>
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-tooltip="Copy run ID"><i data-icon="copy"></i></button>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc" data-run-desc>Crawl docs.ember.dev · Started 4:29 PM</p>
+        </div>
+        <div class="fd-sheet-body">
+          <dl class="fd-kv" data-layout="split" data-divided>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Endpoint</dt><dd class="fd-kv-value"><span class="fd-mono" data-run-endpoint>/crawl</span></dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Duration</dt><dd class="fd-kv-value fd-num" data-run-duration>4 min 12 s</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Pages</dt><dd class="fd-kv-value fd-num" data-run-pages>312 of 500</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Credits</dt><dd class="fd-kv-value fd-num" data-run-credits>312</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">API key</dt><dd class="fd-kv-value" data-run-key>Production crawler</dd></div>
+            <div class="fd-kv-item"><dt class="fd-kv-key">Client</dt><dd class="fd-kv-value"><span class="fd-mono">ember-py 2.4.1</span></dd></div>
+          </dl>
+          <div class="fd-sheet-section">
+            <p class="fd-eyebrow">Last event</p>
+            <p data-run-event>Reading <span class="fd-mono">docs.ember.dev/guides/webhooks</span></p>
+          </div>
+        </div>
+        <div class="fd-sheet-foot">
+          <button class="fd-btn" type="button" data-variant="ghost" data-start data-fd-dialog-open="run-stop" data-run-stop><i data-icon="circle-stop"></i><span>Stop run</span></button>
+          <button class="fd-btn" type="button"><i data-icon="external-link"></i><span>Open run</span></button>
+        </div>
+      </dialog>
+
+      <dialog class="fd-sheet" id="runs-filters" data-modeless data-side="left" data-size="md">
+        <div class="fd-sheet-head">
+          <div class="fd-sheet-bar">
+            <h2 class="fd-sheet-title">Filters</h2>
+            <button class="fd-btn fd-sheet-close" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-dialog-close aria-label="Close"><i data-icon="x"></i></button>
+          </div>
+          <p class="fd-sheet-desc" data-runs-count>Showing 6 of 6 runs</p>
+        </div>
+        <div class="fd-sheet-body">
+          <div class="fd-sheet-section" role="group" aria-labelledby="rf-status">
+            <p class="fd-eyebrow" id="rf-status">Status</p>
+            <div class="fd-options" data-runs-filter>
+              <label class="fd-checkbox"><input type="checkbox" value="running" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Running</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox" value="queued" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Queued</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox" value="completed" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Completed</span></span></label>
+              <label class="fd-checkbox"><input type="checkbox" value="failed" checked><span class="fd-checkbox-box"></span><span class="fd-checkbox-text"><span class="fd-checkbox-label">Failed</span></span></label>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog class="fd-dialog" id="run-stop" data-size="sm">
+        <div class="fd-dialog-head">
+          <h2 class="fd-h3 fd-dialog-title">Stop <span class="fd-mono" data-run-stop-id>run_8f2a91</span>?</h2>
+          <p class="fd-dialog-desc">Pages read so far stay in the run, and their credits are charged.</p>
+        </div>
+        <div class="fd-dialog-foot">
+          <button class="fd-btn" type="button" data-fd-dialog-close>Cancel</button>
+          <button class="fd-btn" type="button" data-variant="danger" data-fd-dialog-close="stop">Stop run</button>
+        </div>
+      </dialog>
+    </div>
+    <ul class="doc-notes">
+      <li>It opens with <code class="fd-code">dialog.show()</code>: no scrim, no scroll lock, no focus trap, and a click outside leaves it open. It floats over the app shell and under menus, popovers, toasts and dialogs. In a product, make it a child of <code class="fd-code">&lt;body&gt;</code>, outside the app shell (in a framework, render it through a portal): the shell’s page is its own stacking context while page transitions are on, and would hold the sheet under the sidebar.</li>
+      <li>Focus moves to the title. The sheet follows its trigger in the Tab order: Tab on the trigger goes in, Tab past the end goes on to what follows the trigger. Escape closes it only while focus is inside it, and focus goes back to the trigger.</li>
+      <li>Opening it from another trigger swaps the content without the slide. Replace the body on <code class="fd-code">fd:open</code>: <code class="fd-code">detail.trigger</code> is the row, <code class="fd-code">detail.swap</code> is true, and <code class="fd-code">detail.wait(promise)</code> marks the sheet <code class="fd-code">aria-busy</code> until the promise settles. The row it shows has <code class="fd-code">aria-expanded="true"</code> and takes the selected look.</li>
+      <li>One modeless sheet per side; opening a second on the same side closes the first. Below 640px it is a bottom sheet at half the screen that drags down to close, and the page above it still scrolls.</li>
     </ul>
   </section>
 
@@ -1332,6 +1455,54 @@
       closeDialog('dlg-delete-team', 'confirm');
       toast({ title: 'Ember Labs deleted', description: 'You were moved to your Personal team.', tone: 'neutral' });
     }, 1200);
+  });
+
+  // Modeless sheet: each run row swaps the sheet's content; the filters sheet narrows the list as you tick.
+  const RUNS = {
+    run_8f2a91: { status: 'Running', tone: 'info', title: 'Crawl docs.ember.dev', started: '4:29 PM', endpoint: '/crawl', duration: '4 min 12 s', pages: '312 of 500', credits: '312', key: 'Production crawler', event: ['Reading ', 'docs.ember.dev/guides/webhooks'] },
+    run_7c1d04: { status: 'Completed', tone: 'success', title: 'Extract pricing tiers', started: '4:12 PM', endpoint: '/extract', duration: '18.4 s', pages: '3 of 3', credits: '15', key: 'Production crawler', event: ['Wrote 12 fields to ', 'pricing.json'] },
+    run_6b9e22: { status: 'Running', tone: 'info', title: 'Compare plans on 3 sites', started: '4:31 PM', endpoint: '/agent', duration: '1 min 40 s', pages: '4 of 9', credits: '22', key: 'Agents', event: ['Comparing prices on ', 'linear.app/pricing'] },
+    run_5a3f17: { status: 'Failed', tone: 'danger', title: 'Scrape ember.dev/blog', started: '3:58 PM', endpoint: '/scrape', duration: '60 s', pages: '0 of 1', credits: '1', key: 'Staging', event: ['Timed out waiting for ', 'ember.dev/blog'] },
+    run_4e8c90: { status: 'Completed', tone: 'success', title: 'Check status.ember.dev', started: '3:45 PM', endpoint: '/scrape', duration: '1.2 s', pages: '1 of 1', credits: '1', key: 'Monitors', event: ['No change since ', 'Nov 14, 2026 3:15 PM'] },
+    run_3d2b55: { status: 'Queued', tone: 'neutral', title: 'Crawl api.ember.dev/reference', started: 'not yet', endpoint: '/crawl', duration: '0 s', pages: '0 of 200', credits: '0', key: 'Production crawler', event: ['Starts after ', 'run_8f2a91'] },
+  };
+  const runSheet = document.getElementById('run-sheet');
+  const fill = (id) => {
+    const run = RUNS[id];
+    if (!run) return;
+    const set = (sel, text) => { const el = runSheet.querySelector(sel); if (el) el.textContent = text; };
+    const status = runSheet.querySelector('[data-run-status]');
+    status.textContent = run.status;
+    if (run.tone === 'neutral') status.removeAttribute('data-tone'); else status.dataset.tone = run.tone;
+    set('[data-run-id]', id);
+    set('[data-run-desc]', `${run.title} · ${run.started === 'not yet' ? 'Not started' : `Started ${run.started}`}`);
+    set('[data-run-endpoint]', run.endpoint);
+    set('[data-run-duration]', run.duration);
+    set('[data-run-pages]', run.pages);
+    set('[data-run-credits]', run.credits);
+    set('[data-run-key]', run.key);
+    const event = runSheet.querySelector('[data-run-event]');
+    const mono = Object.assign(document.createElement('span'), { className: 'fd-mono', textContent: run.event[1] });
+    event.replaceChildren(run.event[0], mono);
+    runSheet.querySelector('[data-run-stop]').hidden = run.status !== 'Running';
+    document.querySelector('[data-run-stop-id]').textContent = id;
+  };
+  runSheet?.addEventListener('fd:open', (event) => {
+    const id = event.detail?.trigger?.dataset?.value;
+    if (!id || !RUNS[id]) return;
+    // A product fetches the run here; the sheet is busy until the promise settles.
+    event.detail.wait(new Promise((resolve) => setTimeout(() => { fill(id); resolve(); }, event.detail.swap ? 280 : 0)));
+  });
+  const runsList = document.querySelector('[data-runs]');
+  const filterRuns = () => {
+    const on = new Set([...document.querySelectorAll('[data-runs-filter] input:checked')].map((input) => input.value));
+    const rows = [...runsList.querySelectorAll('.fd-list-row')];
+    for (const row of rows) row.hidden = !on.has(row.dataset.status);
+    document.querySelector('[data-runs-count]').textContent = `Showing ${rows.filter((row) => !row.hidden).length} of ${rows.length} runs`;
+  };
+  document.querySelector('[data-runs-filter]')?.addEventListener('change', filterRuns);
+  document.getElementById('run-stop')?.addEventListener('fd:close', (event) => {
+    if (event.detail?.value === 'stop') toast({ title: 'Run stopped', description: `${document.querySelector('[data-run-stop-id]').textContent} kept the pages it read.`, tone: 'neutral' });
   });
 
   // Promise toast.

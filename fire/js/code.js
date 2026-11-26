@@ -15,6 +15,13 @@
  *    .fd-codeblock-tab[data-value]   ↔ `.fd-codeblock-body[data-value]` panes
  *    .fd-codeblock-copy              copies the visible pane; icon becomes a check + "Copied" for 1.4s
  *  .fd-snippet .fd-snippet-copy      copies `.fd-snippet-text` (or the button's data-copy)
+ *  [data-copy-next="…"]              (0.13) on a .fd-codeblock, .fd-snippet or .fd-copy-field: the step after copying.
+ *                                    It shows in the .fd-copy-next line right after the block (written in the markup,
+ *                                    or added at init) once Copy is pressed; the line holds its space from the start
+ *                                    (the step is drawn in it, hidden) and is the polite live region, saying one
+ *                                    message: the copied confirmation, then the step. A copy field's copy (forms.js)
+ *                                    is seen through its fd:copy event. Copying again adds nothing. Without script
+ *                                    the line stays empty.
  *  .fd-endpoint                      data-method is read from the tag if missing; `{params}` in the path are wrapped.
  *    [data-copyable]                 (use a <button>) copies data-copy or the path
  *  .fd-json                          rendered from data-json or a child <script type="application/json">.
@@ -42,6 +49,7 @@
  *      renderJSON(el, data, {depth, truncate}), setJSONExpanded(el, open), getJSON(el),
  *      selectTab(block, value), appendLog(el, entry | string) → row, streamLogDemo(el) → stop(),
  *      playTerminal(el, script?) → Promise, copied(button, {label, slot}),
+ *      copyNextLine(block) → the .fd-copy-next line or null, showCopyNext(block, confirmation) → boolean,
  *      showLine(el, line | row, {focus, hash}) → row, firstError(el, {focus}) → row.
  * Events: fd:change (tabs, view switch; detail.value).
  *         fd:select  .fd-log  { value: line number, row }   a line number was chosen; cancelable (preventDefault keeps
@@ -242,6 +250,44 @@ function announce(message) {
   live.textContent = '';
   requestAnimationFrame(() => { live.textContent = message; });
 }
+/* ---------- What to do after copying (0.13) ---------- */
+const COPY_NEXT = '.fd-codeblock[data-copy-next], .fd-snippet[data-copy-next], .fd-copy-field[data-copy-next]';
+/** The .fd-copy-next line after a block with data-copy-next, found or added, its step drawn but hidden; null without the attribute. */
+export function copyNextLine(block) {
+  const step = block instanceof Element ? block.getAttribute('data-copy-next') : null;
+  if (!step) return null;
+  let line = block.nextElementSibling;
+  if (!line?.classList.contains('fd-copy-next')) {
+    line = document.createElement('p');
+    line.className = 'fd-copy-next';
+    block.after(line);
+  }
+  line.setAttribute('role', 'status');
+  line.setAttribute('aria-atomic', 'true');
+  let said = line.firstElementChild;
+  let text = said?.nextElementSibling;
+  if (!said?.classList.contains('fd-sr-only') || !text || line.children.length !== 2) {
+    said = document.createElement('span');
+    said.className = 'fd-sr-only';
+    text = document.createElement('span');
+    line.replaceChildren(said, text);
+  }
+  if (text.textContent !== step) text.textContent = step;
+  return line;
+}
+/** Show the step under a block with data-copy-next and say `confirmation`, then the step, as one message. False when it has none. */
+export function showCopyNext(block, confirmation = 'Copied to clipboard') {
+  const line = copyNextLine(block);
+  if (!line) return false;
+  const said = line.firstElementChild;
+  said.textContent = '';
+  requestAnimationFrame(() => {
+    said.textContent = /[.!?]$/.test(confirmation) ? `${confirmation} ` : `${confirmation}. `;
+    line.dataset.state = 'shown';
+  });
+  return true;
+}
+
 const ORIGINAL = new WeakMap();
 const TIMERS = new WeakMap();
 /** Swap a button's content to a check (+ label) for 1.4s. `slot` swaps only part of the button. */
@@ -250,7 +296,8 @@ export function copied(btn, { label = fdLabel(btn, 'copy.done', 'Copied'), slot 
   clearTimeout(TIMERS.get(btn));
   slot.innerHTML = (iconOnly || !label ? icon('check') : `${icon('check')}<span class="fd-copied-label">${label}</span>`);
   btn.dataset.state = 'copied';
-  announce(fdLabel(btn, 'copy.announce', 'Copied to clipboard'));
+  const said = fdLabel(btn, 'copy.announce', 'Copied to clipboard');
+  if (!showCopyNext(btn.closest('.fd-codeblock[data-copy-next], .fd-snippet[data-copy-next]'), said)) announce(said);
   TIMERS.set(btn, setTimeout(() => {
     slot.innerHTML = ORIGINAL.get(slot);
     ORIGINAL.delete(slot);
@@ -1045,6 +1092,8 @@ function bindGlobal() {
     if (!open && block.getBoundingClientRect().top < 0) block.scrollIntoView({ block: 'start', behavior: reducedMotion() ? 'auto' : 'smooth' });
   });
 
+  // A copy field (forms.js) says it copied with fd:copy; its line is shown here, as one message.
+  on(document, 'fd:copy', '.fd-copy-field[data-copy-next]', (e, field) => { if (e.target === field) showCopyNext(field, fdLabel(field, 'copy.announce', 'Copied to clipboard')); });
   on(document, 'click', '.fd-snippet-copy', async (e, btn) => {
     const text = btn.dataset.copy ?? $('.fd-snippet-text', btn.closest('.fd-snippet'))?.textContent.trim() ?? '';
     if (await copyText(text)) copied(btn, { iconOnly: true });
@@ -1220,6 +1269,7 @@ function bindGlobal() {
 export function init(root = document) {
   bindGlobal();
   scope(root, '.fd-codeblock').forEach(initCodeblock);
+  scope(root, COPY_NEXT).forEach(copyNextLine);
   scope(root, '.fd-endpoint').forEach(initEndpoint);
   scope(root, '.fd-json').forEach(initJSON);
   scope(root, '.fd-viewswitch').forEach(initViewswitch);

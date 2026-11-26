@@ -43,6 +43,7 @@ export const EXTRA_ROOTS = {
   'fd-shortcuts': 'Shell',             // the shortcut sheet's list
   'fd-swatch': 'Forms',                // a colour that is content
   'fd-tabbar': 'Shell',                // the phone tab bar
+  'fd-thumb': 'Content',               // 0.13: a picture at a fixed ratio with a stand-in icon (content.css, beside the tile)
   'fd-tooltip': 'Overlays',            // the vocabulary lists it only as the part of data-fd-tooltip
   'fd-usage-chip': 'Agent',
   'fd-use-agent': 'Agent',
@@ -77,6 +78,7 @@ export const EXTRA_ROOTS = {
   'fd-site-posts': 'Website',
   'fd-site-article': 'Website',        // 0.8: the reading page of a post, a report or a research paper
   'fd-site-media': 'Website',          // 0.8: a picture in a section (a part used inside sections: kind component)
+  'fd-skip': 'Navigation',             // 0.13: the skip link (base.css, beside fd-sr-only), specimen on docs/navigation.html
 };
 
 /** Classes (and their dash-descendants) that are parts of another component: class -> root of the component.
@@ -91,6 +93,7 @@ export const PART_OF = {
   'fd-clamp-2': 'fd-truncate',
   'fd-clamp-3': 'fd-truncate',
   'fd-copied-label': 'fd-codeblock',
+  'fd-copy-next': 'fd-codeblock',      // 0.13: the step after copying; also under a snippet or a copy field (core.js copyNextLine)
   'fd-crosshair': 'fd-frame',          // the frame's registration marks
   'fd-fade': 'fd-rise',                // entrance animations
   'fd-filelist': 'fd-file',
@@ -120,6 +123,8 @@ export const PART_OF = {
   'fd-site-authors': 'fd-site-article',  // 0.8: an article's byline (also used in a posts entry's meta line)
   'fd-site-notes': 'fd-site-article',    // 0.8: footnotes and their references in the text
   'fd-site-refs': 'fd-site-article',     // 0.8: the reference list
+  'fd-doc-step': 'fd-doc-steps',         // 0.13: the numbered steps are their own component (no behaviour: a site's steps rail
+                                         // must not keep docsite.js in a slim build); before, the steps joined doc and doc-setup
 };
 
 /** Component ids that differ from the root class without its `fd-` (the vocabulary says Buttons, the class is btn). */
@@ -134,7 +139,7 @@ export const SECTION_FAMILIES = new Set(['Website']);
 export const SECTION_PARTS = new Set(['fd-site-media']);
 
 /** Single-root components whose readable name is not the id in title case. */
-export const NAMES = { 'fd-site-media': 'Site picture', 'fd-filters': 'Combined filter', 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
+export const NAMES = { 'fd-doc-steps': 'Numbered steps', 'fd-skip': 'Skip link', 'fd-thumb': 'Thumbnail', 'fd-site-media': 'Site picture', 'fd-filters': 'Combined filter', 'fd-list-detail': 'List and detail', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code', 'fd-decision': 'Decision brief', 'fd-draft': 'Drafted text', 'fd-commit': 'Reason and commit', 'fd-hold': 'Held action', 'fd-preview': 'Preview then commit', 'fd-queue': 'Decision queue', 'fd-states': 'Page states', 'fd-site': 'Site', 'fd-site-container': 'Site container', 'fd-site-head': 'Section head', 'fd-site-header': 'Site header', 'fd-site-hero': 'Hero', 'fd-site-logos': 'Logo strip', 'fd-site-features': 'Features section', 'fd-site-split': 'Split section', 'fd-site-stats': 'Stats section', 'fd-site-steps': 'Steps section', 'fd-site-quote': 'Quote section', 'fd-site-pricing': 'Pricing section', 'fd-site-compare': 'Comparison section', 'fd-site-faq': 'FAQ section', 'fd-site-cta': 'Call to action', 'fd-site-footer': 'Site footer', 'fd-site-posts': 'Posts section', 'fd-site-article': 'Article', 'fd-tag-input': 'Tag input', 'fd-secret': 'Secret', 'fd-codeblock': 'Code block', 'fd-json': 'JSON viewer', 'fd-otp': 'One-time code', 'fd-qr': 'QR code' };
 
 /** Documentation pages that specimen each family (a docs anchor is chosen from these first). */
 export const FAMILY_PAGES = {
@@ -221,7 +226,7 @@ export const GROUPS = [
   // Documentation
   { id: 'doc', name: 'Documentation page', family: 'Documentation', root: 'fd-doc', members: ['fd-doc-head', 'fd-doc-foot', 'fd-doc-footer', 'fd-doc-panel', 'fd-doc-hero', 'fd-doc-tabs', 'fd-doc-pager'] },
   { id: 'doc-endpoint', name: 'API reference', family: 'Documentation', root: 'fd-doc-endpoint', members: ['fd-doc-api', 'fd-doc-params', 'fd-doc-response', 'fd-doc-try'] },
-  { id: 'doc-setup', name: 'Setup steps', family: 'Documentation', root: 'fd-doc-setup', members: ['fd-doc-steps'] },
+  { id: 'doc-setup', name: 'Setup card', family: 'Documentation', root: 'fd-doc-setup', members: [] },
   // Content, Overlays, Texture & loading, Data, Charts, Buttons, Tweaks
   { id: 'feature-list', name: 'Feature list', family: 'Content', root: 'fd-feature-list', members: ['fd-feature-row'] },
   { id: 'date-picker', name: 'Date picker', family: 'Overlays', root: 'fd-daterange', members: ['fd-calendar', 'fd-pick'] },
@@ -243,7 +248,9 @@ export const FREE_ATTRIBUTES = {
   'confirm-inline': ['data-confirm'],  // the phrase to type (the form's data-confirm; the input may carry data-match)
   datefield: ['data-min-date', 'data-max-date'], // an ISO date or "today" (forms.js header)
   'date-picker': ['data-compare'],     // starting comparison of a period: none, previous or year
-  codeblock: ['data-collapse'],        // collapsed height in px: "200", "240", "420" (code.js header)
+  codeblock: ['data-collapse', 'data-copy-next'],   // collapsed height in px: "200", "240", "420" (code.js header); 0.13: the step shown after copying
+  snippet: ['data-copy-next'],         // 0.13: the step shown after copying (code.js header)
+  'copy-field': ['data-copy-next'],    // 0.13: the same on a copy field (forms.js header)
   doc: ['data-doc-hide'],              // docs-site breakpoints to hide at, space-separated ("md sm")
   kv: ['data-copy'],                   // the text a row copies
   list: ['data-value'],                // a row's record id: the option a listbox list selects, the record a list-and-detail row opens
@@ -327,6 +334,8 @@ export const STATE_ATTRIBUTES = {
   // feedback after an action: copied, done, voted, revealed, dragged over, uploading
   'fd-codeblock-copy': { 'data-state': [] },
   'fd-snippet-copy': { 'data-state': [] },
+  'fd-copy-next': { 'data-state': [] },              // 0.13, core.js showCopyNext: shown
+  thumb: { 'data-state': [] },                       // 0.13, content.js: failed, when the picture does not load
   'fd-json-btn': { 'data-state': [] },
   'fd-log-btn': { 'data-state': [] },
   'fd-message-action': { 'data-state': [] },

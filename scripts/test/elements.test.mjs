@@ -1,6 +1,9 @@
 // node --test scripts/test/ : Fire's custom elements.
 //   - the committed build outputs are current (build-elements.mjs --check)
 //   - fire/elements.js imports Fire's modules from ./js/ instead of bundling them, and the declarations type-check
+//   - wrappers/lit/elements.js (fire-design/elements/lit) is the same elements with Lit left to the app: no copy of Lit,
+//     the same tags and exports; in each browser, a page that maps `lit` with an import map loads Lit once and the
+//     elements render on it, and fire/elements.js still works with no import map
 //   - in Chromium, Firefox and WebKit, docs/elements.html renders every element exactly as its markup twin: the
 //     element, as its component's root, has the markup root's classes, data-* and ARIA attributes and internals, and
 //     each pair of specimens renders to the same pixels; a page that loads fire.js and elements.js runs one instance
@@ -42,11 +45,52 @@ test('fire.d.ts and elements.d.ts type-check against their usage files', () => {
   assert.equal(run.status, 0, run.stdout + run.stderr);
 });
 
+/* ---------- wrappers/lit/elements.js: the elements on the app's own Lit ---------- */
+const LIT_JS = readFileSync(path.join(ROOT, 'wrappers/lit/elements.js'), 'utf8');
+const BUNDLED_JS = readFileSync(path.join(ROOT, 'fire/elements.js'), 'utf8');
+const definedTags = (js) => [...js.matchAll(/customElements\.define\("(fd-[\w-]+)"/g)].map((m) => m[1]);
+const exported = (js) => /^export \{([^}]*)\};\s*(?:\/\*[\s\S]*\*\/\s*)?$/m.exec(js)?.[1].split(',').map((n) => n.trim()).filter(Boolean).sort();
+
+test('wrappers/lit/elements.js imports Lit from the app and carries no copy of it', () => {
+  const imports = [...LIT_JS.matchAll(/^import .* from "([^"]+)";$/gm)].map((m) => m[1]);
+  const lit = [...new Set(imports.filter((s) => !s.startsWith('../../fire/js/')))].sort();
+  assert.deepEqual(lit, ['lit', 'lit/decorators.js', 'lit/directives/if-defined.js', 'lit/directives/keyed.js']);
+  // It sits outside fire/ (fire/ loads nothing from outside itself) and reaches Fire's modules there, the files fire.js loads.
+  assert.deepEqual([...new Set(imports.filter((s) => s.startsWith('../../fire/js/')))].sort(), ['../../fire/js/charts.js', '../../fire/js/code.js', '../../fire/js/icons.js', '../../fire/js/texture.js']);
+  // What each Lit package does as it loads: in wrappers/lit/elements.js, any of these is a second Lit.
+  for (const marker of ['litElementVersions', 'litHtmlVersions', 'reactiveElementVersions', '_$litDirective$', 'node_modules/', 'Google LLC']) {
+    assert.ok(!LIT_JS.includes(marker), `wrappers/lit/elements.js contains Lit's code (${marker})`);
+    if (marker !== 'node_modules/') assert.ok(BUNDLED_JS.includes(marker), `elements.js no longer bundles Lit (${marker})`);
+  }
+  const [peer, bundled] = [Buffer.byteLength(LIT_JS), Buffer.byteLength(BUNDLED_JS)];
+  assert.ok(peer < bundled / 2, `wrappers/lit/elements.js is ${peer} bytes, elements.js ${bundled}`);
+});
+
+test('wrappers/lit/elements.js registers the same elements and exports the same names as elements.js', () => {
+  assert.deepEqual(definedTags(LIT_JS), ['fd-icon', 'fd-chart', 'fd-code', 'fd-texture']);
+  assert.deepEqual(definedTags(LIT_JS), definedTags(BUNDLED_JS));
+  assert.deepEqual(exported(LIT_JS), ['FdChart', 'FdCode', 'FdIcon', 'FdTexture', 'FireElement']);
+  assert.deepEqual(exported(LIT_JS), exported(BUNDLED_JS));
+});
+
+test('package.json: fire-design/elements/lit is the peer build, with the same types, and lit is an optional peer', () => {
+  const pkg = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+  assert.deepEqual(pkg.exports['./elements'], { types: './fire/elements.d.ts', default: './fire/elements.js' });
+  assert.deepEqual(pkg.exports['./elements/lit'], { types: './fire/elements.d.ts', default: './wrappers/lit/elements.js' });
+  assert.ok(pkg.files.includes('fire'), 'fire/ is packed');
+  assert.match(pkg.peerDependencies.lit, /^\^3\./);
+  assert.equal(pkg.peerDependenciesMeta.lit?.optional, true);
+  // The range covers the Lit the elements are built and tested with.
+  const [major] = pkg.devDependencies.lit.split('.');
+  assert.equal(`^${major}`, pkg.peerDependencies.lit.split('.')[0]);
+});
+
 /* ---------- browsers ---------- */
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.png': 'image/png', '.ico': 'image/x-icon' };
-function serve() {
+function serve(pages = {}) {
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
+    if (pages[url.pathname]) { res.writeHead(200, { 'content-type': 'text/html', 'cache-control': 'no-store' }).end(pages[url.pathname]); return; }
     const file = path.join(ROOT, decodeURIComponent(url.pathname));
     if (!file.startsWith(ROOT + path.sep)) { res.writeHead(403).end(); return; }
     try {
@@ -210,6 +254,97 @@ for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
       });
 
       assert.deepEqual(errors, [], 'console errors');
+      await context.close();
+    } finally {
+      await browser.close();
+      await new Promise((resolve) => server.close(resolve));
+    }
+  });
+}
+
+/* An app with its own Lit: an import map stands for its bundler. The app imports lit, defines a Lit element that
+ * renders Fire's elements, then imports Fire's elements. `elements` picks which file. */
+const IMPORT_MAP = JSON.stringify({ imports: {
+  lit: '/node_modules/lit/index.js',
+  'lit/': '/node_modules/lit/',
+  'lit-html': '/node_modules/lit-html/lit-html.js',
+  'lit-html/': '/node_modules/lit-html/',
+  'lit-element/': '/node_modules/lit-element/',
+  '@lit/reactive-element': '/node_modules/@lit/reactive-element/reactive-element.js',
+  '@lit/reactive-element/': '/node_modules/@lit/reactive-element/',
+} });
+const litApp = (elements) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Ember runs</title>
+<link rel="stylesheet" href="/fire/fire.css">
+<script type="importmap">${IMPORT_MAP}</script>
+<script type="module">
+import { LitElement, html } from 'lit';
+import { FdIcon } from '${elements}';
+class EmberRuns extends LitElement {
+  createRenderRoot() { return this; }
+  render() {
+    return html\`<h1><fd-icon icon="zap"></fd-icon> Deploys</h1>
+      <fd-chart type="bar" .data=\${{ labels: ['Mon', 'Tue', 'Wed'], series: [{ name: 'Deploys', values: [4, 7, 5] }] }}></fd-chart>\`;
+  }
+}
+customElements.define('ember-runs', EmberRuns);
+window.app = { LitElement, FdIcon };
+</script></head><body><ember-runs></ember-runs></body></html>`;
+const noBuild = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Ember runs</title>
+<link rel="stylesheet" href="/fire/fire.css">
+<script type="module" src="/fire/elements.js"></script>
+</head><body><h1><fd-icon icon="zap"></fd-icon> Deploys</h1><fd-code lang="bash" code="ember deploy --prod"></fd-code></body></html>`;
+
+/* Runs in the page: how many copies of Lit loaded, and what the elements drew. */
+async function litReport() {
+  await Promise.all(['fd-icon', 'fd-chart', 'fd-code', 'fd-texture'].map((n) => customElements.whenDefined(n)));
+  await document.querySelector('ember-runs')?.updateComplete;
+  await Promise.all([...document.querySelectorAll('fd-icon, fd-chart, fd-code')].map((el) => el.updateComplete));
+  const icon = document.querySelector('fd-icon');
+  const chart = document.querySelector('fd-chart');
+  const code = document.querySelector('fd-code');
+  return {
+    litElement: globalThis.litElementVersions?.length ?? 0,
+    litHtml: globalThis.litHtmlVersions?.length ?? 0,
+    reactiveElement: globalThis.reactiveElementVersions?.length ?? 0,
+    // The elements are built on the app's LitElement, not on a copy of their own.
+    appLit: window.app ? icon instanceof window.app.LitElement && icon instanceof window.app.FdIcon : null,
+    tags: ['fd-icon', 'fd-chart', 'fd-code', 'fd-texture'].filter((n) => customElements.get(n)),
+    icon: [icon.className, icon.querySelector(':scope > svg > use')?.getAttribute('href')],
+    chart: chart ? [chart.querySelectorAll(':scope > .fd-chart-plot').length, chart.querySelectorAll('table tbody tr').length] : null,
+    code: code ? code.querySelectorAll('.fd-codeblock-line').length : null,
+  };
+}
+
+for (const [name, engine] of Object.entries({ chromium, firefox, webkit })) {
+  test(`in ${name}: a Lit app loads one Lit with wrappers/lit/elements.js, two with elements.js; elements.js alone needs no import map`, async () => {
+    const server = await serve({ '/peer.html': litApp('/wrappers/lit/elements.js'), '/bundled.html': litApp('/fire/elements.js'), '/plain.html': noBuild });
+    const browser = await engine.launch();
+    try {
+      const context = await browser.newContext({ reducedMotion: 'reduce' });
+      const open = async (file) => {
+        const page = await context.newPage();
+        const errors = [];
+        page.on('console', (msg) => { if (msg.type() === 'error' || /multiple versions of lit/i.test(msg.text())) errors.push(msg.text()); });
+        page.on('pageerror', (error) => errors.push(String(error)));
+        await page.goto(`http://127.0.0.1:${server.address().port}/${file}`, { waitUntil: 'load' });
+        const report = await page.evaluate(litReport);
+        await page.close();
+        return { ...report, errors };
+      };
+      const tags = ['fd-icon', 'fd-chart', 'fd-code', 'fd-texture'];
+      const peer = await open('peer.html');
+      console.log(`${name} peer.html ${JSON.stringify(peer)}`);
+      assert.deepEqual(peer, { litElement: 1, litHtml: 1, reactiveElement: 1, appLit: true, tags, icon: ['fd-icon', '#i-zap'], chart: [1, 3], code: null, errors: [] });
+      // The bug the peer build fixes: the bundled file brings its own Lit into a Lit app.
+      const bundled = await open('bundled.html');
+      console.log(`${name} bundled.html ${JSON.stringify(bundled)}`);
+      assert.equal(bundled.litElement, 2);
+      assert.equal(bundled.appLit, false);
+      const plain = await open('plain.html');
+      console.log(`${name} plain.html ${JSON.stringify(plain)}`);
+      assert.deepEqual(plain, { litElement: 1, litHtml: 1, reactiveElement: 1, appLit: null, tags, icon: ['fd-icon', '#i-zap'], chart: null, code: 1, errors: [] });
       await context.close();
     } finally {
       await browser.close();

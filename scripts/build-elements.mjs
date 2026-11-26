@@ -1,5 +1,7 @@
 // Builds Fire's custom elements from elements/src (Lit + TypeScript):
 //   fire/elements.js             ES module, Lit bundled in, not minified; Fire's modules stay external (./js/*.js)
+//   wrappers/lit/elements.js     the same elements with Lit left as bare imports (lit, lit/…), for an app that has
+//                                Lit already (import 'fire-design/elements/lit'): its bundler then loads one Lit
 //   fire/elements.d.ts           one declaration file (HTMLElementTagNameMap included); types from ./fire.js
 //   contract/custom-elements.json  Custom Elements Manifest (analyzer with the Lit plugin)
 // Usage: node scripts/build-elements.mjs [--check]
@@ -16,20 +18,29 @@ import { litPlugin } from '@custom-elements-manifest/analyzer/src/features/frame
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'elements/src');
 const TSCONFIG = path.join(ROOT, 'elements/tsconfig.json');
-const OUTPUTS = ['fire/elements.js', 'fire/elements.d.ts', 'contract/custom-elements.json'];
+const OUTPUTS = ['fire/elements.js', 'wrappers/lit/elements.js', 'fire/elements.d.ts', 'contract/custom-elements.json'];
 const LIT_VERSION = JSON.parse(readFileSync(path.join(ROOT, 'node_modules/lit/package.json'), 'utf8')).version;
 
 /* ---------- fire/elements.js ---------- */
 // Fire's modules are imported from elements/src as ../../fire/js/<name>.js; in fire/elements.js they become ./js/<name>.js,
 // the same URL fire/fire.js imports, so the browser runs one instance of each.
-const fireModulesExternal = {
+// wrappers/lit/elements.js sits outside fire/ (fire/ loads nothing from outside itself), so there they are ../../fire/js/<name>.js.
+const fireModulesExternal = (prefix) => ({
   name: 'fire-modules-external',
   setup(build) {
-    build.onResolve({ filter: /\/fire\/js\/[\w-]+\.js$/ }, (args) => ({ path: `./js/${path.basename(args.path)}`, external: true }));
+    build.onResolve({ filter: /\/fire\/js\/[\w-]+\.js$/ }, (args) => ({ path: `${prefix}${path.basename(args.path)}`, external: true }));
   },
-};
+});
 
-async function buildBundle() {
+// wrappers/lit/elements.js leaves every Lit package to the app: the source imports lit and lit's own subpaths.
+const LIT_PACKAGES = ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'].flatMap((p) => [p, `${p}/*`]);
+
+async function buildBundle({ peerLit = false } = {}) {
+  const outfile = peerLit ? 'wrappers/lit/elements.js' : 'fire/elements.js';
+  const lit = peerLit
+    ? `Imports Lit from the app (import 'lit'): an app that has Lit 3 loads one copy of it. A page with no build step loads
+ * fire/elements.js, which bundles Lit.`
+    : `Bundles Lit ${LIT_VERSION} (https://lit.dev), Copyright Google LLC, BSD-3-Clause: see fire/LICENSE-lit.txt.`;
   const result = await esbuild.build({
     absWorkingDir: ROOT,
     entryPoints: ['elements/src/index.ts'],
@@ -39,15 +50,18 @@ async function buildBundle() {
     target: 'es2022',
     minify: false,
     write: false,
-    outfile: 'fire/elements.js',
+    outfile,
     tsconfig: TSCONFIG,
     charset: 'utf8',
     legalComments: 'eof',
-    plugins: [fireModulesExternal],
+    // Paths in the output's comments stay node_modules/…, also where node_modules is a link (a git worktree's).
+    preserveSymlinks: true,
+    plugins: [fireModulesExternal(peerLit ? '../../fire/js/' : './js/')],
+    external: peerLit ? LIT_PACKAGES : [],
     banner: {
       js: `/* Fire custom elements: fd-icon, fd-chart, fd-code, fd-texture. BUILT by scripts/build-elements.mjs from elements/src
- * (TypeScript, Lit): edit the source and rebuild, never this file. Fire's modules are imported from ./js/ and shared
- * with fire/fire.js. Bundles Lit ${LIT_VERSION} (https://lit.dev), Copyright Google LLC, BSD-3-Clause: see fire/LICENSE-lit.txt. */`,
+ * (TypeScript, Lit): edit the source and rebuild, never this file. Fire's modules are imported from ${peerLit ? '../../fire/js/' : './js/'} and shared
+ * with fire/fire.js. ${lit} */`,
     },
   });
   return result.outputFiles[0].text;
@@ -88,7 +102,8 @@ function buildDeclarations() {
       return '';
     }).trim();
   });
-  const head = `/* Types of fire/elements.js (import 'fire-design/elements'). BUILT by scripts/build-elements.mjs from elements/src:
+  const head = `/* Types of fire/elements.js (import 'fire-design/elements') and of wrappers/lit/elements.js, the same elements on the app's
+ * own Lit (import 'fire-design/elements/lit'). BUILT by scripts/build-elements.mjs from elements/src:
  * edit the source and rebuild, never this file. Data and event types come from fire.d.ts. */
 import type { ${[...types].sort().join(', ')} } from './fire.js';
 
@@ -114,6 +129,7 @@ function buildManifest() {
 const check = process.argv.includes('--check');
 const outputs = {
   'fire/elements.js': await buildBundle(),
+  'wrappers/lit/elements.js': await buildBundle({ peerLit: true }),
   'fire/elements.d.ts': buildDeclarations(),
   'contract/custom-elements.json': buildManifest(),
 };
@@ -138,9 +154,10 @@ if (check) {
   if (stale) process.exit(1);
   console.log(`elements: ${OUTPUTS.length} outputs up to date`);
 } else {
+  const kb = (file) => `${(Buffer.byteLength(outputs[file]) / 1024).toFixed(1)} KB`;
   for (const file of OUTPUTS) {
     mkdirSync(path.dirname(path.join(ROOT, file)), { recursive: true });
     writeFileSync(path.join(ROOT, file), outputs[file]);
   }
-  console.log(`elements: wrote ${OUTPUTS.join(', ')} (elements.js ${(Buffer.byteLength(outputs['fire/elements.js']) / 1024).toFixed(1)} KB)`);
+  console.log(`elements: wrote ${OUTPUTS.join(', ')} (elements.js ${kb('fire/elements.js')}, the Lit entry ${kb('wrappers/lit/elements.js')})`);
 }

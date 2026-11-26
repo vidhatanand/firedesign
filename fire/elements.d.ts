@@ -1,4 +1,5 @@
-/* Types of fire/elements.js (import 'fire-design/elements'). BUILT by scripts/build-elements.mjs from elements/src:
+/* Types of fire/elements.js (import 'fire-design/elements') and of wrappers/lit/elements.js, the same elements on the app's
+ * own Lit (import 'fire-design/elements/lit'). BUILT by scripts/build-elements.mjs from elements/src:
  * edit the source and rebuild, never this file. Data and event types come from fire.d.ts. */
 import type { ChartConfig, ChartFormat, ChartTone, DonutConfig, HeatgridConfig, IconName, QuadrantConfig, StripConfig } from './fire.js';
 

@@ -23,11 +23,52 @@ Then open http://127.0.0.1:4747/docs/index.html.
 |---|---|
 | Building a product with Fire | [GUIDE.md](GUIDE.md): adding Fire to a project, building a screen, layout, theming, and what to do when Fire does not have what you need |
 | Writing the words on a screen | [WRITING.md](WRITING.md): how to write labels, buttons, help text, empty states and errors so the interface stays clean and useful |
-| Setting up an AI agent to build with Fire | [AGENT-RULES.md](AGENT-RULES.md): the rules, and the three-line pointer for a project's `AGENTS.md` |
+| Setting up an AI agent to build with Fire | The skill in [skills/fire](skills/fire/SKILL.md): link or copy the folder into the agent's skills folder. [AGENT-RULES.md](AGENT-RULES.md) holds the rules and the pointer for a project's `AGENTS.md` |
 | Adding to or changing Fire itself | [DESIGN.md](DESIGN.md): the contract every contribution follows |
 | Looking up a class or attribute | [docs/_ref/CLASSES.md](docs/_ref/CLASSES.md), every class, generated from the catalogue; [docs/_ref/VOCABULARY.md](docs/_ref/VOCABULARY.md) explains the common ones |
 | Updating a product to a newer Fire | [CHANGELOG.md](CHANGELOG.md): what changed in each release and what to check |
-| Asking for a component or an extension | GUIDE.md section 7, then the "Component or extension request" issue template |
+| Asking for a component or an extension | GUIDE.md section 7, then `npx fire propose`, or the "Component or extension request" issue template |
+
+## For AI agents: the skill
+
+An agent that is only told to read this repository builds screens from valid parts in arrangements of its own. The skill in [skills/fire](skills/fire/SKILL.md) fixes the order of work:
+
+1. **Choose the reference screen first.** The agent reads [screens.md](skills/fire/screens.md), which lists all 42 reference screens with when to use each and what to use instead, picks the nearest by the person's task and the shape of the data, opens its picture and its file, and says which screen it follows before it builds.
+2. **Choose the parts.** `fire find` searches by what a part does; [parts.md](skills/fire/parts.md) has one line for every part.
+3. **Build by the rules, then check.** [AGENT-RULES.md](AGENT-RULES.md), the lints and `fire review`, then the screen's picture beside the reference's.
+4. **Propose what Fire lacks.** [contributing.md](skills/fire/contributing.md): build it with `x-` classes, then file it as an issue here with `fire propose`.
+
+Install it once and it works in every project that uses Fire. For Claude Code, from a checkout of this repository:
+
+```bash
+ln -s "$(pwd)/skills/fire" ~/.claude/skills/fire
+```
+
+For one project that has installed Fire, from the project's root:
+
+```bash
+mkdir -p .claude/skills && ln -s ../../node_modules/fire-design/skills/fire .claude/skills/fire
+```
+
+Any agent that reads the open Agent Skills format can use the folder; an agent without skills follows [AGENT-RULES.md](AGENT-RULES.md), which opens with the same step. `node skills/fire/where.mjs` prints the Fire a project has installed and the folder to read from. The reference screens, the docs pages and the pictures are in the package, so an agent in a product can open them.
+
+### Proposals are issues
+
+A part Fire lacks, a missing variant or token, a bug or an accessibility fault is filed as an issue on this repository, complete enough to adopt without a conversation:
+
+```bash
+npx fire propose new run-duration-bar --kind component
+```
+
+```bash
+npx fire propose check docs/fire/proposals/run-duration-bar.md
+```
+
+```bash
+npx fire propose send docs/fire/proposals/run-duration-bar.md --dry-run
+```
+
+`new` writes the file with every section to fill: what was being built, what was searched and why each near part does not fit, and the component itself (a card, the markup, the CSS). `check` reports what is missing and what is private. `send` files it with the `gh` command and writes the link into the file; without `--dry-run` it posts. An issue is public, so it describes a component and never a product: no product or person's name, no file paths, no private addresses, no keys, and example data from Ember. A project lists its private words in `package.json` (`"fire": { "private": ["Acme"] }`) and `check` refuses a file that holds one. Every issue gets an answer: adopted in a release, or declined with a reason. `GUIDE.md` section 7 has the steps.
 
 ## What Fire ships
 
@@ -36,17 +77,19 @@ Fire's HTML and CSS are the contract. Everything else is built on them, generate
 | Part | Where | What it is for |
 |---|---|---|
 | Styles and behaviour | `fire/` | Copy it, or depend on `fire-design`. Plain CSS and ES modules, no build needed to use them. |
-| Package entries | `package.json` `exports`, `bin` | `fire-design` (`fire.js`), `/css`, `/boot`, `/transitions.css`, `/slim`, `/slim-map`, `/structure`, `/elements`, `/theme`, `/looks`, `/initial`, `/email`, `/fonts`, `/react`, `/vue`, `/contract`, `/catalog`, `/index`, `/fire/*` for any file, and the `fire` command (`find`, `lint`, `lint-css`, `render-equal`, `slim`, `review`). The pictures in `contract/pictures/` are not in the package. |
+| Package entries | `package.json` `exports`, `bin` | `fire-design` (`fire.js`), `/css`, `/boot`, `/transitions.css`, `/slim`, `/slim-map`, `/structure`, `/elements`, `/theme`, `/looks`, `/initial`, `/email`, `/fonts`, `/react`, `/vue`, `/contract`, `/catalog`, `/index`, `/fire/*` for any file, and the `fire` command (`find`, `lint`, `lint-css`, `render-equal`, `slim`, `review`, `propose`). The package also holds what an agent reads: the reference screens (`templates/`), the docs pages (`docs/`), a picture of every part (`contract/pictures/`) and the skill (`skills/fire/`). |
 | Theme record | `fire/js/theme.js`, `contract/theme.schema.json`, `contract/looks/` | A product's whole look as one JSON object: palette, tone, type, dials and signature; `paletteFrom()` makes a palette from an accent or brand colours that passes every contrast rule. |
 | Named looks | `contract/looks/named/`, `fire/js/looks.js`, `docs/looks.html` | Eight complete looks to start from, far apart in palette, type and structure; `?look=<name>` previews one; `scripts/looks-check.mjs` proves every look and 40 random themes keep contrast on real screens. |
 | Looks: fonts and dials | `contract/fonts.json`, `fire/typefaces.css`, `scripts/fonts.mjs`, `fire/tokens.css` | A catalogue of 53 open-licensed font families and twelve type sets; `fonts.mjs add "<family>"` puts a family in a product. Four structural dials (surfaces, elevation, controls, headings), the signature dials (texture field, mark, cell, ramp, frame marks, intensity) and an imagery dial for a site's pictures restyle every component. |
 | Combined filter | `fire/js/filters.js`, `fire/components/data.css`, `docs/data.html#combined` | One Filter button for a table or list with many fields: a menu that searches fields and values, chips for what is set, and the rows it hides itself. For up to three fields use the filter chips. |
 | Email | `fire/email/email.js`, `docs/email.html` | `renderEmail()` writes a transactional email or a newsletter issue, HTML and text, in the product's look. |
 | Contract | `contract/fire-contract.json` | Every global token with its type, tier (input, scale, derived) and default, the named breakpoints, and the default look (`defaultLook`). Fire writes no tool's own format: a tool that adapts Fire reads this, the catalogue, the theme record and the export rules. |
-| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 184 components, patterns, layouts and website sections, and 4 modules, with their classes, allowed values, events and a card each: job, when to use, when not, other names, and the surfaces it belongs to; a card per template (42) in `contract/cards/templates/`. |
+| Catalogue and cards | `contract/catalog.json`, `contract/cards/` | 187 components, patterns, layouts and website sections, and 4 modules, with their classes, allowed values, events and a card each: job, when to use, when not, other names, and the surfaces it belongs to; a card per template (42) in `contract/cards/templates/`. |
 | Website | `fire/components/site.css`, `fire/js/site.js`, `docs/site.html`, `docs/site-sections.html`, `templates/site-*.html` | A layout foundation (named breakpoints, fluid type, section rhythm, seven grounds, the last a picture) and 15 section types, among them a reading page and a filtered, paged listing, with pictures treated by the look and ten website templates. Fire ships no block library: a site is told apart by its look and its composition. |
 | Page transitions | `fire/transitions.css`, `fire/components/transitions.css`, `fire/js/transitions.js`, `docs/transitions.html` | Opt in per site: the chrome holds still and the page changes. `transition()` does the same in a single-page app. Chromium only so far. |
-| Find | `scripts/find.mjs`, `contract/index.json`, `contract/pictures/` | `npx fire find "<what you need>"` ranks the parts by what they are for, and by surface with `--surface`: 230 entries, no network, each with a picture except the modules. What agents search first. |
+| Find | `scripts/find.mjs`, `contract/index.json`, `contract/pictures/` | `npx fire find "<what you need>"` ranks the parts by what they are for, and by surface with `--surface`: 233 entries, no network, each with a picture except the modules. |
+| Skill | `skills/fire/`, `scripts/build-skill.mjs` | The agent skill: `SKILL.md` (the order of work), `screens.md` and `parts.md` (generated lists an agent reads whole), `contributing.md`, and `where.mjs` (finds the project's Fire). |
+| Proposals | `scripts/propose.mjs`, `.github/ISSUE_TEMPLATE/` | `npx fire propose new`, `check` and `send`: a proposal written as a file, checked for what is missing and what is private, and filed as an issue on this repository. |
 | Gate | `scripts/gate.mjs`, `contract/fingerprints.json` | Compares every component, pattern and template with its peers and fails a near-duplicate unless a card declares a `relation`. `--probe <page>` checks a candidate. |
 | Custom elements | `fire/elements.js` (Lit), `fire/elements.d.ts` | `fd-icon`, `fd-chart`, `fd-code`, `fd-texture` for frameworks; each is its component's root. |
 | Types | `fire/fire.d.ts` | Every export of `fire.js`, the `fd:*` events, the theme record. |
@@ -135,8 +178,9 @@ A page declares where it is used with `data-fd-surface="app|website|phone|email"
 | `fire/boot.js` | A small plain script for `<head>`, after the stylesheets, that restores the saved theme and tweaks before the first paint and keeps the page from being styled without its CSS. |
 | `fire/fire.css`, `fire/fire.js` | Everything in one import each. |
 | `docs/` | The documentation site: 27 pages. Start at `docs/index.html`. `docs/_ref/` holds the class reference (`CLASSES.md`, generated) and the vocabulary. |
+| `skills/fire/` | The agent skill: start here when an agent builds with Fire. |
 | `templates/` | 42 screens for Ember: the app, a long create form, decisions, settings, an audit log, status pages, a record hub, sign-in (split and centred), onboarding, a support page, ten website pages (`site-*.html`, with `site-shell.js`: home, pricing, customers, changelog, blog, post, resources, report, research, newsletter), a documentation site, and the shell as plain markup. 39 have states that open with `?state=` or the control their card names. `templates/media/` holds ten generated placeholder pictures. Start at `templates/index.html`. |
-| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `lint-css`, `render-equal`, `slim`, `review`), `slim.mjs` (a production Fire trimmed to what a product uses), `review.mjs` (every screen in a browser: a gallery and composition checks), `lib/structure.mjs` (the structural rules the lint and the review share), `find.mjs` (search the parts), `lint-markup.mjs`, `lint-css.mjs`, `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-pictures.mjs` (a picture of every part: `npm run build:pictures`), `build-icons.mjs` (regenerates the icon set), `looks-check.mjs` (renders real screens under every look), `build-contract.mjs`, `build-catalog.mjs`, `build-classes.mjs`, `build-elements.mjs`, and `build-wrappers.mjs` (the other generators that `build.mjs` runs), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
+| `scripts/` | `serve.py` (dev server), `fire.mjs` (the `fire` command: `find`, `lint`, `lint-css`, `render-equal`, `slim`, `review`, `propose`), `propose.mjs` (a proposal as an issue: scaffold, check, send), `build-skill.mjs` (the skill's two lists), `slim.mjs` (a production Fire trimmed to what a product uses), `review.mjs` (every screen in a browser: a gallery and composition checks), `lib/structure.mjs` (the structural rules the lint and the review share), `find.mjs` (search the parts), `lint-markup.mjs`, `lint-css.mjs`, `gate.mjs` (the near-duplicate gate), `fonts.mjs` (add a catalogue font to a product), `audit.mjs` (checks), `build.mjs` (every generator, and `--check`), `build-palettes.mjs` (regenerates the palettes and checks every contrast rule), `build-typefaces.mjs` (type sets from the font catalogue), `build-index.mjs` (the search index), `build-pictures.mjs` (a picture of every part: `npm run build:pictures`), `build-icons.mjs` (regenerates the icon set), `looks-check.mjs` (renders real screens under every look), `build-contract.mjs`, `build-catalog.mjs`, `build-classes.mjs`, `build-elements.mjs`, and `build-wrappers.mjs` (the other generators that `build.mjs` runs), `style-diff.html` (compares computed styles of two builds), `test/` (behaviour tests: `node --test scripts/test/*.test.mjs`). |
 
 ## Families
 

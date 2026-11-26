@@ -1,10 +1,15 @@
 {
   "name": "fire-design",
-  "version": "0.12.4",
+  "version": "0.13.0",
   "private": true,
   "license": "MIT",
   "description": "Fire: a design system for developer, agent and AI products. Plain HTML and CSS as the contract, with Lit elements, React and Vue wrappers.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vidhatanand/firedesign.git"
+  },
+  "bugs": "https://github.com/vidhatanand/firedesign/issues",
   "scripts": {
     "dev": "python3 scripts/serve.py 4747",
     "icons": "node scripts/build-icons.mjs node_modules/lucide-static/icons",
@@ -24,6 +29,8 @@
     "build:catalog": "node scripts/build-catalog.mjs",
     "find": "node scripts/find.mjs",
     "build:index": "node scripts/build-index.mjs",
+    "build:skill": "node scripts/build-skill.mjs",
+    "propose": "node scripts/propose.mjs",
     "fonts": "node scripts/fonts.mjs",
     "build:typefaces": "node scripts/build-typefaces.mjs",
     "gate": "node scripts/gate.mjs",
@@ -44,6 +51,10 @@
     "./elements": {
       "types": "./fire/elements.d.ts",
       "default": "./fire/elements.js"
+    },
+    "./elements/lit": {
+      "types": "./fire/elements.d.ts",
+      "default": "./wrappers/lit/elements.js"
     },
     "./theme": {
       "types": "./fire/js/theme.d.ts",
@@ -70,6 +81,10 @@
       "types": "./fire/js/initial.d.ts",
       "default": "./fire/js/initial.js"
     },
+    "./skeleton": {
+      "types": "./fire/js/skeleton.d.ts",
+      "default": "./fire/js/skeleton.js"
+    },
     "./looks": {
       "types": "./fire/js/looks.d.ts",
       "default": "./fire/js/looks.js"
@@ -80,7 +95,9 @@
   "files": [
     "fire",
     "contract",
-    "!contract/pictures",
+    "templates",
+    "docs",
+    "skills",
     "wrappers",
     "spec",
     "scripts/lint-markup.mjs",
@@ -97,6 +114,8 @@
     "WRITING.md",
     "README.md",
     "scripts/fire.mjs",
+    "scripts/propose.mjs",
+    "scripts/lib/proposal.mjs",
     "scripts/find.mjs",
     "scripts/fonts.mjs",
     "scripts/gate.mjs",
@@ -107,6 +126,7 @@
     "react": ">=19",
     "vue": ">=3.4",
     "@lit/react": ">=1",
+    "lit": "^3.0.0",
     "playwright-core": ">=1.50",
     "pixelmatch": ">=7",
     "pngjs": ">=7"
@@ -119,6 +139,9 @@
       "optional": true
     },
     "@lit/react": {
+      "optional": true
+    },
+    "lit": {
       "optional": true
     },
     "playwright-core": {

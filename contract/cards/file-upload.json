@@ -1,10 +1,11 @@
 {
   "id": "file-upload",
   "job": "Add files by dropping them or browsing; one image as a settings row for a logo.",
-  "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Accepted files appear as rows with progress, status and size. fd:files is cancelable so your app can run the upload and report with setFileProgress(); data-max-mb and accept reject files that do not fit. With data-layout=\"logo\" it is one row for a single image: preview, Upload, Remove, a progress bar and a field error. Fire uploads nothing.",
+  "purpose": "A dashed, sunken area that is also a button: click or press Enter to browse, or drop files. Files appear as rows with progress, size, a status line and their own buttons. fd:files is cancelable so your app can run the upload and report with setFileProgress(); data-max-mb and accept reject files that do not fit. With data-layout=\"logo\" it is one row for a single image: preview, Upload, Remove, a progress bar and a field error. Fire uploads nothing.",
   "useWhen": [
     "People attach one or several files, such as a sitemap, a CSV or a document.",
     "Upload progress and per-file errors should show as rows.",
+    "Large uploads that people pause, resume, retry or cancel one file at a time, with the speed and time left in words.",
     "A team uploads its logo or another single image in a settings row, with a preview and a way to remove it."
   ],
   "avoidWhen": [
@@ -29,7 +30,12 @@
     "attachment",
     "logo upload",
     "logo field",
-    "image upload row"
+    "image upload row",
+    "resumable upload",
+    "pause and resume an upload",
+    "upload queue",
+    "large file upload",
+    "upload progress rows"
   ],
   "surfaces": [
     "app",
@@ -47,6 +53,10 @@
     {
       "name": "uploading",
       "how": "data-state=\"uploading\" on a file row"
+    },
+    {
+      "name": "paused",
+      "how": "data-state=\"paused\" on a file row: the bar holds still in a neutral tone; the status says \"Paused at 42%\" or the message"
     },
     {
       "name": "error",
@@ -126,7 +136,12 @@
     },
     {
       "class": "fd-file-status",
-      "role": "Progress, ready or the reason it failed."
+      "role": "Progress, ready or the reason it failed; a sentence wraps (\"42% · 12.3 MB/s · about 2 min left\")."
+    },
+    {
+      "class": "fd-file-actions",
+      "role": "The last column for several icon buttons (Pause, Resume, Try again, Cancel, Open), each named for its file; under the text on a narrow row.",
+      "parent": ["fd-file"]
     },
     {
       "class": "fd-file-bar",

@@ -70,7 +70,7 @@ A card also exists for each kind of entry the catalogue lists: component, patter
 
 A template has a card in `contract/cards/templates/<name>.json`, one for each file in `templates/`, with the same fields except `variants`, `parts`, `related` and `keyboard`. `example` is the template's path. `states` lists every state the screen has and how to reach it: `?state=<name>`, the screen's Demo state band, or the control that opens it. A screen with no states beyond the default says so in one `default` state. The ten website templates add `sections`, a list of `{ section, variant, why }`: which sections the page is composed of, in order, and why each variant. A template card may carry a `relation` too.
 
-A picture of each entry is not a card field: `contract/pictures/<kind>/<id>.png` is rendered from the part's first docs specimen (`npm run build:pictures`), and the build fails when an entry has none. The pictures are in the repository and are left out of the installed package.
+A picture of each entry is not a card field: `contract/pictures/<kind>/<id>.png` is rendered from the part's first docs specimen (`npm run build:pictures`), and the build fails when an entry has none. The pictures are in the package too, so an agent in a product can open them.
 
 ## Writing rules
 

@@ -17,7 +17,26 @@
    .fd-skeleton-stat[data-count] .fd-skeleton-chart[data-variant="bars"] .fd-skeleton-list[data-rows]
    .fd-skeleton-thread .fd-skeleton-form[data-count] .fd-skeleton-hero .fd-skeleton-page
 
+   Static HTML: an empty preset is filled by texture.js, so a page's first HTML writes the filled markup instead
+   (fire/js/skeleton.js, "fire-design/skeleton", returns it as a string). An empty .fd-skeleton-text[data-lines] (1 to 8)
+   draws its lines with CSS alone until the script fills it, at the same height.
+
+   First load (no script yet): .fd-skeleton-app, the app shell's geometry, in the page's static HTML (added in 0.13.0):
+   <div class="fd-skeleton-app" role="status" aria-label="Loading">
+     <div class="fd-skeleton-app-side" aria-hidden="true"><span class="fd-skeleton-app-brand"></span>
+       <span class="fd-skeleton-app-nav"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="fd-skeleton-app-account"></span></div>
+     <div class="fd-skeleton-app-main" aria-hidden="true"><span class="fd-skeleton-app-top"><i></i><i></i><i></i><i></i></span>
+       <div class="fd-skeleton-app-page"><span class="fd-skeleton-app-head"></span> one filled preset </div></div>
+     <span class="fd-skeleton-app-tabbar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>   only when the app has a tab bar
+   </div>
+   data-sidebar="collapsed" when the shell starts as a rail; data-contained fills its parent's box (docs, previews), like
+   .fd-app[data-contained]. skeletonApp() in fire/js/skeleton.js writes it.
+
    Content swap: <div data-fd-loading="true"> skeleton first, real content second </div>
+   Inside a loading region ([data-fd-loading="true"], .fd-states[data-state="loading"]) the skeleton shows only after
+   --fd-skeleton-delay, so a fast load never flashes one; the space is held meanwhile. 0s turns the wait off.
+   Late line: <p class="fd-skeleton-late">Still loading. This is taking longer than usual.</p> in the loading region,
+   shown once --fd-skeleton-late has passed (texture.js announces it once to a screen reader).
    Stagger: set --fd-i on a skeleton (presets do it per row/card).
    ========================================================================== */
 
@@ -47,6 +66,9 @@
   --fd-skeleton-h-xs: 7px;          /* axis ticks, table head cells */
   --fd-skeleton-h-sm: 8px;          /* table cells, form control text */
   --fd-skeleton-stagger: 90ms;      /* delay per --fd-i step */
+  --fd-skeleton-delay: 160ms;       /* a loading region shows its skeleton after this (0s: at once); not scaled by motion */
+  --fd-skeleton-late: 6s;           /* the late line shows after this */
+  --fd-skeleton-sheen-w: 40%;       /* the bright part of the sweep, of the bar's width */
   --fd-skeleton-pulse: 2.4s;        /* chart area and line */
   /* bar thickness inside a text line, named by the line role it stands in for */
   --fd-skeleton-bar-2xs: 7px;
@@ -85,6 +107,22 @@
   --fd-skeleton-sep-w: 20px;
   --fd-skeleton-search-w: 280px;
   --fd-skeleton-search-min: 120px;
+  /* first-load app skeleton (the shell's own tokens give its widths and heights) */
+  --fd-skeleton-app-name-w: 72px;    /* brand name */
+  --fd-skeleton-app-email-w: 112px;  /* account email */
+  --fd-skeleton-app-title-w: 96px;   /* top bar title */
+  --fd-skeleton-app-search-w: 200px; /* top bar search */
+}
+
+/* Colours, derived from --fd-wash like the --fd-a* steps, and redeclared on [data-palette] so a palette set on any
+   element recolours its skeletons. The fill reads clearly above the hairline of its theme; the soft fill (a table
+   head, axis ticks, the text inside a form control) is no fainter than the fill was before 0.13. data.css, charts.css,
+   docsite.css and agent.css read these with the same formula as a fallback, for a slim build that leaves this file
+   out: change them together. */
+:root, [data-palette] {
+  --fd-skeleton-fill: light-dark(color-mix(in srgb, var(--fd-wash) 11%, transparent), color-mix(in srgb, var(--fd-wash) 17%, transparent));
+  --fd-skeleton-fill-soft: light-dark(color-mix(in srgb, var(--fd-wash) 7%, transparent), color-mix(in srgb, var(--fd-wash) 10%, transparent));
+  --fd-skeleton-sheen: light-dark(color-mix(in srgb, var(--fd-wash) 6%, transparent), color-mix(in srgb, var(--fd-wash) 9%, transparent));
 }
 
 /* ---------- Spinner ---------- */
@@ -204,8 +242,8 @@
   border: 0 solid transparent;
   border-block-width: var(--_sk-b);
   border-radius: var(--_sk-r) / calc(var(--_sk-r) + var(--_sk-b));
-  background-color: var(--fd-a6);
-  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a4) 50%, transparent 70%);
+  background-color: var(--fd-skeleton-fill);
+  background-image: linear-gradient(90deg, transparent calc(50% - var(--fd-skeleton-sheen-w) / 2), var(--fd-skeleton-sheen) 50%, transparent calc(50% + var(--fd-skeleton-sheen-w) / 2));
   background-size: 150% 100%;
   background-repeat: no-repeat;
   background-clip: padding-box;
@@ -313,7 +351,7 @@
 .fd-skeleton-table-cell { display: flex; flex: 1 1 0; min-width: 0; }
 .fd-skeleton-table-cell:first-child { flex-grow: 1.6; }
 .fd-skeleton-table-cell:last-child:not(:first-child) { justify-content: flex-end; }
-.fd-skeleton-table-head .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-table-head .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-skeleton-fill-soft); }
 .fd-skeleton-table-row .fd-skeleton { --_sk-h: var(--fd-skeleton-h-sm); --_sk-r: var(--fd-radius-xs); }
 @container (max-width: 480px) {
   .fd-skeleton-table-cell:nth-child(n + 4) { display: none; }
@@ -343,10 +381,10 @@
   column-gap: var(--fd-space-3); row-gap: var(--fd-space-2);
 }
 .fd-skeleton-chart-y { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; margin-block: calc(var(--fd-space-1) * -1); }
-.fd-skeleton-chart-y > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-w: var(--fd-skeleton-tick-y); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-chart-y > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-w: var(--fd-skeleton-tick-y); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-skeleton-fill-soft); }
 .fd-skeleton-chart-y > .fd-skeleton:nth-child(odd) { --_sk-w: var(--fd-skeleton-tick-y-alt); }
 .fd-skeleton-chart-x { grid-column: 2; display: flex; justify-content: space-between; }
-.fd-skeleton-chart-x > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-w: var(--fd-skeleton-tick-x); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-chart-x > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-xs); --_sk-w: var(--fd-skeleton-tick-x); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-skeleton-fill-soft); }
 .fd-skeleton-chart-plot {
   position: relative; overflow: hidden;
   background: linear-gradient(var(--fd-chart-grid) 0 var(--fd-hairline), transparent var(--fd-hairline)) 0 0 / 100% 25%;
@@ -360,19 +398,19 @@
   animation: fd-pulse var(--fd-skeleton-pulse) var(--fd-ease-in-out) infinite;
 }
 .fd-skeleton-chart-area {
-  background: linear-gradient(var(--fd-a6), transparent);
+  background: linear-gradient(var(--fd-skeleton-fill), transparent);
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13 L120 40 L0 40 Z'/></svg>");
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13 L120 40 L0 40 Z'/></svg>");
 }
 .fd-skeleton-chart-line {
-  background: var(--fd-a16);
+  background: var(--fd-a24);
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13' fill='none' stroke='black' stroke-width='1.5' vector-effect='non-scaling-stroke'/></svg>");
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><path d='M0 30 C8 29 12 24 20 25 S32 31 40 27 S52 15 60 17 S74 26 82 21 S98 8 108 11 S116 14 120 13' fill='none' stroke='black' stroke-width='1.5' vector-effect='non-scaling-stroke'/></svg>");
 }
 .fd-skeleton-chart[data-variant="bars"] .fd-skeleton-chart-line { display: none; }
 .fd-skeleton-chart[data-variant="bars"] .fd-skeleton-chart-area {
   inset: 8% 0 0;
-  background: var(--fd-a6);
+  background: var(--fd-skeleton-fill);
   -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><rect x='2' y='22' width='6' height='18' rx='1'/><rect x='12' y='16' width='6' height='24' rx='1'/><rect x='22' y='26' width='6' height='14' rx='1'/><rect x='32' y='12' width='6' height='28' rx='1'/><rect x='42' y='18' width='6' height='22' rx='1'/><rect x='52' y='8' width='6' height='32' rx='1'/><rect x='62' y='20' width='6' height='20' rx='1'/><rect x='72' y='14' width='6' height='26' rx='1'/><rect x='82' y='24' width='6' height='16' rx='1'/><rect x='92' y='6' width='6' height='34' rx='1'/><rect x='102' y='15' width='6' height='25' rx='1'/><rect x='112' y='10' width='6' height='30' rx='1'/></svg>");
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'><rect x='2' y='22' width='6' height='18' rx='1'/><rect x='12' y='16' width='6' height='24' rx='1'/><rect x='22' y='26' width='6' height='14' rx='1'/><rect x='32' y='12' width='6' height='28' rx='1'/><rect x='42' y='18' width='6' height='22' rx='1'/><rect x='52' y='8' width='6' height='32' rx='1'/><rect x='62' y='20' width='6' height='20' rx='1'/><rect x='72' y='14' width='6' height='26' rx='1'/><rect x='82' y='24' width='6' height='16' rx='1'/><rect x='92' y='6' width='6' height='34' rx='1'/><rect x='102' y='15' width='6' height='25' rx='1'/><rect x='112' y='10' width='6' height='30' rx='1'/></svg>");
 }
@@ -395,7 +433,7 @@
   border-radius: var(--fd-radius-2xl);
   background: var(--fd-fill);
 }
-.fd-skeleton-thread-user .fd-skeleton-text > * { background-color: var(--fd-a8); }
+.fd-skeleton-thread-user .fd-skeleton-text > * { background-color: var(--fd-skeleton-fill); }
 .fd-skeleton-thread-reply { display: flex; flex-direction: column; gap: var(--fd-space-3); min-width: 0; }
 .fd-skeleton-thread-tool {
   display: flex; align-items: center; gap: var(--fd-space-2);
@@ -417,7 +455,7 @@
   background: var(--fd-surface);
   box-shadow: inset 0 0 0 var(--fd-hairline) var(--fd-line);
 }
-.fd-skeleton-form-control > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-sm); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-a4); }
+.fd-skeleton-form-control > .fd-skeleton { --_sk-h: var(--fd-skeleton-h-sm); --_sk-r: var(--fd-radius-xs); background-color: var(--fd-skeleton-fill-soft); }
 .fd-skeleton-form-actions { display: flex; justify-content: flex-end; gap: var(--fd-space-2); padding-top: var(--fd-space-1); }
 
 /* ---------- Page hero ---------- */
@@ -461,6 +499,220 @@
   .fd-skeleton-page-toolbar > [data-search] { flex: 1 1 auto; }
 }
 
+/* ---------- Text lines before the script ----------
+   An empty .fd-skeleton-text[data-lines] (1 to 8) draws its lines with CSS: the first line, repeated by its shadow down
+   to the last but one, and the last line at 60% (72% when it is the only one). Same height as the filled lines, so
+   nothing moves when texture.js fills it. */
+.fd-skeleton-text[data-lines]:not(:has(> *)) { --_sk-n: 3; position: relative; height: calc(var(--_sk-n) * var(--_sk-lh)); }
+.fd-skeleton-text[data-lines]:not(:has(> *))::before,
+.fd-skeleton-text[data-lines]:not(:has(> *))::after {
+  content: ""; position: absolute; inset-inline-start: 0;
+  height: var(--_sk-bar);
+  border-radius: var(--fd-radius-xs);
+  background: var(--fd-skeleton-fill);
+}
+.fd-skeleton-text[data-lines]:not(:has(> *))::before { top: calc((var(--_sk-lh) - var(--_sk-bar)) / 2); width: 100%; box-shadow: var(--_sk-more, none); }
+.fd-skeleton-text[data-lines]:not(:has(> *))::after { bottom: calc((var(--_sk-lh) - var(--_sk-bar)) / 2); width: 60%; }
+.fd-skeleton-text[data-lines="1"]:not(:has(> *)) { --_sk-n: 1; }
+.fd-skeleton-text[data-lines="1"]:not(:has(> *))::before { display: none; }
+.fd-skeleton-text[data-lines="1"]:not(:has(> *))::after { width: 72%; }
+.fd-skeleton-text[data-lines="2"]:not(:has(> *)) { --_sk-n: 2; }
+.fd-skeleton-text[data-lines="4"]:not(:has(> *)) { --_sk-n: 4; --_sk-more: 0 var(--_sk-lh) var(--fd-skeleton-fill), 0 calc(2 * var(--_sk-lh)) var(--fd-skeleton-fill); }
+.fd-skeleton-text[data-lines="3"]:not(:has(> *)) { --_sk-more: 0 var(--_sk-lh) var(--fd-skeleton-fill); }
+.fd-skeleton-text[data-lines="5"]:not(:has(> *)) { --_sk-n: 5; --_sk-more: 0 var(--_sk-lh) var(--fd-skeleton-fill), 0 calc(2 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(3 * var(--_sk-lh)) var(--fd-skeleton-fill); }
+.fd-skeleton-text[data-lines="6"]:not(:has(> *)) { --_sk-n: 6; --_sk-more: 0 var(--_sk-lh) var(--fd-skeleton-fill), 0 calc(2 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(3 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(4 * var(--_sk-lh)) var(--fd-skeleton-fill); }
+.fd-skeleton-text[data-lines="7"]:not(:has(> *)) { --_sk-n: 7; --_sk-more: 0 var(--_sk-lh) var(--fd-skeleton-fill), 0 calc(2 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(3 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(4 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(5 * var(--_sk-lh)) var(--fd-skeleton-fill); }
+.fd-skeleton-text[data-lines="8"]:not(:has(> *)) { --_sk-n: 8; --_sk-more: 0 var(--_sk-lh) var(--fd-skeleton-fill), 0 calc(2 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(3 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(4 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(5 * var(--_sk-lh)) var(--fd-skeleton-fill), 0 calc(6 * var(--_sk-lh)) var(--fd-skeleton-fill); }
+
+/* ==========================================================================
+   First load: .fd-skeleton-app, the app shell's geometry, for a page's static HTML.
+   The same tokens as .fd-app (sidebar and rail width, top bar height, the 900px and 640px breakpoints measured on its
+   own width, the frame and the gutter), so the real shell lands on it without a jump. It never waits for
+   --fd-skeleton-delay: it is the first paint.
+   ========================================================================== */
+.fd-skeleton-app {
+  --_sk-sw: var(--fd-sidebar-w);
+  container: fd-skeleton-app / inline-size;
+  display: flex; align-items: flex-start;
+  min-height: 100dvh;
+  background: var(--fd-bg);
+}
+.fd-skeleton-app[data-sidebar="collapsed"] { --_sk-sw: var(--fd-rail-w); }
+/* Contained, like .fd-app[data-contained]: it fills its parent's box (docs specimens, previews). */
+.fd-skeleton-app[data-contained] { position: relative; height: var(--fd-app-h, 100%); min-height: 0; align-items: stretch; overflow: hidden; isolation: isolate; }
+.fd-skeleton-app[data-contained] :is(.fd-skeleton-app-side, .fd-skeleton-app-main) { position: relative; height: auto; min-height: 0; }
+
+/* Every bar inside it: the skeleton's fill and sweep. */
+:where(.fd-skeleton-app-brand, .fd-skeleton-app-account, .fd-skeleton-app-head, .fd-skeleton-app-nav > i, .fd-skeleton-app-tabbar > i)::before,
+:where(.fd-skeleton-app-brand, .fd-skeleton-app-account, .fd-skeleton-app-head, .fd-skeleton-app-nav > i, .fd-skeleton-app-tabbar > i)::after,
+:where(.fd-skeleton-app-top > i) {
+  content: "";
+  display: block; flex: none;
+  border-radius: var(--fd-radius-xs);
+  background-color: var(--fd-skeleton-fill);
+  background-image: linear-gradient(90deg, transparent calc(50% - var(--fd-skeleton-sheen-w) / 2), var(--fd-skeleton-sheen) 50%, transparent calc(50% + var(--fd-skeleton-sheen-w) / 2));
+  background-size: 150% 100%;
+  background-repeat: no-repeat;
+  animation: fd-shimmer var(--fd-loop-shimmer) var(--fd-ease-in-out) infinite both;
+}
+
+/* Sidebar: the brand in a head as tall as the top bar, the nav rows, the account row at the foot. */
+.fd-skeleton-app-side {
+  position: sticky; top: 0;
+  flex: none;
+  display: flex; flex-direction: column;
+  width: var(--_sk-sw); height: 100dvh;
+  border-inline-end: var(--fd-hairline) solid var(--fd-line-faint);
+  overflow: hidden;
+}
+.fd-skeleton-app-brand {
+  flex: none;
+  display: flex; align-items: center; gap: calc((var(--fd-brand-mark) - var(--fd-icon-xl)) / 2);
+  height: var(--fd-topbar-h);
+  padding-inline: calc(var(--fd-space-1-5) + var(--fd-space-2) + (var(--fd-brand-mark) - var(--fd-icon-xl)) / 2);
+  border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-skeleton-app-brand::before { width: var(--fd-icon-xl); height: var(--fd-icon-xl); border-radius: var(--fd-radius-md); }
+.fd-skeleton-app-brand::after { width: var(--fd-skeleton-app-name-w); height: var(--fd-skeleton-bar-title); }
+.fd-skeleton-app-nav {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; flex-direction: column; gap: var(--fd-space-1);
+  padding: var(--fd-space-2) var(--fd-space-1-5) var(--fd-space-4);
+  overflow: hidden;
+}
+/* A row: the icon where the nav icon sits (its centre on the rail's centre line), then the label. */
+.fd-skeleton-app-nav > i {
+  --_sk-w: 46%;
+  display: flex; align-items: center; gap: var(--fd-nav-icon-margin);
+  height: var(--fd-control-md);
+  padding-inline-start: calc(var(--fd-space-2) + var(--fd-nav-icon-margin));
+}
+.fd-skeleton-app-nav > i::before { width: var(--fd-nav-icon); height: var(--fd-nav-icon); border-radius: var(--fd-radius-sm); }
+.fd-skeleton-app-nav > i::after { width: var(--_sk-w); height: var(--fd-skeleton-bar-sm); }
+.fd-skeleton-app-nav > i:nth-child(6n + 2) { --_sk-w: 62%; }
+.fd-skeleton-app-nav > i:nth-child(6n + 3) { --_sk-w: 38%; }
+.fd-skeleton-app-nav > i:nth-child(6n + 4) { --_sk-w: 54%; }
+.fd-skeleton-app-nav > i:nth-child(6n + 5) { --_sk-w: 42%; }
+.fd-skeleton-app-nav > i:nth-child(6n + 6) { --_sk-w: 34%; }
+.fd-skeleton-app-account {
+  flex: none;
+  display: flex; align-items: center; gap: var(--fd-space-2-5);
+  padding: calc(var(--fd-space-3) + (var(--fd-account-h) - var(--fd-account-avatar)) / 2) var(--fd-space-3) calc(var(--fd-space-2) + (var(--fd-account-h) - var(--fd-account-avatar)) / 2) calc(var(--fd-space-1-5) * 2);
+  border-top: var(--fd-hairline) solid var(--fd-line-faint);
+}
+.fd-skeleton-app-account::before { width: var(--fd-account-avatar); height: var(--fd-account-avatar); border-radius: var(--fd-radius-md); }
+.fd-skeleton-app-account::after { width: var(--fd-skeleton-app-email-w); height: var(--fd-skeleton-bar-md); }
+.fd-skeleton-app[data-sidebar="collapsed"] :is(.fd-skeleton-app-brand, .fd-skeleton-app-nav > i, .fd-skeleton-app-account)::after { display: none; }
+
+/* Main column: the top bar, then the page's frame with a page head and one preset. */
+.fd-skeleton-app-main {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column;
+  min-height: 100dvh;
+}
+.fd-skeleton-app-top {
+  flex: none;
+  display: flex; align-items: center; gap: var(--fd-space-2);
+  height: var(--fd-topbar-h); min-width: 0;
+  padding-inline: var(--fd-space-4);
+  border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
+}
+/* The phone's brand tile (the sidebar head folded into the top bar), shown under 900px. */
+.fd-skeleton-app-top::before {
+  content: ""; display: none;
+  flex: none; align-self: stretch;
+  width: var(--fd-topbar-h);
+  margin-inline-start: calc(var(--fd-space-4) * -1);
+  border-inline-end: var(--fd-hairline) solid var(--fd-line-faint);
+  background: radial-gradient(closest-side, var(--fd-skeleton-fill) 96%, transparent) center / var(--fd-icon-xl) var(--fd-icon-xl) no-repeat;
+}
+.fd-skeleton-app-top > i { width: var(--fd-control-md); height: var(--fd-control-md); border-radius: var(--fd-radius-lg); }
+.fd-skeleton-app-top > i:first-child { width: var(--fd-skeleton-app-title-w); height: var(--fd-skeleton-bar-md); border-radius: var(--fd-radius-xs); margin-inline-end: auto; }
+.fd-skeleton-app-top > i:nth-child(2) { width: var(--fd-skeleton-app-search-w); }
+.fd-skeleton-app-page {
+  flex: 1 0 auto;
+  display: flex; flex-direction: column; gap: var(--fd-space-6);
+  width: calc(100% - 2 * var(--fd-gutter)); max-width: var(--fd-content-max);
+  margin-inline: auto;
+  padding: var(--fd-space-6) var(--fd-gutter);
+  border-inline: var(--fd-hairline) solid var(--fd-line-faint);
+  min-width: 0;
+}
+/* The page head: a title at the h2 role's height and a line under it. */
+.fd-skeleton-app-head { display: flex; flex-direction: column; }
+.fd-skeleton-app-head::before { width: 28%; height: var(--fd-skeleton-bar-h2); margin-block: calc((var(--fd-lh-h2) - var(--fd-skeleton-bar-h2)) / 2); border-radius: var(--fd-radius-sm); }
+.fd-skeleton-app-head::after { width: 46%; height: var(--fd-skeleton-bar-sm); margin-block: calc((var(--fd-lh-sm) - var(--fd-skeleton-bar-sm)) / 2); }
+
+/* The phone tab bar, when the app has one: shown under 640px, like .fd-tabbar. */
+.fd-skeleton-app-tabbar { display: none; }
+
+@container fd-skeleton-app (max-width: 899.98px) {
+  .fd-skeleton-app-side,
+  .fd-skeleton-app-top > i:nth-child(2) { display: none; }
+  .fd-skeleton-app-top { padding-inline-end: var(--fd-space-3); }
+  .fd-skeleton-app-top::before { display: block; }
+}
+@container fd-skeleton-app (max-width: 639.98px) {
+  .fd-skeleton-app-page { width: 100%; border-inline: 0; }
+  .fd-skeleton-app-tabbar {
+    position: fixed; z-index: var(--fd-z-topbar);
+    inset-inline: 0; inset-block-end: 0;
+    display: flex; align-items: stretch;
+    padding: 0 var(--fd-space-1) env(safe-area-inset-bottom, 0px);
+    box-shadow: inset 0 var(--fd-hairline) 0 0 var(--fd-line-faint);
+    background: var(--fd-bg);
+  }
+  .fd-skeleton-app-tabbar > i {
+    flex: 1 1 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--fd-tabbar-gap);
+    height: var(--fd-tabbar-h);
+  }
+  .fd-skeleton-app-tabbar > i::before { width: var(--fd-tabbar-icon); height: var(--fd-tabbar-icon); border-radius: var(--fd-radius-sm); }
+  .fd-skeleton-app-tabbar > i::after { width: 44%; height: var(--fd-skeleton-bar-2xs); margin-block: calc((var(--fd-lh-xs) - var(--fd-skeleton-bar-2xs)) / 2); }
+  .fd-skeleton-app[data-contained] > .fd-skeleton-app-tabbar { position: absolute; }
+  .fd-skeleton-app:has(> .fd-skeleton-app-tabbar) .fd-skeleton-app-main { padding-block-end: calc(var(--fd-tabbar-h) + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ==========================================================================
+   Loading regions wait before they show a skeleton, so a fast load never flashes one. The space is held (only the
+   opacity waits). The wait is --fd-skeleton-delay whatever the motion dial; only the fade takes --fd-dur-2, which is 0
+   with reduced motion.
+   ========================================================================== */
+@keyframes fd-skeleton-wait { from { opacity: 0; } }
+[data-fd-loading="true"] > [class*="fd-skeleton"]:not(.fd-skeleton-late),
+.fd-states[data-state="loading"] > [data-when~="loading"]:not([data-when~="ready"]) {
+  animation: fd-skeleton-wait var(--fd-dur-2) var(--fd-ease-out) var(--fd-skeleton-delay) both;
+}
+/* A bar that is itself the region's child keeps its sweep as well. */
+[data-fd-loading="true"] > :is(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile),
+.fd-states[data-state="loading"] > :is(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile)[data-when~="loading"]:not([data-when~="ready"]) {
+  animation:
+    fd-skeleton-wait var(--fd-dur-2) var(--fd-ease-out) var(--fd-skeleton-delay) both,
+    fd-shimmer var(--fd-loop-shimmer) var(--fd-ease-in-out) calc(var(--fd-skeleton-delay) + var(--fd-i, 0) * var(--fd-skeleton-stagger)) infinite both;
+}
+
+/* ---------- The late line ----------
+   One muted line in the product's words, hidden (its space kept) until --fd-skeleton-late has passed while its
+   region loads. Without script CSS shows it; texture.js instead marks it data-fd-late="wait|shown" and writes its words
+   into a polite status inside it when the time is up, so a screen reader hears them once per load. */
+.fd-skeleton-late {
+  display: block;
+  margin: 0;
+  font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm);
+  color: var(--fd-text-3);
+  text-wrap: pretty;
+  visibility: hidden;
+}
+[data-fd-loading] > .fd-skeleton-late { margin-block-end: var(--fd-space-3); }
+/* The status texture.js adds is always in the accessibility tree: it is empty until the time is up. */
+.fd-skeleton-late > [role="status"] { visibility: visible; }
+@keyframes fd-skeleton-late { from { visibility: hidden; opacity: 0; } to { visibility: visible; opacity: 1; } }
+.fd-skeleton-late:not([data-fd-late]) { animation: fd-skeleton-late var(--fd-dur-3) var(--fd-ease-out) var(--fd-skeleton-late) both; }
+[data-fd-loading="false"] > .fd-skeleton-late:not([data-fd-late]) { animation: none; }
+.fd-skeleton-late[data-fd-late="shown"] { visibility: visible; animation: fd-fade-in var(--fd-dur-3) var(--fd-ease-out) both; }
+/* Once loading ends it goes at once, so the next load starts hidden. */
+.fd-skeleton-late[data-fd-late="wait"] { transition: none; animation: none; animation-delay: var(--fd-skeleton-late); }   /* texture.js reads the time here, resolved */
+
 /* ==========================================================================
    Content swap: [data-fd-loading] holds a skeleton and the real content.
    The one in flow sets the height; the other is laid over it, so nothing jumps.
@@ -482,11 +734,19 @@
 /* ---------- Reduced motion: loaders hold still ---------- */
 @media (prefers-reduced-motion: reduce) {
   :where(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-text > *, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile),
+  :where(.fd-skeleton-app-brand, .fd-skeleton-app-account, .fd-skeleton-app-head, .fd-skeleton-app-nav > i, .fd-skeleton-app-tabbar > i)::before,
+  :where(.fd-skeleton-app-brand, .fd-skeleton-app-account, .fd-skeleton-app-head, .fd-skeleton-app-nav > i, .fd-skeleton-app-tabbar > i)::after,
+  :where(.fd-skeleton-app-top > i),
   .fd-skeleton-chart-area, .fd-skeleton-chart-line {
     animation: none;
     background-image: none;
   }
-  .fd-skeleton-chart-area { background-image: linear-gradient(var(--fd-a6), transparent); }
+  /* Still bars: no sweep, and a bar that is a loading region's own child still waits. */
+  [data-fd-loading="true"] > :is(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile),
+  .fd-states[data-state="loading"] > :is(.fd-skeleton, .fd-skeleton-title, .fd-skeleton-avatar, .fd-skeleton-button, .fd-skeleton-tile)[data-when~="loading"]:not([data-when~="ready"]) {
+    animation: fd-skeleton-wait 0s linear var(--fd-skeleton-delay) both;
+  }
+  .fd-skeleton-chart-area { background-image: linear-gradient(var(--fd-skeleton-fill), transparent); }
   .fd-skeleton-chart[data-variant="bars"] .fd-skeleton-chart-area { background-image: none; }
   .fd-dots > * { animation: none; opacity: 0.5; }
   .fd-bars-loader > * { animation: none; }

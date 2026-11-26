@@ -2,14 +2,15 @@
 
 These are the rules an AI agent follows when it builds or changes an interface in a product that uses Fire. They live in Fire, not in the product, so that updating Fire updates the rules.
 
-**For the product's owner.** Copy this file into the project beside `GUIDE.md`, `WRITING.md`, `VOCABULARY.md` and `CLASSES.md`, then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`). Adjust the three paths once; after that the pointer never needs to change.
+**For the product's owner.** Where Fire is installed as a package, this file is at `node_modules/fire-design/AGENT-RULES.md` with everything it names beside it. Where Fire is copied in, copy this file into the project beside `GUIDE.md`, `WRITING.md`, `VOCABULARY.md` and `CLASSES.md`. Then put this pointer in the project's agent instructions (`AGENTS.md`, `CLAUDE.md`). Adjust the paths once; after that the pointer never needs to change. The last line is your permission for agents to file public issues: leave out "Agents may file these" and an agent shows you the proposal instead.
 
 ```markdown
 ## Interface: the Fire design system
 
-- For any interface work, read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
+- For any interface work, use the `fire` skill if you have it; otherwise read and follow `docs/fire/AGENT-RULES.md` first. It names the other files to read.
 - Fire is in `public/fire`. Never edit it.
-- When Fire has nothing close, build to Fire's standard with `x-` classes in `fire-local.css`, and propose it in `docs/fire/REQUESTS.md`.
+- Every screen follows a Fire reference screen. Say which one before you build.
+- When Fire has nothing close, build to Fire's standard with `x-` classes in `fire-local.css`, and file it as an issue on Fire's repository with `fire propose`. Agents may file these; nothing about this product goes in one.
 ```
 
 Anything the project's own instructions say more specifically (its layouts, its helpers, its security policy) wins over this file.
@@ -21,7 +22,8 @@ Anything the project's own instructions say more specifically (its layouts, its 
 | Build or change any screen | `GUIDE.md` |
 | Write any text that appears on a screen | `WRITING.md` |
 | Use a class or an attribute | `CLASSES.md`, the complete generated list (if it is not listed there, it does not exist). For each component it says which parts are required, which element a class goes on, where a part may sit, and gives a `Write:` line to copy. `VOCABULARY.md` explains the common ones |
-| Pick a component, pattern or template | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Search with `--surface` set to where the page is used. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example`; `--json` gives the path of its picture, which you can open |
+| Build any screen | The list of reference screens, `skills/fire/screens.md` in the Fire package, from top to bottom. Choose the nearest by the person's task and the shape of the data, not by its name; open its picture (`contract/pictures/template/<id>.png`), then read `templates/<id>.html`. Say which screen yours follows before you build it |
+| Pick a component or pattern | Run `npx fire find "<what you need>"` first (or `node node_modules/fire-design/scripts/find.mjs "<what you need>"`; `--surface`, `--data` and `--kind` narrow it). It searches the cards by job and other names. Search with `--surface` set to where the page is used. Then read the chosen entry's `useWhen` and `avoidWhen` in `contract/catalog.json` and open its `example`; `--json` gives the path of its picture, which you can open |
 | Build a public website | `GUIDE.md` section 5, "A public website", then `docs/site.html` and `docs/site-sections.html` (articles, listings, sign-up and pictures are there too) |
 | Add your own CSS or tokens | `GUIDE.md` section 7, "Your own CSS and tokens" |
 | Write Fire markup in Lit, React, Next.js or Vue | `spec/EXPORT.md` in the Fire package, and the matching starter in `starters/` |
@@ -33,7 +35,7 @@ Copy each component's markup from the Fire docs pages. Do not write components f
 
 Valid parts do not make a coherent app. Decide these once, write them where everyone building the app reads them (the project's spec or its agent instructions), and follow them on every screen.
 
-1. Map every screen to the Fire template it follows before you build any of them: a list of records (`logs.html`), a create or edit form (`form.html`), one record (`record.html`), settings (`settings.html`), keys and secrets (`api-keys.html`), an audit trail (`audit.html`), a dashboard (`overview.html`), usage and billing (`usage.html`). `npx fire find --kind template "<what the screen is for>"` finds the nearest. A screen with no template is a gap: say so before you build it.
+1. Map every screen to the Fire template it follows before you build any of them: a list of records (`logs.html`), a create or edit form (`form.html`), one record (`record.html`), settings (`settings.html`), keys and secrets (`api-keys.html`), an audit trail (`audit.html`), a dashboard (`overview.html`), usage and billing (`usage.html`). `skills/fire/screens.md` lists all of them with when to use each, and `npx fire find --kind template "<what the screen is for>"` searches them. A screen with no template is a gap: say so before you build it.
 2. One page head for the whole app: the same structure, the same place for the title, the description and the primary action. One form pattern. One way to show a list. Never a second.
 3. Build each screen fresh in its template's structure: the same regions (page head, toolbar, table or sections, foot) in the same order, each written from the components' own markup. A template is a reference to read, never a file to copy and edit. Do not assemble a page layout from loose parts.
 4. When several people or agents build at once, they share this plan and one shell. Nobody starts a screen before the plan exists.
@@ -43,7 +45,7 @@ Valid parts do not make a coherent app. Decide these once, write them where ever
 1. Use only `fd-` classes and attribute values that the vocabulary lists. A value Fire does not define does nothing, and nothing warns you.
 2. No custom CSS, no `<style>` blocks, no `style` attributes in markup (a custom property goes in `data-fd-vars="--name: value"`, and Fire sets it with `setProperty`, so pages work under a strict CSP), no pixel values, and no widths or heights in markup. Lay out with `fd-stack`, `fd-row`, `fd-grid`, `fd-column`, `data-gap`, `data-cols` and `data-span`.
 3. Never edit the project's copy of Fire, and never copy a Fire component and change the copy.
-4. Build every state: empty, loading, error, disabled.
+4. Build every state: empty, loading, error, disabled. Loading keeps the shell and the page head and shows a skeleton shaped like the content (a table for a table, a list for a list); the first load is `fd-skeleton-app` in the static HTML. Never a bare box of bars for a whole page (`GUIDE.md` section 3, "Loading a page").
 5. A button that does something dangerous or irreversible goes on its own page or section with `fd-confirm-inline`; a decision someone can take back waits a few seconds with Undo (`GUIDE.md` section 5, "Decisions"). A control that is off says why (`fd-reason`).
 6. One primary button per view. One step between heading levels: page, section, card, field (`GUIDE.md` section 5, "Heading levels").
 7. Declare the surface: `data-fd-surface="app|website|phone|email"` on `<html>`. A part whose card does not include it gets a `surface-mismatch` warning; use the part the warning names, or leave it out. Search with `fire find --surface`.
@@ -98,8 +100,9 @@ Follow `GUIDE.md` section 7, in order:
 1. Search first, by what the thing does: Fire's index (`npx fire find`; in Facet, `search_components`, templates included). Read the cards and the template pages. Templates are references to read, never starters.
 2. Compose or customise existing components with their variants and states.
 3. If nothing is close, build the component to Fire's standard: an `x-<name>` root class and `x-<name>-<part>` parts, Fire tokens only (no raw colours or lengths), `data-*` variants, ARIA states, every state, light and dark, phone and keyboard. Its CSS goes in the project's `fire-local.css`. Never style or override an `fd-` class or token.
-4. Record it as a proposal: a card in Fire's format (`contract/cards/README.md`), the markup, the CSS, and what you searched (the queries, and for each near Fire entry one sentence on why it does not fit). In Facet, use `propose_component` and mark the root with `data-proposal="<id>"`; elsewhere, add it to the project's `docs/fire/REQUESTS.md` and tell the owner (`GUIDE.md` section 7). Proposals are internal: never post one publicly, as an issue or anywhere else.
-5. Never build a one-off silently. Fire reviews proposals: sent, then adopted as `fd-…` in a release or declined with a reason. When one is adopted, replace the `x-` component with Fire's.
+4. Propose it as an issue on Fire's repository (`GUIDE.md` section 7). `npx fire propose new <slug>` writes the file to fill: what you were building, what you searched (the queries, and for each near Fire entry one sentence on why it does not fit), a card in Fire's format (`contract/cards/README.md`), the markup and the CSS. `npx fire propose check <file>` says what is missing or private, and `npx fire propose send <file>` files it.
+5. The issue is public. It describes the component, never the product: no product, company or person's name, no file paths, no private addresses, no keys, no screenshot of a real screen. Example data is Ember's. File it when the project's instructions allow agents to; otherwise show the owner the file. Tell the owner what you filed.
+6. Never build a one-off silently. Fire answers on the issue: adopted as `fd-…` in a release, or declined with a reason. When one is adopted, replace the `x-` component with Fire's.
 
 In the Fire repository: a new pattern or template must pass the near-duplicate gate (`node scripts/gate.mjs --probe <page>`) or declare a `relation` in its card (`variantOf` or `distinctFrom`, with one sentence on when to use it instead).
 

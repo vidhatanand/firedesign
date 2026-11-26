@@ -559,7 +559,7 @@ export interface ThemeModule {
    ========================================================================== */
 
 /** fd:open detail. null when the sender passes none (shell nav groups and mobile nav, agent menus and tool calls).
- *  overlays: { trigger } (menu, popover, dialog) · chat: { mode } · data: { row } (table expand) or { target } (data
+ *  overlays: { trigger } (menu, popover, dialog); a modeless sheet adds { swap, wait } · chat: { mode } · data: { row } (table expand) or { target } (data
  *  card) · docsite: { value } (nav group key) · content preview: { value (FormData or null), trigger } · forms
  *  (combobox), tweaks: {}. */
 export interface FireOpenDetail {
@@ -569,6 +569,11 @@ export interface FireOpenDetail {
   target?: HTMLElement | null;
   /** docsite: the nav group key · content preview: the form's FormData (or null). */
   value?: string | FormData | null;
+  /** A modeless sheet (fd-sheet[data-modeless]): true when it was already open and now shows another item. */
+  swap?: boolean;
+  /** A modeless sheet: hold aria-busy="true" on it until the promise (or the promise a function returns) settles.
+   *  A later fd:open replaces the wait. */
+  wait?: (work: Promise<unknown> | (() => unknown)) => void;
 }
 
 /** fd:close detail. null when the sender passes none (shell, agent, overlays menus and popovers).
@@ -1007,8 +1012,8 @@ export declare namespace nav {
   export function setStep(steps: HTMLElement, index: number, options?: { silent?: boolean }): void;
 }
 
-/** File row state in a dropzone list. */
-export type FileRowState = 'uploading' | 'done' | 'error';
+/** File row state in a dropzone list ("paused" since 0.13). */
+export type FileRowState = 'uploading' | 'paused' | 'done' | 'error';
 
 /** One contrast row of a colour field (forms.colorChecks). */
 export interface ColorCheck {
@@ -1227,9 +1232,10 @@ export declare namespace overlays {
   export function openPopover(ref: ElementRef, options?: { trigger?: HTMLElement | null; placement?: Placement; focus?: boolean }): HTMLElement | null;
   /** Close a popover. */
   export function closePopover(ref: ElementRef, returnFocus?: boolean): void;
-  /** Open a dialog, sheet or command palette (showModal); returns it, or null. */
+  /** Open a dialog, sheet or command palette (showModal); returns it, or null. A sheet with data-modeless opens with
+   *  show() and leaves the page in use; opening it again while it is open swaps what it shows (fd:open with swap). */
   export function openDialog(ref: ElementRef, options?: { trigger?: Element | null }): HTMLElement | null;
-  /** Close a dialog (default: the top one) with an optional returnValue. */
+  /** Close a dialog (default: the top modal one, else the last modeless sheet) with an optional returnValue. */
   export function closeDialog(ref?: ElementRef | null, value?: string | number): void;
   /** toast({ title, description, tone, icon, action, duration, id, undo }) → id, plus toast.success/…/promise/update/dismiss/hold. */
   export const toast: ToastFunction;
@@ -1360,6 +1366,10 @@ export declare namespace code {
   export function highlight(code: string, lang?: string | null): string;
   /** Swap a button's content to a check (+ label) for 1.4s. `slot` swaps only part of the button. */
   export function copied(btn: HTMLElement, options?: { label?: string; slot?: HTMLElement; iconOnly?: boolean }): void;
+  /** The .fd-copy-next line after a code block, snippet or copy field with data-copy-next (found, or added after it), its step drawn but hidden; null without the attribute. (0.13) */
+  export function copyNextLine(block: Element | null | undefined): HTMLElement | null;
+  /** Show the step under a block with data-copy-next and say `confirmation`, then the step, as one message; false when the block has none. (0.13) */
+  export function showCopyNext(block: Element | null | undefined, confirmation?: string): boolean;
   /** Select a language tab; persists and syncs other blocks in the same group unless { persist: false }. False when no tab has that value. */
   export function selectTab(block: HTMLElement, value: string, options?: { persist?: boolean }): boolean;
   /** Render `data` as a collapsible tree into `el` (an .fd-json). */
@@ -1682,6 +1692,37 @@ export interface Pagebar {
   set(value: number): void;
   done(): void;
   readonly value: number;
+}
+
+/** A skeleton preset: the part after "fd-skeleton-" (fire/js/skeleton.js, "fire-design/skeleton"). */
+export type SkeletonPreset = 'text' | 'card' | 'grid' | 'table' | 'stat' | 'chart' | 'list' | 'thread' | 'form' | 'hero' | 'page';
+
+/** A preset's options, as its data attributes take them. Out-of-range numbers are clamped. */
+export interface SkeletonOptions {
+  /** table 1–40 (5), list 1–24 (4). */
+  rows?: number | string;
+  /** table 1–8 (4). */
+  cols?: number | string;
+  /** grid 1–24 (4), stat 1–6 (4), form 1–12 (3). */
+  count?: number | string;
+  /** text 1–24 (3). */
+  lines?: number | string;
+  /** chart: "bars"; anything else draws a line. */
+  variant?: 'bars' | string;
+}
+
+/** skeletonApp(): the first-load app skeleton (.fd-skeleton-app). */
+export interface SkeletonAppOptions extends SkeletonOptions {
+  /** The preset in the page's content region (default "table"). */
+  preset?: SkeletonPreset;
+  /** The sidebar's nav rows, 1–12 (6). */
+  nav?: number;
+  /** 0, or 3–5: the phone tab bar's items, when the app has one. */
+  tabbar?: number;
+  /** The shell's data-sidebar (default "expanded"). */
+  sidebar?: 'expanded' | 'collapsed';
+  /** The status's accessible name (default "Loading"). */
+  label?: string;
 }
 
 /** Generative character fields, glyphs, text loaders, skeletons, content swap, page bar. */

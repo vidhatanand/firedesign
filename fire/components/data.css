@@ -32,6 +32,8 @@
    Table attributes  data-sticky · data-stack · data-wrap · data-sort="server" · aria-busy
    Cell parts        fd-table-cell > fd-table-lead + fd-table-two > fd-table-title + fd-table-sub · fd-table-trunc · fd-table-link
    Stacked cells     td|th[data-stack="hide"] (dropped when the table stacks) · [data-stack-only] inside a cell (shown only when stacked)
+   Stacked expand    td[data-expand] becomes the card's full-width toggle, worded by its data-label (data.js fills it from
+                     the header text); an open fd-table-detail is the last part of its row's card
    Foot              fd-table-foot > fd-table-foot-info (count or summary, left) + fd-table-foot-actions (right)
    Wrap attributes   data-variant="plain"
    Groups            one tbody per group, its first row the heading; the th labels the rows under it (scope="rowgroup"):
@@ -497,8 +499,8 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table-skeleton {
   display: block; height: var(--fd-data-skeleton-h); width: var(--w, 64%); max-width: 100%;
   border-radius: var(--fd-radius-xs);
-  background-color: var(--fd-a6);
-  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a8) 50%, transparent 70%);
+  background-color: var(--fd-skeleton-fill, light-dark(color-mix(in srgb, var(--fd-wash) 11%, transparent), color-mix(in srgb, var(--fd-wash) 17%, transparent)));   /* the skeleton fill; its formula again for a slim build that leaves skeleton.css out */
+  background-image: linear-gradient(90deg, transparent 30%, var(--fd-skeleton-sheen, light-dark(color-mix(in srgb, var(--fd-wash) 6%, transparent), color-mix(in srgb, var(--fd-wash) 9%, transparent))) 50%, transparent 70%);
   background-size: 200% 100%;
   animation: fd-shimmer var(--fd-loop-shimmer) linear infinite;
 }
@@ -579,70 +581,109 @@ th[aria-sort="descending"] .fd-th-sort {
 .fd-table-bulk-actions { display: flex; align-items: center; gap: var(--fd-space-2); margin-inline-start: auto; }
 .fd-table-bulk-count + .fd-table-bulk-actions { margin-inline-start: 0; }
 
-/* ---------- Phones: rows become stacked cards ---------- */
+/* ---------- Phones: rows become stacked cards ----------
+   Every rule reaches only the table's own rows and cells (> tbody > tr > td), so a table, a grid or a code block inside
+   an open detail keeps its own layout. */
 /* [data-stack-only] is a stacked-card extra (a meta line under the name): hidden until the table stacks. */
 .fd-table [data-stack-only] { display: none; }
 @container fd-table (max-width: 559.98px) {
   .fd-table[data-stack] { display: block; }
-  .fd-table[data-stack] :is(td, th)[data-stack="hide"] { display: none; }
-  .fd-table[data-stack] [data-stack-only] { display: revert; }
-  .fd-table[data-stack] thead {
+  .fd-table[data-stack] > * > tr > :is(td, th)[data-stack="hide"] { display: none; }
+  .fd-table[data-stack] > * > tr:not(.fd-table-detail) [data-stack-only] { display: revert; }
+  .fd-table[data-stack] > thead {
     position: absolute; width: var(--fd-data-sr); height: var(--fd-data-sr); margin: calc(var(--fd-data-sr) * -1); overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
   }
-  .fd-table[data-stack] tbody { display: block; }
-  .fd-table[data-stack] tbody tr {
+  .fd-table[data-stack] > tbody { display: block; }
+  .fd-table[data-stack] > tbody > tr {
     display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--fd-space-2); height: auto;
     padding: var(--fd-space-3-5) var(--fd-row-px); border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
   }
-  .fd-table[data-stack] tbody tr:nth-last-child(1 of :not([hidden])) { border-bottom-color: transparent; }
-  .fd-table[data-stack] tbody tr[aria-selected="true"] { box-shadow: inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent); }
-  .fd-table[data-stack] tbody tr[aria-selected="true"]:dir(rtl) { box-shadow: inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent); }
-  .fd-table[data-stack] tbody tr[aria-selected="true"] > td:first-child { box-shadow: none; }
-  .fd-table[data-stack] tbody tr[aria-selected="true"] > td:first-child:dir(rtl) { box-shadow: none; }
-  .fd-table[data-stack] td {
+  .fd-table[data-stack] > tbody > tr:nth-last-child(1 of :not([hidden])) { border-bottom-color: transparent; }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"] { box-shadow: inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent); }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"]:dir(rtl) { box-shadow: inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent); }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"] > td:first-child { box-shadow: none; }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"] > td:first-child:dir(rtl) { box-shadow: none; }
+  .fd-table[data-stack] > tbody > tr > td {
     display: grid; grid-template-columns: minmax(var(--fd-data-stack-label), 34%) minmax(0, 1fr); gap: var(--fd-space-3); align-items: baseline;
     height: auto; padding: 0; border: 0; text-align: start; white-space: normal; overflow-wrap: anywhere;
   }
-  .fd-table[data-stack] td::before {
+  .fd-table[data-stack] > tbody > tr > td::before {
     content: attr(data-label);
     font-family: var(--fd-eyebrow-font); font-size: var(--fd-text-2xs); line-height: var(--fd-lh-xs);
     letter-spacing: var(--fd-eyebrow-ls); text-transform: var(--fd-eyebrow-case); color: var(--fd-text-3); font-weight: var(--fd-eyebrow-weight);
   }
-  .fd-table[data-stack] td:not([data-label])::before,
-  .fd-table[data-stack] td[data-stack-title]::before { display: none; }
-  .fd-table[data-stack] td:not([data-label]),
-  .fd-table[data-stack] td[data-stack-title] { grid-template-columns: minmax(0, 1fr); }
-  .fd-table[data-stack] td[data-stack-title] { order: -1; color: var(--fd-text); font-weight: var(--fd-weight-label); padding-inline-end: var(--fd-space-10); }
-  .fd-table[data-stack] td[data-select] + td, .fd-table[data-stack] td[data-expand] + td { padding-inline-start: 0; } /* every caption starts on the same edge */
-  .fd-table[data-stack] td[data-num] { text-align: start; }
-  .fd-table[data-stack] .fd-table-trunc { max-inline-size: 100%; }
-  .fd-table[data-stack] td[data-actions] {
+  .fd-table[data-stack] > tbody > tr > td:not([data-label])::before,
+  .fd-table[data-stack] > tbody > tr > td[data-stack-title]::before { display: none; }
+  .fd-table[data-stack] > tbody > tr > td:not([data-label]),
+  .fd-table[data-stack] > tbody > tr > td[data-stack-title] { grid-template-columns: minmax(0, 1fr); }
+  .fd-table[data-stack] > tbody > tr > td[data-stack-title] { order: -1; color: var(--fd-text); font-weight: var(--fd-weight-label); padding-inline-end: var(--fd-space-10); }
+  .fd-table[data-stack] > tbody > tr > td[data-select] + td, .fd-table[data-stack] > tbody > tr > td[data-expand] + td { padding-inline-start: 0; } /* every caption starts on the same edge */
+  .fd-table[data-stack] > tbody > tr > td[data-num] { text-align: start; }
+  .fd-table[data-stack] > tbody > tr > td .fd-table-trunc { max-inline-size: 100%; }
+  .fd-table[data-stack] > tbody > tr > td[data-actions] {
     position: absolute; inset-block-start: var(--fd-space-2); inset-inline-end: var(--fd-space-1-5); display: block; width: auto; padding: 0;
   }
-  .fd-table[data-stack] td[data-actions]::before { display: none; }
-  .fd-table[data-stack] td[data-actions] > .fd-btn { opacity: 1; }
-  .fd-table[data-stack] td[data-select] {
+  .fd-table[data-stack] > tbody > tr > td[data-actions]::before { display: none; }
+  .fd-table[data-stack] > tbody > tr > td[data-actions] > .fd-btn { opacity: 1; }
+  .fd-table[data-stack] > tbody > tr > td[data-select] {
     position: absolute; inset-block-start: var(--fd-space-3-5); inset-inline-start: var(--fd-row-px); display: block; width: auto;
   }
-  .fd-table[data-stack] tbody tr:has(> td[data-select]) { padding-inline-start: calc(var(--fd-row-px) + var(--fd-data-stack-select)); }
-  .fd-table[data-stack] td[data-expand], .fd-table[data-stack] tbody tr.fd-table-detail { display: none; }
-  .fd-table[data-stack] tbody tr.fd-table-state { display: block; padding: 0; }
-  .fd-table[data-stack] .fd-table-state > td { display: block; }
+  .fd-table[data-stack] > tbody > tr:has(> td[data-select]) { padding-inline-start: calc(var(--fd-row-px) + var(--fd-data-stack-select)); }
+  .fd-table[data-stack] > tbody > tr.fd-table-state { display: block; padding: 0; }
+  .fd-table[data-stack] > tbody > .fd-table-state > td { display: block; }
   .fd-table[data-stack] .fd-table-empty { position: static; inline-size: auto; }
-  .fd-table[data-stack] tbody tr[data-skeleton] > td:not([data-label]) { display: block; }
+  .fd-table[data-stack] > tbody > tr[data-skeleton] > td:not([data-label]) { display: block; }
+
+  /* Expandable rows. The toggle is the card's foot: the same button, as wide as the card's values, its words the
+     cell's data-label (data.js fills it from the expand column's header text) drawn over it. An open detail row is
+     the last part of the card: no line between them, the card's padding and its background. A closed one stays
+     hidden by its own [hidden]. An expand cell with no toggle (a group heading, a skeleton row) takes no room. */
+  .fd-table[data-stack] > tbody > tr > td[data-expand] {
+    order: 1; display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; width: auto;
+    margin-block-start: var(--fd-space-1);
+  }
+  .fd-table[data-stack] > tbody > tr > td[data-expand]:not(:has(> .fd-table-expand)) { display: none; }
+  .fd-table[data-stack] > tbody > tr > td[data-expand] > .fd-table-expand {
+    grid-area: 1 / 1; display: flex; justify-content: flex-end; width: 100%; height: var(--fd-control-sm);
+    padding-inline: var(--fd-space-3); border-radius: var(--fd-radius-md);
+    background: var(--fd-fill); color: var(--fd-text-3);
+  }
+  .fd-table[data-stack] > tbody > tr > td[data-expand] > .fd-table-expand:hover { background: var(--fd-fill-hover); color: var(--fd-text); }
+  .fd-table[data-stack] > tbody > tr > td[data-expand] > .fd-table-expand .fd-icon { rotate: 90deg; }
+  .fd-table[data-stack] > tbody > tr > td[data-expand] > .fd-table-expand[aria-expanded="true"] .fd-icon { rotate: -90deg; }
+  .fd-table[data-stack] > tbody > tr > td[data-expand]::before {
+    grid-area: 1 / 1; position: relative; z-index: 1; min-width: 0; padding-inline: var(--fd-space-3) var(--fd-space-8);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none;
+    font-family: inherit; font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); font-weight: var(--fd-weight-label);
+    letter-spacing: normal; text-transform: none; color: var(--fd-text-2);
+    transition: color var(--fd-dur-2) var(--fd-ease-out);
+  }
+  .fd-table[data-stack] > tbody > tr > td[data-expand]:has(> .fd-table-expand:is(:hover, [aria-expanded="true"]))::before { color: var(--fd-text); }
+  .fd-table[data-stack] > tbody > tr:has(+ tr.fd-table-detail:not([hidden])) { padding-block-end: 0; border-bottom-width: 0; }
+  .fd-table[data-stack] > tbody > tr.fd-table-detail { display: block; padding: var(--fd-space-3) var(--fd-row-px) var(--fd-space-3-5); }
+  .fd-table[data-stack] > tbody > tr.fd-table-detail[hidden] { display: none; }
+  .fd-table[data-stack] > tbody > tr:has(> td[data-select]) + tr.fd-table-detail { padding-inline-start: calc(var(--fd-row-px) + var(--fd-data-stack-select)); }
+  .fd-table[data-stack] > tbody > tr.fd-table-detail > td { display: block; padding: 0; }
+  .fd-table[data-stack] > tbody > tr.fd-table-detail > td::before { display: none; }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"] + tr.fd-table-detail { background: var(--fd-accent-4); box-shadow: inset var(--fd-data-select-bar) 0 0 0 var(--fd-accent); }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"] + tr.fd-table-detail:dir(rtl) { box-shadow: inset calc(var(--fd-data-select-bar) * -1) 0 0 0 var(--fd-accent); }
+  .fd-table[data-stack] > tbody > tr[aria-selected="true"]:has(+ tr.fd-table-detail:not([hidden])):hover { background: var(--fd-accent-4); }
+  .fd-table[data-stack] > tbody > tr[data-expanded]:not([aria-selected="true"]):hover { background: var(--fd-fill-subtle); }
+
   /* A group heading stays one plain line: the checkbox (if any) where the rows' checkboxes are, then the title. */
-  .fd-table[data-stack] .fd-table-group > tr.fd-table-group-head {
+  .fd-table[data-stack] > .fd-table-group > tr.fd-table-group-head {
     display: flex; align-items: center; gap: var(--fd-space-3); min-height: var(--_d-th-h); padding: 0 var(--fd-row-px);
     background: var(--fd-bg); border-bottom: var(--fd-hairline) solid var(--fd-line-faint);
   }
-  .fd-table-wrap[data-variant="plain"] .fd-table[data-stack] .fd-table-group > tr.fd-table-group-head { background: var(--fd-fill-subtle); }
-  .fd-table[data-stack] tbody + .fd-table-group > tr.fd-table-group-head { border-top: var(--fd-hairline) solid var(--fd-line-faint); }
-  .fd-table[data-stack] .fd-table-group[data-state="closed"] > tr.fd-table-group-head { border-bottom-color: transparent; }
-  .fd-table[data-stack] tbody tr.fd-table-group-head > :is(th, td) {
+  .fd-table-wrap[data-variant="plain"] .fd-table[data-stack] > .fd-table-group > tr.fd-table-group-head { background: var(--fd-fill-subtle); }
+  .fd-table[data-stack] > tbody + .fd-table-group > tr.fd-table-group-head { border-top: var(--fd-hairline) solid var(--fd-line-faint); }
+  .fd-table[data-stack] > .fd-table-group[data-state="closed"] > tr.fd-table-group-head { border-bottom-color: transparent; }
+  .fd-table[data-stack] > tbody > tr.fd-table-group-head > :is(th, td) {
     position: static; display: block; min-width: 0; padding: 0; border: 0; background: none; white-space: normal;
   }
-  .fd-table[data-stack] tbody tr.fd-table-group-head > td[data-select] { width: auto; }
-  .fd-table[data-stack] tbody tr.fd-table-group-head > th { flex: 1 1 auto; }
+  .fd-table[data-stack] > tbody > tr.fd-table-group-head > td[data-select] { width: auto; }
+  .fd-table[data-stack] > tbody > tr.fd-table-group-head > td[data-expand] { display: none; }
+  .fd-table[data-stack] > tbody > tr.fd-table-group-head > th { flex: 1 1 auto; }
 
   .fd-table-bulk-actions .fd-btn { padding-inline: 0; width: var(--_b-h); }
   .fd-table-bulk-actions .fd-btn > span {
@@ -1441,12 +1482,12 @@ a.fd-stat-tile:focus-visible { box-shadow: var(--fd-ring-inset); border-radius: 
 
 /* ---------- Loading: aria-busy keeps every box and line where it will be; only the contents shimmer ---------- */
 .fd-pipeline[aria-busy="true"] .fd-pipeline-job { pointer-events: none; }
-.fd-pipeline[aria-busy="true"] .fd-pipeline-job > .fd-icon { color: transparent; border-radius: var(--fd-radius-full); background: var(--fd-a6); animation: none; }
+.fd-pipeline[aria-busy="true"] .fd-pipeline-job > .fd-icon { color: transparent; border-radius: var(--fd-radius-full); background: var(--fd-skeleton-fill, light-dark(color-mix(in srgb, var(--fd-wash) 11%, transparent), color-mix(in srgb, var(--fd-wash) 17%, transparent))); animation: none; }
 .fd-pipeline[aria-busy="true"] :is(.fd-pipeline-job-name, .fd-pipeline-job-meta, .fd-pipeline-stage-label) {
   flex: 0 1 auto; block-size: var(--fd-data-skeleton-h); overflow: hidden; color: transparent;
   border-radius: var(--fd-radius-xs);
-  background-color: var(--fd-a6);
-  background-image: linear-gradient(90deg, transparent 30%, var(--fd-a8) 50%, transparent 70%);
+  background-color: var(--fd-skeleton-fill, light-dark(color-mix(in srgb, var(--fd-wash) 11%, transparent), color-mix(in srgb, var(--fd-wash) 17%, transparent)));
+  background-image: linear-gradient(90deg, transparent 30%, var(--fd-skeleton-sheen, light-dark(color-mix(in srgb, var(--fd-wash) 6%, transparent), color-mix(in srgb, var(--fd-wash) 9%, transparent))) 50%, transparent 70%);
   background-size: 200% 100%;
   animation: fd-shimmer var(--fd-loop-shimmer) linear infinite;
 }

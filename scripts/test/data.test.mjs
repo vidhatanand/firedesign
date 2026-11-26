@@ -87,6 +87,117 @@ test('table groups: toggles, sort within groups, selection, labelling, filtering
   await p.close();
 });
 
+test('stacked table: an expandable row keeps its toggle and its detail inside its card', async () => {
+  for (const width of [375, 320]) {
+    const { p, errors } = await open('data.html', width);
+    const t = p.locator('#expand table[aria-label="Agent runs, stacked"]');
+    await t.scrollIntoViewIfNeeded();
+    const box = (l) => l.evaluate((el) => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width }; });
+    const row = (n) => t.locator('tbody > tr:not(.fd-table-detail)').nth(n);
+    const toggles = t.locator('.fd-table-expand');
+    // every toggle shows, as wide as the card's content, with its words from the header ("Details")
+    assert.equal(await toggles.count(), 3);
+    for (let i = 0; i < 3; i++) assert.equal(await toggles.nth(i).isVisible(), true, `toggle ${i} visible`);
+    const cell = await box(toggles.nth(1));
+    const title = await box(row(1).locator('td[data-stack-title]'));
+    assert.ok(Math.abs(cell.left - title.left) <= 1 && cell.width >= title.width - 1, `toggle spans the card's content: ${JSON.stringify({ cell, title })}`);
+    assert.equal(await t.locator('td[data-expand]').nth(1).getAttribute('data-label'), 'Details');
+    assert.equal(await t.locator('td[data-expand]').nth(1).evaluate((td) => getComputedStyle(td, '::before').content), '"Details"');
+    // it is the foot of its card: under every value of the row
+    const values = await row(1).locator('td:not([data-expand], [data-select])').evaluateAll((tds) => Math.max(...tds.map((td) => td.getBoundingClientRect().bottom)));
+    assert.ok(cell.top >= values, 'the toggle sits under the values');
+    // an open detail is the last part of its row's card: flush under it, the same width, no line between
+    assert.equal(await t.locator('#run-phone-detail-1').isVisible(), true);
+    const open1 = await box(t.locator('#run-phone-detail-1'));
+    const row1 = await box(row(0));
+    assert.ok(Math.abs(open1.top - row1.bottom) <= 1 && Math.abs(open1.left - row1.left) <= 1 && Math.abs(open1.right - row1.right) <= 1, `detail joins the card: ${JSON.stringify({ open1, row1 })}`);
+    assert.equal(await row(0).evaluate((r) => getComputedStyle(r).borderBottomWidth), '0px');
+    assert.equal(await row(0).evaluate((r) => getComputedStyle(r).backgroundColor), await t.locator('#run-phone-detail-1').evaluate((r) => getComputedStyle(r).backgroundColor));
+    // a closed detail stays hidden
+    assert.equal(await t.locator('#run-phone-detail-2').isVisible(), false);
+    // keyboard: Tab from the row's checkbox reaches the toggle; Enter and Space open and close it; focus stays
+    await row(1).locator('.fd-table-check').focus();
+    await p.keyboard.press('Tab');
+    assert.equal(await p.evaluate(() => document.activeElement?.getAttribute('aria-controls')), 'run-phone-detail-2');
+    await p.keyboard.press('Enter');
+    assert.equal(await toggles.nth(1).getAttribute('aria-expanded'), 'true');
+    assert.equal(await t.locator('#run-phone-detail-2').isVisible(), true);
+    const open2 = await box(t.locator('#run-phone-detail-2'));
+    const row2 = await box(row(1));
+    assert.ok(Math.abs(open2.top - row2.bottom) <= 1, 'the opened detail sits in the same card');
+    assert.equal(await p.evaluate(() => document.activeElement?.getAttribute('aria-controls')), 'run-phone-detail-2');
+    await p.keyboard.press('Space');
+    assert.equal(await toggles.nth(1).getAttribute('aria-expanded'), 'false');
+    assert.equal(await t.locator('#run-phone-detail-2').isVisible(), false);
+    assert.equal(await p.evaluate(() => document.activeElement?.getAttribute('aria-controls')), 'run-phone-detail-2');
+    await toggles.nth(1).click();
+    assert.equal(await t.locator('#run-phone-detail-2').isVisible(), true);
+    // nothing overflows: not the page, not the scroller, not the code block in the detail
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'the page does not scroll sideways');
+    assert.ok(await t.evaluate((el) => el.parentElement.scrollWidth <= el.parentElement.clientWidth), 'the table scroller does not scroll sideways');
+    const code = await box(t.locator('#run-phone-detail-2 .fd-codeblock'));
+    const detail2 = await box(t.locator('#run-phone-detail-2'));
+    assert.ok(code.left >= detail2.left && code.right <= detail2.right, 'the code block fits its card');
+    assert.deepEqual(errors, []);
+    await p.close();
+  }
+  // above the breakpoint nothing changes: the chevron is a small icon button in its own column, with no words
+  const { p, errors } = await open('data.html', 1440);
+  const wide = p.locator('#expand table[aria-label="Agent runs"]');
+  assert.equal(await wide.locator('td[data-expand]').first().evaluate((td) => getComputedStyle(td).display), 'table-cell');
+  assert.ok((await wide.locator('.fd-table-expand').first().evaluate((b) => b.getBoundingClientRect().width)) < 40, 'an icon-sized toggle');
+  assert.equal(await wide.locator('td[data-expand]').first().evaluate((td) => getComputedStyle(td, '::before').content), 'none');
+  assert.equal(await wide.locator('#run-detail-1').evaluate((r) => getComputedStyle(r).display), 'table-row');
+  assert.deepEqual(errors, []);
+  await p.close();
+});
+
+test('stacked table: expand with groups, skeletons, density, a nested table and reduced motion', async () => {
+  const p = await browser.newPage({ viewport: { width: 375, height: 900 }, reducedMotion: 'reduce' });
+  const errors = [];
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.goto(`${base}/docs/data.html`, { waitUntil: 'networkidle' });
+  const result = await p.evaluate(async () => {
+    const { init } = await import('../fire/js/data.js');
+    const host = document.createElement('div');
+    host.setAttribute('data-density', 'compact');
+    host.innerHTML = `<div class="fd-table-wrap"><div class="fd-table-scroll"><table class="fd-table" data-stack aria-label="Runs by agent">
+      <thead><tr><th data-expand><span class="fd-sr-only">Details</span></th><th>Task</th><th data-num>Credits</th></tr></thead>
+      <tbody class="fd-table-group"><tr class="fd-table-group-head"><td data-expand></td><th scope="rowgroup" colspan="2"><span class="fd-table-group-title">Crawler</span></th></tr>
+        <tr data-value="r1"><td data-expand><button class="fd-table-expand" type="button" aria-expanded="false" aria-controls="x-d1" aria-label="Details for Crawl docs"><i data-icon="chevron-right"></i></button></td><td>Crawl docs</td><td data-num>12</td></tr>
+        <tr class="fd-table-detail" id="x-d1" hidden><td colspan="3"><table class="fd-table" aria-label="Steps"><thead><tr><th>Step</th><th data-num>Pages</th></tr></thead><tbody><tr><td>Fetch</td><td data-num>40</td></tr></tbody></table></td></tr>
+        <tr data-skeleton><td data-expand></td><td><span class="fd-table-skeleton"></span></td><td data-num><span class="fd-table-skeleton" data-size="xs"></span></td></tr>
+      </tbody></table></div></div>`;
+    document.body.append(host);
+    init(host);
+    const t = host.querySelector('table');
+    const toggle = t.querySelector('.fd-table-expand');
+    toggle.click();
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const detail = t.querySelector('#x-d1');
+    const inner = detail.querySelector('table');
+    const out = {
+      toggle: toggle.getBoundingClientRect().width > 100,
+      detail: getComputedStyle(detail).display !== 'none',
+      // the nested table keeps its own rows and cells: the outer table's stacking does not reach into it
+      innerCell: getComputedStyle(inner.querySelector('td')).display,
+      innerHead: getComputedStyle(inner.querySelector('thead')).position,
+      // empty expand cells (a group heading, a skeleton row) take no room
+      headCell: getComputedStyle(t.querySelector('.fd-table-group-head > td[data-expand]')).display,
+      skeletonCell: getComputedStyle(t.querySelector('tr[data-skeleton] > td[data-expand]')).display,
+      // reduced motion: the detail does not fade in, the chevron does not turn
+      fade: parseFloat(getComputedStyle(inner).animationDuration) < 0.001,
+      turn: getComputedStyle(document.querySelector('#expand table[aria-label="Agent runs, stacked"] .fd-table-expand .fd-icon')).transitionDuration,
+      overflow: document.documentElement.scrollWidth <= innerWidth,
+    };
+    host.remove();
+    return out;
+  });
+  assert.deepEqual(result, { toggle: true, detail: true, innerCell: 'table-cell', innerHead: 'static', headCell: 'none', skeletonCell: 'none', fade: true, turn: '0s', overflow: true });
+  assert.deepEqual(errors, []);
+  await p.close();
+});
+
 test('list and detail: selection, panels, phone view and focus', async () => {
   const { p, errors } = await open('data.html');
   const wide = p.locator('#list-detail .fd-list-detail').first();

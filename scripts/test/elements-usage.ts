@@ -1,5 +1,7 @@
 // Type check of fire/elements.d.ts (run by elements.test.mjs with tsc --noEmit). Not executed.
 import { FdChart, FdCode, FdIcon, FdTexture, FireElement, type FdChartData } from '../../fire/elements.js';
+// The entry for an app with its own Lit has the same types (package.json "exports": "./elements/lit").
+import { FdChart as LitChart, FdIcon as LitIcon } from 'fire-design/elements/lit';
 
 const chart = document.createElement('fd-chart');
 const asChart: FdChart = chart;
@@ -47,3 +49,8 @@ field.tone = 'red';
 
 const base: FireElement = asChart;
 base.remove();
+
+const litIcon: LitIcon = document.createElement('fd-icon');
+litIcon.icon = 'zap';
+const sameChart: LitChart = asChart;
+void sameChart;

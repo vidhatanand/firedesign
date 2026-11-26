@@ -192,3 +192,28 @@ test('fire find: results carry their surfaces, and a query that fits better else
   assert.ok(Array.isArray(JSON.parse(j.stdout)));
   assert.match(j.stderr, /other surfaces: toc/);
 });
+
+test('fire find (0.13): a legal page finds the article on a website, and a skip link and numbered steps find their parts', () => {
+  for (const q of ['privacy policy', 'terms of service', 'legal page']) {
+    assert.equal(search(db, q, { surface: 'website' })[0]?.id, 'site-article', q);
+  }
+  const r = spawnSync(process.execPath, ['scripts/find.mjs', '--surface', 'website', 'privacy policy', '--json'], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(JSON.parse(r.stdout)[0].id, 'site-article');
+  assert.equal(search(db, 'skip to content')[0]?.id, 'skip');
+  assert.equal(search(db, 'numbered steps', { surface: 'website' })[0]?.id, 'doc-steps');
+});
+
+test('fire find (0.13): the words people use for what 0.13 added reach the right part first', () => {
+  const first = (query, options) => search(db, query, options)[0]?.id;
+  for (const [query, id] of [
+    ['right side drawer', 'sheet'],
+    ['side panel that keeps the page usable', 'sheet'],
+    ['half width drawer', 'sheet'],
+    ['loading screen for the whole app', 'skeleton'],
+    ['still loading slow', 'skeleton'],
+    ['pause and resume an upload', 'file-upload'],
+    ['expand a row on a phone', 'table'],
+    ['video thumbnail', 'thumb'],
+  ]) assert.equal(first(query), id, query);
+  assert.ok(['codeblock', 'snippet', 'copy-field'].includes(first('what to do after copying')), 'what to do after copying');
+});

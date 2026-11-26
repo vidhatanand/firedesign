@@ -245,6 +245,43 @@
     </div>
   </section>
 
+  <section class="doc-section" id="skip">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Skip link</h2>
+      <p>Put one first in the body of every page that has a header or a sidebar before its content, so a keyboard user passes them in one key. It stays out of sight until it has focus: Tab into the box below to see it, then press Enter to land in the main.</p>
+    </div>
+    <div class="doc-specimen" data-layout="bleed" data-code>
+      <div class="fd-site" data-contained>
+        <a class="fd-skip" href="#sk-main">Skip to content</a>
+        <header class="fd-site-header" data-layout="inline">
+          <div class="fd-site-container"><div class="fd-site-header-bar">
+            <a class="fd-brand" href="#skip"><span class="fd-brand-name">Ember</span></a>
+            <nav class="fd-site-header-nav" id="sk-nav" aria-label="Main"><ul class="fd-site-header-links">
+              <li><a class="fd-site-header-link" href="#skip">Pricing</a></li>
+              <li><a class="fd-site-header-link" href="#skip">Changelog</a></li>
+              <li><a class="fd-site-header-link" href="#skip">Docs</a></li>
+            </ul></nav>
+            <div class="fd-site-header-actions">
+              <a class="fd-btn" data-variant="primary" href="#skip">Start free</a>
+              <button class="fd-btn fd-site-header-toggle" type="button" data-variant="ghost" data-icon-only aria-expanded="false" aria-controls="sk-nav" aria-label="Menu"><i data-icon="menu"></i><i data-icon="x"></i></button>
+            </div>
+          </div></div>
+        </header>
+        <main id="sk-main" tabindex="-1">
+          <section class="fd-site-section"><div class="fd-site-container"><div class="fd-site-head">
+            <h2 class="fd-site-title">Pages in, structured data out.</h2>
+            <p class="fd-site-lead">Send a URL and get clean Markdown back in under a second.</p>
+          </div></div></section>
+        </main>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>Write <code class="fd-code">&lt;a class=&quot;fd-skip&quot; href=&quot;#main&quot;&gt;Skip to content&lt;/a&gt;</code> as the first child of <code class="fd-code">body</code>, and <code class="fd-code">id=&quot;main&quot; tabindex=&quot;-1&quot;</code> on the page's <code class="fd-code">main</code>. Fire draws no ring around a main that takes focus this way.</li>
+      <li>It needs no script and is fixed to the top start corner, so showing it moves nothing. In a contained shell, such as this preview, it sits in the box's corner instead.</li>
+      <li>The app shell, the site shell and the docs shell in <code class="fd-code">templates/</code> add it for you (<code class="fd-code">addSkipLink(main)</code> in <code class="fd-code">templates/shell.js</code>).</li>
+    </ul>
+  </section>
+
   <section class="doc-section" id="pagination">
     <div class="doc-section-head">
       <h2 class="fd-h3">Pagination</h2>
@@ -472,6 +509,7 @@
         <tr><td>.fd-chip-nav</td><td><code class="fd-code">.fd-chip</code> links (<code class="fd-code">aria-current</code>) or buttons (<code class="fd-code">aria-pressed</code>), <code class="fd-code">.fd-chip-count</code>.</td></tr>
         <tr><td>.fd-subnav</td><td><code class="fd-code">.fd-subnav-item</code>, <code class="fd-code">.fd-subnav-meta</code>, <code class="fd-code">.fd-subnav-sep</code>. Becomes a pill row in containers under 760px.</td></tr>
         <tr><td>.fd-breadcrumb, .fd-back</td><td>Breadcrumb wraps an <code class="fd-code">ol</code>; the last item carries <code class="fd-code">aria-current="page"</code>. Back is a link with a leading arrow.</td></tr>
+        <tr><td>.fd-skip</td><td>The skip link: an <code class="fd-code">a</code> first in <code class="fd-code">body</code> with <code class="fd-code">href=&quot;#main&quot;</code>; the page's <code class="fd-code">main</code> carries <code class="fd-code">id=&quot;main&quot; tabindex=&quot;-1&quot;</code>. Out of sight until it has focus.</td></tr>
         <tr><td>.fd-pagination</td><td><code class="fd-code">.fd-pagination-info</code> + <code class="fd-code">.fd-btn-group</code>, or <code class="fd-code">data-variant="numbered"</code> with <code class="fd-code">.fd-pagination-pages</code>, <code class="fd-code">-page</code>, <code class="fd-code">-gap</code>.</td></tr>
         <tr><td>.fd-steps</td><td><code class="fd-code">.fd-step</code> with <code class="fd-code">data-state="done|current|error"</code> in a wizard, <code class="fd-code">data-state="running|failed|waiting|skipped"</code> for live work, and <code class="fd-code">aria-current="step"</code> on the step the flow or record is at; parts <code class="fd-code">-marker</code>, <code class="fd-code">-body</code>, <code class="fd-code">-title</code>, <code class="fd-code">-desc</code>, <code class="fd-code">-owner</code>, <code class="fd-code">-action</code>. <code class="fd-code">data-orientation="vertical|horizontal"</code>, <code class="fd-code">data-variant="tracker"</code>, <code class="fd-code">data-current</code>.</td></tr>
         <tr><td>.fd-toc</td><td><code class="fd-code">.fd-toc-title</code>, <code class="fd-code">.fd-toc-list</code>, <code class="fd-code">.fd-toc-item</code> (<code class="fd-code">data-level="2"</code>), <code class="fd-code">data-fd-scrollspy</code>, <code class="fd-code">data-offset</code> (px from the top, default 96).</td></tr>

@@ -91,8 +91,12 @@
   /* sheet */
   --fd-sheet-w-md: 420px;           /* default */
   --fd-sheet-w-lg: 560px;
+  --fd-sheet-w-half: 50vw;          /* data-size="half": half the window, never narrower than lg */
   --fd-sheet-max-h: 760px;          /* bottom sheet */
   --fd-sheet-demo-h: 560px;
+  --fd-sheet-modeless-z: calc(var(--fd-z-sidebar) + 1); /* a modeless sheet: over the shell, under the phone menu */
+  --fd-sheet-modeless-h: 50dvh;     /* phone: a modeless bottom sheet; the page above it stays in use */
+  --fd-sheet-busy-h: 2px;           /* the loading line under the head while a modeless sheet swaps */
   /* toast */
   --fd-toast-w: 360px;
   --fd-toast-peek: 10px;            /* how much of each tucked toast shows */
@@ -858,7 +862,7 @@
      <div class="fd-sheet-body">…</div>
      <div class="fd-sheet-foot">…</div>
    </dialog>
-   data-side  right (default) | left | bottom        data-size  md 420 (default) | lg 560
+   data-side  right (default) | left | bottom        data-size  md 420 (default) | lg 560 | half (half the window)
    Opened like a dialog: data-fd-dialog-open="log-detail". Below 640px every sheet is a bottom sheet.
    ========================================================================== */
 .fd-sheet {
@@ -886,6 +890,7 @@
 }
 .fd-sheet:not([open]) { transition-duration: var(--fd-dur-3); transition-timing-function: var(--fd-ease-in-out); }
 .fd-sheet[data-size="lg"] { --_o-w: var(--fd-sheet-w-lg); }
+.fd-sheet[data-size="half"] { --_o-w: max(var(--fd-sheet-w-lg), var(--fd-sheet-w-half)); }
 .fd-sheet[data-side="left"] { inset: var(--_o-gap) auto var(--_o-gap) var(--_o-gap); translate: calc(-100% - 2 * var(--_o-gap)) 0; }
 .fd-sheet[data-side="bottom"] {
   inset: auto 0 0 0;
@@ -944,6 +949,49 @@
   }
   .fd-sheet:not([data-static-demo]) .fd-sheet-head { padding-block-start: var(--fd-space-6); touch-action: none; }
 }
+
+/* Modeless (data-modeless): opened with show(), so it is not in the top layer and has no scrim. The page behind stays
+   in use; the sheet sits over the app shell and under every top-layer surface (dialogs, menus, popovers, toasts).
+   Make it a child of <body>, outside the app shell (a portal in a framework): the shell's page is its own stacking
+   context while page transitions are on, and an ancestor that clips or transforms would trap it too.
+   aria-busy="true" (wait() on fd:open) dims the body and runs a line under the head while new content loads. */
+.fd-sheet[data-modeless]:not([data-static-demo]) { z-index: var(--fd-sheet-modeless-z); }
+.fd-sheet[data-modeless] .fd-sheet-body { transition: opacity var(--fd-dur-2) var(--fd-ease-out); }
+.fd-sheet[data-modeless][aria-busy="true"] .fd-sheet-body { opacity: 0.55; cursor: progress; transition-delay: var(--fd-dur-1); }
+.fd-sheet[data-modeless][aria-busy="true"] .fd-sheet-head { position: relative; }
+.fd-sheet[data-modeless][aria-busy="true"] .fd-sheet-head::after {
+  content: ""; position: absolute; inset-block-end: calc(var(--fd-hairline) * -1); inset-inline-start: 0; z-index: 1;
+  width: 30%; height: var(--fd-sheet-busy-h); border-radius: var(--fd-radius-full); background: var(--fd-accent);
+  animation: fd-sheet-busy var(--fd-loop-shimmer) var(--fd-ease-in-out) infinite;
+}
+@keyframes fd-sheet-busy { from { translate: -100% 0; } to { translate: 340% 0; } }
+.fd-sheet[data-modeless][aria-busy="true"]:dir(rtl) .fd-sheet-head::after { animation-direction: reverse; }
+@media (prefers-reduced-motion: reduce) {
+  .fd-sheet[data-modeless][aria-busy="true"] .fd-sheet-head::after { width: 100%; animation: none; opacity: 0.4; }
+}
+
+@media (max-width: 639.98px) {
+  .fd-sheet[data-modeless]:not([data-static-demo]) { height: var(--fd-sheet-modeless-h); max-height: calc(100dvh - var(--fd-overlay-clear)); }
+  /* The page can scroll its last rows up above the sheet, and what takes focus stops above it. */
+  :root[data-fd-modeless] { scroll-padding-block-end: var(--fd-sheet-modeless-h); }
+  :root[data-fd-modeless] body { padding-block-end: var(--fd-sheet-modeless-h); }
+}
+
+/* The row whose detail a modeless sheet shows: its trigger (the row, or the row's link) has aria-expanded="true". It
+   takes the wash and start bar of a selected row (data.css). */
+.fd-list-row:is([aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]), :has(> .fd-list-body > .fd-list-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]))) {
+  --_o-row-bar: var(--fd-data-select-bar);
+  background: var(--fd-accent-4);
+  box-shadow: inset var(--_o-row-bar) 0 0 0 var(--fd-accent);
+}
+.fd-table tbody tr:has(.fd-table-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover])) { --_o-row-bar: var(--fd-data-select-bar); background: var(--fd-accent-4); }
+.fd-table tbody tr:has(.fd-table-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover])) > td:first-child { box-shadow: inset var(--_o-row-bar) 0 0 0 var(--fd-accent); }
+.fd-list-row:is([aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]), :has(> .fd-list-body > .fd-list-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]))):dir(rtl),
+.fd-table tbody tr:has(.fd-table-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover])):dir(rtl) { --_o-row-bar: calc(var(--fd-data-select-bar) * -1); }
+.fd-list-row[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]):focus-visible { box-shadow: var(--fd-ring-inset), inset var(--_o-row-bar) 0 0 0 var(--fd-accent); }
+.fd-list-row:is([aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]), :has(> .fd-list-body > .fd-list-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]))):hover,
+.fd-table tbody tr:has(.fd-table-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover])):hover { background: var(--fd-accent-8); }
+.fd-list-row:is([aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]), :has(> .fd-list-body > .fd-list-link[aria-haspopup="dialog"][aria-expanded="true"]:not([data-fd-popover]))) .fd-list-chevron { color: var(--fd-accent-text); }
 
 /* ==========================================================================
    Toast — created by toast({ title, description, tone, action, duration })

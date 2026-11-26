@@ -40,7 +40,7 @@ contract/
   theme.schema.json    JSON Schema of the theme record
   catalog.json         GENERATED: components, modules, classes, attribute values, elements, events, icons, tokens, templates, cards
   index.json           GENERATED: one compact entry per part (what `fire find` and the Catalogue page read)
-  pictures/<kind>/<id>.png  GENERATED: a picture of every index entry except the modules (section 10); in the repository, not in the package
+  pictures/<kind>/<id>.png  GENERATED: a picture of every index entry except the modules (section 10); in the package from 0.13.0
   catalog.schema.json  JSON Schema of catalog.json
   cards/<id>.json      HAND-WRITTEN: one card per component, pattern, layout or section (judgement fields); cards/templates/<name>.json: one per template
   custom-elements.json GENERATED: Custom Elements Manifest of elements/src
@@ -48,6 +48,7 @@ contract/
   looks/<name>.json    theme records, one per palette; looks/named/<name>.json: the eight named looks (0.7)
 wrappers/react/        GENERATED components + hand-written hooks, with .d.ts
 wrappers/vue/          a plugin (isCustomElement, the v-fire directive) and GlobalComponents types
+wrappers/lit/          BUILT, committed: elements.js, Fire's custom elements importing Lit from the app (fire-design/elements/lit)
 docs/                  the documentation site; docs/_ref/ holds the class reference (CLASSES.md, generated) and the vocabulary
 templates/             42 Ember screens, templates/media/ the placeholder pictures
 spec/
@@ -60,7 +61,7 @@ starters/
   vue-vite/
 scripts/
   build.mjs            runs every generator below; `--check` fails when a committed output is stale
-  build-elements.mjs   elements/src → fire/elements.js, fire/elements.d.ts, contract/custom-elements.json
+  build-elements.mjs   elements/src → fire/elements.js, wrappers/lit/elements.js, fire/elements.d.ts, contract/custom-elements.json
   build-contract.mjs   tokens.css + theme.js → contract/fire-contract.json
   build-catalog.mjs    CSS + module headers + VOCABULARY + cards + manifest → contract/catalog.json
   build-index.mjs      the catalogue → contract/index.json (what `fire find` searches)
@@ -83,9 +84,9 @@ scripts/
 ```
 
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
-`./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./theme` (fire/js/theme.js), `./react`, `./vue`,
+`./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./elements/lit` (wrappers/lit/elements.js, Lit as an optional peer), `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.12.4`), and so do the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.13.0`), and so do the
 starters in this repository, each locked to the release it ships in (`scripts/pin-starters.mjs`), so a starter copied
 out, or installed with `npm ci` anywhere, gets the same Fire. In the repository, `npm install --no-save ../..` in a
 starter tries it against the working copy without changing its `package.json` or lockfile.

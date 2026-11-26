@@ -1,6 +1,165 @@
 # Changes
 
-What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (for example in `docs/fire/REQUESTS.md`) and reads every entry after it before refreshing.
+What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (in its `package.json`, or in its agent instructions when Fire is copied in) and reads every entry after it before refreshing.
+
+## 0.13.0 — 27 Nov 2026
+
+**A page that is loading shows its shape.** Skeleton bars were fainter than Fire's own hairlines, every preset needed
+a script before it drew anything, and nothing said what a page shows while it loads. This release fixes those, adds a
+sheet that leaves the page usable, a thumbnail, a skip link and upload rows that pause, and fixes seven faults that
+products reported. It also gives agents what they were missing: the reference screens and pictures are in the
+package, a skill leads with them, and a proposal is filed as an issue. No class, attribute value, token, event or
+behaviour export was removed or renamed.
+
+### What a product needs to do
+
+- **Every skeleton looks stronger** with no change on your side. If you have screenshots that include a skeleton,
+  take them again.
+- **First load.** If your `index.html` shows a few bars while the app starts, replace them with the app skeleton
+  (`docs/skeletons.html#loading`). `lint-markup` now warns about the old shape as `loading-without-shell`.
+- **Moving between pages.** Keep the shell and the page head with its real title; only the content region is a
+  skeleton, and it is the preset shaped like the screen (`GUIDE.md` section 3, "Loading a page").
+- **A skeleton now waits 160 ms** inside `[data-fd-loading="true"]` and `fd-states` in its loading state, so a fast
+  load does not flash one. A test that looks for a skeleton the instant loading starts must wait for it. Set
+  `--fd-skeleton-delay: 0s` to turn the wait off.
+- **A Lit app** imports `fire-design/elements/lit` in place of `fire-design/elements`, so the page loads Lit once.
+- **A docs site on Fire's doc shell** passes its own name and MCP address to the "Copy page" menu (`data-name`,
+  `data-mcp-url`). Without them the prompt says "this docs page" and the MCP item copies nothing.
+- **`fire slim`** output gets smaller for a page that keeps the `nav` module: it no longer carries the sidebar, shell,
+  content and overlay scripts unless the page uses them. Build and check your slim bundle once.
+- **Agents.** Link the skill once (`skills/fire`, see "For agents" below) and replace the pointer in your project's
+  agent instructions with the new one in `AGENT-RULES.md`. Its last line is your permission for agents to file public
+  issues on Fire's repository.
+- **Proposals move to issues.** A proposal kept in your project's notes reaches Fire only as an issue: file each one
+  that still stands with `npx fire propose`, after taking out everything about your product.
+- Nothing else to change in markup, styles or scripts.
+
+### Loading
+
+- **Stronger bars.** Skeletons have their own colours: `--fd-skeleton-fill`, `--fd-skeleton-fill-soft` and
+  `--fd-skeleton-sheen`. Against its ground a bar was 1.13:1 in light and 1.17 to 1.22:1 in dark, under the hairline
+  of the same theme; it is now 1.25 to 1.29:1 in light and 1.53 to 1.65:1 in dark, in all 15 palettes. The sweep is
+  wider and easier to see. With reduced motion the bars hold still at the same strength. The table's skeleton cells,
+  the pipeline's busy state, the chart's loading state and the docs frame use the same colours.
+- **`fd-skeleton-app`**: the app shell's own geometry as a skeleton, written as plain markup in a page's static HTML:
+  a sidebar, a top bar, a page head and one preset, and the tab bar on a phone. It draws from the stylesheet alone,
+  so it shows before any script arrives, and the real shell lands on it without a jump. `data-sidebar="collapsed"`
+  and `data-contained` are its variants.
+- **`fire-design/skeleton`** (new entry, no DOM): `skeleton()`, `skeletonParts()`, `skeletonApp()` and
+  `SKELETON_PRESETS` return the filled markup of any preset as a string, so a build step, a server or a template can
+  write a filled skeleton into the first HTML. `texture.js` builds its presets from the same module and still leaves a
+  filled preset alone.
+- An empty `fd-skeleton-text[data-lines]` (1 to 8 lines) draws its lines in CSS at the filled height. Other presets
+  in static HTML use the filled markup.
+- **The wait and the late line.** `--fd-skeleton-delay` (160 ms) holds a skeleton back with its space kept;
+  `fd-skeleton-late` is one muted line of your own words that appears after `--fd-skeleton-late` (6 s) and is
+  announced once. Both work without script; neither depends on the motion dial.
+- **The rule.** `GUIDE.md` section 3 has "Loading a page" (first load, moving between pages, a section inside a
+  page); `AGENT-RULES.md` rule 4 points to it; the `skeleton`, `states`, `loader` and `app` cards say it.
+- **`loading-without-shell`**, a `lint-markup` warning: a page whose only content is skeleton parts, with no shell
+  and no preset shaped like a screen.
+
+### For agents
+
+Agents built screens from valid parts in arrangements of their own, because a product that installed Fire had the
+rules and the parts but not the reference screens: `templates/`, the docs pages and the pictures were left out of the
+package, so the files the rules named were not there.
+
+- **The package holds the reference screens** (`templates/`), **the docs pages** (`docs/`) **and a picture of every
+  part** (`contract/pictures/`). `fire find --json` gives a `picture` in a product too. The install grows from 7 MB
+  to about 23 MB on disk; nothing a page loads changes.
+- **The skill, `skills/fire/`** (the open Agent Skills format). It starts with the reference screens: the agent reads
+  `screens.md`, which lists all 42 with when to use each and what to use instead, chooses the nearest by the
+  person's task and the shape of the data, opens its picture and its file, and says which screen it follows before
+  it builds. Then the parts (`fire find`, and `parts.md`, one line for every part), the rules, the checks, and what
+  to do when Fire lacks something. `where.mjs` finds the project's Fire and says which folder to read. Link or copy
+  the folder into the agent's skills folder once: `ln -s "$(pwd)/skills/fire" ~/.claude/skills/fire` from a Fire
+  checkout, for Claude Code. `screens.md` and `parts.md` are generated from the cards (`npm run build:skill`), and
+  the build fails when they are stale.
+- **`fire propose`: a proposal is an issue on Fire's repository.** `fire propose new <slug> --kind
+  component|variant|token|pattern|bug|accessibility` writes the file with every section to fill; `fire propose check`
+  reports what is missing (what was searched, the card, the markup, the CSS, each run through Fire's lints) and what
+  is private (a local path, an email address, a private host, a key, the project's own name and the words it lists
+  in `"fire": { "private": [] }`); `fire propose send` files it with `gh`, refuses a title that already exists, and
+  writes the link into the file. The repository has the same text as its issue templates.
+- **Proposals are public, so the rule changed.** Until now a proposal was internal. `GUIDE.md` section 7 and
+  `AGENT-RULES.md` section 6 now say what one holds and what it must leave out: it describes a component, never a
+  product. An agent files one when the project's instructions allow it.
+- **`AGENT-RULES.md`** has a first row for every screen (choose the reference screen, say which) and a new pointer
+  for a project's agent instructions.
+
+### Added
+
+- **A sheet that leaves the page usable: `fd-sheet[data-modeless]`.** It opens through the same triggers and
+  `openDialog(id)`, with no scrim, no scroll lock and no focus trap, and a click outside leaves it open. Opening it
+  for another item swaps what it shows without sliding again (`fd:open` carries `{ trigger, swap, wait }`, and
+  `wait(promise)` marks it busy). The trigger it shows is `aria-expanded="true"`, and a list or table row that holds
+  that trigger is marked as selected. Escape closes it only while focus is inside. Under 640px it is a bottom sheet
+  at half the screen that drags closed by its head. One modeless sheet per side. Make it a child of `<body>`, outside
+  the app shell: inside the shell's page it can sit under the sidebar while page transitions are on
+  (`docs/overlays.html#modeless`).
+- **A half-width sheet: `fd-sheet[data-size="half"]`.** Half the window and never narrower than `lg` (560px), for a
+  full record, a decision or a comparison. It works on the modal and the modeless sheet, and under 640px it is the
+  bottom sheet like every size.
+- **`fd-thumb`**: a picture at a fixed ratio with a stand-in icon while there is none. `data-ratio` (`wide`, `photo`,
+  `square`, `tall`; 16:9 with none), `data-size` (`row` fits a table or list row in every density; `fill` takes its
+  container's width), `fd-thumb-label` for a duration or a count, `aria-busy="true"` while it loads. A picture that
+  fails to load falls back to the stand-in (`docs/content.html#thumb`).
+- **A line after copying: `data-copy-next="…"`** on `fd-codeblock`, `fd-snippet` and `fd-copy-field`. The line
+  (`fd-copy-next`) holds its space from the start and shows the next step once Copy is pressed, announced once with
+  the copied confirmation (`docs/code.html#copy-next`).
+- **Upload rows.** `fd-file-actions` holds several icon buttons in a row's last column; `data-state="paused"` holds
+  the bar in a neutral tone; the status line takes a longer sentence and wraps. `setFileProgress()` accepts `paused`
+  and a `message`. Rows written the old way look as before (`docs/forms.html#long-upload`). A resumable queue stays
+  the product's: Fire gives the rows.
+- **`fd-skip`**: a skip link, first in `<body>`, out of sight until it has keyboard focus. Fire's app shell, site
+  shell, docs shell and `templates/shell-static.html` have one (`addSkipLink()` in `templates/shell.js`;
+  `docs/navigation.html#skip`).
+- **`nav.fd-doc-top-links`**: a product's main site links in the docs top bar, the current one marked
+  (`aria-current="page"`), hidden under 900px.
+- **`fire-design/elements/lit`**: the same four custom elements with Lit left to the app (18 kB against 42 kB).
+  `lit` is an optional peer dependency. `fire-design/elements` still bundles Lit for a page with no build step.
+- The steps list (`fd-doc-steps`) is its own catalogue entry, `doc-steps`. `site-article` answers to "privacy
+  policy", "terms of service" and "legal page".
+- **`fire find` knows the new words.** "right side drawer", "side panel that keeps the page usable", "loading
+  screen", "still loading", "pause and resume an upload", "what to do after copying" and "expand a row on a phone"
+  each reach their part first; `scripts/test/find.test.mjs` holds it.
+
+### Fixed
+
+- **Expandable rows in a stacked table.** Under 560px `.fd-table[data-stack]` hid the expand cell and every detail
+  row, so a row could not open on a phone. The toggle is now a full-width control at the foot of the card, worded by
+  the expand column's header (or the cell's `data-label`), and an open detail is the last part of its row's card. A
+  table inside a detail is no longer stacked with its parent.
+- **`fire/elements.js` loaded Lit twice in a Lit app.** See `fire-design/elements/lit` above.
+- **The docs "Copy page" menu named Ember.** The product name and the MCP address come from the page; a "View as
+  Markdown" item that is a link is followed.
+- **The docs search palette warned as the wrong surface** on a website page. The `command` card lists `website`.
+- **App parts inside `fd-site-shot` or `fd-doc-frame-media` warned as the wrong surface** on a website page. A
+  specimen frame is where app parts belong.
+- **A site steps rail kept the docs and overlay scripts in a slim build.** The steps keep no module, and
+  `build-slim-map` no longer reads a key passed to `once(document, …)` as a class.
+- **Site footer links ran past the page edge.** A long unbroken link in `.fd-site-footer-col` wraps.
+- The docs top bar's end column no longer overlaps the search at 1440.
+- **The current chip of a narrow subnav had no focus ring.** Under 640px a subnav is a row of chips, and the current
+  chip's own line replaced the ring. It shows the ring now, and the ring keeps the chip's round shape. The looks
+  check found it once the skip link added a stop to the tab order.
+
+### Known limits
+
+- The starters change in the commit that locks them to this release, because until then they install 0.12.4: all
+  three take the skip link, the Lit and Vue starters the first-load skeleton (the Next starter renders on the server
+  and needs none), and the Lit starter the new elements entry. The Lit starter's CSS budget goes from 100 to 105 kB,
+  because Fire's stylesheet grew.
+- The skill was tried once, by a smaller model, on two screens. It chose the right reference screens, opened their
+  pictures and files, and passed the lint and the review. It did not build the loading and error states, compare its
+  screens with the reference's pictures or try the keyboard, and its report said so. The skill now asks for each of
+  those by name in the report.
+- A modeless sheet placed inside the app shell's page is not protected from sitting under the sidebar; the docs say
+  where to put it.
+- The modeless sheet's drag was tested with pointer events, not on a touch device, and no change here was checked
+  with a screen reader.
+- `fd-skeleton-app` shows the expanded sidebar first for someone who keeps it collapsed.
 
 ## 0.12.4 — 24 Nov 2026
 

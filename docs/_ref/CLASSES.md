@@ -1,6 +1,6 @@
 # Fire: every class
 
-Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.12.4). Do not edit: change the CSS or the
+Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.13.0). Do not edit: change the CSS or the
 catalogue and run the build. `VOCABULARY.md` beside this file explains the parts in prose; this file is the complete list.
 
 For each component: its root class, its part classes, the attributes it reads with their values (on the root, then per
@@ -118,7 +118,7 @@ one-line markup of the required structure.
 ### Page states (`states`, pattern)
 
 - Root: `fd-states`, shown at `docs/content.html#page-states`
-- On the root: `data-state="empty|error|expired|filtered|loading|no-access|not-found|off|ready"`, `data-when`
+- On the root: `data-state="empty|error|expired|filtered|loading|no-access|not-found|off|ready"`, `data-when="loading" (or bare)`
 - Events: `fd:change`
 
 ### Plan (`plan`, component)
@@ -173,6 +173,14 @@ one-line markup of the required structure.
 - Parts: `fd-tag-remove`
 - On the root: `data-icon="*"`, `data-variant="soft"`
 - On `fd-tag-remove`: `data-icon="*"`
+
+### Thumbnail (`thumb`, component)
+
+- Root: `fd-thumb`, shown at `docs/content.html#thumb`
+- Parts: `fd-thumb-img` (on `<img>`, child of `fd-thumb`), `fd-thumb-label` (child of `fd-thumb`)
+- Write: `<span class="fd-thumb"><img class="fd-thumb-img" src="…" width="1536" height="1024" alt="…"><i data-icon="video"></i></span>`
+- On the root: `data-ratio="photo|square|tall|wide"`, `data-size="fill|row"`
+- State, set by Fire: `data-state="failed"`
 
 ### Tile (`tile`, component)
 
@@ -428,6 +436,11 @@ one-line markup of the required structure.
 - State, set by Fire: `data-empty`
 - Events: `fd:change`
 
+### Skip link (`skip`, component)
+
+- Root: `fd-skip` (on `<a>`, needs `href`), shown at `docs/navigation.html#skip`
+- Write: `<a class="fd-skip" href="#main">Skip to content</a>`
+
 ### Steps (`steps`, component)
 
 - Root: `fd-steps`, shown at `docs/navigation.html#steps`
@@ -630,7 +643,7 @@ one-line markup of the required structure.
 
 - Root: `fd-copy-field`, shown at `docs/forms.html#secret`
 - Parts: `fd-copy-field-actions`, `fd-copy-field-end`, `fd-copy-field-label`, `fd-copy-field-start`, `fd-copy-field-value`
-- On the root: `data-mask="end|full|partial"`
+- On the root: `data-copy-next="*"`, `data-mask="end|full|partial"`
 - Events: `fd:copy`
 
 ### Datefield (`datefield`, component)
@@ -652,9 +665,9 @@ one-line markup of the required structure.
 ### File upload (`file-upload`, component)
 
 - Root: `fd-dropzone`, shown at `docs/forms.html#dropzone`
-- Parts: `fd-dropzone-actions`, `fd-dropzone-hint`, `fd-dropzone-icon` (child of `fd-dropzone`), `fd-dropzone-preview`, `fd-dropzone-text` (child of `fd-dropzone`), `fd-dropzone-title`, `fd-file`, `fd-file-bar`, `fd-file-icon`, `fd-file-main`, `fd-file-meta`, `fd-file-name`, `fd-file-size`, `fd-file-status`, `fd-filelist`
+- Parts: `fd-dropzone-actions`, `fd-dropzone-hint`, `fd-dropzone-icon` (child of `fd-dropzone`), `fd-dropzone-preview`, `fd-dropzone-text` (child of `fd-dropzone`), `fd-dropzone-title`, `fd-file`, `fd-file-actions` (child of `fd-file`), `fd-file-bar`, `fd-file-icon`, `fd-file-main`, `fd-file-meta`, `fd-file-name`, `fd-file-size`, `fd-file-status`, `fd-filelist`
 - On the root: `data-fd-file-clear`, `data-layout="inline|logo"`
-- State, set by Fire: `data-state="done|dragover|error|uploading"`
+- State, set by Fire: `data-state="done|dragover|error|paused|uploading"`
 - Events: `fd:change`, `fd:files`
 
 ### Form (`form`, component)
@@ -883,7 +896,7 @@ one-line markup of the required structure.
 - Root: `fd-sheet` (on `<dialog>`, never `hidden`), shown at `docs/overlays.html#sheets`
 - Parts: `fd-sheet-bar`, `fd-sheet-body`, `fd-sheet-close`, `fd-sheet-desc`, `fd-sheet-foot`, `fd-sheet-head`, `fd-sheet-section`, `fd-sheet-title` (child of `fd-sheet-bar`)
 - Write: `<dialog class="fd-sheet" id="…" aria-labelledby="…">…</dialog>`
-- On the root: `data-side="bottom|left|right" (or bare)`, `data-size="lg|md"`, `data-static-demo`
+- On the root: `data-modeless`, `data-side="bottom|left|right" (or bare)`, `data-size="half|lg|md"`, `data-static-demo`
 - On `fd-sheet-close`: `data-size="sm"`
 - On `fd-sheet-foot`: `data-start`
 - State, set by Fire: `data-dragging`, `data-step`
@@ -909,13 +922,14 @@ one-line markup of the required structure.
 ### Code block (`codeblock`, component)
 
 - Root: `fd-codeblock`, shown at `docs/code.html#codeblock`
-- Parts: `fd-codeblock-actions`, `fd-codeblock-body` (child of `fd-codeblock`), `fd-codeblock-btn`, `fd-codeblock-copy`, `fd-codeblock-expand`, `fd-codeblock-file`, `fd-codeblock-head` (child of `fd-codeblock`), `fd-codeblock-lang`, `fd-codeblock-line`, `fd-codeblock-more`, `fd-codeblock-tab`, `fd-codeblock-tabs`, `fd-copied-label`, `fd-syntax-comment`, `fd-syntax-fn`, `fd-syntax-key`, `fd-syntax-keyword`, `fd-syntax-number`, `fd-syntax-plain`, `fd-syntax-punct`, `fd-syntax-string`
-- On the root: `data-collapse="*"`, `data-expanded`, `data-lines`, `data-variant="framed"`, `data-wrap`
+- Parts: `fd-codeblock-actions`, `fd-codeblock-body` (child of `fd-codeblock`), `fd-codeblock-btn`, `fd-codeblock-copy`, `fd-codeblock-expand`, `fd-codeblock-file`, `fd-codeblock-head` (child of `fd-codeblock`), `fd-codeblock-lang`, `fd-codeblock-line`, `fd-codeblock-more`, `fd-codeblock-tab`, `fd-codeblock-tabs`, `fd-copied-label`, `fd-copy-next`, `fd-syntax-comment`, `fd-syntax-fn`, `fd-syntax-key`, `fd-syntax-keyword`, `fd-syntax-number`, `fd-syntax-plain`, `fd-syntax-punct`, `fd-syntax-string`
+- On the root: `data-collapse="*"`, `data-copy-next="*"`, `data-expanded`, `data-lines`, `data-variant="framed"`, `data-wrap`
 - On `fd-codeblock-btn`: `data-action="wrap"`
 - On `fd-codeblock-line`: `data-hl`
 - On `fd-codeblock-tab`: `data-tone="danger|success|warning" (or bare)`
 - On `fd-codeblock-tabs`: `data-variant="segmented"`
-- State, set by Fire: `data-state="copied"`
+- State, set by Fire: `data-state="copied|shown"`
+- Events: `fd:copy`
 - Element: `<fd-code>`
 
 ### Diff (`diff`, component)
@@ -963,9 +977,10 @@ one-line markup of the required structure.
 
 - Root: `fd-snippet`, shown at `docs/code.html#snippet`
 - Parts: `fd-snippet-copy`, `fd-snippet-dim`, `fd-snippet-em`, `fd-snippet-prompt`, `fd-snippet-step`, `fd-snippet-step-hint`, `fd-snippet-step-title`, `fd-snippet-steps`, `fd-snippet-text`
-- On the root: `data-size="sm"`, `data-variant="accent"`
+- On the root: `data-copy-next="*"`, `data-size="sm"`, `data-variant="accent"`
 - On `fd-snippet-step`: `data-state="done"`
 - State, set by Fire: `data-state="copied"`
+- Events: `fd:copy`
 
 ### Viewswitch (`viewswitch`, component)
 
@@ -1174,7 +1189,7 @@ one-line markup of the required structure.
 ### Documentation page (`doc`, component)
 
 - Root: `fd-doc`, shown at `docs/documentation.html#shell`
-- Parts: `fd-doc-anchor`, `fd-doc-article`, `fd-doc-aside`, `fd-doc-body`, `fd-doc-brand-tag`, `fd-doc-card-head`, `fd-doc-card-icon`, `fd-doc-card-text`, `fd-doc-card-title`, `fd-doc-content`, `fd-doc-copy`, `fd-doc-crumbs`, `fd-doc-cta`, `fd-doc-cta-brand`, `fd-doc-cta-text`, `fd-doc-cta-title`, `fd-doc-eyebrow`, `fd-doc-foot`, `fd-doc-foot-links`, `fd-doc-foot-row`, `fd-doc-footer`, `fd-doc-footer-bar`, `fd-doc-footer-brand`, `fd-doc-footer-col`, `fd-doc-footer-inner`, `fd-doc-footer-note`, `fd-doc-guide`, `fd-doc-guide-desc`, `fd-doc-guide-time`, `fd-doc-guide-title`, `fd-doc-guides`, `fd-doc-head`, `fd-doc-head-action`, `fd-doc-head-meta`, `fd-doc-helpful`, `fd-doc-helpful-actions`, `fd-doc-helpful-form`, `fd-doc-helpful-q`, `fd-doc-helpful-thanks`, `fd-doc-hero`, `fd-doc-hero-popular`, `fd-doc-hero-search`, `fd-doc-hero-title`, `fd-doc-hit`, `fd-doc-lead`, `fd-doc-main`, `fd-doc-method`, `fd-doc-nav`, `fd-doc-nav-chevron`, `fd-doc-nav-group`, `fd-doc-nav-item`, `fd-doc-nav-label`, `fd-doc-nav-links`, `fd-doc-nav-scroll`, `fd-doc-nav-sections`, `fd-doc-nav-sub`, `fd-doc-nav-tag`, `fd-doc-nav-text`, `fd-doc-otp`, `fd-doc-otp-list`, `fd-doc-pager`, `fd-doc-pager-eyebrow`, `fd-doc-pager-link`, `fd-doc-pager-title`, `fd-doc-panel`, `fd-doc-picker`, `fd-doc-releases`, `fd-doc-releases-empty`, `fd-doc-repo`, `fd-doc-repo-name`, `fd-doc-repo-stars`, `fd-doc-sdk`, `fd-doc-sdk-head`, `fd-doc-sdk-meta`, `fd-doc-sdk-name`, `fd-doc-sdks`, `fd-doc-search`, `fd-doc-section`, `fd-doc-section-desc`, `fd-doc-section-head`, `fd-doc-section-title`, `fd-doc-sections`, `fd-doc-sheet`, `fd-doc-shot`, `fd-doc-shot-bar`, `fd-doc-shot-code`, `fd-doc-shot-pane`, `fd-doc-step`, `fd-doc-step-body`, `fd-doc-step-title`, `fd-doc-switch`, `fd-doc-table`, `fd-doc-tabs`, `fd-doc-title`, `fd-doc-toc`, `fd-doc-toc-title`, `fd-doc-top`, `fd-doc-top-end`, `fd-doc-top-row`, `fd-doc-top-start`, `fd-doc-updated`, `fd-doc-zoom`, `fd-doc-zoom-body`, `fd-doc-zoom-caption`, `fd-doc-zoom-close`
+- Parts: `fd-doc-anchor`, `fd-doc-article`, `fd-doc-aside`, `fd-doc-body`, `fd-doc-brand-tag`, `fd-doc-card-head`, `fd-doc-card-icon`, `fd-doc-card-text`, `fd-doc-card-title`, `fd-doc-content`, `fd-doc-copy`, `fd-doc-crumbs`, `fd-doc-cta`, `fd-doc-cta-brand`, `fd-doc-cta-text`, `fd-doc-cta-title`, `fd-doc-eyebrow`, `fd-doc-foot`, `fd-doc-foot-links`, `fd-doc-foot-row`, `fd-doc-footer`, `fd-doc-footer-bar`, `fd-doc-footer-brand`, `fd-doc-footer-col`, `fd-doc-footer-inner`, `fd-doc-footer-note`, `fd-doc-guide`, `fd-doc-guide-desc`, `fd-doc-guide-time`, `fd-doc-guide-title`, `fd-doc-guides`, `fd-doc-head`, `fd-doc-head-action`, `fd-doc-head-meta`, `fd-doc-helpful`, `fd-doc-helpful-actions`, `fd-doc-helpful-form`, `fd-doc-helpful-q`, `fd-doc-helpful-thanks`, `fd-doc-hero`, `fd-doc-hero-popular`, `fd-doc-hero-search`, `fd-doc-hero-title`, `fd-doc-hit`, `fd-doc-lead`, `fd-doc-main`, `fd-doc-method`, `fd-doc-nav`, `fd-doc-nav-chevron`, `fd-doc-nav-group`, `fd-doc-nav-item`, `fd-doc-nav-label`, `fd-doc-nav-links`, `fd-doc-nav-scroll`, `fd-doc-nav-sections`, `fd-doc-nav-sub`, `fd-doc-nav-tag`, `fd-doc-nav-text`, `fd-doc-otp`, `fd-doc-otp-list`, `fd-doc-pager`, `fd-doc-pager-eyebrow`, `fd-doc-pager-link`, `fd-doc-pager-title`, `fd-doc-panel`, `fd-doc-picker`, `fd-doc-releases`, `fd-doc-releases-empty`, `fd-doc-repo`, `fd-doc-repo-name`, `fd-doc-repo-stars`, `fd-doc-sdk`, `fd-doc-sdk-head`, `fd-doc-sdk-meta`, `fd-doc-sdk-name`, `fd-doc-sdks`, `fd-doc-search`, `fd-doc-section`, `fd-doc-section-desc`, `fd-doc-section-head`, `fd-doc-section-title`, `fd-doc-sections`, `fd-doc-sheet`, `fd-doc-shot`, `fd-doc-shot-bar`, `fd-doc-shot-code`, `fd-doc-shot-pane`, `fd-doc-switch`, `fd-doc-table`, `fd-doc-tabs`, `fd-doc-title`, `fd-doc-toc`, `fd-doc-toc-title`, `fd-doc-top`, `fd-doc-top-end`, `fd-doc-top-links` (on `<nav>`), `fd-doc-top-row`, `fd-doc-top-start`, `fd-doc-updated`, `fd-doc-zoom`, `fd-doc-zoom-body`, `fd-doc-zoom-caption`, `fd-doc-zoom-close`
 - On the root: `data-contained`
 - On `fd-doc-article`: `data-width="wide"`
 - On `fd-doc-method`: `data-method="delete|get|patch|post|put"`, `data-size="lg"`
@@ -1184,7 +1199,6 @@ one-line markup of the required structure.
 - On `fd-doc-panel`: `data-at-end`, `data-kind="request|response"`
 - On `fd-doc-picker`: `data-fd-menu-value`
 - On `fd-doc-shot-bar`: `data-tone="accent|strong"`
-- On `fd-doc-step`: `data-state="done"`
 - On `fd-doc-switch`: `data-mono`
 - On `fd-doc-top`: `data-doc-hide="*"`, `data-doc-show="sm"`
 - On `fd-doc-top-row`: `data-row="crumbs|sections|tools"`
@@ -1192,15 +1206,22 @@ one-line markup of the required structure.
 - State, set by Fire: `data-state="done|open|voted"`
 - Events: `fd:change`
 
+### Numbered steps (`doc-steps`, component)
+
+- Root: `fd-doc-steps` (on `<ol>`), shown at `docs/documentation.html#steps`
+- Parts: `fd-doc-step` (on `<li>`, child of `fd-doc-steps`), `fd-doc-step-body`, `fd-doc-step-title`
+- Write: `<ol class="fd-doc-steps"><li class="fd-doc-step"><h3 class="fd-doc-step-title">…</h3><div class="fd-doc-step-body">…</div></li></ol>`
+- On `fd-doc-step`: `data-state="done"`
+
 ### Prose (`prose`, component)
 
 - Root: `fd-prose`, shown at `docs/documentation.html#prose`
 - On the root: `data-footnotes`, `data-size="lg|sm"`
 
-### Setup steps (`doc-setup`, component)
+### Setup card (`doc-setup`, component)
 
 - Root: `fd-doc-setup`, shown at `docs/documentation.html#setup`
-- Parts: `fd-doc-setup-action`, `fd-doc-setup-desc`, `fd-doc-setup-head`, `fd-doc-setup-hint`, `fd-doc-setup-name`, `fd-doc-setup-panel`, `fd-doc-setup-tile`, `fd-doc-setup-tiles`, `fd-doc-setup-title`, `fd-doc-steps`
+- Parts: `fd-doc-setup-action`, `fd-doc-setup-desc`, `fd-doc-setup-head`, `fd-doc-setup-hint`, `fd-doc-setup-name`, `fd-doc-setup-panel`, `fd-doc-setup-tile`, `fd-doc-setup-tiles`, `fd-doc-setup-title`
 - Events: `fd:change`
 
 ## Texture & loading
@@ -1224,16 +1245,19 @@ one-line markup of the required structure.
 ### Skeleton (`skeleton`, component)
 
 - Root: `fd-skeleton`, shown at `docs/skeletons.html#parts`
-- Parts: `fd-shimmer`, `fd-skeleton-avatar`, `fd-skeleton-button`, `fd-skeleton-card`, `fd-skeleton-card-foot`, `fd-skeleton-card-head`, `fd-skeleton-card-titles`, `fd-skeleton-chart`, `fd-skeleton-chart-area`, `fd-skeleton-chart-body`, `fd-skeleton-chart-head`, `fd-skeleton-chart-line`, `fd-skeleton-chart-plot`, `fd-skeleton-chart-titles`, `fd-skeleton-chart-x`, `fd-skeleton-chart-y`, `fd-skeleton-form`, `fd-skeleton-form-actions`, `fd-skeleton-form-control`, `fd-skeleton-form-field`, `fd-skeleton-grid`, `fd-skeleton-hero`, `fd-skeleton-list`, `fd-skeleton-list-row`, `fd-skeleton-list-text`, `fd-skeleton-page`, `fd-skeleton-page-body`, `fd-skeleton-page-icons`, `fd-skeleton-page-main`, `fd-skeleton-page-rail`, `fd-skeleton-page-sep`, `fd-skeleton-page-toolbar`, `fd-skeleton-page-top`, `fd-skeleton-stat`, `fd-skeleton-stat-tile`, `fd-skeleton-table`, `fd-skeleton-table-cell`, `fd-skeleton-table-head`, `fd-skeleton-table-row`, `fd-skeleton-text`, `fd-skeleton-thread`, `fd-skeleton-thread-reply`, `fd-skeleton-thread-tool`, `fd-skeleton-thread-user`, `fd-skeleton-tile`, `fd-skeleton-title`
+- Parts: `fd-shimmer`, `fd-skeleton-app`, `fd-skeleton-app-account` (child of `fd-skeleton-app-side`), `fd-skeleton-app-brand` (child of `fd-skeleton-app-side`), `fd-skeleton-app-head` (child of `fd-skeleton-app-page`), `fd-skeleton-app-main` (child of `fd-skeleton-app`), `fd-skeleton-app-nav` (child of `fd-skeleton-app-side`), `fd-skeleton-app-page` (child of `fd-skeleton-app-main`), `fd-skeleton-app-side` (child of `fd-skeleton-app`), `fd-skeleton-app-tabbar` (child of `fd-skeleton-app`), `fd-skeleton-app-top` (child of `fd-skeleton-app-main`), `fd-skeleton-avatar`, `fd-skeleton-button`, `fd-skeleton-card`, `fd-skeleton-card-foot`, `fd-skeleton-card-head`, `fd-skeleton-card-titles`, `fd-skeleton-chart`, `fd-skeleton-chart-area`, `fd-skeleton-chart-body`, `fd-skeleton-chart-head`, `fd-skeleton-chart-line`, `fd-skeleton-chart-plot`, `fd-skeleton-chart-titles`, `fd-skeleton-chart-x`, `fd-skeleton-chart-y`, `fd-skeleton-form`, `fd-skeleton-form-actions`, `fd-skeleton-form-control`, `fd-skeleton-form-field`, `fd-skeleton-grid`, `fd-skeleton-hero`, `fd-skeleton-late`, `fd-skeleton-list`, `fd-skeleton-list-row`, `fd-skeleton-list-text`, `fd-skeleton-page`, `fd-skeleton-page-body`, `fd-skeleton-page-icons`, `fd-skeleton-page-main`, `fd-skeleton-page-rail`, `fd-skeleton-page-sep`, `fd-skeleton-page-toolbar`, `fd-skeleton-page-top`, `fd-skeleton-stat`, `fd-skeleton-stat-tile`, `fd-skeleton-table`, `fd-skeleton-table-cell`, `fd-skeleton-table-head`, `fd-skeleton-table-row`, `fd-skeleton-text`, `fd-skeleton-thread`, `fd-skeleton-thread-reply`, `fd-skeleton-thread-tool`, `fd-skeleton-thread-user`, `fd-skeleton-tile`, `fd-skeleton-title`
+- On the root: `data-when="loading"`
 - On `fd-shimmer`: `data-tone="accent"`
-- On `fd-skeleton-avatar`: `data-size="16|20|24|40|48"`
-- On `fd-skeleton-button`: `data-size="lg|sm"`, `data-square`
+- On `fd-skeleton-app`: `data-contained`, `data-sidebar="collapsed"`
+- On `fd-skeleton-avatar`: `data-size="16|20|24|40|48"`, `data-when="loading"`
+- On `fd-skeleton-button`: `data-size="lg|sm"`, `data-square`, `data-when="loading"`
 - On `fd-skeleton-chart`: `data-variant="bars"`
 - On `fd-skeleton-form-control`: `data-search`
+- On `fd-skeleton-late`: `data-fd-late="shown|wait"`
 - On `fd-skeleton-page-toolbar`: `data-search`
-- On `fd-skeleton-text`: `data-size="lg|sm|xs"`
-- On `fd-skeleton-tile`: `data-size="16|20|24|32|48"`
-- On `fd-skeleton-title`: `data-size="caption|display|eyebrow|h1|h2|h3|label|lead|mono|stat"`
+- On `fd-skeleton-text`: `data-lines="1|2|3|4|5|6|7|8" (or bare)`, `data-size="lg|sm|xs"`
+- On `fd-skeleton-tile`: `data-size="16|20|24|32|48"`, `data-when="loading"`
+- On `fd-skeleton-title`: `data-size="caption|display|eyebrow|h1|h2|h3|label|lead|mono|stat"`, `data-when="loading"`
 
 ### Texture (`texture`, component)
 
@@ -1395,4 +1419,4 @@ Parts with no class of their own: functions a page calls.
 - `theme-record`: Theme record, shown at `docs/tweaks.html#records`
 - `transitions`: Page transitions, shown at `docs/transitions.html#demo`
 
-184 components, patterns, layouts and sections; 1656 classes.
+187 components, patterns, layouts and sections; 1674 classes.

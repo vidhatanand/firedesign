@@ -94,6 +94,22 @@
  *   and fd:change (detail.value = step name). openDialog(id, { trigger }), closeDialog(id, value).
  *   Below 640px dialogs and sheets are bottom sheets that can be dragged down to close.
  *
+ * Modeless sheet (0.13): a drawer that leaves the page usable
+ *   <button data-fd-sheet-open="run-detail" data-value="run_8f2a91">…</button>      (one trigger per item)
+ *   <dialog class="fd-sheet" id="run-detail" data-modeless [data-side="left"] [data-size="lg"]>…</dialog>
+ *   The same openDialog(id) and the same triggers open it with dialog.show(): no scrim, no scroll lock, no focus trap, and
+ *   a click outside does not close it. It sits just above the sidebar (--fd-sheet-modeless-z) and below the top layer;
+ *   make it a child of <body>, outside the app shell, whose page is a stacking context while page transitions are on.
+ *   Focus goes quietly to the title. In the focus order the sheet follows the trigger that opened it: Tab on that
+ *   trigger enters the sheet, Tab past its end continues after the trigger, Shift+Tab from its start returns to the
+ *   trigger. Escape closes it only while focus is inside it, and focus then returns to the trigger if it still exists.
+ *   Opening it again while it is open, from another trigger, swaps: no slide, fd:open again with detail
+ *   { trigger, swap: true, wait(promise) }. Replace the body on fd:open; wait(promise) holds aria-busy="true" on the
+ *   sheet until the promise settles. Triggers carry aria-expanded (true on the one it shows) and aria-controls.
+ *   One modeless sheet per side: opening a second on the same side closes the first (all are one side below 640px,
+ *   where it is a bottom sheet at half the screen that drags down to close).
+ *   A dialog opened from inside it is modal as usual and gives focus back into the sheet when it closes.
+ *
  * Type-to-confirm
  *   <dialog class="fd-dialog fd-confirm" data-confirm="ember-prod"><form method="dialog">…
  *     <input class="fd-input" data-fd-confirm-input> … <button value="confirm" data-fd-confirm-submit disabled>…
@@ -1100,6 +1116,17 @@ const dialogOrigin = new WeakMap();
 const dialogWatch = new WeakMap();
 const fallbackTraps = new WeakMap();
 
+/* Modeless sheets: open with show(), outside the modal stack. */
+const MODELESS = '.fd-sheet[data-modeless]';
+const modeless = new Set();          // open modeless sheets
+const focusWasIn = new WeakMap();    // sheet → focus was inside it when closeDialog() ran
+const busyTokens = new WeakMap();    // sheet → the latest wait() token
+const marked = new WeakMap();        // sheet → a trigger marked aria-expanded that is not one of its own triggers
+const isModeless = (el) => !!el?.matches?.(MODELESS) && !isStatic(el);
+const sideOf = (sheet) => (isPhone() ? 'bottom' : sheet.dataset.side || 'right');
+const triggersOf = (sheet) => (sheet.id ? $$(`[data-fd-dialog-open="${CSS.escape(sheet.id)}"], [data-fd-sheet-open="${CSS.escape(sheet.id)}"]`) : []);
+const tabbables = (root) => focusables(root).filter((el) => el.tabIndex >= 0);
+
 const steps = (dialog) => $$('[data-step]', dialog).filter((s) => s.closest(MODAL) === dialog);
 const currentStep = (dialog) => steps(dialog).find((s) => !s.hidden) || null;
 
@@ -1121,6 +1148,7 @@ function setupDialog(dialog) {
 export function openDialog(ref, { trigger = null } = {}) {
   const dialog = byId(ref);
   if (!dialog || isStatic(dialog) || !dialog.matches(MODAL)) return null;
+  if (isModeless(dialog)) return openModeless(dialog, trigger);
   if (dialog.open || dialog.hasAttribute('open')) return dialog;
   setupDialog(dialog);
   hideTip();
@@ -1149,9 +1177,129 @@ export function openDialog(ref, { trigger = null } = {}) {
   return dialog;
 }
 
+/** A modeless sheet: open it, or swap what it shows when it is already open. */
+function openModeless(sheet, trigger) {
+  setupDialog(sheet);
+  hideTip();
+  hideCard();
+  let origin = trigger || doc.activeElement;
+  const layer = origin?.closest?.(FLOATING);
+  if (layer && !isOpen(layer)) origin = doc.activeElement;
+  if (origin === doc.body) origin = null;
+  const swap = !!(sheet.open || sheet.hasAttribute('open')) && modeless.has(sheet);
+  if (!swap) {
+    // One modeless sheet per side: the one already there goes, without taking focus back.
+    for (const other of [...modeless]) {
+      if (other === sheet || sideOf(other) !== sideOf(sheet)) continue;
+      dialogOrigin.delete(other);
+      focusWasIn.set(other, false);
+      closeDialog(other, 'replaced');
+    }
+    resetDialog(sheet);
+    if (HAS_DIALOG && sheet instanceof HTMLDialogElement) {
+      try { if (!sheet.open) sheet.show(); } catch { return null; }
+    } else sheet.setAttribute('open', '');
+    sheet.dataset.state = 'open';
+    modeless.add(sheet);
+    lastLayerAt = performance.now();
+    doc.documentElement.setAttribute('data-fd-modeless', '');
+  } else {
+    for (const body of $$(SCROLLERS, sheet)) if (body.closest(MODAL) === sheet) body.scrollTop = 0;
+  }
+  dialogOrigin.set(sheet, origin);
+  markTriggers(sheet, origin);
+  busyTokens.delete(sheet);
+  sheet.removeAttribute('aria-busy');
+  const wait = (work) => {
+    const token = {};
+    busyTokens.set(sheet, token);
+    sheet.setAttribute('aria-busy', 'true');
+    const done = () => {
+      if (busyTokens.get(sheet) !== token) return;
+      busyTokens.delete(sheet);
+      sheet.removeAttribute('aria-busy');
+      watchDialog(sheet);
+    };
+    Promise.resolve().then(() => (typeof work === 'function' ? work() : work)).then(done, done);
+  };
+  emit(sheet, 'fd:open', { trigger: origin, swap, wait });
+  focusTitle(sheet);
+  watchDialog(sheet);
+  // On a phone the sheet covers the lower half: keep the row it shows in sight above it.
+  if (origin?.isConnected && sideOf(sheet) === 'bottom' && !sheet.contains(origin)) {
+    const r = origin.getBoundingClientRect();
+    const top = innerHeight - sheet.offsetHeight;
+    if (r.bottom > top || r.top < 0) origin.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' });
+  }
+  return sheet;
+}
+
+/** aria-expanded="true" on the trigger the sheet shows, "false" on its other triggers; aria-controls on each. */
+function markTriggers(sheet, current) {
+  const own = triggersOf(sheet);
+  for (const t of own) {
+    t.setAttribute('aria-expanded', String(t === current && !!(sheet.open || sheet.hasAttribute('open'))));
+    if (!t.hasAttribute('aria-controls') && sheet.id) t.setAttribute('aria-controls', sheet.id);
+  }
+  // A trigger passed by script (a map marker, a chart point) is marked while it is the current one.
+  const before = marked.get(sheet);
+  if (before && before !== current) { before.removeAttribute('aria-expanded'); marked.delete(sheet); }
+  if (current && !own.includes(current) && !sheet.contains(current) && current.isConnected && sheet.open) {
+    current.setAttribute('aria-expanded', 'true');
+    marked.set(sheet, current);
+  }
+}
+
+/** Focus a sheet's title without a ring (the surface itself when it has none). */
+function focusTitle(sheet) {
+  const title = $$('.fd-sheet-title', currentStep(sheet) || sheet).find((t) => t.closest(MODAL) === sheet && visible(t));
+  if (title) {
+    if (!title.hasAttribute('tabindex')) titleMade.add(title);
+    focusQuiet(title);
+  } else focusQuiet(sheet);
+}
+
+/** Tab around a modeless sheet as if it sat right after its trigger. Returns true when it moved focus. */
+function tabModeless(event) {
+  if (modalStack.length) return false;
+  const target = event.target;
+  const sheet = target.closest(MODAL);
+  if (sheet && modeless.has(sheet)) {
+    const origin = dialogOrigin.get(sheet);
+    if (!origin?.isConnected || sheet.contains(origin) || !visible(origin)) return false;
+    const list = tabbables(sheet).filter((el) => el.closest(MODAL) === sheet);
+    const index = list.indexOf(target);
+    const before = (el) => !!(target.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING);
+    if (event.shiftKey) {
+      // From the first stop, or from the title or the surface ahead of it: back to the trigger.
+      if (index === 0 || (index === -1 && !list.some(before))) { event.preventDefault(); restoreFocus(origin); return true; }
+      return false;
+    }
+    const after = (el) => !!(target.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) && (target === sheet || !target.contains(el));
+    if (index === list.length - 1 || (index === -1 && !list.some(after))) {
+      const next = tabbables(doc.body).find((el) => !sheet.contains(el) && !origin.contains(el) && !!(origin.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
+      if (!next) return false;
+      event.preventDefault();
+      focusEl(next, true);
+      return true;
+    }
+    return false;
+  }
+  if (event.shiftKey) return false;
+  for (const open of modeless) {
+    if (dialogOrigin.get(open) !== target) continue;
+    const first = tabbables(open).find((el) => el.closest(MODAL) === open);
+    event.preventDefault();
+    if (first) focusEl(first, true); else focusTitle(open);
+    return true;
+  }
+  return false;
+}
+
 export function closeDialog(ref, value) {
-  const dialog = ref == null ? modalStack[modalStack.length - 1] : byId(ref);
+  const dialog = ref == null ? modalStack[modalStack.length - 1] || [...modeless].pop() : byId(ref);
   if (!dialog || !(dialog.open || dialog.hasAttribute('open'))) return;
+  if (modeless.has(dialog) && !focusWasIn.has(dialog)) focusWasIn.set(dialog, dialog.contains(doc.activeElement));
   if (HAS_DIALOG && dialog instanceof HTMLDialogElement) {
     if (value === undefined) dialog.close(); else dialog.close(String(value));
   } else {
@@ -1176,7 +1324,16 @@ function afterClose(dialog) {
   const origin = dialogOrigin.get(dialog);
   dialogOrigin.delete(dialog);
   const top = modalStack[modalStack.length - 1];
-  if (origin?.isConnected && origin !== doc.body && (!top || top.contains(origin))) restoreFocus(origin);
+  if (modeless.delete(dialog) || isModeless(dialog)) {
+    // Focus goes back to the trigger only when it was in the sheet: closing it from the page leaves focus where it is.
+    const inside = focusWasIn.get(dialog) ?? (dialog.contains(doc.activeElement) || doc.activeElement === doc.body);
+    focusWasIn.delete(dialog);
+    busyTokens.delete(dialog);
+    dialog.removeAttribute('aria-busy');
+    markTriggers(dialog, null);
+    if (!modeless.size) doc.documentElement.removeAttribute('data-fd-modeless');
+    if (inside && !top && origin?.isConnected && origin !== doc.body) restoreFocus(origin);
+  } else if (origin?.isConnected && origin !== doc.body && (!top || top.contains(origin))) restoreFocus(origin);
   remountToaster();
   emit(dialog, 'fd:close', { value: dialog.returnValue });
 }
@@ -2235,6 +2392,9 @@ function bindGlobal() {
       if ((event.key === 'Enter' || event.key === ' ') && !menuTrigger.matches('button, a[href], input, summary')) { event.preventDefault(); menuTrigger.click(); return; }
     }
 
+    // A modeless sheet sits right after its trigger in the Tab order.
+    if (event.key === 'Tab' && modeless.size && !event.altKey && !event.ctrlKey && !event.metaKey && tabModeless(event)) return;
+
     // Command palette input
     const palette = target.closest('.fd-command');
     if (palette && target.matches('.fd-command-input')) { onCommandKey(event, palette); return; }
@@ -2277,6 +2437,15 @@ function bindGlobal() {
     if (event.key === 'Escape') {
       const pop = target.closest('.fd-popover');
       if (pop && isOpen(pop)) { event.preventDefault(); event.stopPropagation(); closePopover(pop, true); }
+    }
+
+    // A modeless sheet: Escape closes it only while focus is inside it, and after any menu or popover over it.
+    if (event.key === 'Escape' && !event.defaultPrevented && modeless.size && !modalStack.length) {
+      const sheet = target.closest(MODAL);
+      if (sheet && modeless.has(sheet) && !$$('.fd-menu, .fd-popover').some(isOpen)) {
+        event.preventDefault();
+        closeDialog(sheet, 'dismiss');
+      }
     }
   });
 
@@ -2322,7 +2491,7 @@ function bindGlobal() {
   // Backdrop clicks: the press and the click both land on the <dialog> outside its box.
   doc.addEventListener('click', (event) => {
     const dialog = event.target;
-    if (!(dialog instanceof HTMLElement) || !dialog.matches(MODAL) || !dialog.open || isStatic(dialog) || pressTarget !== dialog) return;
+    if (!(dialog instanceof HTMLElement) || !dialog.matches(MODAL) || !dialog.open || isStatic(dialog) || pressTarget !== dialog || modeless.has(dialog)) return;
     const r = dialog.getBoundingClientRect();
     if (event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom) return;
     if (dialog.hasAttribute('data-static')) bump(dialog); else closeDialog(dialog, 'dismiss');
@@ -2475,7 +2644,15 @@ export function init(root = document) {
     if (menu?.querySelector(GATED)) markOpener(t, !filterMenu(menu, t));
   }
   for (const t of scope('[data-fd-popover]')) setupTrigger(t, 'popover');
-  for (const t of scope('[data-fd-dialog-open], [data-fd-sheet-open], [data-fd-command-open]')) if (!t.hasAttribute('aria-haspopup')) t.setAttribute('aria-haspopup', 'dialog');
+  for (const t of scope('[data-fd-dialog-open], [data-fd-sheet-open], [data-fd-command-open]')) {
+    if (!t.hasAttribute('aria-haspopup')) t.setAttribute('aria-haspopup', 'dialog');
+    // A row added later to the list beside a modeless sheet: it says whether it is the one shown.
+    const sheet = t.matches('[data-fd-command-open]') ? null : byId(t.dataset.fdDialogOpen || t.dataset.fdSheetOpen);
+    if (isModeless(sheet)) {
+      t.setAttribute('aria-expanded', String(!!sheet.open && dialogOrigin.get(sheet) === t));
+      if (!t.hasAttribute('aria-controls')) t.setAttribute('aria-controls', sheet.id);
+    }
+  }
   for (const menu of scope('.fd-menu')) setupMenu(menu);
   for (const pop of scope('.fd-popover')) setupPopover(pop);
   for (const hc of scope('.fd-hovercard')) prepare(hc, 'manual');
@@ -2487,6 +2664,10 @@ export function init(root = document) {
     setupDialog(dialog);
     if (isStatic(dialog)) updateEdges(dialog);
     else if (!dialog.dataset.state) dialog.dataset.state = dialog.open ? 'open' : 'closed';
+    if (isModeless(dialog)) {
+      if (dialog.open && dialog.dataset.state === 'open' && !modeless.has(dialog)) { modeless.add(dialog); doc.documentElement.setAttribute('data-fd-modeless', ''); }
+      markTriggers(dialog, dialog.open ? dialogOrigin.get(dialog) ?? null : null);
+    }
   }
   for (const range of scope('[data-fd-daterange]')) {
     rangeState(range); buildCalendar(range); paintRange(range);

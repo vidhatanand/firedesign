@@ -6,7 +6,8 @@
  *     <script type="module" src="./shell.js"></script>
  *
  * On load the page's <main> is wrapped in the full shell: sidebar (nav, usage card, account),
- * top bar, phone menu, the phone tab bar (0.8: Overview, Logs, Decisions, Usage and More, shown under 640px) and the support button. Or call it yourself:
+ * top bar, phone menu, the phone tab bar (0.8: Overview, Logs, Decisions, Usage and More, shown under 640px) and the support button,
+ * and a skip link (fd-skip, 0.13) goes first in <body>, pointing at the main (addSkipLink). Or call it yourself:
  *
  *   import { mountShell } from './shell.js';
  *   mountShell({ active: 'scrape', title: 'Scrape a page' });
@@ -447,6 +448,21 @@ function bindBehaviour(fire, prefix) {
   sync();
 }
 
+/** The skip link (fd-skip), first in <body>, to the page's <main>: the main gets an id ("main") and tabindex="-1" when it
+ *  has none, so following the link moves focus into it (base.css draws no ring around the whole main). Once per page. */
+export function addSkipLink(main, label = 'Skip to content') {
+  const body = document.body;
+  if (!main || body.querySelector(':scope > .fd-skip')) return null;
+  if (!main.id) main.id = 'main';
+  if (!main.hasAttribute('tabindex')) main.tabIndex = -1;
+  const link = document.createElement('a');
+  link.className = 'fd-skip';
+  link.href = `#${main.id}`;
+  link.textContent = label;
+  body.prepend(link);
+  return link;
+}
+
 /** Wrap the page's <main> in the Ember shell. Returns the .fd-app element. */
 export function mountShell({ active, title } = {}) {
   const body = document.body;
@@ -462,6 +478,7 @@ export function mountShell({ active, title } = {}) {
   if (typeof matchMedia === 'function' && !matchMedia('(min-width: 1100px)').matches) app.querySelectorAll('[data-fd-search-trigger]').forEach((el) => { el.hidden = true; });
   if (main.isConnected) main.before(app); else body.prepend(app);
   app.querySelector('.fd-main').append(main);
+  addSkipLink(main);
   // The support chat is a fixed panel: it lives at the end of <body>, outside the shell's layout.
   const chat = app.querySelector(':scope > .fd-chat');
   if (chat) body.append(chat);

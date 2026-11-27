@@ -94,7 +94,7 @@ starter against your working copy instead, without changing `package.json` or th
 ## Start a new project from it
 
 1. Copy this folder out of the Fire repository. Its `package.json` already depends on the release,
-   `"fire-design": "github:vidhatanand/firedesign#v0.13.1"`, locked in `package-lock.json`.
+   `"fire-design": "github:vidhatanand/firedesign#v0.13.2"`, locked in `package-lock.json`.
 2. `npm ci`, then `npm run dev`. Delete the `check` script: it compares against templates in Fire's repository.
 3. Choose your look: edit `theme.json` (a Fire theme record: palette, type, dials) and run `npm run dev` or
    `npm run build`. `scripts/prepare.mjs` turns it into `src/fire-theme.css` and puts the attributes it needs on

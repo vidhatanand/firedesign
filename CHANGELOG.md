@@ -2,6 +2,32 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (in its `package.json`, or in its agent instructions when Fire is copied in) and reads every entry after it before refreshing.
 
+## 0.13.2 — 27 Nov 2026
+
+**Opening a modal no longer moves a page that has no scroll bar.** One bug fix. No class, token, event or behaviour
+export changed.
+
+### Fixed
+
+- **Page lock.** While a modal is open (a dialog, a modal sheet, the command palette), Fire hides the page's overflow
+  and reserves the scroll bar's gutter, so a page with a scroll bar does not widen under the modal. It reserved that
+  gutter on every page. Where scroll bars take space (Windows, Linux, macOS set to always show them), a page with no
+  scroll bar of its own (shorter than the window, or one that scrolls inside a region) moved left by the bar's width,
+  11px, when a modal opened and back when it closed, and a right sheet sat that far from the window's edge. The lock
+  now measures the page first: `data-fd-modal-lock` is `""` where the page has a scroll bar that takes space, and its
+  gutter stays; it is `"no-gutter"` where the page has none, and none is added. A page with overlay scroll bars
+  (macOS by default, phones) looked right before and looks the same now.
+  Found on GitHub's macOS runners and reproduced in Chromium with scroll bars that take space; not looked at on a
+  Windows machine. `scripts/test/overlays.test.mjs` holds both cases.
+
+### For products refreshing from 0.13.1
+
+- Nothing to change in markup, styles or scripts. Refresh Fire's script and stylesheet together; either one alone
+  behaves as 0.13.1 did.
+- A rule of your own on `[data-fd-modal-lock]` still matches. One written as `[data-fd-modal-lock=""]` now matches
+  only a page with a scroll bar that takes space.
+- A slim bundle that keeps the overlays: build it again.
+
 ## 0.13.1 — 27 Nov 2026
 
 **A skeleton written into a page passes Fire's own lint.** One bug fix. Nothing looks different, and no class,

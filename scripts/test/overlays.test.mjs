@@ -396,3 +396,58 @@ for (const engine of engines.slice(0, 1)) {
     }
   });
 }
+
+// 0.13.2: the page lock keeps a scroll-bar gutter only where the page has a scroll bar that takes space. Before, a
+// page with none (shorter than the window) moved by the bar's width when a modal opened. Playwright hides Chromium's
+// scroll bars and macOS overlays them, so this test starts a Chromium that draws them and skips when it still cannot.
+test('the page lock keeps the scroll-bar gutter of a page that has one, and adds none to a page that has none', async (t) => {
+  let browser;
+  try { browser = await chromium.launch({ channel: 'chromium', ignoreDefaultArgs: ['--hide-scrollbars'], args: ['--disable-features=OverlayScrollbar'] }); } catch { t.skip('Chromium is not installed'); return; }
+  try {
+    const fixture = (tall) => `<!doctype html><html lang="en" data-fd-surface="app"><head><meta charset="utf-8"><link rel="stylesheet" href="/fire/fire.css"></head>
+      <body><main class="fd-page" id="main"><h1 class="fd-h1">Keys</h1><button class="fd-btn" type="button" data-fd-dialog-open="d">Revoke key</button>${tall ? '<p>Run 8f2a91 finished.</p>'.repeat(200) : ''}</main>
+      <dialog class="fd-dialog" id="d" aria-labelledby="d-t"><h2 class="fd-dialog-title" id="d-t">Revoke this key?</h2><button class="fd-btn" type="button" data-fd-dialog-close>Cancel</button></dialog>
+      <dialog class="fd-dialog" id="e" aria-labelledby="e-t"><h2 class="fd-dialog-title" id="e-t">Are you sure?</h2><button class="fd-btn" type="button" data-fd-dialog-close>Cancel</button></dialog></body></html>`;
+    const read = () => {
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;inset:0;visibility:hidden;pointer-events:none';
+      document.body.append(probe);
+      const edge = Math.round(probe.getBoundingClientRect().right);
+      probe.remove();
+      return { bar: innerWidth - document.documentElement.clientWidth, edge, main: Math.round(document.getElementById('main').getBoundingClientRect().right), lock: document.documentElement.getAttribute('data-fd-modal-lock') };
+    };
+    const open = (page, id) => page.evaluate((i) => window.fire.overlays.openDialog(i), id).then(() => page.waitForFunction((i) => document.getElementById(i).open, id));
+    const run = async (tall) => {
+      const page = await browser.newPage({ viewport: { width: 1000, height: 700 }, reducedMotion: 'reduce' });
+      await page.route('**/__lock.html', (route) => route.fulfill({ contentType: 'text/html', body: fixture(tall) }));
+      await page.goto(urlOf('__lock.html'), { waitUntil: 'load' });
+      await page.evaluate(async () => { window.fire = await import('/fire/fire.js'); });
+      const before = await page.evaluate(read);
+      await open(page, 'd');
+      const locked = await page.evaluate(read);
+      await open(page, 'e');
+      const second = await page.evaluate(read);
+      await page.evaluate(() => { window.fire.overlays.closeDialog('e'); window.fire.overlays.closeDialog('d'); });
+      await page.waitForFunction(() => !document.documentElement.hasAttribute('data-fd-modal-lock'));
+      const after = await page.evaluate(read);
+      await page.close();
+      return { before, locked, second, after };
+    };
+    const tall = await run(true);
+    if (!(tall.before.bar > 0)) { t.skip('this machine draws no scroll bar that takes space'); return; }
+    // A page with a scroll bar: the lock keeps its gutter, so nothing widens.
+    assert.equal(tall.locked.lock, '', 'the gutter is kept');
+    assert.deepEqual([tall.locked.main, tall.second.main, tall.after.main], [tall.before.main, tall.before.main, tall.before.main], `a page with a scroll bar does not move (${JSON.stringify(tall)})`);
+    assert.equal(tall.locked.edge, tall.before.edge, 'a fixed box reaches the same edge under the lock');
+    // A page with none: the lock adds no gutter, so nothing narrows.
+    const short = await run(false);
+    assert.equal(short.before.bar, 0, 'the short page has no scroll bar');
+    assert.equal(short.locked.lock, 'no-gutter');
+    assert.equal(short.second.lock, 'no-gutter', 'a second modal keeps what the first measured');
+    assert.deepEqual([short.locked.main, short.second.main, short.after.main], [short.before.main, short.before.main, short.before.main], `a page with no scroll bar does not move (${JSON.stringify(short)})`);
+    assert.equal(short.locked.edge, short.before.edge);
+    assert.equal(short.after.lock, null, 'the lock is removed when the last modal closes');
+  } finally {
+    await browser.close();
+  }
+});

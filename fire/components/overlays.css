@@ -1217,8 +1217,12 @@
   .fd-command-item-hint { display: none; }
 }
 
-/* ---------- Page scroll lock while a modal is open ---------- */
+/* ---------- Page scroll lock while a modal is open ----------
+   The scroll bar's gutter stays, so a page with a scroll bar that takes space does not widen under the modal.
+   overlays.js writes "no-gutter" when the page had no such bar (a short page, a page that scrolls inside, overlay
+   scroll bars): reserving a gutter there would move the page by the bar's width. */
 :root[data-fd-modal-lock] { overflow: hidden; scrollbar-gutter: stable; }
+:root[data-fd-modal-lock="no-gutter"] { scrollbar-gutter: auto; }
 
 /* ---------- Discrete-transition fallback for modals ---------- */
 @supports not (transition-behavior: allow-discrete) {

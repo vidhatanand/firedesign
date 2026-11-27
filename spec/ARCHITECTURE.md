@@ -86,7 +86,7 @@ scripts/
 `package.json` is a real package: `name` "fire-design", `exports` for `.` (fire/fire.js), `./css` (fire/fire.css),
 `./boot` (fire/boot.js), `./transitions.css`, `./elements`, `./elements/lit` (wrappers/lit/elements.js, Lit as an optional peer), `./theme` (fire/js/theme.js), `./react`, `./vue`,
 `./email`, `./initial`, `./looks`, `./fonts` (contract/fonts.json), `./contract`, `./catalog`, `./index`, and `./fire/*`
-for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.13.1`), and so do the
+for direct file access; `bin` is `fire` (scripts/fire.mjs). Development dependencies are pinned to exact versions. Consumers in other repositories depend on it by git tag (`github:vidhatanand/firedesign#v0.13.2`), and so do the
 starters in this repository, each locked to the release it ships in (`scripts/pin-starters.mjs`), so a starter copied
 out, or installed with `npm ci` anywhere, gets the same Fire. In the repository, `npm install --no-save ../..` in a
 starter tries it against the working copy without changing its `package.json` or lockfile.

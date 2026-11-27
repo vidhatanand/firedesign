@@ -1169,12 +1169,22 @@ export function openDialog(ref, { trigger = null } = {}) {
   dialog.dataset.state = 'open';
   modalStack.push(dialog);
   lastLayerAt = performance.now();
-  doc.documentElement.setAttribute('data-fd-modal-lock', '');
+  lockPage();
   focusDialog(dialog);
   watchDialog(dialog);
   remountToaster();
   emit(dialog, 'fd:open', { trigger });
   return dialog;
+}
+
+// The lock hides the page's overflow. Where the page has a scroll bar that takes space, its gutter stays, so the page
+// does not widen under the modal. Where it has none (a page shorter than the window, a page that scrolls inside, overlay
+// scroll bars), a reserved gutter would move the page by the bar's width, so the lock is written as "no-gutter". It is
+// measured once, by the first modal: under the lock the root's clientWidth no longer shows the bar.
+function lockPage() {
+  const root = doc.documentElement;
+  if (root.hasAttribute('data-fd-modal-lock')) return;
+  root.setAttribute('data-fd-modal-lock', window.innerWidth - root.clientWidth > 0 ? '' : 'no-gutter');
 }
 
 /** A modeless sheet: open it, or swap what it shows when it is already open. */

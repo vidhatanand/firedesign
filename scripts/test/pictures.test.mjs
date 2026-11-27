@@ -8,11 +8,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
 import { checkPictures, targets, capHeight } from '../build-pictures.mjs';
 import { pictureFor, PICTURES } from '../build-index.mjs';
 import { encodePalette, padImage, scaleDown, decode } from '../lib/png-palette.mjs';
 import { serve } from '../gate.mjs';
+import { checkPicturesInWorkers } from './picture-check.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const index = JSON.parse(fs.readFileSync(path.join(ROOT, 'contract/index.json'), 'utf8'));
@@ -60,19 +60,10 @@ test('a new template entry is picked up by the rules: a target with its page, ph
   assert.equal(t[2].root, catalog.components.find((c) => c.id === 'tabbar').root);
 });
 
-test('pictures are indexed PNGs at most 1440 px wide, none blank, and the set is under 12 MB', () => {
-  let total = 0;
-  for (const e of pictured) {
-    const file = pictureFor(e.kind, e.id);
-    const buf = fs.readFileSync(path.join(ROOT, file));
-    total += buf.length;
-    const png = PNG.sync.read(buf);
-    assert.ok(png.width <= 1440 && png.width >= 300 && png.height >= 50 && png.height <= 1800, `${file} is ${png.width}x${png.height}`);
-    assert.equal(buf[25], 3, `${file} is not an indexed PNG`);
-    const seen = new Set();
-    for (let i = 0; i < png.width * png.height; i += 7) seen.add(png.data.readUInt32LE(i * 4));
-    assert.ok(seen.size > 3, `${file} is blank`);
-  }
+test('pictures are indexed PNGs at most 1440 px wide, none blank, and the set is under 12 MB', async () => {
+  // Decoding 239 PNGs is the cost: a few worker threads each decode every n-th one (picture-check.mjs holds the check).
+  const files = pictured.map((e) => pictureFor(e.kind, e.id));
+  const total = await checkPicturesInWorkers(ROOT, files);
   assert.ok(total < 12 * 1024 * 1024, `the set is ${(total / 1048576).toFixed(1)} MB`);
 });
 

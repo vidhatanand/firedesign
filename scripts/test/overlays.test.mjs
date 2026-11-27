@@ -45,8 +45,11 @@ test.after(async () => { server.close(); for (const e of engines) await e.browse
 
 const ROW = (id) => `[data-fd-sheet-open="run-sheet"][data-value="${id}"]`;
 
-async function open(engine, { width = 1440, height = 900, reduced = false, file = 'docs/overlays.html' } = {}) {
+async function open(engine, { width = 1440, height = 900, reduced = false, file = 'docs/overlays.html', quiet = false } = {}) {
   const page = await engine.browser.newPage({ viewport: { width, height }, reducedMotion: reduced ? 'reduce' : 'no-preference', hasTouch: false });
+  // quiet: the page has already shown its one-time "What's new" dialog, which otherwise opens 800 ms after load and can land
+  // anywhere in the test. Set before the page's own scripts run.
+  if (quiet) await page.addInitScript(() => { try { localStorage.setItem('ember-whats-new-seen', '1'); } catch { /* none */ } });
   await page.goto(urlOf(file), { waitUntil: 'load' });
   await page.evaluate(async () => { window.fire = await import('/fire/fire.js'); });
   await page.waitForTimeout(600);
@@ -62,6 +65,8 @@ async function open(engine, { width = 1440, height = 900, reduced = false, file 
   return page;
 }
 const settle = (page, ms = 500) => page.waitForTimeout(ms);
+// Until every finite animation and transition has finished (the sheet slides in, the dialog fades up), not a guessed time.
+const settled = (page) => page.evaluate(async () => { await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); await Promise.all(document.getAnimations().filter((a) => Number.isFinite(a.effect?.getComputedTiming().endTime)).map((a) => a.finished.catch(() => {}))); });
 const state = (page, id = 'run-sheet') => page.evaluate((i) => {
   const s = document.getElementById(i);
   const a = document.activeElement;
@@ -303,8 +308,7 @@ for (const engine of engines) {
 
   /* ---------- 6. app shell ---------- */
   test(`${engine.name}: inside the app shell it sits over the sidebar and the top bar, under a modal`, async () => {
-    const page = await open(engine, { file: 'templates/overview.html' });
-    await page.addInitScript(() => { try { localStorage.setItem('ember-whats-new-seen', '1'); } catch { /* none */ } });
+    const page = await open(engine, { file: 'templates/overview.html', quiet: true });
     await page.evaluate(() => {
       // A child of <body>, outside the shell: the shell's page is its own stacking context while page transitions are on.
       document.body.insertAdjacentHTML('beforeend', '<dialog class="fd-sheet" id="t-left" data-modeless data-side="left"><div class="fd-sheet-head"><div class="fd-sheet-bar"><h2 class="fd-sheet-title">Run detail</h2></div></div><div class="fd-sheet-body"><p>run_8f2a91</p></div></dialog>');
@@ -312,7 +316,7 @@ for (const engine of engines) {
       window.fire.init(document.getElementById('t-left'));
       window.fire.overlays.openDialog('t-left');
     });
-    await settle(page);
+    await settled(page);
     const hits = await page.evaluate(() => {
       const sheet = document.getElementById('t-left');
       const r = sheet.getBoundingClientRect();
@@ -332,7 +336,7 @@ for (const engine of engines) {
       document.body.insertAdjacentHTML('beforeend', '<dialog class="fd-dialog" id="t-modal"><div class="fd-dialog-head"><h2 class="fd-dialog-title">Stop run_8f2a91?</h2></div></dialog>');
       window.fire.overlays.openDialog('t-modal');
     });
-    await settle(page);
+    await settled(page);
     const top = await page.evaluate(() => { const r = document.getElementById('t-modal').getBoundingClientRect(); return !!document.elementFromPoint(r.left + 10, r.top + 10)?.closest('#t-modal'); });
     assert.equal(top, true, 'the modal dialog is above the modeless sheet');
     await page.close();

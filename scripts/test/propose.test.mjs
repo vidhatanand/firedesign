@@ -315,16 +315,30 @@ test('meta: the table rows for the kind are there and filled', () => {
   only('meta', BUG.replace('| Surface | app |', '| Surface | desktop |'));
 });
 
-test('section-missing: a required section is absent', () => {
-  only('section-missing', COMPONENT.replace(/## What I was building\n[^\n]+\n\n/, ''));
-  only('section-missing', BUG.replace(/## What should happen\n[^\n]+\n\n/, ''));
-});
+// One edit to a complete proposal, one error: the sections and the html block. Each case is its own test.
+const oneEdit = [
+  ['section-missing: a required section is absent (component)', 'section-missing', COMPONENT.replace(/## What I was building\n[^\n]+\n\n/, '')],
+  ['section-missing: a required section is absent (bug)', 'section-missing', BUG.replace(/## What should happen\n[^\n]+\n\n/, '')],
+  ['section-empty: a section holds only its comment', 'section-empty', COMPONENT.replace(/## What is missing\n[^\n]+\n/, '## What is missing\n<!-- The thing, named by what it does. -->\n')],
+  ['section-empty: a section holds only a TODO: line', 'section-empty', COMPONENT.replace(/## What is missing\n[^\n]+\n/, '## What is missing\nTODO: write this\n')],
+  ['section-empty: a table row with an empty cell', 'section-empty', BUG.replace('| Width | 1440 |', '| Width | |')],
+  ['markup: the html block is not empty (component)', 'markup', COMPONENT.replace(/```html\n[\s\S]*?\n```/, '```html\n```')],
+  ['markup: the html block is not empty (bug)', 'markup', BUG.replace(/```html\n[\s\S]*?\n```/, '```html\n```')],
+];
+for (const [name, rule, text] of oneEdit) test(name, () => { only(rule, text); });
 
-test('section-empty: a section holds only its comment, a TODO: line or empty rows', () => {
-  only('section-empty', COMPONENT.replace(/## What is missing\n[^\n]+\n/, '## What is missing\n<!-- The thing, named by what it does. -->\n'));
-  only('section-empty', COMPONENT.replace(/## What is missing\n[^\n]+\n/, '## What is missing\nTODO: write this\n'));
-  only('section-empty', BUG.replace('| Width | 1440 |', '| Width | |'));
-});
+// Fire's own lints run on the html and css blocks, and their finding is named in the message (none to match: the rule only).
+const lintCases = [
+  ['markup-lint: Fire\'s markup lint runs on the html block', 'markup-lint', COMPONENT.replace('<figure class="x-run-duration">', '<figure class="x-run-duration" style="color: red">'), /no-style/],
+  ['css-lint: Fire\'s CSS lint runs on the css block', 'css-lint', COMPONENT.replace('background: var(--fd-warning-solid);', 'background: #f5a623;'), /no-raw-color/],
+  ['css-lint: Fire\'s CSS lint reports a token that does not exist', 'css-lint', COMPONENT.replace('var(--fd-warning-solid)', 'var(--fd-warning-strong)'), null],
+];
+for (const [name, rule, text, message] of lintCases) {
+  test(name, () => {
+    const c = only(rule, text);
+    if (message) assert.match(c.findings.find((f) => f.rule === rule).message, message);
+  });
+}
 
 test('searched: at least two filled rows, each with all three cells', () => {
   const one = COMPONENT.replace(/\| `fire find "time per step"`[^\n]+\n\| Charts page[^\n]+\n/, '');
@@ -345,16 +359,6 @@ test('card: the json block parses and has the fields in Fire\'s card format', ()
   assert.equal(c.errors, 0);
 });
 
-test('markup: the html block is not empty', () => {
-  only('markup', COMPONENT.replace(/```html\n[\s\S]*?\n```/, '```html\n```'));
-  only('markup', BUG.replace(/```html\n[\s\S]*?\n```/, '```html\n```'));
-});
-
-test('markup-lint: Fire\'s markup lint runs on the html block', () => {
-  const c = only('markup-lint', COMPONENT.replace('<figure class="x-run-duration">', '<figure class="x-run-duration" style="color: red">'));
-  assert.match(c.findings.find((f) => f.rule === 'markup-lint').message, /no-style/);
-});
-
 test('css: the css block is not empty', () => {
   only('css', COMPONENT.replace(/```css\n[\s\S]*?\n```/, '```css\n```'));
 });
@@ -372,12 +376,6 @@ test('css-fd-class: an fd- class is context, never the thing styled', () => {
 
 test('css-fd-token: a proposal declares no --fd- custom property', () => {
   only('css-fd-token', TOKEN.replace(':root { --x-size-log-panel:', ':root { --fd-size-log-panel:').replace('var(--x-size-log-panel)', 'var(--fd-size-md)'));
-});
-
-test('css-lint: Fire\'s CSS lint runs on the css block', () => {
-  const c = only('css-lint', COMPONENT.replace('background: var(--fd-warning-solid);', 'background: #f5a623;'));
-  assert.match(c.findings.find((f) => f.rule === 'css-lint').message, /no-raw-color/);
-  only('css-lint', COMPONENT.replace('var(--fd-warning-solid)', 'var(--fd-warning-strong)'));
 });
 
 test('private-path: local paths and file addresses', () => {
@@ -427,15 +425,17 @@ test('secret: token-shaped strings', () => {
   assert.equal(check(inMissing('The masked key sk-…4f2a is fine.'), opts).errors, 0);
 });
 
-test('url (warning): an address that is not public by default', () => {
-  only('url', inMissing('Our staging is at https://deploys.quarry.invalid/runs.'), 'warning');
-  assert.equal(check(inMissing('See https://www.w3.org/WAI/ARIA/apg/ and https://docs.example.com/runs.'), opts).warnings, 0);
-});
-
-test('local-image (warning): a picture linked from a file', () => {
-  only('local-image', inMissing('![The run page](screenshots/run.png)'), 'warning');
-  assert.equal(check(inMissing('![The run page](https://github.com/user-attachments/assets/1a2b)'), opts).warnings, 0);
-});
+// A warning, and the same thing written the public way raises none.
+const warned = [
+  ['url (warning): an address that is not public by default', 'url', inMissing('Our staging is at https://deploys.quarry.invalid/runs.'), inMissing('See https://www.w3.org/WAI/ARIA/apg/ and https://docs.example.com/runs.')],
+  ['local-image (warning): a picture linked from a file', 'local-image', inMissing('![The run page](screenshots/run.png)'), inMissing('![The run page](https://github.com/user-attachments/assets/1a2b)')],
+];
+for (const [name, rule, bad, good] of warned) {
+  test(name, () => {
+    only(rule, bad, 'warning');
+    assert.equal(check(good, opts).warnings, 0);
+  });
+}
 
 test('file-reference (warning): a path with a line number', () => {
   only('file-reference', inMissing('It is used in src/screens/run-detail.tsx:42.'), 'warning');

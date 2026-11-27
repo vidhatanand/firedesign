@@ -295,12 +295,6 @@ const TEMPLATES = ['overview', 'logs', 'settings', 'api-keys', 'auth', 'form', '
 
 test('component level renders Fire\'s templates exactly as the whole of Fire (render-equal, 1440 and 375, light and dark)', { timeout: 30 * 60 * 1000 }, async () => {
   const outs = {};
-  for (const name of TEMPLATES) {
-    const html = fs.readFileSync(path.join(ROOT, `templates/${name}.html`), 'utf8');
-    const local = [...html.matchAll(/(?:src="|from ')\.\/([\w-]+\.js)/g)].map((m) => `templates/${m[1]}`);
-    outs[name] = tmp();
-    await slim({ sources: [`templates/${name}.html`, ...new Set(local)], cwd: ROOT, out: outs[name], level: 'component' });
-  }
   const srv = await serve((url) => {
     const page = /^\/templates\/([\w-]+)\.slim\.html$/.exec(url);
     if (page) {
@@ -314,15 +308,32 @@ test('component level renders Fire\'s templates exactly as the whole of Fire (re
     if (slimmed) return slimmed[2] === 'fire.js' ? { body: servedJs(outs[slimmed[1]]), type: '.js' } : { file: path.join(outs[slimmed[1]], slimmed[2]) };
     return null;
   });
-  const failed = [];
+  // The twelve templates are independent: each is slimmed, then compared in its own browser, a few at a time (three pages
+  // at once at most, as many as the machine has cores below that). Each template's findings are kept under its own name,
+  // so the report reads in the templates' order whatever order they finish in.
+  const results = new Map();
+  const compare = async (name) => {
+    const html = fs.readFileSync(path.join(ROOT, `templates/${name}.html`), 'utf8');
+    const local = [...html.matchAll(/(?:src="|from ')\.\/([\w-]+\.js)/g)].map((m) => `templates/${m[1]}`);
+    outs[name] = tmp();
+    await slim({ sources: [`templates/${name}.html`, ...new Set(local)], cwd: ROOT, out: outs[name], level: 'component' });
+    const report = await renderEqual({ ref: `${srv.origin}/templates/${name}.html`, cand: `${srv.origin}/templates/${name}.slim.html`,
+      refRoot: 'body', candRoot: 'body', widths: [1440, 375], themes: ['light', 'dark'], engines: ['chromium'],
+      maxPixelRatio: 0.001, pixelThreshold: 0.1, readyTimeout: 6000 });
+    results.set(name, report);
+  };
   try {
-    for (const name of TEMPLATES) {
-      const report = await renderEqual({ ref: `${srv.origin}/templates/${name}.html`, cand: `${srv.origin}/templates/${name}.slim.html`,
-        refRoot: 'body', candRoot: 'body', widths: [1440, 375], themes: ['light', 'dark'], engines: ['chromium'],
-        maxPixelRatio: 0.001, pixelThreshold: 0.1, readyTimeout: 6000 });
-      for (const r of report.runs) if (!r.ok) failed.push(`${name} ${r.width} ${r.theme}: ${[...r.errors, ...r.structure, ...r.styles].slice(0, 3).map((d) => JSON.stringify(d).slice(0, 200)).join('; ')} pixels ${r.pixels?.ratio}`);
-      assert.equal(report.runs.length, 4);
-    }
+    const queue = [...TEMPLATES];
+    const worker = async () => {
+      try { for (let name = queue.shift(); name; name = queue.shift()) await compare(name); } catch (e) { queue.length = 0; throw e; }
+    };
+    await Promise.all(Array.from({ length: Math.min(3, os.availableParallelism(), TEMPLATES.length) }, worker));
   } finally { await srv.close(); }
+  const failed = [];
+  for (const name of TEMPLATES) {
+    const report = results.get(name);
+    for (const r of report.runs) if (!r.ok) failed.push(`${name} ${r.width} ${r.theme}: ${[...r.errors, ...r.structure, ...r.styles].slice(0, 3).map((d) => JSON.stringify(d).slice(0, 200)).join('; ')} pixels ${r.pixels?.ratio}`);
+    assert.equal(report.runs.length, 4);
+  }
   assert.deepEqual(failed, []);
 });

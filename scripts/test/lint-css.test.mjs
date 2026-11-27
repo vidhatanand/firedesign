@@ -245,14 +245,18 @@ test('CLI: text and JSON output, exit codes, directories and globs, the contract
   assert.equal(fire.status, 0, fire.stdout + fire.stderr);
 });
 
-test('the three starters\' own CSS lints clean, and the whole run stays fast', () => {
-  const t0 = Date.now();
+test('the three starters\' own CSS lints clean, and the run covers all of their files', () => {
+  // Work, not time: a wall-clock limit measures the machine's load, not the linter. What a slowdown would show here is
+  // work done, so the run must check every file the inputs expand to (each starter has many), not fewer.
   for (const [dir, inputs] of [['lit-vite', ['src', 'index.html']], ['vue-vite', ['src', 'index.html']], ['next', ['app']]]) {
-    const r = spawnSync(process.execPath, [path.join(here, '..', 'lint-css.mjs'), ...inputs], { cwd: path.join(root, 'starters', dir), encoding: 'utf8' });
+    const cwd = path.join(root, 'starters', dir);
+    const r = spawnSync(process.execPath, [path.join(here, '..', 'lint-css.mjs'), ...inputs], { cwd, encoding: 'utf8' });
     assert.equal(r.status, 0, `${dir}\n${r.stdout}${r.stderr}`);
     assert.match(r.stdout, / 0 errors, 0 warnings/, dir);
+    const files = expandInputs(inputs, cwd).length;
+    assert.ok(files > 0, dir);
+    assert.match(r.stdout, new RegExp(`(^|\\n)${files} files checked,`), `${dir}: ${files} files expected\n${r.stdout}`);
   }
-  assert.ok(Date.now() - t0 < 5000, 'three node starts and three small runs');
 });
 
 test('every look\'s generated theme CSS lints clean: what a theme record writes is not a finding', async () => {

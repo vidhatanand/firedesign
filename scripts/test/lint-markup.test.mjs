@@ -89,10 +89,38 @@ test('icon-only-name: a data-fd-tooltip names an icon-only button (overlays.js g
   assert.deepEqual(rules('a.html', '<button data-icon-only data-fd-tooltip="Copy key"><i data-icon="x"></i></button>'), []);
 });
 
-test('unknown-element: unknown fd- tag fails, catalogued and ordinary tags pass', () => {
-  assert.deepEqual(rules('a.html', '<fd-icon icon="x"></fd-icon><my-thing></my-thing>'), []);
-  assert.deepEqual(rules('a.html', '<fd-nothing></fd-nothing>'), ['unknown-element']);
-});
+// The same shape four times over: one snippet, the rules it must raise (none: it must pass). Each case is its own test,
+// named by the rule and the case, so a failure names it.
+const ruleCases = [
+  // unknown-element: unknown fd- tag fails, catalogued and ordinary tags pass
+  ['unknown-element: a catalogued fd- tag and an ordinary custom tag pass', 'a.html', '<fd-icon icon="x"></fd-icon><my-thing></my-thing>', []],
+  ['unknown-element: an unknown fd- tag fails', 'a.html', '<fd-nothing></fd-nothing>', ['unknown-element']],
+  // no-raw-color and no-raw-px in attributes, not in ids, hrefs, labels or class
+  ['no-raw-color, no-raw-px: not in paint keywords, path data, href, aria-label or title', 'a.html', '<svg fill="currentColor" stroke="none"><path d="M0 0h24px"/></svg><a href="#fff" aria-label="12px" title="#fff"></a>', []],
+  ['no-raw-color: a hex fill', 'a.html', '<svg fill="#fff"></svg>', ['no-raw-color']],
+  ['no-raw-color: a named stroke', 'a.html', '<svg stroke="red"></svg>', ['no-raw-color']],
+  ['no-raw-color: rgb() in a data attribute', 'a.html', '<div data-x="rgb(1 2 3)"></div>', ['no-raw-color']],
+  ['no-raw-px: a px width', 'a.html', '<img width="24px">', ['no-raw-px']],
+  ['no-raw-px: a bare number width passes', 'a.html', '<img width="24">', []],
+  ['no-raw-color, no-raw-px: JSX expressions', 'a.tsx', 'const a = <svg fill={"#000"} width={`10px`} />;', ['no-raw-color', 'no-raw-px']],
+  // icon-only-name: aria-label, aria-labelledby or visible text satisfy it
+  ['icon-only-name: aria-label satisfies it', 'a.html', '<button data-icon-only aria-label="Close"><i data-icon="x"></i></button>', []],
+  ['icon-only-name: aria-labelledby satisfies it', 'a.html', '<button data-icon-only aria-labelledby="t"><i data-icon="x"></i></button>', []],
+  ['icon-only-name: visible text satisfies it', 'a.html', '<button data-icon-only><i data-icon="x"></i><span>Close</span></button>', []],
+  ['icon-only-name: an icon alone fails', 'a.html', '<button data-icon-only><i data-icon="x"></i></button>', ['icon-only-name']],
+  ['icon-only-name: whitespace around the icon fails, data-icon-only="false" is not icon-only', 'a.html', '<button data-icon-only>\n  <i data-icon="x"></i>\n</button><button data-icon-only="false"></button>', ['icon-only-name']],
+  ['icon-only-name: a JSX icon alone fails', 'a.tsx', 'const a = <button data-icon-only><fd-icon icon="x" /></button>;', ['icon-only-name']],
+  ['icon-only-name: a JSX child expression may carry the name', 'a.tsx', 'const a = <button data-icon-only>{label}</button>;', []],
+  ['icon-only-name: a JSX spread may carry the name', 'a.tsx', 'const a = <button data-icon-only {...rest} />;', []],
+  // no-i-icon-in-framework: only in jsx, tsx and vue
+  ['no-i-icon-in-framework: html may use <i data-icon>', 'a.html', '<i data-icon="home"></i>', []],
+  ['no-i-icon-in-framework: tsx', 'a.tsx', 'const a = <i data-icon="home" />;', ['no-i-icon-in-framework']],
+  ['no-i-icon-in-framework: jsx', 'a.jsx', 'const a = <i data-icon="home"></i>;', ['no-i-icon-in-framework']],
+  ['no-i-icon-in-framework: vue', 'a.vue', '<template><i data-icon="home"></i></template>', ['no-i-icon-in-framework']],
+];
+for (const [name, file, text, expected] of ruleCases) {
+  test(name, () => assert.deepEqual(rules(file, text), expected));
+}
 
 test('unknown-icon: data-icon, fd-icon icon and use href', () => {
   assert.deepEqual(rules('a.html', '<i data-icon="home"></i><fd-icon icon="trash"></fd-icon><svg><use href="#i-search"/></svg><svg><use xlink:href="#i-x"/></svg>'), []);
@@ -111,34 +139,6 @@ test('no-style: attribute, JSX prop, Vue binding and Lit attribute', () => {
   assert.deepEqual(rules('a.tsx', 'const a = <p style={{ margin: 0 }} />;'), ['no-style']);
   assert.deepEqual(rules('a.vue', '<template><p :style="s" v-bind:style="t" style="a:b"></p></template>'), ['no-style', 'no-style', 'no-style']);
   assert.deepEqual(rules('a.ts', 'const t = html`<p style=${x}></p>`;'), ['no-style']);
-});
-
-test('no-raw-color and no-raw-px in attributes, not in ids, hrefs, labels or class', () => {
-  assert.deepEqual(rules('a.html', '<svg fill="currentColor" stroke="none"><path d="M0 0h24px"/></svg><a href="#fff" aria-label="12px" title="#fff"></a>'), []);
-  assert.deepEqual(rules('a.html', '<svg fill="#fff"></svg>'), ['no-raw-color']);
-  assert.deepEqual(rules('a.html', '<svg stroke="red"></svg>'), ['no-raw-color']);
-  assert.deepEqual(rules('a.html', '<div data-x="rgb(1 2 3)"></div>'), ['no-raw-color']);
-  assert.deepEqual(rules('a.html', '<img width="24px">'), ['no-raw-px']);
-  assert.deepEqual(rules('a.html', '<img width="24">'), []);
-  assert.deepEqual(rules('a.tsx', 'const a = <svg fill={"#000"} width={`10px`} />;'), ['no-raw-color', 'no-raw-px']);
-});
-
-test('icon-only-name: aria-label, aria-labelledby or visible text satisfy it', () => {
-  assert.deepEqual(rules('a.html', '<button data-icon-only aria-label="Close"><i data-icon="x"></i></button>'), []);
-  assert.deepEqual(rules('a.html', '<button data-icon-only aria-labelledby="t"><i data-icon="x"></i></button>'), []);
-  assert.deepEqual(rules('a.html', '<button data-icon-only><i data-icon="x"></i><span>Close</span></button>'), []);
-  assert.deepEqual(rules('a.html', '<button data-icon-only><i data-icon="x"></i></button>'), ['icon-only-name']);
-  assert.deepEqual(rules('a.html', '<button data-icon-only>\n  <i data-icon="x"></i>\n</button><button data-icon-only="false"></button>'), ['icon-only-name']);
-  assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only><fd-icon icon="x" /></button>;'), ['icon-only-name']);
-  assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only>{label}</button>;'), []);
-  assert.deepEqual(rules('a.tsx', 'const a = <button data-icon-only {...rest} />;'), []);
-});
-
-test('no-i-icon-in-framework: only in jsx, tsx and vue', () => {
-  assert.deepEqual(rules('a.html', '<i data-icon="home"></i>'), []);
-  assert.deepEqual(rules('a.tsx', 'const a = <i data-icon="home" />;'), ['no-i-icon-in-framework']);
-  assert.deepEqual(rules('a.jsx', 'const a = <i data-icon="home"></i>;'), ['no-i-icon-in-framework']);
-  assert.deepEqual(rules('a.vue', '<template><i data-icon="home"></i></template>'), ['no-i-icon-in-framework']);
 });
 
 test('JSX: className template literals lint static parts and skip dynamic ones', () => {

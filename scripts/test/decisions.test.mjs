@@ -230,6 +230,9 @@ test('a standalone hold starts from its trigger, resolves hold(), and leaving th
 
 test('a commit held in a toast frees the page, Ctrl+Z undoes it, and the end sends it', async () => {
   await events();
+  // The first half only looks at the held toast and undoes it: give it a hold no slow machine can outlast, so the clock
+  // cannot send it before Ctrl+Z. The second half needs the real two seconds and waits for the send itself.
+  await page.evaluate(() => { document.getElementById('c3').dataset.fdHold = '60'; });
   await page.click('#c3 button[value="approve"]');
   const toast = page.locator('.fd-toaster .fd-toast[data-held]');
   assert.equal(await toast.count(), 1);
@@ -247,10 +250,14 @@ test('a commit held in a toast frees the page, Ctrl+Z undoes it, and the end sen
   assert.equal(await page.locator('.fd-toaster .fd-toast').last().locator('.fd-toast-title').textContent(), 'Stopped');
 
   // Cancel fd:commit to keep the toast as a loading toast for the result.
-  await page.evaluate(() => document.getElementById('c3').addEventListener('fd:commit', (e) => e.preventDefault(), { once: true }));
+  await page.evaluate(() => {
+    const form = document.getElementById('c3');
+    form.dataset.fdHold = '2';
+    form.addEventListener('fd:commit', (e) => e.preventDefault(), { once: true });
+  });
   await page.click('#c3 button[value="approve"]');
   await page.mouse.move(0, 0);
-  await page.waitForTimeout(2500);
+  await page.waitForFunction(() => window.__ev.some((e) => e.name === 'fd:commit'));
   ev = await events();
   assert.deepEqual(ev.map((e) => e.name), ['fd:hold', 'fd:commit']);
   const id = ev[1].detail.toast;

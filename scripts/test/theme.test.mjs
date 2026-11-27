@@ -20,6 +20,7 @@ import {
 import { PALETTES, PALETTE_TOKENS, oklch, toOklch, contrast } from '../../fire/js/palettes.js';
 import { TYPEFACES } from '../../fire/js/typefaces.js';
 import { paletteFailures } from '../../fire/js/palette-rules.js';
+import { assertGood, sweep } from './palette-sweep.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
@@ -29,26 +30,16 @@ const schemaValid = ajv.compile(schema);
 
 /* ---------- paletteFrom ---------- */
 
-/** Every rule, plus: the result is in the presets' form, and an accent that is not the one asked for is noted. */
-function assertGood(p, asked, context) {
-  assert.deepEqual(Object.keys(p.tokens), PALETTE_TOKENS, `${context}: token set`);
-  for (const k of PALETTE_TOKENS) assert.equal(p.tokens[k].length, 2, `${context}: ${k} is a [light, dark] pair`);
-  assert.deepEqual(paletteFailures(p.tokens, { name: context }), []);
-  if (asked && p.tokens['--fd-accent'][0] !== asked) assert.ok(p.notes.some((n) => n.startsWith(`Accent ${asked} moved to ${p.tokens['--fd-accent'][0]}`)), `${context}: the moved accent is noted`);
-  if (asked && p.tokens['--fd-accent'][0] === asked) assert.ok(!p.notes.some((n) => n.startsWith('Accent ')), `${context}: nothing moved, nothing noted`);
-  // A generated palette is reproducible from its own spec.
-  const again = paletteFrom(p.spec);
-  assert.deepEqual(again.tokens, p.tokens, `${context}: paletteFrom(p.spec) reproduces it`);
-}
-
 const ACCENTS = [];
 for (let h = 0; h < 360; h += 15) for (let i = 0; i < 13; i++) ACCENTS.push(oklch(0.2 + i * 0.06, 0.13, h));
 
-test('paletteFrom: 312 accents across hue and lightness, with every neutral option, all pass', () => {
+test('paletteFrom: 312 accents across hue and lightness, with every neutral option, all pass', async () => {
   assert.ok(new Set(ACCENTS).size >= 300);
-  for (const neutral of ['tinted', 'pure', 'cool', 'warm', 300]) {
-    for (const accent of ACCENTS) assertGood(paletteFrom({ from: 'accent', accent, neutral }), accent, `${accent} ${neutral}`);
-  }
+  // 1560 independent palettes: a few worker threads each take every n-th one (palette-sweep.mjs holds the check).
+  const cases = [];
+  for (const neutral of ['tinted', 'pure', 'cool', 'warm', 300]) for (const accent of ACCENTS) cases.push({ accent, neutral });
+  const done = await sweep(cases);
+  assert.equal(done, cases.length);
 });
 
 test('paletteFrom: an accent with no neutral given is tinted toward its own hue; greys are pure', () => {

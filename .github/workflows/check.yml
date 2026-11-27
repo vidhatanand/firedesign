@@ -2,6 +2,7 @@
 # not wait on one person's computer.
 #
 #   a push to main, rel/** or ci/**, and a pull request   the suite, the gate, the looks check, each starter's check
+#   a push to main of a commit that already passed them    nothing again: a release comes through rel/<x.y.z> first
 #   a tag v<x.y.z>                                        the release, installed the way a product installs it
 #   run by hand with a tag (gh workflow run check.yml -f tag=v<x.y.z>)   the same, for a release that is already out
 #
@@ -35,8 +36,12 @@ jobs:
     name: Release state
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
     outputs:
       locked: ${{ steps.read.outputs.locked }}
+      checked: ${{ steps.earlier.outputs.checked }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -58,10 +63,39 @@ jobs:
             echo "::warning::Fire $version is not released yet and its starters are not locked to it (HANDOFF.md, step 4). The starters' checks and the lock test are skipped for this commit."
           fi
 
+      # A release is pushed as rel/<x.y.z> and checked there, then main is moved to the same commit (HANDOFF.md).
+      # The same commit is the same files, so main does not run the half hour again. It counts only when an earlier
+      # run of this workflow, started by a push of this very commit, finished green with the suite and the gate
+      # run (not skipped) and, when the starters are locked, all three starters' checks. A pull request's run does
+      # not count: it tests a merge, not the commit. Anything unclear, a failed lookup included, runs the checks.
+      - name: Has this commit already passed the checks?
+        id: earlier
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LOCKED: ${{ steps.read.outputs.locked }}
+        run: |
+          checked=false
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF" = refs/heads/main ]; then
+            runs=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/check.yml/runs?head_sha=$GITHUB_SHA&event=push&status=success&per_page=50" \
+              --jq ".workflow_runs[] | select(.id != $GITHUB_RUN_ID and .head_sha == \"$GITHUB_SHA\") | .id" || true)
+            for run in $runs; do
+              jobs=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run/jobs?per_page=100" --jq '.jobs[] | "\(.conclusion) \(.name)"' || true)
+              echo "Run $run:"; echo "$jobs"
+              echo "$jobs" | grep -qx 'success Suite' || continue
+              echo "$jobs" | grep -qx 'success Gate and looks' || continue
+              if echo "$jobs" | grep -qv -e '^success ' -e '^skipped '; then continue; fi
+              if [ "$LOCKED" = true ] && [ "$(echo "$jobs" | grep -c '^success Starter (')" -ne 3 ]; then continue; fi
+              checked=true
+              echo "::notice::This commit passed the suite, the gate and the starters' checks in run $run ($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run). They are not run again."
+              break
+            done
+          fi
+          echo "checked=$checked" >> "$GITHUB_OUTPUT"
+
   suite:
     name: Suite
     needs: state
-    if: github.ref_type != 'tag' && inputs.tag == ''
+    if: github.ref_type != 'tag' && inputs.tag == '' && needs.state.outputs.checked != 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -115,7 +149,7 @@ jobs:
   gate:
     name: Gate and looks
     needs: state
-    if: github.ref_type != 'tag' && inputs.tag == ''
+    if: github.ref_type != 'tag' && inputs.tag == '' && needs.state.outputs.checked != 'true'
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -141,7 +175,7 @@ jobs:
   starters:
     name: Starter (${{ matrix.starter }})
     needs: state
-    if: github.ref_type != 'tag' && inputs.tag == '' && needs.state.outputs.locked == 'true'
+    if: github.ref_type != 'tag' && inputs.tag == '' && needs.state.outputs.checked != 'true' && needs.state.outputs.locked == 'true'
     runs-on: macos-26
     timeout-minutes: 45
     strategy:

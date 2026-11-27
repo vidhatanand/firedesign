@@ -48,6 +48,10 @@ wait on one computer. Read a run with `gh run list --workflow check.yml` and `gh
 - **A tag `v<x.y.z>`** runs the release as a product installs it: an empty project installs the tag, and each starter
   is copied out of the repository, installed and built. `gh workflow run check.yml -f tag=v<x.y.z>` does the same for
   a release that is already out.
+- **A push to `main` of a commit that already passed** runs none of that again, and says so in a notice that links
+  the earlier run. It counts only when a push of the same commit (a `rel/…` or `ci/…` branch) finished green with the
+  suite and the gate run and, with the starters locked, all three starters' checks. A pull request's run does not
+  count, since it tests a merge. A commit pushed straight to `main` is checked in full.
 - **A release commit pushed before its starters are locked** (step 4 below) skips the starters' checks and the lock
   test, with a warning on the run. That is allowed only while the version has no tag.
 - A runner has three cores and scroll bars that take space. A test that passes here and fails there usually waits
@@ -81,5 +85,6 @@ Only with the owner's yes for that release. A release is a tag: no GitHub Releas
 
 GitHub can do the waiting in steps 3, 6 and 8. Push the release commit as a branch named `rel/<x.y.z>` in place of
 `main` in step 4, lock the starters to it, push the lock commit to the same branch and wait for a green run. Then
-fast-forward `main`, tag and push both together; the tag's own run is step 8. Run a step here as well when a run is
+fast-forward `main`, tag and push both together; the tag's own run is step 8, and `main`'s run skips the checks that
+branch already passed. Run a step here as well when a run is
 red for a reason you cannot explain.

@@ -60,6 +60,22 @@
  *             Clicking a button job moves aria-current="true" to it unless the pipeline has data-fd-pipeline="manual".
  *             The pipeline scrolls sideways inside itself and keeps the current job in view; data-overflow marks
  *             the sides with more stages. aria-busy="true" shows every job and label as a placeholder.
+ *  Row confirmation (0.14)  asks in an item's own row before an action that cannot be taken back:
+ *             <div class="fd-confirm-row" id="key-2-confirm" role="group" aria-labelledby="key-2-confirm-text" hidden>
+ *               <p class="fd-confirm-row-text" id="key-2-confirm-text">Revoke <b>Production crawler</b>? …</p>
+ *               <p class="fd-confirm-row-error" role="alert" hidden></p>                  (optional; made when needed)
+ *               <div class="fd-confirm-row-actions"><button class="fd-btn" data-variant="ghost" data-size="sm"
+ *                 data-fd-confirm-row-cancel>Cancel</button><button class="fd-btn" data-variant="danger" data-size="sm"
+ *                 data-fd-confirm-row-submit><span>Revoke key</span></button></div>
+ *             </div>
+ *             The last child of a .fd-list-row or of a card that stands for one item; in a table, alone in the
+ *             tr.fd-table-detail after the item's row, with hidden on that detail row instead. data-fd-confirm-row="id"
+ *             on a menu item (handled from fd:select, once the menu has returned focus) or a button (click) opens it;
+ *             an empty value opens the one in the trigger's own row (a shared menu's opener row). Opening closes any
+ *             other in the same list or table and focuses Cancel. Cancel and Escape close it and return focus to the
+ *             trigger. The danger button fires fd:confirm: not cancelled, it closes; cancelled, it stays open and busy
+ *             (aria-busy on the root, aria-disabled on both buttons, presses ignored) until closeConfirmRow or
+ *             failConfirmRow. Fire never removes a row.
  *
  * Events (bubbling, from the element that changed):
  *   fd:change  table  { source: 'selection', value, selected, rows }       value is an array of row values
@@ -75,12 +91,15 @@
  *   fd:change  .fd-list[role=listbox]  { value, item }                      the selected option's data-value
  *   fd:select  .fd-list-detail row  { value, item }                         cancelable: preventDefault keeps the current row and view
  *   fd:change  .fd-list-detail  { source: 'view', value: 'list' | 'detail' }   only when one pane shows at a time
+ *   fd:open / fd:close  .fd-confirm-row  { trigger }                         trigger: the menu's opener or the button
+ *   fd:confirm  .fd-confirm-row  { value: '', submitter, trigger, row }      cancelable: preventDefault keeps it open and busy
  *
  * API: init(root), selection(table), clearSelection(table), sortTable(table, index, direction), setGroupOpen(group, open),
  *      setFilter(chip, value), setMeter(el, value, max), setProgress(el, value, max), selectJob(pipeline, value),
- *      selectOption(listbox, value), showDetail(listDetail, value, { focus }), showList(listDetail, { focus }).
+ *      selectOption(listbox, value), showDetail(listDetail, value, { focus }), showList(listDetail, { focus }),
+ *      openConfirmRow(ref, { trigger }), closeConfirmRow(ref, { focus: true | false | 'next' }), failConfirmRow(ref, message).
  */
-import { $$, on, once, emit, copyText, label, ensureId, focusQuiet } from './core.js';
+import { $$, on, once, emit, copyText, label, ensureId, focusQuiet, focusables } from './core.js';
 import { icon } from './icons.js';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
@@ -829,6 +848,133 @@ function onListDetailClick(event, item) {
   showDetail(root, item);
 }
 
+/* ------------------------------------------------------------------ row confirmation */
+
+const CR = '.fd-confirm-row';
+const crEl = (ref) => (typeof ref === 'string' ? document.getElementById(ref.replace(/^#/, '')) : ref) || null;
+const crDetail = (q) => { const tr = q.closest('tr'); return tr?.classList.contains('fd-table-detail') ? tr : null; };
+const crIsOpen = (q) => !q.hidden && !crDetail(q)?.hidden;
+const crIsBusy = (q) => q.getAttribute('aria-busy') === 'true';
+const crTriggers = new WeakMap();
+
+/** The item a question belongs to: the row before a table's detail row, else the list row or card that holds it. */
+function crRow(q) {
+  const detail = crDetail(q);
+  if (detail) return detail.previousElementSibling;
+  return q.closest('.fd-list-row, li, [role="row"], .fd-card') ?? q.parentElement;
+}
+const crScope = (row) => row?.closest('.fd-table') ?? row?.parentElement ?? null;
+function crRows(row) {
+  if (row.matches('tr')) return bodyRows(row.closest('.fd-table')).filter((tr) => !tr.hidden);
+  return [...row.parentElement.children].filter((el) => !el.hidden);
+}
+
+/** In a row, the control of the same kind as the trigger (a menu opener, a revoke button), else its first control. */
+function crMatch(row, trigger) {
+  const kind = trigger?.matches?.('[data-fd-menu]') ? '[data-fd-menu]' : trigger?.matches?.('[data-fd-confirm-row]') ? '[data-fd-confirm-row]' : null;
+  const shown = (el) => !el.closest('[hidden], [inert], [popover]') && el.getClientRects().length > 0;
+  return (kind && $$(kind, row).find(shown)) || focusables(row).find((el) => !el.closest('[popover]')) || null;
+}
+
+/** The question a trigger opens: data-fd-confirm-row="id", or with no id the one in the trigger's own row. */
+function crFor(el, start) {
+  const id = el.getAttribute('data-fd-confirm-row');
+  if (id) return document.getElementById(id);
+  const row = start?.closest?.('tr, [role="row"], li, .fd-list-row, [data-fd-flags], .fd-card, article');
+  if (!row) return null;
+  if (row.matches('tr')) return row.nextElementSibling?.matches('.fd-table-detail') ? row.nextElementSibling.querySelector(CR) : null;
+  return row.querySelector(CR);
+}
+
+/** Busy: aria-busy on the root and the danger button (its spinner), aria-disabled on both buttons so focus stays. */
+function crBusy(q, busy) {
+  const set = (el, name) => { if (busy) el.setAttribute(name, 'true'); else el.removeAttribute(name); };
+  set(q, 'aria-busy');
+  $$('[data-fd-confirm-row-cancel], [data-fd-confirm-row-submit]', q).forEach((button) => {
+    set(button, 'aria-disabled');
+    if (button.matches('[data-fd-confirm-row-submit]')) set(button, 'aria-busy');
+  });
+}
+
+/** Open a row confirmation (an element or its id): any other open in the same list or table closes, focus moves to Cancel. */
+export function openConfirmRow(ref, { trigger = null } = {}) {
+  const q = crEl(ref);
+  if (!q) return null;
+  const row = crRow(q);
+  const scope = crScope(row);
+  if (scope) $$(CR, scope).forEach((other) => { if (other !== q && crIsOpen(other)) closeConfirmRow(other, { focus: false }); });
+  if (trigger) crTriggers.set(q, trigger);
+  crBusy(q, false);
+  const error = q.querySelector('.fd-confirm-row-error');
+  if (error) error.hidden = true;
+  const detail = crDetail(q);
+  if (detail) { detail.hidden = false; row?.toggleAttribute('data-expanded', true); }
+  else q.hidden = false;
+  const cancel = q.querySelector('[data-fd-confirm-row-cancel]');
+  cancel?.focus({ preventScroll: true });
+  q.scrollIntoView({ block: 'nearest' });
+  emit(q, 'fd:open', { trigger: crTriggers.get(q) ?? null });
+  return q;
+}
+
+/** Close it. focus: true returns focus to the trigger, false leaves it, 'next' moves it to the next row's matching
+ *  control (else the previous row's, else the list or table): call that first when you are about to remove the row. */
+export function closeConfirmRow(ref, { focus = true } = {}) {
+  const q = crEl(ref);
+  if (!q) return;
+  const open = crIsOpen(q);
+  const row = crRow(q);
+  const trigger = crTriggers.get(q) ?? null;
+  let target = null;
+  if (focus === 'next' && row) {
+    const rows = crRows(row);
+    const i = rows.indexOf(row);
+    target = (rows[i + 1] && crMatch(rows[i + 1], trigger)) || (i > 0 && crMatch(rows[i - 1], trigger)) || crScope(row);
+  } else if (focus) {
+    target = trigger?.isConnected ? trigger : row && crMatch(row, null);
+  }
+  crBusy(q, false);
+  const detail = crDetail(q);
+  if (detail) {
+    detail.hidden = true;
+    // A row that also has its own expanded detail keeps its mark.
+    if (!row?.querySelector('.fd-table-expand[aria-expanded="true"]')) row?.removeAttribute('data-expanded');
+  }
+  else q.hidden = true;
+  if (target) focusQuiet(target);
+  if (open) emit(q, 'fd:close', { trigger });
+}
+
+/** The action failed: busy ends, the message shows in the question, focus moves to the danger button. */
+export function failConfirmRow(ref, message = '') {
+  const q = crEl(ref);
+  if (!q) return;
+  crBusy(q, false);
+  let error = q.querySelector('.fd-confirm-row-error');
+  if (!error) {
+    error = document.createElement('p');
+    error.className = 'fd-confirm-row-error';
+    error.setAttribute('role', 'alert');
+    const actions = q.querySelector('.fd-confirm-row-actions');
+    if (actions) actions.before(error); else q.append(error);
+  }
+  error.hidden = false;
+  error.textContent = message;
+  q.querySelector('[data-fd-confirm-row-submit]')?.focus({ preventScroll: true });
+}
+
+function crConfirm(q, submitter = null) {
+  if (crIsBusy(q)) return;
+  // The same detail shape as the dialog's fd:confirm: value is the typed phrase there, and empty here.
+  if (emit(q, 'fd:confirm', { value: '', submitter, trigger: crTriggers.get(q) ?? null, row: crRow(q) })) closeConfirmRow(q);
+  else crBusy(q, true);
+}
+
+function setupConfirmRow(q) {
+  if (!once(q, 'fd-confirm-row')) return;
+  if (crDetail(q) && crIsOpen(q)) crRow(q)?.toggleAttribute('data-expanded', true);
+}
+
 /* ------------------------------------------------------------------ init */
 
 /** Components that answer their own [data-action] buttons; a click inside them is not a list action. */
@@ -840,6 +986,37 @@ function bindDelegates() {
   delegated = true;
 
   on(document, 'click', '.fd-th-sort', (event, button) => cycleSort(button));
+
+  // Row confirmation. A menu item opens from fd:select, after the menu has closed and handed focus back to its opener.
+  on(document, 'click', '[data-fd-confirm-row]', (event, el) => {
+    if (el.closest('.fd-menu')) return;
+    const q = crFor(el, el);
+    if (q) openConfirmRow(q, { trigger: el });
+  });
+  document.addEventListener('fd:select', (event) => {
+    const { item, trigger, row } = event.detail || {};
+    if (!item?.matches?.('.fd-menu [data-fd-confirm-row]')) return;
+    setTimeout(() => {
+      if (event.defaultPrevented) return;
+      const q = crFor(item, row ?? trigger);
+      if (q) openConfirmRow(q, { trigger: trigger ?? item });
+    });
+  });
+  on(document, 'click', '[data-fd-confirm-row-cancel]', (event, button) => {
+    const q = button.closest(CR);
+    if (q && !crIsBusy(q)) closeConfirmRow(q);
+  });
+  on(document, 'click', '[data-fd-confirm-row-submit]', (event, button) => {
+    const q = button.closest(CR);
+    if (q) crConfirm(q, button);
+  });
+  // Escape closes the question and stops there, so it never also closes a sheet or clears a selection.
+  on(document, 'keydown', CR, (event, q) => {
+    if (event.key !== 'Escape' || !crIsOpen(q)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!crIsBusy(q)) closeConfirmRow(q);
+  }, true);
 
   on(document, 'change', '.fd-table-check', (event, input) => onSelectChange(input));
   // shift is only known on click, so remember it for the change event that follows
@@ -956,4 +1133,5 @@ export function init(root = document) {
   matchesIn(root, '.fd-pipeline').forEach(setupPipeline);
   matchesIn(root, '.fd-list[role="listbox"]').forEach(setupListbox);
   matchesIn(root, '.fd-list-detail').forEach(setupListDetail);
+  matchesIn(root, CR).forEach(setupConfirmRow);
 }

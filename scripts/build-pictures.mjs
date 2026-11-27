@@ -54,6 +54,8 @@ const OVERRIDES = {
   listbox: { open: '#cb-model', shot: '.fd-listbox:popover-open', m: 6 },   // the list itself; the combobox is the field, closed
   // The card's section pictures a pending label; the bar itself runs along the top of the window once started.
   pagebar: { spec: 1, open: '[data-demo-bar="start"]', top: 16 },
+  // 0.14: the list's questions are closed until a menu opens one; the table specimen has one open in its markup.
+  'confirm-row': { spec: 1 },
   // One part, one picture: where a docs section shows several parts, crop to the one the entry is about.
   delta: { crop: '.fd-decision-lead:has(.fd-delta)' },
   panel: { spec: 'aside.fd-panel', crop: 'aside.fd-panel' },

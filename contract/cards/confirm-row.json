@@ -1,0 +1,115 @@
+{
+  "id": "confirm-row",
+  "job": "Ask in an item's own row whether to remove, revoke or sign it out, before the action runs.",
+  "purpose": "A danger-tinted box in the row: the question, then a quiet Cancel and a small danger button named for the effect. A menu item or a button with data-fd-confirm-row opens it and focus moves to Cancel; Cancel and Escape close it and return focus. The danger button fires a cancelable fd:confirm; cancel it to run the work, then closeConfirmRow(el, { focus: 'next' }) or failConfirmRow(el, message).",
+  "useWhen": [
+    "One item in a list or table is about to be removed, revoked or signed out, and the person stays on the list.",
+    "The action cannot be taken back, so it asks first."
+  ],
+  "avoidWhen": [
+    {
+      "when": "The action can be taken back in a few seconds.",
+      "instead": "hold"
+    },
+    {
+      "when": "It reaches far beyond one item, such as deleting a team.",
+      "instead": "confirm"
+    },
+    {
+      "when": "The action has its own page, or must work without script.",
+      "instead": "confirm-inline"
+    },
+    {
+      "when": "The action needs several fields.",
+      "instead": "sheet"
+    },
+    {
+      "when": "The row is itself a link or a button, so it cannot hold buttons.",
+      "instead": "dialog"
+    }
+  ],
+  "aka": [
+    "inline confirm",
+    "row confirmation",
+    "are you sure",
+    "confirm delete",
+    "revoke prompt"
+  ],
+  "surfaces": [
+    "app",
+    "phone"
+  ],
+  "data": [
+    "none"
+  ],
+  "states": [
+    {
+      "name": "open",
+      "how": "no hidden on the root (in a table, on its tr.fd-table-detail); openConfirmRow(el) or a data-fd-confirm-row trigger"
+    },
+    {
+      "name": "busy",
+      "how": "aria-busy=\"true\" on the root after fd:confirm was cancelled; both buttons carry aria-disabled=\"true\""
+    },
+    {
+      "name": "error",
+      "how": "failConfirmRow(el, message) shows the message in fd-confirm-row-error and focuses the danger button"
+    }
+  ],
+  "variants": [],
+  "parts": [
+    {
+      "class": "fd-confirm-row",
+      "role": "The box; role=\"group\" labelled by its text. The last child of a list row or an item's card, or alone in a table's detail row.",
+      "attrs": { "role": "group" },
+      "skeleton": "<div class=\"fd-confirm-row\" id=\"…\" role=\"group\" aria-labelledby=\"…\" hidden><p class=\"fd-confirm-row-text\" id=\"…\">…</p><div class=\"fd-confirm-row-actions\">…</div></div>"
+    },
+    {
+      "class": "fd-confirm-row-text",
+      "role": "The question, naming the item and what happens.",
+      "required": true,
+      "parent": ["fd-confirm-row"]
+    },
+    {
+      "class": "fd-confirm-row-error",
+      "role": "Why the action failed (role=\"alert\"); written by failConfirmRow when missing.",
+      "parent": ["fd-confirm-row"]
+    },
+    {
+      "class": "fd-confirm-row-actions",
+      "role": "Cancel (data-fd-confirm-row-cancel), then the danger button (data-fd-confirm-row-submit).",
+      "required": true,
+      "parent": ["fd-confirm-row"]
+    }
+  ],
+  "related": [
+    "hold",
+    "confirm",
+    "confirm-inline",
+    "menu",
+    "list",
+    "table",
+    "button"
+  ],
+  "keyboard": [
+    {
+      "keys": "Enter, Space",
+      "does": "On the trigger: opens the question with focus on Cancel. On a button: presses it."
+    },
+    {
+      "keys": "Escape",
+      "does": "Closes the question and returns focus to the trigger; nothing else closes."
+    },
+    {
+      "keys": "Tab",
+      "does": "Moves between Cancel and the danger button."
+    }
+  ],
+  "example": "docs/data.html#confirm-row",
+  "provenance": [
+    "docs/data.html",
+    "fire/components/data.css",
+    "fire/js/data.js"
+  ],
+  "since": "0.14.0"
+}

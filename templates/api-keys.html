@@ -88,7 +88,7 @@
     <button class="fd-menu-item" type="button" data-value="rotate"><i data-icon="refresh-cw"></i><span class="fd-menu-item-label">Rotate<span class="fd-menu-item-desc">The old key keeps working for 24 hours</span></span></button>
     <button class="fd-menu-item" type="button" data-value="restrict"><i data-icon="shield"></i><span class="fd-menu-item-label">Restrict endpoints</span></button>
     <hr class="fd-menu-sep">
-    <button class="fd-menu-item" type="button" data-value="revoke" data-tone="danger"><i data-icon="trash-2"></i><span class="fd-menu-item-label">Revoke</span></button>
+    <button class="fd-menu-item" type="button" data-value="revoke" data-tone="danger" data-fd-confirm-row><i data-icon="trash-2"></i><span class="fd-menu-item-label">Revoke</span></button>
   </div>
 
   <!-- Create API key -->
@@ -201,29 +201,10 @@
     </div>
   </dialog>
 
-  <!-- Revoke (type to confirm) -->
-  <dialog class="fd-dialog fd-confirm" id="dlg-revoke" data-size="sm" data-confirm="production-crawler">
-    <form method="dialog">
-      <div class="fd-dialog-head">
-        <h2 class="fd-h3 fd-dialog-title" id="rv-title">Revoke Production crawler?</h2>
-        <p class="fd-dialog-desc" id="rv-desc">Requests signed with this key fail at once. Crawls in progress stop at their next page.</p>
-      </div>
-      <div class="fd-dialog-body">
-        <div class="fd-field">
-          <label class="fd-field-label" for="rv-confirm">Type <span class="fd-confirm-phrase" id="rv-phrase">production-crawler</span> to confirm</label>
-          <input class="fd-input" id="rv-confirm" data-fd-confirm-input autocomplete="off" autocapitalize="off" spellcheck="false" autofocus>
-        </div>
-      </div>
-      <div class="fd-dialog-foot">
-        <button class="fd-btn" type="button" data-variant="ghost" data-fd-dialog-close>Cancel</button>
-        <button class="fd-btn" type="submit" data-variant="danger" value="confirm" data-fd-confirm-submit disabled><span>Revoke key</span></button>
-      </div>
-    </form>
-  </dialog>
 </main>
 
 <script type="module">
-  import { init, overlays, forms, texture, reducedMotion } from '../fire/fire.js';
+  import { init, overlays, forms, texture, data, reducedMotion } from '../fire/fire.js';
 
   const { toast, openDialog } = overlays;
   const { setSecret } = forms;
@@ -231,7 +212,6 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const slug = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   /* ---------- Sample data ---------- */
   const TOTAL = 3000;
@@ -264,6 +244,13 @@
         <div class="fd-row" data-wrap data-gap="1-5" data-gap-x="3">
           <span class="fd-small fd-muted">Created on ${k.created} · Last used ${k.lastUsed}${k.expires ? ` · Expires ${k.expires}` : ''}</span>
           <span class="fd-row" data-gap="1">${k.endpoints.map((e) => `<span class="fd-badge" data-variant="mono">${e}</span>`).join('')}</span>
+        </div>
+        <div class="fd-confirm-row" id="${k.id}-revoke" role="group" aria-labelledby="${k.id}-revoke-text" hidden>
+          <p class="fd-confirm-row-text" id="${k.id}-revoke-text">Revoke <b>${esc(k.name)}</b>? Requests signed with ${k.value.slice(0, 6)}…${k.value.slice(-4)} fail at once, and crawls in progress stop at their next page.</p>
+          <div class="fd-confirm-row-actions">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+            <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Revoke key</span></button>
+          </div>
         </div>
       </div>
     </article>`;
@@ -324,14 +311,7 @@
       openDialog('dlg-restrict', { trigger });
     });
     if (choice === 'rotate') rotate(k);
-    if (choice === 'revoke') requestAnimationFrame(() => {
-      const d = dialog('dlg-revoke');
-      d.dataset.confirm = slug(k.name);
-      $('#rv-phrase').textContent = slug(k.name);
-      $('#rv-title').textContent = `Revoke ${k.name}?`;
-      $('#rv-desc').textContent = `Requests signed with ${k.value.slice(0, 6)}…${k.value.slice(-4)} fail at once. Crawls in progress stop at their next page. You can’t undo this from the key, only restore it for a few seconds.`;
-      openDialog(d, { trigger });
-    });
+    // Revoke (data-fd-confirm-row on the item) asks in the key's own card: see fd:confirm below.
   });
 
   function rotate(k) {
@@ -377,7 +357,6 @@
       replaceCard(target);
       toast.success('Endpoints updated', { description: `${target.name} can call ${target.endpoints.join(', ')}.` });
     }
-    if (el.id === 'dlg-revoke' && event.detail.value === 'confirm' && target) revoke(target);
     if (el === dialog('dlg-create')) finishCreate();
   });
 
@@ -388,7 +367,14 @@
     syncPage();
   }
 
-  /* ---------- Revoke, with Undo ---------- */
+  /* ---------- Revoke: the card asks first, goes busy for a moment, then collapses, with Undo ---------- */
+  list.addEventListener('fd:confirm', (event) => {
+    const k = byId(event.target.closest('[data-key]')?.dataset.key);
+    if (!k) return;
+    event.preventDefault();
+    setTimeout(() => { data.closeConfirmRow(event.target, { focus: 'next' }); revoke(k); }, 700);
+  });
+
   async function revoke(k) {
     const index = keys.indexOf(k);
     const el = $(`[data-key="${k.id}"]`);

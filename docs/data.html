@@ -2336,6 +2336,160 @@ ember runs retry run_3f08d2</code></pre>
     </ul>
   </section>
 
+  <section class="doc-section" id="confirm-row">
+    <div class="doc-section-head">
+      <h2 class="fd-h3">Row confirmation</h2>
+      <p>When one item of a list or table is about to be removed, revoked or signed out and the action cannot be taken back, ask in the item’s own row: the question names the item and what happens, then a quiet Cancel and a danger button named for the effect. If the action can wait a few seconds with Undo, use a <a href="decisions.html#hold">held action</a>; if it reaches far beyond one item, such as deleting a team, the <a href="overlays.html#confirm">type-to-confirm dialog</a>; if it has its own page or must work without script, <a href="forms.html#confirm-inline">confirm on the page</a>.</p>
+    </div>
+    <h3 class="doc-sub">In a list, opened from each row’s menu</h3>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <ul class="fd-list" data-divided aria-label="API keys" id="cr-keys">
+        <li class="fd-list-row">
+          <span class="fd-list-lead" aria-hidden="true"><i data-icon="key-round"></i></span>
+          <div class="fd-list-body"><span class="fd-list-title">Default</span><span class="fd-list-desc">Last used 2 min ago</span></div>
+          <span class="fd-list-meta" data-mono>em_sk_…0f16</span>
+          <div class="fd-list-trail">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="key-1-menu" data-placement="bottom-end" aria-label="More actions for Default"><i data-icon="ellipsis"></i></button>
+            <div class="fd-menu" id="key-1-menu" popover>
+              <button class="fd-menu-item" type="button">Rename</button>
+              <hr class="fd-menu-sep">
+              <button class="fd-menu-item" type="button" data-tone="danger" data-fd-confirm-row="key-1-confirm">Revoke</button>
+            </div>
+          </div>
+          <div class="fd-confirm-row" id="key-1-confirm" role="group" aria-labelledby="key-1-confirm-text" hidden>
+            <p class="fd-confirm-row-text" id="key-1-confirm-text">Revoke <b>Default</b>? Requests signed with it fail at once.</p>
+            <div class="fd-confirm-row-actions">
+              <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+              <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Revoke key</span></button>
+            </div>
+          </div>
+        </li>
+        <li class="fd-list-row">
+          <span class="fd-list-lead" aria-hidden="true"><i data-icon="key-round"></i></span>
+          <div class="fd-list-body"><span class="fd-list-title">Production crawler</span><span class="fd-list-desc">Last used 14 min ago</span></div>
+          <span class="fd-list-meta" data-mono>em_sk_…5fUz</span>
+          <div class="fd-list-trail">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="key-2-menu" data-placement="bottom-end" aria-label="More actions for Production crawler"><i data-icon="ellipsis"></i></button>
+            <div class="fd-menu" id="key-2-menu" popover>
+              <button class="fd-menu-item" type="button">Rename</button>
+              <hr class="fd-menu-sep">
+              <button class="fd-menu-item" type="button" data-tone="danger" data-fd-confirm-row="key-2-confirm">Revoke</button>
+            </div>
+          </div>
+          <div class="fd-confirm-row" id="key-2-confirm" role="group" aria-labelledby="key-2-confirm-text" hidden>
+            <p class="fd-confirm-row-text" id="key-2-confirm-text">Revoke <b>Production crawler</b>? Requests signed with it fail at once, and crawls in progress stop at their next page.</p>
+            <p class="fd-confirm-row-error" role="alert" hidden></p>
+            <div class="fd-confirm-row-actions">
+              <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+              <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Revoke key</span></button>
+            </div>
+          </div>
+        </li>
+        <li class="fd-list-row">
+          <span class="fd-list-lead" aria-hidden="true"><i data-icon="key-round"></i></span>
+          <div class="fd-list-body"><span class="fd-list-title">CI</span><span class="fd-list-desc">Last used Nov 2</span></div>
+          <span class="fd-list-meta" data-mono>em_sk_…sGf</span>
+          <div class="fd-list-trail">
+            <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="key-3-menu" data-placement="bottom-end" aria-label="More actions for CI"><i data-icon="ellipsis"></i></button>
+            <div class="fd-menu" id="key-3-menu" popover>
+              <button class="fd-menu-item" type="button">Rename</button>
+              <hr class="fd-menu-sep">
+              <button class="fd-menu-item" type="button" data-tone="danger" data-fd-confirm-row="key-3-confirm">Revoke</button>
+            </div>
+          </div>
+          <div class="fd-confirm-row" id="key-3-confirm" role="group" aria-labelledby="key-3-confirm-text" hidden>
+            <p class="fd-confirm-row-text" id="key-3-confirm-text">Revoke <b>CI</b>? Builds that use it fail from their next request.</p>
+            <div class="fd-confirm-row-actions">
+              <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+              <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Revoke key</span></button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <h3 class="doc-sub">In a table, from one menu shared by every row</h3>
+    <div class="doc-specimen" data-code data-layout="stack">
+      <div class="fd-table-wrap">
+        <div class="fd-table-scroll">
+          <table class="fd-table" data-stack aria-label="Signed-in devices">
+            <thead>
+              <tr><th>Device</th><th>Location</th><th>Last active</th><th data-actions><span class="fd-sr-only">Actions</span></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-stack-title>MacBook Pro · Safari</td><td data-muted>Lisbon, Portugal</td><td data-muted>Now</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="device-menu" data-placement="bottom-end" aria-label="Actions for MacBook Pro"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr class="fd-table-detail" hidden>
+                <td colspan="4">
+                  <div class="fd-confirm-row" id="device-1-confirm" role="group" aria-labelledby="device-1-confirm-text">
+                    <p class="fd-confirm-row-text" id="device-1-confirm-text">Sign out <b>MacBook Pro</b>? It needs your password to come back.</p>
+                    <div class="fd-confirm-row-actions">
+                      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+                      <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Sign out device</span></button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr data-expanded>
+                <td data-stack-title>Pixel 9 · Ember app</td><td data-muted>Porto, Portugal</td><td data-muted>3 hours ago</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="device-menu" data-placement="bottom-end" aria-label="Actions for Pixel 9"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr class="fd-table-detail">
+                <td colspan="4">
+                  <div class="fd-confirm-row" id="device-2-confirm" role="group" aria-labelledby="device-2-confirm-text">
+                    <p class="fd-confirm-row-text" id="device-2-confirm-text">Sign out <b>Pixel 9</b>? The Ember app on it stops syncing until you sign in again.</p>
+                    <div class="fd-confirm-row-actions">
+                      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+                      <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Sign out device</span></button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td data-stack-title>ThinkPad · Firefox</td><td data-muted>Madrid, Spain</td><td data-muted>Nov 20</td>
+                <td data-actions><button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-icon-only data-fd-menu="device-menu" data-placement="bottom-end" aria-label="Actions for ThinkPad"><i data-icon="ellipsis"></i></button></td>
+              </tr>
+              <tr class="fd-table-detail" hidden>
+                <td colspan="4">
+                  <div class="fd-confirm-row" id="device-3-confirm" role="group" aria-labelledby="device-3-confirm-text">
+                    <p class="fd-confirm-row-text" id="device-3-confirm-text">Sign out <b>ThinkPad</b>? It needs your password to come back.</p>
+                    <div class="fd-confirm-row-actions">
+                      <button class="fd-btn" type="button" data-variant="ghost" data-size="sm" data-fd-confirm-row-cancel>Cancel</button>
+                      <button class="fd-btn" type="button" data-variant="danger" data-size="sm" data-fd-confirm-row-submit><span>Sign out device</span></button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fd-menu" id="device-menu" popover>
+        <button class="fd-menu-item" type="button">Rename</button>
+        <hr class="fd-menu-sep">
+        <button class="fd-menu-item" type="button" data-tone="danger" data-fd-confirm-row>Sign out</button>
+      </div>
+    </div>
+    <ul class="doc-notes">
+      <li>In a list the question is the last child of the row and sits under the body, from the body’s column to the end; in a list narrower than 480px it spans the row. In a table it sits alone in the <code class="fd-code">fd-table-detail</code> row after its item, and <code class="fd-code">hidden</code> goes on that detail row. It can also be the last block of a card that stands for one item.</li>
+      <li><code class="fd-code">data-fd-confirm-row="id"</code> on a menu item or a button opens that question. With no value it opens the one in the trigger’s own row, so one menu can serve every row. Focus moves to Cancel; Cancel and Escape close it and return focus to the menu’s opener. Opening one closes any other in the same list or table.</li>
+      <li>Name the danger button for what it does (“Revoke key”, “Sign out device”), never “Yes” or “Confirm”, and name the item in the question.</li>
+      <li>To run the work, cancel <code class="fd-code">fd:confirm</code>: the question stays open and busy. On success call <code class="fd-code">closeConfirmRow(el, { focus: 'next' })</code>, then remove the row: focus moves to the next row’s menu opener. On failure call <code class="fd-code">failConfirmRow(el, message)</code>. Fire never removes the row itself.</li>
+    </ul>
+    <h3 class="doc-sub">Events and API</h3>
+    <table class="doc-table">
+      <thead><tr><th>Name</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>fd:open, fd:close</td><td><code class="fd-code">{ trigger }</code> on the <code class="fd-code">fd-confirm-row</code>: the menu’s opener, or the button that opened it.</td></tr>
+        <tr><td>fd:confirm</td><td><code class="fd-code">{ value: '', submitter, trigger, row }</code> when the danger button is pressed: the same shape as the dialog’s <code class="fd-code">fd:confirm</code>, with <code class="fd-code">trigger</code> and <code class="fd-code">row</code> filled and nothing typed. Not cancelled, the question closes and focus returns to the trigger. Cancelled with <code class="fd-code">preventDefault()</code>, it stays open with <code class="fd-code">aria-busy="true"</code> and both buttons <code class="fd-code">aria-disabled="true"</code>, and ignores presses.</td></tr>
+        <tr><td>openConfirmRow(ref, { trigger })</td><td>Opens the question (an element or its id), hides an earlier error, closes any other open in the same list or table without moving focus, and focuses Cancel.</td></tr>
+        <tr><td>closeConfirmRow(ref, { focus })</td><td>Closes it and ends busy. <code class="fd-code">focus: true</code> (the default) returns focus to the trigger, <code class="fd-code">false</code> leaves it, <code class="fd-code">'next'</code> moves it to the same control in the next row, else the previous row, else the list or table.</td></tr>
+        <tr><td>failConfirmRow(ref, message)</td><td>Ends busy, shows the message in <code class="fd-code">fd-confirm-row-error</code> (made before the actions when the markup has none) and focuses the danger button.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
   <section class="doc-section" id="list-detail">
     <div class="doc-section-head">
       <h2 class="fd-h3">List and detail</h2>
@@ -3231,6 +3385,7 @@ ember runs retry run_3f08d2</code></pre>
         <tr><td>fd-filters</td><td><code class="fd-code">data-fd-for</code> <code class="fd-code">data-fd-url</code> <code class="fd-code">data-fd-key</code> <code class="fd-code">data-now</code>; parts <code class="fd-code">fd-filters-add</code> (<code class="fd-code">data-icon-only</code>) <code class="fd-code">-menu</code> <code class="fd-code">-panel</code> <code class="fd-code">-search</code> <code class="fd-code">-count</code> <code class="fd-code">-list</code> <code class="fd-code">-op</code> <code class="fd-code">-value</code> <code class="fd-code">-clear</code> <code class="fd-code">-sheet</code> <code class="fd-code">-back</code>. On a field's item <code class="fd-code">data-field</code>, <code class="fd-code">data-kind="one|many|date|text|flag"</code>, <code class="fd-code">data-op="not"</code>; on a value <code class="fd-code">data-value</code>, <code class="fd-code">aria-checked</code>, <code class="fd-code">data-range</code>; on the target's items <code class="fd-code">data-&lt;field&gt;</code> and <code class="fd-code">data-fd-out</code>; <code class="fd-code">[data-fd-none]</code>; <code class="fd-code">data-fd-filters</code> on a chip list outside the root. Full markup in <code class="fd-code">fire/js/filters.js</code>.</td></tr>
         <tr><td>fd-filter-bar</td><td>Wrapping row with <code class="fd-code">fd-filter-search</code> and <code class="fd-code">fd-filter-bar-end</code>; <code class="fd-code">fd-filter-applied</code> holds <code class="fd-code">fd-filter-token</code>s.</td></tr>
         <tr><td>fd-list</td><td><code class="fd-code">data-divided</code> <code class="fd-code">data-card</code> <code class="fd-code">data-interactive</code>; row parts <code class="fd-code">fd-list-lead</code> <code class="fd-code">-body</code> <code class="fd-code">-title</code> <code class="fd-code">-desc</code> <code class="fd-code">-meta</code> <code class="fd-code">-trail</code> <code class="fd-code">-link</code>; <code class="fd-code">data-unread</code>, <code class="fd-code">aria-current="true"</code> or <code class="fd-code">aria-selected="true"</code> on a row; <code class="fd-code">role="listbox"</code> with <code class="fd-code">role="option"</code> rows.</td></tr>
+        <tr><td>fd-confirm-row</td><td><code class="fd-code">role="group"</code> <code class="fd-code">aria-busy</code>; parts <code class="fd-code">fd-confirm-row-text</code> <code class="fd-code">-error</code> <code class="fd-code">-actions</code>; buttons <code class="fd-code">data-fd-confirm-row-cancel</code> <code class="fd-code">data-fd-confirm-row-submit</code>; triggers <code class="fd-code">data-fd-confirm-row</code>. See <a class="fd-link" href="#confirm-row">Row confirmation</a>.</td></tr>
         <tr><td>fd-list-detail</td><td><code class="fd-code">data-view="list|detail"</code>; panes <code class="fd-code">fd-list-detail-list</code> (rows with <code class="fd-code">data-value</code>) and <code class="fd-code">fd-list-detail-main</code> (<code class="fd-code">[data-detail]</code> panels, <code class="fd-code">fd-list-detail-back</code>).</td></tr>
         <tr><td>fd-kv</td><td><code class="fd-code">data-cols="1|2|3"</code> <code class="fd-code">data-layout="split"</code> <code class="fd-code">data-keys="plain"</code> <code class="fd-code">data-divided</code>; value <code class="fd-code">data-copy</code> <code class="fd-code">data-mono</code></td></tr>
         <tr><td>fd-stats</td><td><code class="fd-code">data-variant="cards"</code>; tile parts <code class="fd-code">fd-stat-label</code> <code class="fd-code">fd-stat</code> <code class="fd-code">-sub</code> <code class="fd-code">-row</code> <code class="fd-code">-delta</code> <code class="fd-code">-slot</code> <code class="fd-code">-action</code>; delta <code class="fd-code">data-dir="up|down|flat"</code> <code class="fd-code">data-tone="neutral|success|warning|danger"</code></td></tr>
@@ -3252,6 +3407,7 @@ ember runs retry run_3f08d2</code></pre>
         <tr><td>fd:open, fd:close</td><td>Expand chevrons, data card toggles, and group toggles (<code class="fd-code">{ group }</code>, the tbody)</td></tr>
         <tr><td>fd:change (listbox list)</td><td><code class="fd-code">{ value, item }</code> when the selection moves</td></tr>
         <tr><td>fd:select (list and detail)</td><td><code class="fd-code">{ value, item }</code> when a row is chosen; cancelable</td></tr>
+        <tr><td>fd:open, fd:close, fd:confirm (row confirmation)</td><td><code class="fd-code">{ trigger }</code>, and <code class="fd-code">{ value, submitter, trigger, row }</code> for <code class="fd-code">fd:confirm</code>; cancel it to keep the question open and busy</td></tr>
         <tr><td>fd:change (list and detail)</td><td><code class="fd-code">{ source: 'view', value: 'list' | 'detail' }</code> when one pane shows at a time</td></tr>
       </tbody>
     </table>
@@ -3268,6 +3424,23 @@ ember runs retry run_3f08d2</code></pre>
   </section>
 </main>
 <script type="module">
+  import { overlays, data } from '../fire/fire.js';
+
+  /* Row confirmation: revoking takes a moment; Production crawler fails, the others go, with a toast. */
+  document.getElementById('cr-keys')?.addEventListener('fd:confirm', (event) => {
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    const question = event.target;
+    const row = event.detail.row;
+    const name = row.querySelector('.fd-list-title').textContent;
+    setTimeout(() => {
+      if (question.id === 'key-2-confirm') { data.failConfirmRow(question, 'The key service did not answer, so the key still works. Try again in a minute.'); return; }
+      data.closeConfirmRow(question, { focus: 'next' });
+      row.remove();
+      overlays.toast({ title: `${name} revoked`, description: 'Requests signed with it now fail.', tone: 'neutral' });
+    }, 900);
+  });
+
   /* Combined filter: the toolbar's search is the page's own; it marks the rows it hides with data-fd-out. */
   const reqSearch = document.getElementById('req-search');
   reqSearch?.addEventListener('input', () => {

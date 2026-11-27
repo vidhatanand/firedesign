@@ -2,6 +2,57 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (in its `package.json`, or in its agent instructions when Fire is copied in) and reads every entry after it before refreshing.
 
+## 0.14.0 — 27 Nov 2026
+
+**One item of a list or table asks in its own row before it is removed, revoked or signed out.** One new part,
+`fd-confirm-row`, answering proposal issue 3 on Fire's repository. No class, attribute value, token, event or
+behaviour export was removed or renamed.
+
+### Added
+
+- **`fd-confirm-row`, a row confirmation** (Data family, `docs/data.html#confirm-row`). A box tinted for danger in the
+  item's own row: the question (`fd-confirm-row-text`), an optional error line (`fd-confirm-row-error`) and the
+  actions (`fd-confirm-row-actions`): a quiet Cancel (`data-fd-confirm-row-cancel`) and a small danger button named
+  for the effect (`data-fd-confirm-row-submit`), "Revoke key", never "Yes". It is for an action on one item that
+  cannot be taken back, while the person stays on the list. In a list it is the last child of the row and sits
+  under the body; in a table it sits alone in the `fd-table-detail` row after its item, which takes
+  `data-expanded` while it is open; it can also be the last block of a card for one item. Text and buttons share a
+  line when there is room, and the buttons wrap under the text when there is not.
+- **Opening it.** `data-fd-confirm-row="id"` on a menu item or a button opens that question; with no value it opens
+  the one in the trigger's own row, so one menu serves every row. A menu item opens it after the menu has handed
+  focus back to its opener. Focus moves to Cancel, and any other open question in the same list or table closes.
+  Cancel and Escape close it and return focus to the opener; Escape goes no further.
+- **Running the work.** The danger button fires a cancelable `fd:confirm` on the question, with `trigger` (what opened
+  it) and `row` (the item's row) in its detail.
+  Not cancelled, the question closes. Cancelled, it stays open and busy: `aria-busy="true"` on the question,
+  `aria-disabled="true"` on both buttons (focus stays), presses ignored. `fd:open` and `fd:close` carry
+  `{ trigger }`.
+- **Three functions in `data`.** `openConfirmRow(ref, { trigger })`; `closeConfirmRow(ref, { focus })`, where
+  `focus` is `true` (back to the trigger), `false`, or `'next'`: the same control in the next row, else the
+  previous row, else the list or table, for the caller that is about to remove the row; and
+  `failConfirmRow(ref, message)`, which shows the message and focuses the danger button. Fire never removes a row.
+- The `fd:confirm` type in `fire.d.ts` is now `FireConfirmDetail`, one shape for both: `value` and `submitter` as
+  before, plus optional `trigger` and `row`, which a row confirmation fills. A row confirmation sends an empty
+  `value`, since nothing is typed.
+
+### Changed
+
+- **API keys template.** Revoke asks in the key's own card instead of the type-to-confirm dialog; on confirm the card
+  goes busy for a moment, focus moves to the next key's menu, the card collapses, and the "revoked" toast offers
+  Undo as before. The `dlg-revoke` dialog is gone.
+- **Neighbouring cards.** `confirm` sends a single record in a row and an inline revoke to `confirm-row`;
+  `confirm-inline` sends an action from a row or a menu on one item to `confirm-row` and keeps `confirm` for wide
+  damage; `menu` sends a destructive item with no confirmation step to `confirm-row`; `button` names it for delete
+  or revoke; `confirm`, `confirm-inline`, `hold`, `menu`, `list` and `table` list it as related. `GUIDE.md` and
+  `AGENT-RULES.md` name it beside `fd-confirm-inline`.
+
+### For products refreshing from 0.13.2
+
+- Nothing breaks: the part is new, and no markup, style or script you use changed. A handler of `fd:confirm` on
+  `document` now also hears row confirmations: tell them apart by `event.detail.row`, or by the event's target.
+- A product that built its own confirmation inside a row, or sends one key or one device to the type-to-confirm
+  dialog, can replace it with `fd-confirm-row`.
+
 ## 0.13.2 — 27 Nov 2026
 
 **Opening a modal no longer moves a page that has no scroll bar.** One bug fix. No class, token, event or behaviour

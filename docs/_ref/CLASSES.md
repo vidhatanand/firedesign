@@ -1,6 +1,6 @@
 # Fire: every class
 
-Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.13.2). Do not edit: change the CSS or the
+Generated from `contract/catalog.json` by `node scripts/build-classes.mjs` (Fire 0.14.0). Do not edit: change the CSS or the
 catalogue and run the build. `VOCABULARY.md` beside this file explains the parts in prose; this file is the complete list.
 
 For each component: its root class, its part classes, the attributes it reads with their values (on the root, then per
@@ -1089,6 +1089,13 @@ one-line markup of the required structure.
 - On the root: `data-indeterminate`, `data-size="16|24|40"`, `data-tone="auto|danger|neutral|success|warning"`, `data-variant="ring|steps"`
 - State, set by Fire: `data-complete`, `data-current`, `data-done`, `data-empty`
 
+### Row confirmation (`confirm-row`, component)
+
+- Root: `fd-confirm-row` (needs `role="group"`), shown at `docs/data.html#confirm-row`
+- Parts: `fd-confirm-row-actions` (required, child of `fd-confirm-row`), `fd-confirm-row-error` (child of `fd-confirm-row`), `fd-confirm-row-text` (required, child of `fd-confirm-row`)
+- Write: `<div class="fd-confirm-row" id="…" role="group" aria-labelledby="…" hidden><p class="fd-confirm-row-text" id="…">…</p><div class="fd-confirm-row-actions">…</div></div>`
+- Events: `fd:close`, `fd:confirm`, `fd:open`
+
 ### Stats (`stats`, component)
 
 - Root: `fd-stats`, shown at `docs/data.html#stats`
@@ -1419,4 +1426,4 @@ Parts with no class of their own: functions a page calls.
 - `theme-record`: Theme record, shown at `docs/tweaks.html#records`
 - `transitions`: Page transitions, shown at `docs/transitions.html#demo`
 
-187 components, patterns, layouts and sections; 1674 classes.
+188 components, patterns, layouts and sections; 1678 classes.

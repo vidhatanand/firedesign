@@ -83,6 +83,11 @@
                  <section data-detail="req_8f3a21">…</section>     (optional: one panel per item, matched on data-value)
                </div>
              </div>
+   ROW CONFIRMATION (0.14)  asks in an item's own row before an action that cannot be taken back (behaviour: data.js)
+             fd-confirm-row[role="group"][aria-busy] > fd-confirm-row-text, fd-confirm-row-error, fd-confirm-row-actions
+             The last child of a fd-list-row (a second grid row under the body), of a card for one item, or alone in a
+             tr.fd-table-detail (the item's row takes data-expanded while it is open). Text and actions share a line
+             when there is room; the actions wrap under the text when there is not; an error takes its own line.
    KEY-VALUE fd-kv[data-cols="1|2|3"][data-layout="split"][data-divided] > fd-kv-item > fd-kv-key + fd-kv-value[data-copy|data-mono|data-plain]
    STATS     fd-stats[data-variant="cards"] > fd-stat-tile > fd-stat-label, fd-stat, fd-stat-sub, fd-stat-delta, fd-stat-slot, fd-stat-action
              fd-stat-row > fd-stat + fd-stat-unit   a figure with a small unit on its baseline ("27 of 30 days")
@@ -134,6 +139,7 @@
   --fd-data-sr: 1px;                 /* the visually hidden box */
   --fd-data-stack-label: 80px;       /* stacked card: narrowest caption column */
   --fd-data-stack-select: 28px;      /*   room for the checkbox */
+  --fd-data-confirm-text: 24ch;      /* row confirmation: the question's width before the actions wrap under it */
   --fd-data-group-count: 18px;       /* group heading count: min width and height */
   --fd-data-group-count-px: 5px;
   /* filters */
@@ -448,6 +454,8 @@ th[aria-sort="descending"] .fd-th-sort {
 }
 .fd-table-detail:not([hidden]) > td > * { animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out) both; }
 .fd-table tbody tr[data-expanded] > td { border-bottom-color: transparent; }
+/* A row confirmation (0.14) fills its detail cell, under the row's own edges. */
+.fd-table-detail > td:has(> .fd-confirm-row) { padding: 0 var(--fd-row-px) var(--fd-space-3); }
 
 /* ---------- Groups: one tbody per group, headed by a row that names it ----------
    The heading row reads like the header (mono eyebrow on the page colour) so it never looks like a record: no hover,
@@ -976,6 +984,28 @@ button.fd-list-row { width: 100%; font: inherit; }
 @container fd-list (max-width: 480px) {
   .fd-list-meta { grid-column: 2; grid-row: 2; margin: var(--fd-space-0-5) 0 0; }
   .fd-list-trail { margin-inline-start: var(--fd-space-2); }
+}
+
+/* ==========================================================================
+   Row confirmation: a danger-tinted box in the item's own row. Text first, the actions at the end; they wrap under
+   the text in a narrow row, and an error takes a line of its own between them.
+   ========================================================================== */
+.fd-confirm-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--fd-space-2) var(--fd-space-3);
+  min-inline-size: 0; padding: var(--fd-space-3);
+  border: var(--fd-hairline) solid var(--fd-danger-line); border-radius: var(--fd-radius-lg); background: var(--fd-danger-bg);
+  color: var(--fd-text); font-size: var(--fd-text-sm); line-height: var(--fd-lh-sm); white-space: normal;
+  animation: fd-fade-in var(--fd-dur-4) var(--fd-ease-out) both;
+}
+.fd-confirm-row-text { flex: 1 1 var(--fd-data-confirm-text); min-inline-size: 0; margin: 0; overflow-wrap: anywhere; }
+.fd-confirm-row-error { flex-basis: 100%; margin: 0; color: var(--fd-danger-text); }
+.fd-confirm-row-actions { display: flex; flex: none; gap: var(--fd-space-2); margin-inline-start: auto; }
+.fd-confirm-row[aria-busy="true"] .fd-confirm-row-actions { pointer-events: none; }
+/* In a list row: a second grid row, from the body's column to the end; the row keeps still while it asks. */
+.fd-list-row > .fd-confirm-row { grid-row: 2; grid-column: 2 / -1; margin-block-start: var(--fd-space-2); }
+.fd-list-row:has(> .fd-confirm-row:not([hidden])):not([aria-selected="true"], [aria-current="true"]):hover { background: transparent; }
+@container fd-list (max-width: 480px) {
+  .fd-list-row > .fd-confirm-row { grid-row: 3; grid-column: 1 / -1; }   /* under the meta, which takes the second row */
 }
 
 /* ==========================================================================

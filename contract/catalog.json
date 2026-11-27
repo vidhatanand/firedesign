@@ -1,5 +1,5 @@
 {
-  "fire": "0.13.2",
+  "fire": "0.14.0",
   "components": [
     {
       "id": "accordion",
@@ -1733,7 +1733,7 @@
           },
           {
             "when": "Delete or revoke runs without a confirmation step.",
-            "instead": "Put it behind a dialog or confirm; use the danger variant on the confirming button."
+            "instead": "Ask first: confirm-row for one item in its row, confirm for wide damage; use the danger variant on the confirming button."
           }
         ],
         "aka": [
@@ -6071,11 +6071,11 @@
           },
           {
             "when": "A single record in a row.",
-            "instead": "dialog"
+            "instead": "confirm-row"
           },
           {
             "when": "Revoking a key with an inline confirmation button.",
-            "instead": "button"
+            "instead": "confirm-row"
           },
           {
             "when": "The action has its own page, or must work without script.",
@@ -6126,6 +6126,7 @@
         "related": [
           "button",
           "confirm-inline",
+          "confirm-row",
           "dialog",
           "sheet",
           "toast"
@@ -6189,7 +6190,11 @@
         ],
         "avoidWhen": [
           {
-            "when": "The action starts from a row or a menu and a dialog is natural.",
+            "when": "The action starts from a row or a menu and touches that one item.",
+            "instead": "confirm-row"
+          },
+          {
+            "when": "The action starts from a row or a menu and reaches far beyond one item.",
             "instead": "confirm"
           },
           {
@@ -6251,6 +6256,7 @@
         ],
         "related": [
           "confirm",
+          "confirm-row",
           "button",
           "field",
           "callout"
@@ -6268,6 +6274,152 @@
           "fire/js/forms.js"
         ],
         "since": "0.7.0"
+      }
+    },
+    {
+      "id": "confirm-row",
+      "name": "Row confirmation",
+      "family": "Data",
+      "kind": "component",
+      "root": "fd-confirm-row",
+      "classes": [
+        "fd-confirm-row",
+        "fd-confirm-row-actions",
+        "fd-confirm-row-error",
+        "fd-confirm-row-text"
+      ],
+      "attributes": {},
+      "partAttributes": {},
+      "stateAttributes": {},
+      "element": null,
+      "events": [
+        "fd:close",
+        "fd:confirm",
+        "fd:open"
+      ],
+      "docs": "docs/data.html#confirm-row",
+      "card": {
+        "id": "confirm-row",
+        "job": "Ask in an item's own row whether to remove, revoke or sign it out, before the action runs.",
+        "purpose": "A danger-tinted box in the row: the question, then a quiet Cancel and a small danger button named for the effect. A menu item or a button with data-fd-confirm-row opens it and focus moves to Cancel; Cancel and Escape close it and return focus. The danger button fires a cancelable fd:confirm; cancel it to run the work, then closeConfirmRow(el, { focus: 'next' }) or failConfirmRow(el, message).",
+        "useWhen": [
+          "One item in a list or table is about to be removed, revoked or signed out, and the person stays on the list.",
+          "The action cannot be taken back, so it asks first."
+        ],
+        "avoidWhen": [
+          {
+            "when": "The action can be taken back in a few seconds.",
+            "instead": "hold"
+          },
+          {
+            "when": "It reaches far beyond one item, such as deleting a team.",
+            "instead": "confirm"
+          },
+          {
+            "when": "The action has its own page, or must work without script.",
+            "instead": "confirm-inline"
+          },
+          {
+            "when": "The action needs several fields.",
+            "instead": "sheet"
+          },
+          {
+            "when": "The row is itself a link or a button, so it cannot hold buttons.",
+            "instead": "dialog"
+          }
+        ],
+        "aka": [
+          "inline confirm",
+          "row confirmation",
+          "are you sure",
+          "confirm delete",
+          "revoke prompt"
+        ],
+        "surfaces": [
+          "app",
+          "phone"
+        ],
+        "data": [
+          "none"
+        ],
+        "states": [
+          {
+            "name": "open",
+            "how": "no hidden on the root (in a table, on its tr.fd-table-detail); openConfirmRow(el) or a data-fd-confirm-row trigger"
+          },
+          {
+            "name": "busy",
+            "how": "aria-busy=\"true\" on the root after fd:confirm was cancelled; both buttons carry aria-disabled=\"true\""
+          },
+          {
+            "name": "error",
+            "how": "failConfirmRow(el, message) shows the message in fd-confirm-row-error and focuses the danger button"
+          }
+        ],
+        "variants": [],
+        "parts": [
+          {
+            "class": "fd-confirm-row",
+            "role": "The box; role=\"group\" labelled by its text. The last child of a list row or an item's card, or alone in a table's detail row.",
+            "attrs": {
+              "role": "group"
+            },
+            "skeleton": "<div class=\"fd-confirm-row\" id=\"…\" role=\"group\" aria-labelledby=\"…\" hidden><p class=\"fd-confirm-row-text\" id=\"…\">…</p><div class=\"fd-confirm-row-actions\">…</div></div>"
+          },
+          {
+            "class": "fd-confirm-row-text",
+            "role": "The question, naming the item and what happens.",
+            "required": true,
+            "parent": [
+              "fd-confirm-row"
+            ]
+          },
+          {
+            "class": "fd-confirm-row-error",
+            "role": "Why the action failed (role=\"alert\"); written by failConfirmRow when missing.",
+            "parent": [
+              "fd-confirm-row"
+            ]
+          },
+          {
+            "class": "fd-confirm-row-actions",
+            "role": "Cancel (data-fd-confirm-row-cancel), then the danger button (data-fd-confirm-row-submit).",
+            "required": true,
+            "parent": [
+              "fd-confirm-row"
+            ]
+          }
+        ],
+        "related": [
+          "hold",
+          "confirm",
+          "confirm-inline",
+          "menu",
+          "list",
+          "table",
+          "button"
+        ],
+        "keyboard": [
+          {
+            "keys": "Enter, Space",
+            "does": "On the trigger: opens the question with focus on Cancel. On a button: presses it."
+          },
+          {
+            "keys": "Escape",
+            "does": "Closes the question and returns focus to the trigger; nothing else closes."
+          },
+          {
+            "keys": "Tab",
+            "does": "Moves between Cancel and the danger button."
+          }
+        ],
+        "example": "docs/data.html#confirm-row",
+        "provenance": [
+          "docs/data.html",
+          "fire/components/data.css",
+          "fire/js/data.js"
+        ],
+        "since": "0.14.0"
       }
     },
     {
@@ -11741,6 +11893,7 @@
           "commit",
           "toast",
           "confirm",
+          "confirm-row",
           "decision"
         ],
         "keyboard": [
@@ -13456,7 +13609,8 @@
           "card",
           "avatar",
           "notification",
-          "list-detail"
+          "list-detail",
+          "confirm-row"
         ],
         "keyboard": [
           {
@@ -14615,7 +14769,7 @@
           },
           {
             "when": "A destructive action with no confirmation step.",
-            "instead": "dialog"
+            "instead": "confirm-row"
           }
         ],
         "aka": [
@@ -14753,7 +14907,8 @@
           "dialog",
           "select",
           "checklist",
-          "button"
+          "button",
+          "confirm-row"
         ],
         "keyboard": [
           {
@@ -27645,7 +27800,8 @@
           "empty",
           "skeleton",
           "list",
-          "kv"
+          "kv",
+          "confirm-row"
         ],
         "keyboard": [
           {
@@ -31780,6 +31936,10 @@
     "fd-confirm-inline": "confirm-inline",
     "fd-confirm-inline-rule": "confirm-inline",
     "fd-confirm-phrase": "confirm",
+    "fd-confirm-row": "confirm-row",
+    "fd-confirm-row-actions": "confirm-row",
+    "fd-confirm-row-error": "confirm-row",
+    "fd-confirm-row-text": "confirm-row",
     "fd-context-meter": "composer",
     "fd-context-meter-ring": "composer",
     "fd-copied-label": "codeblock",
@@ -33800,7 +33960,8 @@
         ],
         "data": [
           "{ target }",
-          "{ group }"
+          "{ group }",
+          "{ trigger }"
         ]
       }
     },
@@ -33814,8 +33975,12 @@
       }
     },
     "fd:confirm": {
-      "detail": "",
-      "shapes": {}
+      "detail": "{ value: '', submitter, trigger, row }",
+      "shapes": {
+        "data": [
+          "{ value: '', submitter, trigger, row }"
+        ]
+      }
     },
     "fd:copy": {
       "detail": "{ value }",

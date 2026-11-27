@@ -799,6 +799,18 @@ export interface FireCommitDetail extends FireCommitBase {
   cause?: 'time' | 'pagehide';
 }
 
+/** fd:confirm: from a type-to-confirm dialog (.fd-confirm) or a row confirmation (.fd-confirm-row). */
+export interface FireConfirmDetail {
+  /** The typed phrase, trimmed. Empty from a row confirmation, which has nothing to type. */
+  value: string;
+  /** The button that confirmed. */
+  submitter: HTMLElement | null;
+  /** Row confirmation only: what opened it (a menu's opener or a button). */
+  trigger?: Element | null;
+  /** Row confirmation only: the item's row (the list row, the table row before the detail row, or the card). */
+  row?: HTMLElement | null;
+}
+
 /** Every event Fire dispatches. All bubble and are cancelable. */
 export interface FireEventMap {
   /** A surface opened: menu, popover, dialog, nav group, mobile nav, combobox, chat, tweaks panel, … */
@@ -833,8 +845,9 @@ export interface FireEventMap {
   'fd:valid': CustomEvent<Record<string, never>>;
   /** The rotate button of a secret field (replace the value with forms.setSecret). */
   'fd:rotate': CustomEvent<Record<string, never>>;
-  /** A type-to-confirm dialog was submitted (cancel to run async work, then closeDialog(id, 'confirm')). */
-  'fd:confirm': CustomEvent<{ value: string; submitter: HTMLElement | null }>;
+  /** A type-to-confirm dialog was submitted (cancel to run async work, then closeDialog(id, 'confirm')), or the danger
+   *  button of a row confirmation was pressed (cancel to run the work, then closeConfirmRow or failConfirmRow). */
+  'fd:confirm': CustomEvent<FireConfirmDetail>;
   /** The person took an agent's draft (cancelable: the draft stays out of the reason). On the .fd-draft. */
   'fd:accept': CustomEvent<{ value: string }>;
   /** A hold or held toast started its countdown. On the .fd-commit (or toast.hold's `target`), the .fd-hold, or the toast. */
@@ -1246,7 +1259,7 @@ export declare namespace overlays {
 /** The states of an .fd-states wrapper (children carry data-when). */
 export type PageState = 'loading' | 'ready' | 'empty' | 'filtered' | 'error' | 'no-access' | 'not-found' | 'off' | 'expired';
 
-/** Tables, filters, key-values, meters, progress, data cards, pipelines, listboxes, list-detail. */
+/** Tables, filters, key-values, meters, progress, data cards, pipelines, listboxes, list-detail, row confirmations. */
 export declare namespace data {
   export function init(root?: ParentNode): void;
   /** Sort a table by column index; "none" restores the original order. Fires fd:change unless silent. */
@@ -1271,6 +1284,14 @@ export declare namespace data {
   export function showDetail(root: HTMLElement, value: string | number | Element, options?: { focus?: boolean }): HTMLElement | null;
   /** Back to the list (one pane at a time); focus returns to the open row unless focus is false. */
   export function showList(root: HTMLElement, options?: { focus?: boolean }): void;
+  /** Open a .fd-confirm-row (the element or its id): any other open in the same list or table closes, focus moves to
+   *  Cancel, fd:open fires. Returns the question, or null. */
+  export function openConfirmRow(ref: string | HTMLElement, options?: { trigger?: Element | null }): HTMLElement | null;
+  /** Close it and fire fd:close. focus: true returns focus to the trigger, false leaves it, 'next' moves it to the next
+   *  row's matching control (else the previous row's, else the list or table): call it before you remove the row. */
+  export function closeConfirmRow(ref: string | HTMLElement, options?: { focus?: boolean | 'next' }): void;
+  /** The action failed: busy ends, the message shows in .fd-confirm-row-error, focus moves to the danger button. */
+  export function failConfirmRow(ref: string | HTMLElement, message?: string): void;
 }
 
 /** The kind of a combined filter's field (data-kind). */

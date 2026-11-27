@@ -1,0 +1,204 @@
+# Fire's checks on GitHub's machines: the commands HANDOFF.md lists under "Set up" and "Release", so a release does
+# not wait on one person's computer.
+#
+#   a push to main, rel/** or ci/**, and a pull request   the suite, the gate, the looks check, each starter's check
+#   a tag v<x.y.z>                                        the release, installed the way a product installs it
+#   run by hand with a tag (gh workflow run check.yml -f tag=v<x.y.z>)   the same, for a release that is already out
+#
+# The jobs run on macOS on Apple silicon because the gate's pictures were taken there (HANDOFF.md).
+name: Check
+
+on:
+  push:
+    branches: [main, 'rel/**', 'ci/**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: A released tag to install as a product does (v<x.y.z>). Empty runs the checks on the branch.
+        default: ''
+
+permissions:
+  contents: read
+
+# A newer push to the same branch replaces the run in progress. A run by hand for a tag is its own group.
+concurrency:
+  group: check-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+jobs:
+  # A release commit is pushed before the starters can be locked to it (HANDOFF.md, step 4). Until the lock commit
+  # follows, the starters cannot install and the lock test cannot pass. That state is allowed only while the version
+  # has no tag: a tagged release must be locked.
+  state:
+    name: Release state
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      locked: ${{ steps.read.outputs.locked }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Read the version, its tag and the starters' locks
+        id: read
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then tagged=true; else tagged=false; fi
+          if node scripts/pin-starters.mjs --check; then locked=true; else locked=false; fi
+          echo "Fire $version: tagged $tagged, starters locked $locked"
+          echo "locked=$locked" >> "$GITHUB_OUTPUT"
+          if [ "$locked" = false ] && [ "$tagged" = true ]; then
+            echo "::error::v$version is tagged, and the starters are not locked to it."
+            exit 1
+          fi
+          if [ "$locked" = false ]; then
+            echo "::warning::Fire $version is not released yet and its starters are not locked to it (HANDOFF.md, step 4). The starters' checks and the lock test are skipped for this commit."
+          fi
+
+  suite:
+    name: Suite
+    needs: state
+    if: github.ref_type != 'tag' && inputs.tag == ''
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # Five tests use what the starters install (React, Vue's compiler, the Lit starter itself).
+      - name: Install the starters
+        if: needs.state.outputs.locked == 'true'
+        run: |
+          for starter in lit-vite next vue-vite; do
+            (cd "starters/$starter" && npm ci --no-audit --no-fund)
+          done
+      # `npm run check`, with the test files run one at a time. A runner has three cores; side by side, the browser
+      # tests' waits run out and different tests fail on each run. The first step fails when `check` has changed, so
+      # this list cannot fall behind it.
+      - name: The steps below are npm run check
+        run: |
+          want='node scripts/build.mjs --check && node scripts/audit.mjs && node scripts/build-palettes.mjs --check && node --test scripts/test/*.test.mjs'
+          test "$(node -p "require('./package.json').scripts.check")" = "$want" || { echo "::error::package.json's check script changed: update the Suite job to match it."; exit 1; }
+      - name: Build is current
+        run: node scripts/build.mjs --check
+      - name: Audit
+        run: node scripts/audit.mjs
+      - name: Palettes are current
+        run: node scripts/build-palettes.mjs --check
+      - name: Tests
+        env:
+          FIRE_STARTERS_UNLOCKED: ${{ needs.state.outputs.locked == 'true' && '0' || '1' }}
+        # Some browser tests still wait a fixed time, and one of them can run out on a runner. A file that fails is
+        # run again, twice at most, and named in a notice: a real fault fails all three times. Make the test wait
+        # for its condition when its name shows up there.
+        run: |
+          failed=()
+          for file in scripts/test/*.test.mjs; do
+            node --test "$file" || failed+=("$file")
+          done
+          for attempt in 2 3; do
+            if [ ${#failed[@]} -eq 0 ]; then break; fi
+            echo "::notice::Suite attempt $attempt for ${failed[*]}"
+            again=()
+            for file in "${failed[@]}"; do
+              node --test "$file" || again+=("$file")
+            done
+            failed=(${again[@]+"${again[@]}"})
+          done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::error::Failed three times: ${failed[*]}"
+            exit 1
+          fi
+
+  gate:
+    name: Gate and looks
+    needs: state
+    if: github.ref_type != 'tag' && inputs.tag == ''
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # A capture can be taken while a template is still loading, and then its look differs: the handoff names the
+      # record template at 375 wide, and a runner shows it on others. A run whose only findings are looks is taken
+      # again, so a look that really changed fails three times. Any other finding fails at once.
+      - name: Gate
+        run: |
+          look='^gate: [^ ]*: look changed at '
+          for attempt in 1 2 3; do
+            if node scripts/gate.mjs --check 2> gate-errors.txt; then exit 0; fi
+            cat gate-errors.txt
+            other=$(grep '^gate: ' gate-errors.txt | grep -v -e "$look" -e '^gate: contract/fingerprints.json is stale' -e '^gate: [0-9]* templates, ' || true)
+            if [ -n "$other" ] || ! grep -q "$look" gate-errors.txt; then exit 1; fi
+            echo "::notice::Gate attempt $attempt reported only looks: $(grep "$look" gate-errors.txt | sed 's/^gate: //' | tr '\n' ';')"
+          done
+          exit 1
+      - name: Looks check
+        run: node scripts/looks-check.mjs --check
+
+  starters:
+    name: Starter (${{ matrix.starter }})
+    needs: state
+    if: github.ref_type != 'tag' && inputs.tag == '' && needs.state.outputs.locked == 'true'
+    runs-on: macos-26
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        starter: [lit-vite, next, vue-vite]
+    steps:
+      - uses: actions/checkout@v7
+      # The Vue and Next checks take Playwright from the repository's own packages.
+      - uses: ./.github/actions/setup
+      - name: Install the starter from its lock
+        working-directory: starters/${{ matrix.starter }}
+        run: npm ci --no-audit --no-fund
+      # A check compares pictures, and one capture can differ on a runner: a failed check is run once more.
+      - name: npm run check
+        working-directory: starters/${{ matrix.starter }}
+        run: |
+          npm run check && exit 0
+          echo "::notice::The ${{ matrix.starter }} starter's check failed once. Running it again."
+          npm run check
+
+  # HANDOFF.md, step 8: the tag as a product gets it.
+  release:
+    name: Release as installed
+    needs: state
+    if: github.ref_type == 'tag' || inputs.tag != ''
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Fetch GitHub repositories over HTTPS
+        run: |
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+      - name: The tag is this version
+        run: test "v$(node -p "require('./package.json').version")" = "$TAG"
+      - name: An empty project installs the tag
+        run: |
+          mkdir "$RUNNER_TEMP/empty" && cd "$RUNNER_TEMP/empty"
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund "github:$GITHUB_REPOSITORY#$TAG"
+          fire=node_modules/fire-design
+          test "v$(node -p "require('./$fire/package.json').version")" = "$TAG"
+          for path in fire/fire.css fire/fire.js contract/index.json contract/pictures templates docs skills/fire/SKILL.md GUIDE.md AGENT-RULES.md; do
+            test -e "$fire/$path" || { echo "::error::The package has no $path"; exit 1; }
+          done
+          npx fire find "a table of records with filters"
+      - name: Each starter, copied out of the repository, installs and builds
+        run: |
+          for starter in lit-vite next vue-vite; do
+            cp -R "starters/$starter" "$RUNNER_TEMP/$starter"
+            (cd "$RUNNER_TEMP/$starter" && npm ci --no-audit --no-fund && npm run build)
+          done

@@ -430,8 +430,10 @@ test('copy next: the line holds its space, shows the step after Copy, says one m
     assert.equal(after.specimen, before.specimen);
     assert.equal(await global(), '', `${sel}: no second announcement`);
     // again: one line, one step
+    // The message is cleared and written again on a later frame. Mark the old one, then wait for the new one, not for a fixed time.
+    await page.$eval(sel, (b) => { b.nextElementSibling.querySelector('.fd-sr-only').textContent = 'stale'; });
     await page.locator(`${sel} ${buttons[sel]}`).click();
-    await page.waitForTimeout(100);
+    await page.waitForFunction((s) => { const said = document.querySelector(s).nextElementSibling.querySelector('.fd-sr-only')?.textContent; return said && said !== 'stale'; }, sel, { timeout: 5000 }).catch(() => {});
     const again = await state(sel);
     assert.equal(again.lines, 1);
     assert.equal(again.step, want);

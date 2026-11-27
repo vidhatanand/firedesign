@@ -379,13 +379,18 @@ for (const engine of engines.slice(0, 1)) {
     for (const [width, expected] of [[1440, 720], [1000, 560], [375, 375]]) {
       const page = await open(engine, { width, reduced: true });
       await page.click('[data-fd-dialog-open="sheet-decision"]');
-      await page.waitForTimeout(200);
-      const box = await page.evaluate(() => { const el = document.getElementById('sheet-decision'); const r = el.getBoundingClientRect(); return { open: el.open, size: el.dataset.size, w: Math.round(r.width), bottom: Math.round(innerHeight - r.bottom), right: Math.round(innerWidth - r.right), foot: !!el.querySelector('.fd-sheet-foot'), title: !!el.querySelector('.fd-sheet-title') }; });
+      // Wait for the sheet to be in place, not for a fixed time. Its edge is the edge a fixed box can reach, which
+      // is short of innerWidth where scroll bars take space: the locked page reserves their gutter
+      // (scrollbar-gutter: stable on :root), 11px on GitHub's runners, and the sheet sits beside it.
+      const measure = () => { const el = document.getElementById('sheet-decision'); const r = el.getBoundingClientRect(); const probe = document.createElement('div'); probe.style.cssText = 'position:fixed;inset:0;visibility:hidden;pointer-events:none'; document.body.append(probe); const edge = probe.getBoundingClientRect().right; probe.remove(); return { open: el.open, size: el.dataset.size, w: Math.round(r.width), bottom: Math.round(innerHeight - r.bottom), right: Math.round(edge - r.right), gutter: Math.round(innerWidth - edge), foot: !!el.querySelector('.fd-sheet-foot'), title: !!el.querySelector('.fd-sheet-title') }; };
+      await page.waitForFunction(`(${measure})().open && (innerWidth < 640 ? (${measure})().bottom === 0 : (${measure})().right <= 16)`, null, { timeout: 5000 }).catch(() => {});
+      const box = await page.evaluate(measure);
       assert.equal(box.open, true);
       assert.equal(box.size, 'half');
-      assert.equal(box.w, expected, `width at ${width}`);
+      // The bottom sheet spans what a fixed box can reach: the window, less that gutter where there is one.
+      assert.equal(box.w, width === 375 ? expected - box.gutter : expected, `width at ${width} (${JSON.stringify(box)})`);
       if (width === 375) assert.equal(box.bottom, 0, 'it sits on the bottom edge on a phone');
-      else assert.ok(box.right <= 16, 'it sits at the right edge');
+      else assert.ok(box.right <= 16, `it sits at the right edge at ${width} (${JSON.stringify(box)})`);
       assert.ok(box.title && box.foot, 'a title and a foot for its actions');
       await page.close();
     }

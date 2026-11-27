@@ -1,0 +1,50 @@
+# What every job needs before it can run a check: Node, Fire's own packages and the browsers (HANDOFF.md, "Set up").
+name: Set up Fire
+description: Node, npm ci at the root, and the Playwright browsers the checks use.
+
+inputs:
+  browsers:
+    description: The browsers to install, as the Playwright install command takes them. Empty installs none.
+    default: chromium chromium-headless-shell firefox webkit
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with:
+        node-version: 22
+
+    # A starter's lock names Fire as git+ssh://git@github.com/…, and a runner has no SSH key.
+    - name: Fetch GitHub repositories over HTTPS
+      shell: bash
+      run: |
+        git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+        git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+
+    - name: Install Fire's packages
+      shell: bash
+      run: npm ci --no-audit --no-fund
+
+    - name: Find the Playwright version
+      id: playwright
+      if: inputs.browsers != ''
+      shell: bash
+      run: echo "version=$(node -p "require('./node_modules/playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Restore the browsers
+      id: browsers
+      if: inputs.browsers != ''
+      uses: actions/cache@v6
+      with:
+        path: ~/Library/Caches/ms-playwright
+        key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
+
+    # A download can fail; the handoff says to run the install again.
+    - name: Install the browsers
+      if: inputs.browsers != '' && steps.browsers.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        BROWSERS: ${{ inputs.browsers }}
+      run: |
+        node node_modules/playwright-core/cli.js install $BROWSERS \
+          || node node_modules/playwright-core/cli.js install $BROWSERS

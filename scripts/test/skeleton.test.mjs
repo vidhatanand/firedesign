@@ -241,7 +241,8 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
       const early = await read();
       assert.equal(early.list, 0);
       assert.equal(early.table, 0);
-      await page.waitForTimeout(400);
+      // After the wait and the fade, which a slow machine finishes later than any fixed time.
+      await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('#swap > .fd-skeleton-list')).opacity) === 1 && Number(getComputedStyle(document.querySelector('#states > [data-when="loading"]')).opacity) === 1, null, { timeout: 5000 }).catch(() => {});
       const late = await read();
       assert.equal(late.list, 1);
       assert.equal(late.table, 1);
@@ -250,8 +251,10 @@ for (const reducedMotion of ['no-preference', 'reduce']) {
       await page.evaluate(() => { const s = document.querySelector('#swap'); s.style.setProperty('--fd-skeleton-delay', '0s'); window.texture.setLoading(s, false); });
       await page.waitForTimeout(400);
       await page.evaluate(() => window.texture.setLoading(document.querySelector('#swap'), true));
-      await page.waitForTimeout(60);
-      assert.ok((await read()).list > 0, 'no wait with 0s');
+      // The wait is the animation's delay: read it, then see the skeleton appear. A fixed 60 ms was too short on a slow machine.
+      assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('#swap > .fd-skeleton-list')).animationDelay.split(',')[0].trim()), '0s', 'no wait with 0s');
+      await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('#swap > .fd-skeleton-list')).opacity) > 0, null, { timeout: 5000 }).catch(() => {});
+      assert.ok((await read()).list > 0, 'the skeleton shows with 0s');
     }, { reducedMotion });
   });
 

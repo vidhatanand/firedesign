@@ -320,7 +320,8 @@ test('phone: the button opens a bottom sheet, fields then values, back, Done; th
   assert.equal(await page.textContent(`${sheet} .fd-sheet-title`), 'Filter', 'Escape goes back to the fields');
   assert.equal(await active(page), 'field-status');
   await page.click(`${sheet} [data-fd-dialog-close]`);
-  await page.waitForTimeout(50);
+  // Wait for the sheet to close and hand the menu back, not for a fixed time.
+  await page.waitForFunction((s) => !document.querySelector(s).open && !document.getElementById('f-menu').closest('.fd-filters-sheet'), sheet, { timeout: 5000 }).catch(() => {});
   assert.equal(await page.evaluate((s) => document.querySelector(s).open, sheet), false);
   assert.ok(await page.evaluate(() => !!document.querySelector('#f > .fd-filters-menu, #f-menu')?.closest('#f') && !document.getElementById('f-menu').closest('.fd-filters-sheet')), 'the menu goes back where it was');
   assert.equal(await active(page), 'add');

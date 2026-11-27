@@ -36,6 +36,30 @@ node scripts/looks-check.mjs --check
 - The Lit starter's check uses the Fire installed in that starter, not the working copy: to test a change, install the
   working copy there first (`npm install --no-save ../..`).
 
+## Checks on GitHub
+
+`.github/workflows/check.yml` runs these checks on GitHub's machines (macOS on Apple silicon, Node 22), so they do not
+wait on one computer. Read a run with `gh run list --workflow check.yml` and `gh run view <id> --log-failed`.
+
+- **A push to `main`, to a branch named `rel/…` or `ci/…`, and a pull request** run four things side by side: the
+  suite with the starters installed, the gate with the looks check, and each starter's `npm run check` from its lock.
+  The suite takes about half an hour there, because it runs one test file at a time; the rest take about eight
+  minutes.
+- **A tag `v<x.y.z>`** runs the release as a product installs it: an empty project installs the tag, and each starter
+  is copied out of the repository, installed and built. `gh workflow run check.yml -f tag=v<x.y.z>` does the same for
+  a release that is already out.
+- **A release commit pushed before its starters are locked** (step 4 below) skips the starters' checks and the lock
+  test, with a warning on the run. That is allowed only while the version has no tag.
+- A runner has three cores and scroll bars that take space. A test that passes here and fails there usually waits
+  a fixed time (wait for the condition instead), or measures against `innerWidth` where a locked page has reserved
+  an 11px scroll-bar gutter (measure against the edge a fixed box reaches, as the half-sheet test does).
+- A runner retries what can fail by timing, and names it in a notice on the run: the gate when its only findings
+  are looks (up to three runs), a test file that failed (up to three), a starter's check (twice). A real fault fails
+  every time. When a test's file shows up in a notice, fix the test.
+- The suite job lists the steps of `npm run check` itself, and fails when that script changes: update the job then.
+
+A push still needs the owner's yes. GitHub's run does not replace it.
+
 ## Release
 
 Only with the owner's yes for that release. A release is a tag: no GitHub Release and no npm publish.
@@ -54,3 +78,8 @@ Only with the owner's yes for that release. A release is a tag: no GitHub Releas
 8. Verify from a fresh clone of the tag, a starter copied outside the repository and an empty project that installs
    `github:vidhatanand/firedesign#v<x.y.z>`.
 9. Close each issue the release answers, naming the version. Posting on an issue needs the owner's yes, like a push.
+
+GitHub can do the waiting in steps 3, 6 and 8. Push the release commit as a branch named `rel/<x.y.z>` in place of
+`main` in step 4, lock the starters to it, push the lock commit to the same branch and wait for a green run. Then
+fast-forward `main`, tag and push both together; the tag's own run is step 8. Run a step here as well when a run is
+red for a reason you cannot explain.

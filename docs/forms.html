@@ -1510,7 +1510,8 @@ team = growth</textarea>
     </div>
     <ul class="doc-notes">
       <li>The dropzone as one settings row, for a single image; the first row is live, so choose a PNG, SVG or JPEG, or a file larger than 2 MB. <code class="fd-code">data-layout="logo"</code> turns it into a preview, a hint and two buttons; a file dropped on the row counts as well. The preview is the current logo, or the initial tile of the team's name when there is none.</li>
-      <li>The file is checked against <code class="fd-code">accept</code> and <code class="fd-code">data-max-mb</code> on the page; a refusal goes into the field's error and nothing changes. An accepted file shows at once through an object URL (revoked when it is replaced or removed). Nothing is uploaded: cancel <code class="fd-code">fd:files</code>, send the file, and report with <code class="fd-code">setFileProgress(row, pct, { state, message })</code>. Remove fires <code class="fd-code">fd:change</code> with an empty list.</li>
+      <li>Fire checks the file against <code class="fd-code">accept</code> and <code class="fd-code">data-max-mb</code> before reading it. The initial tile stays while Fire reads the file. The preview uses a <code class="fd-code">data:</code> URL, so <code class="fd-code">img-src 'self' data:</code> is enough. A refusal or read error appears in the field's error line.</li>
+      <li>To upload the file, cancel <code class="fd-code">fd:files</code>, send the file, and report with <code class="fd-code">setFileProgress(row, pct, { state, message })</code>. Remove fires <code class="fd-code">fd:change</code> with an empty list.</li>
     </ul>
   </section>
 

@@ -209,29 +209,38 @@ test('brand: one record fills every fd-brand, with no inline style, a sized logo
   await page.close();
 });
 
-test('logo field: Upload opens the picker, a file previews at once, errors are field errors, Remove restores the tile', { skip }, async () => {
+test('logo field: Upload opens the picker, a file previews under CSP, errors are field errors, Remove restores the tile', { skip }, async () => {
   const page = await browser.newPage();
+  await page.route('**/docs/forms.html', (route) => route.fulfill({
+    contentType: 'text/html', headers: { 'content-security-policy': "img-src 'self' data:" }, body: read('docs/forms.html'),
+  }));
   await open(page, '/docs/forms.html');
-  const zone = page.locator('#logo-live-label + [data-layout="logo"]');
+  const sel = '#logo-live-label + [data-layout="logo"]';
+  const zone = page.locator(sel);
   const field = page.locator('#logo-live-label').locator('xpath=..');
   assert.ok(await zone.locator('.fd-tile .fd-initial').count(), 'the initial tile shows with no logo');
   assert.equal(await zone.locator('[data-fd-file-clear]').isVisible(), false, 'nothing to remove yet');
   const chooser = page.waitForEvent('filechooser');
   await zone.locator('[data-fd-file-pick]').click();
   await chooser;
-  await page.evaluate(() => { window.__seen = []; const z = document.querySelector('#logo-live-label + [data-layout="logo"]'); for (const t of ['fd:files', 'fd:change']) z.addEventListener(t, (e) => window.__seen.push([t, e.detail.files?.length ?? e.detail.value.length])); window.__revoked = []; const r = URL.revokeObjectURL; URL.revokeObjectURL = (u) => { window.__revoked.push(u); r(u); }; });
+  await page.evaluate((s) => {
+    window.__seen = [];
+    const z = document.querySelector(s);
+    for (const t of ['fd:files', 'fd:change']) z.addEventListener(t, (e) => window.__seen.push([t, e.detail.files?.length ?? e.detail.value.length]));
+    window.__logoObjectUrls = 0;
+    const create = URL.createObjectURL.bind(URL);
+    URL.createObjectURL = (file) => { window.__logoObjectUrls++; return create(file); };
+  }, sel);
   await zone.locator('input[type="file"]').setInputFiles({ name: 'logo.png', mimeType: 'image/png', buffer: PNG });
-  await page.waitForSelector('#logo-live-label + [data-layout="logo"] .fd-dropzone-preview > img');
-  const first = await zone.locator('.fd-dropzone-preview > img').getAttribute('src');
-  assert.match(first, /^blob:/);
+  await page.waitForFunction((s) => document.querySelector(`${s} .fd-dropzone-preview > img`)?.naturalWidth > 0, sel);
+  assert.match(await zone.locator('.fd-dropzone-preview > img').getAttribute('src'), /^data:/);
   assert.equal(await zone.locator('.fd-dropzone-preview .fd-tile').isVisible(), false);
   assert.equal(await zone.getAttribute('data-state'), 'uploading');
   assert.deepEqual(await page.evaluate(() => window.__seen), [['fd:files', 1], ['fd:change', 1]]);
   await page.waitForFunction(() => document.querySelector('#logo-live-label + [data-layout="logo"]').dataset.state === 'done');
-  // a second file replaces the first and revokes its object URL
+  // A second file replaces the first. The same bytes give the same data URL, so check its name.
   await zone.locator('input[type="file"]').setInputFiles({ name: 'logo2.png', mimeType: 'image/png', buffer: PNG });
-  await page.waitForFunction((was) => document.querySelector('#logo-live-label + [data-layout="logo"] .fd-dropzone-preview > img').src !== was, first);
-  assert.ok((await page.evaluate(() => window.__revoked)).includes(first));
+  await zone.locator('.fd-dropzone-preview > img[alt="logo2.png"]').waitFor();
   // wrong type and too large: a field error, the picture stays
   await zone.locator('input[type="file"]').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
   await page.waitForFunction(() => document.querySelector('#logo-live-label + [data-layout="logo"]').dataset.state === 'error');
@@ -242,14 +251,70 @@ test('logo field: Upload opens the picker, a file previews at once, errors are f
   await zone.locator('input[type="file"]').setInputFiles({ name: 'big.png', mimeType: 'image/png', buffer: Buffer.alloc(3 * 1024 * 1024, 1) });
   await page.waitForFunction(() => /Larger than 2 MB/.test(document.querySelector('#logo-live-label').parentElement.querySelector('.fd-field-error').textContent));
   // Remove: the tile returns, the error goes, fd:change carries an empty list
-  const shown = await zone.locator('.fd-dropzone-preview > img').getAttribute('src');
   await zone.locator('[data-fd-file-clear]').click();
   assert.equal(await zone.locator('.fd-dropzone-preview > img').count(), 0);
   assert.equal(await zone.locator('.fd-dropzone-preview .fd-tile').isVisible(), true);
   assert.equal(await field.locator('.fd-field-error').isVisible(), false);
   assert.equal(await zone.getAttribute('data-state'), null);
-  assert.ok((await page.evaluate(() => window.__revoked)).includes(shown));
+  assert.equal(await page.evaluate(() => window.__logoObjectUrls), 0);
   assert.deepEqual((await page.evaluate(() => window.__seen)).at(-1), ['fd:change', 0]);
+  await page.close();
+});
+
+test('logo field: the latest read wins, Remove aborts it, and a read error stays on the field', { skip }, async () => {
+  const page = await browser.newPage();
+  await open(page, '/docs/forms.html');
+  const sel = '#logo-live-label + [data-layout="logo"]';
+  const zone = page.locator(sel);
+  const input = zone.locator('input[type="file"]');
+  const image = zone.locator('.fd-dropzone-preview > img');
+  const tile = zone.locator('.fd-dropzone-preview .fd-tile');
+  const error = page.locator('#logo-live-error');
+  const pick = (name, mimeType = 'image/png', buffer = PNG) => input.setInputFiles({ name, mimeType, buffer });
+  const dataUrl = `data:image/png;base64,${PNG.toString('base64')}`;
+  await page.evaluate((s) => {
+    document.querySelector(s).addEventListener('fd:files', (e) => e.preventDefault());
+    window.__logoReads = [];
+    window.FileReader = class {
+      readAsDataURL() { window.__logoReads.push(this); }
+      abort() { this.aborted = true; this.onloadend(); }
+      finish(result, error) { this.result = result; this.error = error; this.onloadend(); }
+    };
+  }, sel);
+
+  await pick('first.png');
+  assert.equal(await image.count(), 0);
+  assert.equal(await tile.isVisible(), true);
+  await pick('second.png');
+  await page.evaluate((url) => {
+    window.__logoReads[1].finish(url);
+    window.__logoReads[0].finish(url); // Deliver a completion after replacement to exercise the guard.
+  }, dataUrl);
+  assert.equal(await image.getAttribute('alt'), 'second.png');
+
+  await pick('removed.png');
+  await zone.locator('[data-fd-file-clear]').click();
+  assert.equal(await page.evaluate(() => window.__logoReads[2].aborted), true);
+  await page.evaluate((url) => window.__logoReads[2].finish(url), dataUrl);
+  assert.equal(await image.count(), 0);
+  assert.equal(await tile.isVisible(), true);
+  assert.equal(await zone.getAttribute('data-state'), null);
+
+  await pick('unreadable.png');
+  await page.evaluate(() => window.__logoReads[3].finish(null, new DOMException('Cannot read', 'NotReadableError')));
+  assert.equal(await image.count(), 0);
+  assert.equal(await tile.isVisible(), true);
+  assert.equal(await zone.getAttribute('data-state'), 'error');
+  assert.equal(await error.innerText(), 'This file could not be read.');
+  assert.equal(await input.getAttribute('aria-invalid'), 'true');
+
+  await pick('superseded.png');
+  await pick('large.png', 'image/png', Buffer.alloc(3 * 1024 * 1024));
+  await page.evaluate((url) => window.__logoReads[4].finish(url), dataUrl);
+  assert.equal(await image.count(), 0);
+  assert.equal(await error.innerText(), 'Larger than 2 MB');
+  await pick('notes.txt', 'text/plain', Buffer.from('hello'));
+  assert.equal(await page.evaluate(() => window.__logoReads.length), 5, 'refused files are not read');
   await page.close();
 });
 
@@ -274,6 +339,7 @@ test('logo field: Remove, a refused file and a second file each stop the upload 
 
   // a refused file while one uploads: the error stays an error
   await pick('logo.png');
+  await zone.locator('.fd-dropzone-preview > img').waitFor();
   assert.equal(await state(), 'uploading');
   await pick('notes.txt', 'text/plain', Buffer.from('hello'));
   assert.equal(await state(), 'error');

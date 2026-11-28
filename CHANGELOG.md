@@ -2,6 +2,21 @@
 
 What changed in each release, and what a product using Fire needs to do. Newest first. A product records the tag it vendors (in its `package.json`, or in its agent instructions when Fire is copied in) and reads every entry after it before refreshing.
 
+## 0.14.1 — 28 Nov 2026
+
+**The logo field previews a chosen image under a strict Content Security Policy.**
+
+### Fixed
+
+- **Logo preview.** Fire reads an accepted image as a `data:` URL, so `img-src 'self' data:` is enough. The initial
+  tile stays while the file is read, and a read error appears on the field. Choosing another file or pressing
+  Remove stops the pending read.
+
+### For products refreshing from 0.14.0
+
+- Nothing to change in markup. Refresh Fire's script and stylesheet together.
+- If your slim bundle keeps forms, build it again.
+
 ## 0.14.0 — 27 Nov 2026
 
 **One item of a list or table asks in its own row before it is removed, revoked or signed out.** One new part,

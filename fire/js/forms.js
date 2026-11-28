@@ -1427,22 +1427,42 @@ function logoError(zone, message) {
     input?.removeAttribute('aria-invalid');
   }
 }
+function stopLogoRead(zone) {
+  const reader = zone.fdLogoReader;
+  if (!reader) return;
+  delete zone.fdLogoReader;
+  zone.removeAttribute('data-fd-logo-reading');
+  reader.abort();
+}
 function logoPreview(zone, file) {
   const box = $('.fd-dropzone-preview', zone);
   if (!box) return;
-  if (zone.fdObjectUrl) { URL.revokeObjectURL(zone.fdObjectUrl); zone.fdObjectUrl = null; }
   $('img', box)?.remove();
   if (!file) return;
-  zone.fdObjectUrl = URL.createObjectURL(file);
-  const img = document.createElement('img');
-  img.alt = zone.dataset.alt || file.name;
-  img.src = zone.fdObjectUrl;
-  box.prepend(img);
+  const reader = new FileReader();
+  zone.fdLogoReader = reader;
+  zone.setAttribute('data-fd-logo-reading', '');
+  reader.onloadend = () => {
+    if (zone.fdLogoReader !== reader) return;
+    delete zone.fdLogoReader;
+    zone.removeAttribute('data-fd-logo-reading');
+    if (reader.error) {
+      zone.dataset.state = 'error';
+      logoError(zone, 'This file could not be read.');
+      return;
+    }
+    const img = document.createElement('img');
+    img.alt = zone.dataset.alt || file.name;
+    img.src = reader.result;
+    box.prepend(img);
+  };
+  reader.readAsDataURL(file);
 }
 function setLogo(zone, files) {
   const file = [...files][0];
   if (!file) return;
   stopUpload(zone);   // an accepted file starts its own; a refused one leaves an error that nothing may overwrite
+  stopLogoRead(zone);
   const problem = acceptProblem(zone, file);
   if (problem) { zone.dataset.state = 'error'; logoError(zone, problem); return; }
   logoError(zone, '');
@@ -1455,6 +1475,7 @@ function setLogo(zone, files) {
 }
 function clearLogo(zone) {
   stopUpload(zone);
+  stopLogoRead(zone);
   logoPreview(zone, null);
   zone.fdFile = null;
   logoError(zone, '');

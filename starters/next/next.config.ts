@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { NextConfig } from 'next';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 
-// fire-design is github:vidhatanand/firedesign#v0.14.0, a real folder in node_modules, which needs no root. Linked from
+// fire-design is github:vidhatanand/firedesign#v0.14.1, a real folder in node_modules, which needs no root. Linked from
 // outside the project instead (`npm install --no-save ../..` in Fire's repository, to try a working copy), it is a
 // symlink out of the project, and Turbopack's root must hold the files it points at.
 const here = process.cwd();
